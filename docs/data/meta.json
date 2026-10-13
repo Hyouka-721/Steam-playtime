@@ -2,26 +2,46 @@
   "schema": 1,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-13T11:57:49.398Z",
-  "generated_at_local": "2026-10-13",
+  "generated_at": "2026-10-13T20:45:41.492Z",
+  "generated_at_local": "2026-10-14",
   "tracking_since": "2026-10-13",
-  "last_snapshot_date": "2026-10-13",
+  "last_snapshot_date": "2026-10-14",
   "steamid_hash": "a8474caf",
   "months": [
     "2026-10"
   ],
   "stats": {
-    "total_minutes": 0,
-    "total_hours": 0,
-    "tracked_days": 1,
-    "active_days": 0,
-    "current_streak": 0,
-    "longest_streak": 0,
-    "week_minutes": 0,
-    "played_games": 0,
-    "best_day": null
+    "total_minutes": 49,
+    "total_hours": 0.8,
+    "tracked_days": 2,
+    "active_days": 1,
+    "current_streak": 1,
+    "longest_streak": 1,
+    "week_minutes": 49,
+    "played_games": 2,
+    "best_day": {
+      "date": "2026-10-14",
+      "minutes": 49
+    }
   },
-  "games_index": {},
+  "games_index": {
+    "227300": {
+      "appid": "227300",
+      "name": "Euro Truck Simulator 2",
+      "img_icon_url": "adc18a4fc9adc0330144b76d61cbda68bb2394a0",
+      "total_minutes": 36,
+      "first_day": "2026-10-14",
+      "last_day": "2026-10-14"
+    },
+    "246420": {
+      "appid": "246420",
+      "name": "Kingdom Rush",
+      "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
+      "total_minutes": 13,
+      "first_day": "2026-10-14",
+      "last_day": "2026-10-14"
+    }
+  },
   "health": {
     "gap_days": 0,
     "low_confidence_days": 1,
