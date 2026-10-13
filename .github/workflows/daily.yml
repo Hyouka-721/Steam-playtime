@@ -1,0 +1,66 @@
+name: Daily Steam Playtime Snapshot
+
+# UTC 15:30 = Asia/Shanghai 23:30（cron 一律按 UTC 解释，不要再加 timezone 参数）
+# 注意：公开仓库若 60 天无任何活动，schedule 会被自动禁用；
+#      届时到 Actions 页面点一次 "Enable workflow" 或手动 Run workflow 即可恢复。
+on:
+  schedule:
+    - cron: '30 15 * * *'
+  workflow_dispatch:
+    inputs:
+      backfill_date:
+        description: '指定快照日期 YYYY-MM-DD（Asia/Shanghai），留空=今天'
+        required: false
+        type: string
+      force:
+        description: '覆盖同日已有快照'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: steam-playtime-snapshot
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Shanghai
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Fetch snapshot from Steam
+        env:
+          STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
+          STEAM_ID64: ${{ secrets.STEAM_ID64 }}
+          OVERRIDE_DATE: ${{ inputs.backfill_date }}
+          FORCE: ${{ inputs.force }}
+        run: node scripts/fetch.mjs
+
+      - name: Compute daily deltas
+        run: node scripts/diff.mjs
+
+      - name: Build site data
+        run: node scripts/build.mjs
+
+      - name: Commit and push
+        run: |
+          git config user.name "steam-playtime-bot"
+          git config user.email "steam-playtime-bot@users.noreply.github.com"
+          git add -A data docs
+          if git diff --cached --quiet; then
+            echo "数据无变化，跳过提交"
+          else
+            git commit -m "chore(data): snapshot $(TZ=Asia/Shanghai date +%F)"
+            git push
+          fi
