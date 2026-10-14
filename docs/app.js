@@ -13,6 +13,7 @@
     view: 'calendar',
     trendRange: 30,
     stacked: false,
+    rankSort: 'total',
     charts: {},
   };
 
@@ -67,11 +68,21 @@
   }
 
   // ---------- ① 概览卡片 ----------
-  // 最近 14 天时长最长的游戏（第三栏）
-  function last14TopGame() {
+  /** 最近 N 天（含最后采集日）的总时长 */
+  function lastNDaysTotal(n) {
+    if (!state.allDates.length) return { minutes: 0, start: null, end: null };
+    const end = state.allDates[state.allDates.length - 1];
+    const start = addDaysStr(end, -(n - 1));
+    let minutes = 0;
+    for (const d of eachDate(start, end)) minutes += state.days.get(d)?.total_minutes ?? 0;
+    return { minutes, start, end };
+  }
+
+  /** 最近 N 天里时长最长的游戏 */
+  function topGameInLastDays(n) {
     if (!state.allDates.length) return null;
     const end = state.allDates[state.allDates.length - 1];
-    const start = addDaysStr(end, -13);
+    const start = addDaysStr(end, -(n - 1));
     const counter = new Map();
     for (const d of eachDate(start, end)) {
       for (const g of state.days.get(d)?.games ?? []) {
@@ -96,7 +107,7 @@
     $('c-games').textContent = s.played_games ?? 0;
     $('c-games-sub').textContent = `有游玩记录的游戏`;
 
-    const hot = last14TopGame();
+    const hot = topGameInLastDays(14);
     if (hot && hot.minutes > 0) {
       $('c-streak').textContent = hot.name;
       $('c-streak-sub').textContent = `近 14 天 ${hm(hot.minutes)}`;
@@ -105,8 +116,9 @@
       $('c-streak-sub').textContent = '近 14 天暂无游玩记录';
     }
 
-    $('c-week').textContent = hm(s.week_minutes ?? 0);
-    $('c-week-sub').textContent = `活跃 ${s.active_days ?? 0} / ${s.tracked_days ?? 0} 天`;
+    const w7 = lastNDaysTotal(7);
+    $('c-week').textContent = hm(w7.minutes);
+    $('c-week-sub').textContent = w7.start ? `${w7.start} → ${w7.end}` : '暂无数据';
 
     if (s.best_day) {
       $('c-best').textContent = hm(s.best_day.minutes);
@@ -513,31 +525,60 @@
   }
 
   // ---------- ④ 排行 ----------
+  /** 从每日数据聚合：全部游戏时长 + 近 14 天时长 */
+  function buildGameStats(windowDays) {
+    const gi = state.meta.games_index ?? {};
+    const map = new Map();
+    const end = state.allDates[state.allDates.length - 1];
+    const winStart = end ? addDaysStr(end, -(windowDays - 1)) : null;
+    for (const d of state.allDates) {
+      for (const g of state.days.get(d)?.games ?? []) {
+        const e =
+          map.get(g.appid) ??
+          map.set(g.appid, {
+            appid: g.appid,
+            name: gi[g.appid]?.name ?? g.name ?? `App ${g.appid}`,
+            icon: gi[g.appid]?.img_icon_url ?? null,
+            total: 0,
+            recent: 0,
+            first_day: null,
+            last_day: null,
+          }).get(g.appid);
+        e.total += g.minutes;
+        if (winStart && d >= winStart) e.recent += g.minutes;
+        if (!e.first_day || d < e.first_day) e.first_day = d;
+        if (!e.last_day || d > e.last_day) e.last_day = d;
+      }
+    }
+    return [...map.values()].filter((g) => g.total > 0);
+  }
+
   function renderRank() {
     const box = $('rank-list');
-    const list = Object.values(state.meta.games_index ?? {})
-      .filter((g) => g.total_minutes > 0)
-      .sort((a, b) => b.total_minutes - a.total_minutes)
-      .slice(0, 20);
+    const key = state.rankSort === 'last14' ? 'recent' : 'total';
+    const list = buildGameStats(14).sort((a, b) => b[key] - a[key] || b.total - a.total);
 
+    $('rank-hint').textContent = list.length ? `共 ${list.length} 款游戏` : '—';
     if (!list.length) {
-      box.innerHTML = '<p class="empty">还没有游戏时长数据。明天的第二次采集后，这里会开始填充。</p>';
+      box.innerHTML = '<p class="empty">还没有游戏时长数据。第二次采集后，这里会开始填充。</p>';
       return;
     }
-    const max = list[0].total_minutes || 1;
+    const max = list[0][key] || 1;
     box.innerHTML = list
       .map((g, i) => {
-        const icon = ICON(g.appid, g.img_icon_url);
-        const pct = Math.max(2, Math.round((g.total_minutes / max) * 100));
+        const icon = ICON(g.appid, g.icon);
+        const pct = Math.max(2, Math.round((g[key] / max) * 100));
+        const recentCls = g.recent > 0 ? 'recent-on' : 'recent-off';
         return `<div class="rank-item">
           <span class="rank-no">${i + 1}</span>
           ${icon ? `<img class="rank-icon" src="${icon}" alt="" loading="lazy">` : '<span class="rank-icon"></span>'}
           <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}</span>
           <span class="rank-bar"><span style="width:${pct}%"></span></span>
           <span class="rank-meta">
-            <span class="t">${hm(g.total_minutes)}</span>
-            <span class="d">${g.first_day ?? '—'} → ${g.last_day ?? '—'}</span>
+            <span class="t">累计 ${hm(g.total)}</span>
+            <span class="d ${recentCls}">近 14 天 ${g.recent > 0 ? hm(g.recent) : '未游玩'}</span>
           </span>
+          <span class="rank-range">${g.first_day ?? '—'} → ${g.last_day ?? '—'}</span>
         </div>`;
       })
       .join('');
@@ -612,6 +653,13 @@
       [...$('trend-range').children].forEach((x) => x.classList.toggle('active', x === b));
       state.trendRange = b.dataset.r === 'all' ? 'all' : Number(b.dataset.r);
       renderTrend();
+    });
+    $('rank-sort').addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      [...$('rank-sort').children].forEach((x) => x.classList.toggle('active', x === b));
+      state.rankSort = b.dataset.k;
+      renderRank();
     });
     $('trend-stack').addEventListener('change', (e) => {
       state.stacked = e.target.checked;

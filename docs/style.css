@@ -141,7 +141,7 @@ select, .seg button {
 /* ---- rank ---- */
 .rank-list { display: flex; flex-direction: column; gap: 10px; }
 .rank-item {
-  display: grid; grid-template-columns: 28px 60px 1fr 220px auto; gap: 14px; align-items: center;
+  display: grid; grid-template-columns: 28px 60px 1fr 180px 150px auto; gap: 14px; align-items: center;
   padding: 8px 10px; border-radius: 8px; background: #131d28; border: 1px solid transparent;
 }
 .rank-item:hover { border-color: var(--border); }
@@ -153,6 +153,9 @@ select, .seg button {
 .rank-meta { font-variant-numeric: tabular-nums; text-align: right; min-width: 130px; }
 .rank-meta .t { color: #e6eef5; font-weight: 600; }
 .rank-meta .d { display: block; font-size: 11px; color: var(--text-dim); }
+.rank-meta .d.recent-on { color: #66c0f4; }
+.rank-meta .d.recent-off { color: #55657a; }
+.rank-range { font-size: 11px; color: #55657a; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* ---- data page ---- */
 .row-actions { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -187,6 +190,6 @@ select, .seg button {
   .view { padding: 16px; }
   .site-header { padding: 16px; }
   .rank-item { grid-template-columns: 24px 50px 1fr; }
-  .rank-bar, .rank-meta .d { display: none; }
+  .rank-bar, .rank-meta .d, .rank-range { display: none; }
   .rank-meta { justify-self: end; }
 }

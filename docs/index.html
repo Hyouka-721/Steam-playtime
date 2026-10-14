@@ -31,7 +31,7 @@
   <div class="card"><div class="card-label">游戏时长</div><div class="card-value" id="c-total">—</div><div class="card-sub" id="c-total-sub">—</div></div>
   <div class="card"><div class="card-label">游戏数量</div><div class="card-value" id="c-games">—</div><div class="card-sub" id="c-games-sub">—</div></div>
   <div class="card"><div class="card-label">近两周最热游戏</div><div class="card-value card-text" id="c-streak">—</div><div class="card-sub" id="c-streak-sub">—</div></div>
-  <div class="card"><div class="card-label">本周（周一起）</div><div class="card-value" id="c-week">—</div><div class="card-sub" id="c-week-sub">—</div></div>
+  <div class="card"><div class="card-label">最近一周</div><div class="card-value" id="c-week">—</div><div class="card-sub" id="c-week-sub">—</div></div>
   <div class="card"><div class="card-label">最佳单日</div><div class="card-value" id="c-best">—</div><div class="card-sub" id="c-best-sub">—</div></div>
 </section>
 
@@ -99,7 +99,16 @@
 <!-- ④ 排行 -->
 <section class="view" id="view-rank">
   <div class="panel">
-    <div class="panel-head"><h2>累计时长排行 Top 20</h2></div>
+    <div class="panel-head">
+      <h2>游戏时长排行</h2>
+      <div class="ctrl">
+        <div class="seg" id="rank-sort">
+          <button data-k="total" class="active">按累计时长</button>
+          <button data-k="last14">按近 14 天</button>
+        </div>
+        <span class="hint" id="rank-hint">—</span>
+      </div>
+    </div>
     <div id="rank-list" class="rank-list"></div>
   </div>
 </section>
