@@ -50,6 +50,10 @@ jobs:
       - name: Compute daily deltas
         run: node scripts/diff.mjs
 
+      - name: Localize game names (zh-CN)
+        run: node scripts/localize.mjs
+        continue-on-error: true
+
       - name: Build site data
         run: node scripts/build.mjs
 
