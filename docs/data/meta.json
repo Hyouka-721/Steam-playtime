@@ -2,26 +2,26 @@
   "schema": 1,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-13T20:45:41.492Z",
-  "generated_at_local": "2026-10-14",
+  "generated_at": "2026-10-14T19:32:36.215Z",
+  "generated_at_local": "2026-10-15",
   "tracking_since": "2026-10-13",
-  "last_snapshot_date": "2026-10-14",
+  "last_snapshot_date": "2026-10-15",
   "steamid_hash": "a8474caf",
   "months": [
     "2026-10"
   ],
   "stats": {
-    "total_minutes": 49,
-    "total_hours": 0.8,
-    "tracked_days": 2,
-    "active_days": 1,
-    "current_streak": 1,
-    "longest_streak": 1,
-    "week_minutes": 49,
+    "total_minutes": 131,
+    "total_hours": 2.2,
+    "tracked_days": 3,
+    "active_days": 2,
+    "current_streak": 2,
+    "longest_streak": 2,
+    "week_minutes": 131,
     "played_games": 2,
     "best_day": {
-      "date": "2026-10-14",
-      "minutes": 49
+      "date": "2026-10-15",
+      "minutes": 82
     }
   },
   "games_index": {
@@ -37,9 +37,9 @@
       "appid": "246420",
       "name": "Kingdom Rush",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "total_minutes": 13,
+      "total_minutes": 95,
       "first_day": "2026-10-14",
-      "last_day": "2026-10-14"
+      "last_day": "2026-10-15"
     }
   },
   "health": {
