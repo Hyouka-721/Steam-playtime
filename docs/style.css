@@ -120,7 +120,7 @@ select, .seg button {
   padding: 9px 0; border-bottom: 1px solid #1e2b39;
 }
 .glist li:last-child { border-bottom: none; }
-.glist img { width: 34px; height: 16px; border-radius: 3px; background: var(--bg-deep); object-fit: cover; }
+.glist img { width: 28px; height: 28px; border-radius: 5px; background: var(--bg-deep); object-fit: contain; }
 .gname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .gbar-wrap { display: flex; align-items: center; gap: 10px; justify-content: flex-end; }
 .gbar { width: 120px; height: 6px; background: #1e2b39; border-radius: 3px; overflow: hidden; }
@@ -141,12 +141,12 @@ select, .seg button {
 /* ---- rank ---- */
 .rank-list { display: flex; flex-direction: column; gap: 10px; }
 .rank-item {
-  display: grid; grid-template-columns: 28px 60px 1fr 180px 150px auto; gap: 14px; align-items: center;
+  display: grid; grid-template-columns: 28px 34px 1fr 180px 150px auto; gap: 14px; align-items: center;
   padding: 8px 10px; border-radius: 8px; background: #131d28; border: 1px solid transparent;
 }
 .rank-item:hover { border-color: var(--border); }
 .rank-no { color: var(--text-dim); font-variant-numeric: tabular-nums; text-align: right; }
-.rank-icon { width: 60px; height: 28px; border-radius: 4px; object-fit: cover; background: var(--bg-deep); }
+.rank-icon { width: 28px; height: 28px; border-radius: 5px; object-fit: contain; background: var(--bg-deep); }
 .rank-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rank-bar { height: 8px; background: #1e2b39; border-radius: 4px; overflow: hidden; }
 .rank-bar > span { display: block; height: 100%; background: linear-gradient(90deg, #2e7cb8, #e8763a); }
@@ -189,7 +189,7 @@ select, .seg button {
   .cards { padding: 16px; }
   .view { padding: 16px; }
   .site-header { padding: 16px; }
-  .rank-item { grid-template-columns: 24px 50px 1fr; }
+  .rank-item { grid-template-columns: 24px 30px 1fr; }
   .rank-bar, .rank-meta .d, .rank-range { display: none; }
   .rank-meta { justify-self: end; }
 }

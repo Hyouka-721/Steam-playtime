@@ -20,11 +20,11 @@
   // ---------- utils ----------
   function hm(m) {
     const n = Math.round(Number(m) || 0);
-    if (n <= 0) return '0 分钟';
-    if (n < 60) return `${n} 分钟`;
+    if (n <= 0) return '0 min';
+    if (n < 60) return `${n} min`;
     const h = Math.floor(n / 60);
     const r = n % 60;
-    return r === 0 ? `${h} 小时` : `${h} 小时 ${r} 分钟`;
+    return r === 0 ? `${h} h` : `${h} h ${r} min`;
   }
   const ymd = (d) => (d instanceof Date ? d : new Date(d)).toISOString().slice(0, 10);
   function addDaysStr(dateStr, n) {
@@ -101,8 +101,8 @@
   function renderCards() {
     const s = state.meta.stats ?? {};
     const lastDate = state.allDates[state.allDates.length - 1];
-    $('c-total').textContent = `${s.total_hours ?? 0} 小时`;
-    $('c-total-sub').textContent = `截至 ${lastDate ?? '—'} · ${s.total_minutes ?? 0} 分钟`;
+    $('c-total').textContent = `${s.total_hours ?? 0} h`;
+    $('c-total-sub').textContent = `截至 ${lastDate ?? '—'} · ${s.total_minutes ?? 0} min`;
 
     $('c-games').textContent = s.played_games ?? 0;
     $('c-games-sub').textContent = `有游玩记录的游戏`;
@@ -212,7 +212,7 @@
         },
         yAxis: {
           type: 'value',
-          name: '分钟',
+          name: 'min',
           nameTextStyle: { color: '#7e93a8', fontSize: 11 },
           axisLabel: { color: '#7e93a8', fontSize: 11 },
           splitLine: { lineStyle: { color: '#1e2b39' } },
