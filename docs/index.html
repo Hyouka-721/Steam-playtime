@@ -28,9 +28,9 @@
 
 <!-- ① 概览卡片 -->
 <section class="cards" id="cards">
-  <div class="card"><div class="card-label">累计时长</div><div class="card-value" id="c-total">—</div><div class="card-sub" id="c-total-sub">—</div></div>
-  <div class="card"><div class="card-label">追踪中的游戏</div><div class="card-value" id="c-games">—</div><div class="card-sub" id="c-games-sub">—</div></div>
-  <div class="card"><div class="card-label">当前连续</div><div class="card-value" id="c-streak">—</div><div class="card-sub" id="c-streak-sub">—</div></div>
+  <div class="card"><div class="card-label">游戏时长</div><div class="card-value" id="c-total">—</div><div class="card-sub" id="c-total-sub">—</div></div>
+  <div class="card"><div class="card-label">游戏数量</div><div class="card-value" id="c-games">—</div><div class="card-sub" id="c-games-sub">—</div></div>
+  <div class="card"><div class="card-label">近两周最热游戏</div><div class="card-value card-text" id="c-streak">—</div><div class="card-sub" id="c-streak-sub">—</div></div>
   <div class="card"><div class="card-label">本周（周一起）</div><div class="card-value" id="c-week">—</div><div class="card-sub" id="c-week-sub">—</div></div>
   <div class="card"><div class="card-label">最佳单日</div><div class="card-value" id="c-best">—</div><div class="card-sub" id="c-best-sub">—</div></div>
 </section>
@@ -44,6 +44,13 @@
 
 <!-- ② 日历热力图 -->
 <section class="view active" id="view-calendar">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>当日游戏时长</h2>
+      <div class="ctrl"><span class="hint" id="today-hint">—</span></div>
+    </div>
+    <div id="chart-today" class="chart"></div>
+  </div>
   <div class="panel">
     <div class="panel-head">
       <h2>全年日历</h2>

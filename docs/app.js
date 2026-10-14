@@ -67,16 +67,43 @@
   }
 
   // ---------- ① 概览卡片 ----------
+  // 最近 14 天时长最长的游戏（第三栏）
+  function last14TopGame() {
+    if (!state.allDates.length) return null;
+    const end = state.allDates[state.allDates.length - 1];
+    const start = addDaysStr(end, -13);
+    const counter = new Map();
+    for (const d of eachDate(start, end)) {
+      for (const g of state.days.get(d)?.games ?? []) {
+        counter.set(g.appid, (counter.get(g.appid) ?? 0) + g.minutes);
+      }
+    }
+    let best = null;
+    for (const [appid, minutes] of counter) {
+      if (!best || minutes > best.minutes) {
+        best = { appid, name: state.meta.games_index?.[appid]?.name ?? `App ${appid}`, minutes };
+      }
+    }
+    return best;
+  }
+
   function renderCards() {
     const s = state.meta.stats ?? {};
+    const lastDate = state.allDates[state.allDates.length - 1];
     $('c-total').textContent = `${s.total_hours ?? 0} 小时`;
-    $('c-total-sub').textContent = `${s.total_minutes ?? 0} 分钟 · 追踪 ${s.tracked_days ?? 0} 天`;
+    $('c-total-sub').textContent = `截至 ${lastDate ?? '—'} · ${s.total_minutes ?? 0} 分钟`;
 
     $('c-games').textContent = s.played_games ?? 0;
     $('c-games-sub').textContent = `有游玩记录的游戏`;
 
-    $('c-streak').textContent = `${s.current_streak ?? 0} 天`;
-    $('c-streak-sub').textContent = `最长连续 ${s.longest_streak ?? 0} 天`;
+    const hot = last14TopGame();
+    if (hot && hot.minutes > 0) {
+      $('c-streak').textContent = hot.name;
+      $('c-streak-sub').textContent = `近 14 天 ${hm(hot.minutes)}`;
+    } else {
+      $('c-streak').textContent = '—';
+      $('c-streak-sub').textContent = '近 14 天暂无游玩记录';
+    }
 
     $('c-week').textContent = hm(s.week_minutes ?? 0);
     $('c-week-sub').textContent = `活跃 ${s.active_days ?? 0} / ${s.tracked_days ?? 0} 天`;
@@ -107,7 +134,108 @@
     $('footer-gen').textContent = `数据生成于 ${state.meta.generated_at_local ?? '—'}`;
   }
 
-  // ---------- ② 日历热力图 ----------
+  // ---------- ② 当日游戏时长柱状图 ----------
+  function renderTodayChart() {
+    const el = $('chart-today');
+    const hint = $('today-hint');
+    if (!state.charts.today) state.charts.today = echarts.init(el);
+
+    const lastDate = state.allDates[state.allDates.length - 1];
+    if (!lastDate) {
+      hint.textContent = '暂无数据';
+      return;
+    }
+    const day = state.days.get(lastDate) ?? { games: [], total_minutes: 0 };
+    const games = (day.games ?? []).filter((g) => g.minutes > 0).slice(0, 12);
+    hint.textContent = `${lastDate} · 共 ${hm(day.total_minutes)}`;
+
+    if (!games.length) {
+      state.charts.today.setOption(
+        {
+          backgroundColor: 'transparent',
+          title: {
+            text: '最近一个采集日没有游玩记录',
+            left: 'center',
+            top: 'middle',
+            textStyle: { color: '#7e93a8', fontSize: 14, fontWeight: 400 },
+          },
+          xAxis: { show: false, type: 'category', data: [] },
+          yAxis: { show: false },
+          series: [],
+        },
+        true,
+      );
+      return;
+    }
+
+    const gi = state.meta.games_index ?? {};
+    const rich = {};
+    games.forEach((g, i) => {
+      const url = ICON(g.appid, gi[g.appid]?.img_icon_url);
+      rich[`g${i}`] = url
+        ? { backgroundColor: { image: url }, width: 30, height: 30, borderRadius: 4 }
+        : { backgroundColor: '#22303f', width: 30, height: 30, borderRadius: 4 };
+    });
+    const short = (n) => (String(n).length > 10 ? String(n).slice(0, 9) + '…' : String(n));
+
+    state.charts.today.setOption(
+      {
+        backgroundColor: 'transparent',
+        grid: { left: 60, right: 20, top: 60, bottom: 60 },
+        tooltip: {
+          backgroundColor: '#0f1620',
+          borderColor: '#263340',
+          textStyle: { color: '#c7d5e0', fontSize: 12 },
+          formatter: (p) => {
+            const g = games[p.dataIndex];
+            return `${escapeHtml(g.name)}<br/><b>${hm(g.minutes)}</b>${g.is_new ? '<br/><span style="color:#66c0f4">新游戏</span>' : ''}`;
+          },
+        },
+        xAxis: {
+          type: 'category',
+          data: games.map((g) => short(g.name)),
+          axisLabel: { color: '#7e93a8', fontSize: 11, interval: 0, rotate: games.length > 6 ? 18 : 0 },
+          axisLine: { lineStyle: { color: '#263340' } },
+          axisTick: { show: false },
+        },
+        yAxis: {
+          type: 'value',
+          name: '分钟',
+          nameTextStyle: { color: '#7e93a8', fontSize: 11 },
+          axisLabel: { color: '#7e93a8', fontSize: 11 },
+          splitLine: { lineStyle: { color: '#1e2b39' } },
+        },
+        series: [
+          {
+            type: 'bar',
+            barMaxWidth: 46,
+            data: games.map((g) => g.minutes),
+            itemStyle: {
+              borderRadius: [4, 4, 0, 0],
+              color: (p) => {
+                const v = p.value ?? 0;
+                if (v >= 360) return '#e8763a';
+                if (v >= 180) return '#d99a5b';
+                if (v >= 90) return '#5fa8d3';
+                if (v >= 30) return '#2e7cb8';
+                return '#1f4e79';
+              },
+            },
+            label: {
+              show: true,
+              position: 'top',
+              distance: 8,
+              formatter: (p) => `{g${p.dataIndex}|}`,
+              rich,
+            },
+          },
+        ],
+      },
+      true,
+    );
+  }
+
+  // ---------- ③ 日历热力图 ----------
   function availableYears() {
     const set = new Set(state.allDates.map((d) => d.slice(0, 4)));
     const todayYear = String(new Date().getFullYear());
@@ -472,7 +600,7 @@
     state.view = v;
     document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.view === v));
     document.querySelectorAll('.view').forEach((s) => s.classList.toggle('active', s.id === `view-${v}`));
-    if (v === 'calendar') requestAnimationFrame(() => state.charts.calendar?.resize());
+    if (v === 'calendar') requestAnimationFrame(() => { state.charts.today?.resize(); state.charts.calendar?.resize(); });
     if (v === 'trend') requestAnimationFrame(() => state.charts.trend?.resize());
   }
 
@@ -505,6 +633,7 @@
     bind();
     if (!(await load())) return;
     renderCards();
+    renderTodayChart();
     renderCalendar();
     renderTrend();
     renderRank();
