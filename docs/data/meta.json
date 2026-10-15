@@ -2,7 +2,7 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-15T10:49:48.966Z",
+  "generated_at": "2026-10-15T14:32:00.536Z",
   "generated_at_local": "2026-10-15",
   "tracking_since": "2026-10-13",
   "last_snapshot_date": "2026-10-15",
@@ -31,7 +31,7 @@
   "games_index": {
     "227300": {
       "appid": "227300",
-      "name": "Euro Truck Simulator 2",
+      "name": "欧洲卡车模拟2",
       "img_icon_url": "adc18a4fc9adc0330144b76d61cbda68bb2394a0",
       "total_minutes": 36,
       "first_day": "2026-10-14",
@@ -39,7 +39,7 @@
     },
     "246420": {
       "appid": "246420",
-      "name": "Kingdom Rush",
+      "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
       "total_minutes": 95,
       "first_day": "2026-10-14",
@@ -49,7 +49,7 @@
   "games_lifetime": {
     "730": {
       "appid": "730",
-      "name": "Counter-Strike 2",
+      "name": "反恐精英2",
       "img_icon_url": "8dbc71957312bbd3baea65848b545be9eae2a355",
       "lifetime_minutes": 786,
       "last_played": "2022-07-17"
@@ -63,21 +63,21 @@
     },
     "105600": {
       "appid": "105600",
-      "name": "Terraria",
+      "name": "泰拉瑞亚",
       "img_icon_url": "858961e95fbf869f136e1770d586e0caefd4cfac",
       "lifetime_minutes": 9722,
       "last_played": "2026-10-10"
     },
     "227300": {
       "appid": "227300",
-      "name": "Euro Truck Simulator 2",
+      "name": "欧洲卡车模拟2",
       "img_icon_url": "adc18a4fc9adc0330144b76d61cbda68bb2394a0",
       "lifetime_minutes": 7833,
       "last_played": "2026-10-13"
     },
     "246420": {
       "appid": "246420",
-      "name": "Kingdom Rush",
+      "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
       "lifetime_minutes": 315,
       "last_played": "2026-10-14"
@@ -91,21 +91,21 @@
     },
     "262060": {
       "appid": "262060",
-      "name": "Darkest Dungeon®",
+      "name": "暗黑地牢 Darkest Dungeon",
       "img_icon_url": "af219e7f9ed0506cb0954aabb7f24a45e38d28e4",
       "lifetime_minutes": 165,
       "last_played": "2026-04-24"
     },
     "270880": {
       "appid": "270880",
-      "name": "American Truck Simulator",
+      "name": "美国卡车模拟",
       "img_icon_url": "2aec8af4b4b23cb6054d9aea06194621cdd66945",
       "lifetime_minutes": 10,
       "last_played": "2025-08-08"
     },
     "271590": {
       "appid": "271590",
-      "name": "Grand Theft Auto V Legacy",
+      "name": "Grand Theft Auto V 传承版",
       "img_icon_url": "1e72f87eb927fa1485e68aefaff23c7fd7178251",
       "lifetime_minutes": 473,
       "last_played": "2026-05-09"
@@ -119,21 +119,21 @@
     },
     "292030": {
       "appid": "292030",
-      "name": "The Witcher 3: Wild Hunt — Remastered",
+      "name": "巫师3：狂猎 — 重制版",
       "img_icon_url": "7b52d11edee478d652ef4e7103e00644bed2c74c",
       "lifetime_minutes": 537,
       "last_played": "2026-06-30"
     },
     "311690": {
       "appid": "311690",
-      "name": "Enter the Gungeon",
+      "name": "挺进地牢",
       "img_icon_url": "b459d94ad4b6a5eabd71005874037b9577a4ca31",
       "lifetime_minutes": 72,
       "last_played": "2026-04-08"
     },
     "322330": {
       "appid": "322330",
-      "name": "Don't Starve Together",
+      "name": "饥荒联机版",
       "img_icon_url": "a80aa6cff8eebc1cbc18c367d9ab063e1553b0ee",
       "lifetime_minutes": 348,
       "last_played": "2026-06-17"
@@ -147,7 +147,7 @@
     },
     "367520": {
       "appid": "367520",
-      "name": "Hollow Knight",
+      "name": "空洞骑士",
       "img_icon_url": "f6ab055c2366237200b1a31cccbd6cf81e436d72",
       "lifetime_minutes": 109,
       "last_played": "2026-06-20"
@@ -161,7 +161,7 @@
     },
     "391730": {
       "appid": "391730",
-      "name": "Crashlands",
+      "name": "崩溃大陆",
       "img_icon_url": "8fb73009c5f9918aab9717d8f9db1a4604733297",
       "lifetime_minutes": 212,
       "last_played": "2026-02-21"
@@ -175,14 +175,14 @@
     },
     "418240": {
       "appid": "418240",
-      "name": "Shadow Tactics: Blades of the Shogun",
+      "name": "影子战术：将军之刃",
       "img_icon_url": "7f933b7e1bcb83caf3bbcc9a143aee85b8a677af",
       "lifetime_minutes": 1961,
       "last_played": "2025-12-31"
     },
     "431960": {
       "appid": "431960",
-      "name": "Wallpaper Engine",
+      "name": "Wallpaper Engine：壁纸引擎",
       "img_icon_url": "72edaed9d748c6cf7397ffb1c83f0b837b9ebd9d",
       "lifetime_minutes": 3553,
       "last_played": "2026-09-24"
@@ -203,21 +203,21 @@
     },
     "502500": {
       "appid": "502500",
-      "name": "ACE COMBAT™7: SKIES UNKNOWN",
+      "name": "ACE COMBAT™ 7: SKIES UNKNOWN",
       "img_icon_url": "f7e1587f3521cacbdebd07b25c05103a963160a8",
       "lifetime_minutes": 208,
       "last_played": "2025-12-22"
     },
     "557600": {
       "appid": "557600",
-      "name": "Gorogoa",
+      "name": "画中世界",
       "img_icon_url": "ae001eaabbb76bf67661566249c978b73c4693e7",
       "lifetime_minutes": 235,
       "last_played": "2026-04-06"
     },
     "588650": {
       "appid": "588650",
-      "name": "Dead Cells",
+      "name": "死亡细胞",
       "img_icon_url": "a431361e5dae5fd6ac2433064b62b2a37abc38f1",
       "lifetime_minutes": 3620,
       "last_played": "2026-03-24"
@@ -231,14 +231,14 @@
     },
     "638230": {
       "appid": "638230",
-      "name": "Journey",
+      "name": "风之旅人",
       "img_icon_url": "8538c0cb998e844ce5c78683f322e9ca81075a34",
       "lifetime_minutes": 134,
       "last_played": "2025-12-23"
     },
     "646570": {
       "appid": "646570",
-      "name": "Slay the Spire",
+      "name": "杀戮尖塔",
       "img_icon_url": "33ea124ea8c03a9ce7012d34c3b348a351612fca",
       "lifetime_minutes": 29792,
       "last_played": "2026-10-11"
@@ -252,14 +252,14 @@
     },
     "733070": {
       "appid": "733070",
-      "name": "Sudoku Universe",
+      "name": "Sudoku Universe / 数独宇宙",
       "img_icon_url": "fc39447b788f1f914acc1042919eca9e71ca6fa1",
       "lifetime_minutes": 2419,
       "last_played": "2026-01-15"
     },
     "769560": {
       "appid": "769560",
-      "name": "Night of the Full Moon",
+      "name": "月圆之夜",
       "img_icon_url": "8ccc812dd5e5c58cf9c1009c2a3eefe12820bea5",
       "lifetime_minutes": 3860,
       "last_played": "2024-11-23"
@@ -273,7 +273,7 @@
     },
     "960090": {
       "appid": "960090",
-      "name": "Bloons TD 6",
+      "name": "气球塔防6",
       "img_icon_url": "c5f0b67c8beeb6be99abe2ad8db2cada5d5ccff0",
       "lifetime_minutes": 177,
       "last_played": "2025-07-11"
@@ -315,49 +315,49 @@
     },
     "1329410": {
       "appid": "1329410",
-      "name": "雀魂麻将(MahjongSoul)",
+      "name": "雀魂麻将",
       "img_icon_url": "9403eb9b90dc6f036dde903a669d70dab3b65e12",
       "lifetime_minutes": 57,
       "last_played": "2025-05-19"
     },
     "1333910": {
       "appid": "1333910",
-      "name": "Sizeable",
+      "name": "Sizeable 缩放世界",
       "img_icon_url": "d85e0010bc76856fc5f8f2c4df4c6a39ae1a006b",
       "lifetime_minutes": 263,
       "last_played": "2026-04-08"
     },
     "1426210": {
       "appid": "1426210",
-      "name": "It Takes Two",
+      "name": "双人成行",
       "img_icon_url": "6b15f6d81c4fc52056f4928b363b7fac591a945b",
       "lifetime_minutes": 885,
       "last_played": "2026-07-16"
     },
     "1504980": {
       "appid": "1504980",
-      "name": "It Takes Two Friend's Pass",
+      "name": "双人成行 好友通行证",
       "img_icon_url": "6b15f6d81c4fc52056f4928b363b7fac591a945b",
       "lifetime_minutes": 813,
       "last_played": "2022-09-11"
     },
     "1579380": {
       "appid": "1579380",
-      "name": "Shadow Tactics: Blades of the Shogun - Aiko's Choice",
+      "name": "Shadow Tactics: 爱子的选择 Aiko's Choice",
       "img_icon_url": "2696fc7ba08cab22ea50f0b8db787a63e6fa3004",
       "lifetime_minutes": 612,
       "last_played": "2026-04-18"
     },
     "1623730": {
       "appid": "1623730",
-      "name": "Palworld",
+      "name": "Palworld / 幻兽帕鲁",
       "img_icon_url": "f5523077a8f4c923c2e8d8c17794b3319035fa73",
       "lifetime_minutes": 101,
       "last_played": "2026-04-04"
     },
     "1669980": {
       "appid": "1669980",
-      "name": "Volcano Princess",
+      "name": "火山的女儿",
       "img_icon_url": "af41b6930b60ea5a3d8e21ba04933284253f42cf",
       "lifetime_minutes": 106,
       "last_played": "2026-05-20"
@@ -378,35 +378,35 @@
     },
     "1794680": {
       "appid": "1794680",
-      "name": "Vampire Survivors",
+      "name": "Vampire Survivors - 吸血鬼幸存者",
       "img_icon_url": "3677cf1be3be1f4ea42261c62ce10519715ade58",
       "lifetime_minutes": 62,
       "last_played": "2026-02-24"
     },
     "1942280": {
       "appid": "1942280",
-      "name": "Brotato",
+      "name": "土豆兄弟(Brotato)",
       "img_icon_url": "d9dfcab8f300a9548439f70bef7b5f4e53d0fc28",
       "lifetime_minutes": 5395,
       "last_played": "2026-04-20"
     },
     "2868840": {
       "appid": "2868840",
-      "name": "Slay the Spire 2",
+      "name": "杀戮尖塔2",
       "img_icon_url": "f92b09dab91f1d1738f72fe0dd9be18dcc2901f9",
       "lifetime_minutes": 978,
       "last_played": "2026-03-24"
     },
     "3009140": {
       "appid": "3009140",
-      "name": "Salt Player for Windows",
+      "name": "Salt Player",
       "img_icon_url": "a2a0483be79a4082e0b50abccb3b67c979d3a457",
       "lifetime_minutes": 857,
       "last_played": "2026-10-10"
     },
     "3167020": {
       "appid": "3167020",
-      "name": "Escape From Duckov",
+      "name": "逃离鸭科夫",
       "img_icon_url": "5bb8d31708442a8f3ddbc100d7be7c3fde530d18",
       "lifetime_minutes": 4548,
       "last_played": "2026-07-17"
@@ -424,7 +424,7 @@
     "low_confidence_days": 1,
     "manual_days": 0,
     "shared_game_count": 0,
-    "name_overrides": 0,
+    "name_overrides": 3,
     "last_error": null
   }
 }

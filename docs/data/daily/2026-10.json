@@ -3,7 +3,7 @@
   "month": "2026-10",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-15T10:49:48.953Z",
+  "generated_at": "2026-10-15T14:32:00.529Z",
   "days": {
     "2026-10-13": {
       "total_minutes": 0,
@@ -24,13 +24,13 @@
       "games": [
         {
           "appid": "227300",
-          "name": "Euro Truck Simulator 2",
+          "name": "欧洲卡车模拟2",
           "minutes": 36,
           "is_new": false
         },
         {
           "appid": "246420",
-          "name": "Kingdom Rush",
+          "name": "王国保卫战",
           "minutes": 13,
           "is_new": false
         }
@@ -45,7 +45,7 @@
       "games": [
         {
           "appid": "246420",
-          "name": "Kingdom Rush",
+          "name": "王国保卫战",
           "minutes": 82,
           "is_new": false
         }

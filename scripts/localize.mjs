@@ -23,13 +23,17 @@ const UA = 'steam-playtime-localizer/1.0';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // 本机沙箱/代理环境下 Node fetch 不读代理环境变量，需要显式走 ProxyAgent；CI 无代理时自动跳过
+// 注意：必须用 undici 自带的 fetch 搭配 ProxyAgent。Node 内置 fetch + 外部 undici 的
+// ProxyAgent 会因版本不匹配报 "invalid onRequestStart method"，表现为全部请求 fetch failed。
 let dispatcher = undefined;
+let doFetch = globalThis.fetch;
 const proxyUrl = process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy;
 if (proxyUrl) {
   try {
-    const { ProxyAgent } = await import('undici');
-    dispatcher = new ProxyAgent(proxyUrl);
-    console.log(`[localize] 使用代理 ${proxyUrl}`);
+    const undici = await import('undici');
+    dispatcher = new undici.ProxyAgent(proxyUrl);
+    doFetch = undici.fetch;
+    console.log(`[localize] 使用代理 ${proxyUrl}（undici fetch）`);
   } catch {
     console.log('[localize] 未安装 undici，忽略代理设置');
   }
@@ -47,10 +51,10 @@ function latestSnapshot() {
  * 返回 { ok: false } 表示网络失败（此时不写缓存，留待下次重试）。
  */
 async function fetchCnName(appid) {
-  const url = `https://store.steampowered.com/api/appdetails?appids=${appid}&l=schinese&filters=basic`;
+  const url = `https://store.steampowered.com/api/appdetails?appids=${appid}&l=schinese&cc=cn&filters=basic`;
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
-      const r = await fetch(url, {
+      const r = await doFetch(url, {
         headers: { 'User-Agent': UA, 'Accept-Language': 'zh-CN,zh;q=0.9' },
         ...(dispatcher ? { dispatcher } : {}),
       });
