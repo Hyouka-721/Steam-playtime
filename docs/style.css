@@ -60,10 +60,11 @@ a { color: var(--accent); }
 .subtitle { margin: 2px 0 0; font-size: 13px; color: var(--text-dim); }
 .header-meta { display: flex; gap: 10px; align-items: center; font-size: 12px; }
 .header-avatar {
-  width: 52px; height: 52px; border-radius: 14px; object-fit: cover;
+  width: 66px; height: 66px; border-radius: 16px; object-fit: contain;
   border: 1px solid var(--border-hi);
   box-shadow: 0 0 18px rgba(102, 192, 244, 0.18);
   background: var(--bg-deep);
+  transform: scaleX(-1);
 }
 
 /* ---- cards ---- */
@@ -155,7 +156,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   font-size: 11px; color: var(--text-faint); letter-spacing: .5px;
   border-bottom: 1px solid var(--border);
 }
-.rh-num { text-align: right; }
+.rh-num { text-align: center; }
 .rh-bar { }
 .rank-list { display: flex; flex-direction: column; gap: 4px; padding-top: 8px; }
 .rank-item {
@@ -179,8 +180,8 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   background: linear-gradient(90deg, #2073ab, #4ba3e3);
   transition: width .5s ease;
 }
-.rank-min { font-variant-numeric: tabular-nums; color: #e6eef5; text-align: right; font-weight: 600; font-size: 13.5px; }
-.rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: right; font-size: 12px; }
+.rank-min { font-variant-numeric: tabular-nums; color: #e6eef5; text-align: center; font-weight: 600; font-size: 13.5px; }
+.rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: center; font-size: 12px; }
 .list-foot { text-align: right; color: var(--text-faint); font-size: 12px; margin: 10px 4px 2px; }
 
 /* ---- 每日记录 ---- */
