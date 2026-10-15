@@ -84,19 +84,19 @@
     const asOf = state.meta.last_snapshot_date;
 
     $('c-lifetime').textContent = hm(s.lifetime_minutes ?? 0);
-    $('c-lifetime-sub').textContent = `截至 ${asOf ?? '—'} · 共 ${s.owned_games ?? 0} 款游戏`;
 
     $('c-games').textContent = `${s.lifetime_played_games ?? 0} / ${s.owned_games ?? 0}`;
-    $('c-games-sub').textContent = '玩过 / 拥有';
 
     const w7 = lastNDaysTotal(7);
     $('c-week').textContent = hm(w7.minutes);
-    $('c-week-sub').textContent = w7.start ? `${w7.start} → ${w7.end}` : '暂无每日数据';
 
-    $('c-track').textContent = hm(s.total_minutes ?? 0);
-    $('c-track-sub').textContent = state.meta.tracking_since
-      ? `自 ${state.meta.tracking_since} 起每日差分记录`
-      : '等待首次采集';
+    // 昨日 = 最新快照日的前一天（快照每天 23:30 采集，最新快照日即「今天」）
+    let yesterdayMin = 0;
+    if (asOf && state.allDates.length) {
+      const y = addDaysStr(asOf, -1);
+      yesterdayMin = state.days.get(y)?.total_minutes ?? 0;
+    }
+    $('c-yesterday').textContent = hm(yesterdayMin);
 
     $('subtitle').textContent = asOf
       ? `数据截至 ${asOf}${state.meta.tracking_since ? ` · 每日记录自 ${state.meta.tracking_since}` : ''}`
