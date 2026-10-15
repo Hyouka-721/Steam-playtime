@@ -3,20 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Steam 每日游戏时长</title>
+<title>Steam 游戏时长统计</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="alternate icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=4">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 </head>
 <body>
 
 <header class="site-header">
   <div class="brand">
-    <span class="logo">◕</span>
+    <span class="logo">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+        <path d="M7.97 6.5h8.06c2.1 0 3.9 1.42 4.44 3.42l1.4 5.22c.42 1.58-.77 3.11-2.4 3.11-.86 0-1.67-.42-2.17-1.13l-1.2-1.72a1.5 1.5 0 0 0-1.23-.65h-5.74c-.49 0-.95.24-1.23.65l-1.2 1.72c-.5.71-1.31 1.13-2.17 1.13-1.63 0-2.82-1.53-2.4-3.11l1.4-5.22A4.6 4.6 0 0 1 7.97 6.5Zm.28 2.1v1.65H6.6v1.5h1.65v1.65h1.5V11.75h1.65v-1.5H9.75V8.6h-1.5Zm7.9.1a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm-1.9 1.9a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/>
+      </svg>
+    </span>
     <div>
-      <h1>Steam 每日游戏时长</h1>
+      <h1>Steam 游戏时长统计</h1>
       <p class="subtitle" id="subtitle">加载中…</p>
     </div>
   </div>
@@ -26,34 +30,75 @@
   </div>
 </header>
 
-<!-- ① 概览卡片 -->
+<!-- 概览 -->
 <section class="cards" id="cards">
-  <div class="card"><div class="card-label">游戏时长</div><div class="card-value" id="c-total">—</div><div class="card-sub" id="c-total-sub">—</div></div>
-  <div class="card"><div class="card-label">游戏数量</div><div class="card-value" id="c-games">—</div><div class="card-sub" id="c-games-sub">—</div></div>
-  <div class="card"><div class="card-label">近两周最热游戏</div><div class="card-value card-text" id="c-streak">—</div><div class="card-sub" id="c-streak-sub">—</div></div>
-  <div class="card"><div class="card-label">最近一周</div><div class="card-value" id="c-week">—</div><div class="card-sub" id="c-week-sub">—</div></div>
-  <div class="card"><div class="card-label">最佳单日</div><div class="card-value" id="c-best">—</div><div class="card-sub" id="c-best-sub">—</div></div>
+  <div class="card card-hero">
+    <div class="card-label">累计游戏时长</div>
+    <div class="card-value" id="c-lifetime">—</div>
+    <div class="card-sub" id="c-lifetime-sub">—</div>
+  </div>
+  <div class="card">
+    <div class="card-label">游戏库</div>
+    <div class="card-value" id="c-games">—</div>
+    <div class="card-sub" id="c-games-sub">—</div>
+  </div>
+  <div class="card">
+    <div class="card-label">最近 7 天</div>
+    <div class="card-value" id="c-week">—</div>
+    <div class="card-sub" id="c-week-sub">—</div>
+  </div>
+  <div class="card">
+    <div class="card-label">每日记录累计</div>
+    <div class="card-value" id="c-track">—</div>
+    <div class="card-sub" id="c-track-sub">—</div>
+  </div>
 </section>
 
 <nav class="tabs" id="tabs">
-  <button class="tab active" data-view="calendar">日历热力图</button>
+  <button class="tab active" data-view="lifetime">游戏累计</button>
+  <button class="tab" data-view="daily">每日记录</button>
   <button class="tab" data-view="trend">趋势</button>
-  <button class="tab" data-view="rank">游戏排行</button>
   <button class="tab" data-view="data">数据</button>
 </nav>
 
-<!-- ② 日历热力图 -->
-<section class="view active" id="view-calendar">
+<!-- ① 游戏累计 -->
+<section class="view active" id="view-lifetime">
   <div class="panel">
     <div class="panel-head">
-      <h2>当日游戏时长</h2>
-      <div class="ctrl"><span class="hint" id="today-hint">—</span></div>
+      <h2>所有游戏 · 累计时长</h2>
+      <div class="ctrl">
+        <input type="search" id="lt-search" class="search" placeholder="搜索游戏名…" autocomplete="off">
+        <div class="seg" id="lt-sort">
+          <button data-k="lifetime" class="active">按时长</button>
+          <button data-k="last_played">按最近游玩</button>
+          <button data-k="name">按名称</button>
+        </div>
+      </div>
     </div>
-    <div id="chart-today" class="chart"></div>
+    <div class="rank-head">
+      <span></span><span>游戏</span><span class="rh-bar"></span><span class="rh-num">累计时长</span><span class="rh-num">最近游玩</span>
+    </div>
+    <div id="lt-list" class="rank-list"></div>
+  </div>
+</section>
+
+<!-- ② 每日记录 -->
+<section class="view" id="view-daily">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>当日明细</h2>
+      <div class="ctrl day-nav">
+        <button class="btn btn-icon" id="day-prev" title="前一天">‹</button>
+        <input type="date" id="day-date" class="date-input">
+        <button class="btn btn-icon" id="day-next" title="后一天">›</button>
+        <button class="btn btn-ghost" id="day-latest">最新一天</button>
+      </div>
+    </div>
+    <div id="day-body"><p class="empty">加载中…</p></div>
   </div>
   <div class="panel">
     <div class="panel-head">
-      <h2>全年日历</h2>
+      <h2>日历热力图</h2>
       <div class="ctrl">
         <select id="cal-year"></select>
         <span class="hint">点击任意一天查看当日明细</span>
@@ -61,19 +106,15 @@
     </div>
     <div id="chart-calendar" class="chart chart-calendar"></div>
     <div class="legend">
-      <span class="lg-item"><i style="background:#22303f"></i>未采集</span>
-      <span class="lg-item"><i style="background:#16202d;border:1px solid #2b3d52"></i>0 min</span>
-      <span class="lg-item"><i style="background:#1f4e79"></i>&lt;30</span>
-      <span class="lg-item"><i style="background:#2e7cb8"></i>&lt;90</span>
-      <span class="lg-item"><i style="background:#5fa8d3"></i>&lt;180</span>
+      <span class="lg-item"><i style="background:#1a2634"></i>未采集</span>
+      <span class="lg-item"><i style="background:#101a26;border:1px solid #24384e"></i>0 min</span>
+      <span class="lg-item"><i style="background:#17456e"></i>&lt;30</span>
+      <span class="lg-item"><i style="background:#2073ab"></i>&lt;90</span>
+      <span class="lg-item"><i style="background:#4ba3e3"></i>&lt;180</span>
       <span class="lg-item"><i style="background:#d99a5b"></i>&lt;360</span>
-      <span class="lg-item"><i style="background:#e8763a"></i>≥360</span>
+      <span class="lg-item"><i style="background:#f08c3c"></i>≥360</span>
       <span class="lg-item"><i class="diag"></i>低置信度</span>
     </div>
-  </div>
-  <div class="panel" id="day-detail-panel">
-    <div class="panel-head"><h2 id="day-detail-title">当日明细</h2><button class="btn-ghost" id="day-detail-close" hidden>关闭</button></div>
-    <div id="day-detail"><p class="empty">在上方日历中选择一天</p></div>
   </div>
 </section>
 
@@ -96,30 +137,13 @@
   </div>
 </section>
 
-<!-- ④ 排行 -->
-<section class="view" id="view-rank">
-  <div class="panel">
-    <div class="panel-head">
-      <h2>游戏时长排行</h2>
-      <div class="ctrl">
-        <div class="seg" id="rank-sort">
-          <button data-k="total" class="active">按累计时长</button>
-          <button data-k="last14">按近 14 天</button>
-        </div>
-        <span class="hint" id="rank-hint">—</span>
-      </div>
-    </div>
-    <div id="rank-list" class="rank-list"></div>
-  </div>
-</section>
-
-<!-- ⑤ 数据 -->
+<!-- ④ 数据 -->
 <section class="view" id="view-data">
   <div class="panel">
     <div class="panel-head"><h2>导出</h2></div>
     <div class="row-actions">
       <button class="btn" id="btn-csv-daily">下载每日时长 CSV</button>
-      <button class="btn" id="btn-csv-games">下载游戏累计 CSV</button>
+      <button class="btn" id="btn-csv-lifetime">下载游戏累计 CSV</button>
       <a class="btn btn-ghost" href="data/meta.json" target="_blank" rel="noopener">查看 meta.json</a>
     </div>
   </div>
@@ -130,12 +154,12 @@
   <div class="panel">
     <div class="panel-head"><h2>关于数据</h2></div>
     <div class="about">
-      <p>Steam Web API 只提供「累计时长」，<strong>不提供每日明细</strong>。本站数据由 GitHub Actions 每日 23:30（北京时间）抓取一次快照，与上一份快照做差分得出当日时长。</p>
+      <p><strong>累计游戏时长</strong>来自 Steam 服务器的终身统计（playtime_forever），截至最新快照日，包含开始追踪之前的全部历史。<strong>每日记录</strong>由 GitHub Actions 每日 23:30（北京时间）抓取快照并与上一份差分得出。</p>
       <ul>
-        <li><strong>历史无法回溯</strong>：数据自基线日才开始积累，之前的时间无法补回。</li>
+        <li>每日数据自基线日（首个快照日）开始积累，基线当天无法计算差分。</li>
         <li><strong>span_days &gt; 1</strong>：表示当天覆盖了对上一次采集之间的若干天（漏采），数值会偏高。</li>
         <li><strong>低置信度</strong>：出现负增量、异常跳变、家庭共享游戏回归等情况时会被标记，仅作参考。</li>
-        <li>时长单位为 min（分钟），由 Steam 服务器统计，含离线游玩与挂机时间。</li>
+        <li>时长由 Steam 服务器统计，含离线游玩与挂机时间。</li>
       </ul>
     </div>
   </div>
@@ -144,9 +168,9 @@
 <footer class="site-footer">
   <span id="footer-gen">—</span>
   <span class="dot">·</span>
-  <span>数据每日本地时间 23:30 自动更新</span>
+  <span>数据每日 23:30（北京时间）自动更新</span>
 </footer>
 
-<script src="app.js"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>

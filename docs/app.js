@@ -1,4 +1,4 @@
-/* Steam 每日游戏时长 —— 零构建前端，仅依赖 ECharts CDN */
+/* Steam 游戏时长统计 —— 零构建前端，仅依赖 ECharts CDN */
 (function () {
   'use strict';
 
@@ -8,12 +8,14 @@
 
   const state = {
     meta: null,
-    days: new Map(), // 'YYYY-MM-DD' -> day
+    days: new Map(),      // 'YYYY-MM-DD' -> day
     allDates: [],
-    view: 'calendar',
+    view: 'lifetime',
+    ltSearch: '',
+    ltSort: 'lifetime',
+    selectedDate: null,   // 每日记录选中的日期
     trendRange: 30,
     stacked: false,
-    rankSort: 'total',
     charts: {},
   };
 
@@ -67,8 +69,7 @@
     return true;
   }
 
-  // ---------- ① 概览卡片 ----------
-  /** 最近 N 天（含最后采集日）的总时长 */
+  // ---------- 概览卡片 ----------
   function lastNDaysTotal(n) {
     if (!state.allDates.length) return { minutes: 0, start: null, end: null };
     const end = state.allDates[state.allDates.length - 1];
@@ -78,59 +79,27 @@
     return { minutes, start, end };
   }
 
-  /** 最近 N 天里时长最长的游戏 */
-  function topGameInLastDays(n) {
-    if (!state.allDates.length) return null;
-    const end = state.allDates[state.allDates.length - 1];
-    const start = addDaysStr(end, -(n - 1));
-    const counter = new Map();
-    for (const d of eachDate(start, end)) {
-      for (const g of state.days.get(d)?.games ?? []) {
-        counter.set(g.appid, (counter.get(g.appid) ?? 0) + g.minutes);
-      }
-    }
-    let best = null;
-    for (const [appid, minutes] of counter) {
-      if (!best || minutes > best.minutes) {
-        best = { appid, name: state.meta.games_index?.[appid]?.name ?? `App ${appid}`, minutes };
-      }
-    }
-    return best;
-  }
-
   function renderCards() {
     const s = state.meta.stats ?? {};
-    const lastDate = state.allDates[state.allDates.length - 1];
-    $('c-total').textContent = `${s.total_hours ?? 0} h`;
-    $('c-total-sub').textContent = `截至 ${lastDate ?? '—'} · ${s.total_minutes ?? 0} min`;
+    const asOf = state.meta.last_snapshot_date;
 
-    $('c-games').textContent = s.played_games ?? 0;
-    $('c-games-sub').textContent = `有游玩记录的游戏`;
+    $('c-lifetime').textContent = hm(s.lifetime_minutes ?? 0);
+    $('c-lifetime-sub').textContent = `截至 ${asOf ?? '—'} · 共 ${s.owned_games ?? 0} 款游戏`;
 
-    const hot = topGameInLastDays(14);
-    if (hot && hot.minutes > 0) {
-      $('c-streak').textContent = hot.name;
-      $('c-streak-sub').textContent = `近 14 天 ${hm(hot.minutes)}`;
-    } else {
-      $('c-streak').textContent = '—';
-      $('c-streak-sub').textContent = '近 14 天暂无游玩记录';
-    }
+    $('c-games').textContent = `${s.lifetime_played_games ?? 0} / ${s.owned_games ?? 0}`;
+    $('c-games-sub').textContent = '玩过 / 拥有';
 
     const w7 = lastNDaysTotal(7);
     $('c-week').textContent = hm(w7.minutes);
-    $('c-week-sub').textContent = w7.start ? `${w7.start} → ${w7.end}` : '暂无数据';
+    $('c-week-sub').textContent = w7.start ? `${w7.start} → ${w7.end}` : '暂无每日数据';
 
-    if (s.best_day) {
-      $('c-best').textContent = hm(s.best_day.minutes);
-      $('c-best-sub').textContent = s.best_day.date;
-    } else {
-      $('c-best').textContent = '—';
-      $('c-best-sub').textContent = '暂无数据';
-    }
+    $('c-track').textContent = hm(s.total_minutes ?? 0);
+    $('c-track-sub').textContent = state.meta.tracking_since
+      ? `自 ${state.meta.tracking_since} 起每日差分记录`
+      : '等待首次采集';
 
-    const since = state.meta.tracking_since;
-    $('subtitle').textContent = since
-      ? `自 ${since} 起累计 ${s.tracked_days ?? 0} 天` + (s.tracked_days <= 1 ? ' · 首日仅作为基准，次日开始产出时长' : '')
+    $('subtitle').textContent = asOf
+      ? `数据截至 ${asOf}${state.meta.tracking_since ? ` · 每日记录自 ${state.meta.tracking_since}` : ''}`
       : '等待首次采集';
 
     const h = state.meta.health ?? {};
@@ -146,112 +115,125 @@
     $('footer-gen').textContent = `数据生成于 ${state.meta.generated_at_local ?? '—'}`;
   }
 
-  // ---------- ② 当日游戏时长柱状图 ----------
-  function renderTodayChart() {
-    const el = $('chart-today');
-    const hint = $('today-hint');
-    if (!state.charts.today) state.charts.today = echarts.init(el);
+  // ---------- ① 游戏累计 ----------
+  /** 追踪期内每款游戏的近期时长（近 14 天），用于「在玩」标记 */
+  function recentMinutesByApp(windowDays) {
+    const map = new Map();
+    if (!state.allDates.length) return map;
+    const end = state.allDates[state.allDates.length - 1];
+    const start = addDaysStr(end, -(windowDays - 1));
+    for (const d of eachDate(start, end)) {
+      for (const g of state.days.get(d)?.games ?? []) {
+        map.set(g.appid, (map.get(g.appid) ?? 0) + g.minutes);
+      }
+    }
+    return map;
+  }
 
-    const lastDate = state.allDates[state.allDates.length - 1];
-    if (!lastDate) {
-      hint.textContent = '暂无数据';
+  function renderLifetime() {
+    const box = $('lt-list');
+    const lifetime = Object.values(state.meta.games_lifetime ?? {});
+    if (!lifetime.length) {
+      box.innerHTML = '<p class="empty">暂无游戏数据。首次快照采集完成后即会显示。</p>';
       return;
     }
-    const day = state.days.get(lastDate) ?? { games: [], total_minutes: 0 };
-    const games = (day.games ?? []).filter((g) => g.minutes > 0).slice(0, 12);
-    hint.textContent = `${lastDate} · 共 ${hm(day.total_minutes)}`;
+    const recent = recentMinutesByApp(14);
+    const q = state.ltSearch.trim().toLowerCase();
+    let list = lifetime.filter((g) => !q || g.name.toLowerCase().includes(q));
 
-    if (!games.length) {
-      state.charts.today.setOption(
-        {
-          backgroundColor: 'transparent',
-          title: {
-            text: '最近一个采集日没有游玩记录',
-            left: 'center',
-            top: 'middle',
-            textStyle: { color: '#7e93a8', fontSize: 14, fontWeight: 400 },
-          },
-          xAxis: { show: false, type: 'category', data: [] },
-          yAxis: { show: false },
-          series: [],
-        },
-        true,
-      );
-      return;
-    }
+    const key = state.ltSort;
+    if (key === 'name') list.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
+    else if (key === 'last_played') list.sort((a, b) => (b.last_played ?? '').localeCompare(a.last_played ?? '') || b.lifetime_minutes - a.lifetime_minutes);
+    else list.sort((a, b) => b.lifetime_minutes - a.lifetime_minutes);
 
-    const gi = state.meta.games_index ?? {};
-    const rich = {};
-    games.forEach((g, i) => {
-      const url = ICON(g.appid, gi[g.appid]?.img_icon_url);
-      rich[`g${i}`] = url
-        ? { backgroundColor: { image: url }, width: 30, height: 30, borderRadius: 4 }
-        : { backgroundColor: '#22303f', width: 30, height: 30, borderRadius: 4 };
-    });
-    const short = (n) => (String(n).length > 10 ? String(n).slice(0, 9) + '…' : String(n));
+    const max = Math.max(...lifetime.map((g) => g.lifetime_minutes), 1);
+    const totalShown = list.reduce((a, g) => a + g.lifetime_minutes, 0);
 
-    state.charts.today.setOption(
-      {
-        backgroundColor: 'transparent',
-        grid: { left: 60, right: 20, top: 60, bottom: 60 },
-        tooltip: {
-          backgroundColor: '#0f1620',
-          borderColor: '#263340',
-          textStyle: { color: '#c7d5e0', fontSize: 12 },
-          formatter: (p) => {
-            const g = games[p.dataIndex];
-            return `${escapeHtml(g.name)}<br/><b>${hm(g.minutes)}</b>${g.is_new ? '<br/><span style="color:#66c0f4">新游戏</span>' : ''}`;
-          },
-        },
-        xAxis: {
-          type: 'category',
-          data: games.map((g) => short(g.name)),
-          axisLabel: { color: '#7e93a8', fontSize: 11, interval: 0, rotate: games.length > 6 ? 18 : 0 },
-          axisLine: { lineStyle: { color: '#263340' } },
-          axisTick: { show: false },
-        },
-        yAxis: {
-          type: 'value',
-          name: 'min',
-          nameTextStyle: { color: '#7e93a8', fontSize: 11 },
-          axisLabel: { color: '#7e93a8', fontSize: 11 },
-          splitLine: { lineStyle: { color: '#1e2b39' } },
-        },
-        series: [
-          {
-            type: 'bar',
-            barMaxWidth: 46,
-            data: games.map((g) => g.minutes),
-            itemStyle: {
-              borderRadius: [4, 4, 0, 0],
-              color: (p) => {
-                const v = p.value ?? 0;
-                if (v >= 360) return '#e8763a';
-                if (v >= 180) return '#d99a5b';
-                if (v >= 90) return '#5fa8d3';
-                if (v >= 30) return '#2e7cb8';
-                return '#1f4e79';
-              },
-            },
-            label: {
-              show: true,
-              position: 'top',
-              distance: 8,
-              formatter: (p) => `{g${p.dataIndex}|}`,
-              rich,
-            },
-          },
-        ],
-      },
-      true,
+    box.innerHTML = list
+      .map((g, i) => {
+        const icon = ICON(g.appid, g.img_icon_url);
+        const pct = Math.max(g.lifetime_minutes > 0 ? 1.5 : 0, (g.lifetime_minutes / max) * 100);
+        const playing = (recent.get(g.appid) ?? 0) > 0;
+        return `<div class="rank-item${g.lifetime_minutes === 0 ? ' zero' : ''}">
+          <span class="rank-no">${i + 1}</span>
+          ${icon ? `<img class="rank-icon" src="${icon}" alt="" loading="lazy">` : '<span class="rank-icon"></span>'}
+          <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
+          <span class="rank-bar"><span style="width:${pct}%"></span></span>
+          <span class="rank-min">${hm(g.lifetime_minutes)}</span>
+          <span class="rank-last">${g.last_played ?? '—'}</span>
+        </div>`;
+      })
+      .join('');
+
+    box.insertAdjacentHTML(
+      'beforeend',
+      `<p class="list-foot">共 ${list.length} 款游戏 · 合计 ${hm(totalShown)}${q ? '（已过滤）' : ''}</p>`,
     );
   }
 
-  // ---------- ③ 日历热力图 ----------
+  // ---------- ② 每日记录 ----------
+  function clampDate(d) {
+    const first = state.allDates[0];
+    const today = ymd(new Date());
+    let max = state.meta.last_snapshot_date ?? today;
+    if (max > today) max = today;
+    if (d < first) return first;
+    if (d > max) return max;
+    return d;
+  }
+
+  function renderDay() {
+    const date = state.selectedDate;
+    const body = $('day-body');
+    $('day-date').value = date;
+    const day = state.days.get(date);
+
+    if (!day) {
+      body.innerHTML = `<p class="empty">${date} 没有采集记录。每日数据从 ${state.allDates[0] ?? '—'} 开始。</p>`;
+      return;
+    }
+
+    const gi = state.meta.games_lifetime ?? state.meta.games_index ?? {};
+    const games = (day.games ?? []).slice().sort((a, b) => b.minutes - a.minutes);
+    const flags = (day.flags ?? []).filter((f) => f !== 'first_snapshot');
+    const summary = [`共 <b>${hm(day.total_minutes)}</b>`, `置信度 <b>${day.confidence}</b>`];
+    if (day.span_days > 1) summary.push(`<span class="warn-text">覆盖 ${day.span_days} 天</span>`);
+    if (flags.length) summary.push(`标记：${flags.join(', ')}`);
+    if ((day.flags ?? []).includes('first_snapshot')) summary.push('首个基准快照日，无法计算当日差分');
+
+    const max = Math.max(...games.map((g) => g.minutes), 1);
+    const items = games
+      .map((g) => {
+        const pct = Math.max(3, Math.round((g.minutes / max) * 100));
+        const icon = ICON(g.appid, gi[g.appid]?.img_icon_url);
+        const tags = [
+          g.is_new ? '<span class="tag new">新游戏</span>' : '',
+          (day.flags ?? []).includes('multi_day') ? '<span class="tag multi">多日</span>' : '',
+        ].join('');
+        return `<li>
+          ${icon ? `<img src="${icon}" alt="" loading="lazy">` : '<span class="icon-ph"></span>'}
+          <span class="gname">${escapeHtml(g.name)}${tags}</span>
+          <span class="gbar-wrap">
+            <span class="gbar"><span style="width:${pct}%"></span></span>
+            <span class="gmin">${hm(g.minutes)}</span>
+          </span>
+        </li>`;
+      })
+      .join('');
+
+    body.innerHTML =
+      `<p class="day-summary">${date} · ${summary.join(' · ')}</p>` +
+      (items ? `<ul class="glist">${items}</ul>` : '<p class="empty">这一天没有游玩记录。</p>');
+  }
+
+  function shiftDay(n) {
+    state.selectedDate = clampDate(addDaysStr(state.selectedDate, n));
+    renderDay();
+  }
+
   function availableYears() {
     const set = new Set(state.allDates.map((d) => d.slice(0, 4)));
-    const todayYear = String(new Date().getFullYear());
-    set.add(todayYear);
+    set.add(String(new Date().getFullYear()));
     return [...set].sort();
   }
 
@@ -259,12 +241,11 @@
     const el = $('chart-calendar');
     if (!state.charts.calendar) state.charts.calendar = echarts.init(el);
 
-    // 年份下拉
     const years = availableYears();
     const sel = $('cal-year');
     if (sel.dataset.built !== '1') {
       sel.innerHTML = years.map((y) => `<option value="${y}">${y} 年</option>`).join('');
-      sel.value = years[years.length - 1];
+      sel.value = (state.selectedDate ?? String(new Date().getFullYear())).slice(0, 4);
       sel.dataset.built = '1';
       sel.addEventListener('change', renderCalendar);
     }
@@ -280,7 +261,6 @@
       data.push(item);
     }
 
-    // 保证至少有今天，避免整图空白
     const today = ymd(new Date());
     const range = today.startsWith(year) ? [today, today] : [`${year}-12-31`, `${year}-12-31`];
 
@@ -288,8 +268,8 @@
       {
         backgroundColor: 'transparent',
         tooltip: {
-          backgroundColor: '#0f1620',
-          borderColor: '#263340',
+          backgroundColor: '#0d1420',
+          borderColor: '#263650',
           textStyle: { color: '#c7d5e0', fontSize: 12 },
           formatter: (p) => {
             const d = p.value[0];
@@ -311,12 +291,12 @@
           top: 0,
           show: false,
           pieces: [
-            { min: 360, color: '#e8763a' },
+            { min: 360, color: '#f08c3c' },
             { min: 180, max: 359, color: '#d99a5b' },
-            { min: 90, max: 179, color: '#5fa8d3' },
-            { min: 30, max: 89, color: '#2e7cb8' },
-            { min: 1, max: 29, color: '#1f4e79' },
-            { value: 0, color: '#16202d' },
+            { min: 90, max: 179, color: '#4ba3e3' },
+            { min: 30, max: 89, color: '#2073ab' },
+            { min: 1, max: 29, color: '#17456e' },
+            { value: 0, color: '#101a26' },
           ],
         },
         calendar: {
@@ -324,12 +304,12 @@
           left: 40,
           right: 20,
           range,
-          cellSize: ['auto', 15],
-          itemStyle: { color: '#22303f', borderWidth: 2, borderColor: '#0f1620' },
-          splitLine: { lineStyle: { color: '#2b3d52', width: 1 } },
+          cellSize: ['auto', 16],
+          itemStyle: { color: '#1a2634', borderWidth: 3, borderColor: '#0d1420' },
+          splitLine: { show: false },
           yearLabel: { show: false },
-          monthLabel: { color: '#7e93a8', fontSize: 11 },
-          dayLabel: { color: '#7e93a8', fontSize: 10, firstDay: 1 },
+          monthLabel: { color: '#8fa5ba', fontSize: 11 },
+          dayLabel: { color: '#5c7089', fontSize: 10, firstDay: 1 },
         },
         series: [
           {
@@ -337,7 +317,7 @@
             coordinateSystem: 'calendar',
             calendarIndex: 0,
             data,
-            itemStyle: { borderRadius: 2 },
+            itemStyle: { borderRadius: 3 },
           },
         ],
       },
@@ -346,53 +326,11 @@
 
     state.charts.calendar.off('click');
     state.charts.calendar.on('click', (p) => {
-      if (p.value && p.value[0]) showDay(p.value[0]);
+      if (p.value && p.value[0]) {
+        state.selectedDate = clampDate(p.value[0]);
+        renderDay();
+      }
     });
-  }
-
-  function showDay(date) {
-    const day = state.days.get(date);
-    const box = $('day-detail');
-    $('day-detail-close').hidden = false;
-    if (!day) {
-      $('day-detail-title').textContent = `${date} · 未采集`;
-      box.innerHTML = '<p class="empty">这一天没有采集记录。</p>';
-      return;
-    }
-    $('day-detail-title').textContent = `${date} · ${hm(day.total_minutes)}`;
-    const flags = (day.flags ?? []).filter((f) => f !== 'first_snapshot');
-    const summary = [];
-    summary.push(`共 <b>${hm(day.total_minutes)}</b>`);
-    summary.push(`置信度 <b>${day.confidence}</b>`);
-    summary.push(`来源 <b>${day.source}</b>`);
-    if (day.span_days > 1) summary.push(`<span style="color:#e8b13a">覆盖 ${day.span_days} 天</span>`);
-    if (flags.length) summary.push(`标记：${flags.join(', ')}`);
-    if ((day.flags ?? []).includes('first_snapshot')) summary.push('这是第一份基准快照，无法计算当日时长');
-
-    const items = (day.games ?? [])
-      .map((g) => {
-        const max = Math.max(...(day.games ?? []).map((x) => x.minutes), 1);
-        const pct = Math.max(3, Math.round((g.minutes / max) * 100));
-        const tags = [
-          g.is_new ? '<span class="tag new">新游戏</span>' : '',
-          (day.flags ?? []).includes('multi_day') ? '<span class="tag multi">多日</span>' : '',
-        ].join('');
-        const icon = ICON(g.appid, (state.meta.games_index || {})[g.appid]?.img_icon_url);
-        return `<li>
-          ${icon ? `<img src="${icon}" alt="" loading="lazy">` : '<span style="width:34px"></span>'}
-          <span class="gname">${escapeHtml(g.name)}${tags}</span>
-          <span class="gbar-wrap">
-            <span class="gbar"><span style="width:${pct}%"></span></span>
-            <span class="gmin">${hm(g.minutes)}</span>
-          </span>
-        </li>`;
-      })
-      .join('');
-
-    box.innerHTML =
-      `<p class="day-summary">${summary.join(' · ')}</p>` +
-      (items ? `<ul class="glist">${items}</ul>` : '<p class="empty">这一天没有游玩记录。</p>');
-    $('day-detail-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   // ---------- ③ 趋势 ----------
@@ -412,21 +350,19 @@
     const dates = eachDate(start, end);
     const totals = dates.map((d) => state.days.get(d)?.total_minutes ?? 0);
 
-    // 7 日移动平均
     const ma7 = totals.map((_, i) => {
       const seg = totals.slice(Math.max(0, i - 6), i + 1);
       return Math.round(seg.reduce((a, b) => a + b, 0) / seg.length);
     });
 
     const series = [];
-    const yAxisLabel = { color: '#7e93a8', fontSize: 11 };
     const base = {
       backgroundColor: 'transparent',
-      grid: { left: 55, right: 20, top: 30, bottom: 40 },
+      grid: { left: 55, right: 20, top: 34, bottom: 40 },
       tooltip: {
         trigger: 'axis',
-        backgroundColor: '#0f1620',
-        borderColor: '#263340',
+        backgroundColor: '#0d1420',
+        borderColor: '#263650',
         textStyle: { color: '#c7d5e0', fontSize: 12 },
         formatter: (ps) => {
           const date = ps[0].axisValue;
@@ -446,26 +382,25 @@
       },
       legend: {
         top: 0,
-        textStyle: { color: '#7e93a8', fontSize: 11 },
+        textStyle: { color: '#8fa5ba', fontSize: 11 },
         inactiveColor: '#3a4a5a',
       },
       xAxis: {
         type: 'category',
         data: dates,
-        axisLabel: { color: '#7e93a8', fontSize: 11 },
-        axisLine: { lineStyle: { color: '#263340' } },
+        axisLabel: { color: '#8fa5ba', fontSize: 11 },
+        axisLine: { lineStyle: { color: '#263650' } },
       },
       yAxis: {
         type: 'value',
-        name: '分钟',
-        nameTextStyle: { color: '#7e93a8', fontSize: 11 },
-        axisLabel: yAxisLabel,
-        splitLine: { lineStyle: { color: '#1e2b39' } },
+        name: 'min',
+        nameTextStyle: { color: '#8fa5ba', fontSize: 11 },
+        axisLabel: { color: '#8fa5ba', fontSize: 11 },
+        splitLine: { lineStyle: { color: '#1a2634' } },
       },
     };
 
     if (state.stacked) {
-      // 取范围内 Top 8 游戏，其余归入「其他」
       const counter = new Map();
       for (const d of dates) {
         for (const g of state.days.get(d)?.games ?? []) {
@@ -473,11 +408,14 @@
         }
       }
       const top = [...counter.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map((e) => e[0]);
-      const palette = ['#2e7cb8', '#e8763a', '#5fa8d3', '#d99a5b', '#66c0f4', '#a8614a', '#1f4e79', '#8fb8d4'];
-      const idx = Object.fromEntries(state.meta.games_index ? Object.entries(state.meta.games_index) : []);
+      const palette = ['#4ba3e3', '#f08c3c', '#7fd1a8', '#d99a5b', '#66c0f4', '#c96f5e', '#2073ab', '#9db8d4'];
+      const names = {};
+      for (const g of Object.values(state.meta.games_lifetime ?? state.meta.games_index ?? {})) {
+        names[g.appid] = g.name;
+      }
       top.forEach((appid, i) => {
         series.push({
-          name: idx[appid]?.name ?? `App ${appid}`,
+          name: names[appid] ?? `App ${appid}`,
           type: 'bar',
           stack: 'total',
           emphasis: { focus: 'series' },
@@ -500,12 +438,12 @@
         itemStyle: {
           color: (p) => {
             const v = p.value ?? 0;
-            if (v >= 360) return '#e8763a';
+            if (v >= 360) return '#f08c3c';
             if (v >= 180) return '#d99a5b';
-            if (v >= 90) return '#5fa8d3';
-            if (v >= 30) return '#2e7cb8';
-            if (v > 0) return '#1f4e79';
-            return '#16202d';
+            if (v >= 90) return '#4ba3e3';
+            if (v >= 30) return '#2073ab';
+            if (v > 0) return '#17456e';
+            return '#101a26';
           },
           borderRadius: [2, 2, 0, 0],
         },
@@ -524,77 +462,17 @@
     state.charts.trend.setOption({ ...base, series }, true);
   }
 
-  // ---------- ④ 排行 ----------
-  /** 从每日数据聚合：全部游戏时长 + 近 14 天时长 */
-  function buildGameStats(windowDays) {
-    const gi = state.meta.games_index ?? {};
-    const map = new Map();
-    const end = state.allDates[state.allDates.length - 1];
-    const winStart = end ? addDaysStr(end, -(windowDays - 1)) : null;
-    for (const d of state.allDates) {
-      for (const g of state.days.get(d)?.games ?? []) {
-        const e =
-          map.get(g.appid) ??
-          map.set(g.appid, {
-            appid: g.appid,
-            name: gi[g.appid]?.name ?? g.name ?? `App ${g.appid}`,
-            icon: gi[g.appid]?.img_icon_url ?? null,
-            total: 0,
-            recent: 0,
-            first_day: null,
-            last_day: null,
-          }).get(g.appid);
-        e.total += g.minutes;
-        if (winStart && d >= winStart) e.recent += g.minutes;
-        if (!e.first_day || d < e.first_day) e.first_day = d;
-        if (!e.last_day || d > e.last_day) e.last_day = d;
-      }
-    }
-    return [...map.values()].filter((g) => g.total > 0);
-  }
-
-  function renderRank() {
-    const box = $('rank-list');
-    const key = state.rankSort === 'last14' ? 'recent' : 'total';
-    const list = buildGameStats(14).sort((a, b) => b[key] - a[key] || b.total - a.total);
-
-    $('rank-hint').textContent = list.length ? `共 ${list.length} 款游戏` : '—';
-    if (!list.length) {
-      box.innerHTML = '<p class="empty">还没有游戏时长数据。第二次采集后，这里会开始填充。</p>';
-      return;
-    }
-    const max = list[0][key] || 1;
-    box.innerHTML = list
-      .map((g, i) => {
-        const icon = ICON(g.appid, g.icon);
-        const pct = Math.max(2, Math.round((g[key] / max) * 100));
-        const recentCls = g.recent > 0 ? 'recent-on' : 'recent-off';
-        return `<div class="rank-item">
-          <span class="rank-no">${i + 1}</span>
-          ${icon ? `<img class="rank-icon" src="${icon}" alt="" loading="lazy">` : '<span class="rank-icon"></span>'}
-          <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}</span>
-          <span class="rank-bar"><span style="width:${pct}%"></span></span>
-          <span class="rank-meta">
-            <span class="t">累计 ${hm(g.total)}</span>
-            <span class="d ${recentCls}">近 14 天 ${g.recent > 0 ? hm(g.recent) : '未游玩'}</span>
-          </span>
-          <span class="rank-range">${g.first_day ?? '—'} → ${g.last_day ?? '—'}</span>
-        </div>`;
-      })
-      .join('');
-  }
-
-  // ---------- ⑤ 数据页 ----------
+  // ---------- ④ 数据页 ----------
   function renderHealth() {
     const h = state.meta.health ?? {};
     const s = state.meta.stats ?? {};
     const items = [
-      ['最近快照', state.meta.last_snapshot_date ?? '—', ''],
-      ['累计采集天数', s.tracked_days ?? 0, ''],
+      ['最新快照日', state.meta.last_snapshot_date ?? '—', ''],
+      ['每日记录天数', s.tracked_days ?? 0, ''],
       ['漏采合并天数', h.gap_days ?? 0, (h.gap_days ?? 0) > 0 ? 'warn' : 'ok'],
       ['低置信度天数', h.low_confidence_days ?? 0, (h.low_confidence_days ?? 0) > 0 ? 'warn' : 'ok'],
       ['手动补录天数', h.manual_days ?? 0, ''],
-      ['家庭共享游戏', h.shared_game_count ?? 0, ''],
+      ['中文名覆盖', h.name_overrides ?? 0, ''],
     ];
     $('health').innerHTML = items
       .map(([l, v, cls]) => `<div class="h-item"><div class="h-label">${l}</div><div class="h-value ${cls}">${v}</div></div>`)
@@ -628,11 +506,10 @@
     return rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
   }
 
-  function csvGames() {
-    const rows = [['appid', 'name', 'total_minutes', 'first_day', 'last_day']];
-    for (const g of Object.values(state.meta.games_index ?? {}).sort((a, b) => b.total_minutes - a.total_minutes)) {
-      rows.push([g.appid, g.name, g.total_minutes, g.first_day, g.last_day]);
-    }
+  function csvLifetime() {
+    const rows = [['appid', 'name', 'lifetime_minutes', 'last_played']];
+    const list = Object.values(state.meta.games_lifetime ?? {}).sort((a, b) => b.lifetime_minutes - a.lifetime_minutes);
+    for (const g of list) rows.push([g.appid, g.name, g.lifetime_minutes, g.last_played ?? '']);
     return rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
   }
 
@@ -641,12 +518,38 @@
     state.view = v;
     document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.view === v));
     document.querySelectorAll('.view').forEach((s) => s.classList.toggle('active', s.id === `view-${v}`));
-    if (v === 'calendar') requestAnimationFrame(() => { state.charts.today?.resize(); state.charts.calendar?.resize(); });
+    if (v === 'daily') requestAnimationFrame(() => state.charts.calendar?.resize());
     if (v === 'trend') requestAnimationFrame(() => state.charts.trend?.resize());
   }
 
   function bind() {
     document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => switchView(t.dataset.view)));
+
+    $('lt-search').addEventListener('input', (e) => {
+      state.ltSearch = e.target.value;
+      renderLifetime();
+    });
+    $('lt-sort').addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      [...$('lt-sort').children].forEach((x) => x.classList.toggle('active', x === b));
+      state.ltSort = b.dataset.k;
+      renderLifetime();
+    });
+
+    $('day-prev').addEventListener('click', () => shiftDay(-1));
+    $('day-next').addEventListener('click', () => shiftDay(1));
+    $('day-latest').addEventListener('click', () => {
+      state.selectedDate = clampDate(state.meta.last_snapshot_date ?? ymd(new Date()));
+      renderDay();
+    });
+    $('day-date').addEventListener('change', (e) => {
+      if (e.target.value) {
+        state.selectedDate = clampDate(e.target.value);
+        renderDay();
+      }
+    });
+
     $('trend-range').addEventListener('click', (e) => {
       const b = e.target.closest('button');
       if (!b) return;
@@ -654,24 +557,13 @@
       state.trendRange = b.dataset.r === 'all' ? 'all' : Number(b.dataset.r);
       renderTrend();
     });
-    $('rank-sort').addEventListener('click', (e) => {
-      const b = e.target.closest('button');
-      if (!b) return;
-      [...$('rank-sort').children].forEach((x) => x.classList.toggle('active', x === b));
-      state.rankSort = b.dataset.k;
-      renderRank();
-    });
     $('trend-stack').addEventListener('change', (e) => {
       state.stacked = e.target.checked;
       renderTrend();
     });
-    $('day-detail-close').addEventListener('click', () => {
-      $('day-detail').innerHTML = '<p class="empty">在上方日历中选择一天</p>';
-      $('day-detail-title').textContent = '当日明细';
-      $('day-detail-close').hidden = true;
-    });
+
     $('btn-csv-daily').addEventListener('click', () => download('steam-daily.csv', csvDaily()));
-    $('btn-csv-games').addEventListener('click', () => download('steam-games.csv', csvGames()));
+    $('btn-csv-lifetime').addEventListener('click', () => download('steam-games-lifetime.csv', csvLifetime()));
     window.addEventListener('resize', () => {
       Object.values(state.charts).forEach((c) => c?.resize());
     });
@@ -681,11 +573,15 @@
     bind();
     if (!(await load())) return;
     renderCards();
-    renderTodayChart();
+
+    const lastSnapshot = state.meta.last_snapshot_date ?? state.allDates[state.allDates.length - 1] ?? ymd(new Date());
+    state.selectedDate = lastSnapshot;
+
+    renderLifetime();
+    renderDay();
     renderCalendar();
     renderTrend();
-    renderRank();
     renderHealth();
-    switchView('calendar');
+    switchView('lifetime');
   })();
 })();

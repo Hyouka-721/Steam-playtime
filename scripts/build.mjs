@@ -151,6 +151,26 @@ function main() {
     if (cn) gamesIndex[appid].name = cn;
   }
 
+  // ---- 终身累计（playtime_forever，来自最新快照）----
+  // 这才是「截至当日所有游戏的累计时长」的权威数据；games_index 只覆盖追踪期内有差分的游戏。
+  const snapGames = snapMeta.games ?? {};
+  const gamesLifetime = {};
+  let lifetimeMinutes = 0;
+  let lifetimePlayed = 0;
+  for (const [appid, g] of Object.entries(snapGames)) {
+    const minutes = g.playtime_forever ?? 0;
+    lifetimeMinutes += minutes;
+    if (minutes > 0) lifetimePlayed++;
+    const rtime = g.rtime_last_played;
+    gamesLifetime[appid] = {
+      appid,
+      name: nameOverrides[appid] ?? g.name ?? `App ${appid}`,
+      img_icon_url: g.img_icon_url ?? null,
+      lifetime_minutes: minutes,
+      last_played: rtime ? shanghaiDate(new Date(rtime * 1000)) : null,
+    };
+  }
+
   const { longest, current } = computeStreaks(allDays);
 
   // 本周（周一起算，Asia/Shanghai）
@@ -167,7 +187,7 @@ function main() {
   const playedGames = Object.values(gamesIndex).filter((g) => g.total_minutes > 0).length;
 
   const meta = {
-    schema: 1,
+    schema: 2,
     tz: 'Asia/Shanghai',
     unit: 'minute',
     generated_at: utcISO(),
@@ -177,6 +197,12 @@ function main() {
     steamid_hash: snapMeta.hash ?? null,
     months: monthFiles.map((f) => f.replace('.json', '')),
     stats: {
+      // 终身累计（截至最新快照日，Steam 服务器统计）
+      lifetime_minutes: lifetimeMinutes,
+      lifetime_hours: Math.round((lifetimeMinutes / 60) * 10) / 10,
+      owned_games: Object.keys(snapGames).length,
+      lifetime_played_games: lifetimePlayed,
+      // 追踪期（差分）统计
       total_minutes: totalMinutes,
       total_hours: Math.round((totalMinutes / 60) * 10) / 10,
       tracked_days: dates.length,
@@ -188,6 +214,7 @@ function main() {
       best_day: bestDay,
     },
     games_index: gamesIndex,
+    games_lifetime: gamesLifetime,
     health: {
       gap_days: gapDays,
       low_confidence_days: lowConfidenceDays,
@@ -201,8 +228,8 @@ function main() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
   fs.writeFileSync(path.join(OUT_DIR, 'meta.json'), JSON.stringify(meta, null, 2) + '\n', 'utf8');
 
-  log(`已生成 docs/data/meta.json（${dates.length} 天，${playedGames} 款游戏）`);
-  log(`累计 ${totalMinutes} 分钟 / ${meta.stats.total_hours} 小时，当前连续 ${current} 天`);
+  log(`已生成 docs/data/meta.json（${dates.length} 天，${playedGames} 款追踪期游戏 / ${lifetimePlayed} 款终身有游玩）`);
+  log(`终身累计 ${lifetimeMinutes} min（${meta.stats.lifetime_hours} h），追踪期累计 ${totalMinutes} min`);
   log('⚠ 校验：meta.json 中不含完整 steamid =', !JSON.stringify(meta).includes('7656119'));
 }
 
