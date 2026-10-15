@@ -164,8 +164,9 @@
         const pct = Math.max(g.lifetime_minutes > 0 ? 1.5 : 0, (g.lifetime_minutes / max) * 100);
         const barStyle = i < topPalette.length ? `width:${pct}%;background:${topPalette[i]}` : `width:${pct}%`;
         const playing = (recent.get(g.appid) ?? 0) > 0;
+        const noCls = i < 3 ? ` r${i + 1}` : '';
         return `<div class="rank-item${g.lifetime_minutes === 0 ? ' zero' : ''}" data-appid="${g.appid}" title="点击查看该游戏每日时长趋势">
-          <span class="rank-no">${i + 1}</span>
+          <span class="rank-no${noCls}">${i + 1}</span>
           <img class="rank-capsule" src="${CAPSULE(g.appid)}" alt="" loading="lazy"
                onerror="this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'">
           <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
@@ -206,8 +207,9 @@
         const icon = ICON(g.appid, g.img_icon_url);
         const pct = Math.max(1.5, (g.recent / max) * 100);
         const barStyle = i < topPalette.length ? `width:${pct}%;background:${topPalette[i]}` : `width:${pct}%`;
+        const noCls = i < 3 ? ` r${i + 1}` : '';
         return `<div class="rank-item">
-          <span class="rank-no">${i + 1}</span>
+          <span class="rank-no${noCls}">${i + 1}</span>
           <img class="rank-capsule" src="${CAPSULE(g.appid)}" alt="" loading="lazy"
                onerror="this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'">
           <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}</span>

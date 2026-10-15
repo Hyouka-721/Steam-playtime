@@ -151,7 +151,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 
 /* ---- 游戏列表 ---- */
 .rank-head {
-  display: grid; grid-template-columns: 36px 130px minmax(150px, 340px) 1fr 150px 110px;
+  display: grid; grid-template-columns: 44px 130px minmax(150px, 340px) 1fr 150px 110px;
   gap: 14px; align-items: center; padding: 0 12px 8px;
   font-size: 11px; color: var(--text-faint); letter-spacing: .5px;
   border-bottom: 1px solid var(--border);
@@ -160,15 +160,22 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .rh-bar { }
 .rank-list { display: flex; flex-direction: column; gap: 4px; padding-top: 8px; }
 .rank-item {
-  display: grid; grid-template-columns: 36px 130px minmax(150px, 340px) 1fr 150px 110px;
+  display: grid; grid-template-columns: 44px 130px minmax(150px, 340px) 1fr 150px 110px;
   gap: 14px; align-items: center; cursor: pointer;
   padding: 7px 12px; border-radius: 9px; background: transparent; border: 1px solid transparent;
   transition: background .15s, border-color .15s;
 }
 .rank-item:hover { background: rgba(102, 192, 244, 0.05); border-color: var(--border); }
 .rank-item.zero { opacity: .55; }
-.rank-no { color: var(--text-faint); font-variant-numeric: tabular-nums; text-align: right; font-size: 13px; }
-.rank-item:first-child .rank-no { color: var(--warn); font-weight: 700; }
+/* 排名序号：靠左对齐、放大；前三名金 / 银 / 铜 */
+.rank-no {
+  color: var(--text-faint); font-variant-numeric: tabular-nums;
+  text-align: left; font-size: 16px; font-weight: 600; letter-spacing: .5px;
+}
+.rank-no.r1, .rank-no.r2, .rank-no.r3 { font-size: 22px; font-weight: 800; }
+.rank-no.r1 { color: #ffd24a; text-shadow: 0 0 12px rgba(255, 210, 74, 0.35); }
+.rank-no.r2 { color: #dbe6f0; text-shadow: 0 0 12px rgba(219, 230, 240, 0.28); }
+.rank-no.r3 { color: #e0914f; text-shadow: 0 0 12px rgba(224, 145, 79, 0.3); }
 .rank-capsule {
   width: 130px; height: 60px; border-radius: 8px; object-fit: cover;
   background: var(--bg-deep); display: block;
@@ -263,7 +270,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .tabs { padding: 12px 16px 0; }
   .site-header { padding: 14px 16px; }
   .rank-head { display: none; }
-  .rank-item { grid-template-columns: 24px 100px 1fr auto; }
+  .rank-item { grid-template-columns: 34px 100px 1fr auto; }
   .rank-capsule { width: 100px; height: 46px; }
   .rank-capsule.is-icon { width: 30px; height: 30px; margin: 8px 0; }
   .rank-bar, .rank-last { display: none; }
