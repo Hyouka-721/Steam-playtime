@@ -5,6 +5,8 @@
   const $ = (id) => document.getElementById(id);
   const ICON = (appid, hash) =>
     hash ? `https://media.steampowered.com/steamcommunity/public/images/apps/${appid}/${hash}.jpg` : null;
+  // 游戏横幅大图（Steam 官方 CDN，460x215）
+  const CAPSULE = (appid) => `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/header.jpg`;
 
   const state = {
     meta: null,
@@ -151,7 +153,8 @@
         const playing = (recent.get(g.appid) ?? 0) > 0;
         return `<div class="rank-item${g.lifetime_minutes === 0 ? ' zero' : ''}">
           <span class="rank-no">${i + 1}</span>
-          ${icon ? `<img class="rank-icon" src="${icon}" alt="" loading="lazy">` : '<span class="rank-icon"></span>'}
+          <img class="rank-capsule" src="${CAPSULE(g.appid)}" alt="" loading="lazy"
+               onerror="this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'">
           <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
           <span class="rank-bar"><span style="${barStyle}"></span></span>
           <span class="rank-min">${hm(g.lifetime_minutes)}</span>
@@ -192,7 +195,8 @@
         const barStyle = i < topPalette.length ? `width:${pct}%;background:${topPalette[i]}` : `width:${pct}%`;
         return `<div class="rank-item">
           <span class="rank-no">${i + 1}</span>
-          ${icon ? `<img class="rank-icon" src="${icon}" alt="" loading="lazy">` : '<span class="rank-icon"></span>'}
+          <img class="rank-capsule" src="${CAPSULE(g.appid)}" alt="" loading="lazy"
+               onerror="this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'">
           <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}</span>
           <span class="rank-bar"><span style="${barStyle}"></span></span>
           <span class="rank-min">${hm(g.recent)}</span>

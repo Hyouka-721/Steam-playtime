@@ -146,9 +146,9 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   background: repeating-linear-gradient(45deg, #4ba3e3, #4ba3e3 3px, #101a26 3px, #101a26 6px);
 }
 
-/* ---- 游戏累计列表 ---- */
+/* ---- 游戏列表 ---- */
 .rank-head {
-  display: grid; grid-template-columns: 36px 40px 1fr minmax(220px, 1fr) 150px 110px;
+  display: grid; grid-template-columns: 36px 130px minmax(140px, 1fr) minmax(220px, 1fr) 150px 110px;
   gap: 14px; align-items: center; padding: 0 12px 8px;
   font-size: 11px; color: var(--text-faint); letter-spacing: .5px;
   border-bottom: 1px solid var(--border);
@@ -157,7 +157,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .rh-bar { }
 .rank-list { display: flex; flex-direction: column; gap: 4px; padding-top: 8px; }
 .rank-item {
-  display: grid; grid-template-columns: 36px 40px 1fr minmax(220px, 1fr) 150px 110px;
+  display: grid; grid-template-columns: 36px 130px minmax(140px, 1fr) minmax(220px, 1fr) 150px 110px;
   gap: 14px; align-items: center;
   padding: 7px 12px; border-radius: 9px; background: transparent; border: 1px solid transparent;
   transition: background .15s, border-color .15s;
@@ -165,9 +165,12 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .rank-item:hover { background: rgba(102, 192, 244, 0.05); border-color: var(--border); }
 .rank-item.zero { opacity: .55; }
 .rank-no { color: var(--text-faint); font-variant-numeric: tabular-nums; text-align: right; font-size: 13px; }
-.rank-no:nth-child(1) { }
 .rank-item:first-child .rank-no { color: var(--warn); font-weight: 700; }
-.rank-icon { width: 30px; height: 30px; border-radius: 6px; object-fit: contain; background: var(--bg-deep); }
+.rank-capsule {
+  width: 130px; height: 60px; border-radius: 8px; object-fit: cover;
+  background: var(--bg-deep); display: block;
+}
+.rank-capsule.is-icon { width: 30px; height: 30px; object-fit: contain; margin: 15px 0; }
 .rank-name {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #e6eef5;
 }
@@ -244,8 +247,10 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .tabs { padding: 12px 16px 0; }
   .site-header { padding: 14px 16px; }
   .rank-head { display: none; }
-  .rank-item { grid-template-columns: 28px 34px 1fr auto; }
+  .rank-item { grid-template-columns: 24px 100px 1fr auto; }
+  .rank-capsule { width: 100px; height: 46px; }
+  .rank-capsule.is-icon { width: 30px; height: 30px; margin: 8px 0; }
   .rank-bar, .rank-last { display: none; }
-  .rank-min { min-width: 84px; }
+  .rank-min { min-width: 84px; text-align: right; }
   .gbar { width: 90px; }
 }
