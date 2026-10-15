@@ -7,7 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="alternate icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="style.css?v=9">
+<link rel="stylesheet" href="style.css?v=10">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 </head>
 <body>
@@ -21,7 +21,7 @@
     </span>
     <div>
       <h1>Steam 游戏时长统计</h1>
-      <p class="subtitle" id="subtitle">加载中…</p>
+      <p class="subtitle" id="subtitle">游戏时长统计</p>
     </div>
   </div>
   <img class="header-avatar" src="avatar.png?v=2" alt="汤姆猫头像">
@@ -157,6 +157,7 @@
   <div class="panel">
     <div class="panel-head"><h2>关于数据</h2></div>
     <div class="about">
+      <p class="day-summary" id="data-range">—</p>
       <p><strong>累计游戏时长</strong>来自 Steam 服务器的终身统计（playtime_forever），截至最新快照日，包含开始追踪之前的全部历史。<strong>每日记录</strong>由 GitHub Actions 每日 23:30（北京时间）抓取快照并与上一份差分得出。</p>
       <ul>
         <li>每日数据自基线日（首个快照日）开始积累，基线当天无法计算差分。</li>
@@ -174,6 +175,6 @@
   <span>数据每日 23:30（北京时间）自动更新</span>
 </footer>
 
-<script src="app.js?v=9"></script>
+<script src="app.js?v=10"></script>
 </body>
 </html>

@@ -97,9 +97,12 @@
     }
     $('c-yesterday').textContent = hm(yesterdayMin);
 
-    $('subtitle').textContent = asOf
-      ? `数据截至 ${asOf}${state.meta.tracking_since ? ` · 每日记录自 ${state.meta.tracking_since}` : ''}`
-      : '等待首次采集';
+    const dr = $('data-range');
+    if (dr) {
+      dr.textContent = asOf
+        ? `数据截至 ${asOf}` + (state.meta.tracking_since ? ` · 每日记录自 ${state.meta.tracking_since}` : '')
+        : '等待首次采集';
+    }
 
     $('footer-gen').textContent = `数据生成于 ${state.meta.generated_at_local ?? '—'}`;
   }
