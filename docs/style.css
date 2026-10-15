@@ -161,7 +161,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .rank-list { display: flex; flex-direction: column; gap: 4px; padding-top: 8px; }
 .rank-item {
   display: grid; grid-template-columns: 36px 130px minmax(150px, 340px) 1fr 150px 110px;
-  gap: 14px; align-items: center;
+  gap: 14px; align-items: center; cursor: pointer;
   padding: 7px 12px; border-radius: 9px; background: transparent; border: 1px solid transparent;
   transition: background .15s, border-color .15s;
 }
@@ -176,22 +176,14 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .rank-capsule.is-icon { width: 30px; height: 30px; object-fit: contain; margin: 15px 0; }
 .rank-name {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #e6eef5;
-  cursor: pointer;
 }
-.rank-name:hover { color: var(--accent); }
-.rank-capsule { cursor: pointer; }
 .rank-bar { height: 7px; background: #16222f; border-radius: 4px; overflow: hidden; }
 .rank-bar > span {
   display: block; height: 100%; border-radius: 4px;
   background: linear-gradient(90deg, #2073ab, #4ba3e3);
   transition: width .5s ease;
 }
-.rank-min {
-  font-variant-numeric: tabular-nums; color: #e6eef5; text-align: center;
-  font-weight: 600; font-size: 13.5px; cursor: pointer; border-radius: 6px; padding: 2px 6px;
-  transition: color .15s, background .15s;
-}
-.rank-min:hover { color: var(--accent); background: rgba(102, 192, 244, 0.08); }
+.rank-min { font-variant-numeric: tabular-nums; color: #e6eef5; text-align: center; font-weight: 600; font-size: 13.5px; }
 .rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: center; font-size: 12px; }
 .list-foot { text-align: right; color: var(--text-faint); font-size: 12px; margin: 10px 4px 2px; }
 

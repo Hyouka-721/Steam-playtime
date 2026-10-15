@@ -153,13 +153,13 @@
         const pct = Math.max(g.lifetime_minutes > 0 ? 1.5 : 0, (g.lifetime_minutes / max) * 100);
         const barStyle = i < topPalette.length ? `width:${pct}%;background:${topPalette[i]}` : `width:${pct}%`;
         const playing = (recent.get(g.appid) ?? 0) > 0;
-        return `<div class="rank-item${g.lifetime_minutes === 0 ? ' zero' : ''}" data-appid="${g.appid}">
+        return `<div class="rank-item${g.lifetime_minutes === 0 ? ' zero' : ''}" data-appid="${g.appid}" title="点击查看该游戏每日时长趋势">
           <span class="rank-no">${i + 1}</span>
           <img class="rank-capsule" src="${CAPSULE(g.appid)}" alt="" loading="lazy"
                onerror="this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'">
-          <span class="rank-name" title="${escapeHtml(g.name)}（点击看每日趋势）">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
+          <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
           <span class="rank-bar"><span style="${barStyle}"></span></span>
-          <span class="rank-min" title="点击查看每日时长趋势">${hm(g.lifetime_minutes)}</span>
+          <span class="rank-min">${hm(g.lifetime_minutes)}</span>
           <span class="rank-last">${g.last_played ?? '—'}</span>
         </div>`;
       })
@@ -265,6 +265,11 @@
     state.charts.drill.setOption(
       {
         backgroundColor: 'transparent',
+        // 入场动画：曲线从左向右延伸绘制
+        animation: true,
+        animationDuration: 1100,
+        animationEasing: 'cubicOut',
+        animationDurationUpdate: 600,
         grid: { left: 55, right: 24, top: 42, bottom: 40 },
         title: {
           text: `${dates[0]} → ${end} · 合计 ${hm(totalMin)} · 有记录 ${activeDays} 天`,
@@ -691,13 +696,11 @@
       openDrill(null);
     });
 
-    // 游戏累计列表：点「游戏时长」→ 每日总趋势；点游戏名/封面 → 单游戏趋势
+    // 游戏累计列表：点击整行 → 该游戏每日时长趋势
     $('lt-list').addEventListener('click', (e) => {
       const row = e.target.closest('.rank-item');
       if (!row) return;
-      const appid = row.dataset.appid;
-      if (e.target.closest('.rank-min')) openDrill(null);
-      else if (e.target.closest('.rank-name') || e.target.closest('.rank-capsule')) openDrill(appid);
+      openDrill(row.dataset.appid);
     });
 
     $('drill-back').addEventListener('click', closeDrill);
