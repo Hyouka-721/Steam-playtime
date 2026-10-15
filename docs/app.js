@@ -13,7 +13,6 @@
     days: new Map(),      // 'YYYY-MM-DD' -> day
     allDates: [],
     view: 'lifetime',
-    ltSearch: '',
     selectedDate: null,   // 每日记录选中的日期
     drill: { appid: null },   // 二级趋势界面：null = 每日总时长
     drillRange: 30,
@@ -140,10 +139,7 @@
       return;
     }
     const recent = recentMinutesByApp(14);
-    const q = state.ltSearch.trim().toLowerCase();
-    const list = lifetime
-      .filter((g) => !q || g.name.toLowerCase().includes(q))
-      .sort((a, b) => b.lifetime_minutes - a.lifetime_minutes);
+    const list = lifetime.slice().sort((a, b) => b.lifetime_minutes - a.lifetime_minutes);
 
     const max = Math.max(...lifetime.map((g) => g.lifetime_minutes), 1);
     const totalShown = list.reduce((a, g) => a + g.lifetime_minutes, 0);
@@ -168,7 +164,7 @@
 
     box.insertAdjacentHTML(
       'beforeend',
-      `<p class="list-foot">共 ${list.length} 款游戏 · 合计 ${hm(totalShown)}${q ? '（已过滤）' : ''}</p>`,
+      `<p class="list-foot">共 ${list.length} 款游戏 · 合计 ${hm(totalShown)}</p>`,
     );
   }
 
@@ -262,13 +258,19 @@
     });
     const totalMin = data.reduce((a, b) => a + b, 0);
     const activeDays = data.filter((v) => v > 0).length;
-    // 累计曲线（分钟）
+    // 累计曲线：以 Steam 终身累计为基准，把「追踪前历史」锚定到起点，
+    // 保证曲线终点 = 卡片上的真实总时长（如 1364 h）
+    const lifetimeMin = appid
+      ? (gl[appid]?.lifetime_minutes ?? null)
+      : (state.meta.stats?.lifetime_minutes ?? null);
+    const base = lifetimeMin != null ? Math.max(0, lifetimeMin - totalMin) : 0;
     const cum = [];
-    let acc = 0;
+    let acc = base;
     for (const v of data) {
       acc += v;
       cum.push(acc);
     }
+    const finalMin = acc;
 
     const barColor = appid
       ? { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: '#66c0f4' }, { offset: 1, color: '#1c5b8f' }] }
@@ -285,7 +287,7 @@
         animationDurationUpdate: 600,
         grid: { left: 58, right: 58, top: 40, bottom: 40 },
         title: {
-          text: `${dates[0]} → ${end} · 累计 ${hm(totalMin)} · 有记录 ${activeDays} 天`,
+          text: `${dates[0]} → ${end} · 最终累计 ${hm(finalMin)} · 期内游玩 ${hm(totalMin)} · 有记录 ${activeDays} 天`,
           left: 8, top: 0,
           textStyle: { color: '#8fa5ba', fontSize: 12, fontWeight: 400 },
         },
@@ -716,11 +718,6 @@
   function bind() {
     document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => switchView(t.dataset.view)));
 
-    $('lt-search').addEventListener('input', (e) => {
-      state.ltSearch = e.target.value;
-      renderLifetime();
-    });
-
     // 顶部「游戏时长」大卡片：进入每日与累计趋势；再次点击返回列表
     $('card-lifetime').addEventListener('click', () => {
       if (!$('lt-detail').hidden) {
@@ -738,7 +735,6 @@
       openDrill(row.dataset.appid);
     });
 
-    $('drill-back').addEventListener('click', closeDrill);
     $('drill-game').addEventListener('change', (e) => {
       state.drill.appid = e.target.value || null;
       renderDrill();
