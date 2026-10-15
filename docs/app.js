@@ -41,10 +41,19 @@
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
-  async function jget(url) {
-    const r = await fetch(url, { cache: 'no-store' });
-    if (!r.ok) throw new Error(`${url} -> HTTP ${r.status}`);
-    return r.json();
+  async function jget(url, tries = 3) {
+    let lastErr;
+    for (let i = 0; i < tries; i++) {
+      try {
+        const r = await fetch(url, { cache: 'no-store' });
+        if (!r.ok) throw new Error(`${url} -> HTTP ${r.status}`);
+        return await r.json();
+      } catch (e) {
+        lastErr = e;
+        if (i < tries - 1) await new Promise((res) => setTimeout(res, 900 * (i + 1)));
+      }
+    }
+    throw lastErr;
   }
 
   /** 致命错误兜底：给出可见提示与重试按钮，避免页面无声空白 */
@@ -471,9 +480,14 @@
   }
 
   (async function init() {
+    // 看门狗：请求挂起（一直 pending 不报错）时，12 秒后给出可见提示
+    const watchdog = setTimeout(() => {
+      if (!state.meta) showFatal('加载超时');
+    }, 12000);
     try {
       bind();
       if (!(await load())) return;
+      clearTimeout(watchdog);
       renderCards();
 
       renderLifetime();
@@ -482,6 +496,7 @@
       buildDrillSelect();
       switchView('lifetime');
     } catch (err) {
+      clearTimeout(watchdog);
       console.error('初始化失败：', err);
       showFatal('页面初始化出错');
     }

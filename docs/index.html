@@ -6,10 +6,22 @@
 <title>Steam 游戏时长统计</title>
 <link rel="icon" type="image/png" href="avatar.png?v=2">
 <link rel="apple-touch-icon" href="avatar.png?v=2">
-<link rel="stylesheet" href="style.css?v=20">
+<link rel="stylesheet" href="style.css?v=21">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/zcool-kuaile@5/index.min.css">
 <link rel="stylesheet" href="https://fonts.loli.net/css2?family=ZCOOL+KuaiLe&display=swap">
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"
+        onerror="var s=document.createElement('script');s.src='https://cdn.bootcdn.net/ajax/libs/echarts/5.5.1/echarts.min.js';document.head.appendChild(s);"></script>
+<script>
+  /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
+  window.__appFail = function () {
+    if (document.querySelector('.script-error')) return;
+    var d = document.createElement('div');
+    d.className = 'script-error';
+    d.style.cssText = 'margin:14px 20px;padding:16px 20px;border:1px solid #5b4a24;background:#2a2314;color:#f0c674;border-radius:10px;font-size:14px;line-height:1.8';
+    d.innerHTML = '<strong>⚠ 脚本加载失败</strong><br>可能是网络波动或站点正在重新部署。<button onclick="location.reload(true)" style="margin-left:10px;padding:4px 16px;cursor:pointer;border-radius:6px;border:1px solid #5b4a24;background:#3a3018;color:#f0c674">重新加载</button>';
+    document.body.insertBefore(d, document.body.firstChild);
+  };
+</script>
 </head>
 <body>
 
@@ -130,6 +142,6 @@
   <span>数据每日 23:30（北京时间）自动更新</span>
 </footer>
 
-<script src="app.js?v=16"></script>
+<script src="app.js?v=21" onerror="__appFail()"></script>
 </body>
 </html>
