@@ -7,7 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="alternate icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="style.css?v=11">
+<link rel="stylesheet" href="style.css?v=12">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 </head>
 <body>
@@ -57,17 +57,38 @@
 
 <!-- ① 游戏累计 -->
 <section class="view active" id="view-lifetime">
-  <div class="panel">
-    <div class="panel-head">
-      <h2>所有游戏 · 累计时长</h2>
-      <div class="ctrl">
-        <input type="search" id="lt-search" class="search" placeholder="搜索游戏名…" autocomplete="off">
+  <div id="lt-main">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>所有游戏 · 累计时长</h2>
+        <div class="ctrl">
+          <span class="drill-tip">点击「游戏时长」看每日总趋势 · 点击游戏名看单游戏趋势</span>
+          <input type="search" id="lt-search" class="search" placeholder="搜索游戏名…" autocomplete="off">
+        </div>
       </div>
+      <div class="rank-head">
+        <span></span><span></span><span>游戏</span><span></span><span class="rh-num">游戏时长</span><span class="rh-num">最近游玩时间</span>
+      </div>
+      <div id="lt-list" class="rank-list"></div>
     </div>
-    <div class="rank-head">
-      <span></span><span></span><span>游戏</span><span></span><span class="rh-num">游戏时长</span><span class="rh-num">最近游玩时间</span>
+  </div>
+  <div id="lt-detail" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <h2 id="drill-title">每日时长趋势</h2>
+        <div class="ctrl">
+          <select id="drill-game" title="选择游戏"></select>
+          <div class="seg" id="drill-range">
+            <button data-r="30" class="active">30 天</button>
+            <button data-r="90">90 天</button>
+            <button data-r="365">365 天</button>
+            <button data-r="all">全部</button>
+          </div>
+          <button class="btn btn-ghost" id="drill-back">‹ 返回列表</button>
+        </div>
+      </div>
+      <div id="chart-drill" class="chart chart-tall"></div>
     </div>
-    <div id="lt-list" class="rank-list"></div>
   </div>
 </section>
 
@@ -175,6 +196,6 @@
   <span>数据每日 23:30（北京时间）自动更新</span>
 </footer>
 
-<script src="app.js?v=11"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>

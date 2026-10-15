@@ -15,6 +15,8 @@
     view: 'lifetime',
     ltSearch: '',
     selectedDate: null,   // 每日记录选中的日期
+    drill: { appid: null },   // 二级趋势界面：null = 每日总时长
+    drillRange: 30,
     trendRange: 30,
     stacked: false,
     charts: {},
@@ -151,13 +153,13 @@
         const pct = Math.max(g.lifetime_minutes > 0 ? 1.5 : 0, (g.lifetime_minutes / max) * 100);
         const barStyle = i < topPalette.length ? `width:${pct}%;background:${topPalette[i]}` : `width:${pct}%`;
         const playing = (recent.get(g.appid) ?? 0) > 0;
-        return `<div class="rank-item${g.lifetime_minutes === 0 ? ' zero' : ''}">
+        return `<div class="rank-item${g.lifetime_minutes === 0 ? ' zero' : ''}" data-appid="${g.appid}">
           <span class="rank-no">${i + 1}</span>
           <img class="rank-capsule" src="${CAPSULE(g.appid)}" alt="" loading="lazy"
                onerror="this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'">
-          <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
+          <span class="rank-name" title="${escapeHtml(g.name)}（点击看每日趋势）">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
           <span class="rank-bar"><span style="${barStyle}"></span></span>
-          <span class="rank-min">${hm(g.lifetime_minutes)}</span>
+          <span class="rank-min" title="点击查看每日时长趋势">${hm(g.lifetime_minutes)}</span>
           <span class="rank-last">${g.last_played ?? '—'}</span>
         </div>`;
       })
@@ -204,6 +206,122 @@
         </div>`;
       })
       .join('');
+  }
+
+  // ---------- ①c 二级趋势界面（游戏累计下钻） ----------
+  /** 每天每款游戏的时长已在 daily 数据中；这里负责折线展示 */
+  function buildDrillSelect() {
+    const sel = $('drill-game');
+    const gl = Object.values(state.meta.games_lifetime ?? {})
+      .filter((g) => g.lifetime_minutes > 0)
+      .sort((a, b) => b.lifetime_minutes - a.lifetime_minutes);
+    sel.innerHTML =
+      '<option value="">全部游戏 · 每日总时长</option>' +
+      gl.map((g) => `<option value="${g.appid}">${escapeHtml(g.name)}</option>`).join('');
+  }
+
+  function openDrill(appid) {
+    state.drill.appid = appid;
+    $('drill-game').value = appid ?? '';
+    $('lt-main').hidden = true;
+    $('lt-detail').hidden = false;
+    renderDrill();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function closeDrill() {
+    $('lt-detail').hidden = true;
+    $('lt-main').hidden = false;
+  }
+
+  function renderDrill() {
+    const el = $('chart-drill');
+    if (!state.charts.drill) state.charts.drill = echarts.init(el);
+    if (!state.allDates.length) return;
+
+    const appid = state.drill.appid;
+    const gl = state.meta.games_lifetime ?? {};
+    const title = appid ? (gl[appid]?.name ?? `App ${appid}`) : '全部游戏 · 每日总时长';
+    $('drill-title').textContent = `${title} · 每日时长趋势`;
+
+    const today = ymd(new Date());
+    const lastDate = state.allDates[state.allDates.length - 1];
+    const end = today < lastDate ? today : lastDate;
+    let start;
+    if (state.drillRange === 'all') start = state.allDates[0];
+    else start = addDaysStr(end, -(state.drillRange - 1));
+    if (start < state.allDates[0]) start = state.allDates[0];
+
+    const dates = eachDate(start, end);
+    const data = dates.map((d) => {
+      const day = state.days.get(d);
+      if (!day) return 0;
+      if (!appid) return day.total_minutes ?? 0;
+      return (day.games ?? []).find((g) => String(g.appid) === String(appid))?.minutes ?? 0;
+    });
+    const totalMin = data.reduce((a, b) => a + b, 0);
+    const activeDays = data.filter((v) => v > 0).length;
+
+    state.charts.drill.setOption(
+      {
+        backgroundColor: 'transparent',
+        grid: { left: 55, right: 24, top: 42, bottom: 40 },
+        title: {
+          text: `${dates[0]} → ${end} · 合计 ${hm(totalMin)} · 有记录 ${activeDays} 天`,
+          left: 8, top: 0,
+          textStyle: { color: '#8fa5ba', fontSize: 12, fontWeight: 400 },
+        },
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: '#0d1420',
+          borderColor: '#263650',
+          textStyle: { color: '#c7d5e0', fontSize: 12 },
+          formatter: (ps) => {
+            const p = ps[0];
+            const day = state.days.get(p.axisValue);
+            let s = `${p.axisValue}<br/>${p.marker}<b>${hm(p.value ?? 0)}</b>`;
+            if (day && day.span_days > 1) s += `<br/><span style="color:#e8b13a">覆盖 ${day.span_days} 天</span>`;
+            return s;
+          },
+        },
+        xAxis: {
+          type: 'category',
+          data: dates,
+          axisLabel: { color: '#8fa5ba', fontSize: 11 },
+          axisLine: { lineStyle: { color: '#263650' } },
+        },
+        yAxis: {
+          type: 'value',
+          name: 'min',
+          nameTextStyle: { color: '#8fa5ba', fontSize: 11 },
+          axisLabel: { color: '#8fa5ba', fontSize: 11 },
+          splitLine: { lineStyle: { color: '#1a2634' } },
+        },
+        series: [
+          {
+            name: title,
+            type: 'line',
+            smooth: true,
+            symbol: 'circle',
+            symbolSize: 5,
+            showSymbol: data.length <= 60,
+            itemStyle: { color: appid ? '#66c0f4' : '#f08c3c' },
+            lineStyle: { width: 2.4, color: appid ? '#66c0f4' : '#f08c3c' },
+            areaStyle: {
+              color: {
+                type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+                colorStops: [
+                  { offset: 0, color: appid ? 'rgba(102,192,244,0.32)' : 'rgba(240,140,60,0.32)' },
+                  { offset: 1, color: 'rgba(102,192,244,0.02)' },
+                ],
+              },
+            },
+            data,
+          },
+        ],
+      },
+      true,
+    );
   }
 
   // ---------- ② 每日记录 ----------
@@ -553,6 +671,7 @@
     state.view = v;
     document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.view === v));
     document.querySelectorAll('.view').forEach((s) => s.classList.toggle('active', s.id === `view-${v}`));
+    if (v === 'lifetime') closeDrill();
     if (v === 'daily') requestAnimationFrame(() => state.charts.calendar?.resize());
     if (v === 'trend') requestAnimationFrame(() => state.charts.trend?.resize());
     if (v === 'recent') renderRecent();
@@ -564,6 +683,28 @@
     $('lt-search').addEventListener('input', (e) => {
       state.ltSearch = e.target.value;
       renderLifetime();
+    });
+
+    // 游戏累计列表：点「游戏时长」→ 每日总趋势；点游戏名/封面 → 单游戏趋势
+    $('lt-list').addEventListener('click', (e) => {
+      const row = e.target.closest('.rank-item');
+      if (!row) return;
+      const appid = row.dataset.appid;
+      if (e.target.closest('.rank-min')) openDrill(null);
+      else if (e.target.closest('.rank-name') || e.target.closest('.rank-capsule')) openDrill(appid);
+    });
+
+    $('drill-back').addEventListener('click', closeDrill);
+    $('drill-game').addEventListener('change', (e) => {
+      state.drill.appid = e.target.value || null;
+      renderDrill();
+    });
+    $('drill-range').addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      [...$('drill-range').children].forEach((x) => x.classList.toggle('active', x === b));
+      state.drillRange = b.dataset.r === 'all' ? 'all' : Number(b.dataset.r);
+      renderDrill();
     });
 
     $('day-prev').addEventListener('click', () => shiftDay(-1));
@@ -612,6 +753,7 @@
     renderCalendar();
     renderTrend();
     renderHealth();
+    buildDrillSelect();
     switchView('lifetime');
   })();
 })();
