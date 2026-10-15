@@ -216,7 +216,7 @@
       .filter((g) => g.lifetime_minutes > 0)
       .sort((a, b) => b.lifetime_minutes - a.lifetime_minutes);
     sel.innerHTML =
-      '<option value="">全部游戏 · 每日总时长</option>' +
+      '<option value="">全部游戏</option>' +
       gl.map((g) => `<option value="${g.appid}">${escapeHtml(g.name)}</option>`).join('');
   }
 
@@ -241,8 +241,8 @@
 
     const appid = state.drill.appid;
     const gl = state.meta.games_lifetime ?? {};
-    const title = appid ? (gl[appid]?.name ?? `App ${appid}`) : '全部游戏 · 每日总时长';
-    $('drill-title').textContent = `${title} · 每日时长趋势`;
+    const title = appid ? (gl[appid]?.name ?? `App ${appid}`) : '全部游戏';
+    $('drill-title').textContent = `${title} · 每日与累计时长趋势`;
 
     const today = ymd(new Date());
     const lastDate = state.allDates[state.allDates.length - 1];
@@ -261,20 +261,38 @@
     });
     const totalMin = data.reduce((a, b) => a + b, 0);
     const activeDays = data.filter((v) => v > 0).length;
+    // 累计曲线（分钟）
+    const cum = [];
+    let acc = 0;
+    for (const v of data) {
+      acc += v;
+      cum.push(acc);
+    }
+
+    const barColor = appid
+      ? { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: '#66c0f4' }, { offset: 1, color: '#1c5b8f' }] }
+      : { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: '#f0a35c' }, { offset: 1, color: '#9a5a24' }] };
+    const lineColor = appid ? '#7fd1a8' : '#eef5fb';
 
     state.charts.drill.setOption(
       {
         backgroundColor: 'transparent',
-        // 入场动画：曲线从左向右延伸绘制
+        // 入场动画：柱子生长 + 曲线延伸
         animation: true,
         animationDuration: 1100,
         animationEasing: 'cubicOut',
         animationDurationUpdate: 600,
-        grid: { left: 55, right: 24, top: 42, bottom: 40 },
+        grid: { left: 58, right: 58, top: 46, bottom: 40 },
         title: {
-          text: `${dates[0]} → ${end} · 合计 ${hm(totalMin)} · 有记录 ${activeDays} 天`,
+          text: `${dates[0]} → ${end} · 累计 ${hm(totalMin)} · 有记录 ${activeDays} 天`,
           left: 8, top: 0,
           textStyle: { color: '#8fa5ba', fontSize: 12, fontWeight: 400 },
+        },
+        legend: {
+          top: 0, right: 8,
+          data: ['每日时长', '累计时长'],
+          textStyle: { color: '#8fa5ba', fontSize: 11 },
+          inactiveColor: '#3a4a5a',
         },
         tooltip: {
           trigger: 'axis',
@@ -282,9 +300,11 @@
           borderColor: '#263650',
           textStyle: { color: '#c7d5e0', fontSize: 12 },
           formatter: (ps) => {
-            const p = ps[0];
-            const day = state.days.get(p.axisValue);
-            let s = `${p.axisValue}<br/>${p.marker}<b>${hm(p.value ?? 0)}</b>`;
+            const date = ps[0].axisValue;
+            const bar = ps.find((p) => p.seriesName === '每日时长');
+            const line = ps.find((p) => p.seriesName === '累计时长');
+            const day = state.days.get(date);
+            let s = `${date}<br/>${bar.marker}<b>当日：${hm(bar.value ?? 0)}</b><br/>${line.marker}累计：${hm(line.value ?? 0)}`;
             if (day && day.span_days > 1) s += `<br/><span style="color:#e8b13a">覆盖 ${day.span_days} 天</span>`;
             return s;
           },
@@ -295,33 +315,42 @@
           axisLabel: { color: '#8fa5ba', fontSize: 11 },
           axisLine: { lineStyle: { color: '#263650' } },
         },
-        yAxis: {
-          type: 'value',
-          name: 'min',
-          nameTextStyle: { color: '#8fa5ba', fontSize: 11 },
-          axisLabel: { color: '#8fa5ba', fontSize: 11 },
-          splitLine: { lineStyle: { color: '#1a2634' } },
-        },
+        yAxis: [
+          {
+            type: 'value',
+            name: '每日 min',
+            nameTextStyle: { color: '#8fa5ba', fontSize: 11 },
+            axisLabel: { color: '#8fa5ba', fontSize: 11 },
+            splitLine: { lineStyle: { color: '#1a2634' } },
+          },
+          {
+            type: 'value',
+            name: '累计 h',
+            nameTextStyle: { color: '#8fa5ba', fontSize: 11 },
+            axisLabel: {
+              color: '#8fa5ba', fontSize: 11,
+              formatter: (v) => Math.round((v / 60) * 10) / 10,
+            },
+            splitLine: { show: false },
+          },
+        ],
         series: [
           {
-            name: title,
-            type: 'line',
-            smooth: true,
-            symbol: 'circle',
-            symbolSize: 5,
-            showSymbol: data.length <= 60,
-            itemStyle: { color: appid ? '#66c0f4' : '#f08c3c' },
-            lineStyle: { width: 2.4, color: appid ? '#66c0f4' : '#f08c3c' },
-            areaStyle: {
-              color: {
-                type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-                colorStops: [
-                  { offset: 0, color: appid ? 'rgba(102,192,244,0.32)' : 'rgba(240,140,60,0.32)' },
-                  { offset: 1, color: 'rgba(102,192,244,0.02)' },
-                ],
-              },
-            },
+            name: '每日时长',
+            type: 'bar',
+            barWidth: '62%',
+            barMaxWidth: 28,
+            itemStyle: { color: barColor, borderRadius: [3, 3, 0, 0] },
             data,
+          },
+          {
+            name: '累计时长',
+            type: 'line',
+            yAxisIndex: 1,
+            smooth: true,
+            symbol: 'none',
+            lineStyle: { width: 2.6, color: lineColor, shadowBlur: 8, shadowColor: lineColor, shadowOpacity: 0.35 },
+            data: cum,
           },
         ],
       },
