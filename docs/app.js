@@ -66,7 +66,7 @@
       `<p><strong>⚠ ${msg}</strong></p>` +
       '<p class="load-error-sub">可能是网络波动，或站点正在重新部署（刚推送过更新）。</p>' +
       '<button class="btn" id="btn-reload">重新加载</button>';
-    document.querySelector('.tabs')?.insertAdjacentElement('afterend', el);
+    document.querySelector('.cards')?.insertAdjacentElement('afterend', el);
     $('btn-reload').addEventListener('click', () => location.reload());
   }
 
@@ -106,18 +106,11 @@
 
     $('c-lifetime').textContent = hm(s.lifetime_minutes ?? 0);
 
-    $('c-games').textContent = `${s.lifetime_played_games ?? 0} / ${s.owned_games ?? 0}`;
+    // 最近游玩卡：近两周总时长
+    $('c-recent').textContent = hm(lastNDaysTotal(14).minutes);
 
-    const w7 = lastNDaysTotal(7);
-    $('c-week').textContent = hm(w7.minutes);
-
-    // 昨日 = 最新快照日的前一天（快照每天 23:30 采集，最新快照日即「今天」）
-    let yesterdayMin = 0;
-    if (asOf && state.allDates.length) {
-      const y = addDaysStr(asOf, -1);
-      yesterdayMin = state.days.get(y)?.total_minutes ?? 0;
-    }
-    $('c-yesterday').textContent = hm(yesterdayMin);
+    // 数据卡：数据截至时间
+    $('c-data').textContent = asOf ? `截至 ${asOf}` : '等待采集';
 
     const dr = $('data-range');
     if (dr) {
@@ -434,24 +427,26 @@
   // ---------- tabs / init ----------
   function switchView(v) {
     state.view = v;
-    document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.view === v));
+    document.querySelectorAll('.card-nav').forEach((c) => c.classList.toggle('active', c.dataset.view === v));
     document.querySelectorAll('.view').forEach((s) => s.classList.toggle('active', s.id === `view-${v}`));
     if (v === 'lifetime') closeDrill();
     if (v === 'recent') renderRecent();
   }
 
   function bind() {
-    document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => switchView(t.dataset.view)));
-
-    // 顶部「游戏时长」大卡片：进入每日与累计趋势；再次点击返回列表
+    // 三张导航卡：游戏时长 / 最近游玩 / 数据
+    // 游戏时长卡：他页 → 回列表；列表 → 每日与累计趋势；趋势中 → 返回列表
     $('card-lifetime').addEventListener('click', () => {
-      if (!$('lt-detail').hidden) {
+      if (state.view !== 'lifetime') {
+        switchView('lifetime');
+      } else if (!$('lt-detail').hidden) {
         closeDrill();
-        return;
+      } else {
+        openDrill(null);
       }
-      switchView('lifetime');
-      openDrill(null);
     });
+    $('card-recent').addEventListener('click', () => switchView('recent'));
+    $('card-data').addEventListener('click', () => switchView('data'));
 
     // 游戏累计列表：点击整行 → 该游戏每日时长趋势
     $('lt-list').addEventListener('click', (e) => {

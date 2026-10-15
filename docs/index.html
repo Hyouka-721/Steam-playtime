@@ -6,7 +6,7 @@
 <title>Steam 游戏时长统计</title>
 <link rel="icon" type="image/png" href="avatar.png?v=2">
 <link rel="apple-touch-icon" href="avatar.png?v=2">
-<link rel="stylesheet" href="style.css?v=21">
+<link rel="stylesheet" href="style.css?v=22">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/zcool-kuaile@5/index.min.css">
 <link rel="stylesheet" href="https://fonts.loli.net/css2?family=ZCOOL+KuaiLe&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"
@@ -39,33 +39,23 @@
   <img class="header-avatar" src="avatar.png?v=2" alt="汤姆猫头像">
 </header>
 
-<!-- 概览 -->
+<!-- 概览 · 三张导航卡（替代原 Tab 栏） -->
 <section class="cards" id="cards">
-  <div class="card card-hero card-clickable" id="card-lifetime" title="点击查看每日与累计趋势 · 再次点击返回列表">
+  <div class="card card-nav card-hero" id="card-lifetime" data-view="lifetime" title="点击查看所有游戏的累计时长">
     <div class="card-label">游戏时长</div>
     <div class="card-value" id="c-lifetime">—</div>
   </div>
-  <div class="card">
-    <div class="card-label">游戏库</div>
-    <div class="card-value" id="c-games">—</div>
+  <div class="card card-nav" id="card-recent" data-view="recent" title="点击查看近两周的游玩记录">
+    <div class="card-label">最近游玩</div>
+    <div class="card-value" id="c-recent">—</div>
   </div>
-  <div class="card">
-    <div class="card-label">最近 7 天</div>
-    <div class="card-value" id="c-week">—</div>
-  </div>
-  <div class="card">
-    <div class="card-label">昨日时长</div>
-    <div class="card-value" id="c-yesterday">—</div>
+  <div class="card card-nav" id="card-data" data-view="data" title="点击查看数据详情与导出">
+    <div class="card-label">数据</div>
+    <div class="card-value" id="c-data">—</div>
   </div>
 </section>
 
-<nav class="tabs" id="tabs">
-  <button class="tab active" data-view="lifetime">游戏累计</button>
-  <button class="tab" data-view="recent">最近游玩</button>
-  <button class="tab" data-view="data">数据</button>
-</nav>
-
-<!-- ① 游戏累计 -->
+<!-- ① 游戏时长（原游戏累计，经游戏时长卡进入） -->
 <section class="view active" id="view-lifetime">
   <div id="lt-main">
     <div class="panel">
@@ -142,6 +132,6 @@
   <span>数据每日 23:30（北京时间）自动更新</span>
 </footer>
 
-<script src="app.js?v=21" onerror="__appFail()"></script>
+<script src="app.js?v=22" onerror="__appFail()"></script>
 </body>
 </html>

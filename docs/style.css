@@ -67,10 +67,13 @@ a { color: var(--accent); }
   transform: scaleX(-1);
 }
 
-/* ---- cards ---- */
+/* ---- 导航卡片（游戏时长 / 最近游玩 / 数据，替代 Tab 栏） ---- */
 .cards {
   display: grid; gap: 14px; padding: 22px 28px 6px;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: 1.2fr 1fr 1fr;
+}
+@media (max-width: 720px) {
+  .cards { grid-template-columns: 1fr; }
 }
 .card {
   background: linear-gradient(170deg, #14202e 0%, #101a26 100%);
@@ -79,9 +82,16 @@ a { color: var(--accent); }
   transition: border-color .2s, transform .2s, box-shadow .2s;
 }
 .card:hover { border-color: var(--border-hi); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); }
-.card-clickable { cursor: pointer; }
-.card-clickable .card-value { transition: color .15s; }
-.card-clickable:hover { border-color: rgba(102, 192, 244, 0.45); }
+.card-nav { cursor: pointer; }
+.card-nav .card-value { transition: color .15s; }
+.card-nav:hover { border-color: rgba(102, 192, 244, 0.45); }
+.card-nav.active {
+  border-color: rgba(102, 192, 244, 0.55);
+  background:
+    linear-gradient(150deg, rgba(102, 192, 244, 0.1), transparent 60%),
+    linear-gradient(170deg, #14202e 0%, #101a26 100%);
+  box-shadow: 0 0 0 1px rgba(102, 192, 244, 0.25), 0 8px 24px rgba(0, 0, 0, 0.35);
+}
 .card-hero {
   background:
     linear-gradient(150deg, rgba(102, 192, 244, 0.13), transparent 55%),
@@ -96,19 +106,6 @@ a { color: var(--accent); }
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .card-sub { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
-
-/* ---- tabs ---- */
-.tabs { display: flex; gap: 6px; padding: 14px 28px 0; flex-wrap: wrap; }
-.tab {
-  background: none; border: 1px solid transparent; border-radius: 9px;
-  color: var(--text-dim); padding: 8px 18px; cursor: pointer; font-size: 14px;
-  transition: color .15s, background .15s;
-}
-.tab:hover { color: var(--text); background: rgba(102, 192, 244, 0.06); }
-.tab.active {
-  color: var(--accent); background: rgba(102, 192, 244, 0.1);
-  border-color: rgba(102, 192, 244, 0.35); font-weight: 600;
-}
 
 .view { display: none; padding: 18px 28px 8px; }
 .view.active { display: block; }
