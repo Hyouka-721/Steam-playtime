@@ -3,7 +3,7 @@
   "month": "2026-10",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-14T19:32:36.143Z",
+  "generated_at": "2026-10-15T19:17:32.122Z",
   "days": {
     "2026-10-13": {
       "total_minutes": 0,
@@ -50,6 +50,14 @@
           "is_new": false
         }
       ]
+    },
+    "2026-10-16": {
+      "total_minutes": 0,
+      "span_days": 1,
+      "confidence": "high",
+      "source": "auto",
+      "flags": [],
+      "games": []
     }
   }
 }
