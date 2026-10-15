@@ -7,7 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="alternate icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="style.css?v=8">
+<link rel="stylesheet" href="style.css?v=9">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 </head>
 <body>
@@ -49,6 +49,7 @@
 
 <nav class="tabs" id="tabs">
   <button class="tab active" data-view="lifetime">游戏累计</button>
+  <button class="tab" data-view="recent">最近游玩</button>
   <button class="tab" data-view="daily">每日记录</button>
   <button class="tab" data-view="trend">趋势</button>
   <button class="tab" data-view="data">数据</button>
@@ -61,16 +62,26 @@
       <h2>所有游戏 · 累计时长</h2>
       <div class="ctrl">
         <input type="search" id="lt-search" class="search" placeholder="搜索游戏名…" autocomplete="off">
-        <div class="seg" id="lt-sort">
-          <button data-k="lifetime" class="active">按时长</button>
-          <button data-k="last_played">按最近游玩</button>
-        </div>
       </div>
     </div>
     <div class="rank-head">
       <span></span><span></span><span>游戏</span><span></span><span class="rh-num">游戏时长</span><span class="rh-num">最近游玩时间</span>
     </div>
     <div id="lt-list" class="rank-list"></div>
+  </div>
+</section>
+
+<!-- ①b 最近游玩 -->
+<section class="view" id="view-recent">
+  <div class="panel">
+    <div class="panel-head">
+      <h2>最近游玩 · 近两周时长</h2>
+      <div class="ctrl"><span class="hint" id="recent-hint">—</span></div>
+    </div>
+    <div class="rank-head">
+      <span></span><span></span><span>游戏</span><span></span><span class="rh-num">近两周时长</span><span class="rh-num">最近游玩时间</span>
+    </div>
+    <div id="recent-list" class="rank-list"></div>
   </div>
 </section>
 
@@ -163,6 +174,6 @@
   <span>数据每日 23:30（北京时间）自动更新</span>
 </footer>
 
-<script src="app.js?v=8"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>

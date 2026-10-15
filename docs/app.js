@@ -12,7 +12,6 @@
     allDates: [],
     view: 'lifetime',
     ltSearch: '',
-    ltSort: 'lifetime',
     selectedDate: null,   // 每日记录选中的日期
     trendRange: 30,
     stacked: false,
@@ -106,7 +105,7 @@
   }
 
   // ---------- ① 游戏累计 ----------
-  /** 追踪期内每款游戏的近期时长（近 14 天），用于「在玩」标记 */
+  /** 追踪期内每款游戏的近期时长（近 N 天），用于「在玩」标记与最近游玩页 */
   function recentMinutesByApp(windowDays) {
     const map = new Map();
     if (!state.allDates.length) return map;
@@ -120,6 +119,11 @@
     return map;
   }
 
+  const topPalette = [
+    '#f0a35c', '#4ba3e3', '#7fd1a8', '#e8b13a', '#c98ad1',
+    '#9d8cff', '#66c0f4', '#e8766a', '#5ad0c0', '#b8d45a',
+  ];
+
   function renderLifetime() {
     const box = $('lt-list');
     const lifetime = Object.values(state.meta.games_lifetime ?? {});
@@ -129,19 +133,12 @@
     }
     const recent = recentMinutesByApp(14);
     const q = state.ltSearch.trim().toLowerCase();
-    let list = lifetime.filter((g) => !q || g.name.toLowerCase().includes(q));
-
-    const key = state.ltSort;
-    if (key === 'last_played') list.sort((a, b) => (b.last_played ?? '').localeCompare(a.last_played ?? '') || b.lifetime_minutes - a.lifetime_minutes);
-    else list.sort((a, b) => b.lifetime_minutes - a.lifetime_minutes);
+    const list = lifetime
+      .filter((g) => !q || g.name.toLowerCase().includes(q))
+      .sort((a, b) => b.lifetime_minutes - a.lifetime_minutes);
 
     const max = Math.max(...lifetime.map((g) => g.lifetime_minutes), 1);
     const totalShown = list.reduce((a, g) => a + g.lifetime_minutes, 0);
-    // 前十名各用一种颜色（按当前排序名次），其余统一蓝色渐变
-    const topPalette = [
-      '#f0a35c', '#4ba3e3', '#7fd1a8', '#e8b13a', '#c98ad1',
-      '#9d8cff', '#66c0f4', '#e8766a', '#5ad0c0', '#b8d45a',
-    ];
 
     box.innerHTML = list
       .map((g, i) => {
@@ -164,6 +161,42 @@
       'beforeend',
       `<p class="list-foot">共 ${list.length} 款游戏 · 合计 ${hm(totalShown)}${q ? '（已过滤）' : ''}</p>`,
     );
+  }
+
+  // ---------- ①b 最近游玩（近两周时长） ----------
+  function renderRecent() {
+    const box = $('recent-list');
+    const hint = $('recent-hint');
+    const lifetime = state.meta.games_lifetime ?? {};
+    const recent = recentMinutesByApp(14);
+    const list = Object.values(lifetime)
+      .map((g) => ({ ...g, recent: recent.get(g.appid) ?? 0 }))
+      .filter((g) => g.recent > 0)
+      .sort((a, b) => b.recent - a.recent);
+
+    if (!list.length) {
+      hint.textContent = '—';
+      box.innerHTML = '<p class="empty">最近两周还没有游玩记录（每日数据自首次快照后开始积累）。</p>';
+      return;
+    }
+    hint.textContent = `近 14 天 · 共 ${list.length} 款游戏`;
+    const max = Math.max(...list.map((g) => g.recent), 1);
+
+    box.innerHTML = list
+      .map((g, i) => {
+        const icon = ICON(g.appid, g.img_icon_url);
+        const pct = Math.max(1.5, (g.recent / max) * 100);
+        const barStyle = i < topPalette.length ? `width:${pct}%;background:${topPalette[i]}` : `width:${pct}%`;
+        return `<div class="rank-item">
+          <span class="rank-no">${i + 1}</span>
+          ${icon ? `<img class="rank-icon" src="${icon}" alt="" loading="lazy">` : '<span class="rank-icon"></span>'}
+          <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}</span>
+          <span class="rank-bar"><span style="${barStyle}"></span></span>
+          <span class="rank-min">${hm(g.recent)}</span>
+          <span class="rank-last">${g.last_played ?? '—'}</span>
+        </div>`;
+      })
+      .join('');
   }
 
   // ---------- ② 每日记录 ----------
@@ -515,6 +548,7 @@
     document.querySelectorAll('.view').forEach((s) => s.classList.toggle('active', s.id === `view-${v}`));
     if (v === 'daily') requestAnimationFrame(() => state.charts.calendar?.resize());
     if (v === 'trend') requestAnimationFrame(() => state.charts.trend?.resize());
+    if (v === 'recent') renderRecent();
   }
 
   function bind() {
@@ -522,13 +556,6 @@
 
     $('lt-search').addEventListener('input', (e) => {
       state.ltSearch = e.target.value;
-      renderLifetime();
-    });
-    $('lt-sort').addEventListener('click', (e) => {
-      const b = e.target.closest('button');
-      if (!b) return;
-      [...$('lt-sort').children].forEach((x) => x.classList.toggle('active', x === b));
-      state.ltSort = b.dataset.k;
       renderLifetime();
     });
 
@@ -573,6 +600,7 @@
     state.selectedDate = lastSnapshot;
 
     renderLifetime();
+    renderRecent();
     renderDay();
     renderCalendar();
     renderTrend();

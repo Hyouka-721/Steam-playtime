@@ -60,10 +60,7 @@ a { color: var(--accent); }
 .subtitle { margin: 2px 0 0; font-size: 13px; color: var(--text-dim); }
 .header-meta { display: flex; gap: 10px; align-items: center; font-size: 12px; }
 .header-avatar {
-  width: 66px; height: 66px; border-radius: 16px; object-fit: contain;
-  border: 1px solid var(--border-hi);
-  box-shadow: 0 0 18px rgba(102, 192, 244, 0.18);
-  background: var(--bg-deep);
+  width: 88px; height: 88px; border-radius: 20px; object-fit: contain;
   transform: scaleX(-1);
 }
 
