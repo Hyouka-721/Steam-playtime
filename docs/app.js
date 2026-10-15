@@ -685,6 +685,12 @@
       renderLifetime();
     });
 
+    // 顶部「游戏时长」大卡片 → 每日总时长趋势
+    $('card-lifetime').addEventListener('click', () => {
+      switchView('lifetime');
+      openDrill(null);
+    });
+
     // 游戏累计列表：点「游戏时长」→ 每日总趋势；点游戏名/封面 → 单游戏趋势
     $('lt-list').addEventListener('click', (e) => {
       const row = e.target.closest('.rank-item');

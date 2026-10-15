@@ -76,6 +76,9 @@ a { color: var(--accent); }
   transition: border-color .2s, transform .2s, box-shadow .2s;
 }
 .card:hover { border-color: var(--border-hi); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); }
+.card-clickable { cursor: pointer; }
+.card-clickable .card-value { transition: color .15s; }
+.card-clickable:hover { border-color: rgba(102, 192, 244, 0.45); }
 .card-hero {
   background:
     linear-gradient(150deg, rgba(102, 192, 244, 0.13), transparent 55%),
