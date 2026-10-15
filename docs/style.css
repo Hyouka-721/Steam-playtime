@@ -59,12 +59,12 @@ a { color: var(--accent); }
 .site-header h1 { margin: 0; font-size: 20px; font-weight: 650; letter-spacing: .3px; color: #eef5fb; }
 .subtitle { margin: 2px 0 0; font-size: 13px; color: var(--text-dim); }
 .header-meta { display: flex; gap: 10px; align-items: center; font-size: 12px; }
-.tz-badge, .src-badge {
-  padding: 4px 12px; border-radius: 20px;
-  border: 1px solid var(--border); background: rgba(10, 15, 24, 0.6); color: var(--text-dim);
+.header-avatar {
+  width: 52px; height: 52px; border-radius: 14px; object-fit: cover;
+  border: 1px solid var(--border-hi);
+  box-shadow: 0 0 18px rgba(102, 192, 244, 0.18);
+  background: var(--bg-deep);
 }
-.src-badge.ok { color: var(--ok); border-color: #23583d; }
-.src-badge.warn { color: var(--warn); border-color: #5b4a24; }
 
 /* ---- cards ---- */
 .cards {

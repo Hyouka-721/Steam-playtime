@@ -102,16 +102,6 @@
       ? `数据截至 ${asOf}${state.meta.tracking_since ? ` · 每日记录自 ${state.meta.tracking_since}` : ''}`
       : '等待首次采集';
 
-    const h = state.meta.health ?? {};
-    const badge = $('badge-health');
-    const problems = (h.gap_days ?? 0) + (h.low_confidence_days ?? 0);
-    if (problems === 0) {
-      badge.textContent = '采集状态正常';
-      badge.className = 'src-badge ok';
-    } else {
-      badge.textContent = `${problems} 天需注意`;
-      badge.className = 'src-badge warn';
-    }
     $('footer-gen').textContent = `数据生成于 ${state.meta.generated_at_local ?? '—'}`;
   }
 
@@ -142,8 +132,7 @@
     let list = lifetime.filter((g) => !q || g.name.toLowerCase().includes(q));
 
     const key = state.ltSort;
-    if (key === 'name') list.sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
-    else if (key === 'last_played') list.sort((a, b) => (b.last_played ?? '').localeCompare(a.last_played ?? '') || b.lifetime_minutes - a.lifetime_minutes);
+    if (key === 'last_played') list.sort((a, b) => (b.last_played ?? '').localeCompare(a.last_played ?? '') || b.lifetime_minutes - a.lifetime_minutes);
     else list.sort((a, b) => b.lifetime_minutes - a.lifetime_minutes);
 
     const max = Math.max(...lifetime.map((g) => g.lifetime_minutes), 1);

@@ -7,7 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="alternate icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=6">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 </head>
 <body>
@@ -24,10 +24,7 @@
       <p class="subtitle" id="subtitle">加载中…</p>
     </div>
   </div>
-  <div class="header-meta">
-    <span class="tz-badge">时区 Asia/Shanghai</span>
-    <span class="src-badge" id="badge-health">—</span>
-  </div>
+  <img class="header-avatar" src="avatar.svg?v=1" alt="汤姆猫头像">
 </header>
 
 <!-- 概览 -->
@@ -67,12 +64,11 @@
         <div class="seg" id="lt-sort">
           <button data-k="lifetime" class="active">按时长</button>
           <button data-k="last_played">按最近游玩</button>
-          <button data-k="name">按名称</button>
         </div>
       </div>
     </div>
     <div class="rank-head">
-      <span></span><span>游戏</span><span class="rh-bar"></span><span class="rh-num">累计时长</span><span class="rh-num">最近游玩</span>
+      <span></span><span>游戏</span><span class="rh-bar"></span><span class="rh-num">游戏时长</span><span class="rh-num">最近游玩时间</span>
     </div>
     <div id="lt-list" class="rank-list"></div>
   </div>
@@ -167,6 +163,6 @@
   <span>数据每日 23:30（北京时间）自动更新</span>
 </footer>
 
-<script src="app.js?v=5"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>
