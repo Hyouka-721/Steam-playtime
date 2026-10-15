@@ -278,12 +278,12 @@
     state.charts.drill.setOption(
       {
         backgroundColor: 'transparent',
-        // 入场动画：柱子生长 + 曲线延伸
+        // 入场动画：累计柱生长 + 每日曲线延伸
         animation: true,
         animationDuration: 1100,
         animationEasing: 'cubicOut',
         animationDurationUpdate: 600,
-        grid: { left: 58, right: 58, top: 46, bottom: 40 },
+        grid: { left: 58, right: 58, top: 40, bottom: 40 },
         title: {
           text: `${dates[0]} → ${end} · 累计 ${hm(totalMin)} · 有记录 ${activeDays} 天`,
           left: 8, top: 0,
@@ -291,7 +291,7 @@
         },
         legend: {
           top: 0, right: 8,
-          data: ['每日时长', '累计时长'],
+          data: ['累计时长', '每日时长'],
           textStyle: { color: '#8fa5ba', fontSize: 11 },
           inactiveColor: '#3a4a5a',
         },
@@ -302,10 +302,10 @@
           textStyle: { color: '#c7d5e0', fontSize: 12 },
           formatter: (ps) => {
             const date = ps[0].axisValue;
-            const bar = ps.find((p) => p.seriesName === '每日时长');
-            const line = ps.find((p) => p.seriesName === '累计时长');
+            const cumP = ps.find((p) => p.seriesName === '累计时长');
+            const dayP = ps.find((p) => p.seriesName === '每日时长');
             const day = state.days.get(date);
-            let s = `${date}<br/>${bar.marker}<b>当日：${hm(bar.value ?? 0)}</b><br/>${line.marker}累计：${hm(line.value ?? 0)}`;
+            let s = `${date}<br/>${cumP.marker}<b>累计：${hm(cumP.value ?? 0)}</b><br/>${dayP.marker}当日：${hm(dayP.value ?? 0)}`;
             if (day && day.span_days > 1) s += `<br/><span style="color:#e8b13a">覆盖 ${day.span_days} 天</span>`;
             return s;
           },
@@ -319,39 +319,40 @@
         yAxis: [
           {
             type: 'value',
-            name: '每日 min',
-            nameTextStyle: { color: '#8fa5ba', fontSize: 11 },
-            axisLabel: { color: '#8fa5ba', fontSize: 11 },
-            splitLine: { lineStyle: { color: '#1a2634' } },
-          },
-          {
-            type: 'value',
-            name: '累计 h',
-            nameTextStyle: { color: '#8fa5ba', fontSize: 11 },
+            name: '',
             axisLabel: {
               color: '#8fa5ba', fontSize: 11,
               formatter: (v) => Math.round((v / 60) * 10) / 10,
             },
+            splitLine: { lineStyle: { color: '#1a2634' } },
+          },
+          {
+            type: 'value',
+            name: '',
+            axisLabel: { color: '#8fa5ba', fontSize: 11 },
             splitLine: { show: false },
           },
         ],
         series: [
           {
-            name: '每日时长',
+            name: '累计时长',
             type: 'bar',
             barWidth: '62%',
             barMaxWidth: 28,
             itemStyle: { color: barColor, borderRadius: [3, 3, 0, 0] },
-            data,
+            data: cum,
           },
           {
-            name: '累计时长',
+            name: '每日时长',
             type: 'line',
             yAxisIndex: 1,
             smooth: true,
-            symbol: 'none',
+            symbol: 'circle',
+            symbolSize: 4,
+            showSymbol: data.length <= 60,
+            itemStyle: { color: lineColor },
             lineStyle: { width: 2.6, color: lineColor, shadowBlur: 8, shadowColor: lineColor, shadowOpacity: 0.35 },
-            data: cum,
+            data,
           },
         ],
       },
@@ -720,8 +721,12 @@
       renderLifetime();
     });
 
-    // 顶部「游戏时长」大卡片 → 每日总时长趋势
+    // 顶部「游戏时长」大卡片：进入每日与累计趋势；再次点击返回列表
     $('card-lifetime').addEventListener('click', () => {
+      if (!$('lt-detail').hidden) {
+        closeDrill();
+        return;
+      }
       switchView('lifetime');
       openDrill(null);
     });
