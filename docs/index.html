@@ -6,7 +6,7 @@
 <title>Steam 游戏时长统计</title>
 <link rel="icon" type="image/png" href="avatar.png?v=2">
 <link rel="apple-touch-icon" href="avatar.png?v=2">
-<link rel="stylesheet" href="style.css?v=19">
+<link rel="stylesheet" href="style.css?v=20">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/zcool-kuaile@5/index.min.css">
 <link rel="stylesheet" href="https://fonts.loli.net/css2?family=ZCOOL+KuaiLe&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
@@ -50,8 +50,6 @@
 <nav class="tabs" id="tabs">
   <button class="tab active" data-view="lifetime">游戏累计</button>
   <button class="tab" data-view="recent">最近游玩</button>
-  <button class="tab" data-view="daily">每日记录</button>
-  <button class="tab" data-view="trend">趋势</button>
   <button class="tab" data-view="data">数据</button>
 </nav>
 
@@ -59,9 +57,6 @@
 <section class="view active" id="view-lifetime">
   <div id="lt-main">
     <div class="panel">
-      <div class="panel-head">
-        <h2>所有游戏 · 累计时长</h2>
-      </div>
       <div class="rank-head">
         <span></span><span></span><span>游戏</span><span></span><span class="rh-num">游戏时长</span><span class="rh-num">最近游玩时间</span>
       </div>
@@ -91,68 +86,12 @@
 <section class="view" id="view-recent">
   <div class="panel">
     <div class="panel-head">
-      <h2>最近游玩 · 近两周时长</h2>
       <div class="ctrl"><span class="hint" id="recent-hint">—</span></div>
     </div>
     <div class="rank-head">
       <span></span><span></span><span>游戏</span><span></span><span class="rh-num">近两周时长</span><span class="rh-num">最近游玩时间</span>
     </div>
     <div id="recent-list" class="rank-list"></div>
-  </div>
-</section>
-
-<!-- ② 每日记录 -->
-<section class="view" id="view-daily">
-  <div class="panel">
-    <div class="panel-head">
-      <h2>当日明细</h2>
-      <div class="ctrl day-nav">
-        <button class="btn btn-icon" id="day-prev" title="前一天">‹</button>
-        <input type="date" id="day-date" class="date-input">
-        <button class="btn btn-icon" id="day-next" title="后一天">›</button>
-        <button class="btn btn-ghost" id="day-latest">最新一天</button>
-      </div>
-    </div>
-    <div id="day-body"><p class="empty">加载中…</p></div>
-  </div>
-  <div class="panel">
-    <div class="panel-head">
-      <h2>日历热力图</h2>
-      <div class="ctrl">
-        <select id="cal-year"></select>
-        <span class="hint">点击任意一天查看当日明细</span>
-      </div>
-    </div>
-    <div id="chart-calendar" class="chart chart-calendar"></div>
-    <div class="legend">
-      <span class="lg-item"><i style="background:#1a2634"></i>未采集</span>
-      <span class="lg-item"><i style="background:#101a26;border:1px solid #24384e"></i>0 min</span>
-      <span class="lg-item"><i style="background:#17456e"></i>&lt;30</span>
-      <span class="lg-item"><i style="background:#2073ab"></i>&lt;90</span>
-      <span class="lg-item"><i style="background:#4ba3e3"></i>&lt;180</span>
-      <span class="lg-item"><i style="background:#d99a5b"></i>&lt;360</span>
-      <span class="lg-item"><i style="background:#f08c3c"></i>≥360</span>
-      <span class="lg-item"><i class="diag"></i>低置信度</span>
-    </div>
-  </div>
-</section>
-
-<!-- ③ 趋势 -->
-<section class="view" id="view-trend">
-  <div class="panel">
-    <div class="panel-head">
-      <h2>每日时长趋势</h2>
-      <div class="ctrl">
-        <div class="seg" id="trend-range">
-          <button data-r="30" class="active">30 天</button>
-          <button data-r="90">90 天</button>
-          <button data-r="365">365 天</button>
-          <button data-r="all">全部</button>
-        </div>
-        <label class="switch"><input type="checkbox" id="trend-stack"> 按游戏堆叠</label>
-      </div>
-    </div>
-    <div id="chart-trend" class="chart chart-tall"></div>
   </div>
 </section>
 
