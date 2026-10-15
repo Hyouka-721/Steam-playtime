@@ -56,7 +56,8 @@
     try {
       state.meta = await jget('data/meta.json');
     } catch (e) {
-      $('subtitle').textContent = '数据加载失败：尚未构建数据或部署未完成';
+      const sub = $('subtitle');
+      if (sub) sub.textContent = '数据加载失败：尚未构建数据或部署未完成';
       document.querySelectorAll('.view').forEach((v) => (v.style.display = 'none'));
       return false;
     }
