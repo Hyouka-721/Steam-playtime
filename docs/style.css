@@ -179,7 +179,6 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   background: linear-gradient(90deg, #2073ab, #4ba3e3);
   transition: width .5s ease;
 }
-.rank-item:first-child .rank-bar > span { background: linear-gradient(90deg, #d99a5b, #f0a35c); }
 .rank-min { font-variant-numeric: tabular-nums; color: #e6eef5; text-align: right; font-weight: 600; font-size: 13.5px; }
 .rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: right; font-size: 12px; }
 .list-foot { text-align: right; color: var(--text-faint); font-size: 12px; margin: 10px 4px 2px; }

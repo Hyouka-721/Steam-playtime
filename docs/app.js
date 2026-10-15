@@ -137,17 +137,23 @@
 
     const max = Math.max(...lifetime.map((g) => g.lifetime_minutes), 1);
     const totalShown = list.reduce((a, g) => a + g.lifetime_minutes, 0);
+    // 前十名各用一种颜色（按当前排序名次），其余统一蓝色渐变
+    const topPalette = [
+      '#f0a35c', '#4ba3e3', '#7fd1a8', '#e8b13a', '#c98ad1',
+      '#9d8cff', '#66c0f4', '#e8766a', '#5ad0c0', '#b8d45a',
+    ];
 
     box.innerHTML = list
       .map((g, i) => {
         const icon = ICON(g.appid, g.img_icon_url);
         const pct = Math.max(g.lifetime_minutes > 0 ? 1.5 : 0, (g.lifetime_minutes / max) * 100);
+        const barStyle = i < topPalette.length ? `width:${pct}%;background:${topPalette[i]}` : `width:${pct}%`;
         const playing = (recent.get(g.appid) ?? 0) > 0;
         return `<div class="rank-item${g.lifetime_minutes === 0 ? ' zero' : ''}">
           <span class="rank-no">${i + 1}</span>
           ${icon ? `<img class="rank-icon" src="${icon}" alt="" loading="lazy">` : '<span class="rank-icon"></span>'}
           <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
-          <span class="rank-bar"><span style="width:${pct}%"></span></span>
+          <span class="rank-bar"><span style="${barStyle}"></span></span>
           <span class="rank-min">${hm(g.lifetime_minutes)}</span>
           <span class="rank-last">${g.last_played ?? '—'}</span>
         </div>`;
