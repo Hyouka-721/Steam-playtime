@@ -70,7 +70,7 @@ a { color: var(--accent); }
 /* ---- 导航卡片（游戏时长 / 最近游玩 / 数据，替代 Tab 栏） ---- */
 .cards {
   display: grid; gap: 14px; padding: 22px 28px 6px;
-  grid-template-columns: 1.2fr 1fr 1fr;
+  grid-template-columns: 1.2fr 1fr 0.8fr 1fr;
 }
 @media (max-width: 720px) {
   .cards { grid-template-columns: 1fr; }

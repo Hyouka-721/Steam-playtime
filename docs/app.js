@@ -109,6 +109,9 @@
     // 最近游玩卡：近两周总时长
     $('c-recent').textContent = hm(lastNDaysTotal(14).minutes);
 
+    // 游戏库卡：玩过 / 拥有
+    $('c-games').textContent = `${s.lifetime_played_games ?? 0} / ${s.owned_games ?? 0}`;
+
     // 数据卡：数据截至时间
     $('c-data').textContent = asOf ? `截至 ${asOf}` : '等待采集';
 
