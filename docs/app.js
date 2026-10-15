@@ -50,14 +50,26 @@
     return r.json();
   }
 
+  /** 致命错误兜底：给出可见提示与重试按钮，避免页面无声空白 */
+  function showFatal(msg) {
+    document.querySelectorAll('.view').forEach((v) => (v.style.display = 'none'));
+    if (document.querySelector('.load-error')) return;
+    const el = document.createElement('div');
+    el.className = 'load-error';
+    el.innerHTML =
+      `<p><strong>⚠ ${msg}</strong></p>` +
+      '<p class="load-error-sub">可能是网络波动，或站点正在重新部署（刚推送过更新）。</p>' +
+      '<button class="btn" id="btn-reload">重新加载</button>';
+    document.querySelector('.tabs')?.insertAdjacentElement('afterend', el);
+    $('btn-reload').addEventListener('click', () => location.reload());
+  }
+
   // ---------- load ----------
   async function load() {
     try {
       state.meta = await jget('data/meta.json');
     } catch (e) {
-      const sub = $('subtitle');
-      if (sub) sub.textContent = '数据加载失败：尚未构建数据或部署未完成';
-      document.querySelectorAll('.view').forEach((v) => (v.style.display = 'none'));
+      showFatal('数据加载失败');
       return false;
     }
     for (const m of state.meta.months ?? []) {
@@ -780,20 +792,25 @@
   }
 
   (async function init() {
-    bind();
-    if (!(await load())) return;
-    renderCards();
+    try {
+      bind();
+      if (!(await load())) return;
+      renderCards();
 
-    const lastSnapshot = state.meta.last_snapshot_date ?? state.allDates[state.allDates.length - 1] ?? ymd(new Date());
-    state.selectedDate = lastSnapshot;
+      const lastSnapshot = state.meta.last_snapshot_date ?? state.allDates[state.allDates.length - 1] ?? ymd(new Date());
+      state.selectedDate = lastSnapshot;
 
-    renderLifetime();
-    renderRecent();
-    renderDay();
-    renderCalendar();
-    renderTrend();
-    renderHealth();
-    buildDrillSelect();
-    switchView('lifetime');
+      renderLifetime();
+      renderRecent();
+      renderDay();
+      renderCalendar();
+      renderTrend();
+      renderHealth();
+      buildDrillSelect();
+      switchView('lifetime');
+    } catch (err) {
+      console.error('初始化失败：', err);
+      showFatal('页面初始化出错');
+    }
   })();
 })();

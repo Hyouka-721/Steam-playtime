@@ -221,6 +221,15 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 
 .empty { color: var(--text-dim); font-size: 13px; margin: 8px 0; }
 
+/* ---- 加载失败兜底 ---- */
+.load-error {
+  margin: 24px 28px; padding: 28px 24px; text-align: center;
+  background: var(--panel); border: 1px solid #5b4a24; border-radius: var(--radius);
+  color: var(--warn); font-size: 15px;
+}
+.load-error-sub { color: var(--text-dim); font-size: 13px; margin: 8px 0 16px; }
+.load-error .btn { padding: 8px 26px; }
+
 /* ---- 数据页 ---- */
 .row-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .btn {
