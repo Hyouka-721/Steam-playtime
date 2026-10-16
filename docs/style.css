@@ -62,15 +62,12 @@ a { color: var(--accent); }
 }
 .subtitle { margin: 2px 0 0; font-size: 13px; color: var(--text-dim); }
 .header-meta { display: flex; gap: 10px; align-items: center; font-size: 12px; }
-/* 头像以 CSS 背景呈现：不可拖动/另存，圆形裁切 + 强调色光环与站点深蓝主题呼应 */
+/* 头像以 CSS 背景呈现：不可拖动/另存，无描边光晕，仅保留柔和投影 */
 .header-avatar {
-  width: 68px; height: 68px; border-radius: 50%;
-  background: url('avatar.png?v=3') center / 120% no-repeat #101a26;
+  width: 96px; height: 96px; border-radius: 50%;
+  background: url('avatar.png?v=3') center / contain no-repeat;
   transform: scaleX(-1);
-  border: 2px solid rgba(102, 192, 244, 0.55);
-  box-shadow:
-    0 0 0 5px rgba(102, 192, 244, 0.10),
-    0 8px 22px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   flex-shrink: 0;
 }
 
