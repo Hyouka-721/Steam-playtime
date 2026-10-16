@@ -280,20 +280,10 @@
   }
 
   // ---------- ①c 二级趋势界面（游戏累计下钻） ----------
-  /** 每天每款游戏的时长已在 daily 数据中；这里负责折线展示 */
-  function buildDrillSelect() {
-    const sel = $('drill-game');
-    const gl = Object.values(state.meta.games_lifetime ?? {})
-      .filter((g) => g.lifetime_minutes > 0)
-      .sort((a, b) => b.lifetime_minutes - a.lifetime_minutes);
-    sel.innerHTML =
-      '<option value="">全部游戏</option>' +
-      gl.map((g) => `<option value="${g.appid}">${escapeHtml(g.name)}</option>`).join('');
-  }
+  /** 每天每款游戏的时长已在 daily 数据中；这里负责折线展示。游戏由列表点击进入，不做切换下拉 */
 
   function openDrill(appid) {
     state.drill.appid = appid;
-    $('drill-game').value = appid ?? '';
     $('lt-main').hidden = true;
     $('lt-detail').hidden = false;
     renderDrill();
@@ -602,10 +592,6 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    $('drill-game').addEventListener('change', (e) => {
-      state.drill.appid = e.target.value || null;
-      renderDrill();
-    });
     $('drill-range').addEventListener('click', (e) => {
       const b = e.target.closest('button');
       if (!b) return;
@@ -636,7 +622,6 @@
       renderRecent();
       renderAch();
       renderHealth();
-      buildDrillSelect();
       buildAchSelect();
       switchView('lifetime');
     } catch (err) {
