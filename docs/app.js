@@ -122,14 +122,16 @@
     // 游戏库卡：玩过 / 拥有
     $('c-games').textContent = `${s.lifetime_played_games ?? 0} / ${s.owned_games ?? 0}`;
 
-    // 成就卡：完成百分比 + 已解锁/总数（未启动过的游戏不计入）
+    // 成就卡：完成百分比 + 已解锁/总数（未启动过的游戏不计入）；无数据时只显示占位符
     const a = state.ach?.stats;
+    const achSub = $('c-ach-sub');
     if (a) {
       $('c-ach').textContent = `${a.pct}%`;
-      $('c-ach-sub').textContent = `${a.unlocked} / ${a.total} 项`;
+      achSub.hidden = false;
+      achSub.textContent = `${a.unlocked} / ${a.total} 项`;
     } else {
       $('c-ach').textContent = '—';
-      $('c-ach-sub').textContent = '成就数据待采集';
+      achSub.hidden = true;
     }
 
     // 数据卡：数据截止时间（不加速度前缀，保持卡片轻量）
