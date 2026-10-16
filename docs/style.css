@@ -256,6 +256,68 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   color: var(--text-faint); font-size: 12px;
 }
 
+/* ---- 游戏时间轴（按周聚合，经游戏库卡进入） ---- */
+.timeline { padding-top: 6px; }
+.tl-item {
+  display: grid; grid-template-columns: 116px 44px 1fr;
+  align-items: start;
+}
+/* 左列：月份大标签 + 周区间 */
+.tl-left { text-align: right; padding: 4px 2px 0 0; }
+.tl-month {
+  font-size: 24px; font-weight: 700; color: #eef5fb; line-height: 1.2;
+  font-family: 'ZCOOL KuaiLe', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  letter-spacing: 1px;
+}
+.tl-month-ph { min-height: 29px; }
+.tl-week { font-size: 12px; color: var(--text-faint); margin-top: 2px; font-variant-numeric: tabular-nums; }
+/* 中列：时间轴主线 + 周节点圆点 */
+.tl-node { position: relative; height: 100%; min-height: 70px; }
+.tl-node::before {
+  content: ''; position: absolute; left: 50%; top: 0; bottom: 0;
+  width: 2px; transform: translateX(-50%);
+  background: linear-gradient(180deg, #2a4a63, #1a2a3a);
+}
+.tl-item:first-child .tl-node::before { top: 18px; }
+.tl-item:last-child .tl-node::before { bottom: calc(100% - 18px); }
+.tl-dot {
+  position: absolute; left: 50%; top: 13px; transform: translateX(-50%);
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 0 3px rgba(102, 192, 244, 0.18);
+  z-index: 1;
+}
+/* 右列：该周游玩的游戏胶囊，大小随时长 */
+.tl-body { padding: 0 0 26px 4px; min-width: 0; }
+.tl-games { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+.tl-game {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  border-radius: 8px; overflow: hidden; background: var(--bg-deep);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+  transition: transform .15s;
+}
+.tl-game:hover { transform: translateY(-2px); }
+.tl-game img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tl-game.lg { width: 210px; height: 98px; }
+.tl-game.md { width: 132px; height: 61px; }
+.tl-game.sm { width: 92px; height: 43px; }
+/* 横幅加载失败回退：图标居中呈现 */
+.tl-game.is-icon img { width: 38px; height: 38px; object-fit: contain; }
+.tl-badge {
+  position: absolute; right: 4px; bottom: 4px;
+  background: rgba(6, 12, 20, 0.78); color: #fff;
+  font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums;
+  padding: 0 7px; border-radius: 5px; line-height: 1.7;
+  pointer-events: none;
+}
+/* 周内累计里程碑（每满 100h） */
+.tl-milestone {
+  margin-top: 10px; display: inline-block;
+  background: rgba(102, 192, 244, 0.1); border: 1px solid rgba(102, 192, 244, 0.35);
+  color: var(--accent); border-radius: 8px; padding: 4px 14px;
+  font-size: 13px;
+}
+.tl-milestone b { font-size: 16px; margin-left: 4px; }
+
 /* ---- 每日记录 ---- */
 .day-summary { font-size: 13.5px; color: var(--text-dim); margin: 2px 0 12px; }
 .day-summary b { color: #eef5fb; }
@@ -337,4 +399,13 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .ach-item { grid-template-columns: 40px 1fr auto; gap: 10px; }
   .ach-icon, .ach-icon-ph { width: 40px; height: 40px; }
   .ach-date { font-size: 11px; }
+  .tl-item { grid-template-columns: 78px 30px 1fr; }
+  .tl-month { font-size: 19px; }
+  .tl-month-ph { min-height: 23px; }
+  .tl-node { min-height: 56px; }
+  .tl-dot { top: 10px; width: 9px; height: 9px; }
+  .tl-item:first-child .tl-node::before { top: 14px; }
+  .tl-game.lg { width: 148px; height: 69px; }
+  .tl-game.md { width: 104px; height: 48px; }
+  .tl-game.sm { width: 76px; height: 36px; }
 }

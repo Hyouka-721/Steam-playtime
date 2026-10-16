@@ -497,6 +497,116 @@
       .join('');
   }
 
+  // ---------- ①d 游戏时间轴（按周聚合，图标大小随时长） ----------
+  /** 短时长格式：'12.3h' / '45min'（时间轴角标用，比 hm 紧凑） */
+  function hoursShort(m) {
+    const n = Math.round(Number(m) || 0);
+    if (n <= 0) return '0';
+    if (n < 60) return `${n}min`;
+    const h = Math.round((n / 60) * 10) / 10;
+    return `${h % 1 === 0 ? Math.round(h) : h.toFixed(1)}h`;
+  }
+
+  /** 该日期所在周的周一（Asia/Shanghai 无关紧要：数据本身就是日期字符串） */
+  function weekStart(dateStr) {
+    const dow = (new Date(`${dateStr}T12:00:00Z`).getUTCDay() + 6) % 7; // 周一=0
+    return addDaysStr(dateStr, -dow);
+  }
+
+  function renderTimeline() {
+    const box = $('timeline');
+    const hint = $('tl-hint');
+    if (!state.allDates.length) {
+      hint.textContent = '—';
+      box.innerHTML = '<p class="empty">每日数据还在积累中。首次快照采集完成后即可看到时间轴。</p>';
+      return;
+    }
+
+    // 按周聚合：周一 -> {games: Map<appid, {name, minutes}>}
+    const weeks = new Map();
+    for (const d of state.allDates) {
+      const day = state.days.get(d);
+      if (!day) continue;
+      const ws = weekStart(d);
+      if (!weeks.has(ws)) weeks.set(ws, { start: ws, games: new Map() });
+      const w = weeks.get(ws);
+      for (const g of day.games ?? []) {
+        const cur = w.games.get(g.appid);
+        if (cur) cur.minutes += g.minutes;
+        else w.games.set(g.appid, { appid: g.appid, name: g.name, minutes: g.minutes });
+      }
+    }
+    if (!weeks.size) {
+      hint.textContent = '—';
+      box.innerHTML = '<p class="empty">暂无每周游玩数据。</p>';
+      return;
+    }
+
+    const asc = [...weeks.values()].sort((a, b) => a.start.localeCompare(b.start));
+    // 累计里程碑（每满 100h 一档）：以终身累计为基准锚定，周内跨越阈值即在该周标记
+    const allTotal = asc.reduce((a, w) => a + [...w.games.values()].reduce((x, g) => x + g.minutes, 0), 0);
+    const base = Math.max(0, (state.meta.stats?.lifetime_minutes ?? 0) - allTotal);
+    const STEP = 6000; // 100h
+    let cum = base;
+    for (const w of asc) {
+      const before = cum;
+      for (const g of w.games.values()) cum += g.minutes;
+      w.milestones = [];
+      for (let m = Math.floor(before / STEP) + 1; m * STEP <= cum; m++) {
+        w.milestones.push(m * STEP);
+      }
+    }
+
+    const totalWeeks = asc.length;
+    hint.textContent = `按周汇总（周一至周日）· 共 ${totalWeeks} 周 · 图标大小与该周游玩时长成正比`;
+
+    const cap = (g, cls) => {
+      const icon = ICON(g.appid, (state.meta.games_lifetime ?? {})[g.appid]?.img_icon_url);
+      return `<span class="tl-game ${cls}" title="${escapeHtml(g.name)} · ${hm(g.minutes)}">
+          <img src="${CAPSULE(g.appid)}" alt="" loading="lazy"
+               onerror="this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'">
+          <span class="tl-badge">${hoursShort(g.minutes)}</span>
+        </span>`;
+    };
+
+    // 由新到旧渲染
+    const desc = asc.slice().reverse();
+    let prevMonth = null;
+    box.innerHTML = desc
+      .map((w) => {
+        const end = addDaysStr(w.start, 6);
+        const list = [...w.games.values()].filter((g) => g.minutes > 0).sort((a, b) => b.minutes - a.minutes);
+        if (!list.length) return '';
+        const max = Math.max(...list.map((g) => g.minutes));
+        const month = w.start.slice(0, 7).replace('-', '.');
+        const showMonth = month !== prevMonth;
+        prevMonth = month;
+        const range = `${Number(w.start.slice(5, 7))}.${Number(w.start.slice(8, 10))}-${Number(end.slice(5, 7))}.${Number(end.slice(8, 10))}`;
+        const games = list
+          .map((g) => {
+            const r = g.minutes / max;
+            const cls = r >= 0.66 || list.length === 1 ? 'lg' : r >= 0.3 ? 'md' : 'sm';
+            return cap(g, cls);
+          })
+          .join('');
+        const ms = (w.milestones ?? [])
+          .map((m) => `<div class="tl-milestone">游戏时长突破 <b>${hoursShort(m)}</b></div>`)
+          .join('');
+        return `<div class="tl-item">
+          <div class="tl-left">
+            ${showMonth ? `<div class="tl-month">${month}</div>` : '<div class="tl-month tl-month-ph"></div>'}
+            <div class="tl-week">${range}</div>
+          </div>
+          <div class="tl-node"><span class="tl-dot"></span></div>
+          <div class="tl-body">
+            <div class="tl-games">${games}</div>
+            ${ms}
+          </div>
+        </div>`;
+      })
+      .join('');
+  }
+
   // ---------- ④ 数据页 ----------
   function renderHealth() {
     const h = state.meta.health ?? {};
@@ -556,6 +666,7 @@
     if (v === 'lifetime') closeDrill();
     if (v === 'recent') renderRecent();
     if (v === 'ach') renderAch();
+    if (v === 'timeline') renderTimeline();
   }
 
   function bind() {
@@ -572,6 +683,7 @@
     });
     $('card-recent').addEventListener('click', () => switchView('recent'));
     $('card-ach').addEventListener('click', () => switchView('ach'));
+    $('card-games').addEventListener('click', () => switchView('timeline'));
     $('card-data').addEventListener('click', () => switchView('data'));
 
     // 成就页：游戏筛选
@@ -623,6 +735,7 @@
       renderAch();
       renderHealth();
       buildAchSelect();
+      renderTimeline();
       switchView('lifetime');
     } catch (err) {
       clearTimeout(watchdog);
