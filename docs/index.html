@@ -13,7 +13,7 @@
     document.documentElement.dataset.theme = ids[Math.floor(Math.random() * ids.length)];
   })();
 </script>
-<link rel="stylesheet" href="style.css?v=36">
+<link rel="stylesheet" href="style.css?v=37">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/zcool-kuaile@5/index.min.css">
 <link rel="stylesheet" href="https://fonts.loli.net/css2?family=ZCOOL+KuaiLe&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"
@@ -34,18 +34,17 @@
 
 <header class="site-header">
   <div class="brand">
-    <span class="logo">
-      <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor" aria-hidden="true">
-        <path d="M7.97 6.5h8.06c2.1 0 3.9 1.42 4.44 3.42l1.4 5.22c.42 1.58-.77 3.11-2.4 3.11-.86 0-1.67-.42-2.17-1.13l-1.2-1.72a1.5 1.5 0 0 0-1.23-.65h-5.74c-.49 0-.95.24-1.23.65l-1.2 1.72c-.5.71-1.31 1.13-2.17 1.13-1.63 0-2.82-1.53-2.4-3.11l1.4-5.22A4.6 4.6 0 0 1 7.97 6.5Zm.28 2.1v1.65H6.6v1.5h1.65v1.65h1.5V11.75h1.65v-1.5H9.75V8.6h-1.5Zm7.9.1a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm-1.9 1.9a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/>
-      </svg>
+    <span class="logo" id="theme-light" role="button" tabindex="0"
+          title="点击切换浅色主题" aria-label="切换浅色主题">
+      <img src="jerry.png?v=1" alt="杰瑞" draggable="false">
     </span>
     <div>
       <h1>Steam 游戏时长统计</h1>
     </div>
   </div>
-  <!-- 头像用 CSS 背景呈现：不可拖动、不可另存；点击随机切换主题 -->
+  <!-- 头像（汤姆）：点击随机切换深色主题 -->
   <div class="header-avatar" id="theme-switch" role="button" tabindex="0"
-       title="点击随机切换主题（共 8 套）" aria-label="随机切换主题"></div>
+       title="点击切换深色主题" aria-label="切换深色主题"></div>
 </header>
 
 <!-- 概览 · 五张统计卡（其中四张可点击导航，替代原 Tab 栏） -->
@@ -173,6 +172,6 @@
   <span>数据每日 23:30（北京时间）自动更新</span>
 </footer>
 
-<script src="app.js?v=36" onerror="__appFail()"></script>
+<script src="app.js?v=37" onerror="__appFail()"></script>
 </body>
 </html>

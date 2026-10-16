@@ -385,7 +385,16 @@ a { color: var(--accent); }
   border: none; border-radius: 14px;
   background: var(--logo-bg);
   filter: var(--logo-glow);
+  cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+  transition: transform .18s ease;
 }
+.logo img {
+  width: 46px; height: auto; display: block;
+  user-select: none; -webkit-user-drag: none;
+}
+.logo:hover { transform: scale(1.06); }
+.logo:active { transform: scale(0.96); }
+.logo:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 .site-header h1 {
   margin: 0; font-size: 28px; font-weight: 500; letter-spacing: 2px; color: var(--text-strong);
   font-family: 'ZCOOL KuaiLe', 'PingFang SC', 'Microsoft YaHei', sans-serif;

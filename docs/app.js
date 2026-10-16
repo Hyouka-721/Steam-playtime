@@ -75,14 +75,14 @@
   // ---------- 主题 ----------
   /** 8 套主题：切换只改 <html data-theme>，配色全部走 CSS 变量 */
   const THEMES = [
-    { id: 'deepblue', name: '深空蓝' },
-    { id: 'nebula', name: '深空星云' },
-    { id: 'aurora', name: '极光玻璃' },
-    { id: 'ember', name: '熔岩暮色' },
-    { id: 'neon', name: '午夜霓虹' },
-    { id: 'cream', name: '暖阳米' },
-    { id: 'mint', name: '薄荷晨' },
-    { id: 'dawn', name: '晨曦紫' },
+    { id: 'deepblue', name: '深空蓝', mode: 'dark' },
+    { id: 'nebula', name: '深空星云', mode: 'dark' },
+    { id: 'aurora', name: '极光玻璃', mode: 'dark' },
+    { id: 'ember', name: '熔岩暮色', mode: 'dark' },
+    { id: 'neon', name: '午夜霓虹', mode: 'dark' },
+    { id: 'cream', name: '暖阳米', mode: 'light' },
+    { id: 'mint', name: '薄荷晨', mode: 'light' },
+    { id: 'dawn', name: '晨曦紫', mode: 'light' },
   ];
   /** 读取当前主题的 CSS 变量（图表画在 canvas 上，必须显式取色） */
   const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -102,16 +102,21 @@
     if (announce) toast(`主题：${themeName(id)}`);
   }
 
-  /** 同步头像 title 提示（主题由首屏内联脚本随机决定时也要更新文案） */
+  /** 同步杰瑞/汤姆的 title 提示（主题由首屏内联脚本随机决定时也要更新文案） */
   function syncThemeUi(id = currentTheme()) {
-    const sw = $('theme-switch');
-    if (sw) sw.title = `当前主题：${themeName(id)} · 点击随机切换（共 ${THEMES.length} 套）`;
+    const light = $('theme-light');
+    const dark = $('theme-switch');
+    if (light) light.title = `当前主题：${themeName(id)} · 点击切换浅色主题`;
+    if (dark) dark.title = `当前主题：${themeName(id)} · 点击切换深色主题`;
   }
 
-  /** 随机挑一个与当前不同的主题 */
-  function randomTheme() {
-    const others = THEMES.filter((t) => t.id !== currentTheme());
-    return others[Math.floor(Math.random() * others.length)].id;
+  /** 在指定深/浅组内随机挑一个与当前不同的主题 */
+  function randomTheme(mode) {
+    const cur = currentTheme();
+    const pool = THEMES.filter((t) => t.mode === mode && t.id !== cur);
+    // 组内全被排除时（当前主题不在该组）直接全组随机
+    const list = pool.length ? pool : THEMES.filter((t) => t.mode === mode);
+    return list[Math.floor(Math.random() * list.length)].id;
   }
 
   function toast(msg) {
@@ -723,18 +728,21 @@
   }
 
   function bind() {
-    // 头像：点击随机切换主题（键盘 Enter / 空格同样支持）
-    const sw = $('theme-switch');
-    if (sw) {
-      const flip = () => applyTheme(randomTheme(), { announce: true });
-      sw.addEventListener('click', flip);
-      sw.addEventListener('keydown', (e) => {
+    // 杰瑞（站标）：点击随机切换浅色主题；汤姆（头像）：点击随机切换深色主题
+    // 键盘 Enter / 空格同样支持
+    const bindFlip = (el, mode) => {
+      if (!el) return;
+      const flip = () => applyTheme(randomTheme(mode), { announce: true });
+      el.addEventListener('click', flip);
+      el.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           flip();
         }
       });
-    }
+    };
+    bindFlip($('theme-light'), 'light');
+    bindFlip($('theme-switch'), 'dark');
 
     // 三张导航卡：游戏时长 / 最近游玩 / 数据
     // 游戏时长卡：他页 → 回列表；列表 → 每日与累计趋势；趋势中（全部游戏或单游戏）→ 点对应主卡返回列表
