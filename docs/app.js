@@ -671,12 +671,13 @@
 
   function bind() {
     // 三张导航卡：游戏时长 / 最近游玩 / 数据
-    // 游戏时长卡：他页 → 回列表；列表 → 打开「全部游戏」趋势。
-    // 二级趋势中的返回只由面板左上角「← 返回」承担，卡片不兼任返回键
+    // 游戏时长卡：他页 → 回列表；列表 → 每日与累计趋势；趋势中（全部游戏或单游戏）→ 点对应主卡返回列表
     $('card-lifetime').addEventListener('click', () => {
       if (state.view !== 'lifetime') {
         switchView('lifetime');
-      } else if ($('lt-detail').hidden) {
+      } else if (!$('lt-detail').hidden) {
+        closeDrill();
+      } else {
         openDrill(null);
       }
     });
