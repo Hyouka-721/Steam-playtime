@@ -381,15 +381,15 @@ a { color: var(--accent); }
 .brand { display: flex; align-items: center; gap: 16px; }
 .logo {
   color: var(--accent);
-  width: 62px; height: 62px; display: grid; place-items: center;
-  border: none; border-radius: 14px;
-  background: var(--logo-bg);
-  filter: var(--logo-glow);
+  width: 84px; height: 84px; display: grid; place-items: center;
+  border: none; border-radius: 0;
+  background: none;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.28));
   cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
   transition: transform .18s ease;
 }
 .logo img {
-  width: 46px; height: auto; display: block;
+  width: 100%; height: auto; display: block;
   user-select: none; -webkit-user-drag: none;
 }
 .logo:hover { transform: scale(1.06); }
