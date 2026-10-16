@@ -112,8 +112,8 @@
     // 游戏库卡：玩过 / 拥有
     $('c-games').textContent = `${s.lifetime_played_games ?? 0} / ${s.owned_games ?? 0}`;
 
-    // 数据卡：数据截至时间
-    $('c-data').textContent = asOf ? `截至 ${asOf}` : '等待采集';
+    // 数据卡：数据截止时间（不加速度前缀，保持卡片轻量）
+    $('c-data').textContent = asOf ?? '等待采集';
 
     const dr = $('data-range');
     if (dr) {

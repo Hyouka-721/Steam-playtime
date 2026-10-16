@@ -165,6 +165,8 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .rh-num { text-align: center; }
 .rh-bar { }
 .rank-list { display: flex; flex-direction: column; gap: 4px; padding-top: 8px; }
+/* display:flex 会覆盖 [hidden] 的 UA 样式，必须显式声明，否则折叠区永远展开 */
+.rank-list[hidden] { display: none; }
 .rank-item {
   display: grid; grid-template-columns: 44px 130px minmax(150px, 340px) 1fr 150px 110px;
   gap: 14px; align-items: center; cursor: pointer;
