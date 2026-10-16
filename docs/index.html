@@ -6,7 +6,16 @@
 <title>Steam 游戏时长统计</title>
 <link rel="icon" type="image/png" href="avatar.png?v=2">
 <link rel="apple-touch-icon" href="avatar.png?v=2">
-<link rel="stylesheet" href="style.css?v=33">
+<script>
+  /* 首屏前套用已保存的主题，避免刷新时闪一下默认配色 */
+  (function () {
+    try {
+      var t = localStorage.getItem('sp-theme');
+      if (t) document.documentElement.dataset.theme = t;
+    } catch (e) { /* 隐私模式下 localStorage 不可用，忽略 */ }
+  })();
+</script>
+<link rel="stylesheet" href="style.css?v=34">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/zcool-kuaile@5/index.min.css">
 <link rel="stylesheet" href="https://fonts.loli.net/css2?family=ZCOOL+KuaiLe&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"
@@ -36,8 +45,9 @@
       <h1>Steam 游戏时长统计</h1>
     </div>
   </div>
-  <!-- 头像用 CSS 背景呈现：不可拖动、不可另存，径向光晕与站点配色融为一体 -->
-  <div class="header-avatar" role="img" aria-label="汤姆猫头像"></div>
+  <!-- 头像用 CSS 背景呈现：不可拖动、不可另存；点击随机切换主题 -->
+  <div class="header-avatar" id="theme-switch" role="button" tabindex="0"
+       title="点击随机切换主题（共 8 套）" aria-label="随机切换主题"></div>
 </header>
 
 <!-- 概览 · 五张统计卡（其中四张可点击导航，替代原 Tab 栏） -->
@@ -165,6 +175,6 @@
   <span>数据每日 23:30（北京时间）自动更新</span>
 </footer>
 
-<script src="app.js?v=33" onerror="__appFail()"></script>
+<script src="app.js?v=34" onerror="__appFail()"></script>
 </body>
 </html>

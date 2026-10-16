@@ -72,6 +72,58 @@
     $('btn-reload').addEventListener('click', () => location.reload());
   }
 
+  // ---------- 主题 ----------
+  /** 8 套主题：切换只改 <html data-theme>，配色全部走 CSS 变量 */
+  const THEMES = [
+    { id: 'deepblue', name: '深空蓝' },
+    { id: 'nebula', name: '深空星云' },
+    { id: 'aurora', name: '极光玻璃' },
+    { id: 'ember', name: '熔岩暮色' },
+    { id: 'neon', name: '午夜霓虹' },
+    { id: 'cream', name: '暖阳米' },
+    { id: 'mint', name: '薄荷晨' },
+    { id: 'dawn', name: '晨曦紫' },
+  ];
+  const THEME_KEY = 'sp-theme';
+  /** 读取当前主题的 CSS 变量（图表画在 canvas 上，必须显式取色） */
+  const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const themeName = (id) => (THEMES.find((t) => t.id === id) ?? THEMES[0]).name;
+
+  function currentTheme() {
+    const t = document.documentElement.dataset.theme;
+    return THEMES.some((x) => x.id === t) ? t : 'deepblue';
+  }
+
+  function applyTheme(id, { announce = false } = {}) {
+    if (!THEMES.some((t) => t.id === id)) id = 'deepblue';
+    document.documentElement.dataset.theme = id;
+    try {
+      localStorage.setItem(THEME_KEY, id);
+    } catch (e) {
+      /* 隐私模式禁用 localStorage：本次可切换，刷新后回到默认 */
+    }
+    const sw = $('theme-switch');
+    if (sw) sw.title = `当前主题：${themeName(id)} · 点击随机切换（共 ${THEMES.length} 套）`;
+    // 图表画在 canvas 上，不会跟随 CSS 变量，需重新渲染
+    if (state.charts.drill) renderDrill();
+    if (announce) toast(`主题：${themeName(id)}`);
+  }
+
+  /** 随机挑一个与当前不同的主题 */
+  function randomTheme() {
+    const others = THEMES.filter((t) => t.id !== currentTheme());
+    return others[Math.floor(Math.random() * others.length)].id;
+  }
+
+  function toast(msg) {
+    document.querySelectorAll('.toast').forEach((t) => t.remove());
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1500);
+  }
+
   // ---------- load ----------
   async function load() {
     try {
@@ -336,10 +388,12 @@
     }
     const finalMin = acc;
 
+    const CA = cssVar('--chart-axis');
+    const CS = cssVar('--chart-split');
     const barColor = appid
-      ? { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: '#66c0f4' }, { offset: 1, color: '#1c5b8f' }] }
-      : { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: '#f0a35c' }, { offset: 1, color: '#9a5a24' }] };
-    const lineColor = appid ? '#7fd1a8' : '#eef5fb';
+      ? { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: cssVar('--chart-cum-a2') }, { offset: 1, color: cssVar('--chart-cum-b2') }] }
+      : { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: cssVar('--chart-cum-a') }, { offset: 1, color: cssVar('--chart-cum-b') }] };
+    const lineColor = cssVar(appid ? '--chart-line2' : '--chart-line');
 
     state.charts.drill.setOption(
       {
@@ -353,19 +407,19 @@
         title: {
           text: `${dates[0]} → ${end} · 最终累计 ${hm(finalMin)} · 期内游玩 ${hm(totalMin)} · 有记录 ${activeDays} 天`,
           left: 8, top: 0,
-          textStyle: { color: '#8fa5ba', fontSize: 12, fontWeight: 400 },
+          textStyle: { color: cssVar('--chart-title'), fontSize: 12, fontWeight: 400 },
         },
         legend: {
           top: 0, right: 8,
           data: ['累计时长', '每日时长'],
-          textStyle: { color: '#8fa5ba', fontSize: 11 },
-          inactiveColor: '#3a4a5a',
+          textStyle: { color: CA, fontSize: 11 },
+          inactiveColor: cssVar('--chart-legend-off'),
         },
         tooltip: {
           trigger: 'axis',
-          backgroundColor: '#0d1420',
-          borderColor: '#263650',
-          textStyle: { color: '#c7d5e0', fontSize: 12 },
+          backgroundColor: cssVar('--chart-tip-bg'),
+          borderColor: cssVar('--chart-tip-border'),
+          textStyle: { color: cssVar('--chart-tip-text'), fontSize: 12 },
           formatter: (ps) => {
             const date = ps[0].axisValue;
             const cumP = ps.find((p) => p.seriesName === '累计时长');
@@ -379,23 +433,23 @@
         xAxis: {
           type: 'category',
           data: dates,
-          axisLabel: { color: '#8fa5ba', fontSize: 11 },
-          axisLine: { lineStyle: { color: '#263650' } },
+          axisLabel: { color: CA, fontSize: 11 },
+          axisLine: { lineStyle: { color: CS } },
         },
         yAxis: [
           {
             type: 'value',
             name: '',
             axisLabel: {
-              color: '#8fa5ba', fontSize: 11,
+              color: CA, fontSize: 11,
               formatter: (v) => Math.round((v / 60) * 10) / 10,
             },
-            splitLine: { lineStyle: { color: '#1a2634' } },
+            splitLine: { lineStyle: { color: CS } },
           },
           {
             type: 'value',
             name: '',
-            axisLabel: { color: '#8fa5ba', fontSize: 11 },
+            axisLabel: { color: CA, fontSize: 11 },
             splitLine: { show: false },
           },
         ],
@@ -670,6 +724,19 @@
   }
 
   function bind() {
+    // 头像：点击随机切换主题（键盘 Enter / 空格同样支持）
+    const sw = $('theme-switch');
+    if (sw) {
+      const flip = () => applyTheme(randomTheme(), { announce: true });
+      sw.addEventListener('click', flip);
+      sw.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          flip();
+        }
+      });
+    }
+
     // 三张导航卡：游戏时长 / 最近游玩 / 数据
     // 游戏时长卡：他页 → 回列表；列表 → 每日与累计趋势；趋势中（全部游戏或单游戏）→ 点对应主卡返回列表
     $('card-lifetime').addEventListener('click', () => {
@@ -726,6 +793,8 @@
     }, 12000);
     try {
       bind();
+      // 套用已保存主题（首屏已在 <head> 内联脚本中应用过一次，这里同步提示文案）
+      applyTheme(currentTheme());
       if (!(await load())) return;
       clearTimeout(watchdog);
       renderCards();
