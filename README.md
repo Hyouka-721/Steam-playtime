@@ -33,7 +33,7 @@ scripts/
   fetch.mjs            调 Steam API → data/snapshots/YYYY-MM-DD.json
   diff.mjs             全量快照重算 → data/daily/YYYY-MM.json
   build.mjs            生成 docs/data/*（含脱敏与统计汇总）
-  diff.test.mjs        18 条边界用例的可执行单测
+  diff.test.mjs        21 条边界用例的可执行单测
   lib/steam.mjs        API 封装：重试、429 退避、隐私/部分返回检测
   lib/diff-core.mjs    差分算法（纯函数）
   lib/dates.mjs        Asia/Shanghai 日期工具
@@ -50,7 +50,7 @@ docs/                  GitHub Pages 发布源（index.html / app.js / style.css 
 ## 本地使用
 
 ```bash
-npm test                                   # 跑 18 条边界用例
+npm test                                   # 跑 21 条边界用例
 export STEAM_API_KEY=你的密钥
 export STEAM_ID64=你的SteamID64
 npm run fetch                              # 抓一次快照
@@ -104,6 +104,23 @@ Steam → 个人资料 → 编辑个人资料 → 隐私设置：
 到 **Actions → Daily Steam Playtime Snapshot → Run workflow**，直接绿色按钮运行一次，确认能产出快照。
 
 此后每天北京时间 23:30 自动执行。
+
+### 5. 轮换密钥（怀疑泄露时）
+
+1. 打开 https://steamcommunity.com/dev/apikey，点 **Revoke My Steam Web API Key** 作废旧 Key。
+2. 重新生成一个新 Key（域名可任意填写，本地脚本与 Actions 都不校验）。
+3. 仓库 **Settings → Secrets and variables → Actions**，用新值覆盖 `STEAM_API_KEY`。
+4. 本地若用 `.env`，同步更新（可先 `cp .env.example .env`）。
+5. 手动 **Run workflow** 一次，确认新 Key 能正常取数。
+
+> GitHub Secret 保存后无法再查看，只能覆盖。Secret 一旦更新，**所有**用到它的分支立即生效，无需改代码。
+
+### 6. 自检清单
+
+```bash
+git ls-files | grep -iE "^\.env|secret"   # 应无输出：确认 .env 没被提交
+grep -rn "STEAM_API_KEY" .github/          # 只应出现 ${{ secrets.STEAM_API_KEY }} 引用
+```
 
 ---
 
