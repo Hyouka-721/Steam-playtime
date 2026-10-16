@@ -234,8 +234,8 @@
     radial-gradient(760px 420px at 12% -6%, rgba(217, 118, 47, 0.13), transparent 62%),
     radial-gradient(680px 400px at 88% 2%, rgba(245, 158, 66, 0.12), transparent 60%),
     radial-gradient(900px 520px at 50% 112%, rgba(190, 90, 120, 0.07), transparent 66%);
-  --panel: #ffffff;
-  --panel-2: #fdf6ee;
+  --panel: #fffaf3;
+  --panel-2: #fdf3e9;
   --sunken: #f6efe6;
   --border: #eee5d9;
   --border-hi: #dccdbb;
@@ -246,11 +246,11 @@
   --tint-2: rgba(217, 118, 47, 0.12);
   --tint-border: rgba(217, 118, 47, 0.45);
   --ring: rgba(217, 118, 47, 0.22);
-  --card-bg: linear-gradient(170deg, #ffffff, #fdfaf5);
+  --card-bg: linear-gradient(170deg, #fffcf6, #fbf3e8);
   --card-border: #eee5d9;
   --card-shadow: 0 1px 2px rgba(60, 40, 20, 0.05), 0 6px 18px rgba(90, 60, 25, 0.07);
   --card-hover-shadow: 0 12px 28px rgba(90, 60, 25, 0.12);
-  --header-bg: rgba(255, 255, 255, 0.8);
+  --header-bg: rgba(255, 250, 243, 0.8);
   --logo-bg: linear-gradient(160deg, #ffffff, #fdf6ee);
   --logo-glow: drop-shadow(0 1px 2px rgba(90, 60, 25, 0.12));
   --medal-1: #c58a00; --medal-2: #8d8175; --medal-3: #b3703c;
@@ -274,8 +274,8 @@
     radial-gradient(760px 420px at 12% -6%, rgba(15, 158, 142, 0.13), transparent 62%),
     radial-gradient(680px 400px at 88% 2%, rgba(56, 189, 248, 0.11), transparent 60%),
     radial-gradient(900px 520px at 50% 112%, rgba(163, 230, 53, 0.09), transparent 66%);
-  --panel: #ffffff;
-  --panel-2: #f6fcfa;
+  --panel: #f7fdfb;
+  --panel-2: #ecf8f3;
   --sunken: #eef7f4;
   --border: #e0f0ea;
   --border-hi: #c2e2d6;
@@ -286,11 +286,11 @@
   --tint-2: rgba(15, 158, 142, 0.12);
   --tint-border: rgba(15, 158, 142, 0.45);
   --ring: rgba(15, 158, 142, 0.22);
-  --card-bg: linear-gradient(170deg, #ffffff, #f7fdfb);
+  --card-bg: linear-gradient(170deg, #f9fdfc, #eff9f5);
   --card-border: #e0f0ea;
   --card-shadow: 0 1px 2px rgba(10, 50, 42, 0.05), 0 6px 18px rgba(10, 60, 50, 0.07);
   --card-hover-shadow: 0 12px 28px rgba(10, 60, 50, 0.12);
-  --header-bg: rgba(255, 255, 255, 0.8);
+  --header-bg: rgba(247, 253, 251, 0.8);
   --logo-bg: linear-gradient(160deg, #ffffff, #f1faf7);
   --logo-glow: drop-shadow(0 1px 2px rgba(10, 60, 50, 0.12));
   --medal-1: #c08a00; --medal-2: #82968f; --medal-3: #a9753c;
@@ -314,8 +314,8 @@
     radial-gradient(760px 420px at 12% -6%, rgba(124, 92, 240, 0.13), transparent 62%),
     radial-gradient(680px 400px at 88% 2%, rgba(236, 72, 153, 0.09), transparent 60%),
     radial-gradient(900px 520px at 50% 112%, rgba(56, 189, 248, 0.09), transparent 66%);
-  --panel: #ffffff;
-  --panel-2: #fbfaff;
+  --panel: #fbfaff;
+  --panel-2: #f4f1fd;
   --sunken: #f4f2fd;
   --border: #e9e5f6;
   --border-hi: #d2caf0;
@@ -326,11 +326,11 @@
   --tint-2: rgba(124, 92, 240, 0.13);
   --tint-border: rgba(124, 92, 240, 0.45);
   --ring: rgba(124, 92, 240, 0.22);
-  --card-bg: linear-gradient(170deg, #ffffff, #fbfaff);
+  --card-bg: linear-gradient(170deg, #fcfbff, #f4f1fd);
   --card-border: #e9e5f6;
   --card-shadow: 0 1px 2px rgba(40, 25, 80, 0.05), 0 6px 18px rgba(50, 30, 100, 0.07);
   --card-hover-shadow: 0 12px 28px rgba(50, 30, 100, 0.12);
-  --header-bg: rgba(255, 255, 255, 0.8);
+  --header-bg: rgba(251, 250, 255, 0.8);
   --logo-bg: linear-gradient(160deg, #ffffff, #f4f2fd);
   --logo-glow: drop-shadow(0 1px 2px rgba(50, 30, 100, 0.12));
   --medal-1: #c98a00; --medal-2: #8b85a3; --medal-3: #b06f3c;
