@@ -90,14 +90,12 @@ function main() {
   fs.mkdirSync(OUT_DAILY_DIR, { recursive: true });
 
   // 逐月写出前端数据，同时应用中文名覆盖
-  let overwritten = 0;
   for (const f of monthFiles) {
     const obj = readJson(path.join(DAILY_DIR, f));
     const days = {};
     for (const [date, day] of Object.entries(obj.days ?? {})) {
       const games = (day.games ?? []).map((g) => {
         const cn = nameOverrides[g.appid];
-        if (cn && cn !== g.name) overwritten++;
         return { ...g, name: cn ?? g.name };
       });
       days[date] = { ...day, games };
@@ -170,6 +168,11 @@ function main() {
       last_played: rtime ? shanghaiDate(new Date(rtime * 1000)) : null,
     };
   }
+
+  // 「中文名覆盖」= 译名映射实际生效的游戏款数（统计确立在本命名字典上，而非 daily 里的出现次数）
+  const overwritten = Object.entries(gamesLifetime).filter(
+    ([appid, g]) => nameOverrides[appid] && g.name === nameOverrides[appid],
+  ).length;
 
   const { longest, current } = computeStreaks(allDays);
 
