@@ -14,6 +14,7 @@ const ROOT = path.resolve(__dirname, '..');
 const DAILY_DIR = path.join(ROOT, 'data', 'daily');
 const OVERRIDE_DIR = path.join(ROOT, 'data', 'overrides');
 const SNAP_DIR = path.join(ROOT, 'data', 'snapshots');
+const ACH_DIR = path.join(ROOT, 'data', 'achievements');
 const OUT_DIR = path.join(ROOT, 'docs', 'data');
 const OUT_DAILY_DIR = path.join(OUT_DIR, 'daily');
 
@@ -40,6 +41,64 @@ function loadGameMetaFromLatestSnapshot() {
   const latest = readJson(path.join(SNAP_DIR, files[files.length - 1]));
   // date 取内容日：凌晨抓的快照（cron 延迟）data_date 已修正为前一天，站点应显示数据的真实截止日
   return { games: latest.games ?? {}, hash: latest.steamid_hash ?? null, date: latest.data_date ?? latest.date ?? null };
+}
+
+/** 读取最新一份成就快照（成就解锁是累积状态，最新一份即权威） */
+function loadLatestAchievements() {
+  if (!fs.existsSync(ACH_DIR)) return null;
+  const files = fs.readdirSync(ACH_DIR).filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort();
+  if (!files.length) return null;
+  try {
+    return readJson(path.join(ACH_DIR, files[files.length - 1]));
+  } catch (e) {
+    console.warn('[build] WARN: 成就快照解析失败:', e.message);
+    return null;
+  }
+}
+
+/** 生成 docs/data/achievements.json；无成就数据时写占位文件，前端据此显示待采集 */
+function buildAchievementsDoc(nameOverrides) {
+  const OUT_ACH = path.join(OUT_DIR, 'achievements.json');
+  const ach = loadLatestAchievements();
+  if (!ach) {
+    fs.writeFileSync(OUT_ACH, JSON.stringify({ schema: 1, ready: false }, null, 2) + '\n', 'utf8');
+    log('无成就数据，已写占位 docs/data/achievements.json');
+    return;
+  }
+
+  const games = {};
+  let unlockedTotal = 0;
+  let totalTotal = 0;
+  for (const [appid, g] of Object.entries(ach.games ?? {})) {
+    const all = (g.achievements ?? []).slice();
+    // 有时间戳的按解锁时间倒序；无时间戳（罕见）排在末尾
+    all.sort((a, b) => (b.ts ?? 0) - (a.ts ?? 0));
+    games[appid] = {
+      appid,
+      name: nameOverrides[appid] ?? g.name ?? `App ${appid}`,
+      total: g.total ?? 0,
+      unlocked: g.unlocked ?? 0,
+      achievements: all,
+    };
+    unlockedTotal += g.unlocked ?? 0;
+    totalTotal += g.total ?? 0;
+  }
+
+  const doc = {
+    schema: 1,
+    ready: true,
+    generated_at: utcISO(),
+    snapshot_date: ach.data_date ?? ach.date ?? null,
+    stats: {
+      unlocked: unlockedTotal,
+      total: totalTotal,
+      pct: totalTotal ? Math.round((unlockedTotal / totalTotal) * 1000) / 10 : 0,
+      games: Object.keys(games).length,
+    },
+    games,
+  };
+  fs.writeFileSync(OUT_ACH, JSON.stringify(doc, null, 2) + '\n', 'utf8');
+  log(`已生成 docs/data/achievements.json（${unlockedTotal}/${totalTotal}，${doc.stats.pct}%，${doc.stats.games} 款游戏）`);
 }
 
 function computeStreaks(allDays) {
@@ -231,6 +290,7 @@ function main() {
 
   fs.mkdirSync(OUT_DIR, { recursive: true });
   fs.writeFileSync(path.join(OUT_DIR, 'meta.json'), JSON.stringify(meta, null, 2) + '\n', 'utf8');
+  buildAchievementsDoc(nameOverrides);
 
   log(`已生成 docs/data/meta.json（${dates.length} 天，${playedGames} 款追踪期游戏 / ${lifetimePlayed} 款终身有游玩）`);
   log(`终身累计 ${lifetimeMinutes} min（${meta.stats.lifetime_hours} h），追踪期累计 ${totalMinutes} min`);

@@ -19,6 +19,8 @@ import { addDays, shanghaiDate, shanghaiDateTime, utcISO } from './lib/dates.mjs
 import {
   fetchOwnedGames,
   fetchRecentlyPlayedGames,
+  fetchPlayerAchievements,
+  fetchAchievementSchema,
   mergeSources,
   SteamApiError,
 } from './lib/steam.mjs';
@@ -27,8 +29,11 @@ import { detectPartial } from './lib/diff-core.mjs';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const SNAP_DIR = path.join(ROOT, 'data', 'snapshots');
+const ACH_DIR = path.join(ROOT, 'data', 'achievements');
+const ACH_SCHEMA_CACHE = path.join(ROOT, 'data', 'cache', 'ach-schema');
 
 const log = (...a) => console.log('[fetch]', ...a);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /**
  * 快照的内容归属日。
@@ -47,6 +52,95 @@ function die(msg, err) {
   console.error('[fetch] FATAL:', msg);
   if (err?.stack) console.error(err.stack);
   process.exit(1);
+}
+
+// ---------- 成就采集 ----------
+
+/** 读取成就 Schema 本地缓存。undefined = 无缓存；[] = 已确认无成就系统。 */
+function readSchemaCache(appid) {
+  const f = path.join(ACH_SCHEMA_CACHE, `${appid}.json`);
+  if (!fs.existsSync(f)) return undefined;
+  try {
+    return JSON.parse(fs.readFileSync(f, 'utf8'));
+  } catch {
+    return undefined;
+  }
+}
+
+function writeSchemaCache(appid, list) {
+  fs.mkdirSync(ACH_SCHEMA_CACHE, { recursive: true });
+  fs.writeFileSync(
+    path.join(ACH_SCHEMA_CACHE, `${appid}.json`),
+    JSON.stringify(list ?? []) + '\n',
+    'utf8',
+  );
+}
+
+/**
+ * 对「玩过」（playtime_forever > 0）的游戏采集成就明细。
+ * 未启动过的游戏不计入；无成就系统的游戏自动跳过（并缓存空 schema，次日不再重复请求）。
+ * 成就 Schema 基本不变，缓存后每天只请求玩家进度部分。
+ */
+async function collectAchievements({ key, steamid, date, snapshot }) {
+  const played = Object.values(snapshot.games).filter((g) => (g.playtime_forever ?? 0) > 0);
+  log(`成就采集开始：${played.length} 款已游玩游戏（未启动的不计入）`);
+  const games = {};
+
+  for (let i = 0; i < played.length; i++) {
+    const g = played[i];
+    try {
+      let schema = readSchemaCache(g.appid);
+      if (schema === undefined) {
+        schema = (await fetchAchievementSchema(key, g.appid)) ?? [];
+        writeSchemaCache(g.appid, schema);
+        await sleep(200);
+      }
+      if (!schema.length) continue; // 无成就系统的游戏
+
+      const player = await fetchPlayerAchievements(key, steamid, g.appid);
+      if (!player) continue;
+      await sleep(200);
+
+      const byApi = new Map(schema.map((a) => [a.api, a]));
+      const unlocked = [];
+      for (const p of player) {
+        if (!p.achieved) continue;
+        const s = byApi.get(p.api);
+        unlocked.push({
+          api: p.api,
+          name: s?.name ?? p.api,
+          desc: s?.desc ?? null,
+          icon: s?.icon ?? null,
+          ts: p.ts || null,
+        });
+      }
+      games[g.appid] = {
+        appid: g.appid,
+        name: g.name,
+        total: schema.length,
+        unlocked: unlocked.length,
+        achievements: unlocked,
+      };
+    } catch (e) {
+      // 单款游戏失败只告警，不让整体成就采集中断
+      console.warn(`[fetch] WARN 成就采集跳过 ${g.name}(${g.appid}):`, e.message);
+    }
+    if ((i + 1) % 10 === 0) log(`  成就进度 ${i + 1}/${played.length}`);
+  }
+
+  const out = {
+    schema: 1,
+    date,
+    captured_at: utcISO(),
+    captured_at_local: shanghaiDateTime(),
+    game_count: Object.keys(games).length,
+    games,
+  };
+  fs.mkdirSync(ACH_DIR, { recursive: true });
+  fs.writeFileSync(path.join(ACH_DIR, `${date}.json`), JSON.stringify(out, null, 2) + '\n', 'utf8');
+  const u = Object.values(games).reduce((a, g) => a + g.unlocked, 0);
+  const t = Object.values(games).reduce((a, g) => a + g.total, 0);
+  log(`成就数据已写入 data/achievements/${date}.json（${out.game_count} 款游戏，${u}/${t} 项）`);
 }
 
 /** 读取最新的历史快照（用于 game_count 守卫） */
@@ -155,6 +249,13 @@ async function main() {
   fs.mkdirSync(SNAP_DIR, { recursive: true });
   fs.writeFileSync(target, JSON.stringify(snapshot, null, 2) + '\n', 'utf8');
   log(`已写入 data/snapshots/${date}.json (${snapshot.played_game_count} 款有游玩记录)`);
+
+  // 成就采集：非致命环节，失败只告警，绝不影响快照与时长差分
+  try {
+    await collectAchievements({ key, steamid, date, snapshot });
+  } catch (e) {
+    console.warn('[fetch] WARN: 成就采集整体失败（时长数据不受影响）:', e.message);
+  }
 
   // 顺手统计一下今天的情况，便于人工核对
   if (prev) {

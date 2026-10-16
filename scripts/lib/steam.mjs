@@ -13,6 +13,7 @@
 //   ⚠ 隐私「游戏详情」非公开时，GetOwnedGames 返回 HTTP 200 + {"response":{}}（静默为空）。
 
 const BASE = 'https://api.steampowered.com/IPlayerService';
+const STATS_BASE = 'https://api.steampowered.com/ISteamUserStats';
 
 export class SteamApiError extends Error {
   constructor(code, message, detail) {
@@ -25,8 +26,8 @@ export class SteamApiError extends Error {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function call(path, params, { attempts = 4, timeoutMs = 30000 } = {}) {
-  const url = new URL(`${BASE}/${path}/v1/`);
+async function call(path, params, { attempts = 4, timeoutMs = 30000, base = BASE } = {}) {
+  const url = new URL(`${base}/${path}/v1/`);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
   url.searchParams.set('format', 'json');
 
@@ -100,6 +101,41 @@ export async function fetchRecentlyPlayedGames(key, steamid) {
     throw new SteamApiError('BAD_RESPONSE', 'GetRecentlyPlayedGames missing games[]', { raw: res });
   }
   return { total_count: res.total_count ?? res.games.length, games: res.games };
+}
+
+/** 取玩家某款游戏的全部成就状态。无成就系统的游戏返回 HTTP 400 → 归一为 null。 */
+export async function fetchPlayerAchievements(key, steamid, appid) {
+  try {
+    const res = await call('GetPlayerAchievements', { key, steamid, appid }, { base: STATS_BASE, attempts: 2 });
+    const ps = res.playerstats;
+    if (!ps || !Array.isArray(ps.achievements)) return null;
+    return ps.achievements.map((a) => ({
+      api: a.apiname,
+      achieved: !!a.achieved,
+      ts: Number(a.unlocktime) || 0,
+    }));
+  } catch (e) {
+    if (e instanceof SteamApiError && e.code === 'HTTP') return null; // 多为无成就系统的游戏
+    throw e;
+  }
+}
+
+/** 取游戏成就 Schema（l=schinese 时 displayName/description 为中文）。无成就系统返回 null。 */
+export async function fetchAchievementSchema(key, appid) {
+  try {
+    const res = await call('GetSchemaForGame', { key, appid, l: 'schinese' }, { base: STATS_BASE, attempts: 2 });
+    const stats = res.game?.availableGameStats;
+    if (!stats || !Array.isArray(stats.achievements)) return null;
+    return stats.achievements.map((a) => ({
+      api: a.name,
+      name: a.displayName ?? a.name,
+      desc: a.description ?? null,
+      icon: a.icon ?? null,
+    }));
+  } catch (e) {
+    if (e instanceof SteamApiError && e.code === 'HTTP') return null;
+    throw e;
+  }
 }
 
 /**
