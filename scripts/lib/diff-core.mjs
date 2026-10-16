@@ -195,12 +195,68 @@ export function dedupeByDate(snapshots) {
 }
 
 /**
+ * 按内容日分组，产出参与差分的快照链。
+ * 背景：GitHub Actions cron 常延迟数小时，凌晨抓的快照内容实为「前一天终态」，
+ * 归属日已在 readSnapshots 阶段修正为内容日（data_date），因此同一内容日可能出现两份快照。
+ * 规则：
+ *   - 每组只保留「最晚一份」作为当日终态（playtime_forever 单调递增，中间份无信息损失）；
+ *   - 首组额外保留「最早一份」作为差分基线（产出 first_snapshot 占位）。
+ * 输入须已按抓取顺序（文件名日期）升序；输出保持该顺序。
+ */
+export function pickSnapshotChain(snapshots) {
+  // 稳定排序（同内容日保持输入序 = 抓取序：早抓的基线在前）
+  const sorted = [...snapshots].sort((a, b) => a.date.localeCompare(b.date));
+  const groups = new Map();
+  for (const s of sorted) {
+    if (!groups.has(s.date)) groups.set(s.date, []);
+    groups.get(s.date).push(s);
+  }
+  const chain = [];
+  let firstGroup = true;
+  for (const g of groups.values()) {
+    if (firstGroup) {
+      chain.push(g[0]);
+      if (g.length > 1) chain.push(g[g.length - 1]);
+      firstGroup = false;
+    } else {
+      chain.push(g[g.length - 1]);
+    }
+  }
+  return chain;
+}
+
+/** 合并同一天的两条差分记录（如基线占位 + 当日窗口增量）：增量相加、标记取并集 */
+export function mergeDays(a, b) {
+  const map = new Map();
+  for (const g of [...(a.games ?? []), ...(b.games ?? [])]) {
+    const old = map.get(g.appid);
+    if (old) {
+      old.minutes += g.minutes;
+      old.is_new = old.is_new || g.is_new;
+    } else {
+      map.set(g.appid, { ...g });
+    }
+  }
+  const games = [...map.values()].sort(
+    (x, y) => y.minutes - x.minutes || x.appid.localeCompare(y.appid),
+  );
+  return {
+    total_minutes: (a.total_minutes ?? 0) + (b.total_minutes ?? 0),
+    span_days: Math.max(a.span_days ?? 1, b.span_days ?? 1),
+    confidence: worse(a.confidence ?? 'high', b.confidence ?? 'high'),
+    source: a.source === 'manual' || b.source === 'manual' ? 'manual' : 'auto',
+    flags: [...new Set([...(a.flags ?? []), ...(b.flags ?? [])])].sort(),
+    games,
+  };
+}
+
+/**
  * 从全量快照重建所有日记录（幂等：每次都从第一份快照重算，方便修 bug 后回溯重放）。
- * @param snapshots 已按日期升序去重
+ * @param snapshots 已按抓取顺序升序；date = 内容日（快照数据实际所属的自然日）
  * @param manuals   Map<'YYYY-MM-DD', manualObject>
  */
 export function rebuildDays(snapshots, manuals = new Map()) {
-  const list = dedupeByDate(snapshots);
+  const list = pickSnapshotChain(snapshots);
   const everSeen = new Set();
   const out = new Map();
 
@@ -208,6 +264,10 @@ export function rebuildDays(snapshots, manuals = new Map()) {
     const snap = list[i];
     const prev = i === 0 ? null : list[i - 1];
     let day = computeDay(snap, prev, everSeen);
+
+    // 同一内容日可能有多个窗口（首日：基线占位 + 当日增量），合并而非覆盖
+    const existing = out.get(snap.date);
+    if (existing) day = mergeDays(existing, day);
 
     const manual = manuals.get(snap.date);
     if (manual) day = applyManual(day, manual, snap.date);

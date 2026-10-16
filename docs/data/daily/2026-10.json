@@ -3,24 +3,16 @@
   "month": "2026-10",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-16T10:27:15.285Z",
+  "generated_at": "2026-10-16T10:53:22.671Z",
   "days": {
     "2026-10-13": {
-      "total_minutes": 0,
+      "total_minutes": 49,
       "span_days": 1,
       "confidence": "low",
       "source": "auto",
       "flags": [
         "first_snapshot"
       ],
-      "games": []
-    },
-    "2026-10-14": {
-      "total_minutes": 49,
-      "span_days": 1,
-      "confidence": "high",
-      "source": "auto",
-      "flags": [],
       "games": [
         {
           "appid": "227300",
@@ -36,7 +28,7 @@
         }
       ]
     },
-    "2026-10-15": {
+    "2026-10-14": {
       "total_minutes": 82,
       "span_days": 1,
       "confidence": "high",
@@ -51,7 +43,7 @@
         }
       ]
     },
-    "2026-10-16": {
+    "2026-10-15": {
       "total_minutes": 0,
       "span_days": 1,
       "confidence": "high",

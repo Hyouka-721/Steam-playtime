@@ -38,7 +38,8 @@ function loadGameMetaFromLatestSnapshot() {
   const files = fs.readdirSync(SNAP_DIR).filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort();
   if (!files.length) return {};
   const latest = readJson(path.join(SNAP_DIR, files[files.length - 1]));
-  return { games: latest.games ?? {}, hash: latest.steamid_hash ?? null, date: latest.date ?? null };
+  // date 取内容日：凌晨抓的快照（cron 延迟）data_date 已修正为前一天，站点应显示数据的真实截止日
+  return { games: latest.games ?? {}, hash: latest.steamid_hash ?? null, date: latest.data_date ?? latest.date ?? null };
 }
 
 function computeStreaks(allDays) {

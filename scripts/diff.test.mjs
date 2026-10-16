@@ -10,6 +10,8 @@ import {
   dedupeByDate,
   rebuildDays,
   maxPerGame,
+  mergeDays,
+  pickSnapshotChain,
 } from './lib/diff-core.mjs';
 import { fetchOwnedGames, SteamApiError } from './lib/steam.mjs';
 
@@ -290,5 +292,47 @@ describe('阈值与辅助', () => {
     const days = rebuildDays(snapshots);
     assert.deepEqual([...days.keys()], ['2026-10-11', '2026-10-12', '2026-10-13']);
     assert.equal(days.get('2026-10-13').total_minutes, 30);
+  });
+
+  // ---- 内容日归属（凌晨采集修正，2026-10-16） ----
+  test('pickSnapshotChain: 同内容日两份快照，首组保留基线+终态，其余组只留终态', () => {
+    const chain = pickSnapshotChain([
+      snap('2026-10-13', { 730: game('CS2', 1000) }), // 基线，当天 19:18 抓
+      snap('2026-10-13', { 730: game('CS2', 1049) }), // 次日凌晨 03:xx 抓（10-13 终态）
+      snap('2026-10-14', { 730: game('CS2', 1131) }), // 10-14 终态
+    ]);
+    assert.equal(chain.length, 3);
+    assert.deepEqual(
+      chain.map((s) => s.games[730].playtime_forever),
+      [1000, 1049, 1131],
+    );
+  });
+
+  test('rebuildDays: 基线+凌晨终态合并，增量归前一天', () => {
+    const days = rebuildDays([
+      snap('2026-10-13', { 730: game('CS2', 1000) }), // 当天 19:18 基线
+      snap('2026-10-13', { 730: game('CS2', 1049) }), // 归一化后同为 10-13 的凌晨终态
+      snap('2026-10-14', { 730: game('CS2', 1131) }),
+    ]);
+    assert.deepEqual([...days.keys()], ['2026-10-13', '2026-10-14']);
+    assert.equal(days.get('2026-10-13').total_minutes, 49);
+    assert.equal(days.get('2026-10-14').total_minutes, 82);
+    assert.ok(days.get('2026-10-13').flags.includes('first_snapshot'));
+  });
+
+  test('mergeDays: 同日多窗口增量相加、flags 取并集、confidence 就低', () => {
+    const a = {
+      total_minutes: 30, span_days: 1, confidence: 'high', source: 'auto', flags: [],
+      games: [{ appid: '730', name: 'CS2', minutes: 30, is_new: false }],
+    };
+    const b = {
+      total_minutes: 12, span_days: 1, confidence: 'low', source: 'auto', flags: ['negative_delta'],
+      games: [{ appid: '730', name: 'CS2', minutes: 12, is_new: false }],
+    };
+    const m = mergeDays(a, b);
+    assert.equal(m.total_minutes, 42);
+    assert.equal(m.confidence, 'low');
+    assert.deepEqual(m.flags, ['negative_delta']);
+    assert.equal(m.games[0].minutes, 42);
   });
 });

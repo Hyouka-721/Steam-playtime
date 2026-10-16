@@ -15,7 +15,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
-import { shanghaiDate, shanghaiDateTime, utcISO } from './lib/dates.mjs';
+import { addDays, shanghaiDate, shanghaiDateTime, utcISO } from './lib/dates.mjs';
 import {
   fetchOwnedGames,
   fetchRecentlyPlayedGames,
@@ -29,6 +29,19 @@ const ROOT = path.resolve(__dirname, '..');
 const SNAP_DIR = path.join(ROOT, 'data', 'snapshots');
 
 const log = (...a) => console.log('[fetch]', ...a);
+
+/**
+ * 快照的内容归属日。
+ * 背景：GitHub Actions 的 cron 延迟不可控（实测计划 23:30 会拖到次日凌晨 3 点才跑），
+ * 凌晨抓到的总量实为「前一天全天结束」的状态。因此北京时间 0:00–11:59 抓取时，
+ * 归属日记为前一天，避免差分整体错位一天。
+ * OVERRIDE_DATE 显式补录时不受此修正影响。
+ */
+function resolveDataDate(now = new Date()) {
+  const today = shanghaiDate(now);
+  const hour = Number(shanghaiDateTime(now).slice(11, 13));
+  return hour < 12 ? addDays(today, -1) : today;
+}
 
 function die(msg, err) {
   console.error('[fetch] FATAL:', msg);
@@ -81,7 +94,7 @@ async function main() {
   if (!/^\d{17}$/.test(steamid)) die(`STEAM_ID64 应为 17 位数字，当前为: ${steamid.length} 位`);
 
   const force = String(process.env.FORCE ?? '').toLowerCase() === 'true';
-  const date = process.env.OVERRIDE_DATE?.trim() || shanghaiDate();
+  const date = process.env.OVERRIDE_DATE?.trim() || resolveDataDate();
 
   const target = path.join(SNAP_DIR, `${date}.json`);
   if (fs.existsSync(target) && !force) {

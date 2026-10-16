@@ -2,10 +2,10 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-16T10:27:15.287Z",
+  "generated_at": "2026-10-16T10:53:22.674Z",
   "generated_at_local": "2026-10-16",
   "tracking_since": "2026-10-13",
-  "last_snapshot_date": "2026-10-16",
+  "last_snapshot_date": "2026-10-15",
   "steamid_hash": "a8474caf",
   "months": [
     "2026-10"
@@ -17,14 +17,14 @@
     "lifetime_played_games": 38,
     "total_minutes": 131,
     "total_hours": 2.2,
-    "tracked_days": 4,
+    "tracked_days": 3,
     "active_days": 2,
     "current_streak": 0,
     "longest_streak": 2,
     "week_minutes": 131,
     "played_games": 2,
     "best_day": {
-      "date": "2026-10-15",
+      "date": "2026-10-14",
       "minutes": 82
     }
   },
@@ -34,16 +34,16 @@
       "name": "欧洲卡车模拟2",
       "img_icon_url": "adc18a4fc9adc0330144b76d61cbda68bb2394a0",
       "total_minutes": 36,
-      "first_day": "2026-10-14",
-      "last_day": "2026-10-14"
+      "first_day": "2026-10-13",
+      "last_day": "2026-10-13"
     },
     "246420": {
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
       "total_minutes": 95,
-      "first_day": "2026-10-14",
-      "last_day": "2026-10-15"
+      "first_day": "2026-10-13",
+      "last_day": "2026-10-14"
     }
   },
   "games_lifetime": {
@@ -322,7 +322,7 @@
     },
     "1333910": {
       "appid": "1333910",
-      "name": "缩放世界 Sizeable",
+      "name": "Sizeable",
       "img_icon_url": "d85e0010bc76856fc5f8f2c4df4c6a39ae1a006b",
       "lifetime_minutes": 263,
       "last_played": "2026-04-08"
@@ -371,7 +371,7 @@
     },
     "1718570": {
       "appid": "1718570",
-      "name": "ASTLIBRA ～生きた証～ Revision",
+      "name": "神之天平",
       "img_icon_url": "e7c445fc57e408d34f6d831588026cace13d3150",
       "lifetime_minutes": 0,
       "last_played": null
@@ -424,7 +424,7 @@
     "low_confidence_days": 1,
     "manual_days": 0,
     "shared_game_count": 0,
-    "name_overrides": 52,
+    "name_overrides": 53,
     "last_error": null
   }
 }

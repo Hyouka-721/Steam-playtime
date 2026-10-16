@@ -27,11 +27,13 @@ function readSnapshots() {
   return fs
     .readdirSync(SNAP_DIR)
     .filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f))
-    .sort()
+    .sort() // 文件名序 = 抓取顺序
     .map((f) => {
       const s = readJson(path.join(SNAP_DIR, f));
       if (s.schema !== 1) throw new Error(`未知 snapshot schema: ${f} (${s.schema})`);
-      return { date: s.date, games: s.games ?? {} };
+      // date 一律取「内容日」：data_date 是快照数据实际所属的自然日。
+      // 凌晨抓取的快照（cron 延迟）内容是前一天终态，data_date 已在前一天，防止差分整体错位一天。
+      return { date: s.data_date ?? s.date, games: s.games ?? {} };
     });
 }
 
