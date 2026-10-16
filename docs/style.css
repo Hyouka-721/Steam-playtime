@@ -67,10 +67,10 @@ a { color: var(--accent); }
   transform: scaleX(-1);
 }
 
-/* ---- 导航卡片（游戏时长 / 最近游玩 / 数据，替代 Tab 栏） ---- */
+/* ---- 导航卡片（游戏时长 / 最近游玩 / 成就 / 游戏库 / 数据，替代 Tab 栏） ---- */
 .cards {
   display: grid; gap: 14px; padding: 22px 28px 6px;
-  grid-template-columns: 1.2fr 1fr 0.8fr 1fr;
+  grid-template-columns: 1.2fr 1fr 1fr 0.8fr 1fr;
 }
 @media (max-width: 720px) {
   .cards { grid-template-columns: 1fr; }
@@ -222,6 +222,34 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 #lt-detail[hidden] { display: none; }
 .drill-tip { font-size: 12px; color: var(--text-faint); }
 
+/* ---- 成就详情（成就卡下钻） ---- */
+.ach-list { display: flex; flex-direction: column; gap: 4px; padding-top: 8px; }
+.ach-item {
+  display: grid; grid-template-columns: 44px 1fr 110px; gap: 14px; align-items: center;
+  padding: 7px 12px; border-radius: 9px; border: 1px solid transparent;
+  transition: background .15s, border-color .15s;
+}
+.ach-item:hover { background: rgba(102, 192, 244, 0.05); border-color: var(--border); }
+.ach-icon {
+  width: 44px; height: 44px; border-radius: 8px; object-fit: contain;
+  background: var(--bg-deep); display: block;
+}
+.ach-icon-ph { width: 44px; height: 44px; }
+.ach-main { min-width: 0; }
+.ach-name {
+  color: #e6eef5; font-weight: 600; font-size: 13.5px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ach-sub {
+  color: var(--text-dim); font-size: 12px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ach-sub .ach-game { color: rgba(102, 192, 244, 0.85); }
+.ach-date {
+  text-align: right; font-variant-numeric: tabular-nums;
+  color: var(--text-faint); font-size: 12px;
+}
+
 /* ---- 每日记录 ---- */
 .day-summary { font-size: 13.5px; color: var(--text-dim); margin: 2px 0 12px; }
 .day-summary b { color: #eef5fb; }
@@ -300,4 +328,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .rank-bar, .rank-last { display: none; }
   .rank-min { min-width: 84px; text-align: right; }
   .gbar { width: 90px; }
+  .ach-item { grid-template-columns: 40px 1fr auto; gap: 10px; }
+  .ach-icon, .ach-icon-ph { width: 40px; height: 40px; }
+  .ach-date { font-size: 11px; }
 }

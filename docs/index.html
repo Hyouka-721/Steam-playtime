@@ -6,7 +6,7 @@
 <title>Steam 游戏时长统计</title>
 <link rel="icon" type="image/png" href="avatar.png?v=2">
 <link rel="apple-touch-icon" href="avatar.png?v=2">
-<link rel="stylesheet" href="style.css?v=26">
+<link rel="stylesheet" href="style.css?v=27">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/zcool-kuaile@5/index.min.css">
 <link rel="stylesheet" href="https://fonts.loli.net/css2?family=ZCOOL+KuaiLe&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"
@@ -39,7 +39,7 @@
   <img class="header-avatar" src="avatar.png?v=2" alt="汤姆猫头像">
 </header>
 
-<!-- 概览 · 四张统计卡（其中三张可点击导航，替代原 Tab 栏） -->
+<!-- 概览 · 五张统计卡（其中四张可点击导航，替代原 Tab 栏） -->
 <section class="cards" id="cards">
   <div class="card card-nav card-hero" id="card-lifetime" data-view="lifetime" title="点击查看所有游戏的累计时长">
     <div class="card-label">游戏时长</div>
@@ -48,6 +48,11 @@
   <div class="card card-nav" id="card-recent" data-view="recent" title="点击查看近两周的游玩记录">
     <div class="card-label">最近游玩</div>
     <div class="card-value" id="c-recent">—</div>
+  </div>
+  <div class="card card-nav" id="card-ach" data-view="ach" title="点击查看成就详情">
+    <div class="card-label">成就</div>
+    <div class="card-value" id="c-ach">—</div>
+    <div class="card-sub" id="c-ach-sub">成就完成度</div>
   </div>
   <div class="card">
     <div class="card-label">游戏库</div>
@@ -104,6 +109,17 @@
   </div>
 </section>
 
+<!-- ①c 成就详情（经成就卡进入） -->
+<section class="view" id="view-ach">
+  <div class="panel">
+    <div class="panel-head">
+      <div class="ctrl"><span class="hint" id="ach-hint">—</span></div>
+      <div class="ctrl"><select id="ach-game" title="选择游戏"></select></div>
+    </div>
+    <div id="ach-list" class="ach-list"></div>
+  </div>
+</section>
+
 <!-- ④ 数据 -->
 <section class="view" id="view-data">
   <div class="panel">
@@ -139,6 +155,6 @@
   <span>数据每日 23:30（北京时间）自动更新</span>
 </footer>
 
-<script src="app.js?v=26" onerror="__appFail()"></script>
+<script src="app.js?v=27" onerror="__appFail()"></script>
 </body>
 </html>

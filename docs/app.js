@@ -10,6 +10,8 @@
 
   const state = {
     meta: null,
+    ach: null,            // docs/data/achievements.json（可能尚未生成）
+    achFilter: null,      // 成就页游戏筛选
     days: new Map(),      // 'YYYY-MM-DD' -> day
     allDates: [],
     view: 'lifetime',
@@ -87,6 +89,14 @@
       }
     }
     state.allDates = [...state.days.keys()].sort();
+
+    // 成就数据：可选资源，404 / 占位（ready:false）时卡片与详情页显示待采集
+    try {
+      const ach = await jget('data/achievements.json');
+      if (ach && ach.ready && ach.stats?.total > 0) state.ach = ach;
+    } catch (e) {
+      console.warn('成就数据未生成（每日采集任务自明日开始产出）');
+    }
     return true;
   }
 
@@ -111,6 +121,16 @@
 
     // 游戏库卡：玩过 / 拥有
     $('c-games').textContent = `${s.lifetime_played_games ?? 0} / ${s.owned_games ?? 0}`;
+
+    // 成就卡：完成百分比 + 已解锁/总数（未启动过的游戏不计入）
+    const a = state.ach?.stats;
+    if (a) {
+      $('c-ach').textContent = `${a.pct}%`;
+      $('c-ach-sub').textContent = `${a.unlocked} / ${a.total} 项`;
+    } else {
+      $('c-ach').textContent = '—';
+      $('c-ach-sub').textContent = '成就数据待采集';
+    }
 
     // 数据卡：数据截止时间（不加速度前缀，保持卡片轻量）
     $('c-data').textContent = asOf ?? '等待采集';
@@ -414,6 +434,77 @@
     );
   }
 
+  // ---------- ①d 成就详情 ----------
+  /** 解锁时间戳 → Asia/Shanghai 日期 */
+  const achDate = (ts) => {
+    if (!ts) return null;
+    return new Date(ts * 1000 + 8 * 3600 * 1000).toISOString().slice(0, 10);
+  };
+
+  function buildAchSelect() {
+    const sel = $('ach-game');
+    if (!state.ach) {
+      sel.innerHTML = '<option value="">全部游戏</option>';
+      return;
+    }
+    // 按完成度降序排列，完成度相同的按解锁数降序
+    const list = Object.values(state.ach.games ?? {}).sort(
+      (x, y) => y.unlocked / (y.total || 1) - x.unlocked / (x.total || 1) || y.unlocked - x.unlocked,
+    );
+    sel.innerHTML =
+      '<option value="">全部游戏</option>' +
+      list.map((g) => `<option value="${g.appid}">${escapeHtml(g.name)}（${g.unlocked}/${g.total}）</option>`).join('');
+  }
+
+  function renderAch() {
+    const box = $('ach-list');
+    const hint = $('ach-hint');
+    const stats = state.ach?.stats;
+
+    if (!stats) {
+      hint.textContent = '—';
+      box.innerHTML =
+        '<p class="empty">成就数据尚未采集。成就由每日 23:30（北京时间）的采集任务自动生成，\n        首次采集完成后即可在此查看。</p>';
+      return;
+    }
+
+    const appid = state.achFilter;
+    const games = appid
+      ? [state.ach.games?.[appid]].filter(Boolean)
+      : Object.values(state.ach.games ?? {});
+
+    // 展平后按完成日期由新到旧
+    const rows = [];
+    for (const g of games) {
+      for (const a of g.achievements ?? []) rows.push({ ...a, game: g.name });
+    }
+    rows.sort((x, y) => (y.ts ?? 0) - (x.ts ?? 0));
+
+    hint.textContent = appid
+      ? `${games[0]?.name ?? ''} · 已解锁 ${games[0]?.unlocked ?? 0} / ${games[0]?.total ?? 0} 项`
+      : `已解锁 ${stats.unlocked} / ${stats.total} 项 · 完成度 ${stats.pct}% · 覆盖 ${stats.games} 款游戏`;
+
+    if (!rows.length) {
+      box.innerHTML = '<p class="empty">该游戏暂无已解锁的成就。</p>';
+      return;
+    }
+
+    box.innerHTML = rows
+      .map((a) => {
+        const d = achDate(a.ts);
+        return `<div class="ach-item">
+          <img class="ach-icon" src="${a.icon ?? ''}" alt="" loading="lazy"
+               onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'icon-ph ach-icon-ph'}))">
+          <div class="ach-main">
+            <div class="ach-name" title="${escapeHtml(a.name)}">${escapeHtml(a.name)}</div>
+            <div class="ach-sub"><span class="ach-game">${escapeHtml(a.game)}</span>${a.desc ? ` · ${escapeHtml(a.desc)}` : ''}</div>
+          </div>
+          <span class="ach-date">${d ?? '已解锁'}</span>
+        </div>`;
+      })
+      .join('');
+  }
+
   // ---------- ④ 数据页 ----------
   function renderHealth() {
     const h = state.meta.health ?? {};
@@ -472,6 +563,7 @@
     document.querySelectorAll('.view').forEach((s) => s.classList.toggle('active', s.id === `view-${v}`));
     if (v === 'lifetime') closeDrill();
     if (v === 'recent') renderRecent();
+    if (v === 'ach') renderAch();
   }
 
   function bind() {
@@ -487,7 +579,14 @@
       }
     });
     $('card-recent').addEventListener('click', () => switchView('recent'));
+    $('card-ach').addEventListener('click', () => switchView('ach'));
     $('card-data').addEventListener('click', () => switchView('data'));
+
+    // 成就页：游戏筛选
+    $('ach-game').addEventListener('change', (e) => {
+      state.achFilter = e.target.value || null;
+      renderAch();
+    });
 
     // 游戏累计列表：点击整行 → 该游戏每日时长趋势
     $('lt-list').addEventListener('click', (e) => {
@@ -533,8 +632,10 @@
 
       renderLifetime();
       renderRecent();
+      renderAch();
       renderHealth();
       buildDrillSelect();
+      buildAchSelect();
       switchView('lifetime');
     } catch (err) {
       clearTimeout(watchdog);
