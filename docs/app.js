@@ -84,7 +84,6 @@
     { id: 'mint', name: '薄荷晨' },
     { id: 'dawn', name: '晨曦紫' },
   ];
-  const THEME_KEY = 'sp-theme';
   /** 读取当前主题的 CSS 变量（图表画在 canvas 上，必须显式取色） */
   const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   const themeName = (id) => (THEMES.find((t) => t.id === id) ?? THEMES[0]).name;
@@ -97,16 +96,16 @@
   function applyTheme(id, { announce = false } = {}) {
     if (!THEMES.some((t) => t.id === id)) id = 'deepblue';
     document.documentElement.dataset.theme = id;
-    try {
-      localStorage.setItem(THEME_KEY, id);
-    } catch (e) {
-      /* 隐私模式禁用 localStorage：本次可切换，刷新后回到默认 */
-    }
-    const sw = $('theme-switch');
-    if (sw) sw.title = `当前主题：${themeName(id)} · 点击随机切换（共 ${THEMES.length} 套）`;
+    syncThemeUi(id);
     // 图表画在 canvas 上，不会跟随 CSS 变量，需重新渲染
     if (state.charts.drill) renderDrill();
     if (announce) toast(`主题：${themeName(id)}`);
+  }
+
+  /** 同步头像 title 提示（主题由首屏内联脚本随机决定时也要更新文案） */
+  function syncThemeUi(id = currentTheme()) {
+    const sw = $('theme-switch');
+    if (sw) sw.title = `当前主题：${themeName(id)} · 点击随机切换（共 ${THEMES.length} 套）`;
   }
 
   /** 随机挑一个与当前不同的主题 */
@@ -793,8 +792,8 @@
     }, 12000);
     try {
       bind();
-      // 套用已保存主题（首屏已在 <head> 内联脚本中应用过一次，这里同步提示文案）
-      applyTheme(currentTheme());
+      // 主题已由 <head> 内联脚本随机决定，这里只同步头像提示文案
+      syncThemeUi();
       if (!(await load())) return;
       clearTimeout(watchdog);
       renderCards();
