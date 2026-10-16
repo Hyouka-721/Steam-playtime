@@ -6,7 +6,7 @@
 <title>Steam 游戏时长统计</title>
 <link rel="icon" type="image/png" href="avatar.png?v=2">
 <link rel="apple-touch-icon" href="avatar.png?v=2">
-<link rel="stylesheet" href="style.css?v=24">
+<link rel="stylesheet" href="style.css?v=25">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/zcool-kuaile@5/index.min.css">
 <link rel="stylesheet" href="https://fonts.loli.net/css2?family=ZCOOL+KuaiLe&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"
@@ -39,7 +39,7 @@
   <img class="header-avatar" src="avatar.png?v=2" alt="汤姆猫头像">
 </header>
 
-<!-- 概览 · 三张导航卡（替代原 Tab 栏） -->
+<!-- 概览 · 四张统计卡（其中三张可点击导航，替代原 Tab 栏） -->
 <section class="cards" id="cards">
   <div class="card card-nav card-hero" id="card-lifetime" data-view="lifetime" title="点击查看所有游戏的累计时长">
     <div class="card-label">游戏时长</div>
@@ -72,7 +72,10 @@
   <div id="lt-detail" hidden>
     <div class="panel">
       <div class="panel-head">
-        <h2 id="drill-title">每日时长趋势</h2>
+        <div class="panel-title">
+          <button class="btn btn-back" id="btn-drill-back" title="返回游戏时长列表">← 返回</button>
+          <h2 id="drill-title">每日时长趋势</h2>
+        </div>
         <div class="ctrl">
           <select id="drill-game" title="选择游戏"></select>
           <div class="seg" id="drill-range">
@@ -136,6 +139,6 @@
   <span>数据每日 23:30（北京时间）自动更新</span>
 </footer>
 
-<script src="app.js?v=24" onerror="__appFail()"></script>
+<script src="app.js?v=25" onerror="__appFail()"></script>
 </body>
 </html>

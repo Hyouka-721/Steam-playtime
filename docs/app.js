@@ -154,18 +154,20 @@
     }
     const recent = recentMinutesByApp(14);
     const list = lifetime.slice().sort((a, b) => b.lifetime_minutes - a.lifetime_minutes);
+    // 0 时长的「从未游玩」游戏不参与竞争，收进折叠区，避免占据半屏视觉空间
+    const played = list.filter((g) => g.lifetime_minutes > 0);
+    const idle = list.filter((g) => g.lifetime_minutes === 0);
 
-    const max = Math.max(...lifetime.map((g) => g.lifetime_minutes), 1);
-    const totalShown = list.reduce((a, g) => a + g.lifetime_minutes, 0);
+    const max = Math.max(...played.map((g) => g.lifetime_minutes), 1);
+    const totalShown = played.reduce((a, g) => a + g.lifetime_minutes, 0);
 
-    box.innerHTML = list
-      .map((g, i) => {
-        const icon = ICON(g.appid, g.img_icon_url);
-        const pct = Math.max(g.lifetime_minutes > 0 ? 1.5 : 0, (g.lifetime_minutes / max) * 100);
-        const barStyle = i < topPalette.length ? `width:${pct}%;background:${topPalette[i]}` : `width:${pct}%`;
-        const playing = (recent.get(g.appid) ?? 0) > 0;
-        const noCls = i < 3 ? ` r${i + 1}` : '';
-        return `<div class="rank-item${g.lifetime_minutes === 0 ? ' zero' : ''}" data-appid="${g.appid}" title="点击查看该游戏每日时长趋势">
+    const rowHtml = (g, i) => {
+      const icon = ICON(g.appid, g.img_icon_url);
+      const pct = Math.max(g.lifetime_minutes > 0 ? 1.5 : 0, (g.lifetime_minutes / max) * 100);
+      const barStyle = i < topPalette.length ? `width:${pct}%;background:${topPalette[i]}` : `width:${pct}%`;
+      const playing = (recent.get(g.appid) ?? 0) > 0;
+      const noCls = i < 3 ? ` r${i + 1}` : '';
+      return `<div class="rank-item${g.lifetime_minutes === 0 ? ' zero' : ''}" data-appid="${g.appid}" title="点击查看该游戏每日时长趋势">
           <span class="rank-no${noCls}">${i + 1}</span>
           <img class="rank-capsule" src="${CAPSULE(g.appid)}" alt="" loading="lazy"
                onerror="this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'">
@@ -174,13 +176,47 @@
           <span class="rank-min">${hm(g.lifetime_minutes)}</span>
           <span class="rank-last">${g.last_played ?? '—'}</span>
         </div>`;
-      })
-      .join('');
+    };
 
-    box.insertAdjacentHTML(
-      'beforeend',
-      `<p class="list-foot">共 ${list.length} 款游戏 · 合计 ${hm(totalShown)}</p>`,
-    );
+    let html = played.map(rowHtml).join('');
+    if (idle.length) {
+      html +=
+        `<div class="idle-toggle" id="idle-toggle" role="button" tabindex="0" aria-expanded="false">` +
+        `<span class="idle-caret">▸</span>` +
+        `<span class="idle-label">展开 ${idle.length} 款未游玩的游戏</span>` +
+        `</div>` +
+        `<div id="idle-list" class="rank-list" hidden>${idle.map((g, i) => rowHtml(g, played.length + i)).join('')}</div>`;
+    }
+    html +=
+      `<p class="list-foot">共 ${played.length} 款已游玩游戏 · 合计 ${hm(totalShown)}` +
+      (idle.length ? `　<span class="list-foot-dim">另有 ${idle.length} 款从未启动</span>` : '') +
+      `</p>`;
+
+    box.innerHTML = html;
+    if (idle.length) bindIdleToggle(idle.length);
+  }
+
+  /** 折叠区标题点击 / 回车均可展开与收起 */
+  function bindIdleToggle(count) {
+    const toggle = $('idle-toggle');
+    const list = $('idle-list');
+    const caret = toggle.querySelector('.idle-caret');
+    const label = toggle.querySelector('.idle-label');
+    const flip = () => {
+      const willOpen = list.hidden;
+      list.hidden = !willOpen;
+      toggle.setAttribute('aria-expanded', String(willOpen));
+      toggle.classList.toggle('open', willOpen);
+      caret.textContent = willOpen ? '▾' : '▸';
+      label.textContent = willOpen ? '收起未游玩的游戏' : `展开 ${count} 款未游玩的游戏`;
+    };
+    toggle.addEventListener('click', flip);
+    toggle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        flip();
+      }
+    });
   }
 
   // ---------- ①b 最近游玩（近两周时长） ----------
@@ -458,6 +494,11 @@
       const row = e.target.closest('.rank-item');
       if (!row) return;
       openDrill(row.dataset.appid);
+    });
+
+    $('btn-drill-back').addEventListener('click', () => {
+      closeDrill();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
     $('drill-game').addEventListener('change', (e) => {
