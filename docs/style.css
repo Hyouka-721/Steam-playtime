@@ -353,7 +353,15 @@ html, body {
   margin: 0;
   padding: 0;
   background-color: var(--bg);
-  background-image: var(--bg-layers);
+  /* 背景画（浪与少女）垫在最底层，其上先盖一层「主题底色蒙版」再叠主题渐变：
+     蒙版用 color-mix 混入 --bg，深色主题压暗、浅色主题洗白，保证任何主题下前景可读 */
+  background-image:
+    var(--bg-layers),
+    linear-gradient(180deg, color-mix(in srgb, var(--bg) 72%, transparent), color-mix(in srgb, var(--bg) 86%, transparent)),
+    url('bg-wave.jpg');
+  background-position: center, center, center;
+  background-size: auto, auto, cover;
+  background-repeat: no-repeat;
   background-attachment: fixed;
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Roboto, sans-serif;
