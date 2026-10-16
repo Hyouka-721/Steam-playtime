@@ -2,7 +2,7 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-15T19:17:32.249Z",
+  "generated_at": "2026-10-16T10:27:15.287Z",
   "generated_at_local": "2026-10-16",
   "tracking_since": "2026-10-13",
   "last_snapshot_date": "2026-10-16",
@@ -56,7 +56,7 @@
     },
     "49520": {
       "appid": "49520",
-      "name": "Borderlands 2",
+      "name": "无主之地2",
       "img_icon_url": "a3f4945226e69b6196074df4c776e342d3e5a3be",
       "lifetime_minutes": 0,
       "last_played": null
@@ -84,14 +84,14 @@
     },
     "250900": {
       "appid": "250900",
-      "name": "The Binding of Isaac: Rebirth",
+      "name": "以撒的结合：重生",
       "img_icon_url": "16d46c8630499bfc54d20745ac90786a302cd643",
       "lifetime_minutes": 0,
       "last_played": null
     },
     "262060": {
       "appid": "262060",
-      "name": "暗黑地牢 Darkest Dungeon",
+      "name": "暗黑地牢",
       "img_icon_url": "af219e7f9ed0506cb0954aabb7f24a45e38d28e4",
       "lifetime_minutes": 165,
       "last_played": "2026-04-24"
@@ -105,14 +105,14 @@
     },
     "271590": {
       "appid": "271590",
-      "name": "Grand Theft Auto V 传承版",
+      "name": "GTA5 传承版",
       "img_icon_url": "1e72f87eb927fa1485e68aefaff23c7fd7178251",
       "lifetime_minutes": 473,
       "last_played": "2026-05-09"
     },
     "286690": {
       "appid": "286690",
-      "name": "Metro 2033 Redux",
+      "name": "地铁2033 重制版",
       "img_icon_url": "353ea01a045c084215bca95519808eaa7319ce0c",
       "lifetime_minutes": 0,
       "last_played": null
@@ -140,7 +140,7 @@
     },
     "346110": {
       "appid": "346110",
-      "name": "ARK: Survival Evolved",
+      "name": "方舟：生存进化",
       "img_icon_url": "fef1799533131c10f538d2dd697bbbd89e663265",
       "lifetime_minutes": 0,
       "last_played": null
@@ -154,7 +154,7 @@
     },
     "379720": {
       "appid": "379720",
-      "name": "DOOM",
+      "name": "毁灭战士",
       "img_icon_url": "b6e72ff47d1990cb644700751eeeff14e0aba6dc",
       "lifetime_minutes": 0,
       "last_played": null
@@ -168,7 +168,7 @@
     },
     "407530": {
       "appid": "407530",
-      "name": "ARK: Survival Of The Fittest",
+      "name": "方舟：适者生存",
       "img_icon_url": "807c673cddebbfee0700a947a75f4872ad136e9b",
       "lifetime_minutes": 0,
       "last_played": null
@@ -189,21 +189,21 @@
     },
     "489830": {
       "appid": "489830",
-      "name": "The Elder Scrolls V: Skyrim Special Edition",
+      "name": "上古卷轴5：天际 特别版",
       "img_icon_url": "0dfe3eed5658f9fbd8b62f8021038c0a4190f21d",
       "lifetime_minutes": 0,
       "last_played": null
     },
     "493340": {
       "appid": "493340",
-      "name": "Planet Coaster",
+      "name": "过山车之星",
       "img_icon_url": "1b2f29e743dd3048f21fefd9642d86a5f5123968",
       "lifetime_minutes": 0,
       "last_played": null
     },
     "502500": {
       "appid": "502500",
-      "name": "ACE COMBAT™ 7: SKIES UNKNOWN",
+      "name": "皇牌空战7：未知空域",
       "img_icon_url": "f7e1587f3521cacbdebd07b25c05103a963160a8",
       "lifetime_minutes": 208,
       "last_played": "2025-12-22"
@@ -224,7 +224,7 @@
     },
     "613100": {
       "appid": "613100",
-      "name": "House Flipper",
+      "name": "房产达人",
       "img_icon_url": "4ab6e7c49f3f0c063dfe08ab85038c979301f6dd",
       "lifetime_minutes": 0,
       "last_played": null
@@ -252,7 +252,7 @@
     },
     "733070": {
       "appid": "733070",
-      "name": "Sudoku Universe / 数独宇宙",
+      "name": "数独宇宙",
       "img_icon_url": "fc39447b788f1f914acc1042919eca9e71ca6fa1",
       "lifetime_minutes": 2419,
       "last_played": "2026-01-15"
@@ -266,7 +266,7 @@
     },
     "877280": {
       "appid": "877280",
-      "name": "SAO Utils 2: Progressive",
+      "name": "SAO Utils 2：进阶版",
       "img_icon_url": "ab16d51fcd68f9b86c1313fe1d9beb0e563afce1",
       "lifetime_minutes": 12,
       "last_played": "2023-10-29"
@@ -280,28 +280,28 @@
     },
     "990630": {
       "appid": "990630",
-      "name": "The Last Campfire",
+      "name": "最后的篝火",
       "img_icon_url": "a6601e3e8776e4c71d20869ae2ca1cad23d41cc0",
       "lifetime_minutes": 373,
       "last_played": "2026-04-07"
     },
     "1174180": {
       "appid": "1174180",
-      "name": "Red Dead Redemption 2",
+      "name": "荒野大镖客：救赎2",
       "img_icon_url": "5106abd9c1187a97f23295a0ba9470c94804ec6c",
       "lifetime_minutes": 0,
       "last_played": null
     },
     "1222140": {
       "appid": "1222140",
-      "name": "Detroit: Become Human",
+      "name": "底特律：变人",
       "img_icon_url": "3d9f5bc971d44398aef740c0d8e79a358be2e800",
       "lifetime_minutes": 0,
       "last_played": null
     },
     "1237970": {
       "appid": "1237970",
-      "name": "Titanfall® 2",
+      "name": "泰坦陨落2",
       "img_icon_url": "d73c7e572859bd7490947d1aeab5c33eda18fd64",
       "lifetime_minutes": 0,
       "last_played": null
@@ -322,7 +322,7 @@
     },
     "1333910": {
       "appid": "1333910",
-      "name": "Sizeable 缩放世界",
+      "name": "缩放世界 Sizeable",
       "img_icon_url": "d85e0010bc76856fc5f8f2c4df4c6a39ae1a006b",
       "lifetime_minutes": 263,
       "last_played": "2026-04-08"
@@ -343,14 +343,14 @@
     },
     "1579380": {
       "appid": "1579380",
-      "name": "Shadow Tactics: 爱子的选择 Aiko's Choice",
+      "name": "影子战术：爱子的选择",
       "img_icon_url": "2696fc7ba08cab22ea50f0b8db787a63e6fa3004",
       "lifetime_minutes": 612,
       "last_played": "2026-04-18"
     },
     "1623730": {
       "appid": "1623730",
-      "name": "Palworld / 幻兽帕鲁",
+      "name": "幻兽帕鲁",
       "img_icon_url": "f5523077a8f4c923c2e8d8c17794b3319035fa73",
       "lifetime_minutes": 101,
       "last_played": "2026-04-04"
@@ -364,7 +364,7 @@
     },
     "1687950": {
       "appid": "1687950",
-      "name": "Persona 5 Royal",
+      "name": "女神异闻录5 皇家版",
       "img_icon_url": "2f868d8c16fc357dc7122d440b9de3916e36e6fa",
       "lifetime_minutes": 0,
       "last_played": null
@@ -378,14 +378,14 @@
     },
     "1794680": {
       "appid": "1794680",
-      "name": "Vampire Survivors - 吸血鬼幸存者",
+      "name": "吸血鬼幸存者",
       "img_icon_url": "3677cf1be3be1f4ea42261c62ce10519715ade58",
       "lifetime_minutes": 62,
       "last_played": "2026-02-24"
     },
     "1942280": {
       "appid": "1942280",
-      "name": "土豆兄弟(Brotato)",
+      "name": "土豆兄弟",
       "img_icon_url": "d9dfcab8f300a9548439f70bef7b5f4e53d0fc28",
       "lifetime_minutes": 5395,
       "last_played": "2026-04-20"
@@ -413,7 +413,7 @@
     },
     "3240220": {
       "appid": "3240220",
-      "name": "Grand Theft Auto V Enhanced",
+      "name": "GTA5 增强版",
       "img_icon_url": "8355a7bbdb704f727bfba80ec56bc7228991338e",
       "lifetime_minutes": 0,
       "last_played": null
@@ -424,7 +424,7 @@
     "low_confidence_days": 1,
     "manual_days": 0,
     "shared_game_count": 0,
-    "name_overrides": 3,
+    "name_overrides": 52,
     "last_error": null
   }
 }
