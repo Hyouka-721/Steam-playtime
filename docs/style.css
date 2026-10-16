@@ -404,7 +404,7 @@ a { color: var(--accent); }
 /* 头像以 CSS 背景呈现：不可拖动/另存；点击可随机切换主题 */
 .header-avatar {
   width: 96px; height: 96px;
-  background: url('avatar.png?v=4') center / contain no-repeat;
+  background: url('avatar.png?v=5') center / contain no-repeat;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
   flex-shrink: 0;
   cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
