@@ -32,8 +32,6 @@
   --header-bg: rgba(18, 28, 41, 0.75);
   --logo-bg: linear-gradient(160deg, #18263a, #0e1826);
   --logo-glow: drop-shadow(0 0 10px rgba(102, 192, 244, 0.25));
-  --avatar-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-  --avatar-bg: #e1eef8;
   --medal-1: #ffd24a; --medal-2: #dbe6f0; --medal-3: #e0914f;
   --medal-shadow-1: 0 0 12px rgba(255, 210, 74, 0.35);
   --medal-shadow-2: 0 0 12px rgba(219, 230, 240, 0.28);
@@ -83,8 +81,6 @@
   --header-bg: rgba(16, 13, 38, 0.75);
   --logo-bg: linear-gradient(160deg, #2a2158, #150f30);
   --logo-glow: drop-shadow(0 0 10px rgba(157, 184, 255, 0.3));
-  --avatar-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
-  --avatar-bg: #e7e6fa;
   --medal-1: #ffd24a; --medal-2: #cfd0ee; --medal-3: #e0914f;
   --medal-shadow-1: 0 0 14px rgba(255, 210, 74, 0.4);
   --medal-shadow-2: 0 0 14px rgba(207, 208, 238, 0.3);
@@ -128,8 +124,6 @@
   --header-bg: rgba(4, 26, 32, 0.7);
   --logo-bg: linear-gradient(160deg, #0b3a44, #052026);
   --logo-glow: drop-shadow(0 0 10px rgba(94, 234, 212, 0.28));
-  --avatar-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-  --avatar-bg: #ddf3ec;
   --medal-1: #ffd24a; --medal-2: #cfeae4; --medal-3: #e0914f;
   --medal-shadow-1: 0 0 14px rgba(255, 210, 74, 0.38);
   --medal-shadow-2: 0 0 14px rgba(207, 234, 228, 0.28);
@@ -173,8 +167,6 @@
   --header-bg: rgba(28, 16, 15, 0.75);
   --logo-bg: linear-gradient(160deg, #4a2a24, #24110f);
   --logo-glow: drop-shadow(0 0 10px rgba(255, 178, 107, 0.28));
-  --avatar-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
-  --avatar-bg: #faeadb;
   --medal-1: #ffd24a; --medal-2: #e8d6c8; --medal-3: #e0914f;
   --medal-shadow-1: 0 0 14px rgba(255, 210, 74, 0.4);
   --medal-shadow-2: 0 0 14px rgba(232, 214, 200, 0.3);
@@ -219,8 +211,6 @@
   --header-bg: rgba(8, 10, 18, 0.82);
   --logo-bg: linear-gradient(160deg, #121a2c, #080c16);
   --logo-glow: drop-shadow(0 0 10px rgba(34, 211, 238, 0.3));
-  --avatar-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
-  --avatar-bg: #e0eff1;
   --medal-1: #ffd24a; --medal-2: #cbd5e1; --medal-3: #e0914f;
   --medal-shadow-1: 0 0 14px rgba(255, 210, 74, 0.4);
   --medal-shadow-2: 0 0 14px rgba(203, 213, 225, 0.28);
@@ -263,8 +253,6 @@
   --header-bg: rgba(255, 255, 255, 0.8);
   --logo-bg: linear-gradient(160deg, #ffffff, #fdf6ee);
   --logo-glow: drop-shadow(0 1px 2px rgba(90, 60, 25, 0.12));
-  --avatar-shadow: 0 4px 14px rgba(90, 60, 25, 0.18);
-  --avatar-bg: #fdf1e3;
   --medal-1: #c58a00; --medal-2: #8d8175; --medal-3: #b3703c;
   --medal-shadow-1: none; --medal-shadow-2: none; --medal-shadow-3: none;
   --track: rgba(36, 28, 21, 0.09);
@@ -305,8 +293,6 @@
   --header-bg: rgba(255, 255, 255, 0.8);
   --logo-bg: linear-gradient(160deg, #ffffff, #f1faf7);
   --logo-glow: drop-shadow(0 1px 2px rgba(10, 60, 50, 0.12));
-  --avatar-shadow: 0 4px 14px rgba(10, 60, 50, 0.18);
-  --avatar-bg: #e4f2ed;
   --medal-1: #c08a00; --medal-2: #82968f; --medal-3: #a9753c;
   --medal-shadow-1: none; --medal-shadow-2: none; --medal-shadow-3: none;
   --track: rgba(18, 38, 32, 0.09);
@@ -347,8 +333,6 @@
   --header-bg: rgba(255, 255, 255, 0.8);
   --logo-bg: linear-gradient(160deg, #ffffff, #f4f2fd);
   --logo-glow: drop-shadow(0 1px 2px rgba(50, 30, 100, 0.12));
-  --avatar-shadow: 0 4px 14px rgba(50, 30, 100, 0.18);
-  --avatar-bg: #ece7fb;
   --medal-1: #c98a00; --medal-2: #8b85a3; --medal-3: #b06f3c;
   --medal-shadow-1: none; --medal-shadow-2: none; --medal-shadow-3: none;
   --track: rgba(27, 23, 48, 0.09);
@@ -410,21 +394,13 @@ a { color: var(--accent); }
 .header-meta { display: flex; gap: 10px; align-items: center; font-size: 12px; }
 /* 头像以 CSS 背景呈现：不可拖动/另存；点击可随机切换主题 */
 .header-avatar {
-  width: 96px; height: 96px; border-radius: 50%;
-  background: var(--avatar-bg);
-  box-shadow: var(--avatar-shadow);
+  width: 96px; height: 96px;
+  background: url('avatar.png?v=4') center / contain no-repeat;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
   flex-shrink: 0;
   cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
-  transition: transform .18s ease, box-shadow .18s ease;
-  position: relative;
+  transition: transform .18s ease, filter .18s ease;
   transform: scaleX(-1);
-}
-/* 图片画在伪元素上并 multiply 混合：PNG 自带的白底融进主题色调，汤姆猫本体保留 */
-.header-avatar::before {
-  content: '';
-  position: absolute; inset: 0; border-radius: 50%;
-  background: url('avatar.png?v=3') center / contain no-repeat;
-  mix-blend-mode: multiply;
 }
 .header-avatar:hover { transform: scaleX(-1) scale(1.04); }
 .header-avatar:active { transform: scaleX(-1) scale(0.97); }
