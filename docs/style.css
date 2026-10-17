@@ -395,6 +395,10 @@ a { color: var(--accent); }
 .logo:hover { transform: scale(1.06); }
 .logo:active { transform: scale(0.96); }
 .logo:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.site-header h1 {
+  margin: 0; font-size: 28px; font-weight: 500; letter-spacing: 2px; color: var(--text-strong);
+  font-family: 'ZCOOL KuaiLe', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
 /* 2026-10-17：网站名「Game time」花体字（inline SVG 方案）经用户确认**暂不上线**，
    相关 HTML/CSS 已整体移除，dock 栏中部留空；矢量底稿存档于工作区 gametime.svg，
    用户满意后可随时恢复（快照 index_with_gametime_v49_snapshot.html）。 */
@@ -567,11 +571,12 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 }
 /* 加菲猫（2026-10-17）：趴在首行时长条的横线上，水平居中。
    源图 600×338，内部横线位于高度 60.5% 处（实测 rows 202-207 满宽浅灰线）；
-   用 translate(-50%, -60.5%) 把图片自身 60.5% 处钉在进度条竖直中线上，
-   无论条多粗/图片多大都严丝合缝。pointer-events:none 保证整行仍可点击下钻。 */
+   用 translate(-50%, calc(-60.5% - 10px)) 把图片自身 60.5% 处钉在进度条竖直中线上方
+   10px（用户要求整体上移 10px），无论条多粗/图片多大偏移量都一致。
+   pointer-events:none 保证整行仍可点击下钻。 */
 .rank-cat {
   position: absolute; left: 50%; top: 50%;
-  transform: translate(-50%, -60.5%);
+  transform: translate(-50%, calc(-60.5% - 10px));
   height: 70px; width: auto;
   filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
   pointer-events: none;
