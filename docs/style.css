@@ -381,7 +381,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    用 translate(0, -87.6%) 把杆中线钉在进度条竖直中线上。 */
 .rank-penguin {
   position: absolute; right: 0; top: 50%;
-  transform: translate(0, calc(-87.6% - 1.5px));
+  transform: translate(0, calc(-87.6% - 2.7px));
   height: 64px; width: auto;
   filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
   pointer-events: none;
@@ -395,7 +395,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    用 translate(-50%, -96.1%) 把地面线钉在进度条竖直中线上。 */
 .rank-tj {
   position: absolute; left: 50%; top: 50%;
-  transform: translate(-50%, calc(-96.1% - 1px));
+  transform: translate(-50%, calc(-96.1% - 2.5px));
   height: 62px; width: auto;
   filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
   pointer-events: none;
