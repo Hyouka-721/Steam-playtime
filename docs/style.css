@@ -591,6 +591,20 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 @media (max-width: 1080px) {
   .rank-cat { display: none; }
 }
+/* 企鹅（首行最右端，与加菲猫左右对称）：
+   源图 1000×404，内部横杆满宽行 351-357，中线 354 = 87.6%；
+   用 translate(0, -87.6%) 把杆中线钉在进度条竖直中线上。 */
+.rank-penguin {
+  position: absolute; right: 0; top: 50%;
+  transform: translate(0, -87.6%);
+  height: 64px; width: auto;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
+  pointer-events: none;
+  user-select: none; -webkit-user-drag: none;
+}
+@media (max-width: 1080px) {
+  .rank-penguin { display: none; }
+}
 .rank-min { font-variant-numeric: tabular-nums; color: var(--text-strong); text-align: center; font-weight: 600; font-size: 13.5px; }
 .rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: center; font-size: 12px; }
 .list-foot { text-align: right; color: var(--text-faint); font-size: 12px; margin: 10px 4px 2px; }
