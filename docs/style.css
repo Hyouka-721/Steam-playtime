@@ -1,233 +1,18 @@
-/* Steam 游戏时长统计 —— 多主题（8 套）配色系统，点击头像随机切换 */
+/* Steam 游戏时长统计 —— 多主题（3 套，全浅色）配色系统，点击站标/头像随机切换 */
 /* 主题切换只改 CSS 变量，布局与功能完全一致 */
 
-:root,
-[data-theme="deepblue"] {
-  --bg: #0d1420;
-  --bg-layers:
-    radial-gradient(1200px 500px at 70% -10%, rgba(70, 130, 180, 0.14), transparent 60%),
-    radial-gradient(900px 400px at 10% 0%, rgba(102, 192, 244, 0.08), transparent 55%);
-  --panel: #121c29;
-  --panel-2: #182433;
-  --sunken: #0a0f18;
-  --border: #223140;
-  --border-hi: #2e4358;
-  --text: #cfdde9;
-  --text-dim: #8fa5ba;
-  --text-faint: #5c7089;
-  --text-strong: #eef5fb;
-  --accent: #66c0f4;
-  --accent-2: #4ba3e3;
-  --warn: #e8b13a;
-  --ok: #4ade80;
-  --radius: 12px;
-  --tint-1: rgba(102, 192, 244, 0.05);
-  --tint-2: rgba(102, 192, 244, 0.12);
-  --tint-border: rgba(102, 192, 244, 0.45);
-  --ring: rgba(102, 192, 244, 0.25);
-  --card-bg: linear-gradient(170deg, #14202e 0%, #101a26 100%);
-  --card-border: #223140;
-  --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  --card-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  --header-bg: rgba(18, 28, 41, 0.75);
-  --logo-bg: linear-gradient(160deg, #18263a, #0e1826);
-  --logo-glow: drop-shadow(0 0 10px rgba(102, 192, 244, 0.25));
-  --medal-1: #ffd24a; --medal-2: #dbe6f0; --medal-3: #e0914f;
-  --medal-shadow-1: 0 0 12px rgba(255, 210, 74, 0.35);
-  --medal-shadow-2: 0 0 12px rgba(219, 230, 240, 0.28);
-  --medal-shadow-3: 0 0 12px rgba(224, 145, 79, 0.3);
-  --track: #16222f;
-  --bar-grad: linear-gradient(90deg, #2073ab, #4ba3e3);
-  --badge-bg: rgba(6, 12, 20, 0.78);
-  --badge-text: #fff;
-  --tl-line: linear-gradient(180deg, #2a4a63, #1a2a3a);
-  --scroll-thumb: #24354a;
-  --chart-axis: #8fa5ba;
-  --chart-split: #1a2634;
-  --chart-title: #8fa5ba;
-  --chart-tip-bg: #0d1420;
-  --chart-tip-border: #263650;
-  --chart-tip-text: #c7d5e0;
-  --chart-legend-off: #3a4a5a;
-  --chart-cum-a: #f0a35c; --chart-cum-b: #9a5a24; --chart-line: #eef5fb;
-  --chart-cum-a2: #66c0f4; --chart-cum-b2: #1c5b8f; --chart-line2: #7fd1a8;
+/* 网站名花体字 Black Rose（本地嵌入，GitHub Pages 静态托管） */
+@font-face {
+  font-family: 'Black Rose';
+  src: url('blackrose.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
-/* ② 深空星云：深蓝紫底 + 紫/品红/青辉光 */
-[data-theme="nebula"] {
-  --bg: #0a0918;
-  --bg-layers:
-    radial-gradient(900px 520px at 12% -8%, rgba(124, 77, 255, 0.30), transparent 62%),
-    radial-gradient(760px 460px at 88% 4%, rgba(236, 72, 153, 0.20), transparent 60%),
-    radial-gradient(1000px 600px at 50% 108%, rgba(34, 211, 238, 0.14), transparent 65%),
-    linear-gradient(180deg, #0a0918 0%, #080713 100%);
-  --panel: rgba(26, 22, 52, 0.72);
-  --panel-2: rgba(38, 32, 74, 0.8);
-  --sunken: rgba(10, 8, 24, 0.9);
-  --border: rgba(150, 132, 255, 0.20);
-  --border-hi: rgba(170, 150, 255, 0.45);
-  --text: #e2e0ff; --text-dim: #a3a0cc; --text-faint: #6f6c98; --text-strong: #f2f0ff;
-  --accent: #9db8ff; --accent-2: #b79bff;
-  --warn: #e8b13a; --ok: #4ade80;
-  --tint-1: rgba(157, 184, 255, 0.07);
-  --tint-2: rgba(157, 184, 255, 0.16);
-  --tint-border: rgba(170, 150, 255, 0.5);
-  --ring: rgba(150, 132, 255, 0.3);
-  --card-bg: linear-gradient(160deg, rgba(122, 92, 255, 0.16), transparent 62%),
-    linear-gradient(170deg, rgba(30, 25, 60, 0.85), rgba(14, 12, 32, 0.9));
-  --card-border: rgba(150, 132, 255, 0.22);
-  --card-shadow: 0 8px 26px rgba(6, 4, 20, 0.5);
-  --card-hover-shadow: 0 10px 30px rgba(90, 60, 200, 0.28);
-  --header-bg: rgba(16, 13, 38, 0.75);
-  --logo-bg: linear-gradient(160deg, #2a2158, #150f30);
-  --logo-glow: drop-shadow(0 0 10px rgba(157, 184, 255, 0.3));
-  --medal-1: #ffd24a; --medal-2: #cfd0ee; --medal-3: #e0914f;
-  --medal-shadow-1: 0 0 14px rgba(255, 210, 74, 0.4);
-  --medal-shadow-2: 0 0 14px rgba(207, 208, 238, 0.3);
-  --medal-shadow-3: 0 0 14px rgba(224, 145, 79, 0.32);
-  --track: rgba(255, 255, 255, 0.08);
-  --bar-grad: linear-gradient(90deg, #7c5cf0, #b79bff);
-  --badge-bg: rgba(10, 6, 28, 0.8); --badge-text: #eae6ff;
-  --tl-line: linear-gradient(180deg, rgba(157, 184, 255, 0.6), transparent);
-  --scroll-thumb: #2f2760;
-  --chart-axis: #a3a0cc; --chart-split: rgba(150, 132, 255, 0.14); --chart-title: #a3a0cc;
-  --chart-tip-bg: #171233; --chart-tip-border: #3a2f70; --chart-tip-text: #e2e0ff;
-  --chart-legend-off: #4a4270;
-  --chart-cum-a: #b79bff; --chart-cum-b: #5b3fd6; --chart-line: #f2f0ff;
-  --chart-cum-a2: #9db8ff; --chart-cum-b2: #3f5fd6; --chart-line2: #9ef0ff;
-}
-
-/* ③ 极光玻璃：墨绿青底 + 极光柔光带 */
-[data-theme="aurora"] {
-  --bg: #04141a;
-  --bg-layers:
-    radial-gradient(820px 420px at 8% 6%, rgba(45, 212, 191, 0.22), transparent 60%),
-    radial-gradient(900px 480px at 82% -6%, rgba(56, 189, 248, 0.20), transparent 62%),
-    radial-gradient(1000px 620px at 60% 112%, rgba(34, 197, 94, 0.14), transparent 66%),
-    linear-gradient(180deg, #04141a 0%, #030d12 100%);
-  --panel: rgba(9, 42, 50, 0.66);
-  --panel-2: rgba(12, 58, 66, 0.72);
-  --sunken: rgba(3, 22, 27, 0.9);
-  --border: rgba(120, 220, 210, 0.16);
-  --border-hi: rgba(150, 240, 225, 0.4);
-  --text: #d9f6f0; --text-dim: #8fbdb6; --text-faint: #5d8c88; --text-strong: #f0fffb;
-  --accent: #5eead4; --accent-2: #38bdf8;
-  --warn: #e8b13a; --ok: #4ade80;
-  --tint-1: rgba(94, 234, 212, 0.06);
-  --tint-2: rgba(94, 234, 212, 0.15);
-  --tint-border: rgba(150, 240, 225, 0.45);
-  --ring: rgba(94, 234, 212, 0.25);
-  --card-bg: linear-gradient(165deg, rgba(255, 255, 255, 0.07), transparent 55%), rgba(7, 38, 45, 0.62);
-  --card-border: rgba(120, 220, 210, 0.18);
-  --card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 30px rgba(0, 0, 0, 0.35);
-  --card-hover-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 12px 34px rgba(0, 0, 0, 0.4);
-  --header-bg: rgba(4, 26, 32, 0.7);
-  --logo-bg: linear-gradient(160deg, #0b3a44, #052026);
-  --logo-glow: drop-shadow(0 0 10px rgba(94, 234, 212, 0.28));
-  --medal-1: #ffd24a; --medal-2: #cfeae4; --medal-3: #e0914f;
-  --medal-shadow-1: 0 0 14px rgba(255, 210, 74, 0.38);
-  --medal-shadow-2: 0 0 14px rgba(207, 234, 228, 0.28);
-  --medal-shadow-3: 0 0 14px rgba(224, 145, 79, 0.3);
-  --track: rgba(255, 255, 255, 0.08);
-  --bar-grad: linear-gradient(90deg, #0d9488, #5eead4);
-  --badge-bg: rgba(3, 26, 31, 0.8); --badge-text: #eafffb;
-  --tl-line: linear-gradient(180deg, rgba(94, 234, 212, 0.6), transparent);
-  --scroll-thumb: #10454e;
-  --chart-axis: #8fbdb6; --chart-split: rgba(120, 220, 210, 0.14); --chart-title: #8fbdb6;
-  --chart-tip-bg: #052a31; --chart-tip-border: #0d5d68; --chart-tip-text: #d9f6f0;
-  --chart-legend-off: #2f6a68;
-  --chart-cum-a: #5eead4; --chart-cum-b: #0d7f74; --chart-line: #f0fffb;
-  --chart-cum-a2: #38bdf8; --chart-cum-b2: #0a5c85; --chart-line2: #86efac;
-}
-
-/* ④ 熔岩暮色：近黑暖底 + 琥珀/玫红 */
-[data-theme="ember"] {
-  --bg: #110b0b;
-  --bg-layers:
-    radial-gradient(880px 460px at 84% -6%, rgba(255, 140, 80, 0.24), transparent 62%),
-    radial-gradient(760px 440px at 6% 4%, rgba(255, 90, 110, 0.16), transparent 60%),
-    radial-gradient(1000px 600px at 40% 110%, rgba(120, 60, 180, 0.14), transparent 66%),
-    linear-gradient(180deg, #130c0c 0%, #0b0708 100%);
-  --panel: rgba(44, 25, 24, 0.66);
-  --panel-2: rgba(60, 34, 30, 0.75);
-  --sunken: rgba(20, 10, 10, 0.9);
-  --border: rgba(255, 170, 120, 0.18);
-  --border-hi: rgba(255, 190, 140, 0.42);
-  --text: #f7e8dd; --text-dim: #c3a394; --text-faint: #8c7166; --text-strong: #fff6ee;
-  --accent: #ffb26b; --accent-2: #ff7a59;
-  --warn: #e8b13a; --ok: #7fd1a8;
-  --tint-1: rgba(255, 178, 107, 0.07);
-  --tint-2: rgba(255, 178, 107, 0.16);
-  --tint-border: rgba(255, 190, 140, 0.5);
-  --ring: rgba(255, 170, 120, 0.28);
-  --card-bg: linear-gradient(165deg, rgba(255, 180, 120, 0.10), transparent 58%), rgba(42, 24, 23, 0.7);
-  --card-border: rgba(255, 170, 120, 0.2);
-  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.42);
-  --card-hover-shadow: 0 12px 34px rgba(0, 0, 0, 0.48);
-  --header-bg: rgba(28, 16, 15, 0.75);
-  --logo-bg: linear-gradient(160deg, #4a2a24, #24110f);
-  --logo-glow: drop-shadow(0 0 10px rgba(255, 178, 107, 0.28));
-  --medal-1: #ffd24a; --medal-2: #e8d6c8; --medal-3: #e0914f;
-  --medal-shadow-1: 0 0 14px rgba(255, 210, 74, 0.4);
-  --medal-shadow-2: 0 0 14px rgba(232, 214, 200, 0.3);
-  --medal-shadow-3: 0 0 14px rgba(224, 145, 79, 0.32);
-  --track: rgba(255, 255, 255, 0.07);
-  --bar-grad: linear-gradient(90deg, #c2521f, #ffb26b);
-  --badge-bg: rgba(24, 12, 10, 0.8); --badge-text: #fff2e4;
-  --tl-line: linear-gradient(180deg, rgba(255, 178, 107, 0.6), transparent);
-  --scroll-thumb: #4a2a24;
-  --chart-axis: #c3a394; --chart-split: rgba(255, 170, 120, 0.14); --chart-title: #c3a394;
-  --chart-tip-bg: #2a1614; --chart-tip-border: #5c352a; --chart-tip-text: #f7e8dd;
-  --chart-legend-off: #6b4a3e;
-  --chart-cum-a: #ffb26b; --chart-cum-b: #b85c1c; --chart-line: #fff2e4;
-  --chart-cum-a2: #ff9d6b; --chart-cum-b2: #96330f; --chart-line2: #ffd9a8;
-}
-
-/* ⑤ 午夜霓虹：近黑 + 网格 + 青粉描边 */
-[data-theme="neon"] {
-  --bg: #06070c;
-  --bg-layers:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.022) 0 1px, transparent 1px 46px),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.022) 0 1px, transparent 1px 46px),
-    radial-gradient(760px 420px at 78% -4%, rgba(244, 114, 182, 0.16), transparent 62%),
-    radial-gradient(820px 460px at 14% 2%, rgba(34, 211, 238, 0.18), transparent 60%),
-    linear-gradient(180deg, #06070c 0%, #04050a 100%);
-  --panel: rgba(13, 16, 26, 0.85);
-  --panel-2: rgba(20, 24, 38, 0.9);
-  --sunken: #04050a;
-  --border: rgba(120, 140, 180, 0.2);
-  --border-hi: rgba(34, 211, 238, 0.5);
-  --text: #e6edf7; --text-dim: #93a3bd; --text-faint: #5f6d85; --text-strong: #ffffff;
-  --accent: #22d3ee; --accent-2: #f472b6;
-  --warn: #e8b13a; --ok: #4ade80;
-  --tint-1: rgba(34, 211, 238, 0.06);
-  --tint-2: rgba(34, 211, 238, 0.14);
-  --tint-border: rgba(34, 211, 238, 0.5);
-  --ring: rgba(34, 211, 238, 0.25);
-  --card-bg: linear-gradient(170deg, rgba(20, 25, 40, 0.88), rgba(9, 11, 20, 0.92));
-  --card-border: rgba(120, 140, 180, 0.2);
-  --card-shadow: 0 0 0 1px rgba(34, 211, 238, 0.06), 0 10px 30px rgba(0, 0, 0, 0.5);
-  --card-hover-shadow: 0 0 18px rgba(34, 211, 238, 0.16), 0 12px 34px rgba(0, 0, 0, 0.55);
-  --header-bg: rgba(8, 10, 18, 0.82);
-  --logo-bg: linear-gradient(160deg, #121a2c, #080c16);
-  --logo-glow: drop-shadow(0 0 10px rgba(34, 211, 238, 0.3));
-  --medal-1: #ffd24a; --medal-2: #cbd5e1; --medal-3: #e0914f;
-  --medal-shadow-1: 0 0 14px rgba(255, 210, 74, 0.4);
-  --medal-shadow-2: 0 0 14px rgba(203, 213, 225, 0.28);
-  --medal-shadow-3: 0 0 14px rgba(224, 145, 79, 0.3);
-  --track: rgba(255, 255, 255, 0.07);
-  --bar-grad: linear-gradient(90deg, #0891b2, #22d3ee);
-  --badge-bg: rgba(6, 8, 14, 0.82); --badge-text: #e6edf7;
-  --tl-line: linear-gradient(180deg, rgba(34, 211, 238, 0.6), transparent);
-  --scroll-thumb: #1e293b;
-  --chart-axis: #93a3bd; --chart-split: rgba(120, 140, 180, 0.16); --chart-title: #93a3bd;
-  --chart-tip-bg: #0b0e17; --chart-tip-border: #1f2937; --chart-tip-text: #e6edf7;
-  --chart-legend-off: #334155;
-  --chart-cum-a: #22d3ee; --chart-cum-b: #0e5f74; --chart-line: #f472b6;
-  --chart-cum-a2: #f472b6; --chart-cum-b2: #7a1f4d; --chart-line2: #22d3ee;
-}
 
 /* ⑥ 暖阳米：米白底 + 暖橙强调（浅色） */
+:root,
 [data-theme="cream"] {
   --bg: #fbf7f1;
   --bg-layers:
@@ -398,8 +183,8 @@ a { color: var(--accent); }
 .logo:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 /* 网站名：居中列（justify-self: center），与左 logo/右头像共同构成视觉居中 */
 .site-title {
-  margin: 0; font-size: 58px; font-weight: 500; letter-spacing: 2px; color: var(--text-strong);
-  font-family: 'ZCOOL KuaiLe', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  margin: 0; font-size: 58px; font-weight: normal; letter-spacing: 2px; color: var(--text-strong);
+  font-family: 'Black Rose', 'ZCOOL KuaiLe', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   justify-self: center; text-align: center;
 }
 /* 2026-10-17：网站名「Game time」花体字（inline SVG 方案）经用户确认**暂不上线**，
@@ -596,7 +381,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    用 translate(0, -87.6%) 把杆中线钉在进度条竖直中线上。 */
 .rank-penguin {
   position: absolute; right: 0; top: 50%;
-  transform: translate(0, calc(-87.6% - 0.5px));
+  transform: translate(0, calc(-87.6% - 1.5px));
   height: 64px; width: auto;
   filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
   pointer-events: none;
@@ -610,7 +395,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    用 translate(-50%, -96.1%) 把地面线钉在进度条竖直中线上。 */
 .rank-tj {
   position: absolute; left: 50%; top: 50%;
-  transform: translate(-50%, -96.1%);
+  transform: translate(-50%, calc(-96.1% - 1px));
   height: 62px; width: auto;
   filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
   pointer-events: none;

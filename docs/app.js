@@ -73,13 +73,8 @@
   }
 
   // ---------- 主题 ----------
-  /** 8 套主题：切换只改 <html data-theme>，配色全部走 CSS 变量 */
+  /** 3 套主题（全浅色）：切换只改 <html data-theme>，配色全部走 CSS 变量 */
   const THEMES = [
-    { id: 'deepblue', name: '深空蓝', mode: 'dark' },
-    { id: 'nebula', name: '深空星云', mode: 'dark' },
-    { id: 'aurora', name: '极光玻璃', mode: 'dark' },
-    { id: 'ember', name: '熔岩暮色', mode: 'dark' },
-    { id: 'neon', name: '午夜霓虹', mode: 'dark' },
     { id: 'cream', name: '暖阳米', mode: 'light' },
     { id: 'mint', name: '薄荷晨', mode: 'light' },
     { id: 'dawn', name: '晨曦紫', mode: 'light' },
@@ -90,11 +85,11 @@
 
   function currentTheme() {
     const t = document.documentElement.dataset.theme;
-    return THEMES.some((x) => x.id === t) ? t : 'deepblue';
+    return THEMES.some((x) => x.id === t) ? t : 'cream';
   }
 
   function applyTheme(id, { announce = false } = {}) {
-    if (!THEMES.some((t) => t.id === id)) id = 'deepblue';
+    if (!THEMES.some((t) => t.id === id)) id = 'cream';
     document.documentElement.dataset.theme = id;
     syncThemeUi(id);
     // 图表画在 canvas 上，不会跟随 CSS 变量，需重新渲染
@@ -107,7 +102,7 @@
     const light = $('theme-light');
     const dark = $('theme-switch');
     if (light) light.title = `当前主题：${themeName(id)} · 点击切换浅色主题`;
-    if (dark) dark.title = `当前主题：${themeName(id)} · 点击切换深色主题`;
+    if (dark) dark.title = `当前主题：${themeName(id)} · 点击切换浅色主题`;
   }
 
   /** 在指定深/浅组内随机挑一个与当前不同的主题 */
@@ -245,7 +240,7 @@
           <img class="rank-capsule" src="${CAPSULE(g.appid)}" alt="" loading="lazy"
                onerror="this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'">
           <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
-          <span class="rank-bar"><span style="${barStyle}"></span>${i === 0 ? '<img class="rank-cat" src="garfield.png?v=2" alt="" draggable="false"><img class="rank-tj" src="tomjerry.png?v=1" alt="" draggable="false"><img class="rank-penguin" src="penguins.png?v=1" alt="" draggable="false">' : ''}</span>
+          <span class="rank-bar"><span style="${barStyle}"></span>${i === 0 ? '<img class="rank-cat" src="garfield.png?v=3" alt="" draggable="false"><img class="rank-tj" src="tomjerry.png?v=1" alt="" draggable="false"><img class="rank-penguin" src="penguins.png?v=1" alt="" draggable="false">' : ''}</span>
           <span class="rank-min">${hm(g.lifetime_minutes)}</span>
           <span class="rank-last">${g.last_played ?? '—'}</span>
         </div>`;
@@ -748,7 +743,7 @@
       });
     };
     bindFlip($('theme-light'), 'light');
-    bindFlip($('theme-switch'), 'dark');
+    bindFlip($('theme-switch'), 'light');
 
     // 三张导航卡：游戏时长 / 最近游玩 / 数据
     // 游戏时长卡：他页 → 回列表；列表 → 每日与累计趋势；趋势中（全部游戏或单游戏）→ 点对应主卡返回列表
