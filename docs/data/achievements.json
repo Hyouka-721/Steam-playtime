@@ -1,4 +1,13 @@
 {
   "schema": 1,
-  "ready": false
+  "ready": true,
+  "generated_at": "2026-10-17T04:07:19.527Z",
+  "snapshot_date": "2026-10-17",
+  "stats": {
+    "unlocked": 0,
+    "total": 0,
+    "pct": 0,
+    "games": 0
+  },
+  "games": {}
 }
