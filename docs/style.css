@@ -189,7 +189,9 @@ a { color: var(--accent); }
   margin: 0; font-size: 70px; font-weight: normal; letter-spacing: 2px; color: var(--text-strong);
   font-family: 'Black Rose', 'ZCOOL KuaiLe', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   justify-self: center; text-align: center;
+  cursor: pointer;
 }
+.site-title:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 8px; }
 /* 2026-10-17：网站名「Game time」花体字（inline SVG 方案）经用户确认**暂不上线**，
    相关 HTML/CSS 已整体移除，dock 栏中部留空；矢量底稿存档于工作区 gametime.svg，
    用户满意后可随时恢复（快照 index_with_gametime_v49_snapshot.html）。 */

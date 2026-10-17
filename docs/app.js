@@ -745,6 +745,19 @@
     bindFlip($('theme-light'), 'light');
     bindFlip($('theme-switch'), 'light');
 
+    // 网站名：点击返回顶部（键盘 Enter / 空格同样支持）
+    const titleHome = $('site-title');
+    if (titleHome) {
+      const backTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+      titleHome.addEventListener('click', backTop);
+      titleHome.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          backTop();
+        }
+      });
+    }
+
     // 三张导航卡：游戏时长 / 最近游玩 / 数据
     // 游戏时长卡：他页 → 回列表；列表 → 每日与累计趋势；趋势中（全部游戏或单游戏）→ 点对应主卡返回列表
     $('card-lifetime').addEventListener('click', () => {
