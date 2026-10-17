@@ -579,7 +579,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    pointer-events:none 保证整行仍可点击下钻。 */
 .rank-cat {
   position: absolute; left: 0; top: 50%;
-  transform: translate(0, calc(-60.5% - 4px));
+  transform: translate(0, calc(-60.5% - 3.9px));
   height: 70px; width: auto;
   filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
   pointer-events: none;
@@ -596,7 +596,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    用 translate(0, -87.6%) 把杆中线钉在进度条竖直中线上。 */
 .rank-penguin {
   position: absolute; right: 0; top: 50%;
-  transform: translate(0, -87.6%);
+  transform: translate(0, calc(-87.6% - 0.5px));
   height: 64px; width: auto;
   filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
   pointer-events: none;
@@ -605,19 +605,19 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 @media (max-width: 1080px) {
   .rank-penguin { display: none; }
 }
-/* 小黄人（首行正中间，与加菲猫/企鹅三足鼎立）：
-   源图 683×370，站立姿势无横杆，脚底实质行到 y=354 ≈ 95.7%；
-   用 translate(-50%, calc(-95.7% + 2px)) 把脚底钉在进度条中线上（略踩入 2px）。 */
-.rank-minion {
+/* 猫和老鼠（首行正中间，替换小黄人）：
+   源图 1600×1200 白底 JPG 抠图，内部地面线位于 y≈1151-1156，中线 96.1%；
+   用 translate(-50%, -96.1%) 把地面线钉在进度条竖直中线上。 */
+.rank-tj {
   position: absolute; left: 50%; top: 50%;
-  transform: translate(-50%, calc(-95.7% + 2px));
-  height: 54px; width: auto;
+  transform: translate(-50%, -96.1%);
+  height: 62px; width: auto;
   filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
   pointer-events: none;
   user-select: none; -webkit-user-drag: none;
 }
 @media (max-width: 1080px) {
-  .rank-minion { display: none; }
+  .rank-tj { display: none; }
 }
 .rank-min { font-variant-numeric: tabular-nums; color: var(--text-strong); text-align: center; font-weight: 600; font-size: 13.5px; }
 .rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: center; font-size: 12px; }
