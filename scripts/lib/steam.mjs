@@ -7,6 +7,8 @@
 //   ⚠ IPlayerService 系列payload 在 response 里，ISteamUserStats 系列在顶层自定义键里。
 //     因此 call() 提供 raw 选项：raw=true 时原样返回整个 JSON，由调用方自行取键。
 //   ⚠ GetSchemaForGame 现行版本是 v2（v1 为遗留版本），必须显式传 version: 2。
+//   GetSchemaForGame 的 achievements[] 含 percent（全球玩家完成率，float 百分比），
+//     站点成就页在完成日期左侧展示该值；缺失时归一为 null，前端不渲染。
 //   ⚠ 隐私「游戏详情」非公开时，GetOwnedGames 返回 HTTP 200 + {"response":{}}（静默为空）。
 
 const BASE = 'https://api.steampowered.com/IPlayerService';
@@ -70,6 +72,13 @@ async function call(path, params, { attempts = 4, timeoutMs = 30000, base = BASE
   throw lastErr ?? new SteamApiError('NETWORK', `unknown failure calling ${path}`);
 }
 
+/** 归一化 Steam 的 percent 字段（全球玩家完成率，float 百分比，如 45.6 = 45.6%）。
+ *  缺失 / 非数字 / 负数一律置 null，由前端决定不渲染。 */
+function normalizePercent(v) {
+  const n = Number(v);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
 /** 取拥有（含已玩过的免费）游戏。返回 { game_count, games[] } 原始结构。 */
 export async function fetchOwnedGames(key, steamid) {
   const res = await call('GetOwnedGames', {
@@ -131,6 +140,7 @@ export async function fetchAchievementSchema(key, appid) {
       name: a.displayName ?? a.name,
       desc: a.description ?? null,
       icon: a.icon ?? null,
+      percent: normalizePercent(a.percent),
     }));
   } catch (e) {
     if (e instanceof SteamApiError && e.code === 'HTTP') return null;

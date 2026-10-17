@@ -34,8 +34,8 @@ describe('成就接口响应封装（2026-10-17 回归）', () => {
           gameName: 'Test Game',
           availableGameStats: {
             achievements: [
-              { name: 'ACH_ONE', displayName: '成就一', description: '描述一', icon: 'http://icon/1.jpg' },
-              { name: 'ACH_TWO', displayName: '成就二', description: '描述二', icon: 'http://icon/2.jpg' },
+              { name: 'ACH_ONE', displayName: '成就一', description: '描述一', icon: 'http://icon/1.jpg', percent: 45.6 },
+              { name: 'ACH_TWO', displayName: '成就二', description: '描述二', icon: 'http://icon/2.jpg', percent: 12.34 },
             ],
           },
         },
@@ -46,12 +46,41 @@ describe('成就接口响应封装（2026-10-17 回归）', () => {
       assert.equal(schema.length, 2, '必须解析出 2 条成就，而不是返回 null/[]');
       assert.deepEqual(
         schema[0],
-        { api: 'ACH_ONE', name: '成就一', desc: '描述一', icon: 'http://icon/1.jpg' },
+        { api: 'ACH_ONE', name: '成就一', desc: '描述一', icon: 'http://icon/1.jpg', percent: 45.6 },
       );
       assert.equal(schema[1].api, 'ACH_TWO');
       // 版本号回归：必须走 v2（v1 为遗留版本，曾与封装 bug 叠加）
       assert.match(calledUrl, /\/GetSchemaForGame\/v2\//, `应请求 v2，实际: ${calledUrl}`);
       assert.match(calledUrl, /l=schinese/, '应请求中文 Schema');
+    } finally {
+      restore();
+    }
+  });
+
+  test('GetSchemaForGame: percent 归一化（站点成就页全球完成率）', async () => {
+    const restore = mockFetch(async () =>
+      jsonRes({
+        game: {
+          gameName: 'Pct Test',
+          availableGameStats: {
+            achievements: [
+              { name: 'A', displayName: '甲', percent: 100 },        // 100 → 保留 100
+              { name: 'B', displayName: '乙', percent: '7.25' },     // 字符串数字 → 7.25
+              { name: 'C', displayName: '丙', percent: 0 },          // 0 是有效值（极少数人完成）
+              { name: 'D', displayName: '丁' },                      // 缺失 → null
+              { name: 'E', displayName: '戊', percent: 'abc' },      // 非数字 → null
+              { name: 'F', displayName: '己', percent: -3 },         // 负值 → null
+            ],
+          },
+        },
+      }),
+    );
+    try {
+      const schema = await fetchAchievementSchema('KEY', 730);
+      assert.deepEqual(
+        schema.map((a) => a.percent),
+        [100, 7.25, 0, null, null, null],
+      );
     } finally {
       restore();
     }

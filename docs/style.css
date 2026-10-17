@@ -395,10 +395,9 @@ a { color: var(--accent); }
 .logo:hover { transform: scale(1.06); }
 .logo:active { transform: scale(0.96); }
 .logo:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-.site-header h1 {
-  margin: 0; font-size: 28px; font-weight: 500; letter-spacing: 2px; color: var(--text-strong);
-  font-family: 'ZCOOL KuaiLe', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-}
+/* 2026-10-17：网站名「Game time」花体字（inline SVG 方案）经用户确认**暂不上线**，
+   相关 HTML/CSS 已整体移除，dock 栏中部留空；矢量底稿存档于工作区 gametime.svg，
+   用户满意后可随时恢复（快照 index_with_gametime_v49_snapshot.html）。 */
 .subtitle { margin: 2px 0 0; font-size: 13px; color: var(--text-dim); }
 .header-meta { display: flex; gap: 10px; align-items: center; font-size: 12px; }
 /* 头像以 CSS 背景呈现：不可拖动/另存；点击可随机切换主题 */
@@ -430,8 +429,9 @@ a { color: var(--accent); }
 }
 
 /* ---- 导航卡片（游戏时长 / 最近游玩 / 成就 / 游戏库 / 数据，替代 Tab 栏） ---- */
+/* 2026-10-17：dock 栏 ↔ 统计卡区 ↔ 下方展示区的三区间距调大 */
 .cards {
-  display: grid; gap: 14px; padding: 22px 28px 6px;
+  display: grid; gap: 14px; padding: 34px 28px 12px;
   grid-template-columns: 1.2fr 1fr 1fr 0.8fr 1fr;
 }
 @media (max-width: 720px) {
@@ -471,7 +471,7 @@ a { color: var(--accent); }
 }
 .card-sub { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
 
-.view { display: none; padding: 18px 28px 8px; }
+.view { display: none; padding: 28px 28px 10px; }
 .view.active { display: block; }
 
 /* ---- panel ---- */
@@ -557,11 +557,31 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .rank-name {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-strong);
 }
-.rank-bar { height: 7px; background: var(--track); border-radius: 4px; overflow: hidden; }
+/* 进度条不再 overflow:hidden——加菲猫要趴在条上（绝对定位、可溢出条体）。
+   填充span自带 border-radius，不依赖外层裁剪。 */
+.rank-bar { height: 7px; background: var(--track); border-radius: 4px; position: relative; }
 .rank-bar > span {
   display: block; height: 100%; border-radius: 4px;
   background: var(--bar-grad);
   transition: width .5s ease;
+}
+/* 加菲猫（2026-10-17）：趴在首行时长条的横线上，水平居中。
+   源图 600×338，内部横线位于高度 60.5% 处（实测 rows 202-207 满宽浅灰线）；
+   用 translate(-50%, -60.5%) 把图片自身 60.5% 处钉在进度条竖直中线上，
+   无论条多粗/图片多大都严丝合缝。pointer-events:none 保证整行仍可点击下钻。 */
+.rank-cat {
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -60.5%);
+  height: 70px; width: auto;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
+  pointer-events: none;
+  user-select: none; -webkit-user-drag: none;
+}
+/* 视口 <1080px 时进度条被网格挤到 <124px（存量布局特性：minmax(150,340) 名称列
+   先于 1fr 吃掉剩余空间），加菲猫会溢出条体压到游戏名/时长列——此宽度下直接隐藏。
+   ≤860px 时 .rank-bar 本就 display:none，猫随之隐藏。 */
+@media (max-width: 1080px) {
+  .rank-cat { display: none; }
 }
 .rank-min { font-variant-numeric: tabular-nums; color: var(--text-strong); text-align: center; font-weight: 600; font-size: 13.5px; }
 .rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: center; font-size: 12px; }
@@ -590,7 +610,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 /* ---- 成就详情（成就卡下钻） ---- */
 .ach-list { display: flex; flex-direction: column; gap: 4px; padding-top: 8px; }
 .ach-item {
-  display: grid; grid-template-columns: 44px 1fr 110px; gap: 14px; align-items: center;
+  display: grid; grid-template-columns: 44px 1fr minmax(158px, auto); gap: 14px; align-items: center;
   padding: 7px 12px; border-radius: 9px; border: 1px solid transparent;
   transition: background .15s, border-color .15s;
 }
@@ -610,6 +630,16 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .ach-sub .ach-game { color: var(--accent); }
+.ach-meta {
+  display: flex; align-items: baseline; gap: 10px; justify-content: flex-end;
+  white-space: nowrap;
+}
+.ach-pct {
+  min-width: 46px; text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim); font-size: 13px;
+  font-weight: 600;
+}
 .ach-date {
   text-align: right; font-variant-numeric: tabular-nums;
   color: var(--text-faint); font-size: 12px;
@@ -744,8 +774,8 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .dot { opacity: .5; }
 
 @media (max-width: 860px) {
-  .cards { padding: 16px 16px 4px; }
-  .view { padding: 14px 16px 6px; }
+  .cards { padding: 26px 16px 8px; }
+  .view { padding: 22px 16px 8px; }
   .tabs { padding: 12px 16px 0; }
   .site-header { padding: 14px 16px; }
   .rank-head { display: none; }
@@ -757,6 +787,8 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .gbar { width: 90px; }
   .ach-item { grid-template-columns: 40px 1fr auto; gap: 10px; }
   .ach-icon, .ach-icon-ph { width: 40px; height: 40px; }
+  .ach-meta { gap: 8px; }
+  .ach-pct { font-size: 12px; min-width: 42px; }
   .ach-date { font-size: 11px; }
   .tl-item { grid-template-columns: 78px 30px 1fr; }
   .tl-month { font-size: 19px; }

@@ -250,7 +250,7 @@
           <img class="rank-capsule" src="${CAPSULE(g.appid)}" alt="" loading="lazy"
                onerror="this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'">
           <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
-          <span class="rank-bar"><span style="${barStyle}"></span></span>
+          <span class="rank-bar"><span style="${barStyle}"></span>${i === 0 ? '<img class="rank-cat" src="garfield.png?v=1" alt="" draggable="false">' : ''}</span>
           <span class="rank-min">${hm(g.lifetime_minutes)}</span>
           <span class="rank-last">${g.last_played ?? '—'}</span>
         </div>`;
@@ -491,6 +491,13 @@
     return new Date(ts * 1000 + 8 * 3600 * 1000).toISOString().slice(0, 10);
   };
 
+  /** Steam 全球完成率 → 显示文本：>=10% 取整，<10% 保留一位小数；无数据返回 null */
+  const achPctText = (p) => {
+    const n = Number(p);
+    if (!Number.isFinite(n) || n < 0) return null;
+    return n >= 10 ? `${Math.round(n)}%` : `${n.toFixed(1)}%`;
+  };
+
   function buildAchSelect() {
     const sel = $('ach-game');
     if (!state.ach) {
@@ -542,6 +549,7 @@
     box.innerHTML = rows
       .map((a) => {
         const d = achDate(a.ts);
+        const p = achPctText(a.percent);
         return `<div class="ach-item">
           <img class="ach-icon" src="${a.icon ?? ''}" alt="" loading="lazy"
                onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'icon-ph ach-icon-ph'}))">
@@ -549,7 +557,10 @@
             <div class="ach-name" title="${escapeHtml(a.name)}">${escapeHtml(a.name)}</div>
             <div class="ach-sub"><span class="ach-game">${escapeHtml(a.game)}</span>${a.desc ? ` · ${escapeHtml(a.desc)}` : ''}</div>
           </div>
-          <span class="ach-date">${d ?? '已解锁'}</span>
+          <span class="ach-meta">
+            ${p ? `<span class="ach-pct" title="全球玩家完成率">${p}</span>` : ''}
+            <span class="ach-date">${d ?? '已解锁'}</span>
+          </span>
         </div>`;
       })
       .join('');

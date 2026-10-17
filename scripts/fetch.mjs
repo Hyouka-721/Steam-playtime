@@ -60,7 +60,9 @@ function die(msg, err) {
 // ---------- 成就采集 ----------
 
 /** 读取成就 Schema 本地缓存。
- *  新格式：{ v:1, checked_at, achievements[] }；旧格式（裸数组，无时间戳）一律视为过期，强制重采。
+ *  现行格式：{ v:2, checked_at, achievements[] }（achievements 含 percent 全球完成率）。
+ *  旧版 v1 / 裸数组（无时间戳）一律视为过期，强制重采——版本号即字段迁移的自愈开关：
+ *  2026-10-17 为引入 percent 从 v1 升至 v2，线上遗留的 v1 缓存缺该字段会被判过期自动重采。
  *  undefined = 无缓存；返回对象 achievements 可能为空数组（= 已确认无成就系统）。 */
 function readSchemaCache(appid) {
   const f = path.join(ACH_SCHEMA_CACHE, `${appid}.json`);
@@ -79,16 +81,18 @@ function writeSchemaCache(appid, list) {
   fs.mkdirSync(ACH_SCHEMA_CACHE, { recursive: true });
   fs.writeFileSync(
     path.join(ACH_SCHEMA_CACHE, `${appid}.json`),
-    JSON.stringify({ v: 1, checked_at: utcISO(), achievements: list ?? [] }) + '\n',
+    JSON.stringify({ v: SCHEMA_CACHE_VERSION, checked_at: utcISO(), achievements: list ?? [] }) + '\n',
     'utf8',
   );
 }
 
-/** 缓存超过 30 天强制重采：防止接口行为变化被旧缓存长期掩盖（历史事故：一次封装 bug
- *  曾把全部游戏误缓存为「无成就」，靠此机制可自愈，无需人工清缓存）。 */
+const SCHEMA_CACHE_VERSION = 2; // achievements[] 的字段版本：v2 起含 percent（全球完成率）
+// 30 天 TTL：防止接口行为变化被旧缓存长期掩盖（历史事故：一次封装 bug
+//  曾把全部游戏误缓存为「无成就」，靠此机制可自愈，无需人工清缓存）。
 const SCHEMA_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 function isSchemaStale(entry) {
+  if (entry?.v !== SCHEMA_CACHE_VERSION) return true; // 版本不符（含旧裸数组 checked_at:null）→ 重采
   if (!entry?.checked_at) return true;
   const age = Date.now() - Date.parse(entry.checked_at);
   if (!Number.isFinite(age)) return true; // 时间戳损坏也按过期处理
@@ -113,6 +117,9 @@ async function collectAchievements({ key, steamid, date, snapshot }) {
       if (cached && !isSchemaStale(cached)) {
         schema = cached.achievements;
       } else {
+        if (cached && cached.v !== SCHEMA_CACHE_VERSION) {
+          log(`  ${g.name}: schema 缓存版本过旧（v${cached.v} → v${SCHEMA_CACHE_VERSION}），重采补全字段`);
+        }
         schema = (await fetchAchievementSchema(key, g.appid)) ?? [];
         writeSchemaCache(g.appid, schema);
         await sleep(200);
@@ -133,6 +140,7 @@ async function collectAchievements({ key, steamid, date, snapshot }) {
           name: s?.name ?? p.api,
           desc: s?.desc ?? null,
           icon: s?.icon ?? null,
+          percent: s?.percent ?? null,
           ts: p.ts || null,
         });
       }
