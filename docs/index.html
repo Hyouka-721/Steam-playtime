@@ -13,7 +13,7 @@
     document.documentElement.dataset.theme = ids[Math.floor(Math.random() * ids.length)];
   })();
 </script>
-<link rel="stylesheet" href="style.css?v=68">
+<link rel="stylesheet" href="style.css?v=70">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/zcool-kuaile@5/index.min.css">
 <link rel="stylesheet" href="https://fonts.loli.net/css2?family=ZCOOL+KuaiLe&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"
@@ -74,9 +74,6 @@
 <section class="view active" id="view-lifetime">
   <div id="lt-main">
     <div class="panel">
-      <div class="rank-head">
-        <span></span><span></span><span>游戏</span><span></span><span class="rh-num">游戏时长</span><span class="rh-num">最近游玩时间</span>
-      </div>
       <div id="lt-list" class="rank-list"></div>
     </div>
   </div>
@@ -106,9 +103,6 @@
   <div class="panel">
     <div class="panel-head">
       <div class="ctrl"><span class="hint" id="recent-hint">—</span></div>
-    </div>
-    <div class="rank-head">
-      <span></span><span></span><span>游戏</span><span></span><span class="rh-num">近两周时长</span><span class="rh-num">最近游玩时间</span>
     </div>
     <div id="recent-list" class="rank-list"></div>
   </div>
@@ -170,6 +164,6 @@
   <span>数据每日 23:30（北京时间）自动更新</span>
 </footer>
 
-<script src="app.js?v=68" onerror="__appFail()"></script>
+<script src="app.js?v=70" onerror="__appFail()"></script>
 </body>
 </html>

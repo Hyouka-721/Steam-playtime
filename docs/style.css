@@ -318,15 +318,11 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 }
 
 /* ---- 游戏列表 ---- */
-.rank-head {
-  display: grid; grid-template-columns: 44px 130px minmax(150px, 340px) 1fr 150px 110px;
-  gap: 14px; align-items: center; padding: 0 12px 8px;
-  font-size: 11px; color: var(--text-faint); letter-spacing: .5px;
-  border-bottom: 1px solid var(--border);
-}
-.rh-num { text-align: center; }
-.rh-bar { }
-.rank-list { display: flex; flex-direction: column; gap: 4px; padding-top: 8px; }
+/* 表头（游戏 / 游戏时长 / 最近游玩时间 + 下划线）已按用户要求移除（2026-10-17）。
+   列表顶部内边距 18px：三只装饰图的锚点（图内地平线）钉在进度条中线上，
+   放大时约 60%~88% 的尺寸是往上长的，留白用于保证它们不顶出面板上边框。
+   （实测：18px 时企鹅头顶距面板上边框约 5px、加菲猫约 20px，均在面板内。） */
+.rank-list { display: flex; flex-direction: column; gap: 4px; padding-top: 18px; }
 /* display:flex 会覆盖 [hidden] 的 UA 样式，必须显式声明，否则折叠区永远展开 */
 .rank-list[hidden] { display: none; }
 .rank-item {
@@ -366,11 +362,13 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    源图 600×338，内部横线位于高度 60.5% 处（实测 rows 202-207 满宽浅灰线）；
    用 translate(0, calc(-60.5% - 4px)) 把图片自身 60.5% 处钉在进度条竖直中线上方
    4px（先上移 10px、再下移 5px、再下移 1px，净偏移 -4px）。
-   pointer-events:none 保证整行仍可点击下钻。 */
+   pointer-events:none 保证整行仍可点击下钻。
+   2026-10-17 放大 70px → 84px：transform 用的是自身高度的百分比，
+   放大后图内地平线仍钉在进度条中线 -3.9px 处，"站在条上"的关系不变。 */
 .rank-cat {
   position: absolute; left: 0; top: 50%;
   transform: translate(0, calc(-60.5% - 3.9px));
-  height: 70px; width: auto;
+  height: 84px; width: auto;
   filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
   pointer-events: none;
   user-select: none; -webkit-user-drag: none;
@@ -383,11 +381,12 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 }
 /* 企鹅（首行最右端，与加菲猫左右对称）：
    源图 1000×404，内部横杆满宽行 351-357，中线 354 = 87.6%；
-   用 translate(0, -87.6%) 把杆中线钉在进度条竖直中线上。 */
+   用 translate(0, -87.6%) 把杆中线钉在进度条竖直中线上。
+   2026-10-17 放大 64px → 77px（同加菲猫，百分比 transform 保证杆中线不漂移）。 */
 .rank-penguin {
   position: absolute; right: 0; top: 50%;
   transform: translate(0, calc(-87.6% - 2.7px));
-  height: 64px; width: auto;
+  height: 77px; width: auto;
   filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
   pointer-events: none;
   user-select: none; -webkit-user-drag: none;
@@ -604,7 +603,6 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .view { padding: 22px 16px 8px; }
   .tabs { padding: 12px 16px 0; }
   .site-header { padding: 14px 16px; }
-  .rank-head { display: none; }
   .rank-item { grid-template-columns: 34px 100px 1fr auto; }
   .rank-capsule { width: 100px; height: 46px; }
   .rank-capsule.is-icon { width: 30px; height: 30px; margin: 8px 0; }
