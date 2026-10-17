@@ -398,7 +398,7 @@ a { color: var(--accent); }
 .logo:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 /* 网站名：居中列（justify-self: center），与左 logo/右头像共同构成视觉居中 */
 .site-title {
-  margin: 0; font-size: 28px; font-weight: 500; letter-spacing: 2px; color: var(--text-strong);
+  margin: 0; font-size: 38px; font-weight: 500; letter-spacing: 2px; color: var(--text-strong);
   font-family: 'ZCOOL KuaiLe', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   justify-self: center; text-align: center;
 }
@@ -574,12 +574,12 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 }
 /* 加菲猫（2026-10-17）：趴在首行时长条的横线上，水平居中。
    源图 600×338，内部横线位于高度 60.5% 处（实测 rows 202-207 满宽浅灰线）；
-   用 translate(-50%, calc(-60.5% - 5px)) 把图片自身 60.5% 处钉在进度条竖直中线上方
-   5px（先按用户要求上移 10px，后又要求下移 5px，净偏移 -5px）。
+   用 translate(-50%, calc(-60.5% - 4px)) 把图片自身 60.5% 处钉在进度条竖直中线上方
+   4px（先上移 10px、再下移 5px、再下移 1px，净偏移 -4px）。
    pointer-events:none 保证整行仍可点击下钻。 */
 .rank-cat {
   position: absolute; left: 50%; top: 50%;
-  transform: translate(-50%, calc(-60.5% - 5px));
+  transform: translate(-50%, calc(-60.5% - 4px));
   height: 70px; width: auto;
   filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
   pointer-events: none;
@@ -812,5 +812,5 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    避免固定 108px 图标 + 标题把网格撑出横向溢出（标题可换行） */
 @media (max-width: 480px) {
   .logo, .header-avatar { width: 80px; height: 80px; }
-  .site-title { font-size: 24px; letter-spacing: 1px; }
+  .site-title { font-size: 34px; letter-spacing: 1px; }
 }
