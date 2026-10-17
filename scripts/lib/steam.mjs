@@ -1,15 +1,12 @@
 // Steam Web API 封装。零第三方依赖，仅用 Node 22 内置 fetch。
 // 已实测确认的字段行为（2026-10-13）：
 //   GetOwnedGames       -> response.{game_count, games[]}
-//                          games[]: appid, name, img_icon_url, has_community_visible_stats,
-//                          playtime_forever, playtime_windows_forever, playtime_mac_forever,
-//                          playtime_linux_forever, playtime_deck_forever, rtime_last_played,
-//                          content_descriptorids, playtime_disconnected
-//                          ⚠ playtime_2weeks 为「条件字段」：仅近期玩过的游戏才返回。
 //   GetRecentlyPlayedGames -> response.{total_count, games[]}
-//                          games[]: appid, name, img_icon_url, playtime_2weeks,
-//                          playtime_forever, playtime_*_forever
-//                          ⚠ 不返回 rtime_last_played。
+//   GetPlayerAchievements -> playerstats.{steamID, gameName, achievements[]}   ← 顶层无 response！
+//   GetSchemaForGame    -> game.{gameName, availableGameStats.{stats, achievements[]}} ← 顶层无 response！
+//   ⚠ IPlayerService 系列payload 在 response 里，ISteamUserStats 系列在顶层自定义键里。
+//     因此 call() 提供 raw 选项：raw=true 时原样返回整个 JSON，由调用方自行取键。
+//   ⚠ GetSchemaForGame 现行版本是 v2（v1 为遗留版本），必须显式传 version: 2。
 //   ⚠ 隐私「游戏详情」非公开时，GetOwnedGames 返回 HTTP 200 + {"response":{}}（静默为空）。
 
 const BASE = 'https://api.steampowered.com/IPlayerService';
@@ -26,8 +23,8 @@ export class SteamApiError extends Error {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function call(path, params, { attempts = 4, timeoutMs = 30000, base = BASE } = {}) {
-  const url = new URL(`${base}/${path}/v1/`);
+async function call(path, params, { attempts = 4, timeoutMs = 30000, base = BASE, version = 1, raw = false } = {}) {
+  const url = new URL(`${base}/${path}/v${version}/`);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
   url.searchParams.set('format', 'json');
 
@@ -56,6 +53,7 @@ async function call(path, params, { attempts = 4, timeoutMs = 30000, base = BASE
         throw new SteamApiError('HTTP', `${path} returned HTTP ${res.status}`, { status: res.status });
       }
       const json = await res.json();
+      if (raw) return json ?? {};
       return json?.response ?? {};
     } catch (e) {
       clearTimeout(timer);
@@ -103,10 +101,11 @@ export async function fetchRecentlyPlayedGames(key, steamid) {
   return { total_count: res.total_count ?? res.games.length, games: res.games };
 }
 
-/** 取玩家某款游戏的全部成就状态。无成就系统的游戏返回 HTTP 400 → 归一为 null。 */
+/** 取玩家某款游戏的全部成就状态。无成就系统的游戏返回 HTTP 400 → 归一为 null。
+ *  响应顶层键是 playerstats（无 response 包裹），必须 raw: true。 */
 export async function fetchPlayerAchievements(key, steamid, appid) {
   try {
-    const res = await call('GetPlayerAchievements', { key, steamid, appid }, { base: STATS_BASE, attempts: 2 });
+    const res = await call('GetPlayerAchievements', { key, steamid, appid }, { base: STATS_BASE, attempts: 2, raw: true });
     const ps = res.playerstats;
     if (!ps || !Array.isArray(ps.achievements)) return null;
     return ps.achievements.map((a) => ({
@@ -120,10 +119,11 @@ export async function fetchPlayerAchievements(key, steamid, appid) {
   }
 }
 
-/** 取游戏成就 Schema（l=schinese 时 displayName/description 为中文）。无成就系统返回 null。 */
+/** 取游戏成就 Schema（l=schinese 时 displayName/description 为中文）。无成就系统返回 null。
+ *  响应顶层键是 game（无 response 包裹），必须 raw: true；现行版本为 v2。 */
 export async function fetchAchievementSchema(key, appid) {
   try {
-    const res = await call('GetSchemaForGame', { key, appid, l: 'schinese' }, { base: STATS_BASE, attempts: 2 });
+    const res = await call('GetSchemaForGame', { key, appid, l: 'schinese' }, { base: STATS_BASE, attempts: 2, version: 2, raw: true });
     const stats = res.game?.availableGameStats;
     if (!stats || !Array.isArray(stats.achievements)) return null;
     return stats.achievements.map((a) => ({

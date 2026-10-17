@@ -59,12 +59,17 @@ function die(msg, err) {
 
 // ---------- 成就采集 ----------
 
-/** 读取成就 Schema 本地缓存。undefined = 无缓存；[] = 已确认无成就系统。 */
+/** 读取成就 Schema 本地缓存。
+ *  新格式：{ v:1, checked_at, achievements[] }；旧格式（裸数组，无时间戳）一律视为过期，强制重采。
+ *  undefined = 无缓存；返回对象 achievements 可能为空数组（= 已确认无成就系统）。 */
 function readSchemaCache(appid) {
   const f = path.join(ACH_SCHEMA_CACHE, `${appid}.json`);
   if (!fs.existsSync(f)) return undefined;
   try {
-    return JSON.parse(fs.readFileSync(f, 'utf8'));
+    const parsed = JSON.parse(fs.readFileSync(f, 'utf8'));
+    if (Array.isArray(parsed)) return { achievements: parsed, checked_at: null };
+    if (parsed && Array.isArray(parsed.achievements)) return parsed;
+    return undefined;
   } catch {
     return undefined;
   }
@@ -74,9 +79,20 @@ function writeSchemaCache(appid, list) {
   fs.mkdirSync(ACH_SCHEMA_CACHE, { recursive: true });
   fs.writeFileSync(
     path.join(ACH_SCHEMA_CACHE, `${appid}.json`),
-    JSON.stringify(list ?? []) + '\n',
+    JSON.stringify({ v: 1, checked_at: utcISO(), achievements: list ?? [] }) + '\n',
     'utf8',
   );
+}
+
+/** 缓存超过 30 天强制重采：防止接口行为变化被旧缓存长期掩盖（历史事故：一次封装 bug
+ *  曾把全部游戏误缓存为「无成就」，靠此机制可自愈，无需人工清缓存）。 */
+const SCHEMA_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+function isSchemaStale(entry) {
+  if (!entry?.checked_at) return true;
+  const age = Date.now() - Date.parse(entry.checked_at);
+  if (!Number.isFinite(age)) return true; // 时间戳损坏也按过期处理
+  return age > SCHEMA_CACHE_TTL_MS;
 }
 
 /**
@@ -92,8 +108,11 @@ async function collectAchievements({ key, steamid, date, snapshot }) {
   for (let i = 0; i < played.length; i++) {
     const g = played[i];
     try {
-      let schema = readSchemaCache(g.appid);
-      if (schema === undefined) {
+      let schema;
+      const cached = readSchemaCache(g.appid);
+      if (cached && !isSchemaStale(cached)) {
+        schema = cached.achievements;
+      } else {
         schema = (await fetchAchievementSchema(key, g.appid)) ?? [];
         writeSchemaCache(g.appid, schema);
         await sleep(200);
@@ -129,6 +148,15 @@ async function collectAchievements({ key, steamid, date, snapshot }) {
       console.warn(`[fetch] WARN 成就采集跳过 ${g.name}(${g.appid}):`, e.message);
     }
     if ((i + 1) % 10 === 0) log(`  成就进度 ${i + 1}/${played.length}`);
+  }
+
+  // 异常信号：已游玩游戏全部返回空 Schema。正常库容里总该有几款带成就系统的游戏，
+  // 全空大概率是采集链路失效（接口封装、版本号、字段路径变更），必须大声暴露而不是静默写 0。
+  if (played.length >= 5 && Object.keys(games).length === 0) {
+    console.warn(
+      `[fetch] WARN 异常信号：${played.length} 款已游玩游戏全部返回空成就 Schema，采到 0 款。\n` +
+        '  若其中明显有带成就系统的游戏，说明 GetSchemaForGame 采集链路已失效，请检查接口封装与版本号。',
+    );
   }
 
   const out = {
@@ -175,6 +203,7 @@ function buildSnapshot({ date, merged, gameCount, sharedCount }) {
   return {
     schema: 1,
     date,
+    data_date: date, // 内容归属日：diff/build 与槽位守卫均以此为准（与 date 相同，但显式声明语义）
     captured_at: utcISO(),
     captured_at_local: shanghaiDateTime(),
     source: process.env.GITHUB_ACTIONS === 'true' ? 'github-actions' : 'local',
