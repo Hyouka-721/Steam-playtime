@@ -199,7 +199,7 @@ async function main() {
   if (!steamid) die('缺少环境变量 STEAM_ID64（请配置 GitHub Secrets）');
   if (!/^\d{17}$/.test(steamid)) die(`STEAM_ID64 应为 17 位数字，当前为: ${steamid.length} 位`);
 
-  const force = String(process.env.FORCE ?? '').to.toLowerCase() === 'true';
+  const force = String(process.env.FORCE ?? '').toLowerCase() === 'true';
   const date = process.env.OVERRIDE_DATE?.trim() || resolveDataDate();
 
   // 把真实内容日暴露给 daily.yml 的提交信息，避免用「当前日期」掩盖归属错位
