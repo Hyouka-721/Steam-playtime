@@ -245,7 +245,7 @@
           <img class="rank-capsule" src="${CAPSULE(g.appid)}" alt="" loading="lazy"
                onerror="this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'">
           <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
-          <span class="rank-bar"><span style="${barStyle}"></span>${i === 0 ? '<img class="rank-cat" src="garfield.png?v=2" alt="" draggable="false"><img class="rank-penguin" src="penguins.png?v=1" alt="" draggable="false">' : ''}</span>
+          <span class="rank-bar"><span style="${barStyle}"></span>${i === 0 ? '<img class="rank-cat" src="garfield.png?v=2" alt="" draggable="false"><img class="rank-minion" src="minions.png?v=1" alt="" draggable="false"><img class="rank-penguin" src="penguins.png?v=1" alt="" draggable="false">' : ''}</span>
           <span class="rank-min">${hm(g.lifetime_minutes)}</span>
           <span class="rank-last">${g.last_played ?? '—'}</span>
         </div>`;
