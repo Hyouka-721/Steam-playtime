@@ -9,6 +9,9 @@
  *   FORCE          可选，'true' 时覆盖同日已有快照
  *
  * 退出码：0 成功或跳过，1 失败（永不写入脏数据）
+ *
+ * 槽位保护：目标日期文件已存在但内容日不符（data_date 修正前旧代码按抓取日命名留下的
+ *   错位文件）时，自动改名让位；无法让位则报错中止，绝不静默跳过吞掉当天数据。
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -143,6 +146,15 @@ async function collectAchievements({ key, steamid, date, snapshot }) {
   log(`成就数据已写入 data/achievements/${date}.json（${out.game_count} 款游戏，${u}/${t} 项）`);
 }
 
+/** 读取并解析单个快照文件；损坏返回 null */
+function readSnapshotFile(file) {
+  try {
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
 /** 读取最新的历史快照（用于 game_count 守卫） */
 function readLatestSnapshot() {
   if (!fs.existsSync(SNAP_DIR)) return null;
@@ -187,13 +199,37 @@ async function main() {
   if (!steamid) die('缺少环境变量 STEAM_ID64（请配置 GitHub Secrets）');
   if (!/^\d{17}$/.test(steamid)) die(`STEAM_ID64 应为 17 位数字，当前为: ${steamid.length} 位`);
 
-  const force = String(process.env.FORCE ?? '').toLowerCase() === 'true';
+  const force = String(process.env.FORCE ?? '').to.toLowerCase() === 'true';
   const date = process.env.OVERRIDE_DATE?.trim() || resolveDataDate();
+
+  // 把真实内容日暴露给 daily.yml 的提交信息，避免用「当前日期」掩盖归属错位
+  if (process.env.GITHUB_ENV) {
+    fs.appendFileSync(process.env.GITHUB_ENV, `DATA_DATE=${date}\n`, 'utf8');
+  }
 
   const target = path.join(SNAP_DIR, `${date}.json`);
   if (fs.existsSync(target) && !force) {
-    log(`快照 ${date}.json 已存在，跳过（需要覆盖请设 FORCE=true）`);
-    return;
+    // 槽位被占。占用文件的内容日与目标一致 → 正常跳过（幂等，首抓者赢）。
+    // 不一致 → data_date 修正前旧代码按「抓取当日」命名留下的错位文件；
+    // 这种错位若直接跳过，会静默吞掉当天的数据——必须让位或大声失败。
+    const occupant = readSnapshotFile(target);
+    const occupantDate = occupant?.data_date ?? occupant?.date;
+    if (occupantDate && occupantDate !== date) {
+      const freed = path.join(SNAP_DIR, `${occupantDate}.json`);
+      if (fs.existsSync(freed)) {
+        die(
+          `槽位冲突且无法自动让位：${date}.json 已存在，但其内容日是 ${occupantDate}，\n` +
+            `而 ${occupantDate}.json 也被占用。继续跳过将永久丢失 ${date} 的数据。\n` +
+            '请人工处理：把错位文件改名到其内容日对应的空位，或设 FORCE=true 明确覆盖后重跑。',
+        );
+      }
+      fs.renameSync(target, freed);
+      log(`槽位冲突：${date}.json 实为内容日 ${occupantDate} 的错位文件，已让位为 ${occupantDate}.json`);
+      log(`继续采集内容日 ${date}`);
+    } else {
+      log(`快照 ${date}.json 已存在，跳过（需要覆盖请设 FORCE=true）`);
+      return;
+    }
   }
 
   log(`采集日期(Asia/Shanghai): ${date}${force ? ' [FORCE]' : ''}`);
