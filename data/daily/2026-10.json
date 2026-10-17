@@ -3,7 +3,7 @@
   "month": "2026-10",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-17T04:34:45.429Z",
+  "generated_at": "2026-10-17T04:56:16.333Z",
   "days": {
     "2026-10-13": {
       "total_minutes": 49,
@@ -43,13 +43,28 @@
         }
       ]
     },
-    "2026-10-15": {
-      "total_minutes": 0,
-      "span_days": 1,
-      "confidence": "high",
+    "2026-10-16": {
+      "total_minutes": 175,
+      "span_days": 2,
+      "confidence": "medium",
       "source": "auto",
-      "flags": [],
-      "games": []
+      "flags": [
+        "gap_filled"
+      ],
+      "games": [
+        {
+          "appid": "646570",
+          "name": "Slay the Spire",
+          "minutes": 93,
+          "is_new": false
+        },
+        {
+          "appid": "246420",
+          "name": "Kingdom Rush",
+          "minutes": 82,
+          "is_new": false
+        }
+      ]
     }
   }
 }

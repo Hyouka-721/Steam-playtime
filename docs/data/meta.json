@@ -2,30 +2,30 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-17T04:34:45.696Z",
+  "generated_at": "2026-10-17T04:56:16.447Z",
   "generated_at_local": "2026-10-17",
   "tracking_since": "2026-10-13",
-  "last_snapshot_date": "2026-10-15",
+  "last_snapshot_date": "2026-10-16",
   "steamid_hash": "a8474caf",
   "months": [
     "2026-10"
   ],
   "stats": {
-    "lifetime_minutes": 81855,
-    "lifetime_hours": 1364.3,
+    "lifetime_minutes": 82030,
+    "lifetime_hours": 1367.2,
     "owned_games": 53,
     "lifetime_played_games": 38,
-    "total_minutes": 131,
-    "total_hours": 2.2,
+    "total_minutes": 306,
+    "total_hours": 5.1,
     "tracked_days": 3,
-    "active_days": 2,
-    "current_streak": 0,
-    "longest_streak": 2,
-    "week_minutes": 131,
-    "played_games": 2,
+    "active_days": 3,
+    "current_streak": 1,
+    "longest_streak": 3,
+    "week_minutes": 306,
+    "played_games": 3,
     "best_day": {
-      "date": "2026-10-14",
-      "minutes": 82
+      "date": "2026-10-16",
+      "minutes": 175
     }
   },
   "games_index": {
@@ -41,9 +41,17 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "total_minutes": 95,
+      "total_minutes": 177,
       "first_day": "2026-10-13",
-      "last_day": "2026-10-14"
+      "last_day": "2026-10-16"
+    },
+    "646570": {
+      "appid": "646570",
+      "name": "杀戮尖塔",
+      "img_icon_url": "33ea124ea8c03a9ce7012d34c3b348a351612fca",
+      "total_minutes": 93,
+      "first_day": "2026-10-16",
+      "last_day": "2026-10-16"
     }
   },
   "games_lifetime": {
@@ -79,8 +87,8 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "lifetime_minutes": 315,
-      "last_played": "2026-10-14"
+      "lifetime_minutes": 397,
+      "last_played": "2026-10-17"
     },
     "250900": {
       "appid": "250900",
@@ -240,8 +248,8 @@
       "appid": "646570",
       "name": "杀戮尖塔",
       "img_icon_url": "33ea124ea8c03a9ce7012d34c3b348a351612fca",
-      "lifetime_minutes": 29792,
-      "last_played": "2026-10-11"
+      "lifetime_minutes": 29885,
+      "last_played": "2026-10-17"
     },
     "683320": {
       "appid": "683320",
@@ -420,7 +428,7 @@
     }
   },
   "health": {
-    "gap_days": 0,
+    "gap_days": 1,
     "low_confidence_days": 1,
     "manual_days": 0,
     "shared_game_count": 0,
