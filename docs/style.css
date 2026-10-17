@@ -31,6 +31,7 @@
   --tint-2: rgba(217, 118, 47, 0.12);
   --tint-border: rgba(217, 118, 47, 0.45);
   --ring: rgba(217, 118, 47, 0.22);
+  --radius: 10px;
   --card-bg: linear-gradient(170deg, #fdf3e4, #f8e8d2);
   --card-border: #eee5d9;
   --card-shadow: 0 1px 2px rgba(60, 40, 20, 0.05), 0 6px 18px rgba(90, 60, 25, 0.07);
@@ -71,6 +72,7 @@
   --tint-2: rgba(15, 158, 142, 0.12);
   --tint-border: rgba(15, 158, 142, 0.45);
   --ring: rgba(15, 158, 142, 0.22);
+  --radius: 10px;
   --card-bg: linear-gradient(170deg, #ecf8f4, #daf0e8);
   --card-border: #e0f0ea;
   --card-shadow: 0 1px 2px rgba(10, 50, 42, 0.05), 0 6px 18px rgba(10, 60, 50, 0.07);
@@ -111,6 +113,7 @@
   --tint-2: rgba(124, 92, 240, 0.13);
   --tint-border: rgba(124, 92, 240, 0.45);
   --ring: rgba(124, 92, 240, 0.22);
+  --radius: 10px;
   --card-bg: linear-gradient(170deg, #f4f0ff, #e9e3fd);
   --card-border: #e9e5f6;
   --card-shadow: 0 1px 2px rgba(40, 25, 80, 0.05), 0 6px 18px rgba(50, 30, 100, 0.07);
