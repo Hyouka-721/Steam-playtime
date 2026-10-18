@@ -8,7 +8,7 @@
  * · 移动端 / 窄屏自动降低粒子量与 DPR
  * · 遵循系统 prefers-reduced-motion 偏好
  * · 粒子颜色默认取自当前主题的 CSS 变量，随主题切换自动刷新
- *   （例外：雨滴按用户要求固定为自然纯白，见 CONFIG.rain.rgb）
+ *   （例外：雨滴按用户要求固定为自然纯白主体 + 中性灰描边，见 CONFIG.rain.rgb/edgeRgb）
  * ---------------------------------------------------------------------------
  * 调参入口：下方 CONFIG —— 数量 / 密度 / 速度 / 方向 / 透明度全部集中在这里
  * ========================================================================== */
@@ -24,13 +24,18 @@
     // ---- 雨 ----
     rain: {
       colorVar: '--fx-rain',     // 主题变量仅作说明；存在 rgb 字段时以 rgb 为准
-      rgb: [255, 255, 255],      // 2026-10-18 按用户要求：改为自然纯白，去除偏蓝色偏
+      rgb: [255, 255, 255],      // 主体：自然纯白（2026-10-18 按用户要求，去除偏蓝色偏）
+      edgeRgb: [118, 118, 118],  // 2026-10-18 新增：中性灰描边——纯白在浅色面板/卡片上
+                                 // 几乎不可见（用户反馈只在深色图标上清晰），加一层略宽的
+                                 // 淡灰描边保证任何底色下都清晰；主体仍是白，整体无色偏
+      edgeAlpha: 0.5,            // 描边透明度 = 粒子透明度 × 此系数（0.5~0.7 → 0.25~0.35）
+      edgeWidth: 1.6,            // 描边比主体宽出的 px（两侧各约 0.8px 柔边）
       density: 110,        // 每 1e6 px² 的雨滴数（1440×950 ≈ 150 根；再被 min/max 夹住）
       min: 40, max: 280,   // 粒子数量上下限
       speed: [820, 1400],   // 下落速度 px/秒
       length: [9, 28],      // 雨丝长度 px
       thickness: [0.5, 1.2],// 线宽 px
-      alpha: [0.5, 0.7],    // 透明度区间（2026-10-18 按用户要求 0.05~0.13 → 0.5~0.7：通透且不抢眼）
+      alpha: [0.5, 0.7],    // 主体透明度区间（2026-10-18 按用户要求 0.05~0.13 → 0.5~0.7）
       angleDeg: 14,         // 方向：与竖直方向的夹角，正数 = 向右下方飘
       jitter: 0.22,         // 个体速度随机抖动比例（让雨有层次）
     },
@@ -177,11 +182,22 @@
   }
 
   function drawRain() {
+    const c = CONFIG.rain;
     const col = colors.rain;
     ctx.lineCap = 'round';
     for (const p of particles) {
       const tailX = p.x - p.ux * p.len;
       const tailY = p.y - p.uy * p.len;
+      // 第一遍：中性灰描边（略宽）——纯白主体在浅色底上对比不足，
+      // 描边保证面板/卡片等浅色场景也清晰；透明度随粒子本体缩放，
+      // 保持每根雨丝整体的浓淡层次（不影响速度/密度/方向/循环）
+      ctx.strokeStyle = rgba(c.edgeRgb, p.a * c.edgeAlpha);
+      ctx.lineWidth = p.thick + c.edgeWidth;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(tailX, tailY);
+      ctx.stroke();
+      // 第二遍：纯白主体（深色图标/封面上靠它提亮）
       ctx.strokeStyle = rgba(col, p.a);
       ctx.lineWidth = p.thick;
       ctx.beginPath();
