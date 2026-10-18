@@ -184,8 +184,8 @@
   <span class="fx-switch">
     <span class="fx-label">氛围</span>
     <span class="seg" id="fx-seg" role="group" aria-label="背景氛围效果">
-      <button type="button" data-fx="off" class="active">关</button>
-      <button type="button" data-fx="rain">雨</button>
+      <button type="button" data-fx="off">关</button>
+      <button type="button" data-fx="rain" class="active">雨</button>
       <button type="button" data-fx="snow">雪</button>
       <button type="button" data-fx="meteor">流星</button>
     </span>
@@ -219,7 +219,7 @@
 </div>
 
 <!-- fx.js 先于 app.js 加载：app.js 绑定时需读取 window.__fx（特效状态的唯一来源） -->
-<script src="fx.js?v=9"></script>
+<script src="fx.js?v=10"></script>
 <script src="app.js?v=76" onerror="__appFail()"></script>
 </body>
 </html>

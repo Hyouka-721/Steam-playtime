@@ -9,9 +9,12 @@
  * · 遵循系统 prefers-reduced-motion 偏好
  * · 粒子颜色默认取自当前主题的 CSS 变量，随主题切换自动刷新
  *   （例外：雨滴按用户要求固定为深色雨丝——半透明深灰蓝、纺锤形柔边轮廓，见 CONFIG.rain.rgb）
+ * · 雨模式（默认开启）：Canvas 粒子系统——按可配置密度随机生成，每滴随机
+ *   大小/速度/透明度/倾斜角；dt 驱动物理（帧率无关），顶部淡入入场、触水
+ *   溅射、越界回收，对象池 + 同屏上限，无直接消失/闪烁/内存泄漏
  * · 雨模式附加：视口底部积水层（波动水面线 + 雨滴水中倒影），雨滴落地触发
  *   飞溅水花粒子与扩散涟漪圆环——落点检测与绘制共用同一水面函数 surfaceY()，
- *   保证判定位置与视觉效果一致
+ *   保证判定位置与视觉效果一致；另有与落点解耦的低频环境涟漪点缀水面
  * ---------------------------------------------------------------------------
  * 调参入口：下方 CONFIG —— 数量 / 密度 / 速度 / 方向 / 透明度全部集中在这里
  * ========================================================================== */
@@ -20,8 +23,10 @@
 
   /* ========================== ① 集中配置 ========================== */
   const CONFIG = {
-    /** 初始模式：'off' | 'rain' | 'snow' | 'meteor'（用户选择后会记住） */
-    mode: 'off',
+    /** 初始模式：'off' | 'rain' | 'snow' | 'meteor'（用户选择后会记住）。
+     *  2026-10-18 起默认 'rain'：修复「清理过浏览器存储 / 新访客看不到雨」
+     *  ——下雨已是站点氛围的一部分，首次访问直接下雨（reduced-motion 仍除外） */
+    mode: 'rain',
     storageKey: 'fx-mode',
 
     // ---- 雨 ----
@@ -34,8 +39,12 @@
       length: [3, 8],      // 雨丝长度 px（2026-10-18 大幅调短——更接近真实雨滴的短促形态）
       thickness: [0.5, 1.2],// 线宽 px
       alpha: [0.5, 0.7],    // 主体透明度区间
-      angleDeg: 14,         // 方向：与竖直方向的夹角，正数 = 向右下方飘
+      angleDeg: 14,         // 方向：与竖直方向的夹角（基准值），正数 = 向右下方飘
+      angleJitter: 3,       // 每滴倾斜角随机抖动 ±deg：在基准角上微调，
+                            // 让倾斜不那么千篇一派（大数下均值仍≈angleDeg）
       jitter: 0.22,         // 个体速度随机抖动比例（让雨有层次）
+      fadeIn: 60,           // 顶部入场淡入距离 px：从视口上方进入后逐渐显形，
+                            // 避免雨滴在画面顶缘"突然弹出"（与回收淡出对称）
       endRatio: 0.32,       // 形状：两端收窄到的宽度比例（相对中段；0=尖头尖尾，1=圆柱）
       taper: 0.75,          // 形状：收尾锐度（正弦包络指数；<1 更尖、>1 更圆）
       seg: 9,               // 形状：沿长度的采样分段数（越大轮廓越平滑，开销线性增长）
@@ -65,6 +74,10 @@
       life: [0.3, 0.55],   // 飞溅粒子寿命 s
       ringTtl: [0.55, 0.95], // 涟漪寿命 s（逐渐消失）
       ringR: [16, 34],     // 涟漪最大半径 px
+      ambientPerSec: 0.8,  // 环境涟漪频率 次/秒：与雨滴落点解耦的零星涟漪
+                           // （取参考版本「独立涟漪层」之长——雨小时水面也有生气；
+                           //   位置仍贴 surfaceY，透明度更淡，不与落点涟漪抢戏；0=关闭）
+      ambientAlphaScale: 0.55, // 环境涟漪透明度缩放（相对落点涟漪）
     },
 
     // ---- 雪 ----
@@ -138,6 +151,7 @@
   let groundY = 0;             // 积水平均水面线 y（CSS px）：surfaceY() 围绕它起伏
   let splashParts = [];        // 飞溅水花粒子池（仅雨模式使用）
   let ripples = [];            // 积水涟漪圆环池（仅雨模式使用）
+  let ambientAcc = 0;          // 环境涟漪生成累加器（按 ambientPerSec 计时）
 
   function refreshColors() {
     // rgb 字段（固定色）优先于主题 CSS 变量：雨滴按用户要求固定为深色雨丝、
@@ -177,34 +191,51 @@
   }
 
   /* ========================== ⑤ 粒子构建 ========================== */
-  function buildRain() {
+  /** 生成一滴雨：位置 / 大小 / 线宽 / 透明度 / 速度 / 倾斜角全部随机。
+   *  spread=true 首次撒点（压到水面之上留 30px 余量，防开局贴脸触水）；
+   *  spread=false 回收再生（从视口上方进入，配 fadeIn 淡入，无"弹出"感） */
+  function spawnDrop(spread) {
     const c = CONFIG.rain;
-    const rad = (c.angleDeg * Math.PI) / 180;
-    const sx = Math.sin(rad);
-    const sy = Math.cos(rad);
-    const spawn = (spread) => {
-      const spd = rand(c.speed[0], c.speed[1]) * rand(1 - c.jitter, 1 + c.jitter);
-      const len = Math.hypot(spd * sx, spd * sy) || 1; // 只是取模，用于单位向量
-      return {
-        x: rand(-0.15 * w, w * 1.05),
-        // 初始撒点压到水面之上并留 30px 余量（groundY 由 resize 预先算好）：
-        // 避免刚开特效就有一批雨滴贴脸触水、凭空刷一片飞溅
-        y: spread ? rand(-h * 0.2, Math.max(10, groundY - 30)) : rand(-h * 0.35, -10),
-        len: rand(c.length[0], c.length[1]),
-        thick: rand(c.thickness[0], c.thickness[1]),
-        a: rand(c.alpha[0], c.alpha[1]),
-        vx: spd * sx,
-        vy: spd * sy,
-        // 单位方向向量，画尾迹时直接用（省掉每帧 hypot）
-        ux: (spd * sx) / len,
-        uy: (spd * sy) / len,
-      };
+    const spd = rand(c.speed[0], c.speed[1]) * rand(1 - c.jitter, 1 + c.jitter);
+    // 每滴在基准角上叠加 ±angleJitter 随机抖动（均值仍≈angleDeg）
+    const ang = (c.angleDeg + rand(-c.angleJitter, c.angleJitter)) * Math.PI / 180;
+    const dx = Math.sin(ang), dy = Math.cos(ang);
+    const len = Math.hypot(spd * dx, spd * dy) || 1; // 只是取模，用于单位向量
+    return {
+      x: rand(-0.15 * w, w * 1.05),
+      y: spread ? rand(-h * 0.2, Math.max(10, groundY - 30)) : rand(-h * 0.35, -10),
+      len: rand(c.length[0], c.length[1]),
+      thick: rand(c.thickness[0], c.thickness[1]),
+      a: rand(c.alpha[0], c.alpha[1]),
+      vx: spd * dx,
+      vy: spd * dy,
+      // 单位方向向量，画尾迹时直接用（省掉每帧 hypot）
+      ux: (spd * dx) / len,
+      uy: (spd * dy) / len,
     };
-    const n = targetCount(c);
+  }
+
+  function buildRain() {
+    const n = targetCount(CONFIG.rain);
     particles = [];
-    splashParts = [];  // 重建（切模式 / resize / 重新可见）时清空飞溅与涟漪，
+    splashParts = [];  // 重建（切模式 / 重新可见）时清空飞溅与涟漪，
     ripples = [];      // 防止上一轮的旧粒子残留
-    for (let i = 0; i < n; i++) particles.push(spawn(true));
+    ambientAcc = 0;
+    for (let i = 0; i < n; i++) particles.push(spawnDrop(true));
+  }
+
+  /** 视口变化时平滑适配雨滴池（不整体重建）：
+   *  越界 / 贴水的粒子从顶部重新进入，屏内粒子继续下落——
+   *  避免 resize 时满屏雨滴"重置式"闪一下；数量按新视口密度补齐/裁撤 */
+  function rainResize() {
+    const target = targetCount(CONFIG.rain);
+    for (const p of particles) {
+      if (p.x < -0.05 * w || p.x > w * 1.05 || p.y > groundY - 4) {
+        Object.assign(p, spawnDrop(false));
+      }
+    }
+    while (particles.length > target) particles.pop();
+    while (particles.length < target) particles.push(spawnDrop(true));
   }
 
   /** 积水水面线：绘制与落点检测共用同一函数，保证判定位置与视觉效果一致。
@@ -227,13 +258,13 @@
         // 横坐标，保证「检测位置 = 溅射位置 = 水面线位置」三者一致
         const lx = p.x - p.vx * (p.y - sy) / Math.max(p.vy, 1);
         spawnSplash(lx, sy);
-        p.x = rand(-0.15 * w, w * 1.05);
-        p.y = rand(-h * 0.35, -10);
+        Object.assign(p, spawnDrop(false));   // 从顶部再生：新位置+新随机属性
         continue;
       }
       if (p.x < -0.3 * w || p.x > w * 1.3) {
-        p.x = rand(-0.15 * w, w * 1.05);
-        p.y = rand(-h * 0.35, -10);
+        // 越界回收：出屏即再生（屏外不可见，无"直接消失"观感）；
+        // 位置在 ±0.3 屏宽外才触发，保证回收点永不在画面内
+        Object.assign(p, spawnDrop(false));
       }
     }
   }
@@ -241,14 +272,15 @@
   /** 落地飞溅：在 (x, y) 生成向外扩散的小水花粒子与逐渐消失的涟漪圆环。
    *  概率 + 上限双保险：chance / rippleChance 掷点控制触发频率，
    *  particleMax / rippleMax 封住同屏总量（lite 按 countRatio 再缩减），
-   *  密集落雨时粒子预算恒定，不会随落点频率膨胀 */
-  function spawnSplash(x, y) {
+   *  密集落雨时粒子预算恒定，不会随落点频率膨胀。
+   *  ambient=true 时为环境涟漪（无落点、无水花，仅一圈淡涟漪点缀水面） */
+  function spawnSplash(x, y, ambient) {
     const c = CONFIG.splash;
     if (x < -40 || x > w + 40) return;      // 屏幕外落点没有水面可溅（插值偶发）
     const cap = isLite() ? CONFIG.lite.countRatio : 1;
     const pMax = Math.floor(c.particleMax * cap);
     const rMax = Math.floor(c.rippleMax * cap);
-    if (Math.random() < c.chance && splashParts.length < pMax) {
+    if (!ambient && Math.random() < c.chance && splashParts.length < pMax) {
       const n = Math.floor(rand(c.perHit[0], c.perHit[1] + 1));
       for (let i = 0; i < n; i++) {
         if (splashParts.length >= pMax) break;
@@ -263,19 +295,21 @@
         });
       }
     }
-    if (Math.random() < c.rippleChance && ripples.length < rMax) {
+    if (Math.random() < (ambient ? 1 : c.rippleChance) && ripples.length < rMax) {
       ripples.push({
         x, y,
         r: rand(2, 5),                      // 初始半径：贴近落点的一小圈
-        rMax: rand(c.ringR[0], c.ringR[1]) * cap,
+        rMax: rand(c.ringR[0], c.ringR[1]) * cap * (ambient ? 0.7 : 1),
         ttl: rand(c.ringTtl[0], c.ringTtl[1]),
         age: 0,
+        alphaScale: ambient ? c.ambientAlphaScale : 1, // 环境涟漪更淡
       });
     }
   }
 
   /** 飞溅/涟漪推进：水花受重力走抛物线、落回水面即消失；
-   *  涟漪只累计年龄，扩散与淡出都在绘制端按 age/ttl 计算 */
+   *  涟漪只累计年龄，扩散与淡出都在绘制端按 age/ttl 计算；
+   *  另按 ambientPerSec 频率生成与落点解耦的环境涟漪（点缀水面） */
   function stepSplash(dt) {
     const c = CONFIG.splash;
     for (let i = splashParts.length - 1; i >= 0; i--) {
@@ -291,6 +325,15 @@
       r.age += dt;
       if (r.age >= r.ttl) ripples.splice(i, 1);
     }
+    // 环境涟漪：随机 x、贴本地水面线，透明度更淡（alphaScale）
+    if (c.ambientPerSec > 0) {
+      ambientAcc += dt * c.ambientPerSec;
+      while (ambientAcc >= 1) {
+        ambientAcc -= 1;
+        const ax = rand(0, w);
+        spawnSplash(ax, surfaceY(ax), true);
+      }
+    }
   }
 
   /* 雨丝渲染：两端收窄、中段略粗的纺锤形实心轮廓 + 垂直渐变柔边
@@ -304,22 +347,27 @@
    *      taper 收尾锐度（<1 更尖、>1 更圆）；seg 沿长度采样分段数 */
   function drawRain() {
     const c = CONFIG.puddle;
+    const fadeIn = CONFIG.rain.fadeIn;
     for (const p of particles) {
       const hx = p.x, hy = p.y;              // 头端（运动方向前方）
       const tx = hx - p.ux * p.len;          // 尾端
       const ty = hy - p.uy * p.len;
-      drawStreak(hx, hy, tx, ty, p.thick, p.a);
+      // 顶部入场淡入：从视口上方进入后逐渐显形（fade=0 的直接跳过，省绘制）——
+      // 与越界回收对称：雨滴只会"渐显"与"溅射消失"，不会突然弹出/不见
+      const fade = clamp((hy + 10) / fadeIn, 0, 1);
+      if (fade <= 0) continue;
+      drawStreak(hx, hy, tx, ty, p.thick, p.a * fade);
       // 水中倒影：距水面 reflectRange 以内才画；以本地水面线为镜面、
       // 0.5 纵向压扁，透明度 × reflectAlpha，且越近水面越实
       const sy = surfaceY(p.x);
       const above = hy - sy;                 // 头端高出水面多少（触水帧可能略小于 0）
       if (above < c.reflectRange) {
-        const fade = clamp(1 - above / c.reflectRange, 0, 1);
+        const fadeR = clamp(1 - above / c.reflectRange, 0, 1);
         drawStreak(
           hx, sy + Math.max(above, 0) * 0.5,
           tx, sy + Math.max(sy - ty, 0) * 0.5,
           p.thick,
-          p.a * c.reflectAlpha * fade,
+          p.a * c.reflectAlpha * fadeR * fade,
         );
       }
     }
@@ -527,7 +575,7 @@
       const t = r.age / r.ttl;                  // 0→1 寿命进度
       const ease = 1 - Math.pow(1 - t, 2.2);    // 先快后慢的扩散曲线
       const rx = r.r + (r.rMax - r.r) * ease;
-      const alpha = (1 - t) * 0.5;
+      const alpha = (1 - t) * 0.5 * (r.alphaScale || 1); // 环境涟漪更淡
       if (alpha <= 0.01) continue;
       ctx.strokeStyle = rgba(col, alpha);
       ctx.beginPath();
@@ -690,7 +738,9 @@
       if (mode === 'off') return;
       if (!active()) return;
       resize();
-      ENGINES[mode].build();
+      // 雨模式平滑适配粒子池（越界再生 + 数量补齐，屏内粒子不下落中断），
+      // 避免整体重建造成的"满屏重置"闪烁；雪/流星仍用整体重建
+      if (mode === 'rain') rainResize(); else ENGINES[mode].build();
       start();
     }, 160);
   });
@@ -710,7 +760,14 @@
   resize();
   refreshColors();
   syncButtons();
-  const initial = readStored();
+  // 默认模式为 rain（修复"看不到雨"）；但系统要求减少动效、且用户从未显式
+  // 选择过效果时，保持"关"——不替系统偏好做决定（显式选过则尊重其选择）
+  let initial = readStored();
+  if (reduced.matches && initial === CONFIG.mode) {
+    let hasStored = false;
+    try { hasStored = localStorage.getItem(CONFIG.storageKey) !== null; } catch (e) {}
+    if (!hasStored) initial = 'off';
+  }
   if (initial !== 'off' && ENGINES[initial]) {
     mode = initial;
     syncButtons();
