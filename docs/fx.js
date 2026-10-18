@@ -1,125 +1,34 @@
 /* ============================================================================
- * 背景氛围效果：雨 / 雪 / 流星
+ * 背景氛围效果：流星
  * ---------------------------------------------------------------------------
  * · 零第三方依赖：原生 Canvas 2D + requestAnimationFrame
- * · 三种模式互斥切换（不叠加），选择写入 localStorage
+ * · 单模式开关：史蒂夫头像单击 开 / 关（状态写入 localStorage）
  * · 全屏 fixed 图层 + pointer-events:none，不影响任何点击 / 表单输入
  * · 页面隐藏（切标签、最小化）自动暂停；恢复可见自动续播
- * · 移动端 / 窄屏自动降低粒子量与 DPR
+ * · 移动端 / 窄屏自动降低 DPR
  * · 遵循系统 prefers-reduced-motion 偏好
- * · 粒子颜色默认取自当前主题的 CSS 变量，随主题切换自动刷新
- *   （例外：雨滴按用户要求固定为深色雨丝——半透明深灰蓝、纺锤形柔边轮廓，见 CONFIG.rain.rgb）
- * · 雨模式（默认开启）：Canvas 粒子系统——按可配置密度随机生成，每滴随机
- *   大小/速度/透明度/倾斜角；dt 驱动物理（帧率无关），顶部淡入入场、触水
- *   溅射、越界回收，对象池 + 同屏上限，无直接消失/闪烁/内存泄漏
- * · 雨模式附加：视口底部积水层（平静水面线 + 雨滴水中倒影），雨滴落地触发
- *   飞溅水花粒子与扩散涟漪圆环——落点检测与绘制共用同一水面线 groundY，
- *   保证判定位置与视觉效果一致；另有与落点解耦的低频环境涟漪点缀水面
- *   （2026-10-18：移除水面线的时间涌动/谐波起伏，groundY 恒定；雪花左右
- *    摆动 sway 同步移除，静态出生随机不受影响）
+ * · 颜色取自当前主题的 CSS 变量 --fx-meteor，随主题切换自动刷新
  * ---------------------------------------------------------------------------
- * 调参入口：下方 CONFIG —— 数量 / 密度 / 速度 / 方向 / 透明度全部集中在这里
+ * 2026-10-18：按用户要求移除雨 / 雪两种效果（含积水层、飞溅、涟漪、
+ * 雪花预染贴图等全部相关代码），仅保留流星；页脚多选切换器同步移除，
+ * 开关统一由右上史蒂夫头像承担（见 app.js onSteveActivate）。
+ * ---------------------------------------------------------------------------
+ * 调参入口：下方 CONFIG.meteor —— 密度 / 速度 / 尾迹 / 亮度全部集中在这里
  * ========================================================================== */
 (function () {
   'use strict';
 
   /* ========================== ① 集中配置 ========================== */
   const CONFIG = {
-    /** 初始模式：'off' | 'rain' | 'snow' | 'meteor'（用户选择后会记住）。
-     *  2026-10-18 起默认 'rain'：修复「清理过浏览器存储 / 新访客看不到雨」
-     *  ——下雨已是站点氛围的一部分，首次访问直接下雨（reduced-motion 仍除外） */
-    mode: 'rain',
+    /** 初始状态：默认 'meteor' —— 流星是站点氛围的一部分，首次访问直接开启
+     *  （2026-10-18 起仅剩流星；reduced-motion 且无存储值时仍保持 off，
+     *    不替系统偏好做决定；存过 'rain' / 'snow' 的旧访客自动回落为流星） */
+    mode: 'meteor',
     storageKey: 'fx-mode',
-
-    // ---- 雨 ----
-    rain: {
-      colorVar: '--fx-rain',     // 主题变量仅作说明；存在 rgb 字段时以 rgb 为准
-      rgb: [58, 64, 72],         // 主体：半透明深色雨丝（2026-10-18 按用户要求，深灰蓝）
-      density: 170,        // 每 1e6 px² 的雨滴数（1440×950 ≈ 256 根；再被 min/max 夹住）
-      min: 60, max: 420,   // 粒子数量上下限
-      speed: [1150, 1750], // 下落速度 px/秒（2026-10-18：雨丝调短后适当提高，保持画面节奏）
-      length: [3, 8],      // 雨丝长度 px（2026-10-18 大幅调短——更接近真实雨滴的短促形态）
-      thickness: [0.5, 1.2],// 线宽 px
-      alpha: [0.5, 0.7],    // 主体透明度区间
-      angleDeg: 14,         // 方向：与竖直方向的夹角（基准值），正数 = 向右下方飘
-      angleJitter: 3,       // 每滴倾斜角随机抖动 ±deg：在基准角上微调，
-                            // 让倾斜不那么千篇一派（大数下均值仍≈angleDeg）
-      jitter: 0.22,         // 个体速度随机抖动比例（让雨有层次）
-      fadeIn: 60,           // 顶部入场淡入距离 px：从视口上方进入后逐渐显形，
-                            // 避免雨滴在画面顶缘"突然弹出"（与回收淡出对称）
-      endRatio: 0.32,       // 形状：两端收窄到的宽度比例（相对中段；0=尖头尖尾，1=圆柱）
-      taper: 0.75,          // 形状：收尾锐度（正弦包络指数；<1 更尖、>1 更圆）
-      seg: 9,               // 形状：沿长度的采样分段数（越大轮廓越平滑，开销线性增长）
-    },
-
-    // ---- 雨：画面底部积水层与落地飞溅 ----
-    puddle: {
-      height: 14,        // 积水层高度（视口底部，CSS px；2026-10-18 按用户要求降至最底部——
-                         // 原 96px 会盖住列表下方大片区域，现水面线贴在 h-14 处）
-      alpha: 0.10,       // 积水基底不透明度（水面处最大，向下渐隐至 35%）
-      lineAlpha: 0.42,   // 水面线不透明度
-      reflectRange: 28,  // 倒影作用范围：雨滴距水面多高以内绘制水中镜像
-                         // （须 ≤ height×2：倒影长 = above×0.5，才装得进浅水层、
-                         //   不被画面底边硬截断；水位若再调低需同步调小）
-      reflectAlpha: 0.3, // 倒影透明度系数（相对雨滴本体）
-      squash: 0.26,      // 涟漪压扁系数（椭圆 ry = rx × 此值，营造透视）
-    },
-    splash: {
-      chance: 0.55,        // 落地时产生飞溅粒子的概率（配合上限控制粒子总量）
-      perHit: [3, 6],      // 每次飞溅的粒子数
-      particleMax: 240,    // 同屏飞溅粒子上限（窄屏/触屏按 lite.countRatio 缩减）
-      rippleChance: 0.6,   // 落地时产生涟漪圆环的概率
-      rippleMax: 80,       // 同屏涟漪上限
-      speed: [70, 240],    // 飞溅粒子初速 px/s（向上半圆随机方向）
-      gravity: 1600,       // 飞溅粒子重力 px/s²（抛物线落回水面即消失）
-      life: [0.3, 0.55],   // 飞溅粒子寿命 s
-      ringTtl: [0.55, 0.95], // 涟漪寿命 s（逐渐消失）
-      ringR: [16, 34],     // 涟漪最大半径 px
-      ambientPerSec: 0.8,  // 环境涟漪频率 次/秒：与雨滴落点解耦的零星涟漪
-                           // （取参考版本「独立涟漪层」之长——雨小时水面也有生气；
-                           //   位置仍贴水面线 groundY，透明度更淡，不与落点涟漪抢戏；0=关闭）
-      ambientAlphaScale: 0.55, // 环境涟漪透明度缩放（相对落点涟漪）
-    },
-
-    // ---- 雪 ----
-    /* 2026-10-18 重写：粒子模型对齐 Wallpaper Engine「故宫 snowperspective」
-     * 预设（创意工坊 3115274650），参数按 1440×900 基准等比映射到 CSS px：
-     *   sizerandom      2–30        → radius 1–11px（原预设单位，按摄像机缩放折半）
-     *   velocityrandom  (-37..-10, -90..-50) → 速度 46–92 px/s
-     *                   x 向速度恒为负 = 统一向左飘的风；|vy| 越大则越靠前越快
-     *   alphafade       入场 0.1s 淡入，年龄全覆盖才满不透明
-     *   colorrandom     纯白 → 灰 (95,98,100)：远景偏灰、近景偏白，形成纵深
-     *   maxcount 360 × 实例 count 1.65 × alpha 0.31 ≈ 每屏 150 片（上限 420）
-     *
-     * 2026-10-18 定色：雪花改为**固定纯白 #FFFFFF**，不再读取 --fx-snow。
-     * 原先 colorVar 走主题变量（cream #c3d2df / mint #bcd9e4 / dawn #cfc9e8），
-     * 换主题雪花会跟着偏蓝 / 偏青 / 偏紫。现在 rgb 字段优先于 colorVar，
-     * 三档预染贴图全部由 rgb 推导——纯白只按「不透明度」分出纵深，色相恒为 255,255,255。
-     * colorVar 保留仅为字段对齐（rain/meteor 仍在用），雪模式永不读取它。 */
-    snow: {
-      colorVar: '--fx-snow',  // 仅占位，实际不生效：rgb 存在时优先
-      rgb: [255, 255, 255],   // ★ 固定纯白 #FFFFFF —— 不随任何主题变化
-      density: 110,          // 每 1e6 px² 的雪花数（1440×900 ≈ 143 片）
-      min: 55, max: 420,
-      speed: [46, 92],       // 下落速度 px/秒
-      radius: [0.9, 7.5],    // 雪花视觉半径 px（大 = 近，小 = 远）
-                     // 预设 sizerandom 2–30 是 3D 单位，直接映射会让近景雪片直径 22px，
-                     // 在网页上过重；收到 7.5 上限，兼顾纵深与"雪"而非"泡泡"的观感
-      alpha: [0.31, 0.31],   // 整体不透明度（预设实例 alpha = 0.31）
-      angleDeg: 9,           // 风向偏角：正数 = 向左下飘（预设 x 速度为负）
-      windJitter: 0.35,      // 每片速度的横向抖动比例（出生时确定，不随时间摆动）
-      fadeIn: 4,             // 出生后多少秒内完成淡入（对应预设 alphafade 0.1 × lifetime 1.01）
-      farAlpha: 0.5,         // 最远（最小）雪的额外透明度系数
-      nearAlpha: 1.45,       // 最近（最大）雪的透明度系数（>1 = 近景更实）
-      softEdge: 0.45,        // 边缘柔化：0 = 硬边，1 = 极柔
-      depthShade: 0.42,      // ★ 纵深明暗幅度：远景压到 58% 亮度、近景 100% 纯白。
-                             //   只压亮度不改色相（R=G=B），因此仍是纯白家族；
-                             //   设 0 = 全屏同一亮度（彻底关掉纵深明暗）
-    },
 
     // ---- 流星 ----
     meteor: {
-      colorVar: '--fx-meteor',
+      colorVar: '--fx-meteor',  // 主题变量：三套主题各有一颗流星色
       spawnPerSec: [0.7, 1.7], // 密度：每秒出现几颗
       maxAlive: 14,            // 同屏最多几颗
       speed: [560, 1050],      // 速度 px/秒
@@ -132,14 +41,13 @@
       spawnArea: [0.25, 1.15], // 出生点在宽度上的分布
     },
 
-    /** 降级策略：窄屏 / 触屏设备降低粒子量与 DPR，优先保证流畅 */
-    lite: { maxWidth: 720, countRatio: 0.45, dpr: 1.5 },
+    /** 降级策略：窄屏 / 触屏设备降低 DPR，优先保证流畅 */
+    lite: { maxWidth: 720, dpr: 1.5 },
     maxDpr: 2,
   };
 
   /* ========================== ② 基础工具 ========================== */
   const canvas = document.getElementById('fx-canvas');
-  const seg = document.getElementById('fx-seg');
   if (!canvas || !canvas.getContext) return;
   const ctx = canvas.getContext('2d');
 
@@ -164,42 +72,20 @@
   }
 
   /* ========================== ③ 运行时状态 ========================== */
-  let mode = 'off';            // 当前模式
+  let mode = 'off';            // 当前状态（'off' | 'meteor'）
   let w = 0, h = 0, dpr = 1;   // 画布尺寸（CSS 像素）与设备像素比
   let particles = [];          // 当前粒子池
   let raf = 0, last = 0;       // 动画帧句柄与上一帧时间戳
   let spawnAcc = 0;            // 流星生成累加器
-  let colors = { rain: [58, 64, 72], snow: [195, 210, 223], meteor: [232, 150, 74] };
-  let groundY = 0;             // 积水水面线 y（CSS px）：水平线（2026-10-18 移除涌动，恒定不变）
-  let splashParts = [];        // 飞溅水花粒子池（仅雨模式使用）
-  let ripples = [];            // 积水涟漪圆环池（仅雨模式使用）
-  let ambientAcc = 0;          // 环境涟漪生成累加器（按 ambientPerSec 计时）
-  let snowTints = null;        // 雪的三档预染贴图（Canvas[]，由 buildSnowSprite 烘焙）
-  let snowSpriteReady = false; // 贴图是否已烘焙（雪色固定纯白，烘一次即可，永不重烘）
+  let colors = { meteor: [232, 150, 74] };  // 流星色（默认 = 浅色主题 --fx-meteor）
 
   function refreshColors() {
-    // rgb 字段（固定色）优先于主题 CSS 变量：雨与雪都按用户要求固定为各自的
-    // 固定色、不随主题偏色（雪花 = 纯白 #FFFFFF）；流星仍走主题变量
-    const pick = (cfg) => (cfg.rgb ? cfg.rgb.slice() : hexToRgb(cssVar(cfg.colorVar)));
-    colors = {
-      rain: pick(CONFIG.rain),
-      snow: pick(CONFIG.snow),
-      meteor: pick(CONFIG.meteor),
-    };
-    // 雪的贴图已改为固定纯白（CONFIG.snow.rgb），**不再依赖主题取色**，
-    // 因此换主题无需重烘——省掉每次切主题的一次 64×64 重绘 + 3 张 canvas 重建。
+    // 流星走主题 CSS 变量（--fx-meteor），三套主题各不相同
+    colors.meteor = hexToRgb(cssVar(CONFIG.meteor.colorVar));
   }
 
   function isLite() {
     return window.innerWidth <= CONFIG.lite.maxWidth || coarse.matches;
-  }
-
-  /** 由「密度」换算出粒子数量，窄屏按比例缩减 */
-  function targetCount(cfg) {
-    const area = window.innerWidth * window.innerHeight;
-    let n = Math.round((area / 1e6) * cfg.density);
-    if (isLite()) n = Math.round(n * CONFIG.lite.countRatio);
-    return clamp(n, cfg.min, cfg.max);
   }
 
   /* ========================== ④ 尺寸处理 ========================== */
@@ -212,349 +98,9 @@
     canvas.style.width = w + 'px';
     canvas.style.height = h + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    // 积水层贴视口底部；矮视口按 30% 高度内缩，避免水面挤占画面主体
-    groundY = h - Math.min(CONFIG.puddle.height, h * 0.3);
   }
 
-  /* ========================== ⑤ 粒子构建 ========================== */
-  /** 生成一滴雨：位置 / 大小 / 线宽 / 透明度 / 速度 / 倾斜角全部随机。
-   *  spread=true 首次撒点（压到水面之上留 30px 余量，防开局贴脸触水）；
-   *  spread=false 回收再生（从视口上方进入，配 fadeIn 淡入，无"弹出"感） */
-  function spawnDrop(spread) {
-    const c = CONFIG.rain;
-    const spd = rand(c.speed[0], c.speed[1]) * rand(1 - c.jitter, 1 + c.jitter);
-    // 每滴在基准角上叠加 ±angleJitter 随机抖动（均值仍≈angleDeg）
-    const ang = (c.angleDeg + rand(-c.angleJitter, c.angleJitter)) * Math.PI / 180;
-    const dx = Math.sin(ang), dy = Math.cos(ang);
-    const len = Math.hypot(spd * dx, spd * dy) || 1; // 只是取模，用于单位向量
-    return {
-      x: rand(-0.15 * w, w * 1.05),
-      y: spread ? rand(-h * 0.2, Math.max(10, groundY - 30)) : rand(-h * 0.35, -10),
-      len: rand(c.length[0], c.length[1]),
-      thick: rand(c.thickness[0], c.thickness[1]),
-      a: rand(c.alpha[0], c.alpha[1]),
-      vx: spd * dx,
-      vy: spd * dy,
-      // 单位方向向量，画尾迹时直接用（省掉每帧 hypot）
-      ux: (spd * dx) / len,
-      uy: (spd * dy) / len,
-    };
-  }
-
-  function buildRain() {
-    const n = targetCount(CONFIG.rain);
-    particles = [];
-    splashParts = [];  // 重建（切模式 / 重新可见）时清空飞溅与涟漪，
-    ripples = [];      // 防止上一轮的旧粒子残留
-    ambientAcc = 0;
-    for (let i = 0; i < n; i++) particles.push(spawnDrop(true));
-  }
-
-  /** 视口变化时平滑适配雨滴池（不整体重建）：
-   *  越界 / 贴水的粒子从顶部重新进入，屏内粒子继续下落——
-   *  避免 resize 时满屏雨滴"重置式"闪一下；数量按新视口密度补齐/裁撤 */
-  function rainResize() {
-    const target = targetCount(CONFIG.rain);
-    for (const p of particles) {
-      if (p.x < -0.05 * w || p.x > w * 1.05 || p.y > groundY - 4) {
-        Object.assign(p, spawnDrop(false));
-      }
-    }
-    while (particles.length > target) particles.pop();
-    while (particles.length < target) particles.push(spawnDrop(true));
-  }
-
-  /** 积水水面线：绘制与落点检测共用 groundY 同一常量，保证判定位置与视觉效果一致。
-   *  2026-10-18：随时间涌动的双谐波震荡（原 surfaceY(x)）已按要求移除，水面为水平线 */
-  function stepRain(dt) {
-    for (const p of particles) {
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      const sy = groundY;
-      if (p.y >= sy) {
-        // 触水回收：本帧起点为 (p.x - p.vx*dt, p.y - p.vy*dt)，落点按帧内
-        // 线性插值回溯到水面处——dt 在分子分母中约掉，得到精确的水面交点
-        // 横坐标，保证「检测位置 = 溅射位置 = 水面线位置」三者一致
-        const lx = p.x - p.vx * (p.y - sy) / Math.max(p.vy, 1);
-        spawnSplash(lx, sy);
-        Object.assign(p, spawnDrop(false));   // 从顶部再生：新位置+新随机属性
-        continue;
-      }
-      if (p.x < -0.3 * w || p.x > w * 1.3) {
-        // 越界回收：出屏即再生（屏外不可见，无"直接消失"观感）；
-        // 位置在 ±0.3 屏宽外才触发，保证回收点永不在画面内
-        Object.assign(p, spawnDrop(false));
-      }
-    }
-  }
-
-  /** 落地飞溅：在 (x, y) 生成向外扩散的小水花粒子与逐渐消失的涟漪圆环。
-   *  概率 + 上限双保险：chance / rippleChance 掷点控制触发频率，
-   *  particleMax / rippleMax 封住同屏总量（lite 按 countRatio 再缩减），
-   *  密集落雨时粒子预算恒定，不会随落点频率膨胀。
-   *  ambient=true 时为环境涟漪（无落点、无水花，仅一圈淡涟漪点缀水面） */
-  function spawnSplash(x, y, ambient) {
-    const c = CONFIG.splash;
-    if (x < -40 || x > w + 40) return;      // 屏幕外落点没有水面可溅（插值偶发）
-    const cap = isLite() ? CONFIG.lite.countRatio : 1;
-    const pMax = Math.floor(c.particleMax * cap);
-    const rMax = Math.floor(c.rippleMax * cap);
-    if (!ambient && Math.random() < c.chance && splashParts.length < pMax) {
-      const n = Math.floor(rand(c.perHit[0], c.perHit[1] + 1));
-      for (let i = 0; i < n; i++) {
-        if (splashParts.length >= pMax) break;
-        const ang = rand(-Math.PI * 0.9, -Math.PI * 0.1); // 向上半圆随机方向
-        const spd = rand(c.speed[0], c.speed[1]);
-        splashParts.push({
-          x, y,
-          vx: Math.cos(ang) * spd,
-          vy: Math.sin(ang) * spd,          // 负值 = 向上
-          life: rand(c.life[0], c.life[1]),
-          age: 0,
-        });
-      }
-    }
-    if (Math.random() < (ambient ? 1 : c.rippleChance) && ripples.length < rMax) {
-      ripples.push({
-        x, y,
-        r: rand(2, 5),                      // 初始半径：贴近落点的一小圈
-        rMax: rand(c.ringR[0], c.ringR[1]) * cap * (ambient ? 0.7 : 1),
-        ttl: rand(c.ringTtl[0], c.ringTtl[1]),
-        age: 0,
-        alphaScale: ambient ? c.ambientAlphaScale : 1, // 环境涟漪更淡
-      });
-    }
-  }
-
-  /** 飞溅/涟漪推进：水花受重力走抛物线、落回水面即消失；
-   *  涟漪只累计年龄，扩散与淡出都在绘制端按 age/ttl 计算；
-   *  另按 ambientPerSec 频率生成与落点解耦的环境涟漪（点缀水面） */
-  function stepSplash(dt) {
-    const c = CONFIG.splash;
-    for (let i = splashParts.length - 1; i >= 0; i--) {
-      const p = splashParts[i];
-      p.age += dt;
-      p.vy += c.gravity * dt;
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      if (p.age >= p.life || p.y >= groundY) splashParts.splice(i, 1);
-    }
-    for (let i = ripples.length - 1; i >= 0; i--) {
-      const r = ripples[i];
-      r.age += dt;
-      if (r.age >= r.ttl) ripples.splice(i, 1);
-    }
-    // 环境涟漪：随机 x、贴本地水面线，透明度更淡（alphaScale）
-    if (c.ambientPerSec > 0) {
-      ambientAcc += dt * c.ambientPerSec;
-      while (ambientAcc >= 1) {
-        ambientAcc -= 1;
-        const ax = rand(0, w);
-        spawnSplash(ax, groundY, true);
-      }
-    }
-  }
-
-  /* 雨丝渲染：两端收窄、中段略粗的纺锤形实心轮廓 + 垂直渐变柔边
-   * （2026-10-18 按用户要求重写：此前“宽描边 + 细主体”两遍画法有中空长方形观感、
-   *  纯白主体在浅色面板上像发白高亮块；现改为单色深灰蓝一次填充：
-   *  ① 轮廓沿长度按正弦包络收窄——两端窄、中段宽，无生硬直角；
-   *  ② 填充色沿垂直雨丝方向做 透明→实色→透明 渐变——边缘柔化，无边框感）
-   * 2026-10-18 追加积水层后：形状逻辑抽成 drawStreak() 供雨滴本体与水中倒影
-   *  共用（倒影 = 同一根雨丝以水面为镜面、纵向 0.5 压扁的浅淡镜像）。
-   * 调参：CONFIG.rain.endRatio 头尾端残余宽度比例（0=尖头尖尾）；
-   *      taper 收尾锐度（<1 更尖、>1 更圆）；seg 沿长度采样分段数 */
-  function drawRain() {
-    const c = CONFIG.puddle;
-    const fadeIn = CONFIG.rain.fadeIn;
-    for (const p of particles) {
-      const hx = p.x, hy = p.y;              // 头端（运动方向前方）
-      const tx = hx - p.ux * p.len;          // 尾端
-      const ty = hy - p.uy * p.len;
-      // 顶部入场淡入：从视口上方进入后逐渐显形（fade=0 的直接跳过，省绘制）——
-      // 与越界回收对称：雨滴只会"渐显"与"溅射消失"，不会突然弹出/不见
-      const fade = clamp((hy + 10) / fadeIn, 0, 1);
-      if (fade <= 0) continue;
-      drawStreak(hx, hy, tx, ty, p.thick, p.a * fade);
-      // 水中倒影：距水面 reflectRange 以内才画；以水面线 groundY 为镜面、
-      // 0.5 纵向压扁，透明度 × reflectAlpha，且越近水面越实
-      const sy = groundY;
-      const above = hy - sy;                 // 头端高出水面多少（触水帧可能略小于 0）
-      if (above < c.reflectRange) {
-        const fadeR = clamp(1 - above / c.reflectRange, 0, 1);
-        drawStreak(
-          hx, sy + Math.max(above, 0) * 0.5,
-          tx, sy + Math.max(sy - ty, 0) * 0.5,
-          p.thick,
-          p.a * c.reflectAlpha * fadeR * fade,
-        );
-      }
-    }
-  }
-
-  /** 单根雨丝（本体或倒影）绘制：传入头/尾端点、线宽与透明度即可。
-   *  轮廓沿长度按正弦包络收窄（两端窄、中段宽）；填充沿垂直方向
-   *  透明→实色→透明 渐变，一次 fill 成实心柔边形状 */
-  function drawStreak(hx, hy, tx, ty, thick, alpha) {
-    if (alpha <= 0.002) return;
-    const col = colors.rain;
-    const END = CONFIG.rain.endRatio;  // 两端收窄到的宽度比例（相对中段半宽）
-    const TAPER = CONFIG.rain.taper;   // 正弦包络指数
-    const SEG = CONFIG.rain.seg;       // 沿雨丝长度的采样段数
-    const L = Math.hypot(hx - tx, hy - ty) || 1;
-    const ux = (hx - tx) / L, uy = (hy - ty) / L;   // 轴向单位向量（尾→头）
-    const t = thick / 2;                            // 中段半宽（雨丝最粗处）
-    ctx.beginPath();
-    for (let i = 0; i <= SEG; i++) {
-      const s = i / SEG;                                        // 0=尾 1=头
-      const wdt = t * (END + (1 - END) * Math.pow(Math.sin(Math.PI * s), TAPER));
-      const cx = tx + (hx - tx) * s;
-      const cy = ty + (hy - ty) * s;
-      const ex = cx - uy * wdt, ey = cy + ux * wdt;             // 垂直于轴偏移 ±wdt
-      if (i === 0) ctx.moveTo(ex, ey); else ctx.lineTo(ex, ey);
-    }
-    for (let i = SEG; i >= 0; i--) {
-      const s = i / SEG;
-      const wdt = t * (END + (1 - END) * Math.pow(Math.sin(Math.PI * s), TAPER));
-      const cx = tx + (hx - tx) * s;
-      const cy = ty + (hy - ty) * s;
-      ctx.lineTo(cx + uy * wdt, cy - ux * wdt);
-    }
-    ctx.closePath();
-    // 柔边：以雨丝中点为原点、沿垂直方向铺 透明→实色→透明 渐变后填充
-    const mx = (tx + hx) / 2, my = (ty + hy) / 2;
-    const g = ctx.createLinearGradient(mx - uy * t, my + ux * t, mx + uy * t, my - ux * t);
-    g.addColorStop(0, rgba(col, 0));
-    g.addColorStop(0.5, rgba(col, alpha));
-    g.addColorStop(1, rgba(col, 0));
-    ctx.fillStyle = g;
-    ctx.fill();
-  }
-
-  /* ========================== ⑤b 雪：预渲染贴图 ==========================
-   * 创意工坊原件（Wallpaper Engine「故宫」3115274650）用 genericparticle 着色器 +
-   * additive 混合 + particle/chromaticdot 贴图（64×64 白色径向柔边圆点）。
-   * Web 端逐帧 drawImage 一张预渲染贴图远比逐帧 createRadialGradient 便宜：
-   * 一帧 N 片雪 = N 次贴图拉伸，开销恒定。
-   *
-   * 2026-10-18 定色改动：
-   *   · 颜色来源从「主题变量 --fx-snow」改为「CONFIG.snow.rgb 固定纯白」；
-   *   · 纵深原为「灰 95,98,100 → 主题色」的色相偏移，现改为**纯白只降亮度**
-   *     （R=G=B 同步缩放），因此无论哪一档贴图，色相恒为 #FFFFFF 家族；
-   *   · 贴图只在首次进入雪模式时烘一次，换主题**不再重烘**（refreshColors 里已摘除）。
-   * 绘制时按粒子的 band 挑一档，避免运行时 filter / 合成模式切换。 */
-  const SNOW_BANDS = 3;        // 预染档数：远 / 中 / 近
-
-  /** 生成三档贴图：档 0 = 最暗（远景），档 2 = 纯白（近景）。
-   *  色相固定为 CONFIG.snow.rgb（#FFFFFF），纵深只用亮度表达。 */
-  function buildSnowSprite() {
-    const c = CONFIG.snow;
-    const S = 64;                       // 贴图边长（2 的幂，利于 GPU 采样）
-    const base = c.rgb || [255, 255, 255]; // ★ 固定纯白，不再读 colors.snow
-    snowTints = [];
-    for (let band = 0; band < SNOW_BANDS; band++) {
-      const k = band / (SNOW_BANDS - 1);          // 0 .. 1
-      // 纵深明暗：远景 ×(1-far%)，近景 ×100%。depthShade=0 → 三档同为纯白。
-      const lum = 1 - c.depthShade * (1 - k);
-      const rgb = [
-        Math.round(base[0] * lum),
-        Math.round(base[1] * lum),
-        Math.round(base[2] * lum),
-      ];
-      const cv = document.createElement('canvas');
-      cv.width = cv.height = S;
-      const g = cv.getContext('2d');
-      const r = S / 2;
-      // 径向渐变：中心瓷实 → softEdge 处才开始衰减 → 边缘全透明。
-      // 2026-10-18 首版把 softEdge 设 0.55，衰减从 45% 半径就启动，
-      // 屏幕上看起来是一团雾而不是雪——现收窄衰减带，让雪花有明确的核心。
-      const solid = clamp(0.80 - c.softEdge * 0.42, 0.25, 0.8); // 实心核心半径比例
-      const grad = g.createRadialGradient(r, r, 0, r, r, r);
-      grad.addColorStop(0, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},1)`);
-      grad.addColorStop(solid, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.98)`);
-      grad.addColorStop(solid + (1 - solid) * 0.45, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.62)`);
-      grad.addColorStop(solid + (1 - solid) * 0.78, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.2)`);
-      grad.addColorStop(1, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0)`);
-      g.fillStyle = grad;
-      g.beginPath();
-      g.arc(r, r, r, 0, Math.PI * 2);
-      g.fill();
-      snowTints.push(cv);
-    }
-    snowSpriteReady = true;
-  }
-
-  /** 生成一片雪。纵深模型：radius 越大 = 越近 = 越快、越白；
-   *  radius 越小 = 越远 = 越慢、越灰。全部随机量在出生时定好，逐帧只做加法。 */
-  function spawnSnowflake(spread) {
-    const c = CONFIG.snow;
-    // t=0 最远（小、灰、慢），t=1 最近（大、白、快）；幂次 <1 让中远景更密
-    const t = Math.pow(Math.random(), 0.72);
-    const r = c.radius[0] + (c.radius[1] - c.radius[0]) * t;
-    const spd = c.speed[0] + (c.speed[1] - c.speed[0]) * t;
-    const ang = (c.angleDeg * Math.PI) / 180;
-    const jit = rand(1 - c.windJitter, 1 + c.windJitter);
-    return {
-      // 首次铺满整屏；回收时从视口上方进入
-      x: rand(-20, w + 20),
-      y: spread ? rand(-h * 0.15, h) : rand(-h * 0.12, -r * 2 - 6),
-      r,
-      t,
-      band: t < 0.34 ? 0 : t < 0.7 ? 1 : 2,   // 对应哪一档预染贴图
-      vx: -Math.sin(ang) * spd * jit,         // 预设 x 速度为负 → 向左飘
-      vy: Math.cos(ang) * spd * jit,
-      baseAlpha: clamp(c.alpha[0] * (c.farAlpha + (c.nearAlpha - c.farAlpha) * t), 0, 1),
-      age: spread ? rand(0.4, 3) : 0,         // 铺屏时的雪已经"下过一会儿"
-    };
-  }
-
-  function buildSnow() {
-    const c = CONFIG.snow;
-    if (!snowSpriteReady) buildSnowSprite();
-    const n = targetCount(c);
-    particles = [];
-    for (let i = 0; i < n; i++) particles.push(spawnSnowflake(true));
-  }
-
-  function stepSnow(dt) {
-    const floor = h + 24;   // 完全出画才回收，避免可见的"凭空消失"
-    const ceil = -h * 0.12;
-    for (const p of particles) {
-      p.age += dt;
-      // 匀速漂移：横向风速 + 纵向下落，无摆动（2026-10-18 移除正弦横摆）
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      // 回收：落到底部以下 → 从顶部重新进入（随机 x，保持风的整体性）
-      if (p.y - p.r > floor) {
-        const np = spawnSnowflake(false);
-        Object.assign(p, np);
-      }
-      // 横向绕回，防止风把雪全吹到左侧堆积
-      if (p.x < -p.r * 4 - 40) p.x = w + p.r * 4 + rand(0, 40);
-      else if (p.x > w + p.r * 4 + 40) p.x = -p.r * 4 - rand(0, 40);
-      // 兜底：极端情况下自顶堆叠过多（例如页面长时间隐藏后恢复），直接重置 y
-      if (p.y < ceil - h) p.y = rand(ceil, 0);
-    }
-  }
-
-  function drawSnow() {
-    if (!snowSpriteReady || !snowTints) return;
-    // 贴图本身是纯白；纵深色差直接烘焙进三档预染贴图，避免逐帧 filter / 合成模式切换
-    const fadeIn = Math.max(0.01, CONFIG.snow.fadeIn);
-    for (const p of particles) {
-      // 入场淡入：前 fadeIn 秒渐显，避免"啪"地出现
-      const fade = p.age >= fadeIn ? 1 : p.age / fadeIn;
-      const a = p.baseAlpha * fade;
-      if (a < 0.012) continue;
-      // 贴图绘制尺寸：贴图四周留有柔边留白（实心半径占 1/1.35），故放大 1.35 后实心区即 p.r
-      const size = p.r * 2.7;
-      const half = size * 0.5;
-      ctx.globalAlpha = a;
-      ctx.drawImage(snowTints[p.band], p.x - half, p.y - half, size, size);
-    }
-    ctx.globalAlpha = 1;
-  }
-
+  /* ========================== ⑤ 流星引擎 ========================== */
   function buildMeteor() {
     particles = [];
     spawnAcc = 0;
@@ -638,88 +184,7 @@
     }
   }
 
-  /** 积水层：半透明基底（水面处最实、向下渐隐至 35%）+ 一条平静的水平水面线。
-   *  水面线即 groundY（2026-10-18 移除涌动）——与落点检测同一常量，视觉与判定严格一致 */
-  function drawPuddle() {
-    const c = CONFIG.puddle;
-    const top = groundY - 1;        // 渐变上沿贴水面线（留 1px 抗锯齿余量）
-    const g = ctx.createLinearGradient(0, top, 0, h);
-    g.addColorStop(0, rgba(colors.rain, c.alpha));
-    g.addColorStop(1, rgba(colors.rain, c.alpha * 0.35));
-    ctx.fillStyle = g;
-    ctx.fillRect(0, top, w, h - top);
-    ctx.beginPath();
-    ctx.moveTo(0, groundY);
-    ctx.lineTo(w, groundY);
-    ctx.strokeStyle = rgba(colors.rain, c.lineAlpha);
-    ctx.lineWidth = 1;
-    ctx.stroke();
-  }
-
-  /** 涟漪圆环：落点处扩散的压扁椭圆（ry = rx × squash 营造水面透视），
-   *  半径先快后慢扩张、透明度随寿命衰减直至消失；
-   *  裁剪到水面线以下——涟漪在水面上，不飘到空气中 */
-  function drawRipples() {
-    const squash = CONFIG.puddle.squash;
-    const col = colors.rain;
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(0, groundY - 8, w, h);   // 裁剪到水面线以下（涟漪在水面上，不飘到空气中）；
-                                      // 2026-10-18：水面恒定 groundY，余量由波动行程改为固定 8px
-    ctx.clip();
-    ctx.lineWidth = 1;
-    for (const r of ripples) {
-      const t = r.age / r.ttl;                  // 0→1 寿命进度
-      const ease = 1 - Math.pow(1 - t, 2.2);    // 先快后慢的扩散曲线
-      const rx = r.r + (r.rMax - r.r) * ease;
-      const alpha = (1 - t) * 0.5 * (r.alphaScale || 1); // 环境涟漪更淡
-      if (alpha <= 0.01) continue;
-      ctx.strokeStyle = rgba(col, alpha);
-      ctx.beginPath();
-      ctx.ellipse(r.x, r.y, rx, Math.max(rx * squash, 0.8), 0, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-
-  /** 飞溅水花：一粒粒短促的向上小水珠（沿速度方向反向拖 2.4px 短线），
-   *  透明度随剩余寿命衰减；落回水面或寿终即消失（消失逻辑在 stepSplash） */
-  function drawSplashParts() {
-    const col = colors.rain;
-    ctx.lineCap = 'round';
-    ctx.lineWidth = 1;
-    for (const p of splashParts) {
-      const k = 1 - p.age / p.life;
-      if (k <= 0) continue;
-      const m = Math.hypot(p.vx, p.vy) || 1;
-      const ux = p.vx / m, uy = p.vy / m;
-      ctx.strokeStyle = rgba(col, 0.5 * k);
-      ctx.beginPath();
-      ctx.moveTo(p.x, p.y);
-      ctx.lineTo(p.x - ux * 2.4, p.y - uy * 2.4);
-      ctx.stroke();
-    }
-    ctx.lineCap = 'butt';
-  }
-
-  /** 雨模式单帧入口：粒子 + 飞溅 + 涟漪一次推进完 */
-  function stepRainAll(dt) {
-    stepRain(dt);
-    stepSplash(dt);
-  }
-
-  /** 雨模式绘制入口：先积水基底与水面线，再雨滴与倒影，最后涟漪与飞溅——
-   *  由远及近，落点效果（涟漪/飞溅）自然压在水面视觉效果之上 */
-  function drawRainAll() {
-    drawPuddle();
-    drawRain();
-    drawRipples();
-    drawSplashParts();
-  }
-
   const ENGINES = {
-    rain: { build: buildRain, step: stepRainAll, draw: drawRainAll },
-    snow: { build: buildSnow, step: stepSnow, draw: drawSnow },
     meteor: { build: buildMeteor, step: stepMeteor, draw: drawMeteor },
   };
 
@@ -753,27 +218,12 @@
     ctx.clearRect(0, 0, w, h);
   }
 
-  /** 真正生效的条件：选了效果 + 系统未要求减少动效 + 页面可见 */
+  /** 真正生效的条件：开着 + 系统未要求减少动效 + 页面可见 */
   function active() {
     return mode !== 'off' && !reduced.matches && !document.hidden;
   }
 
-  /* ========================== ⑦ 模式切换与 UI ========================== */
-  function syncButtons() {
-    if (!seg) return;
-    const off = reduced.matches;
-    seg.querySelectorAll('button').forEach((b) => {
-      const fx = b.dataset.fx;
-      b.classList.toggle('active', fx === mode);
-      b.setAttribute('aria-pressed', fx === mode ? 'true' : 'false');
-      // 系统偏好「减少动态效果」时只允许「关」，并给出原因提示
-      const disabled = off && fx !== 'off';
-      b.disabled = disabled;
-      b.title = disabled ? '系统已开启「减少动态效果」，暂不启用动画' : '';
-      if (disabled && fx === mode) b.classList.remove('active');
-    });
-  }
-
+  /* ========================== ⑦ 开关与状态 ========================== */
   function setMode(next, persist) {
     const valid = next === 'off' || !!ENGINES[next];
     mode = valid ? next : 'off';
@@ -784,8 +234,7 @@
         /* 隐私模式下忽略 */
       }
     }
-    syncButtons();
-    notifyFxChange(); // 外部 UI（首行日期上方的开关图标）同步状态
+    notifyFxChange(); // 外部 UI（史蒂夫头像）同步状态
     if (!active()) {
       stop();
       clearCanvas();
@@ -799,6 +248,7 @@
   function readStored() {
     try {
       const v = localStorage.getItem(CONFIG.storageKey);
+      // 旧访客可能存着已移除的 'rain' / 'snow' —— 一律回落为默认效果
       return v in ENGINES || v === 'off' ? v : CONFIG.mode;
     } catch (e) {
       return CONFIG.mode;
@@ -806,14 +256,6 @@
   }
 
   /* ========================== ⑧ 事件绑定 ========================== */
-  if (seg) {
-    seg.addEventListener('click', (e) => {
-      const b = e.target.closest('button');
-      if (!b || b.disabled) return;
-      if (b.dataset.fx !== mode) setMode(b.dataset.fx);
-    });
-  }
-
   // 切标签 / 最小化 → 暂停；回来 → 续播
   document.addEventListener('visibilitychange', () => {
     if (!active()) {
@@ -831,17 +273,14 @@
   window.addEventListener('resize', () => {
     clearTimeout(rt);
     rt = setTimeout(() => {
-      if (mode === 'off') return;
       if (!active()) return;
       resize();
-      // 雨模式平滑适配粒子池（越界再生 + 数量补齐，屏内粒子不下落中断），
-      // 避免整体重建造成的"满屏重置"闪烁；雪/流星仍用整体重建
-      if (mode === 'rain') rainResize(); else ENGINES[mode].build();
+      ENGINES[mode].build();
       start();
     }, 160);
   });
 
-  // 主题切换后刷新粒子配色（三套主题的 --fx-* 各不相同）
+  // 主题切换后刷新粒子配色（三套主题的 --fx-meteor 各不相同）
   new MutationObserver(refreshColors).observe(document.documentElement, {
     attributes: true,
     attributeFilter: ['data-theme'],
@@ -855,9 +294,8 @@
   /* ========================== ⑨ 启动 ========================== */
   resize();
   refreshColors();
-  syncButtons();
-  // 默认模式为 rain（修复"看不到雨"）；但系统要求减少动效、且用户从未显式
-  // 选择过效果时，保持"关"——不替系统偏好做决定（显式选过则尊重其选择）
+  // 默认开着；但系统要求减少动效、且用户从未显式选择过时，保持"关"——
+  // 不替系统偏好做决定（显式选过则尊重其选择）
   let initial = readStored();
   if (reduced.matches && initial === CONFIG.mode) {
     let hasStored = false;
@@ -866,7 +304,6 @@
   }
   if (initial !== 'off' && ENGINES[initial]) {
     mode = initial;
-    syncButtons();
     if (active()) {
       ENGINES[mode].build();
       start();
@@ -874,12 +311,10 @@
   }
 
   /* ========================== ⑩ 对外最小 API ==========================
-   * 供页面元素复用同一套状态管理（模式 + localStorage），避免第二份真相：
-   * · mode()       当前模式（'off' | 'rain' | 'snow' | 'meteor'）
-   * · cycle()      单击语义（史蒂夫头像）：关 → 第一个效果；开 → 按 ENGINES
-   *                注册顺序循环下一个（雨→雪→流星→雨……）
-   * · off()        双击语义：关闭
-   * · onChange(cb) 模式每次变化后触发（页脚 / 头像 / 系统偏好变化均含）
+   * 供页面元素复用同一套状态管理（开关 + localStorage），避免第二份真相：
+   * · mode()       当前状态（'off' | 'meteor'）
+   * · toggle()     单击语义（史蒂夫头像）：关 → 开；开 → 关
+   * · onChange(cb) 状态每次变化后触发（头像同步；系统偏好变化也含）
    * 注意：index.html 中本脚本先于 app.js 加载，保证 app.js 绑定时就已就绪。 */
   const fxListeners = [];
   function notifyFxChange() {
@@ -893,17 +328,11 @@
   }
   window.__fx = {
     mode: () => mode,
-    cycle() {
-      // 系统开启「减少动态效果」时不允许启用（与页脚按钮的禁用策略一致），
-      // 直接返回当前模式，由调用方据此给出提示
+    toggle() {
+      // 系统开启「减少动态效果」时不允许启用，直接返回当前状态，
+      // 由调用方据此给出提示
       if (mode === 'off' && reduced.matches) return mode;
-      const keys = Object.keys(ENGINES);
-      const i = keys.indexOf(mode);
-      setMode(i < 0 ? keys[0] : keys[(i + 1) % keys.length]);
-      return mode;
-    },
-    off() {
-      setMode('off');
+      setMode(mode === 'off' ? 'meteor' : 'off');
       return mode;
     },
     onChange(fn) {

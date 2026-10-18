@@ -51,8 +51,8 @@
   --chart-legend-off: #c0b2a3;
   --chart-cum-a: #e08b3f; --chart-cum-b: #b85c1c; --chart-line: #8a4a12;
   --chart-cum-a2: #d9762f; --chart-cum-b2: #9c4f16; --chart-line2: #5f7f2f;
-  /* 背景氛围层配色（雨/雪/流星）：低饱和冷调雨丝 + 浅冷调雪点 + 暖琥珀流星（＝本主题 accent 家族） */
-  --fx-rain: #7f97ad; --fx-snow: #c3d2df; --fx-meteor: #e8964a;
+  /* 背景氛围层配色（流星）：暖琥珀流星（＝本主题 accent 家族） */
+  --fx-meteor: #e8964a;
 }
 
 /* ⑦ 薄荷晨：淡青白底 + 青绿强调（浅色） */
@@ -94,8 +94,8 @@
   --chart-legend-off: #a8c2ba;
   --chart-cum-a: #2bb8a5; --chart-cum-b: #0a7d70; --chart-line: #0f9e8e;
   --chart-cum-a2: #0f9e8e; --chart-cum-b2: #076057; --chart-line2: #2f8fd1;
-  /* 背景氛围层配色：青绿主题下流星用亮青，雨用更冷的蓝绿 */
-  --fx-rain: #4f93a8; --fx-snow: #bcd9e4; --fx-meteor: #2bb8a5;
+  /* 背景氛围层配色：青绿主题下流星用亮青 */
+  --fx-meteor: #2bb8a5;
 }
 
 /* ⑧ 晨曦紫：淡紫白底 + 紫强调（浅色） */
@@ -137,8 +137,8 @@
   --chart-legend-off: #b3adcb;
   --chart-cum-a: #8f74ff; --chart-cum-b: #6143d6; --chart-line: #6a4fd0;
   --chart-cum-a2: #a78bfa; --chart-cum-b2: #6d4bd6; --chart-line2: #d946a8;
-  /* 背景氛围层配色：紫主题的雨偏紫灰，流星取亮紫 */
-  --fx-rain: #8b87b8; --fx-snow: #cfc9e8; --fx-meteor: #a78bfa;
+  /* 背景氛围层配色：紫主题的流星取亮紫 */
+  --fx-meteor: #a78bfa;
 }
 
 * { box-sizing: border-box; }
@@ -209,8 +209,9 @@ a { color: var(--accent); }
    2026-10-18 换成 Minecraft 史蒂夫+狼（docs/minecraft.png，438×423 RGBA），
    并**移除「点击切换主题」交互**（原来绑在它身上的主题切换逻辑已删）；
    同日又改成「游玩日历」入口：点击弹出月历，可选择有记录的日期做数据回看。
-   2026-10-18 职能再对调：头像改为**氛围特效循环开关**（单击在 雨→雪→流星
-   间循环、双击关闭），日历入口移到游戏累计列表首行日期上方的小日历图标。
+   2026-10-18 职能再对调：头像改为**氛围特效开关**（单击 开 / 关；
+   2026-10-18 按用户要求仅保留流星一种效果，雨 / 雪已移除），
+   日历入口移到游戏累计列表首行日期上方的小日历图标。
    2026-10-18 按用户要求**移除全部边框装饰**（原有效果状态环/外框/背景框已删），
    呈现干净的无框显示；当前特效状态仅由 title 提示文案承载（悬停可见）。
    指针态与 hover/active 反馈保留（与左侧站标同一套手感），focus-visible
@@ -707,12 +708,12 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .review-actions { display: flex; gap: 8px; margin-left: auto; }
 .review-actions .btn { padding: 5px 12px; font-size: 12.5px; }
 
-/* ================= 背景氛围层（雨 / 雪 / 流星）================= */
+/* ================= 背景氛围层（流星）================= */
 /* 2026-10-18 新增：由 fx.js 驱动的 Canvas 层。
    - pointer-events:none —— 不拦截列表点击、卡片导航、日历浮层等任何交互
-   - z-index 20 —— 盖在页面内容之上（营造“天气在眼前”的效果），
+   - z-index 20 —— 盖在页面内容之上（营造"流星在眼前"的效果），
      但低于 toast(50) 与日历浮层(60)，弹层始终清晰
-   - 实际配色走各主题里的 --fx-rain / --fx-snow / --fx-meteor */
+   - 实际配色走各主题里的 --fx-meteor */
 #fx-canvas {
   position: fixed; inset: 0;
   width: 100%; height: 100%;
@@ -723,15 +724,6 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 @media print {
   #fx-canvas { display: none; }
 }
-/* 页脚右侧的「氛围」切换器：直接复用已有的 .seg 分段控件样式 */
-.fx-switch {
-  display: inline-flex; align-items: center; gap: 8px;
-  margin-left: auto;
-}
-.fx-label { font-size: 12px; color: var(--text-faint); letter-spacing: .5px; }
-.fx-switch .seg button { padding: 3px 11px; font-size: 12px; line-height: 1.5; }
-.fx-switch .seg button[disabled] { opacity: .45; cursor: not-allowed; }
-.fx-switch .seg button[disabled]:hover { border-color: var(--border); }
 
 /* ================= 游玩日历浮层 ================= */
 /* 点击右上史蒂夫头像打开；点空白 / Esc 关闭。三套主题均为浅色，色值直接走 CSS 变量 */
@@ -841,6 +833,4 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .cal-overlay { padding: 12px; }
   .cal-panel { width: 100%; }
   .cal-day { min-height: 38px; font-size: 13px; }
-  /* 窄屏页脚会换行，氛围切换器占满一行并靠右对齐 */
-  .fx-switch { margin-left: 0; width: 100%; justify-content: flex-end; }
 }

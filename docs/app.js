@@ -226,7 +226,7 @@
   /* 首行日期上方的「游玩日历」入口图标（2026-10-18 职能对调后）：
      透明小日历（无底色无边框），CSS 里绝对定位于日期文字上方，不占布局、不改行高；
      点击打开月历浮层选日期回看（即原先挂在右上史蒂夫头像上的职能）；
-     史蒂夫头像已改为氛围特效的循环开关（单击循环 / 双击关闭）。
+     史蒂夫头像已改为氛围特效开关（单击 开 / 关，仅流星）。
      点击在 #lt-list 的委托里最先拦截，不会误触发行下钻；日期文字本身的
      点击行为不变（仍下钻）。回看中：图标着色 --accent 并显示圆点（.cal-mark）。 */
   const CAL_ICON_BTN =
@@ -332,53 +332,32 @@
     btn.title = d ? `正在回看 ${d} · 点击选择其它日期` : '点击打开游玩日历，选择日期进行数据回看';
   }
 
-  /* ---- 右上史蒂夫头像 → 氛围特效循环开关 ----
-   * 单击：关 → 雨；之后按 雨→雪→流星→雨 循环（策略在 fx.js 的 cycle()）。
-   * 双击：关闭特效。单击/双击用 300ms 定时器防抖——双击时撤销待发的单击，
-   * 避免被当成两次循环。状态提示（title + 彩色光环）由 syncSteveFx 统一同步。 */
-  const STEVE_DBL_MS = 300;
-  let steveTimer = 0;
-  const FX_NAMES = { rain: '雨', snow: '雪', meteor: '流星' };
+  /* ---- 右上史蒂夫头像 → 氛围特效开关 ----
+   * 单击：开 → 关 → 开 ……（2026-10-18 起仅剩流星一种效果，策略在 fx.js 的
+   * toggle()；此前的 雨/雪/流星 循环与「双击关闭」已按用户要求整体移除）。
+   * 状态提示（title 文案）由 syncSteveFx 统一同步。 */
+  const FX_NAME = '流星';
 
-  /** 同步头像的特效状态标识：data-fx（驱动 CSS 光环配色）+ title 文案 */
+  /** 同步头像的特效状态标识：data-fx（状态标记）+ title 文案 */
   function syncSteveFx() {
     const el = $('fx-toggle');
     if (!el) return;
     const m = window.__fx ? window.__fx.mode() : 'off';
     if (m === 'off') delete el.dataset.fx;
     else el.dataset.fx = m;
-    const name = FX_NAMES[m] ?? m;
     el.title = m === 'off'
-      ? '氛围效果：关 · 单击开启并循环切换（雨/雪/流星），双击关闭'
-      : `氛围效果：${name} · 单击切换下一个，双击关闭`;
-    el.setAttribute('aria-label', m === 'off' ? '氛围效果已关闭，单击开启' : `氛围效果：${name}`);
+      ? '氛围效果：关 · 单击开启'
+      : `氛围效果：${FX_NAME} · 单击关闭`;
+    el.setAttribute('aria-label', m === 'off' ? '氛围效果已关闭，单击开启' : `氛围效果：${FX_NAME}`);
   }
 
-  /** 头像被激活（点击 / 回车 / 空格）→ 防抖区分单双击 */
+  /** 头像被激活（点击 / 回车 / 空格）→ 开关特效 */
   function onSteveActivate() {
-    if (steveTimer) {
-      clearTimeout(steveTimer);
-      steveTimer = 0;
-      steveFxAction('double');
-      return;
-    }
-    steveTimer = setTimeout(() => {
-      steveTimer = 0;
-      steveFxAction('single');
-    }, STEVE_DBL_MS);
-  }
-
-  function steveFxAction(kind) {
     const fx = window.__fx;
     if (!fx) return;
-    if (kind === 'double') {
-      if (fx.mode() !== 'off') fx.off();
-      else flashSteve('氛围效果已是关闭状态');
-      return;
-    }
     const before = fx.mode();
-    const after = fx.cycle();
-    // 被系统「减少动态效果」拦住（模式没变）→ 给个两秒临时说明
+    const after = fx.toggle();
+    // 被系统「减少动态效果」拦住（状态没变）→ 给个两秒临时说明
     if (after === before && before === 'off') flashSteve('系统已开启「减少动态效果」，暂不启用动画');
   }
 
@@ -1216,14 +1195,12 @@
         }
       });
     };
-    // 只有站标（小黄人）绑定主题切换；史蒂夫头像自 2026-10-18 起不再切主题，
-    // 改作「游玩日历」入口（见下方 bindCalendar）
+    // 只有站标（小黄人）绑定主题切换；史蒂夫头像是氛围特效开关（下方），
+    // 游玩日历入口为首行日期上方的小日历图标 + 回看状态条的「更改日期」按钮。
     bindFlip($('theme-light'), 'light');
 
-    // 史蒂夫头像 → 氛围特效循环开关（单击在 雨→雪→流星 间循环，双击关闭；
+    // 史蒂夫头像 → 氛围特效开关（单击 开 / 关，仅流星；
     // 回车 / 空格同样支持，长按重复不算多次激活）。
-    // 注意：早先「头像 → 打开游玩日历」的 click/keydown 绑定已整体移除，
-    // 日历入口现为首行日期上方的小日历图标 + 回看状态条的「更改日期」按钮。
     const steve = $('fx-toggle');
     if (steve) {
       steve.addEventListener('click', onSteveActivate);
@@ -1236,7 +1213,7 @@
       });
       syncSteveFx();
     }
-    // 特效模式变化（页脚 / 头像 / 系统偏好）→ 同步头像的提示文案与光环
+    // 特效状态变化（头像开关 / 系统偏好）→ 同步头像的提示文案
     if (window.__fx && window.__fx.onChange) window.__fx.onChange(syncSteveFx);
 
     // 日历浮层：上下月、关闭、点空白关闭、点有记录的日期回溯
