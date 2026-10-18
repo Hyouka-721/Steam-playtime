@@ -97,12 +97,11 @@
     if (announce) toast(`主题：${themeName(id)}`);
   }
 
-  /** 同步杰瑞/汤姆的 title 提示（主题由首屏内联脚本随机决定时也要更新文案） */
+  /** 同步站标（小黄人）的 title 提示（主题由首屏内联脚本随机决定时也要更新文案）。
+      头像（史蒂夫）2026-10-18 起改为纯装饰，不再参与主题切换，故不在此同步。 */
   function syncThemeUi(id = currentTheme()) {
     const light = $('theme-light');
-    const dark = $('theme-switch');
     if (light) light.title = `当前主题：${themeName(id)} · 点击切换浅色主题`;
-    if (dark) dark.title = `当前主题：${themeName(id)} · 点击切换浅色主题`;
   }
 
   /** 在指定深/浅组内随机挑一个与当前不同的主题 */
@@ -742,8 +741,8 @@
         }
       });
     };
+    // 只有站标（小黄人）绑定主题切换；史蒂夫头像自 2026-10-18 起为纯装饰，不绑定任何点击
     bindFlip($('theme-light'), 'light');
-    bindFlip($('theme-switch'), 'light');
 
     // 网站名：点击返回顶部（键盘 Enter / 空格同样支持）
     const titleHome = $('site-title');

@@ -168,9 +168,11 @@ a { color: var(--accent); }
   position: sticky; top: 0; z-index: 10;
 }
 .brand { display: flex; align-items: center; gap: 16px; justify-self: start; }
+/* 2026-10-18 站标与史蒂夫头像同比放大 ×1.222（108 → 132px），保持原比例不失真；
+   两者用同一缩放系数，视觉体量一致。≤480px 断点同步 72 → 88px。 */
 .logo {
   color: var(--accent);
-  width: 108px; height: 108px; display: grid; place-items: center;
+  width: 132px; height: 132px; display: grid; place-items: center;
   border: none; border-radius: 0;
   background: none;
   filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.28));
@@ -197,20 +199,18 @@ a { color: var(--accent); }
    用户满意后可随时恢复（快照 index_with_gametime_v49_snapshot.html）。 */
 .subtitle { margin: 2px 0 0; font-size: 13px; color: var(--text-dim); }
 .header-meta { display: flex; gap: 10px; align-items: center; font-size: 12px; }
-/* 头像以 CSS 背景呈现：不可拖动/另存；点击可随机切换主题 */
+/* 头像：CSS 背景呈现，不可拖动/另存。
+   2026-10-18 换成 Minecraft 史蒂夫+狼（docs/minecraft.png，438×423 RGBA），
+   并**移除「点击切换主题」交互**（原 click/keydown 监听已删），
+   所以 cursor / hover / active / focus-visible / transition 一并清理掉。
+   注意：contain 保证等比不拉伸；去掉 scaleX(-1) 保持原图朝向。 */
 .header-avatar {
-  width: 108px; height: 108px;
-  background: url('avatar.png?v=5') center / contain no-repeat;
+  width: 132px; height: 132px;
+  background: url('minecraft.png?v=1') center / contain no-repeat;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
   flex-shrink: 0;
   justify-self: end;
-  cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
-  transition: transform .18s ease, filter .18s ease;
-  transform: scaleX(-1);
 }
-.header-avatar:hover { transform: scaleX(-1) scale(1.04); }
-.header-avatar:active { transform: scaleX(-1) scale(0.97); }
-.header-avatar:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 
 /* 切换主题时的一闪提示 */
 .toast {
@@ -625,8 +625,8 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .tl-game.sm { width: 76px; height: 36px; }
 }
 /* 窄屏（≤480px）：header 三列网格中 logo/头像收一档、标题缩字号，
-   避免固定 108px 图标 + 标题把网格撑出横向溢出（标题可换行） */
+   避免固定 132px 图标 + 标题把网格撑出横向溢出（标题可换行） */
 @media (max-width: 480px) {
-  .logo, .header-avatar { width: 72px; height: 72px; }
+  .logo, .header-avatar { width: 88px; height: 88px; }
   .site-title { font-size: 44px; letter-spacing: 1px; }
 }
