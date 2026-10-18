@@ -95,6 +95,7 @@
 
   /* ========================== ③ 运行时状态 ========================== */
   let mode = 'off';            // 当前模式
+  let lastFx = 'rain';         // 上次使用的具体效果（图标「重新开启」时恢复它，默认雨）
   let w = 0, h = 0, dpr = 1;   // 画布尺寸（CSS 像素）与设备像素比
   let particles = [];          // 当前粒子池
   let raf = 0, last = 0;       // 动画帧句柄与上一帧时间戳
@@ -373,6 +374,7 @@
   function setMode(next, persist) {
     const valid = next === 'off' || !!ENGINES[next];
     mode = valid ? next : 'off';
+    if (mode !== 'off') lastFx = mode; // 记住具体效果，供图标重新开启时恢复
     if (persist !== false) {
       try {
         localStorage.setItem(CONFIG.storageKey, mode);
@@ -381,6 +383,7 @@
       }
     }
     syncButtons();
+    notifyFxChange(); // 外部 UI（首行日期上方的开关图标）同步状态
     if (!active()) {
       stop();
       clearCanvas();
@@ -452,10 +455,41 @@
   const initial = readStored();
   if (initial !== 'off' && ENGINES[initial]) {
     mode = initial;
+    lastFx = initial;
     syncButtons();
     if (active()) {
       ENGINES[mode].build();
       start();
     }
   }
+
+  /* ========================== ⑩ 对外最小 API ==========================
+   * 供首行日期上方的特效开关图标复用同一套状态管理（模式 + localStorage），
+   * 避免出现第二份真相。mode() 供渲染时对齐初始状态；toggle() 供单击切换；
+   * onChange(cb) 在模式每次变化后触发（页脚切换 / 图标切换 / 系统偏好变化均含）。
+   * 注意：index.html 中本脚本先于 app.js 加载，保证 app.js 绑定时就已就绪。 */
+  const fxListeners = [];
+  function notifyFxChange() {
+    for (const fn of fxListeners) {
+      try {
+        fn(mode);
+      } catch (e) {
+        /* 单个监听器异常不影响其他监听器与动画本身 */
+      }
+    }
+  }
+  window.__fx = {
+    mode: () => mode,
+    /** 在「启用 / 停用」两态间切换；重新启用时恢复上次的具体效果（雨/雪/流星）。
+     *  系统开启「减少动态效果」时拒绝启用（与页脚按钮的禁用策略一致），
+     *  直接返回当前模式（调用方据此给出提示）。返回切换后的模式。 */
+    toggle() {
+      if (mode === 'off' && reduced.matches) return mode;
+      setMode(mode === 'off' ? lastFx : 'off');
+      return mode;
+    },
+    onChange(fn) {
+      if (typeof fn === 'function') fxListeners.push(fn);
+    },
+  };
 })();

@@ -223,6 +223,20 @@
     '#9d8cff', '#66c0f4', '#e8766a', '#5ad0c0', '#b8d45a',
   ];
 
+  /* 首行日期上方的氛围特效开关图标（2026-10-18）：
+     透明小日历（无底色无边框），CSS 里绝对定位于日期文字上方，不占布局、不改行高；
+     点击只在特效「启用 / 停用」间切换（复用 fx.js 的 window.__fx，单一状态源），
+     不发生日历弹层（日历入口仍是右上史蒂夫头像），也不会误触发行下钻——
+     拦截在 #lt-list 的点击委托里完成（见 bind()）。 */
+  const FX_ICON_BTN =
+    '<button class="fx-icon-btn" type="button" data-fx-toggle aria-pressed="false" ' +
+    'title="氛围效果：关（点击开启）" aria-label="氛围效果开关：开启或关闭背景动画">' +
+    '<svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" focusable="false">' +
+    '<rect x="2.6" y="4.2" width="14.8" height="13.6" rx="2.2"></rect>' +
+    '<path d="M2.6 8.6h14.8M7 2.6v3M13 2.6v3"></path>' +
+    '<path class="fx-check" d="M7.5 12.4l2.2 2.2 3.8-4.1"></path>' +
+    '</svg></button>';
+
   function renderLifetime() {
     const box = $('lt-list');
     const lifetime = Object.values(state.meta.games_lifetime ?? {});
@@ -239,12 +253,17 @@
     const max = Math.max(...played.map((g) => g.lifetime_minutes), 1);
     const totalShown = played.reduce((a, g) => a + g.lifetime_minutes, 0);
 
-    const rowHtml = (g, i) => {
+    const rowHtml = (g, i, noFx) => {
       const icon = ICON(g.appid, g.img_icon_url);
       const pct = Math.max(g.lifetime_minutes > 0 ? 1.5 : 0, (g.lifetime_minutes / max) * 100);
       const barStyle = i < topPalette.length ? `width:${pct}%;background:${topPalette[i]}` : `width:${pct}%`;
       const playing = (recent.get(g.appid) ?? 0) > 0;
       const noCls = i < 3 ? ` r${i + 1}` : '';
+      // 仅首行（折叠区 noFx=true 不渲染）在日期文字上方放特效开关图标；
+      // 图标为绝对定位，日期文字本身的位置与行高不受影响
+      const lastHtml = !noFx && i === 0
+        ? `<span class="rank-last">${FX_ICON_BTN}${g.last_played ?? '—'}</span>`
+        : `<span class="rank-last">${g.last_played ?? '—'}</span>`;
       return `<div class="rank-item${g.lifetime_minutes === 0 ? ' zero' : ''}" data-appid="${g.appid}" title="点击查看该游戏每日时长趋势">
           <span class="rank-no${noCls}">${i + 1}</span>
           <img class="rank-capsule" src="${CAPSULE(g.appid)}" alt="" loading="lazy"
@@ -252,18 +271,18 @@
           <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
           <span class="rank-bar"><span style="${barStyle}"></span>${i === 0 ? '<img class="rank-cat" src="garfield.png?v=3" alt="" draggable="false"><img class="rank-tj" src="tomjerry.png?v=1" alt="" draggable="false"><img class="rank-penguin" src="penguins.png?v=1" alt="" draggable="false">' : ''}</span>
           <span class="rank-min">${hm(g.lifetime_minutes)}</span>
-          <span class="rank-last">${g.last_played ?? '—'}</span>
+          ${lastHtml}
         </div>`;
     };
 
-    let html = played.map(rowHtml).join('');
+    let html = played.map((g, i) => rowHtml(g, i)).join('');
     if (idle.length) {
       html +=
         `<div class="idle-toggle" id="idle-toggle" role="button" tabindex="0" aria-expanded="false">` +
         `<span class="idle-caret">▸</span>` +
         `<span class="idle-label">展开 ${idle.length} 款未游玩的游戏</span>` +
         `</div>` +
-        `<div id="idle-list" class="rank-list" hidden>${idle.map((g, i) => rowHtml(g, played.length + i)).join('')}</div>`;
+        `<div id="idle-list" class="rank-list" hidden>${idle.map((g, i) => rowHtml(g, played.length + i, true)).join('')}</div>`;
     }
     html +=
       `<p class="list-foot">共 ${played.length} 款已游玩游戏 · 合计 ${hm(totalShown)}` +
@@ -271,6 +290,7 @@
       `</p>`;
 
     box.innerHTML = html;
+    syncFxIcon(); // 列表重渲染后，把图标状态对齐 fx.js 的当前模式
     if (idle.length) bindIdleToggle(idle.length);
   }
 
@@ -295,6 +315,36 @@
         flip();
       }
     });
+  }
+
+  /* ---- 首行日期上方的氛围特效开关（状态以 fx.js 为唯一来源） ---- */
+  function fxIconEl() {
+    return document.querySelector('#lt-list [data-fx-toggle]');
+  }
+
+  /** 把图标的视觉状态（着色 / 对勾 / aria-pressed / 提示文案）对齐到当前特效模式 */
+  function syncFxIcon() {
+    const btn = fxIconEl();
+    if (!btn) return;
+    const on = !!(window.__fx && window.__fx.mode() !== 'off');
+    btn.classList.toggle('on', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.title = on ? '氛围效果：开（点击关闭）' : '氛围效果：关（点击开启）';
+  }
+
+  /** 图标单击 = 特效开 / 关；若被系统「减少动态效果」拦住，给两秒临时说明 */
+  function toggleFxFromIcon(btn) {
+    const fx = window.__fx;
+    if (!fx || typeof fx.toggle !== 'function') return;
+    const before = fx.mode();
+    const after = fx.toggle();
+    if (after === before && before === 'off') {
+      const keep = btn.title;
+      btn.title = '系统已开启「减少动态效果」，暂不启用动画';
+      setTimeout(() => {
+        if (btn.isConnected) btn.title = keep;
+      }, 2000);
+    }
   }
 
   // ---------- ①b 最近游玩（近两周时长） ----------
@@ -1205,11 +1255,20 @@
     });
 
     // 游戏累计列表：点击整行 → 该游戏每日时长趋势
+    // 首行日期上方的特效图标只切换氛围效果，必须最先拦截，避免误触发行下钻
+    // （日期文字本身仍是行的一部分，点击行为与以往一致 = 下钻）
     $('lt-list').addEventListener('click', (e) => {
+      const fxBtn = e.target.closest('[data-fx-toggle]');
+      if (fxBtn) {
+        toggleFxFromIcon(fxBtn);
+        return;
+      }
       const row = e.target.closest('.rank-item');
       if (!row) return;
       openDrill(row.dataset.appid);
     });
+    // 特效模式变化（页脚切换 / 图标切换 / 系统偏好变化）→ 同步首行图标
+    if (window.__fx && window.__fx.onChange) window.__fx.onChange(syncFxIcon);
 
     $('btn-drill-back').addEventListener('click', () => {
       closeDrill();

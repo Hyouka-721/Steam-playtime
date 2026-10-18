@@ -424,7 +424,33 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .rank-tj { display: none; }
 }
 .rank-min { font-variant-numeric: tabular-nums; color: var(--text-strong); text-align: center; font-weight: 600; font-size: 13.5px; }
-.rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: center; font-size: 12px; }
+.rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: center; font-size: 12px; position: relative; }
+/* 首行日期上方的氛围特效开关（2026-10-18）：透明小日历图标，无底色无边框，
+   线条色与日期文字一致（--text-faint）。绝对定位于日期上方 2px——
+   日期文字的盒模型与行高完全不变，切换只改颜色 / 透明度 / 对勾，零布局位移。
+   开启态：着色 --accent、提高不透明度并显示对勾（fx-check）。
+   ≤860px 时父级 .rank-last 已 display:none，图标随之隐藏，无需额外规则。 */
+.fx-icon-btn {
+  appearance: none; -webkit-appearance: none;
+  background: none; border: 0; padding: 0; margin: 0;
+  position: absolute; left: 50%; bottom: calc(100% + 2px);
+  transform: translateX(-50%);
+  width: 18px; height: 18px; display: block;
+  color: var(--text-faint); opacity: .5; cursor: pointer;
+  touch-action: manipulation; /* 触屏尽快响应，免除双击缩放等待 */
+  transition: color .18s ease, opacity .18s ease;
+}
+.fx-icon-btn svg {
+  display: block; width: 17px; height: 17px;
+  fill: none; stroke: currentColor;
+  stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+}
+.fx-icon-btn .fx-check { opacity: 0; transition: opacity .18s ease; }
+.fx-icon-btn:hover { opacity: .8; }
+.fx-icon-btn:active { opacity: 1; }
+.fx-icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 5px; opacity: .9; }
+.fx-icon-btn.on { color: var(--accent); opacity: 1; }
+.fx-icon-btn.on .fx-check { opacity: 1; }
 .list-foot { text-align: right; color: var(--text-faint); font-size: 12px; margin: 10px 4px 2px; }
 .list-foot-dim { opacity: .75; }
 
