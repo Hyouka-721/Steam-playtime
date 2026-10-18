@@ -1,12 +1,12 @@
 {
   "schema": 1,
   "ready": true,
-  "generated_at": "2026-10-18T13:49:21.597Z",
-  "snapshot_date": "2026-10-17",
+  "generated_at": "2026-10-18T18:13:49.662Z",
+  "snapshot_date": "2026-10-18",
   "stats": {
-    "unlocked": 832,
+    "unlocked": 834,
     "total": 2504,
-    "pct": 33.2,
+    "pct": 33.3,
     "games": 31
   },
   "games": {
@@ -1301,8 +1301,24 @@
       "appid": "246420",
       "name": "王国保卫战",
       "total": 74,
-      "unlocked": 27,
+      "unlocked": 29,
       "achievements": [
+        {
+          "api": "ACH_GREAT_DEFENDER",
+          "name": "Great Defender",
+          "desc": "Complete the campaign.",
+          "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/891b60bda9108ded465713a61ac900fc3c0cd3f6.jpg",
+          "percent": null,
+          "ts": 1792289838
+        },
+        {
+          "api": "ACH_VEZNAN",
+          "name": "This is the end",
+          "desc": "Defeat Vez'nan.",
+          "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/1f1f5b2952ceaa5bd60115c86e9f835286e0f89a.jpg",
+          "percent": null,
+          "ts": 1792289825
+        },
         {
           "api": "ACH_DINEINHELL",
           "name": "We dine in hell!",

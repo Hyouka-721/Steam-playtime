@@ -3,7 +3,7 @@
   "month": "2026-10",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-17T17:53:57.837Z",
+  "generated_at": "2026-10-18T18:13:49.536Z",
   "days": {
     "2026-10-13": {
       "total_minutes": 49,
@@ -89,6 +89,45 @@
           "appid": "105600",
           "name": "Terraria",
           "minutes": 22,
+          "is_new": false
+        }
+      ]
+    },
+    "2026-10-18": {
+      "total_minutes": 264,
+      "span_days": 1,
+      "confidence": "high",
+      "source": "auto",
+      "flags": [],
+      "games": [
+        {
+          "appid": "246420",
+          "name": "Kingdom Rush",
+          "minutes": 157,
+          "is_new": false
+        },
+        {
+          "appid": "227300",
+          "name": "Euro Truck Simulator 2",
+          "minutes": 49,
+          "is_new": false
+        },
+        {
+          "appid": "105600",
+          "name": "Terraria",
+          "minutes": 26,
+          "is_new": false
+        },
+        {
+          "appid": "646570",
+          "name": "Slay the Spire",
+          "minutes": 24,
+          "is_new": false
+        },
+        {
+          "appid": "431960",
+          "name": "Wallpaper Engine",
+          "minutes": 8,
           "is_new": false
         }
       ]
