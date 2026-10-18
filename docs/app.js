@@ -232,7 +232,7 @@
   const CAL_ICON_BTN =
     '<button class="cal-icon-btn" type="button" data-cal-toggle ' +
     'title="点击打开游玩日历，选择日期进行数据回看" aria-label="打开游玩日历，选择有游玩记录的日期进行数据回看">' +
-    '<svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true" focusable="false">' +
+    '<svg viewBox="0 0 20 20" width="22" height="22" aria-hidden="true" focusable="false">' +
     '<rect x="2.6" y="4.2" width="14.8" height="13.6" rx="2.2"></rect>' +
     '<path d="M2.6 8.6h14.8M7 2.6v3M13 2.6v3"></path>' +
     '<circle class="cal-mark" cx="10" cy="13.4" r="1.3"></circle>' +

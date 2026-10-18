@@ -211,8 +211,10 @@ a { color: var(--accent); }
    同日又改成「游玩日历」入口：点击弹出月历，可选择有记录的日期做数据回看。
    2026-10-18 职能再对调：头像改为**氛围特效循环开关**（单击在 雨→雪→流星
    间循环、双击关闭），日历入口移到游戏累计列表首行日期上方的小日历图标。
-   所以指针态与 hover/active/focus 反馈保留（与左侧站标同一套手感），
-   但不再牵扯任何主题代码。
+   2026-10-18 按用户要求**移除全部边框装饰**（原有效果状态环/外框/背景框已删），
+   呈现干净的无框显示；当前特效状态仅由 title 提示文案承载（悬停可见）。
+   指针态与 hover/active 反馈保留（与左侧站标同一套手感），focus-visible
+   的键盘焦点环也保留（仅 Tab 聚焦时出现，属可访问性设施，非装饰边框）。
    注意：contain 保证等比不拉伸；去掉 scaleX(-1) 保持原图朝向。 */
 .header-avatar {
   width: 132px; height: 132px;
@@ -221,17 +223,11 @@ a { color: var(--accent); }
   flex-shrink: 0;
   justify-self: end;
   cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
-  transition: transform .18s ease, box-shadow .18s ease;
+  transition: transform .18s ease;
 }
 .header-avatar:hover { transform: scale(1.05); }
 .header-avatar:active { transform: scale(0.96); }
 .header-avatar:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 12px; }
-/* 氛围特效状态环（2026-10-18）：data-fx 由 syncSteveFx 维护，
-   环色随当前效果（雨=灰蓝 / 雪=青白 / 流星=橙），与 title 文案配合，
-   一眼看出当前选中的是哪种特效；无特效时无环 */
-.header-avatar[data-fx="rain"] { box-shadow: 0 0 0 2px var(--fx-rain), 0 0 0 5px var(--ring); border-radius: 14px; }
-.header-avatar[data-fx="snow"] { box-shadow: 0 0 0 2px var(--fx-snow), 0 0 0 5px var(--ring); border-radius: 14px; }
-.header-avatar[data-fx="meteor"] { box-shadow: 0 0 0 2px var(--fx-meteor), 0 0 0 5px var(--ring); border-radius: 14px; }
 
 /* 切换主题时的一闪提示 */
 .toast {
@@ -432,21 +428,23 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .rank-min { font-variant-numeric: tabular-nums; color: var(--text-strong); text-align: center; font-weight: 600; font-size: 13.5px; }
 .rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: center; font-size: 12px; position: relative; }
 /* 首行日期上方的「游玩日历」入口（2026-10-18 职能对调后）：透明小日历图标，
-   无底色无边框，线条色与日期文字一致（--text-faint）。绝对定位于日期上方 2px——
-   日期文字的盒模型与行高完全不变。回看中：着色 --accent、显示圆点（.cal-mark）
-   并加细光环。≤860px 时父级 .rank-last 已 display:none，图标随之隐藏。 */
+   无底色无边框，线条色与日期文字一致（--text-faint）。绝对定位于日期上方 4px
+   （2026-10-18 按用户要求由 18px 放大到 24px 并整体上移）——SVG 为矢量，
+   放大不变形；日期文字的盒模型与行高完全不变，图标不溢出行顶。
+   回看中：着色 --accent、显示圆点（.cal-mark）并加细光环。
+   ≤860px 时父级 .rank-last 已 display:none，图标随之隐藏。 */
 .cal-icon-btn {
   appearance: none; -webkit-appearance: none;
   background: none; border: 0; padding: 0; margin: 0;
-  position: absolute; left: 50%; bottom: calc(100% + 2px);
+  position: absolute; left: 50%; bottom: calc(100% + 4px);
   transform: translateX(-50%);
-  width: 18px; height: 18px; display: block;
+  width: 24px; height: 24px; display: block;
   color: var(--text-faint); opacity: .5; cursor: pointer;
   touch-action: manipulation; /* 触屏尽快响应，免除双击缩放等待 */
   transition: color .18s ease, opacity .18s ease, box-shadow .18s ease;
 }
 .cal-icon-btn svg {
-  display: block; width: 17px; height: 17px;
+  display: block; width: 22px; height: 22px;
   fill: none; stroke: currentColor;
   stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
 }
