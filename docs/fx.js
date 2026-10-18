@@ -7,7 +7,8 @@
  * · 页面隐藏（切标签、最小化）自动暂停；恢复可见自动续播
  * · 移动端 / 窄屏自动降低粒子量与 DPR
  * · 遵循系统 prefers-reduced-motion 偏好
- * · 粒子颜色取自当前主题的 CSS 变量，随主题切换自动刷新
+ * · 粒子颜色默认取自当前主题的 CSS 变量，随主题切换自动刷新
+ *   （例外：雨滴按用户要求固定为自然纯白，见 CONFIG.rain.rgb）
  * ---------------------------------------------------------------------------
  * 调参入口：下方 CONFIG —— 数量 / 密度 / 速度 / 方向 / 透明度全部集中在这里
  * ========================================================================== */
@@ -22,13 +23,14 @@
 
     // ---- 雨 ----
     rain: {
-      colorVar: '--fx-rain',
+      colorVar: '--fx-rain',     // 主题变量仅作说明；存在 rgb 字段时以 rgb 为准
+      rgb: [255, 255, 255],      // 2026-10-18 按用户要求：改为自然纯白，去除偏蓝色偏
       density: 110,        // 每 1e6 px² 的雨滴数（1440×950 ≈ 150 根；再被 min/max 夹住）
       min: 40, max: 280,   // 粒子数量上下限
       speed: [820, 1400],   // 下落速度 px/秒
       length: [9, 28],      // 雨丝长度 px
       thickness: [0.5, 1.2],// 线宽 px
-      alpha: [0.05, 0.13],  // 透明度区间（2026-10-18 按用户要求由 0.10~0.26 降至约一半：雨滴更清澈轻盈、减少存在感，避免遮挡背景/文字/图标；速度/密度/方向不变）
+      alpha: [0.5, 0.7],    // 透明度区间（2026-10-18 按用户要求 0.05~0.13 → 0.5~0.7：通透且不抢眼）
       angleDeg: 14,         // 方向：与竖直方向的夹角，正数 = 向右下方飘
       jitter: 0.22,         // 个体速度随机抖动比例（让雨有层次）
     },
@@ -99,13 +101,16 @@
   let particles = [];          // 当前粒子池
   let raf = 0, last = 0;       // 动画帧句柄与上一帧时间戳
   let spawnAcc = 0;            // 流星生成累加器
-  let colors = { rain: [127, 151, 173], snow: [195, 210, 223], meteor: [232, 150, 74] };
+  let colors = { rain: [255, 255, 255], snow: [195, 210, 223], meteor: [232, 150, 74] };
 
   function refreshColors() {
+    // rgb 字段（固定色，如纯白）优先于主题 CSS 变量：雨滴按用户要求改为自然纯白、
+    // 不随主题偏色；雪/流星无 rgb 字段，仍各自走主题变量
+    const pick = (cfg) => (cfg.rgb ? cfg.rgb.slice() : hexToRgb(cssVar(cfg.colorVar)));
     colors = {
-      rain: hexToRgb(cssVar(CONFIG.rain.colorVar)),
-      snow: hexToRgb(cssVar(CONFIG.snow.colorVar)),
-      meteor: hexToRgb(cssVar(CONFIG.meteor.colorVar)),
+      rain: pick(CONFIG.rain),
+      snow: pick(CONFIG.snow),
+      meteor: pick(CONFIG.meteor),
     };
   }
 
