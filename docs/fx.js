@@ -8,7 +8,7 @@
  * · 移动端 / 窄屏自动降低粒子量与 DPR
  * · 遵循系统 prefers-reduced-motion 偏好
  * · 粒子颜色默认取自当前主题的 CSS 变量，随主题切换自动刷新
- *   （例外：雨滴按用户要求固定为自然纯白主体 + 中性灰描边，见 CONFIG.rain.rgb/edgeRgb）
+ *   （例外：雨滴按用户要求固定为深色雨丝——半透明深灰蓝、纺锤形柔边轮廓，见 CONFIG.rain.rgb）
  * ---------------------------------------------------------------------------
  * 调参入口：下方 CONFIG —— 数量 / 密度 / 速度 / 方向 / 透明度全部集中在这里
  * ========================================================================== */
@@ -24,13 +24,8 @@
     // ---- 雨 ----
     rain: {
       colorVar: '--fx-rain',     // 主题变量仅作说明；存在 rgb 字段时以 rgb 为准
-      rgb: [255, 255, 255],      // 主体：自然纯白（2026-10-18 按用户要求，去除偏蓝色偏）
-      edgeRgb: [140, 140, 140],  // 2026-10-18 新增、当日二次调整：118→140 更浅的中性灰描边
-                                 // ——纯白在浅色面板/卡片上几乎不可见（用户反馈只在深色图标上清晰），
-                                 // 加一层略宽的淡灰描边保证任何底色下都清晰；主体仍是白，整体无色偏
-      edgeAlpha: 0.4,            // 描边透明度 = 粒子透明度 × 此系数（0.5~0.7 → 0.2~0.28）
-                                 // （用户反馈“灰度过高”，0.5→0.4 配合更浅的 edgeRgb 淡化描边）
-      edgeWidth: 1.6,            // 描边比主体宽出的 px（两侧各约 0.8px 柔边）
+      rgb: [58, 64, 72],         // 主体：半透明深色雨丝（2026-10-18 按用户要求：由纯白改为深灰蓝，
+                                 // 更暗、更像雨丝而非发白高亮块；浅色面板上清晰，深色封面自然隐入）
       density: 110,        // 每 1e6 px² 的雨滴数（1440×950 ≈ 150 根；再被 min/max 夹住）
       min: 40, max: 280,   // 粒子数量上下限
       speed: [720, 1250],   // 下落速度 px/秒（2026-10-18 按用户要求稍微降低：[820,1400]→[720,1250]）
@@ -107,10 +102,10 @@
   let particles = [];          // 当前粒子池
   let raf = 0, last = 0;       // 动画帧句柄与上一帧时间戳
   let spawnAcc = 0;            // 流星生成累加器
-  let colors = { rain: [255, 255, 255], snow: [195, 210, 223], meteor: [232, 150, 74] };
+  let colors = { rain: [58, 64, 72], snow: [195, 210, 223], meteor: [232, 150, 74] };
 
   function refreshColors() {
-    // rgb 字段（固定色，如纯白）优先于主题 CSS 变量：雨滴按用户要求改为自然纯白、
+    // rgb 字段（固定色）优先于主题 CSS 变量：雨滴按用户要求固定为深色雨丝、
     // 不随主题偏色；雪/流星无 rgb 字段，仍各自走主题变量
     const pick = (cfg) => (cfg.rgb ? cfg.rgb.slice() : hexToRgb(cssVar(cfg.colorVar)));
     colors = {
@@ -182,29 +177,49 @@
     }
   }
 
+  /* 雨丝渲染：两端收窄、中段略粗的纺锤形实心轮廓 + 横向渐变柔边
+   * （2026-10-18 按用户要求重写：此前“宽描边 + 细主体”两遍画法有中空长方形观感、
+   *  纯白主体在浅色面板上像发白高亮块；现改为单色深灰蓝一次填充：
+   *  ① 轮廓沿长度按正弦包络收窄——两端窄、中段宽，无生硬直角；
+   *  ② 填充色沿垂直雨丝方向做 透明→实色→透明 渐变——边缘柔化，无边框感）
+   * 调参：END 头尾端残余宽度比例（0=尖头尖尾）；TAPER 收尾锐度（<1 更尖、>1 更圆）；
+   *      SEG 沿长度采样分段数（越大轮廓越平滑，性能开销线性增长） */
   function drawRain() {
-    const c = CONFIG.rain;
     const col = colors.rain;
-    ctx.lineCap = 'round';
+    const END = 0.32;   // 两端收窄到的宽度比例（相对中段半宽）
+    const TAPER = 0.75; // 正弦包络指数
+    const SEG = 9;      // 沿雨丝长度的采样段数
     for (const p of particles) {
-      const tailX = p.x - p.ux * p.len;
-      const tailY = p.y - p.uy * p.len;
-      // 第一遍：中性灰描边（略宽）——纯白主体在浅色底上对比不足，
-      // 描边保证面板/卡片等浅色场景也清晰；透明度随粒子本体缩放，
-      // 保持每根雨丝整体的浓淡层次（不影响速度/密度/方向/循环）
-      ctx.strokeStyle = rgba(c.edgeRgb, p.a * c.edgeAlpha);
-      ctx.lineWidth = p.thick + c.edgeWidth;
+      const t = p.thick / 2;                 // 中段半宽（雨丝最粗处）
+      const hx = p.x, hy = p.y;              // 头端（运动方向前方）
+      const tx = hx - p.ux * p.len;          // 尾端
+      const ty = hy - p.uy * p.len;
+      // 纺锤轮廓：上侧 尾→头、下侧 头→尾，一次 fill 成实心形状
       ctx.beginPath();
-      ctx.moveTo(p.x, p.y);
-      ctx.lineTo(tailX, tailY);
-      ctx.stroke();
-      // 第二遍：纯白主体（深色图标/封面上靠它提亮）
-      ctx.strokeStyle = rgba(col, p.a);
-      ctx.lineWidth = p.thick;
-      ctx.beginPath();
-      ctx.moveTo(p.x, p.y);
-      ctx.lineTo(tailX, tailY);
-      ctx.stroke();
+      for (let i = 0; i <= SEG; i++) {
+        const s = i / SEG;                                        // 0=尾 1=头
+        const wdt = t * (END + (1 - END) * Math.pow(Math.sin(Math.PI * s), TAPER));
+        const cx = tx + (hx - tx) * s;
+        const cy = ty + (hy - ty) * s;
+        const ex = cx - p.uy * wdt, ey = cy + p.ux * wdt;         // 垂直于轴偏移 ±wdt
+        if (i === 0) ctx.moveTo(ex, ey); else ctx.lineTo(ex, ey);
+      }
+      for (let i = SEG; i >= 0; i--) {
+        const s = i / SEG;
+        const wdt = t * (END + (1 - END) * Math.pow(Math.sin(Math.PI * s), TAPER));
+        const cx = tx + (hx - tx) * s;
+        const cy = ty + (hy - ty) * s;
+        ctx.lineTo(cx + p.uy * wdt, cy - p.ux * wdt);
+      }
+      ctx.closePath();
+      // 柔边：以雨丝中点为原点、沿垂直方向铺 透明→实色→透明 渐变后填充
+      const mx = (tx + hx) / 2, my = (ty + hy) / 2;
+      const g = ctx.createLinearGradient(mx - p.uy * t, my + p.ux * t, mx + p.uy * t, my - p.ux * t);
+      g.addColorStop(0, rgba(col, 0));
+      g.addColorStop(0.5, rgba(col, p.a));
+      g.addColorStop(1, rgba(col, 0));
+      ctx.fillStyle = g;
+      ctx.fill();
     }
   }
 
