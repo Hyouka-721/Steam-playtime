@@ -428,15 +428,17 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .rank-min { font-variant-numeric: tabular-nums; color: var(--text-strong); text-align: center; font-weight: 600; font-size: 13.5px; }
 .rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: center; font-size: 12px; position: relative; }
 /* 首行日期上方的「游玩日历」入口（2026-10-18 职能对调后）：透明小日历图标，
-   无底色无边框，线条色与日期文字一致（--text-faint）。绝对定位于日期上方 4px
-   （2026-10-18 按用户要求由 18px 放大到 24px 并整体上移）——SVG 为矢量，
-   放大不变形；日期文字的盒模型与行高完全不变，图标不溢出行顶。
+   无底色无边框，线条色与日期文字一致（--text-faint）。绝对定位于日期上方 8px
+   （2026-10-18 按用户要求由 18px 放大到 24px 并整体上移；同日再上移 4px，
+   与日期文字间距 4px→8px，视觉重心更协调）——SVG 为矢量，放大不变形；
+   日期文字的盒模型与行高完全不变，图标不溢出行顶（实测上方留白区在图标
+   水平位置空置，与企鹅等装饰图水平相距 221px，不会重叠）。
    回看中：着色 --accent、显示圆点（.cal-mark）并加细光环。
    ≤860px 时父级 .rank-last 已 display:none，图标随之隐藏。 */
 .cal-icon-btn {
   appearance: none; -webkit-appearance: none;
   background: none; border: 0; padding: 0; margin: 0;
-  position: absolute; left: 50%; bottom: calc(100% + 4px);
+  position: absolute; left: 50%; bottom: calc(100% + 8px);
   transform: translateX(-50%);
   width: 24px; height: 24px; display: block;
   color: var(--text-faint); opacity: .5; cursor: pointer;
