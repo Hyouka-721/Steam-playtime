@@ -5,6 +5,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import { utcISO, shanghaiDate, addDays } from './lib/dates.mjs';
@@ -306,6 +307,12 @@ function main() {
   log(`已生成 docs/data/meta.json（${dates.length} 天，${playedGames} 款追踪期游戏 / ${lifetimePlayed} 款终身有游玩）`);
   log(`终身累计 ${lifetimeMinutes} min（${meta.stats.lifetime_hours} h），追踪期累计 ${totalMinutes} min`);
   log('⚠ 校验：meta.json 中不含完整 steamid =', !JSON.stringify(meta).includes('7656119'));
+
+  // 最后把首屏数据内联进 index.html（2026-10-18）：GitHub Pages 每个请求的
+  // TTFB 要 320~580ms，为此让首屏少发 1~2 次请求比省几 KB 更值钱。
+  // 单独拆成脚本是为了可以幂等重跑；这里自动串上，避免 CI 产出过期内联数据。
+  const r = spawnSync(process.execPath, [path.join(__dirname, 'inline-boot.mjs')], { stdio: 'inherit' });
+  if (r.status !== 0) log('⚠ inline-boot 失败，首屏将回退到 fetch 取数');
 }
 
 main();

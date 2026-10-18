@@ -145,13 +145,17 @@
       '</div>'
     ).join('');
   }
-  /** 首屏进入时先把骨架铺上，避免空白 —— 在 init 里最早调用 */
+  /** 首屏骨架（兜底）：骨架已由 index.html 静态预置，随首个字节即显示，
+   *  不必等本脚本下载执行。这里只处理"HTML 版本较旧、没有预置骨架"的情况
+   *  （例如用户缓存了旧 HTML），保证任何情况下都不会露出空白框。 */
   function paintSkeletons() {
     const lt = $('lt-list');
-    if (lt && !lt.querySelector('.rank-item')) lt.innerHTML = rankSkeleton(8);
+    if (lt && !lt.querySelector('.sk-row') && !lt.querySelector('.rank-item')) {
+      lt.innerHTML = rankSkeleton(8);
+    }
     ['c-lifetime', 'c-recent', 'c-ach', 'c-games', 'c-data'].forEach((id) => {
       const el = $(id);
-      if (el) el.classList.add('sk-value');
+      if (el && el.textContent.trim() === '—') el.classList.add('sk-value');
     });
   }
   function clearCardSkeleton() {
@@ -231,32 +235,63 @@
   }
 
   /* ---------- load ----------
-     2026-10-18 首屏优化：原来 meta → 逐月 → achievements 三层**严格串行**，
-     三层加起来 1.3s 全在等网络，等完才第一次渲染，于是用户看到的是一张
-     全是「—」的空白页。现在改为：
-       ① meta 只试 1 次、最快拿到；拿到就返回，**首屏立即可渲染**；
-       ② 月份文件并行拉取（原来 for-await 一个个来）；
-       ③ 成就**明细**不再进首屏关键路径——首屏只要 stats.pct 一个数，
-          从 meta.ach_stats（CI 已同步）读；完整 285KB 明细推迟到用户
-          点开「成就」页时再取（见 ensureAchDetail）。 */
+     2026-10-18 首屏优化（两轮）：
+     第一轮解决了「串行 + no-store + 285KB 进关键路径」；
+     第二轮发现真正的成本是 **GitHub Pages 的 TTFB**：连接复用后每个请求仍要
+     排 320~580ms 才回第一个字节，而文件本身只有几 KB。所以"减少请求数"比
+     "减小体积"更值钱。于是：
+       ① meta + 当月的 daily **合成一个请求**（原 2 个 → 1 个，省一次排队）；
+       ② 构建期把这份合并数据**内联进 index.html**（window.__BOOT），
+          首屏连这 1 个请求都不用发——DOM 解析完数据就在手上了；
+       ③ 内联数据带日期戳，过期（跨天/换了快照）则自动回退到 fetch，
+          保证数据永远是新的；
+       ④ 月份数据若有多个，第一个进内联，其余仍并行拉取。
+     兜底：没有内联数据（例如老页面缓存、构建未运行）时走原来的 fetch 路径。 */
+  const BOOT_MAX_AGE_H = 36; // 内联数据的最长可用时长（小时）；采集每天 23:30 跑一次
+
+  function bootDataIsFresh(b) {
+    if (!b || !b.generated_at) return false;
+    const t = Date.parse(b.generated_at);
+    if (!Number.isFinite(t)) return false;
+    return Date.now() - t < BOOT_MAX_AGE_H * 3600 * 1000;
+  }
+
   async function load() {
-    try {
-      state.meta = await jget('data/meta.json', 1); // 首屏关键：快速失败，交给 showFatal
-    } catch (e) {
-      showFatal('数据加载失败');
-      return false;
+    const boot = window.__BOOT;
+    let monthData = null;
+
+    if (bootDataIsFresh(boot)) {
+      // 快路径：内联数据即可用，零网络请求
+      state.meta = boot.meta;
+      monthData = boot.daily; // { '2026-10': {...} }
+    } else {
+      try {
+        state.meta = await jget('data/meta.json', 1); // 首屏关键：快速失败，交给 showFatal
+      } catch (e) {
+        showFatal('数据加载失败');
+        return false;
+      }
     }
 
-    // 月份文件并行拉取（通常只有 1–3 个，串行的收益差在这里被放大）
+    // 月份数据：内联里已带的直接用，缺的并行补拉
     const months = state.meta.months ?? [];
-    const results = await Promise.allSettled(months.map((m) => jget(`data/daily/${m}.json`, 2)));
-    results.forEach((r, i) => {
-      if (r.status === 'fulfilled') {
-        for (const [date, day] of Object.entries(r.value.days ?? {})) state.days.set(date, day);
-      } else {
-        console.warn('月份加载失败', months[i], r.reason);
+    if (monthData) {
+      for (const m of months) {
+        const d = monthData[m];
+        if (d) for (const [date, day] of Object.entries(d.days ?? {})) state.days.set(date, day);
       }
-    });
+    }
+    const missing = months.filter((m) => !monthData || !monthData[m]);
+    if (missing.length) {
+      const results = await Promise.allSettled(missing.map((m) => jget(`data/daily/${m}.json`, 2)));
+      results.forEach((r, i) => {
+        if (r.status === 'fulfilled') {
+          for (const [date, day] of Object.entries(r.value.days ?? {})) state.days.set(date, day);
+        } else {
+          console.warn('月份加载失败', missing[i], r.reason);
+        }
+      });
+    }
     state.allDates = [...state.days.keys()].sort();
     // 留底：进入「数据回看」时会被按目标日截断，退出时靠这两份还原
     state.allDatesFull = state.allDates;
@@ -312,6 +347,7 @@
   function renderCards() {
     const s = state.meta.stats ?? {};
     const asOf = state.meta.last_snapshot_date;
+    clearCardSkeleton(); // 有值了就把占位块撤掉（HTML 里预置的 sk-value 类）
 
     $('c-lifetime').textContent = hm(s.lifetime_minutes ?? 0);
 
