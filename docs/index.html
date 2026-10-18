@@ -7,13 +7,17 @@
 <link rel="icon" type="image/png" href="jerry.png?v=3">
 <link rel="apple-touch-icon" href="jerry.png?v=3">
 <script>
-  /* 每次进入/刷新都随机出一套主题（首屏前应用，避免闪默认配色） */
+  /* 主题持久化（2026-10-18 起，取代原先「每次进入/刷新随机换主题」）：
+     沿用 localStorage 里用户手动选过的主题；从未选过则用默认「暖阳米」cream。
+     仍在首屏前应用，避免闪默认配色；隐私模式下读写抛错时静默回落默认。 */
   (function () {
     var ids = ['cream', 'mint', 'dawn'];
-    document.documentElement.dataset.theme = ids[Math.floor(Math.random() * ids.length)];
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    document.documentElement.dataset.theme = ids.indexOf(saved) >= 0 ? saved : 'cream';
   })();
 </script>
-<link rel="stylesheet" href="style.css?v=80">
+<link rel="stylesheet" href="style.css?v=81">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/zcool-kuaile@5/index.min.css">
 <link rel="stylesheet" href="https://fonts.loli.net/css2?family=ZCOOL+KuaiLe&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"
@@ -32,7 +36,7 @@
 </head>
 <body>
 
-<!-- 背景氛围层（雨 / 雪 / 流星）：全屏 fixed + pointer-events:none，不拦截任何点击与输入 -->
+<!-- 背景氛围层（流星）：全屏 fixed + pointer-events:none，不拦截任何点击与输入 -->
 <canvas id="fx-canvas" aria-hidden="true"></canvas>
 
 <header class="site-header">
@@ -209,7 +213,7 @@
 </div>
 
 <!-- fx.js 先于 app.js 加载：app.js 绑定时需读取 window.__fx（特效状态的唯一来源） -->
-<script src="fx.js?v=14"></script>
-<script src="app.js?v=77" onerror="__appFail()"></script>
+<script src="fx.js?v=15"></script>
+<script src="app.js?v=78" onerror="__appFail()"></script>
 </body>
 </html>

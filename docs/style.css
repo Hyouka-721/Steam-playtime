@@ -1,4 +1,5 @@
-/* Steam 游戏时长统计 —— 多主题（3 套，全浅色）配色系统，点击站标/头像随机切换 */
+/* Steam 游戏时长统计 —— 多主题（3 套，全浅色）配色系统，点击站标随机切换，
+   选择记入 localStorage，刷新 / 重新进入沿用（2026-10-18 起不再刷新随机换） */
 /* 主题切换只改 CSS 变量，布局与功能完全一致 */
 
 /* 网站名花体字 Black Rose（本地嵌入，GitHub Pages 静态托管） */
@@ -433,15 +434,18 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    （2026-10-18 按用户要求由 18px 放大到 24px 并整体上移；同日再上移 4px，
    与日期文字间距 4px→8px，视觉重心更协调；同日夜再上移 8px，改由
    translateY(-8px) 承担——transform 不参与布局，日期文字的盒模型、行高及
-   与其它元素的间距完全不受影响）——SVG 为矢量，放大不变形。
-   实测：上移后与企鹅水平相距 221px 零重叠、距面板顶 25.4px 仍在面板内。
+   与其它元素的间距完全不受影响）。
+   2026-10-18 按用户要求再整体上移 8px（-8px → -16px）：与上一行内容视觉对齐；
+   仍由 transform 承担，尺寸（24×24 按钮 + 22×22 SVG）、间距、≤860px 响应式
+   隐藏策略全部不变。SVG 为矢量，放大不变形。
+   实测：上移后与企鹅水平相距 221px 零重叠、距面板顶 17.4px 仍在面板内。
    回看中：着色 --accent、显示圆点（.cal-mark）并加细光环。
    ≤860px 时父级 .rank-last 已 display:none，图标随之隐藏。 */
 .cal-icon-btn {
   appearance: none; -webkit-appearance: none;
   background: none; border: 0; padding: 0; margin: 0;
   position: absolute; left: 50%; bottom: calc(100% + 8px);
-  transform: translateX(-50%) translateY(-8px);
+  transform: translateX(-50%) translateY(-16px);
   width: 24px; height: 24px; display: block;
   color: var(--text-faint); opacity: .5; cursor: pointer;
   touch-action: manipulation; /* 触屏尽快响应，免除双击缩放等待 */

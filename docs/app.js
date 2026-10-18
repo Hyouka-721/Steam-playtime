@@ -97,15 +97,18 @@
   function applyTheme(id, { announce = false } = {}) {
     if (!THEMES.some((t) => t.id === id)) id = 'cream';
     document.documentElement.dataset.theme = id;
+    // 持久化：刷新 / 重新进入页面时沿用（2026-10-18 起取代刷新随机换主题）；
+    // <head> 内联脚本首屏前读同一 key，隐私模式下静默失败不影响当前会话
+    try { localStorage.setItem('theme', id); } catch (e) { /* 隐私模式下忽略 */ }
     syncThemeUi(id);
     // 图表画在 canvas 上，不会跟随 CSS 变量，需重新渲染
     if (state.charts.drill) renderDrill();
     if (announce) toast(`主题：${themeName(id)}`);
   }
 
-  /** 同步站标（小黄人）的 title 提示（主题由首屏内联脚本随机决定时也要更新文案）。
-      头像（史蒂夫）自 2026-10-18 起不再参与主题切换——它改作「游玩日历」入口，
-      提示文案由 renderReviewBar / exitReview 负责维护，故不在此同步。 */
+  /** 同步站标（小黄人）的 title 提示（首屏内联脚本先于本脚本应用了持久化主题，
+      文案也要随之更新）。头像（史蒂夫）自 2026-10-18 起不再参与主题切换——它改作
+      「游玩日历」入口，提示文案由 renderReviewBar / exitReview 负责维护，故不在此同步。 */
   function syncThemeUi(id = currentTheme()) {
     const light = $('theme-light');
     if (light) light.title = `当前主题：${themeName(id)} · 点击切换浅色主题`;
@@ -1316,7 +1319,7 @@
     }, 12000);
     try {
       bind();
-      // 主题已由 <head> 内联脚本随机决定，这里只同步头像提示文案
+      // 主题已由 <head> 内联脚本按 localStorage 决定（默认 cream），这里只同步站标提示文案
       syncThemeUi();
       if (!(await load())) return;
       clearTimeout(watchdog);
