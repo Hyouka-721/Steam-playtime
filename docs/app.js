@@ -9,15 +9,21 @@
   const CAPSULE = (appid) => `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/header.jpg`;
 
   const state = {
-    meta: null,
-    ach: null,            // docs/data/achievements.json（可能尚未生成）
-    achFilter: null,      // 成就页游戏筛选
-    days: new Map(),      // 'YYYY-MM-DD' -> day
+    meta: null,       // 当前生效的 meta：正常态为原始值，回看态为按目标日反推的派生快照
+    ach: null,        // docs/data/achievements.json（可能尚未生成）
+    achFilter: null,  // 成就页游戏筛选
+    days: new Map(),  // 'YYYY-MM-DD' -> day（始终保留全量，回看只截断日期索引）
     allDates: [],
     view: 'lifetime',
     drill: { appid: null },   // 二级趋势界面：null = 每日总时长
     drillRange: 30,
     charts: {},
+    // ---- 数据回看（史蒂夫头像 → 游玩日历）----
+    review: null,       // 回看日期 'YYYY-MM-DD'；null = 最新数据（今天）
+    metaFull: null,     // 原始 meta 留底，退出回看时还原
+    achFull: null,      // 原始成就留底
+    allDatesFull: [],   // 原始日期索引留底
+    cal: { open: false, ym: '2026-10', busy: false, lastFocus: null },
   };
 
   // ---------- utils ----------
@@ -98,7 +104,8 @@
   }
 
   /** 同步站标（小黄人）的 title 提示（主题由首屏内联脚本随机决定时也要更新文案）。
-      头像（史蒂夫）2026-10-18 起改为纯装饰，不再参与主题切换，故不在此同步。 */
+      头像（史蒂夫）自 2026-10-18 起不再参与主题切换——它改作「游玩日历」入口，
+      提示文案由 renderReviewBar / exitReview 负责维护，故不在此同步。 */
   function syncThemeUi(id = currentTheme()) {
     const light = $('theme-light');
     if (light) light.title = `当前主题：${themeName(id)} · 点击切换浅色主题`;
@@ -139,6 +146,9 @@
       }
     }
     state.allDates = [...state.days.keys()].sort();
+    // 留底：进入「数据回看」时会被按目标日截断，退出时靠这两份还原
+    state.allDatesFull = state.allDates;
+    state.metaFull = state.meta;
 
     // 成就数据：可选资源，404 / 占位（ready:false）时卡片与详情页显示待采集
     try {
@@ -147,6 +157,7 @@
     } catch (e) {
       console.warn('成就数据未生成（每日采集任务自明日开始产出）');
     }
+    if (state.ach) state.achFull = state.ach;
     return true;
   }
 
@@ -716,6 +727,384 @@
     return rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
   }
 
+  // ---------- 史蒂夫头像 → 游玩日历 + 数据回看 ----------
+  /** 一周从周一起算，与 renderTimeline 的 weekStart 保持一致 */
+  const todayStr = () => ymd(new Date());
+  /** 有游玩记录 = 当日分钟数 > 0（CI 可能写入 0 分钟的占位日，那也按无记录处理） */
+  const hasPlay = (d) => (state.days.get(d)?.total_minutes ?? 0) > 0;
+
+  /** 可翻阅的月份范围受限于已落盘的 data/daily/*.json（meta.months），避免翻到空月份 */
+  function calRange() {
+    const ms = (state.metaFull?.months ?? []).slice().sort();
+    return ms.length ? { min: ms[0], max: ms[ms.length - 1] } : null;
+  }
+
+  /** 打开日历时的默认月：最新快照所在月（当前数据即 2026-10），退化到有数据的最后一个月 */
+  function calDefaultMonth() {
+    const snap = state.metaFull?.last_snapshot_date;
+    if (snap) {
+      const r = calRange();
+      const m = snap.slice(0, 7);
+      if (!r || (m >= r.min && m <= r.max)) return m;
+      return r.max;
+    }
+    const r = calRange();
+    return r ? r.max : todayStr().slice(0, 7);
+  }
+
+  function setCalStatus(msg, isErr = false) {
+    const el = $('cal-status');
+    if (!el) return;
+    el.textContent = msg ?? '';
+    el.classList.toggle('err', !!isErr);
+  }
+
+  function setCalBusy(on, text) {
+    state.cal.busy = on;
+    const mask = $('cal-mask');
+    if (mask) {
+      mask.hidden = !on;
+      const t = mask.querySelector('.cal-mask-text');
+      if (t) t.textContent = text ?? '加载中…';
+    }
+  }
+
+  function renderCalGrid() {
+    const grid = $('cal-grid');
+    if (!grid) return;
+    const ym = state.cal.ym;
+    const [y, m] = ym.split('-').map(Number);
+    $('cal-title').textContent = `${y} 年 ${m} 月`;
+
+    const range = calRange();
+    const prev = $('cal-prev');
+    const next = $('cal-next');
+    if (prev) prev.disabled = !!range && ym <= range.min;
+    if (next) next.disabled = !!range && ym >= range.max;
+
+    if (!state.metaFull) {
+      grid.innerHTML = '<div class="cal-empty">数据尚未加载完成，请稍候再试</div>';
+      setCalStatus('数据未就绪', true);
+      return;
+    }
+
+    // 周一为一周首日 → 1 号之前要补几个空格
+    const lead = (new Date(`${ym}-01T12:00:00Z`).getUTCDay() + 6) % 7;
+    const dim = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    const today = todayStr();
+
+    const cells = [];
+    for (let i = 0; i < lead; i++) cells.push('<span class="cal-day pad" aria-hidden="true"></span>');
+    let activeCount = 0;
+    for (let n = 1; n <= dim; n++) {
+      const ds = `${ym}-${String(n).padStart(2, '0')}`;
+      const day = state.days.get(ds);
+      const play = hasPlay(ds);
+      if (play) activeCount++;
+      const cls = ['cal-day', play ? 'on' : 'off'];
+      if (ds === today) cls.push('today');
+      if (ds === state.review) cls.push('sel');
+      const tip = play
+        ? `${ds} · 游玩 ${hm(day.total_minutes)}　点击回溯到这一天`
+        : `${ds} · 无游玩记录`;
+      cells.push(
+        `<span class="${cls.join(' ')}" data-date="${ds}"` +
+          ` role="${play ? 'button' : 'presentation'}" tabindex="${play ? 0 : -1}"` +
+          ` aria-disabled="${play ? 'false' : 'true'}" title="${escapeHtml(tip)}">` +
+          `<span class="cal-num">${n}</span>` +
+          (play ? `<span class="cal-min">${hoursShort(day.total_minutes)}</span>` : '') +
+          `</span>`,
+      );
+    }
+    grid.innerHTML = cells.join('');
+    setCalStatus(state.review ? `正在回看 ${state.review}` : `本月 ${activeCount} 天有记录`);
+  }
+
+  function stepMonth(delta) {
+    const [y, m] = state.cal.ym.split('-').map(Number);
+    const d = new Date(Date.UTC(y, m - 1 + delta, 1));
+    const next = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+    const r = calRange();
+    if (r && (next < r.min || next > r.max)) return;
+    state.cal.ym = next;
+    renderCalGrid();
+  }
+
+  function openCal(ym) {
+    if (state.cal.open) return;
+    state.cal.open = true;
+    state.cal.lastFocus = document.activeElement;
+    state.cal.ym = (ym || state.review || calDefaultMonth()).slice(0, 7);
+    const ov = $('cal-overlay');
+    ov.hidden = false;
+    setCalBusy(false);
+    setCalStatus('');
+    renderCalGrid();
+    document.addEventListener('keydown', onCalKey, true);
+    const first = $('cal-grid').querySelector('.cal-day.sel') ?? $('cal-close');
+    if (first) first.focus();
+  }
+
+  function closeCal() {
+    if (!state.cal.open) return;
+    state.cal.open = false;
+    setCalBusy(false);
+    $('cal-overlay').hidden = true;
+    document.removeEventListener('keydown', onCalKey, true);
+    const f = state.cal.lastFocus;
+    if (f && f.isConnected && f.focus) f.focus();
+  }
+
+  function onCalKey(e) {
+    if (e.key === 'Escape') {
+      if (state.cal.busy) return;
+      e.preventDefault();
+      e.stopPropagation();
+      closeCal();
+    } else if (e.key === 'ArrowLeft' && !state.cal.busy) {
+      stepMonth(-1);
+    } else if (e.key === 'ArrowRight' && !state.cal.busy) {
+      stepMonth(1);
+    }
+  }
+
+  /** 按目标日重建一份「当时的 meta 快照」。
+      仓库只保存每日差分（以及一份当前终身累计），没有历史全量快照，因此：
+        · 每日相关统计 —— 在截断到该日的每日记录上真实重算（精确）
+        · 终身累计 —— 用「当前值 − 该日之后的每日增量」反推（估算）
+        · 成就 —— 按解锁时间过滤（精确）
+      无法精确还原的部分统一记进 notes，由状态条明示给用户。 */
+  function buildSnapshot(date) {
+    const full = state.metaFull;
+    if (!full) throw new Error('数据尚未加载完成');
+    const within = state.allDatesFull.filter((d) => d <= date);
+    const after = state.allDatesFull.filter((d) => d > date);
+    if (!within.length) throw new Error('该日之前没有任何每日记录，无法回溯');
+    if (!full.games_lifetime || !Object.keys(full.games_lifetime).length) {
+      throw new Error('缺少游戏终身时长数据，无法还原');
+    }
+
+    const notes = [];
+    // 之后的每日增量 / 每款游戏的增量
+    const laterTotal = after.reduce((a, d) => a + (state.days.get(d)?.total_minutes ?? 0), 0);
+    const laterByApp = new Map();
+    for (const d of after) {
+      for (const g of state.days.get(d)?.games ?? []) {
+        const k = String(g.appid);
+        laterByApp.set(k, (laterByApp.get(k) ?? 0) + g.minutes);
+      }
+    }
+
+    const day = state.days.get(date);
+    if (laterTotal > 0) notes.push('终身累计为按「当前值 − 之后增量」反推的估算值');
+    if (!day) {
+      notes.push('当日没有独立快照，展示的是此前最近一次记录的状态');
+    } else {
+      if ((day.span_days ?? 1) > 1) notes.push(`当日覆盖 ${day.span_days} 天（含补采），数值偏高`);
+      if (day.confidence === 'low') notes.push('当日为低置信度快照');
+      else if (day.confidence === 'medium') notes.push('当日置信度中等');
+      if ((day.flags ?? []).length) notes.push(`标记：${day.flags.join('、')}`);
+    }
+
+    // ---- 每日维度：精确重算 ----
+    const totalMin = within.reduce((a, d) => a + (state.days.get(d)?.total_minutes ?? 0), 0);
+    const appSet = new Set();
+    for (const d of within) {
+      for (const g of state.days.get(d)?.games ?? []) appSet.add(String(g.appid));
+    }
+    let cur = 0;
+    let p = date;
+    while (hasPlay(p)) {
+      cur++;
+      p = addDaysStr(p, -1);
+    }
+    let longest = 0;
+    let run = 0;
+    for (const d of eachDate(within[0], date)) {
+      if (hasPlay(d)) {
+        run++;
+        if (run > longest) longest = run;
+      } else run = 0;
+    }
+    const weekMin = eachDate(addDaysStr(date, -6), date).reduce(
+      (a, d) => a + (state.days.get(d)?.total_minutes ?? 0),
+      0,
+    );
+    let best = null;
+    for (const d of within) {
+      const mm = state.days.get(d)?.total_minutes ?? 0;
+      if (mm > 0 && (!best || mm > best.minutes)) best = { date: d, minutes: mm };
+    }
+    const lifetimeMin = Math.max(0, (full.stats?.lifetime_minutes ?? 0) - laterTotal);
+    const stats = {
+      ...(full.stats ?? {}),
+      lifetime_minutes: lifetimeMin,
+      lifetime_hours: Math.round((lifetimeMin / 60) * 10) / 10,
+      total_minutes: totalMin,
+      total_hours: Math.round((totalMin / 60) * 10) / 10,
+      tracked_days: within.length,
+      active_days: within.filter(hasPlay).length,
+      current_streak: cur,
+      longest_streak: longest,
+      week_minutes: weekMin,
+      played_games: appSet.size,
+      best_day: best,
+    };
+
+    // ---- 每款游戏的终身时长：减去之后增量反推；last_played 一并截断 ----
+    const gl = {};
+    for (const [k, g] of Object.entries(full.games_lifetime ?? {})) {
+      const later = laterByApp.get(String(g.appid)) ?? 0;
+      let last = g.last_played ?? null;
+      if (last && last > date) {
+        last = null;
+        for (const d of within) {
+          if ((state.days.get(d)?.games ?? []).some((x) => String(x.appid) === String(g.appid))) last = d;
+        }
+      }
+      gl[k] = { ...g, lifetime_minutes: Math.max(0, (g.lifetime_minutes ?? 0) - later), last_played: last };
+    }
+
+    // ---- games_index 同步重算（保持派生 meta 的形状完整） ----
+    const gi = {};
+    for (const d of within) {
+      for (const g of state.days.get(d)?.games ?? []) {
+        const k = String(g.appid);
+        const it =
+          gi[k] ??
+          (gi[k] = {
+            appid: g.appid,
+            name: g.name,
+            img_icon_url: full.games_lifetime?.[k]?.img_icon_url ?? '',
+            total_minutes: 0,
+            first_day: d,
+            last_day: d,
+          });
+        it.total_minutes += g.minutes;
+        it.last_day = d;
+      }
+    }
+
+    const health = {
+      ...(full.health ?? {}),
+      gap_days: within.filter((d) => (state.days.get(d)?.span_days ?? 1) > 1).length,
+      low_confidence_days: within.filter((d) => state.days.get(d)?.confidence === 'low').length,
+    };
+
+    return {
+      meta: { ...full, last_snapshot_date: date, stats, games_lifetime: gl, games_index: gi, health },
+      notes,
+    };
+  }
+
+  /** 成就回看：按解锁时间（Asia/Shanghai）截断，重算解锁数与完成度 */
+  function buildAchSnapshot(date) {
+    const full = state.achFull;
+    if (!full?.stats) return null;
+    const games = {};
+    let unlocked = 0;
+    for (const [k, g] of Object.entries(full.games ?? {})) {
+      const list = (g.achievements ?? []).filter((a) => (achDate(a.ts) ?? '') <= date);
+      unlocked += list.length;
+      games[k] = { ...g, unlocked: list.length, achievements: list };
+    }
+    const total = full.stats.total ?? 0;
+    return {
+      ...full,
+      games,
+      stats: { ...full.stats, unlocked, pct: total ? Math.round((unlocked / total) * 1000) / 10 : 0 },
+    };
+  }
+
+  /** 所有模块按「当前生效的 meta / allDates」重渲染（回看进入与退出共用） */
+  function renderAll() {
+    renderCards();
+    renderLifetime();
+    renderRecent();
+    renderAch();
+    renderHealth();
+    buildAchSelect();
+    renderTimeline();
+    switchView(state.view);
+    // switchView('lifetime') 会 closeDrill，所以要在其后判断下钻界面是否仍然打开
+    if (!$('lt-detail').hidden && window.echarts) {
+      try {
+        renderDrill();
+      } catch (e) {
+        console.warn('回看态重绘趋势图失败', e);
+      }
+    }
+  }
+
+  function renderReviewBar(date, notes = []) {
+    const bar = $('review-bar');
+    if (!bar) return;
+    bar.hidden = false;
+    $('review-date').textContent = date;
+    const latest = state.metaFull?.last_snapshot_date;
+    const note = notes.length
+      ? notes.map(escapeHtml).join('；')
+      : '已按该日状态重建全部模块（每日数据为精确重算）';
+    const tail = latest && latest !== date ? `<span class="review-dim">　最新快照：${escapeHtml(latest)}</span>` : '';
+    $('review-note').innerHTML = note + tail;
+    const btn = $('calendar-toggle');
+    if (btn) {
+      btn.classList.add('reviewing');
+      btn.title = `正在回看 ${date} · 点击选择其它日期`;
+    }
+  }
+
+  async function enterReview(date) {
+    if (state.cal.busy) return;
+    if (!state.metaFull) {
+      setCalStatus('数据尚未加载完成，请稍候再试', true);
+      return;
+    }
+    if (!hasPlay(date)) {
+      setCalStatus('该日期没有游玩记录', true);
+      return;
+    }
+    setCalStatus('');
+    setCalBusy(true, '正在回溯数据…');
+    try {
+      // 派生快照是同步 CPU 操作，先让浏览器把 loading 画出来
+      await new Promise((r) => setTimeout(r, 60));
+      const snap = buildSnapshot(date);
+      state.review = date;
+      state.meta = snap.meta;
+      state.ach = buildAchSnapshot(date);
+      state.allDates = state.allDatesFull.filter((d) => d <= date);
+      renderReviewBar(date, snap.notes);
+      renderAll();
+      closeCal();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      toast(`已回溯到 ${date}`);
+    } catch (err) {
+      // 关键：失败只提示，绝不改动 state.meta / state.allDates，页面保持原样
+      console.error('回溯失败', err);
+      setCalStatus(`回溯失败：${err.message}（页面状态未改变）`, true);
+    } finally {
+      setCalBusy(false);
+    }
+  }
+
+  function exitReview() {
+    if (!state.review) return;
+    state.review = null;
+    state.meta = state.metaFull;
+    state.ach = state.achFull;
+    state.allDates = state.allDatesFull;
+    $('review-bar').hidden = true;
+    const btn = $('calendar-toggle');
+    if (btn) {
+      btn.classList.remove('reviewing');
+      btn.title = '点击查看游玩日历';
+    }
+    renderAll();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    toast('已返回最新数据');
+  }
+
   // ---------- tabs / init ----------
   function switchView(v) {
     state.view = v;
@@ -728,8 +1117,7 @@
   }
 
   function bind() {
-    // 杰瑞（站标）：点击随机切换浅色主题；汤姆（头像）：点击随机切换深色主题
-    // 键盘 Enter / 空格同样支持
+    // 站标（小黄人）：点击随机切换浅色主题；键盘 Enter / 空格同样支持
     const bindFlip = (el, mode) => {
       if (!el) return;
       const flip = () => applyTheme(randomTheme(mode), { announce: true });
@@ -741,8 +1129,45 @@
         }
       });
     };
-    // 只有站标（小黄人）绑定主题切换；史蒂夫头像自 2026-10-18 起为纯装饰，不绑定任何点击
+    // 只有站标（小黄人）绑定主题切换；史蒂夫头像自 2026-10-18 起不再切主题，
+    // 改作「游玩日历」入口（见下方 bindCalendar）
     bindFlip($('theme-light'), 'light');
+
+    // 史蒂夫头像 → 打开游玩日历（点击 / 回车 / 空格均可）
+    const calBtn = $('calendar-toggle');
+    if (calBtn) {
+      calBtn.addEventListener('click', () => openCal());
+      calBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openCal();
+        }
+      });
+    }
+
+    // 日历浮层：上下月、关闭、点空白关闭、点有记录的日期回溯
+    $('cal-prev').addEventListener('click', () => stepMonth(-1));
+    $('cal-next').addEventListener('click', () => stepMonth(1));
+    $('cal-close').addEventListener('click', () => closeCal());
+    $('cal-overlay').addEventListener('click', (e) => {
+      if (e.target.closest('.cal-panel')) return; // 面板内的点击不关闭
+      if (!state.cal.busy) closeCal();
+    });
+    $('cal-grid').addEventListener('click', (e) => {
+      const cell = e.target.closest('.cal-day.on');
+      if (cell && !state.cal.busy) enterReview(cell.dataset.date);
+    });
+    $('cal-grid').addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const cell = e.target.closest('.cal-day.on');
+      if (!cell || state.cal.busy) return;
+      e.preventDefault();
+      enterReview(cell.dataset.date);
+    });
+
+    // 回看状态条：更改日期 / 返回今天
+    $('btn-review-cal').addEventListener('click', () => openCal());
+    $('btn-review-exit').addEventListener('click', exitReview);
 
     // 网站名：点击返回顶部（键盘 Enter / 空格同样支持）
     const titleHome = $('site-title');

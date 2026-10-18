@@ -201,8 +201,10 @@ a { color: var(--accent); }
 .header-meta { display: flex; gap: 10px; align-items: center; font-size: 12px; }
 /* 头像：CSS 背景呈现，不可拖动/另存。
    2026-10-18 换成 Minecraft 史蒂夫+狼（docs/minecraft.png，438×423 RGBA），
-   并**移除「点击切换主题」交互**（原 click/keydown 监听已删），
-   所以 cursor / hover / active / focus-visible / transition 一并清理掉。
+   并**移除「点击切换主题」交互**（原来绑在它身上的主题切换逻辑已删）；
+   同日又改成「游玩日历」入口：点击弹出月历，可选择有记录的日期做数据回看。
+   所以这里重新加回指针态与 hover/active/focus 反馈（与左侧站标同一套手感），
+   但不再牵扯任何主题代码。
    注意：contain 保证等比不拉伸；去掉 scaleX(-1) 保持原图朝向。 */
 .header-avatar {
   width: 132px; height: 132px;
@@ -210,7 +212,14 @@ a { color: var(--accent); }
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
   flex-shrink: 0;
   justify-self: end;
+  cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+  transition: transform .18s ease;
 }
+.header-avatar:hover { transform: scale(1.05); }
+.header-avatar:active { transform: scale(0.96); }
+.header-avatar:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 12px; }
+/* 回看状态下给入口一个持续可见的强调环，提示「当前看的不是最新数据」 */
+.header-avatar.reviewing { box-shadow: 0 0 0 2px var(--accent), 0 0 0 6px var(--ring); border-radius: 14px; }
 
 /* 切换主题时的一闪提示 */
 .toast {
@@ -629,4 +638,142 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 @media (max-width: 480px) {
   .logo, .header-avatar { width: 88px; height: 88px; }
   .site-title { font-size: 44px; letter-spacing: 1px; }
+}
+
+/* ================= 数据回看状态条 ================= */
+/* 史蒂夫头像 → 月历选中有游玩记录的日期后出现；「返回今天」退出回看 */
+.review-bar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin: 16px 28px 0; padding: 10px 16px;
+  background:
+    linear-gradient(150deg, var(--tint-2), transparent 60%),
+    var(--panel);
+  border: 1px solid var(--tint-border); border-radius: var(--radius);
+  box-shadow: 0 0 0 1px var(--ring), var(--card-shadow);
+  font-size: 12.5px; color: var(--text-dim); line-height: 1.6;
+}
+/* flex 会覆盖 UA 的 [hidden]，必须显式声明 */
+.review-bar[hidden] { display: none; }
+.review-badge {
+  background: var(--accent); color: #fff; border-radius: 999px;
+  padding: 1px 12px; font-size: 12px; letter-spacing: .8px; white-space: nowrap;
+  font-weight: 600;
+}
+.review-date {
+  color: var(--text-strong); font-weight: 700; font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.review-note { flex: 1 1 320px; min-width: 0; }
+.review-dim { opacity: .7; }
+.review-actions { display: flex; gap: 8px; margin-left: auto; }
+.review-actions .btn { padding: 5px 12px; font-size: 12.5px; }
+
+/* ================= 游玩日历浮层 ================= */
+/* 点击右上史蒂夫头像打开；点空白 / Esc 关闭。三套主题均为浅色，色值直接走 CSS 变量 */
+.cal-overlay {
+  position: fixed; inset: 0; z-index: 60;
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.cal-overlay[hidden] { display: none; }
+.cal-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(30, 22, 14, 0.38);
+  backdrop-filter: blur(2px);
+}
+.cal-panel {
+  position: relative; width: 372px; max-width: 100%;
+  max-height: calc(100vh - 48px); overflow: auto;
+  background: var(--panel); border: 1px solid var(--border-hi);
+  border-radius: 14px; padding: 16px 18px 14px;
+  box-shadow: 0 18px 48px rgba(40, 25, 10, 0.28);
+  animation: cal-in .18s ease both;
+}
+@keyframes cal-in {
+  from { opacity: 0; transform: translateY(8px) scale(.98); }
+  to { opacity: 1; transform: none; }
+}
+.cal-head {
+  display: grid; grid-template-columns: 34px 1fr 34px 34px; align-items: center; gap: 6px;
+  margin-bottom: 12px;
+}
+.cal-title {
+  text-align: center; font-size: 16px; font-weight: 700; color: var(--text-strong);
+  font-variant-numeric: tabular-nums;
+}
+.cal-nav, .cal-close {
+  width: 32px; height: 32px; padding: 0; border-radius: 8px;
+  background: var(--sunken); border: 1px solid var(--border); color: var(--text);
+  cursor: pointer; font-size: 17px; line-height: 1; font-family: inherit;
+  display: grid; place-items: center;
+  transition: border-color .15s, color .15s;
+}
+.cal-nav:hover:not(:disabled), .cal-close:hover { border-color: var(--accent-2); color: var(--accent); }
+.cal-nav:disabled { opacity: .35; cursor: not-allowed; }
+.cal-weekdays, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-weekdays {
+  font-size: 11.5px; color: var(--text-faint); text-align: center; margin-bottom: 6px;
+}
+.cal-day {
+  position: relative; aspect-ratio: 1 / 1; min-height: 42px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border-radius: 9px; border: 1px solid transparent; background: transparent;
+  font-size: 14px; line-height: 1.15; font-variant-numeric: tabular-nums;
+  user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.cal-day.pad { visibility: hidden; }
+/* 有游玩记录：黑色 + 可点击 */
+.cal-day.on {
+  color: #000; font-weight: 700; cursor: pointer;
+  background: var(--tint-2); border-color: var(--tint-border);
+  transition: background .14s, border-color .14s, transform .14s;
+}
+.cal-day.on:hover, .cal-day.on:focus-visible {
+  background: var(--tint-1); border-color: var(--accent);
+  transform: translateY(-1px); outline: none;
+}
+/* 无记录 / 未来日期：灰色 + 禁用 */
+.cal-day.off { color: var(--text-faint); opacity: .7; cursor: not-allowed; }
+.cal-day.today { box-shadow: inset 0 0 0 1px var(--border-hi); }
+/* 当前正在回看的日期 */
+.cal-day.sel { background: var(--accent); border-color: var(--accent-2); color: #fff; }
+.cal-day.sel .cal-min { color: rgba(255, 255, 255, .88); }
+.cal-min { font-size: 10px; font-weight: 500; color: var(--text-dim); margin-top: 1px; }
+.cal-day.off .cal-min { display: none; }
+.cal-empty {
+  grid-column: 1 / -1; text-align: center; color: var(--text-dim);
+  font-size: 12.5px; padding: 22px 0;
+}
+.cal-foot {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);
+  font-size: 11.5px; color: var(--text-dim);
+}
+.cal-legend { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.cal-dot {
+  width: 10px; height: 10px; border-radius: 3px;
+  background: var(--tint-2); border: 1px solid var(--tint-border);
+}
+.cal-dot.off { background: var(--sunken); border-color: var(--border); }
+.cal-status { margin-left: auto; text-align: right; }
+.cal-status.err { color: var(--warn); }
+/* 回溯进行中的遮罩：失败时也在此提示，且不动页面原有状态 */
+.cal-mask {
+  position: absolute; inset: 0; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: rgba(255, 255, 255, .78);
+  font-size: 13px; color: var(--text-dim);
+}
+.cal-mask[hidden] { display: none; }
+.cal-spin {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid var(--border-hi); border-top-color: var(--accent);
+  animation: cal-spin .8s linear infinite;
+}
+@keyframes cal-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 480px) {
+  .review-bar { margin: 12px 16px 0; }
+  .cal-overlay { padding: 12px; }
+  .cal-panel { width: 100%; }
+  .cal-day { min-height: 38px; font-size: 13px; }
 }
