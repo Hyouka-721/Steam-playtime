@@ -12,9 +12,11 @@
  * · 雨模式（默认开启）：Canvas 粒子系统——按可配置密度随机生成，每滴随机
  *   大小/速度/透明度/倾斜角；dt 驱动物理（帧率无关），顶部淡入入场、触水
  *   溅射、越界回收，对象池 + 同屏上限，无直接消失/闪烁/内存泄漏
- * · 雨模式附加：视口底部积水层（波动水面线 + 雨滴水中倒影），雨滴落地触发
- *   飞溅水花粒子与扩散涟漪圆环——落点检测与绘制共用同一水面函数 surfaceY()，
+ * · 雨模式附加：视口底部积水层（平静水面线 + 雨滴水中倒影），雨滴落地触发
+ *   飞溅水花粒子与扩散涟漪圆环——落点检测与绘制共用同一水面线 groundY，
  *   保证判定位置与视觉效果一致；另有与落点解耦的低频环境涟漪点缀水面
+ *   （2026-10-18：移除水面线的时间涌动/谐波起伏，groundY 恒定；雪花左右
+ *    摆动 sway 同步移除，静态出生随机不受影响）
  * ---------------------------------------------------------------------------
  * 调参入口：下方 CONFIG —— 数量 / 密度 / 速度 / 方向 / 透明度全部集中在这里
  * ========================================================================== */
@@ -54,7 +56,6 @@
     puddle: {
       height: 14,        // 积水层高度（视口底部，CSS px；2026-10-18 按用户要求降至最底部——
                          // 原 96px 会盖住列表下方大片区域，现水面线贴在 h-14 处）
-      waveAmp: 2.6,      // 水面线波动振幅 px（两条正弦谐波叠加，随时间缓慢涌动）
       alpha: 0.10,       // 积水基底不透明度（水面处最大，向下渐隐至 35%）
       lineAlpha: 0.42,   // 水面线不透明度
       reflectRange: 28,  // 倒影作用范围：雨滴距水面多高以内绘制水中镜像
@@ -76,22 +77,44 @@
       ringR: [16, 34],     // 涟漪最大半径 px
       ambientPerSec: 0.8,  // 环境涟漪频率 次/秒：与雨滴落点解耦的零星涟漪
                            // （取参考版本「独立涟漪层」之长——雨小时水面也有生气；
-                           //   位置仍贴 surfaceY，透明度更淡，不与落点涟漪抢戏；0=关闭）
+                           //   位置仍贴水面线 groundY，透明度更淡，不与落点涟漪抢戏；0=关闭）
       ambientAlphaScale: 0.55, // 环境涟漪透明度缩放（相对落点涟漪）
     },
 
     // ---- 雪 ----
+    /* 2026-10-18 重写：粒子模型对齐 Wallpaper Engine「故宫 snowperspective」
+     * 预设（创意工坊 3115274650），参数按 1440×900 基准等比映射到 CSS px：
+     *   sizerandom      2–30        → radius 1–11px（原预设单位，按摄像机缩放折半）
+     *   velocityrandom  (-37..-10, -90..-50) → 速度 46–92 px/s
+     *                   x 向速度恒为负 = 统一向左飘的风；|vy| 越大则越靠前越快
+     *   alphafade       入场 0.1s 淡入，年龄全覆盖才满不透明
+     *   colorrandom     纯白 → 灰 (95,98,100)：远景偏灰、近景偏白，形成纵深
+     *   maxcount 360 × 实例 count 1.65 × alpha 0.31 ≈ 每屏 150 片（上限 420）
+     *
+     * 2026-10-18 定色：雪花改为**固定纯白 #FFFFFF**，不再读取 --fx-snow。
+     * 原先 colorVar 走主题变量（cream #c3d2df / mint #bcd9e4 / dawn #cfc9e8），
+     * 换主题雪花会跟着偏蓝 / 偏青 / 偏紫。现在 rgb 字段优先于 colorVar，
+     * 三档预染贴图全部由 rgb 推导——纯白只按「不透明度」分出纵深，色相恒为 255,255,255。
+     * colorVar 保留仅为字段对齐（rain/meteor 仍在用），雪模式永不读取它。 */
     snow: {
-      colorVar: '--fx-snow',
-      density: 70,          // 每 1e6 px² 的雪点数（1440×950 ≈ 96 片）
-      min: 35, max: 180,
-      speed: [18, 62],      // 下落速度 px/秒（比雨慢很多）
-      radius: [0.9, 2.6],   // 雪点半径 px
-      alpha: [0.28, 0.62],
-      angleDeg: 8,          // 方向：整体风向偏角（负数则向左）
-      swayAmp: [6, 22],     // 左右摆动幅度 px
-      swaySpeed: [0.35, 1.1],// 摆动频率
-      blur: 2.2,            // 边缘柔化（越大越像绒毛）
+      colorVar: '--fx-snow',  // 仅占位，实际不生效：rgb 存在时优先
+      rgb: [255, 255, 255],   // ★ 固定纯白 #FFFFFF —— 不随任何主题变化
+      density: 110,          // 每 1e6 px² 的雪花数（1440×900 ≈ 143 片）
+      min: 55, max: 420,
+      speed: [46, 92],       // 下落速度 px/秒
+      radius: [0.9, 7.5],    // 雪花视觉半径 px（大 = 近，小 = 远）
+                     // 预设 sizerandom 2–30 是 3D 单位，直接映射会让近景雪片直径 22px，
+                     // 在网页上过重；收到 7.5 上限，兼顾纵深与"雪"而非"泡泡"的观感
+      alpha: [0.31, 0.31],   // 整体不透明度（预设实例 alpha = 0.31）
+      angleDeg: 9,           // 风向偏角：正数 = 向左下飘（预设 x 速度为负）
+      windJitter: 0.35,      // 每片速度的横向抖动比例（出生时确定，不随时间摆动）
+      fadeIn: 4,             // 出生后多少秒内完成淡入（对应预设 alphafade 0.1 × lifetime 1.01）
+      farAlpha: 0.5,         // 最远（最小）雪的额外透明度系数
+      nearAlpha: 1.45,       // 最近（最大）雪的透明度系数（>1 = 近景更实）
+      softEdge: 0.45,        // 边缘柔化：0 = 硬边，1 = 极柔
+      depthShade: 0.42,      // ★ 纵深明暗幅度：远景压到 58% 亮度、近景 100% 纯白。
+                             //   只压亮度不改色相（R=G=B），因此仍是纯白家族；
+                             //   设 0 = 全屏同一亮度（彻底关掉纵深明暗）
     },
 
     // ---- 流星 ----
@@ -147,21 +170,24 @@
   let raf = 0, last = 0;       // 动画帧句柄与上一帧时间戳
   let spawnAcc = 0;            // 流星生成累加器
   let colors = { rain: [58, 64, 72], snow: [195, 210, 223], meteor: [232, 150, 74] };
-  let clock = 0;               // 雨模式时钟（秒）：驱动积水水面波动
-  let groundY = 0;             // 积水平均水面线 y（CSS px）：surfaceY() 围绕它起伏
+  let groundY = 0;             // 积水水面线 y（CSS px）：水平线（2026-10-18 移除涌动，恒定不变）
   let splashParts = [];        // 飞溅水花粒子池（仅雨模式使用）
   let ripples = [];            // 积水涟漪圆环池（仅雨模式使用）
   let ambientAcc = 0;          // 环境涟漪生成累加器（按 ambientPerSec 计时）
+  let snowTints = null;        // 雪的三档预染贴图（Canvas[]，由 buildSnowSprite 烘焙）
+  let snowSpriteReady = false; // 贴图是否已烘焙（雪色固定纯白，烘一次即可，永不重烘）
 
   function refreshColors() {
-    // rgb 字段（固定色）优先于主题 CSS 变量：雨滴按用户要求固定为深色雨丝、
-    // 不随主题偏色；雪/流星无 rgb 字段，仍各自走主题变量
+    // rgb 字段（固定色）优先于主题 CSS 变量：雨与雪都按用户要求固定为各自的
+    // 固定色、不随主题偏色（雪花 = 纯白 #FFFFFF）；流星仍走主题变量
     const pick = (cfg) => (cfg.rgb ? cfg.rgb.slice() : hexToRgb(cssVar(cfg.colorVar)));
     colors = {
       rain: pick(CONFIG.rain),
       snow: pick(CONFIG.snow),
       meteor: pick(CONFIG.meteor),
     };
+    // 雪的贴图已改为固定纯白（CONFIG.snow.rgb），**不再依赖主题取色**，
+    // 因此换主题无需重烘——省掉每次切主题的一次 64×64 重绘 + 3 张 canvas 重建。
   }
 
   function isLite() {
@@ -238,20 +264,13 @@
     while (particles.length < target) particles.push(spawnDrop(true));
   }
 
-  /** 积水水面线：绘制与落点检测共用同一函数，保证判定位置与视觉效果一致。
-   *  两条正弦谐波叠加、随时间缓慢涌动（clock 驱动），幅度见 CONFIG.puddle.waveAmp */
-  function surfaceY(x) {
-    const c = CONFIG.puddle;
-    return groundY
-      + Math.sin(x * 0.018 + clock * 1.1) * c.waveAmp
-      + Math.sin(x * 0.043 - clock * 0.7 + 1.7) * c.waveAmp * 0.45;
-  }
-
+  /** 积水水面线：绘制与落点检测共用 groundY 同一常量，保证判定位置与视觉效果一致。
+   *  2026-10-18：随时间涌动的双谐波震荡（原 surfaceY(x)）已按要求移除，水面为水平线 */
   function stepRain(dt) {
     for (const p of particles) {
       p.x += p.vx * dt;
       p.y += p.vy * dt;
-      const sy = surfaceY(p.x);
+      const sy = groundY;
       if (p.y >= sy) {
         // 触水回收：本帧起点为 (p.x - p.vx*dt, p.y - p.vy*dt)，落点按帧内
         // 线性插值回溯到水面处——dt 在分子分母中约掉，得到精确的水面交点
@@ -318,7 +337,7 @@
       p.vy += c.gravity * dt;
       p.x += p.vx * dt;
       p.y += p.vy * dt;
-      if (p.age >= p.life || p.y >= surfaceY(p.x)) splashParts.splice(i, 1);
+      if (p.age >= p.life || p.y >= groundY) splashParts.splice(i, 1);
     }
     for (let i = ripples.length - 1; i >= 0; i--) {
       const r = ripples[i];
@@ -331,7 +350,7 @@
       while (ambientAcc >= 1) {
         ambientAcc -= 1;
         const ax = rand(0, w);
-        spawnSplash(ax, surfaceY(ax), true);
+        spawnSplash(ax, groundY, true);
       }
     }
   }
@@ -357,9 +376,9 @@
       const fade = clamp((hy + 10) / fadeIn, 0, 1);
       if (fade <= 0) continue;
       drawStreak(hx, hy, tx, ty, p.thick, p.a * fade);
-      // 水中倒影：距水面 reflectRange 以内才画；以本地水面线为镜面、
+      // 水中倒影：距水面 reflectRange 以内才画；以水面线 groundY 为镜面、
       // 0.5 纵向压扁，透明度 × reflectAlpha，且越近水面越实
-      const sy = surfaceY(p.x);
+      const sy = groundY;
       const above = hy - sy;                 // 头端高出水面多少（触水帧可能略小于 0）
       if (above < c.reflectRange) {
         const fadeR = clamp(1 - above / c.reflectRange, 0, 1);
@@ -412,48 +431,128 @@
     ctx.fill();
   }
 
+  /* ========================== ⑤b 雪：预渲染贴图 ==========================
+   * 创意工坊原件（Wallpaper Engine「故宫」3115274650）用 genericparticle 着色器 +
+   * additive 混合 + particle/chromaticdot 贴图（64×64 白色径向柔边圆点）。
+   * Web 端逐帧 drawImage 一张预渲染贴图远比逐帧 createRadialGradient 便宜：
+   * 一帧 N 片雪 = N 次贴图拉伸，开销恒定。
+   *
+   * 2026-10-18 定色改动：
+   *   · 颜色来源从「主题变量 --fx-snow」改为「CONFIG.snow.rgb 固定纯白」；
+   *   · 纵深原为「灰 95,98,100 → 主题色」的色相偏移，现改为**纯白只降亮度**
+   *     （R=G=B 同步缩放），因此无论哪一档贴图，色相恒为 #FFFFFF 家族；
+   *   · 贴图只在首次进入雪模式时烘一次，换主题**不再重烘**（refreshColors 里已摘除）。
+   * 绘制时按粒子的 band 挑一档，避免运行时 filter / 合成模式切换。 */
+  const SNOW_BANDS = 3;        // 预染档数：远 / 中 / 近
+
+  /** 生成三档贴图：档 0 = 最暗（远景），档 2 = 纯白（近景）。
+   *  色相固定为 CONFIG.snow.rgb（#FFFFFF），纵深只用亮度表达。 */
+  function buildSnowSprite() {
+    const c = CONFIG.snow;
+    const S = 64;                       // 贴图边长（2 的幂，利于 GPU 采样）
+    const base = c.rgb || [255, 255, 255]; // ★ 固定纯白，不再读 colors.snow
+    snowTints = [];
+    for (let band = 0; band < SNOW_BANDS; band++) {
+      const k = band / (SNOW_BANDS - 1);          // 0 .. 1
+      // 纵深明暗：远景 ×(1-far%)，近景 ×100%。depthShade=0 → 三档同为纯白。
+      const lum = 1 - c.depthShade * (1 - k);
+      const rgb = [
+        Math.round(base[0] * lum),
+        Math.round(base[1] * lum),
+        Math.round(base[2] * lum),
+      ];
+      const cv = document.createElement('canvas');
+      cv.width = cv.height = S;
+      const g = cv.getContext('2d');
+      const r = S / 2;
+      // 径向渐变：中心瓷实 → softEdge 处才开始衰减 → 边缘全透明。
+      // 2026-10-18 首版把 softEdge 设 0.55，衰减从 45% 半径就启动，
+      // 屏幕上看起来是一团雾而不是雪——现收窄衰减带，让雪花有明确的核心。
+      const solid = clamp(0.80 - c.softEdge * 0.42, 0.25, 0.8); // 实心核心半径比例
+      const grad = g.createRadialGradient(r, r, 0, r, r, r);
+      grad.addColorStop(0, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},1)`);
+      grad.addColorStop(solid, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.98)`);
+      grad.addColorStop(solid + (1 - solid) * 0.45, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.62)`);
+      grad.addColorStop(solid + (1 - solid) * 0.78, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0.2)`);
+      grad.addColorStop(1, `rgba(${rgb[0]},${rgb[1]},${rgb[2]},0)`);
+      g.fillStyle = grad;
+      g.beginPath();
+      g.arc(r, r, r, 0, Math.PI * 2);
+      g.fill();
+      snowTints.push(cv);
+    }
+    snowSpriteReady = true;
+  }
+
+  /** 生成一片雪。纵深模型：radius 越大 = 越近 = 越快、越白；
+   *  radius 越小 = 越远 = 越慢、越灰。全部随机量在出生时定好，逐帧只做加法。 */
+  function spawnSnowflake(spread) {
+    const c = CONFIG.snow;
+    // t=0 最远（小、灰、慢），t=1 最近（大、白、快）；幂次 <1 让中远景更密
+    const t = Math.pow(Math.random(), 0.72);
+    const r = c.radius[0] + (c.radius[1] - c.radius[0]) * t;
+    const spd = c.speed[0] + (c.speed[1] - c.speed[0]) * t;
+    const ang = (c.angleDeg * Math.PI) / 180;
+    const jit = rand(1 - c.windJitter, 1 + c.windJitter);
+    return {
+      // 首次铺满整屏；回收时从视口上方进入
+      x: rand(-20, w + 20),
+      y: spread ? rand(-h * 0.15, h) : rand(-h * 0.12, -r * 2 - 6),
+      r,
+      t,
+      band: t < 0.34 ? 0 : t < 0.7 ? 1 : 2,   // 对应哪一档预染贴图
+      vx: -Math.sin(ang) * spd * jit,         // 预设 x 速度为负 → 向左飘
+      vy: Math.cos(ang) * spd * jit,
+      baseAlpha: clamp(c.alpha[0] * (c.farAlpha + (c.nearAlpha - c.farAlpha) * t), 0, 1),
+      age: spread ? rand(0.4, 3) : 0,         // 铺屏时的雪已经"下过一会儿"
+    };
+  }
+
   function buildSnow() {
     const c = CONFIG.snow;
-    const rad = (c.angleDeg * Math.PI) / 180;
-    const sx = Math.sin(rad);
-    const spawn = (spread) => ({
-      x: rand(0, w),
-      y: spread ? rand(0, h) : rand(-40, -5),
-      r: rand(c.radius[0], c.radius[1]),
-      a: rand(c.alpha[0], c.alpha[1]),
-      spd: rand(c.speed[0], c.speed[1]),
-      drift: rand(c.speed[0], c.speed[1]) * sx * rand(0.4, 1.2),
-      phase: rand(0, Math.PI * 2),
-      swayAmp: rand(c.swayAmp[0], c.swayAmp[1]),
-      swaySpd: rand(c.swaySpeed[0], c.swaySpeed[1]),
-    });
+    if (!snowSpriteReady) buildSnowSprite();
     const n = targetCount(c);
     particles = [];
-    for (let i = 0; i < n; i++) particles.push(spawn(true));
+    for (let i = 0; i < n; i++) particles.push(spawnSnowflake(true));
   }
 
   function stepSnow(dt) {
+    const floor = h + 24;   // 完全出画才回收，避免可见的"凭空消失"
+    const ceil = -h * 0.12;
     for (const p of particles) {
-      p.phase += p.swaySpd * dt;
-      p.y += p.spd * dt;
-      p.x += (p.drift + Math.cos(p.phase) * p.swayAmp * p.swaySpd) * dt;
-      if (p.y - p.r > h) {
-        p.y = rand(-40, -5);
-        p.x = rand(0, w);
+      p.age += dt;
+      // 匀速漂移：横向风速 + 纵向下落，无摆动（2026-10-18 移除正弦横摆）
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      // 回收：落到底部以下 → 从顶部重新进入（随机 x，保持风的整体性）
+      if (p.y - p.r > floor) {
+        const np = spawnSnowflake(false);
+        Object.assign(p, np);
       }
-      if (p.x < -30) p.x = w + 20;
-      else if (p.x > w + 30) p.x = -20;
+      // 横向绕回，防止风把雪全吹到左侧堆积
+      if (p.x < -p.r * 4 - 40) p.x = w + p.r * 4 + rand(0, 40);
+      else if (p.x > w + p.r * 4 + 40) p.x = -p.r * 4 - rand(0, 40);
+      // 兜底：极端情况下自顶堆叠过多（例如页面长时间隐藏后恢复），直接重置 y
+      if (p.y < ceil - h) p.y = rand(ceil, 0);
     }
   }
 
   function drawSnow() {
-    const col = colors.snow;
+    if (!snowSpriteReady || !snowTints) return;
+    // 贴图本身是纯白；纵深色差直接烘焙进三档预染贴图，避免逐帧 filter / 合成模式切换
+    const fadeIn = Math.max(0.01, CONFIG.snow.fadeIn);
     for (const p of particles) {
-      ctx.fillStyle = rgba(col, p.a);
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fill();
+      // 入场淡入：前 fadeIn 秒渐显，避免"啪"地出现
+      const fade = p.age >= fadeIn ? 1 : p.age / fadeIn;
+      const a = p.baseAlpha * fade;
+      if (a < 0.012) continue;
+      // 贴图绘制尺寸：贴图四周留有柔边留白（实心半径占 1/1.35），故放大 1.35 后实心区即 p.r
+      const size = p.r * 2.7;
+      const half = size * 0.5;
+      ctx.globalAlpha = a;
+      ctx.drawImage(snowTints[p.band], p.x - half, p.y - half, size, size);
     }
+    ctx.globalAlpha = 1;
   }
 
   function buildMeteor() {
@@ -539,22 +638,19 @@
     }
   }
 
-  /** 积水层：半透明基底（水面处最实、向下渐隐至 35%）+ 一条随时间涌动的水面线。
-   *  水面线由 surfaceY() 采样连线——与落点检测同一函数，视觉与判定严格一致 */
+  /** 积水层：半透明基底（水面处最实、向下渐隐至 35%）+ 一条平静的水平水面线。
+   *  水面线即 groundY（2026-10-18 移除涌动）——与落点检测同一常量，视觉与判定严格一致 */
   function drawPuddle() {
     const c = CONFIG.puddle;
-    const top = groundY - c.waveAmp * 2;        // 渐变上沿盖住波动最大行程
+    const top = groundY - 1;        // 渐变上沿贴水面线（留 1px 抗锯齿余量）
     const g = ctx.createLinearGradient(0, top, 0, h);
     g.addColorStop(0, rgba(colors.rain, c.alpha));
     g.addColorStop(1, rgba(colors.rain, c.alpha * 0.35));
     ctx.fillStyle = g;
     ctx.fillRect(0, top, w, h - top);
     ctx.beginPath();
-    const stepPx = 12;                          // 水面线采样步长 px
-    for (let x = 0; x <= w + stepPx; x += stepPx) {
-      const y = surfaceY(x);
-      if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    }
+    ctx.moveTo(0, groundY);
+    ctx.lineTo(w, groundY);
     ctx.strokeStyle = rgba(colors.rain, c.lineAlpha);
     ctx.lineWidth = 1;
     ctx.stroke();
@@ -568,7 +664,8 @@
     const col = colors.rain;
     ctx.save();
     ctx.beginPath();
-    ctx.rect(0, groundY - CONFIG.puddle.waveAmp * 2, w, h);
+    ctx.rect(0, groundY - 8, w, h);   // 裁剪到水面线以下（涟漪在水面上，不飘到空气中）；
+                                      // 2026-10-18：水面恒定 groundY，余量由波动行程改为固定 8px
     ctx.clip();
     ctx.lineWidth = 1;
     for (const r of ripples) {
@@ -605,9 +702,8 @@
     ctx.lineCap = 'butt';
   }
 
-  /** 雨模式单帧入口：clock 驱动水面波动；粒子 + 飞溅 + 涟漪一次推进完 */
+  /** 雨模式单帧入口：粒子 + 飞溅 + 涟漪一次推进完 */
   function stepRainAll(dt) {
-    clock += dt;
     stepRain(dt);
     stepSplash(dt);
   }
