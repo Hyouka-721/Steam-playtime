@@ -13,7 +13,7 @@
     document.documentElement.dataset.theme = ids[Math.floor(Math.random() * ids.length)];
   })();
 </script>
-<link rel="stylesheet" href="style.css?v=75">
+<link rel="stylesheet" href="style.css?v=76">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/zcool-kuaile@5/index.min.css">
 <link rel="stylesheet" href="https://fonts.loli.net/css2?family=ZCOOL+KuaiLe&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"
@@ -44,13 +44,16 @@
   </div>
   <h1 class="site-title" id="site-title" role="button" tabindex="0"
       title="点击返回顶部" aria-label="返回顶部">My Game Time</h1>
-  <!-- Minecraft 史蒂夫+狼：2026-10-18 起改作「游玩日历」入口（点击 / 回车打开月历），
-       不再参与主题切换（主题切换仍由左侧小黄人承担） -->
-  <div class="header-avatar" id="calendar-toggle" role="button" tabindex="0"
-       title="点击查看游玩日历" aria-label="打开游玩日历，选择有游玩记录的日期进行数据回看"></div>
+  <!-- Minecraft 史蒂夫+狼：2026-10-18 起改作「氛围特效」循环开关——
+       单击在 雨→雪→流星 间循环，双击关闭；状态由 title 文案与彩色光环标示。
+       游玩日历入口已改为游戏累计列表首行日期上方的小日历图标。
+       不参与主题切换（主题切换仍由左侧小黄人承担） -->
+  <div class="header-avatar" id="fx-toggle" role="button" tabindex="0"
+       title="氛围效果：关 · 单击开启并循环切换（雨/雪/流星），双击关闭"
+       aria-label="氛围效果已关闭，单击开启并循环切换，双击关闭"></div>
 </header>
 
-<!-- 数据回看状态条：通过史蒂夫头像的月历选定日期后显示，平时隐藏 -->
+<!-- 数据回看状态条：通过首行日期上方小日历图标的月历选定日期后显示，平时隐藏 -->
 <div class="review-bar" id="review-bar" hidden>
   <span class="review-badge">回看</span>
   <span class="review-date" id="review-date">—</span>
@@ -189,7 +192,7 @@
   </span>
 </footer>
 
-<!-- 游玩日历浮层（点击右上史蒂夫头像打开；Esc / 点击空白处关闭） -->
+<!-- 游玩日历浮层（点击游戏累计列表首行日期上方的小日历图标打开；Esc / 点击空白处关闭） -->
 <div class="cal-overlay" id="cal-overlay" hidden>
   <div class="cal-backdrop"></div>
   <div class="cal-panel" id="cal-panel" role="dialog" aria-modal="true" aria-labelledby="cal-title">
@@ -216,7 +219,7 @@
 </div>
 
 <!-- fx.js 先于 app.js 加载：app.js 绑定时需读取 window.__fx（特效状态的唯一来源） -->
-<script src="fx.js?v=2"></script>
-<script src="app.js?v=74" onerror="__appFail()"></script>
+<script src="fx.js?v=3"></script>
+<script src="app.js?v=75" onerror="__appFail()"></script>
 </body>
 </html>
