@@ -56,14 +56,18 @@ function loadLatestAchievements() {
   }
 }
 
-/** 生成 docs/data/achievements.json；无成就数据时写占位文件，前端据此显示待采集 */
+/** 生成 docs/data/achievements.json；无成就数据时写占位文件，前端据此显示待采集
+ *  返回值：摘要 stats（供写进 meta.json 的 ach_stats 字段）。
+ *  2026-10-18 首屏优化：前端首屏只需要 unlocked/total/pct 三个数，不该为此下载
+ *  285KB 的明细文件；把摘要同步进 meta（13KB）后，概览卡可立即渲染，明细推迟到
+ *  用户真正打开「成就」页时再取。 */
 function buildAchievementsDoc(nameOverrides) {
   const OUT_ACH = path.join(OUT_DIR, 'achievements.json');
   const ach = loadLatestAchievements();
   if (!ach) {
     fs.writeFileSync(OUT_ACH, JSON.stringify({ schema: 1, ready: false }, null, 2) + '\n', 'utf8');
     log('无成就数据，已写占位 docs/data/achievements.json');
-    return;
+    return null;
   }
 
   const games = {};
@@ -99,6 +103,7 @@ function buildAchievementsDoc(nameOverrides) {
   };
   fs.writeFileSync(OUT_ACH, JSON.stringify(doc, null, 2) + '\n', 'utf8');
   log(`已生成 docs/data/achievements.json（${unlockedTotal}/${totalTotal}，${doc.stats.pct}%，${doc.stats.games} 款游戏）`);
+  return doc.stats; // 摘要写进 meta.ach_stats，供首屏直接使用
 }
 
 function computeStreaks(allDays) {
@@ -249,6 +254,10 @@ function main() {
   const activeDays = dates.filter((d) => (allDays[d].total_minutes ?? 0) > 0).length;
   const playedGames = Object.values(gamesIndex).filter((g) => g.total_minutes > 0).length;
 
+  // 先算成就摘要：要写进 meta.ach_stats（首屏用），所以得早于 meta 落盘
+  fs.mkdirSync(OUT_DIR, { recursive: true });
+  const achStats = buildAchievementsDoc(nameOverrides);
+
   const meta = {
     schema: 2,
     tz: 'Asia/Shanghai',
@@ -259,6 +268,9 @@ function main() {
     last_snapshot_date: snapMeta.date ?? null,
     steamid_hash: snapMeta.hash ?? null,
     months: monthFiles.map((f) => f.replace('.json', '')),
+    // 成就摘要（2026-10-18 起）：前端首屏只读这里，不再为首屏一个百分比
+    // 下载 285KB 的 achievements.json；明细按需加载
+    ach_stats: achStats,
     stats: {
       // 终身累计（截至最新快照日，Steam 服务器统计）
       lifetime_minutes: lifetimeMinutes,
@@ -290,7 +302,6 @@ function main() {
 
   fs.mkdirSync(OUT_DIR, { recursive: true });
   fs.writeFileSync(path.join(OUT_DIR, 'meta.json'), JSON.stringify(meta, null, 2) + '\n', 'utf8');
-  buildAchievementsDoc(nameOverrides);
 
   log(`已生成 docs/data/meta.json（${dates.length} 天，${playedGames} 款追踪期游戏 / ${lifetimePlayed} 款终身有游玩）`);
   log(`终身累计 ${lifetimeMinutes} min（${meta.stats.lifetime_hours} h），追踪期累计 ${totalMinutes} min`);

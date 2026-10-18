@@ -54,7 +54,9 @@
 
   const state = {
     meta: null,       // 当前生效的 meta：正常态为原始值，回看态为按目标日反推的派生快照
-    ach: null,        // docs/data/achievements.json（可能尚未生成）
+    ach: null,        // 成就数据：首屏只有 stats（轻量摘要），明细按需加载后才有 games
+    achReady: false,  // 成就**明细**（games / achievements）是否已加载
+    achLoading: null, // 明细加载中的 Promise（并发去重）
     achFilter: null,  // 成就页游戏筛选
     days: new Map(),  // 'YYYY-MM-DD' -> day（始终保留全量，回看只截断日期索引）
     allDates: [],
@@ -93,23 +95,74 @@
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
+  /* 数据请求（2026-10-18 首屏优化重写）
+     原实现 `fetch(url, { cache: 'no-store' })` —— 每次刷新都绕过 HTTP 缓存重新下载，
+     而 GitHub Pages 本身给了 `Cache-Control: max-age=600` + ETag，等于把服务端缓存
+     权限主动放弃了。实测 achievements.json(285KB) 冷启动 13.6s、即使热连接 0.94s，
+     每次刷新都要重付这笔钱。
+     现在：默认走浏览器 HTTP 缓存（命中则 0 字节），过期后由 ETag 协商（304 极快）。
+     数据每天 23:30 更新一次，10 分钟的新鲜度完全够用；需要绝对新鲜时用 Ctrl+F5，
+     或在 URL 上加时间戳（见 metaVersion）。 */
   async function jget(url, tries = 3) {
     let lastErr;
     for (let i = 0; i < tries; i++) {
       try {
-        const r = await fetch(url, { cache: 'no-store' });
+        const r = await fetch(url, { cache: 'default' }); // 交给 HTTP 缓存 + ETag 协商
         if (!r.ok) throw new Error(`${url} -> HTTP ${r.status}`);
         return await r.json();
       } catch (e) {
         lastErr = e;
+        // 失败重试：900ms/1800ms 递增退避。首屏关键请求只试 1 次（tries=1），
+        // 避免一个慢请求把整个首屏拖到秒级；非关键资源再重试。
         if (i < tries - 1) await new Promise((res) => setTimeout(res, 900 * (i + 1)));
       }
     }
     throw lastErr;
   }
 
+  /* ---------- 骨架屏（2026-10-18 首屏优化）----------
+     用户反馈"每次刷新都先长时间停在加载画面"——数据到位前页面是一张全是「—」的
+     空白卡片 + 空列表框，观感上像卡死。骨架屏用与真实内容同形状的浅色块占位，
+     让等待有明确的"正在来"的信号；配合增量渲染，概览卡与列表可以先各自到位。 */
+  function rankSkeleton(n = 8) {
+    return Array.from({ length: n }, () =>
+      '<div class="sk-row">' +
+      '<span class="sk-block sk-no"></span>' +
+      '<span class="sk-block sk-cap"></span>' +
+      '<span class="sk-block sk-line"></span>' +
+      '<span class="sk-block sk-bar"></span>' +
+      '<span class="sk-block sk-min"></span>' +
+      '<span class="sk-block sk-date"></span>' +
+      '</div>'
+    ).join('');
+  }
+  function achSkeleton(n = 6) {
+    return Array.from({ length: n }, () =>
+      '<div class="sk-row" style="grid-template-columns:40px 1fr 120px">' +
+      '<span class="sk-block" style="width:40px;height:40px;border-radius:8px"></span>' +
+      '<span class="sk-block sk-line"></span>' +
+      '<span class="sk-block sk-date"></span>' +
+      '</div>'
+    ).join('');
+  }
+  /** 首屏进入时先把骨架铺上，避免空白 —— 在 init 里最早调用 */
+  function paintSkeletons() {
+    const lt = $('lt-list');
+    if (lt && !lt.querySelector('.rank-item')) lt.innerHTML = rankSkeleton(8);
+    ['c-lifetime', 'c-recent', 'c-ach', 'c-games', 'c-data'].forEach((id) => {
+      const el = $(id);
+      if (el) el.classList.add('sk-value');
+    });
+  }
+  function clearCardSkeleton() {
+    ['c-lifetime', 'c-recent', 'c-ach', 'c-games', 'c-data'].forEach((id) => {
+      $(id)?.classList.remove('sk-value');
+    });
+  }
+
   /** 致命错误兜底：给出可见提示与重试按钮，避免页面无声空白 */
   function showFatal(msg) {
+    clearCardSkeleton(); // 出错时不留下一直闪的骨架块
     document.querySelectorAll('.view').forEach((v) => (v.style.display = 'none'));
     if (document.querySelector('.load-error')) return;
     const el = document.createElement('div');
@@ -177,36 +230,73 @@
     setTimeout(() => el.remove(), 1500);
   }
 
-  // ---------- load ----------
+  /* ---------- load ----------
+     2026-10-18 首屏优化：原来 meta → 逐月 → achievements 三层**严格串行**，
+     三层加起来 1.3s 全在等网络，等完才第一次渲染，于是用户看到的是一张
+     全是「—」的空白页。现在改为：
+       ① meta 只试 1 次、最快拿到；拿到就返回，**首屏立即可渲染**；
+       ② 月份文件并行拉取（原来 for-await 一个个来）；
+       ③ 成就**明细**不再进首屏关键路径——首屏只要 stats.pct 一个数，
+          从 meta.ach_stats（CI 已同步）读；完整 285KB 明细推迟到用户
+          点开「成就」页时再取（见 ensureAchDetail）。 */
   async function load() {
     try {
-      state.meta = await jget('data/meta.json');
+      state.meta = await jget('data/meta.json', 1); // 首屏关键：快速失败，交给 showFatal
     } catch (e) {
       showFatal('数据加载失败');
       return false;
     }
-    for (const m of state.meta.months ?? []) {
-      try {
-        const month = await jget(`data/daily/${m}.json`);
-        for (const [date, day] of Object.entries(month.days ?? {})) state.days.set(date, day);
-      } catch (e) {
-        console.warn('月份加载失败', m, e);
+
+    // 月份文件并行拉取（通常只有 1–3 个，串行的收益差在这里被放大）
+    const months = state.meta.months ?? [];
+    const results = await Promise.allSettled(months.map((m) => jget(`data/daily/${m}.json`, 2)));
+    results.forEach((r, i) => {
+      if (r.status === 'fulfilled') {
+        for (const [date, day] of Object.entries(r.value.days ?? {})) state.days.set(date, day);
+      } else {
+        console.warn('月份加载失败', months[i], r.reason);
       }
-    }
+    });
     state.allDates = [...state.days.keys()].sort();
     // 留底：进入「数据回看」时会被按目标日截断，退出时靠这两份还原
     state.allDatesFull = state.allDates;
     state.metaFull = state.meta;
 
-    // 成就数据：可选资源，404 / 占位（ready:false）时卡片与详情页显示待采集
-    try {
-      const ach = await jget('data/achievements.json');
-      if (ach && ach.ready && ach.stats?.total > 0) state.ach = ach;
-    } catch (e) {
-      console.warn('成就数据未生成（每日采集任务自明日开始产出）');
+    // 成就摘要（轻量）：优先用 meta 里 CI 同步过来的 ach_stats，
+    // 这样概览卡立刻有值，不必等 285KB 的明细文件。
+    const s = state.meta.ach_stats;
+    if (s && Number(s.total) > 0) {
+      state.ach = { stats: s }; // 只有 stats，games 待 ensureAchDetail 补齐
+      state.achFull = state.ach;
     }
-    if (state.ach) state.achFull = state.ach;
     return true;
+  }
+
+  /* 成就**明细**按需加载（进入「成就」视图时才调用）。
+     - 并发去重：同一时刻多次调用只发一个请求
+     - 失败静默降级：成就页显示"尚未采集"文案，不影响其余页面
+     - 旧快照无 meta.ach_stats 时，这里也顺手兜底填充 stats */
+  function ensureAchDetail() {
+    if (state.achReady) return Promise.resolve(state.ach);
+    if (state.achLoading) return state.achLoading;
+    state.achLoading = (async () => {
+      try {
+        const ach = await jget('data/achievements.json', 2);
+        if (ach && ach.ready && ach.stats?.total > 0) {
+          state.achReady = true;
+          state.achFull = ach;
+          // 处于回看态时，state.ach 必须是"按回看日期截断"的派生快照，
+          // 不能直接塞完整数据（否则成就页会显示未来才解锁的成就）
+          state.ach = state.review ? buildAchSnapshot(state.review) ?? ach : ach;
+        }
+      } catch (e) {
+        console.warn('成就明细加载失败（每日采集任务自明日开始产出）', e);
+      } finally {
+        state.achLoading = null;
+      }
+      return state.ach;
+    })();
+    return state.achLoading;
   }
 
   // ---------- 概览卡片 ----------
@@ -708,6 +798,13 @@
       return;
     }
 
+    // 摘要已就位但明细（285KB）还在路上：给「加载中」而不是误报「暂无成就」
+    if (!state.achReady) {
+      hint.textContent = `已解锁 ${stats.unlocked} / ${stats.total} 项 · 完成度 ${stats.pct}% · 覆盖 ${stats.games} 款游戏`;
+      box.innerHTML = achSkeleton(6);
+      return;
+    }
+
     const appid = state.achFilter;
     const games = appid
       ? [state.ach.games?.[appid]].filter(Boolean)
@@ -1184,6 +1281,10 @@
   function buildAchSnapshot(date) {
     const full = state.achFull;
     if (!full?.stats) return null;
+    // 明细未加载时（首屏只带了 stats 摘要）不能按日期推算解锁数——那会把
+    // unlocked 算成 0、完成度显示成 0%。此时原样返回摘要，宁可"不回溯成就"
+    // 也不给错数；用户打开成就页触发 ensureAchDetail 后再回看即可精确。
+    if (!state.achReady) return full;
     const games = {};
     let unlocked = 0;
     for (const [k, g] of Object.entries(full.games ?? {})) {
@@ -1287,7 +1388,18 @@
     document.querySelectorAll('.view').forEach((s) => s.classList.toggle('active', s.id === `view-${v}`));
     if (v === 'lifetime') closeDrill();
     if (v === 'recent') renderRecent();
-    if (v === 'ach') renderAch();
+    if (v === 'ach') {
+      // 成就**明细**（285KB）按需加载：首屏只带 stats 摘要，这里才去取 games。
+      // 先同步渲染一次（显示摘要 + "加载中"），到位后再渲染一次（填充明细列表）。
+      renderAch();
+      if (!state.achReady) {
+        ensureAchDetail().then(() => {
+          if (state.view !== 'ach') return; // 用户已切走就不必重绘
+          renderAch();
+          buildAchSelect();
+        });
+      }
+    }
     if (v === 'timeline') renderTimeline();
   }
 
@@ -1425,15 +1537,21 @@
     }, 12000);
     try {
       bind();
+      // 先把骨架铺上（同步执行，早于任何网络请求）：用户立刻看到"内容正在来"，
+      // 而不是一张全是「—」的空白卡片
+      paintSkeletons();
       // 主题已由 <head> 内联脚本按 localStorage 决定（默认 cream），这里只同步站标提示文案
       syncThemeUi();
       if (!(await load())) return;
       clearTimeout(watchdog);
+      clearCardSkeleton();
       renderCards();
 
+      // 下面这些只依赖 meta（已在 load 里拿到），可立即渲染，
+      // 不必等成就明细——这正是"首屏不再等 285KB"的关键
       renderLifetime();
       renderRecent();
-      renderAch();
+      renderAch();      // 此处只有 stats 摘要，成就页显示骨架
       renderHealth();
       buildAchSelect();
       renderTimeline();

@@ -10,6 +10,12 @@
   "months": [
     "2026-10"
   ],
+  "ach_stats": {
+    "unlocked": 832,
+    "total": 2504,
+    "pct": 33.2,
+    "games": 31
+  },
   "stats": {
     "lifetime_minutes": 82190,
     "lifetime_hours": 1369.8,

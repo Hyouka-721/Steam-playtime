@@ -343,6 +343,43 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    放大时约 60%~88% 的尺寸是往上长的，留白用于保证它们不顶出面板上边框。
    （实测：18px 时企鹅头顶距面板上边框约 5px、加菲猫约 20px，均在面板内。） */
 .rank-list { display: flex; flex-direction: column; gap: 4px; padding-top: 18px; }
+
+/* ---- 骨架屏（2026-10-18 首屏优化）----
+   数据未到位时占住真实内容的形状，让等待有"进度感"而不是一张空白框。
+   刻意复用 .rank-item 的六列网格与行高，数据到达后替换成真实行时**零布局跳动**。
+   动画只做背景位移（transform/background-position），不触发布局重排。 */
+.sk-row {
+  display: grid; grid-template-columns: 44px 130px minmax(150px, 340px) 1fr 150px 110px;
+  gap: 14px; align-items: center; padding: 7px 12px;
+}
+.sk-block {
+  background: linear-gradient(90deg, var(--track) 0%, var(--sunken) 40%, var(--track) 80%);
+  background-size: 300% 100%;
+  border-radius: 6px;
+  animation: sk-shimmer 1.4s ease-in-out infinite;
+}
+.sk-cap { height: 60px; border-radius: 8px; }
+.sk-line { height: 11px; }
+.sk-no { width: 16px; height: 14px; }
+.sk-bar { height: 7px; border-radius: 4px; }
+.sk-min { width: 72px; height: 13px; margin-left: auto; }
+.sk-date { width: 58px; height: 11px; margin-left: auto; }
+/* 概览卡数值占位：与 .card-value 同高，避免渲染后卡片高度跳动 */
+.card-value.sk-value {
+  color: transparent;
+  border-radius: 7px;
+  background: linear-gradient(90deg, var(--track) 0%, var(--sunken) 40%, var(--track) 80%);
+  background-size: 300% 100%;
+  animation: sk-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes sk-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+/* 尊重系统偏好：关闭动效时只用静态浅块，不做流动 */
+@media (prefers-reduced-motion: reduce) {
+  .sk-block, .card-value.sk-value { animation: none; background: var(--track); }
+}
 /* display:flex 会覆盖 [hidden] 的 UA 样式，必须显式声明，否则折叠区永远展开 */
 .rank-list[hidden] { display: none; }
 .rank-item {
