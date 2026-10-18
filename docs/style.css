@@ -51,6 +51,8 @@
   --chart-legend-off: #c0b2a3;
   --chart-cum-a: #e08b3f; --chart-cum-b: #b85c1c; --chart-line: #8a4a12;
   --chart-cum-a2: #d9762f; --chart-cum-b2: #9c4f16; --chart-line2: #5f7f2f;
+  /* 背景氛围层配色（雨/雪/流星）：低饱和冷调雨丝 + 浅冷调雪点 + 暖琥珀流星（＝本主题 accent 家族） */
+  --fx-rain: #7f97ad; --fx-snow: #c3d2df; --fx-meteor: #e8964a;
 }
 
 /* ⑦ 薄荷晨：淡青白底 + 青绿强调（浅色） */
@@ -92,6 +94,8 @@
   --chart-legend-off: #a8c2ba;
   --chart-cum-a: #2bb8a5; --chart-cum-b: #0a7d70; --chart-line: #0f9e8e;
   --chart-cum-a2: #0f9e8e; --chart-cum-b2: #076057; --chart-line2: #2f8fd1;
+  /* 背景氛围层配色：青绿主题下流星用亮青，雨用更冷的蓝绿 */
+  --fx-rain: #4f93a8; --fx-snow: #bcd9e4; --fx-meteor: #2bb8a5;
 }
 
 /* ⑧ 晨曦紫：淡紫白底 + 紫强调（浅色） */
@@ -133,6 +137,8 @@
   --chart-legend-off: #b3adcb;
   --chart-cum-a: #8f74ff; --chart-cum-b: #6143d6; --chart-line: #6a4fd0;
   --chart-cum-a2: #a78bfa; --chart-cum-b2: #6d4bd6; --chart-line2: #d946a8;
+  /* 背景氛围层配色：紫主题的雨偏紫灰，流星取亮紫 */
+  --fx-rain: #8b87b8; --fx-snow: #cfc9e8; --fx-meteor: #a78bfa;
 }
 
 * { box-sizing: border-box; }
@@ -668,6 +674,32 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .review-actions { display: flex; gap: 8px; margin-left: auto; }
 .review-actions .btn { padding: 5px 12px; font-size: 12.5px; }
 
+/* ================= 背景氛围层（雨 / 雪 / 流星）================= */
+/* 2026-10-18 新增：由 fx.js 驱动的 Canvas 层。
+   - pointer-events:none —— 不拦截列表点击、卡片导航、日历浮层等任何交互
+   - z-index 20 —— 盖在页面内容之上（营造“天气在眼前”的效果），
+     但低于 toast(50) 与日历浮层(60)，弹层始终清晰
+   - 实际配色走各主题里的 --fx-rain / --fx-snow / --fx-meteor */
+#fx-canvas {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+  z-index: 20;
+  pointer-events: none;
+}
+@media print {
+  #fx-canvas { display: none; }
+}
+/* 页脚右侧的「氛围」切换器：直接复用已有的 .seg 分段控件样式 */
+.fx-switch {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-left: auto;
+}
+.fx-label { font-size: 12px; color: var(--text-faint); letter-spacing: .5px; }
+.fx-switch .seg button { padding: 3px 11px; font-size: 12px; line-height: 1.5; }
+.fx-switch .seg button[disabled] { opacity: .45; cursor: not-allowed; }
+.fx-switch .seg button[disabled]:hover { border-color: var(--border); }
+
 /* ================= 游玩日历浮层 ================= */
 /* 点击右上史蒂夫头像打开；点空白 / Esc 关闭。三套主题均为浅色，色值直接走 CSS 变量 */
 .cal-overlay {
@@ -776,4 +808,6 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .cal-overlay { padding: 12px; }
   .cal-panel { width: 100%; }
   .cal-day { min-height: 38px; font-size: 13px; }
+  /* 窄屏页脚会换行，氛围切换器占满一行并靠右对齐 */
+  .fx-switch { margin-left: 0; width: 100%; justify-content: flex-end; }
 }

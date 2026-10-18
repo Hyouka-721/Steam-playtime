@@ -13,7 +13,7 @@
     document.documentElement.dataset.theme = ids[Math.floor(Math.random() * ids.length)];
   })();
 </script>
-<link rel="stylesheet" href="style.css?v=73">
+<link rel="stylesheet" href="style.css?v=74">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/zcool-kuaile@5/index.min.css">
 <link rel="stylesheet" href="https://fonts.loli.net/css2?family=ZCOOL+KuaiLe&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"
@@ -31,6 +31,9 @@
 </script>
 </head>
 <body>
+
+<!-- 背景氛围层（雨 / 雪 / 流星）：全屏 fixed + pointer-events:none，不拦截任何点击与输入 -->
+<canvas id="fx-canvas" aria-hidden="true"></canvas>
 
 <header class="site-header">
   <div class="brand">
@@ -174,6 +177,16 @@
   <span id="footer-gen">—</span>
   <span class="dot">·</span>
   <span>数据每日 23:30（北京时间）自动更新</span>
+  <!-- 氛围切换：雨 / 雪 / 流星 三选一（互斥，不叠加），选择记入 localStorage -->
+  <span class="fx-switch">
+    <span class="fx-label">氛围</span>
+    <span class="seg" id="fx-seg" role="group" aria-label="背景氛围效果">
+      <button type="button" data-fx="off" class="active">关</button>
+      <button type="button" data-fx="rain">雨</button>
+      <button type="button" data-fx="snow">雪</button>
+      <button type="button" data-fx="meteor">流星</button>
+    </span>
+  </span>
 </footer>
 
 <!-- 游玩日历浮层（点击右上史蒂夫头像打开；Esc / 点击空白处关闭） -->
@@ -203,5 +216,6 @@
 </div>
 
 <script src="app.js?v=73" onerror="__appFail()"></script>
+<script src="fx.js?v=1"></script>
 </body>
 </html>
