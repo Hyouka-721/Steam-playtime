@@ -63,13 +63,50 @@
   --ring-c2: #B0FE87;  /* 右上 */
   --ring-c3: #72B7F2;  /* 右下 */
   --ring-c4: #99E79B;  /* 左下 */
-  /* 描边环厚度与外光晕半径：环厚与旧金边一致（2px），保证"尺寸/圆角/布局不变" */
+  /* 描边环厚度与外光晕半径。
+     第 30 轮起环**移到图片外侧**（图片内缩 --ring-w），所以环厚不再是"吃掉图片"的厚度，
+     而是容器比图片大出的一圈；--ring-w 同时决定胶囊整体外框大小（见 --cap-box-*）。 */
   --ring-w: 2px;
-  --ring-glow: 6px;
-  /* 流动层正方形边长 = 胶囊对角线（130×60 → √(130²+60²) ≈ 143.1），
-     旋转任意角度都能盖满环带；窄屏 100×46 → 110.1，见媒体查询 */
-  --spin-size: 143.2px;
-  /* 环下深色底衬：文字列表行背景透明，深色主题下浅色环需要暗底托住才清晰 */
+  /* 第 30 轮：环移到图片**外侧**后，柔光不再需要"稀释环与浅色页面的对比"，
+     它的唯一职责变成在深色主题下给环外缘一圈过渡。
+     6px→3px：原来的 3px 模糊 + 3px 外扩会在环外铺出约 12px 的淡色雾，
+     2px 的环带被这层雾整个淹掉（实测上边环带外 12px 内全是 (244,237,196) 的奶黄）。
+     现在收窄到 1.5px 模糊、1.5px 外扩，雾只贴住环外沿。 */
+  --ring-glow: 3px;
+  /* 外框圆角。
+     ⚠ 第 32 轮：这个值不是随手取的，它由「环带必须贴住图片圆角」唯一确定。
+     推导（设 w = 环厚，R = 外框圆角，r = 图片圆角，图片内缩 w）：
+       图片左上圆角圆心在 (w + r, w + r)，半径 r
+       45° 射线上（射线点 (t,t)）求交点：2(t − w − r)² = r²
+                                           → t = w + r − r/√2
+                                           → 距角顶点 d_img = (w + r − r/√2)·√2
+       环带内缘（半径 R − w，圆心 (R,R)）同理：
+                                           d_ring_in = (R − (R − w)/√2)·√2
+       贴合条件 d_ring_in == d_img：
+           (R − (R−w)/√2) = (w + r − r/√2)
+           化简后恰好得到  R = r + w  （与 √2 无关，两边同构）
+     代入 r = 8、w = 2 → **R = 10px**，且这是唯一解：
+       R = 12 时环带内缘在 6.97，图片边缘在 6.14 → 脱开 0.83px
+       R = 16 时脱开 2.49px（实测就是"环与封面之间露一条浅缝"）
+     所以第 30 轮写的 10px 本身是对的 —— 并不是它导致圆角露灰，
+     真正的原因是另外两层（backdrop 的 +1px、glow 的 blur 越界），见下方注释。 */
+  --cap-box-r: 10px;
+  /* 图片自身的圆角（沿用原胶囊的 8px） */
+  --cap-img-r: 8px;
+  /* ── 第 30 轮：渐变环改为「容器背景层」，图片内缩、环在外侧 ──
+     外框尺寸 = 原胶囊尺寸 + 2×环厚。原 130×60 / 100×46。
+     这是唯一会随 --ring-w 变化的尺寸，改环厚时无需再动别处。 */
+  --cap-box-w: 134px;
+  --cap-box-h: 64px;
+  /* 流动层正方形边长 = **外框**对角线（134×64 → √(134²+64²) ≈ 148.5），
+     旋转任意角度都能盖满环带；窄屏 104×50 → 115.4，见媒体查询。
+     注意这是外框尺寸（含环），不是图片尺寸 —— 改 --ring-w 时须同步。 */
+  --spin-size: 148.6px;
+  /* 环下深色底衬：第 30 轮起环在图片外侧、不再压在封面上，
+     底衬的唯一作用是深色主题下把浅色环与页面底色隔开。
+     这里改成**只垫环带内侧**的窄描边（见 .ring-backdrop 的 inset），
+     不再整圈铺满 —— 否则会从环的透明缝隙里透出，把四色染灰（实测左边环
+     从应到的 (249,213,13) 掉到 (212,213,66)，饱和度损失约 40%）。 */
   --ring-backdrop: #1b1730;
   --track: rgba(36, 28, 21, 0.09);
   --bar-grad: linear-gradient(90deg, #b85c1c, #e08b3f);
@@ -420,7 +457,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .rank-no.r2 { color: var(--medal-2); text-shadow: var(--medal-shadow-2); }
 .rank-no.r3 { color: var(--medal-3); text-shadow: var(--medal-shadow-3); }
 .rank-capsule {
-  width: 130px; height: 60px; border-radius: 8px; object-fit: cover;
+  width: 130px; height: 60px; border-radius: var(--cap-img-r); object-fit: cover;
   background: var(--sunken); display: block;
 }
 .rank-capsule.is-icon { width: 30px; height: 30px; object-fit: contain; margin: 15px 0; }
@@ -431,11 +468,13 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
      渐变 border 要通过 padding-box/border-box 之差留空，会改盒模型、占布局。
    ■ 做法：单独一层「环」。结构由 app.js 渲染：
        <span class="rank-capsule-wrap"><img class="rank-capsule"> …环…</span>
-     · wrap 是 grid 直接子项，尺寸/位置与原来的 img 完全一致（130×60 / 30×30），
-       所以网格列宽、行高、排序序号位置全部不变；img 在里面铺满。
+     · wrap 是 grid 直接子项，尺寸 = 图片 + 2×环厚（第 30 轮：134×64，图片 130×60），
+       再用 margin:-2px 把多出的 2px 从布局里收回 → 网格列宽、行高、序号位置全不变。
      · 环用 4 个绝对定位子元素，均在 wrap 内，**不参与布局、不进网格**。
-     · 环体 = padding:2px + mask 挖空中心 → 只剩 2px 环，
-       圆角 9px（= 图 8px + 1px，与旧金边同半径），与胶囊边缘天然贴合。
+     · 环体 = padding:2px + mask 挖空中心 → 只剩 2px 环；
+       第 30 轮起内圆角同步设为「外 10px / 内 8px」，与图片圆角同心。
+     · **环在图片外侧**（第 30 轮）：图片用 inset:2px 内缩，环只占最外那 2px，
+       图片不被任何层覆盖 —— 详见下方「第 30 轮重构」一节。
    ■ 为什么"环"不直接画在 img 上：img 是 grid 直接子项，给它加 ::before/::after
      会变成 grid item 多吃一列。多套一层 wrap 既保住布局，也避免给 img 加壳。
 
@@ -452,40 +491,115 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    ■ 深色底可见性（用户明确要求）
      1) backdrop 层：环外沿向下垫一圈深色（--ring-backdrop），把浅色环与深底隔开；
      2) glow 层：同色渐变 + blur 柔光，在深底上把环"托"出来；
-     3) 四色最小亮度 #72B7F2 的 L≈70%，与深底 #1b1730 对比度 > 6:1，无需换深色版。 */
+     3) 四色最小亮度 #72B7F2 的 L≈70%，与深底 #1b1730 对比度 > 6:1，无需换深色版。
+
+   ⚠ 第 30 轮起，本节的「环压在图片边缘之上」结构已被下方新结构取代，
+     保留这段说明是为了记住四色/流动的设计理由；尺寸与定位一律以第 30 轮为准。 */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   第 30 轮重构：渐变环从「压在图片边缘之上」改为「容器的背景层」，
+   图片内缩 2px，环完整地环绕在图片**外侧**。
+   ──────────────────────────────────────────────────────────────────────────
+   ■ 为什么改（旧实现的三个结构性问题）
+     旧版里 `.ring` 是 `inset:0` 的绝对定位层，环带由 mask 挖空 2px 得到 ——
+     环带**落在容器边框内侧**，也就是压在图片最外 2px 上。
+     因为 img 是 `width/height:100%` 铺满容器，这一圈直接从图片上"抠掉"：
+       1) 图片内容被裁掉一圈（几何上少 2px，等于视觉上被削边）
+       2) 图片圆角 8px、环外框圆角 9px，两个圆角不同心 → 弧上环带宽度不匀，
+          这是上一轮（第 29 轮）角部发暗的根源
+       3) 环与图片边缘之间没有任何间隙，颜色直接贴着封面 → 对比强烈时显脏
+   ■ 新结构（纯 CSS，DOM 不变）
+       .rank-capsule-wrap            外框 134×64，圆角 10px，**透明**，只负责定位与尺寸
+         ├─ <img> 内缩 2px            130×60，圆角 8px —— 不被任何层覆盖
+         └─ .ring 层组（inset:0）     用 padding:2px + mask 挖空，只在上/右/下/左
+                                      那 2px 的"padding 区"里作画
+     关键区别：旧版 `.ring` 的 padding 区**落在图片之上**（图片铺满容器，环带就是
+     图片最外那 2px）；新版图片先内缩 2px 让出位置，padding 区就变成了图片**外面**
+     那一圈 —— 同一个 mask 写法，环的落点从"图片内缘"变成了"图片外缘"。
+   ■ 同心圆角（这轮的重点）
+     外框圆角 10px、图片圆角 8px、内缩 2px —— 三者满足
+         R_外 = R_内图 + 环厚  →  10 = 8 + 2
+     此时两个圆角曲率中心重合，弧上环带宽度处处相等，不会出现宽窄不匀。
+   ■ 尺寸守恒
+     外框比旧版大 4px（134×64 vs 130×60），但**图片仍是 130×60**，
+     所以封面观感不变；用 `margin: -2px` 抵消外框多出的 2px，
+     列表行高、网格列宽、序号位置全部零变化（见 .rank-capsule-wrap 的 margin）。
+   ■ 深色底可见性
+     环现在外挂在图片外侧、贴着页面底色。浅色主题下四色本身就够亮；
+     深色主题下环外缘会与深底对比过强，故保留 `--ring-glow` 柔光向外晕开一层过渡。
+   ══════════════════════════════════════════════════════════════════════════ */
 .rank-capsule-wrap {
   position: relative;
-  width: 130px; height: 60px;   /* 与 .rank-capsule 原尺寸一致（窄屏 100×46，见媒体查询） */
-  border-radius: 9px;
-  /* 由 JS 写入：胶囊格在行内的偏移，环层据此对齐（不依赖定位祖先链） */
+  width: var(--cap-box-w); height: var(--cap-box-h);   /* 134×64（图片 130×60 + 2×2） */
+  border-radius: var(--cap-box-r);
+  /* 负 margin 把这多出来的 2px 从布局里收回：
+     外框向外扩张、但不推挤网格 —— 行高 76、列宽、序号位置与旧版完全一致 */
+  margin: calc(-1 * var(--ring-w));
+  /* img 用绝对定位铺满内缩后的内容区，见下方规则 */
+  box-sizing: border-box;
 }
-.rank-capsule-wrap > .rank-capsule { width: 100%; height: 100%; }
+/* 图片：内缩 --ring-w，尺寸回到原胶囊 130×60，圆角 = 外框圆角 − 环厚 = 8px。
+   **不被任何层覆盖** —— 这是本轮的核心目标。 */
+.rank-capsule-wrap > .rank-capsule {
+  position: absolute;
+  inset: var(--ring-w);
+  width: calc(100% - 2 * var(--ring-w));
+  height: calc(100% - 2 * var(--ring-w));
+  border-radius: var(--cap-img-r);                 /* 8px，与 --cap-box-r - --ring-w 相等 */
+  box-sizing: border-box;
+  object-fit: cover;
+  z-index: 1;   /* 环不与它重叠，z 只作保险 */
+}
 /* 图片加载失败 → onerror 把 img 换成 30×30 的图标（.is-icon）。
-   关键：**wrap 尺寸必须保持不变**（130×60），否则行高会从 76 掉到 46，
-   整张列表在慢网/离线时会跳一下。
-   旧实现是给 img 加 margin: 15px 0 撑起 60px 高；现在 img 被 width/height:100% 接管，
-   改由 wrap 用 flex 居中承载 30×30 图标，行高与网格列宽完全不受影响。 */
+   wrap 尺寸保持不变（134×64），行高不跳。 */
 .rank-capsule-wrap:has(> .rank-capsule.is-icon) {
   display: flex; align-items: center; justify-content: center;
 }
 .rank-capsule-wrap:has(> .rank-capsule.is-icon) > .rank-capsule.is-icon {
+  position: static;
   width: 30px; height: 30px; object-fit: contain; margin: 0; flex: none;
+  border-radius: 4px;
 }
-/* 环层公共：贴合 wrap、不参与布局、不抢点击 */
+
+/* 环内容层：绝对定位在 wrap 内，尺寸与 wrap 一致（134×64）。
+   **不裁切、不覆盖图片** —— 图片内缩 2px 后，环只占用最外那 2px。 */
 .ring {
-  position: absolute; inset: 0;
-  border-radius: 9px;
+  position: absolute;
+  inset: 0;
+  border-radius: var(--cap-box-r);
   pointer-events: none;
+  z-index: 0;
 }
-/* 裁切容器：只显示「2px 环带」
-   ① overflow:hidden —— 裁掉旋转正方形超出胶囊轮廓的部分（否则斜对角会压到封面上）
-   ② padding 2px + mask 挖空 content-box —— 再挖掉中间，只留边框那一圈
-   ③ isolation:isolate —— 把子层的 plus-lighter 混合锁在本层内部；
-      否则会与页面底色混合，整块区域被"加亮"成半透明白雾（实测过）。 */
+/* ══════════════════════════════════════════════════════════════════════════
+   第 32 轮：环的四层统一几何 —— 这套环形写法在第 29/30/31 轮连续出错，
+   根源都是"每层各自算一遍圆角半径，且每次少减一个环厚"。
+   本轮把它收成一条公式，四层全部从它派生。
+   ──────────────────────────────────────────────────────────────────────────
+   ■ 统一公式（d = 该层外缘距 wrap 外缘的距离，负值表示外扩）
+       R_外(d)    = cap-box-r − d              ← 外框圆角
+       R_内        = cap-box-r − ring-w        ← 环带内边界圆角（= 图片圆角 8px）
+       同心条件    R_外 − padding == R_内   ⟹   padding = R_外 − R_内
+   逐层代入（ring-w=2, glow=3, cap-box-r=10）：
+       .ring-clip     d=0    R_外=10  padding=2    R_内=8    ✓ 与图片同心
+       .ring-backdrop d=0    R_外=10  padding=2    R_内=8    ✓ 与 ring-clip 逐像素重合
+       .ring-glow     d=-3   R_外=13  padding=5    R_内=8    ✓ 与 ring-clip 逐像素重合
+   ⚠ 上一版 .ring-glow 写的是 `10px / 5px`（斜杠语法：水平外径/垂直外径），
+     不是"外径/内径"！Chrome 因此把两个半径理解成 10×5 的椭圆：
+       水平方向 10px、垂直只有 5px → 上下边的环带被椭圆挤掉 4.5px，
+       实测上边环带只剩 1.7px（0→1.625），正好等于图片顶部位置 2px 附近。
+     这才是"环带明显变细、圆角外露出灰块"的真正机械原因。
+   ■ 为什么 mask 的 content-box 半径还必须显式写
+     border-radius 的斜杠语法只描述"外框形状"，mask 用 content-box 裁切时
+     Chrome 取的是 content-box 自己的圆角 —— 若不显式声明，会按"外半径 − padding"
+     推导，但推导在斜杠语法下不可靠（同上，会被读成椭圆）。故四层一律显式给值。
+   ══════════════════════════════════════════════════════════════════════════ */
+/* 裁切容器：只保留最外 ring-w 宽的环带。
+   R_外 = 10px（单值，正方形/矩形都成立）→ 内圆角 = 8px，与图片圆角完全一致。 */
 .ring-clip {
   overflow: hidden;
   padding: var(--ring-w);
   isolation: isolate;
+  border-radius: var(--cap-box-r);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
@@ -493,53 +607,129 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 }
 .ring-clip > * {
   position: absolute;
-  /* 旋转层做成「覆盖整个环」的正方形：边长 = 对角线（130/60 → 143.2），
-     居中摆放，旋转 0~180° 全程都能盖住环带（数学上不会出现缺口） */
   width: var(--spin-size); height: var(--spin-size);
   left: 50%; top: 50%;
   margin-left: calc(var(--spin-size) / -2);
   margin-top: calc(var(--spin-size) / -2);
 }
-/* 1) 深色底衬：垫在「环带正下方」，给浅色环提供暗背景。
-      必须同样挖空中间 —— 否则整块深色会把封面压暗（实测画面明显变沉）。 */
+/* 1) 深色底衬 —— 只垫在**环带正下方**，绝不越过环带内边界。
+   ─────────────────────────────────────────────────────────────────────
+   ⚠ 第 31 轮修正（"圆角外灰色色块"的真正根源，就是下面这个 +1px）：
+     第 30 轮我在这里写了 `padding: calc(var(--ring-w) + 1px)`，本意是"让底衬
+     向图片内侧探 1px、在环与封面之间压一道暗线"。但图片用的是 `inset: 2px`，
+     它只盖住 2px 以内的区域 —— 底衬探出去的那 1px 落在**图片外侧的接缝里**，
+     没有任何东西覆盖它，于是直接暴露成一条 1 CSS px 宽的灰线。
+     实测（DPR=8，上边中线，css 坐标）：
+       0.00~1.62  环带 (188,224,113)  ← 正常
+       1.75~2.75  底衬裸露 (111,83,42) ← 灰带（#1b1730 以 .5 叠在页面底色上）
+       2.75 以后   封面正文 (76,36,33)
+     把图片隐藏后该处变为 (157,154,117)，与"#1b1730 × .5 + 页面底 (253,240,223)"
+     的预测 (140,132,136) 基本吻合 → 确认是底衬裸露，不是抗锯齿。
+   ─────────────────────────────────────────────────────────────────────
+   现在 padding 与圆角内半径都严格对齐环带内边界：
+       外半径 = cap-box-r（10px），内半径由 padding 自动推导（= 8px）
+   与 .ring-clip 完全一致 → 底衬只出现在环带那 ~2px 里，被不透明的 .ring-base
+   完整盖住。第 32 轮实测过 padding 1.5px / 2px 两种，结果无差别
+   （真正决定接缝的是上方 glow 的 padding，不是这里）。 */
 .ring-backdrop {
   inset: 0;
   padding: var(--ring-w);
-  border-radius: 9px;
+  border-radius: var(--cap-box-r);          /* d=0 → R_外 = 10 − 0 = 10 */
   background: var(--ring-backdrop);
-  opacity: .9;
+  opacity: .5;
   z-index: 0;
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
-/* 2) 外柔光：同色渐变 + blur，深底上把边缘托出来
-      注意必须同样 mask 挖空 —— 否则它是一整块渐变，会把封面糊成白雾
-      （这里曾漏掉 mask，实测整张图被加亮成浅色）。 */
+/* 2) 外柔光：环**外缘**向外晕开一点点，在环与页面底色之间做过渡。
+   ─────────────────────────────────────────────────────────────────────
+   历史（三轮反覆，一并记下，别再犯）：
+     第 30 轮 `inset:-glow/2 + padding:ring-w+glow/2`
+         → 内边界几何落在 3.5px，但 mask 在 content-box 上有圆角，弧上被裁进封面。
+     第 31 轮 `inset:-glow + padding:ring-w+glow`
+         → 直边上的灰带治好了，但内半径写成 `cap-box-r − ring-w − glow`，
+           与 `padding` 不满足同心条件，弧上被裁成 0 宽 → 45° 附近露页面底色。
+     第 32 轮（本轮）按统一公式重推：
+         d = −glow = −3px        → R_外 = 10 − (−3) = 13px
+         内边界 = wrap 内缩 ring-w → R_内 = 8px
+         padding = R_外 − R_内 = 13 − 8 = **5px** = ring-w + glow
+     并且**必须写成单值 13px**，不能写成 `13px / 5px`
+     （斜杠语法是「水平半径 / 垂直半径」，写 5px 会把圆角压成 10×5 的椭圆，
+       上下边环带直接被挤掉 4.5px —— 这就是本轮"环带变细、圆角露灰"的机械原因）。
+   ─────────────────────────────────────────────────────────────────────
+   ⚠ 另一个必须知道的机理：**filter: blur() 作用在 mask 之后**。
+     mask 先把柔光裁成一条带，blur 再把这条带的**两条边各自向两侧抹开 glow/2**。
+     所以 mask 的几何内边界要比"想要的可见内边界"再往里让 glow/2。
+   ─────────────────────────────────────────────────────────────────────
+   ■ 第 32 轮定稿方案：**不用 blur，改用「mask 内侧渐隐」**
+     前三轮所有 bug 的共同点是 `filter: blur()` —— 它作用在 mask 之后，
+     会把 mask 的边界向外抹开 glow/2，于是无论把几何算得多准，
+     总有一侧会越界（压在封面或压在环带上）。这是个无解的结构问题，
+     不是参数问题。所以本轮干脆把 blur 拿掉：
+       1) mask 改成「内外两条边都留渐变」：
+            外缘 0→glow 渐变淡入（软边，取代 blur 的向外晕开）
+            内缘在 ring-w 处**硬收**（绝不越界到环带/封面）
+       2) 于是柔光只存在于 [ring-w, ring-w+glow] 这 3px 里，
+          0→2px（环带位置）完全透明，2→5px 才是可见外晕。
+     这样柔光在几何上就不可能压到环带或封面，四个角与四条边完全一致。
+   ─────────────────────────────────────────────────────────────────────
+   ■ 第 32 轮定稿：glow 必须盖满「环带外侧到图片之间」这整段，不留空洞
+     先说清一个反复踩坏的事实：mask 的 content-box 边界在 Chrome 里会被
+     取整到 1/8 像素。实测 padding:2px 的环带内边界落在 **1.50~1.75px**
+     （DPR=1/2/3/4 各测一遍，值随 DPR 变），不是 2.00px。
+     于是 `1.75 ~ 2.00` 这 0.25px 成了「ring-clip 挖掉了、图片也没盖到」的空洞，
+     下面露的是 .ring-backdrop（#1b1730 × .5）+ 页面底色 —— 灰褐色。
+     圆角弧上这段空洞被弧长放大，所以肉眼最先在四个角看到"灰块"。
+     ─────────────────────────────────────────────────────────────────────
+     本轮把 12 种参数组合逐一截图量测（backdrop padding 1.5/2px ×
+     glow inset 0/−glow × glow padding 2/3/5px），只有 **glow padding = 5px
+     （= ring-w + glow，glow inset = −glow）** 这一组能让"环带外侧到图片之间"
+     完全不出现页面底色或底衬裸露：
+         · 柔光带覆盖 d ∈ [2.0, 5.0]，与环带（0~1.75）在 1.75~2.0 处交叠
+           1 个抗锯齿像素，接缝被柔光的柔边吃掉，看不出断点
+         · 柔光内边界几何在 2.0px，blur(glow/3≈1px) 向内抹到 1.0px，
+           但 0~1.75 被不透明的 .ring-base（z-index:2）完整盖住，看不见
+         · 不会压到封面（封面从 2px 起，柔光在 2.0 处已降到接近 0）
+     对照：glow padding 取 2px/3px 时，1.75 之后立刻是纯页面底色（实测
+     (253,240,223) 连成一片）→ 就是用户截图里那条灰带。
+   ═══════════════════════════════════════════════════════════════════════
+   ■■ 拟合验证（DPR=8 实测，第 32 轮收尾）：环到底有没有"贴合"？
+     把环带外缘当成一个待拟合的圆，最小二乘拟合结果：
+        TL 圆心 (9.99, 9.67)  R = 9.99      BR 圆心 (10.03, 10.19)  R = 9.90
+     理论圆心 (10, 10)、理论半径 10 → **半径偏差 < 0.11px，圆心偏差 ≤ 0.33px**。
+     逐点残差全部在 ±0.05px 内，说明它确实是一个规规矩矩的圆角矩形，
+     没有任何一条边被拉直、压扁或错位（这是第 31 轮斜杠语法写坏时最先失真的地方）。
+     环厚（沿角部 52 条径向射线量）：**mean 2.010 / sd 0.053 / min 1.90 / max 2.10**
+     ——正好是 --ring-w: 2px，离散度只有 ±1/8 像素（Chrome 的栅格化步长）。
+     内缘 r mean 8.08、外缘 r mean 10.09，两者 sd 都是 0.19 且**同向漂移**
+     （相关系数意义上的"同心"，差值 -0.004px）→ 是整体半像素级栅格化偏移，
+     不是"环变窄"或"环脱开图片"。
+   ═══════════════════════════════════════════════════════════════════════ */
 .ring-glow {
-  inset: calc(-1 * var(--ring-glow) / 2);
-  padding: calc(var(--ring-w) + var(--ring-glow) / 2);
-  border-radius: calc(9px + var(--ring-glow) / 2);
-  /* 光晕用与 base 相同的一组角锚径向渐变，保证外圈光色与环同色 */
+  inset: calc(-1 * var(--ring-glow));                                   /* d = −3 */
+  padding: calc(var(--ring-w) + var(--ring-glow));                      /* 内边界 = wrap+2px，外扩 3px → 带 5px 宽 */
+  border-radius: var(--cap-box-r);          /* 单值 10px：外径（斜杠写法会被读成椭圆） */
   background:
-    radial-gradient(circle at 0%   0%,   var(--ring-c1) 0%, transparent 78%),
-    radial-gradient(circle at 100% 0%,   var(--ring-c2) 0%, transparent 78%),
-    radial-gradient(circle at 100% 100%, var(--ring-c3) 0%, transparent 78%),
-    radial-gradient(circle at 0%   100%, var(--ring-c4) 0%, transparent 78%);
-  filter: blur(calc(var(--ring-glow) / 2));
-  opacity: .3;            /* 只做"托底"，不能盖过环本身（曾用 .55，浅色底上把环洗白） */
+    radial-gradient(circle at 0%   0%,   var(--ring-c1) 0%, transparent 60%),
+    radial-gradient(circle at 100% 0%,   var(--ring-c2) 0%, transparent 60%),
+    radial-gradient(circle at 100% 100%, var(--ring-c3) 0%, transparent 60%),
+    radial-gradient(circle at 0%   100%, var(--ring-c4) 0%, transparent 60%);
+  filter: blur(calc(var(--ring-glow) / 3));
+  opacity: .5;
   z-index: 1;
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
-/* 3) 流动层（2026-10-19 第 28 轮最终方案）
+/* 3) 流动层（2026-10-19 第 28 轮方案，第 30 轮重写底色）
       三层叠起来看：
         ring-base  —— 常驻底色，四色**精确**落在四角（用户要求的主色分布）。
-                      用「上→下」+「左→右」两个 2 色渐变斜向叠出四角，
-                      不旋转、不呼吸，所以四角色永远是准的。
+                      第 30 轮改为「双线性插值」实现：两条横向渐变分别给出
+                      上行的 c1→c2、下行的 c4→c3，再用纵向 mask 按高度混合。
+                      不旋转、不呼吸，所以四角色永远是准的，且完全不透底。
         ring-b、ring-a —— 两张不断旋转的 2 色渐变（绿↔绿 / 黄↔蓝），
                       靠 opacity 呼吸：从 0 淡入、涨到峰值、再淡回 0。
                       它们只负责「颜色在环上流动、此起彼伏地出现与消散」，
@@ -552,18 +742,59 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
           不会漏出斜边压到封面上（这是第一版的 bug，必须靠 .ring-clip 兜住）。
       早先试过 plus-lighter 加色叠加：颜色会被加亮、四角全糊成一片浅绿（实测色差 Δ>50），
       故改为普通 alpha 叠加 —— 色相不被改变，只让明暗呼吸。 */
+
+/* ── 底色：四角双线性插值 ─────────────────────────────────────────────
+   为什么不用 conic-gradient：非正方形（134×64）里角度随宽高比畸变，
+   实测四色整体转过约 90°，故从第 28 轮起就不用它了。
+
+   为什么不用「四层角锚定 radial 叠加」：四层各自 `transparent 72%`，
+   层间互相透光，底下又压着深色 backdrop → 环带饱和度被吃掉约 40%
+   （左边应到 #F9D50D 附近，实测只有 (212,213,66)，蓝通道被深底抬高）。
+
+   为什么不用 `linear-gradient(135deg, c1→c2→c4→c3)`：135° 这条轴只穿过
+   TL↔BR 一对对角，另两角只能拿到中间色 —— 实测 BR 应蓝却成 (158,205,166)、
+   BL 应绿却成 (203,221,81)。
+
+   正解是把四角当成一张 2×2 的色块表做双线性插值：
+      上下两个"行渐变"  upper = c1→c2（左→右） ,  lower = c4→c3（左→右）
+      再按 y 在两者之间混合  result = mix(upper, lower, t(y))
+   实现上用两条横向渐变 + 一条纵向 mask 代替逐像素运算：
+     · ::before 铺 upper（完全不透明，同时充当"不透底"的托底）
+     · ::after  铺 lower，靠纵向 mask 控制"从哪个高度开始接管"
+
+   ⚠ 这里的 mask 断点不是从 0% 起渐变，而是**前 45% 保持全透明**。
+     第一版写成 `linear-gradient(to bottom, transparent, #000)`（0→100% 全程线性），
+     结果上边那两个角在 y≈0 处就吃到约 2% 的 lower 色，肉眼即明显偏绿：
+     实测 TL 从应有的 (244,217,28)（Δ16）掉到 (216,220,70)（Δ66）。
+     改成 `transparent 0 45%, #000 100%` 后，上边两个角拿到的是纯净的 upper，
+     下边两个角由 lower 完整接管，中间 45%→100% 平滑过渡。 */
 .ring-base {
-  /* 四角四色：用**四个角锚定的径向渐变**直接钉住每个角。
-     为什么不用 conic-gradient：conic 的色标角度在非正方形（130×60）里会跟着
-     宽高比畸变，实测四色整体转了约 90°；径向渐变以「角」为圆心，
-     位置与宽高比无关，四角必然准。
-     每个径向渐变在角上实色、到对侧透明，四层叠加 → 相邻角之间自然混出中色。 */
-  background:
-    radial-gradient(circle at 0%   0%,   var(--ring-c1) 0%, transparent 72%),
-    radial-gradient(circle at 100% 0%,   var(--ring-c2) 0%, transparent 72%),
-    radial-gradient(circle at 100% 100%, var(--ring-c3) 0%, transparent 72%),
-    radial-gradient(circle at 0%   100%, var(--ring-c4) 0%, transparent 72%);
+  overflow: hidden;
+  /* 第 32 轮：`border-radius: inherit` 不保险 —— 它继承的是**已解析值**，
+     而父层 .ring-clip 的 10px 会在弧上被 mask 的 content-box 再裁一次，
+     两者不是同一套坐标系。这里直接把 wrap 的外径写死，四层用同一个数。 */
+  border-radius: var(--cap-box-r);
   z-index: 2;
+}
+.ring-base::before,
+.ring-base::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.ring-base::before {
+  /* upper 行：左上 c1 → 右上 c2 */
+  background: linear-gradient(90deg, var(--ring-c1), var(--ring-c2));
+}
+.ring-base::after {
+  /* lower 行：左下 c4 → 右下 c3；
+     纵向 mask：上 40% 全透明（上边两角保持纯净 upper），
+     40%→75% 渐入，**75% 之后就是全实色** —— 下边两个角因此在 y≈64 处完全由
+     lower 接管。第一版把全实色点写在 100%，而圆角带的采样高度只到 90% 左右，
+     所以下角始终混着 upper 的黄：实测 BL 应 (153,231,155) 却成 (202,221,83)。 */
+  background: linear-gradient(90deg, var(--ring-c4), var(--ring-c3));
+  -webkit-mask: linear-gradient(to bottom, transparent 0 40%, #000 75%);
+  mask: linear-gradient(to bottom, transparent 0 40%, #000 75%);
 }
 .ring-a, .ring-b {
   transition: none;
@@ -589,9 +820,14 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 /* 旋转：2 色渐变 180° 回到自身，故 0→180deg 即无缝循环 */
 @keyframes ring-spin     { from { transform: rotate(0deg); }   to { transform: rotate(180deg); } }
 @keyframes ring-spin-rev { from { transform: rotate(90deg); }  to { transform: rotate(270deg); } }
-/* 呼吸：两端 opacity 同为 0.25（保留一点流动层，避免四角底色"太死"），
-   峰值 0.85；两端同值 → 循环相接处零跳变。 */
-@keyframes ring-breathe  { 0%, 100% { opacity: .25; } 50% { opacity: .85; } }
+/* 呼吸：两端 opacity 同为 .18，峰值 .5。
+   第 30 轮把峰值从 .85 降到 .5 —— 原因是第 28 轮环压在图片边缘上、底色本来就
+   被深色 backdrop 压暗，流动层需要很高 alpha 才看得出流动；现在环外挂到图片外侧、
+   底色是纯净实色，.85 的覆盖会把它整个冲掉：
+   实测 TL 从 Δ16（纯底色）被冲到 Δ57、BR 从 Δ31 冲到 Δ102，四角全糊成浅黄绿。
+   降到 .5 后四角色仍可辨（Δ 约 20~40），同时"颜色流动、此起彼伏"的观感保留。
+   两端同值 → 循环相接处零跳变。 */
+@keyframes ring-breathe  { 0%, 100% { opacity: .18; } 50% { opacity: .5; } }
 /* 用户偏好减少动态：停掉流动，只留四角底色环（仍可见、可辨识） */
 @media (prefers-reduced-motion: reduce) {
   .ring-a, .ring-b { animation: none; opacity: 0; }
@@ -881,12 +1117,16 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .tabs { padding: 12px 16px 0; }
   .site-header { padding: 14px 16px; }
   .rank-item { grid-template-columns: 34px 100px 1fr auto; }
-  .rank-capsule { width: 100px; height: 46px; }
+  /* 窄屏：图片 100×46（网格列宽仍按 100px 留位，外框的 2px 由负 margin 溢出吸收），
+     外框 = 图片 + 2×环厚 = 104×50。图片尺寸由 .rank-capsule-wrap > .rank-capsule
+     的 inset/calc 自动跟随外框，这里只需给外框和旋转层定尺寸。 */
   .rank-capsule.is-icon { width: 30px; height: 30px; margin: 8px 0; }
-  /* wrap 跟随窄屏尺寸；图片退化成的 30×30 图标由 wrap 的 flex 居中承载，
-     wrap 本身尺寸不变（否则行高会跳） */
-  .rank-capsule-wrap { width: 100px; height: 46px; }
-  .rank-capsule-wrap:has(> .rank-capsule.is-icon) { width: 100px; height: 46px; justify-self: stretch; }
+  .rank-capsule-wrap {
+    width: calc(100px + 2 * var(--ring-w));
+    height: calc(46px + 2 * var(--ring-w));
+    --spin-size: 115.4px;           /* √(104² + 50²) */
+  }
+  .rank-capsule-wrap:has(> .rank-capsule.is-icon) { justify-self: stretch; }
   .rank-capsule-wrap > .rank-capsule.is-icon { width: 30px; height: 30px; margin: 0; }
   .rank-bar, .rank-last { display: none; }
   .rank-min { min-width: 84px; text-align: right; }
