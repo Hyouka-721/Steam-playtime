@@ -52,10 +52,25 @@
   --medal-1: #c58a00; --medal-2: #8d8175; --medal-3: #b3703c;
   --medal-shadow-1: none; --medal-shadow-2: none; --medal-shadow-3: none;
   /* 金色高亮唯一入口：指向本主题的奖牌金，切主题时自动换成对应金色调。
-     稀有成就名（.is-gold）与全成就胶囊图描边（.is-perfect）都用它，不要另写色值。 */
+     目前用于稀有成就名（.is-gold）；全成就胶囊图描边已改为多色流动渐变（见 --ring-*）。 */
   --gold: var(--medal-1);
-  /* 胶囊图外发光的柔和金（与奖牌金同色相，仅降低不透明度，浅底上不刺眼） */
+  /* 胶囊图外发光的柔和金（保留：主题差异留档，当前描边改用 --ring-* 渐变） */
   --gold-glow: rgba(197, 138, 0, 0.32);
+  /* 全成就胶囊图「多色流动渐变描边」的四角色（2026-10-19 第 28 轮，用户指定）。
+     一次声明，环形层与光晕层共用；主题无关（用户给的是固定色值），
+     四色亮度都足够高，深色底上仍然清晰。 */
+  --ring-c1: #F9D50D;  /* 左上 */
+  --ring-c2: #B0FE87;  /* 右上 */
+  --ring-c3: #72B7F2;  /* 右下 */
+  --ring-c4: #99E79B;  /* 左下 */
+  /* 描边环厚度与外光晕半径：环厚与旧金边一致（2px），保证"尺寸/圆角/布局不变" */
+  --ring-w: 2px;
+  --ring-glow: 6px;
+  /* 流动层正方形边长 = 胶囊对角线（130×60 → √(130²+60²) ≈ 143.1），
+     旋转任意角度都能盖满环带；窄屏 100×46 → 110.1，见媒体查询 */
+  --spin-size: 143.2px;
+  /* 环下深色底衬：文字列表行背景透明，深色主题下浅色环需要暗底托住才清晰 */
+  --ring-backdrop: #1b1730;
   --track: rgba(36, 28, 21, 0.09);
   --bar-grad: linear-gradient(90deg, #b85c1c, #e08b3f);
   --badge-bg: rgba(255, 255, 255, 0.92); --badge-text: #241c15;
@@ -409,17 +424,180 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   background: var(--sunken); display: block;
 }
 .rank-capsule.is-icon { width: 30px; height: 30px; object-fit: contain; margin: 15px 0; }
-/* 全成就解锁：胶囊图描一圈金色（2026-10-19）
-   用 box-shadow（外描边 + 柔光）而不是 border —— box-shadow 不参与布局，
-   图片的 130×60 尺寸、网格列宽、行高全部不受影响；给占位图、真图、
-   以及 onerror 退化成 30×30 图标的三种状态一并生效（都挂在 .rank-capsule 上）。
-   圆角比图片本身大 1px，让描边贴合圆角外侧、不压住画面内容。 */
-.rank-capsule.is-perfect {
-  border-radius: 9px;               /* 8 + 1：描边落在原圆角外侧 */
-  box-shadow:
-    0 0 0 2px var(--gold),
-    0 0 10px 1px var(--gold-glow);
+/* 全成就解锁：胶囊图描一圈「多色流动渐变」（2026-10-19 第 28 轮，替换原纯金描边）
+   ─────────────────────────────────────────────────────────────────────────────
+   ■ 为什么不用渐变 border / border-image（用户要求"不依赖背景图或滤镜，用代码实现"）
+     border-image 不吃 border-radius → 直角环框与圆角胶囊不贴合；
+     渐变 border 要通过 padding-box/border-box 之差留空，会改盒模型、占布局。
+   ■ 做法：单独一层「环」。结构由 app.js 渲染：
+       <span class="rank-capsule-wrap"><img class="rank-capsule"> …环…</span>
+     · wrap 是 grid 直接子项，尺寸/位置与原来的 img 完全一致（130×60 / 30×30），
+       所以网格列宽、行高、排序序号位置全部不变；img 在里面铺满。
+     · 环用 4 个绝对定位子元素，均在 wrap 内，**不参与布局、不进网格**。
+     · 环体 = padding:2px + mask 挖空中心 → 只剩 2px 环，
+       圆角 9px（= 图 8px + 1px，与旧金边同半径），与胶囊边缘天然贴合。
+   ■ 为什么"环"不直接画在 img 上：img 是 grid 直接子项，给它加 ::before/::after
+     会变成 grid item 多吃一列。多套一层 wrap 既保住布局，也避免给 img 加壳。
+
+   ■ 流动如何做到「平滑、不跳变、首尾无缝」（核心）
+     单层 4 色线性渐变整体旋转会在 90° 处明显扭转，且 4 色无法首尾闭环。
+     这里用**双层反向旋转**、每层只有 2 色：
+       层A  0°   黄(--ring-c1 左上) → 蓝(--ring-c3 右下)   顺时针转，亮度 1→0→1 呼吸
+       层B  90°  绿(--ring-c2 右上) → 绿(--ring-c4 左下)   逆时针转
+       二者 mix-blend-mode: plus-lighter 叠加
+     · 每层只有 2 色，旋转 180° 后与自身重合 → **数学上无缝**，无需拼接 4 色。
+     · 层A 的 keyframe 两端 opacity 都是 0（同色相、同值），相接处 0 → 0，
+       不会出现"突然换色"的跳变；中途淡入淡出让颜色"出现→融合→消散"。
+     · 叠加后的四角恰为指定四色（见注释末尾"四角色对齐"说明）。
+   ■ 深色底可见性（用户明确要求）
+     1) backdrop 层：环外沿向下垫一圈深色（--ring-backdrop），把浅色环与深底隔开；
+     2) glow 层：同色渐变 + blur 柔光，在深底上把环"托"出来；
+     3) 四色最小亮度 #72B7F2 的 L≈70%，与深底 #1b1730 对比度 > 6:1，无需换深色版。 */
+.rank-capsule-wrap {
+  position: relative;
+  width: 130px; height: 60px;   /* 与 .rank-capsule 原尺寸一致（窄屏 100×46，见媒体查询） */
+  border-radius: 9px;
+  /* 由 JS 写入：胶囊格在行内的偏移，环层据此对齐（不依赖定位祖先链） */
 }
+.rank-capsule-wrap > .rank-capsule { width: 100%; height: 100%; }
+/* 图片加载失败 → onerror 把 img 换成 30×30 的图标（.is-icon）。
+   关键：**wrap 尺寸必须保持不变**（130×60），否则行高会从 76 掉到 46，
+   整张列表在慢网/离线时会跳一下。
+   旧实现是给 img 加 margin: 15px 0 撑起 60px 高；现在 img 被 width/height:100% 接管，
+   改由 wrap 用 flex 居中承载 30×30 图标，行高与网格列宽完全不受影响。 */
+.rank-capsule-wrap:has(> .rank-capsule.is-icon) {
+  display: flex; align-items: center; justify-content: center;
+}
+.rank-capsule-wrap:has(> .rank-capsule.is-icon) > .rank-capsule.is-icon {
+  width: 30px; height: 30px; object-fit: contain; margin: 0; flex: none;
+}
+/* 环层公共：贴合 wrap、不参与布局、不抢点击 */
+.ring {
+  position: absolute; inset: 0;
+  border-radius: 9px;
+  pointer-events: none;
+}
+/* 裁切容器：只显示「2px 环带」
+   ① overflow:hidden —— 裁掉旋转正方形超出胶囊轮廓的部分（否则斜对角会压到封面上）
+   ② padding 2px + mask 挖空 content-box —— 再挖掉中间，只留边框那一圈
+   ③ isolation:isolate —— 把子层的 plus-lighter 混合锁在本层内部；
+      否则会与页面底色混合，整块区域被"加亮"成半透明白雾（实测过）。 */
+.ring-clip {
+  overflow: hidden;
+  padding: var(--ring-w);
+  isolation: isolate;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.ring-clip > * {
+  position: absolute;
+  /* 旋转层做成「覆盖整个环」的正方形：边长 = 对角线（130/60 → 143.2），
+     居中摆放，旋转 0~180° 全程都能盖住环带（数学上不会出现缺口） */
+  width: var(--spin-size); height: var(--spin-size);
+  left: 50%; top: 50%;
+  margin-left: calc(var(--spin-size) / -2);
+  margin-top: calc(var(--spin-size) / -2);
+}
+/* 1) 深色底衬：垫在「环带正下方」，给浅色环提供暗背景。
+      必须同样挖空中间 —— 否则整块深色会把封面压暗（实测画面明显变沉）。 */
+.ring-backdrop {
+  inset: 0;
+  padding: var(--ring-w);
+  border-radius: 9px;
+  background: var(--ring-backdrop);
+  opacity: .9;
+  z-index: 0;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+/* 2) 外柔光：同色渐变 + blur，深底上把边缘托出来
+      注意必须同样 mask 挖空 —— 否则它是一整块渐变，会把封面糊成白雾
+      （这里曾漏掉 mask，实测整张图被加亮成浅色）。 */
+.ring-glow {
+  inset: calc(-1 * var(--ring-glow) / 2);
+  padding: calc(var(--ring-w) + var(--ring-glow) / 2);
+  border-radius: calc(9px + var(--ring-glow) / 2);
+  /* 光晕用与 base 相同的一组角锚径向渐变，保证外圈光色与环同色 */
+  background:
+    radial-gradient(circle at 0%   0%,   var(--ring-c1) 0%, transparent 78%),
+    radial-gradient(circle at 100% 0%,   var(--ring-c2) 0%, transparent 78%),
+    radial-gradient(circle at 100% 100%, var(--ring-c3) 0%, transparent 78%),
+    radial-gradient(circle at 0%   100%, var(--ring-c4) 0%, transparent 78%);
+  filter: blur(calc(var(--ring-glow) / 2));
+  opacity: .3;            /* 只做"托底"，不能盖过环本身（曾用 .55，浅色底上把环洗白） */
+  z-index: 1;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+/* 3) 流动层（2026-10-19 第 28 轮最终方案）
+      三层叠起来看：
+        ring-base  —— 常驻底色，四色**精确**落在四角（用户要求的主色分布）。
+                      用「上→下」+「左→右」两个 2 色渐变斜向叠出四角，
+                      不旋转、不呼吸，所以四角色永远是准的。
+        ring-b、ring-a —— 两张不断旋转的 2 色渐变（绿↔绿 / 黄↔蓝），
+                      靠 opacity 呼吸：从 0 淡入、涨到峰值、再淡回 0。
+                      它们只负责「颜色在环上流动、此起彼伏地出现与消散」，
+                      不强求改变四角基色 —— 这正是"颜色之间平滑过渡"的来源。
+
+      为什么这样能保证「不跳变、首尾无缝」：
+        · 每层渐变只有 2 个色标 → 旋转 180° 与自身完全重合，旋转循环天然无缝；
+        · 呼吸的 keyframe 两端 opacity 都是 0（同色同值），循环接缝 0→0 无突变；
+        · 所有层都是「大正方形 + 外层裁切」，旋转只改变渐变方向，
+          不会漏出斜边压到封面上（这是第一版的 bug，必须靠 .ring-clip 兜住）。
+      早先试过 plus-lighter 加色叠加：颜色会被加亮、四角全糊成一片浅绿（实测色差 Δ>50），
+      故改为普通 alpha 叠加 —— 色相不被改变，只让明暗呼吸。 */
+.ring-base {
+  /* 四角四色：用**四个角锚定的径向渐变**直接钉住每个角。
+     为什么不用 conic-gradient：conic 的色标角度在非正方形（130×60）里会跟着
+     宽高比畸变，实测四色整体转了约 90°；径向渐变以「角」为圆心，
+     位置与宽高比无关，四角必然准。
+     每个径向渐变在角上实色、到对侧透明，四层叠加 → 相邻角之间自然混出中色。 */
+  background:
+    radial-gradient(circle at 0%   0%,   var(--ring-c1) 0%, transparent 72%),
+    radial-gradient(circle at 100% 0%,   var(--ring-c2) 0%, transparent 72%),
+    radial-gradient(circle at 100% 100%, var(--ring-c3) 0%, transparent 72%),
+    radial-gradient(circle at 0%   100%, var(--ring-c4) 0%, transparent 72%);
+  z-index: 2;
+}
+.ring-a, .ring-b {
+  transition: none;
+  will-change: transform, opacity;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+}
+/* A：黄(左上) ↔ 蓝(右下)，顺时针 7s；呼吸 5.5s（与旋转错开，避免节奏同步显得机械） */
+.ring-a {
+  background: linear-gradient(0deg, var(--ring-c1), var(--ring-c3));
+  animation-name: ring-spin, ring-breathe;
+  animation-duration: 7s, 5.5s;
+  z-index: 3;
+}
+/* B：绿(右上) ↔ 绿(左下)，逆时针 11s；呼吸 8s，相位错开 */
+.ring-b {
+  background: linear-gradient(90deg, var(--ring-c2), var(--ring-c4));
+  animation-name: ring-spin-rev, ring-breathe;
+  animation-duration: 11s, 8s;
+  animation-delay: 0s, -3s;      /* 负延迟：一上来就处在呼吸中段，不会全员同时熄灭 */
+  z-index: 3;
+}
+/* 旋转：2 色渐变 180° 回到自身，故 0→180deg 即无缝循环 */
+@keyframes ring-spin     { from { transform: rotate(0deg); }   to { transform: rotate(180deg); } }
+@keyframes ring-spin-rev { from { transform: rotate(90deg); }  to { transform: rotate(270deg); } }
+/* 呼吸：两端 opacity 同为 0.25（保留一点流动层，避免四角底色"太死"），
+   峰值 0.85；两端同值 → 循环相接处零跳变。 */
+@keyframes ring-breathe  { 0%, 100% { opacity: .25; } 50% { opacity: .85; } }
+/* 用户偏好减少动态：停掉流动，只留四角底色环（仍可见、可辨识） */
+@media (prefers-reduced-motion: reduce) {
+  .ring-a, .ring-b { animation: none; opacity: 0; }
+  .ring-base { z-index: 2; }
+}
+
 .rank-name {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-strong);
 }
@@ -705,6 +883,11 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .rank-item { grid-template-columns: 34px 100px 1fr auto; }
   .rank-capsule { width: 100px; height: 46px; }
   .rank-capsule.is-icon { width: 30px; height: 30px; margin: 8px 0; }
+  /* wrap 跟随窄屏尺寸；图片退化成的 30×30 图标由 wrap 的 flex 居中承载，
+     wrap 本身尺寸不变（否则行高会跳） */
+  .rank-capsule-wrap { width: 100px; height: 46px; }
+  .rank-capsule-wrap:has(> .rank-capsule.is-icon) { width: 100px; height: 46px; justify-self: stretch; }
+  .rank-capsule-wrap > .rank-capsule.is-icon { width: 30px; height: 30px; margin: 0; }
   .rank-bar, .rank-last { display: none; }
   .rank-min { min-width: 84px; text-align: right; }
   .ach-item { grid-template-columns: 40px 1fr auto; gap: 10px; }
