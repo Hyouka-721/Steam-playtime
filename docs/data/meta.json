@@ -2,7 +2,7 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-19T10:18:41.068Z",
+  "generated_at": "2026-10-19T10:55:21.395Z",
   "generated_at_local": "2026-10-19",
   "tracking_since": "2026-10-13",
   "last_snapshot_date": "2026-10-18",
@@ -16,6 +16,15 @@
     "pct": 33.3,
     "games": 31
   },
+  "ach_perfect": [
+    "105600",
+    "3167020",
+    "431960",
+    "557600",
+    "646570",
+    "733070",
+    "990630"
+  ],
   "stats": {
     "lifetime_minutes": 82454,
     "lifetime_hours": 1374.2,

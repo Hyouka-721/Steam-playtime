@@ -427,6 +427,8 @@
 
     const max = Math.max(...played.map((g) => g.lifetime_minutes), 1);
     const totalShown = played.reduce((a, g) => a + g.lifetime_minutes, 0);
+    // 全成就解锁集合只算一次，供所有行复用（不在每行里重建 Set）
+    const perfect = perfectGameSet();
 
     const rowHtml = (g, i, noCal) => {
       const icon = ICON(g.appid, g.img_icon_url);
@@ -446,9 +448,12 @@
       // 首屏可见的几行由观察器立刻接管（rootMargin 提前 200px 预热），
       // 屏幕外的行在滚动到附近前完全零请求。首行额外走高优先级，让焦点图先到。
       const eager = i === 0;
+      // 全部成就已解锁 → 胶囊图描一圈金光（.is-perfect，见 style.css）。
+      // 只加 class，不改 img 的宽高与 object-fit，图片尺寸与列表布局零影响。
+      const perfectCls = perfect.has(String(g.appid)) ? ' is-perfect' : '';
       return `<div class="rank-item${g.lifetime_minutes === 0 ? ' zero' : ''}" data-appid="${g.appid}" title="点击查看该游戏每日时长趋势">
           <span class="rank-no${noCls}">${i + 1}</span>
-          <img class="rank-capsule" data-src="${CAPSULE(g.appid)}" src="${BLANK_GIF}" alt=""
+          <img class="rank-capsule${perfectCls}" data-src="${CAPSULE(g.appid)}" src="${BLANK_GIF}" alt=""
                ${eager ? 'loading="eager" fetchpriority="high"' : ''} decoding="async" width="130" height="60"
                onerror="this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'">
           <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
@@ -574,6 +579,8 @@
     }
     hint.textContent = `近 14 天 · 共 ${list.length} 款游戏`;
     const max = Math.max(...list.map((g) => g.recent), 1);
+    // 与累计榜同一口径：全成就解锁的游戏胶囊图标金（集合只建一次）
+    const perfect = perfectGameSet();
 
     box.innerHTML = list
       .map((g, i) => {
@@ -581,9 +588,10 @@
         const pct = Math.max(1.5, (g.recent / max) * 100);
         const barStyle = i < topPalette.length ? `width:${pct}%;background:${topPalette[i]}` : `width:${pct}%`;
         const noCls = i < 3 ? ` r${i + 1}` : '';
+        const perfectCls = perfect.has(String(g.appid)) ? ' is-perfect' : '';
         return `<div class="rank-item">
           <span class="rank-no${noCls}">${i + 1}</span>
-          <img class="rank-capsule" data-src="${CAPSULE(g.appid)}" src="${BLANK_GIF}" alt="" decoding="async"
+          <img class="rank-capsule${perfectCls}" data-src="${CAPSULE(g.appid)}" src="${BLANK_GIF}" alt="" decoding="async"
                width="130" height="60"
                onerror="this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'">
           <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}</span>
@@ -811,6 +819,57 @@
     return n >= 10 ? `${Math.round(n)}%` : `${n.toFixed(1)}%`;
   };
 
+  /* ---------- 金色高亮判定（2026-10-19）----------
+     两条规则：
+       ① 成就名：全球完成率**严格小于** 10% → 文字金色（.is-gold）
+       ② 游戏胶囊图：全部成就已解锁 → 图片描一圈金光（.is-perfect）
+     判定集中在这里，阈值具名，避免条件散落各处。 */
+
+  /** 稀有成就阈值：全球完成率严格小于该值即标金 */
+  const ACH_RARE_PCT = 10;
+
+  /** 成就名是否标金。
+   *  边界：percent 为 null/undefined/空串（无数据）→ false，绝不参与比较
+   *  （Number(null) === 0 会把它误判成 0% 而标金）；percent === 10 → false（不含等号）。 */
+  const isRareAch = (p) => {
+    if (p === null || p === undefined || p === '') return false;
+    const n = Number(p);
+    if (!Number.isFinite(n) || n < 0) return false;
+    return n < ACH_RARE_PCT; // 严格小于
+  };
+
+  /** 一款游戏是否「全部成就已解锁」（胶囊图标金）。
+   *  边界：total 必须 > 0 —— 0/0（无成就系统的游戏）与缺字段都不算全解锁，
+   *  否则 0 === 0 会把一大批无成就游戏误判成已全解锁。 */
+  const isAchComplete = (g) => {
+    if (!g) return false;
+    const total = Number(g.total);
+    const unlocked = Number(g.unlocked);
+    if (!Number.isFinite(total) || total <= 0) return false;
+    if (!Number.isFinite(unlocked)) return false;
+    return unlocked >= total;
+  };
+
+  /** 「全成就已解锁」游戏的 appid 集合（胶囊图标金用）。
+   *  两条数据来源，优先前者：
+   *   1) 当前生效的成就快照 state.ach.games —— 打开过成就页或回看态下可用，
+   *      回看时是**按回看日期截断**后的结果，最精确；
+   *   2) meta.ach_perfect —— 构建期算好随 meta 下发（已内联进首屏），
+   *      首屏明细尚未加载时用它，避免为主界面一个边框去下载 285KB 明细。
+   *  每次列表渲染只调用一次（结果传给行渲染函数），不在每行里重复建 Set。 */
+  function perfectGameSet() {
+    const out = new Set();
+    const games = state.ach?.games;
+    if (games && Object.keys(games).length) {
+      for (const [appid, g] of Object.entries(games)) {
+        if (isAchComplete(g)) out.add(String(appid));
+      }
+      return out;
+    }
+    for (const id of state.meta?.ach_perfect ?? []) out.add(String(id));
+    return out;
+  }
+
   function buildAchSelect() {
     const sel = $('ach-game');
     if (!state.ach) {
@@ -870,11 +929,14 @@
       .map((a) => {
         const d = achDate(a.ts);
         const p = achPctText(a.percent);
+        // 稀有成就（全球完成率 < 10%）名称标金：仅加 class，不改结构与文案，
+        // 布局零影响（.is-gold 只改颜色，不动字号字重）
+        const rare = isRareAch(a.percent) ? ' is-gold' : '';
         return `<div class="ach-item">
           <img class="ach-icon" src="${a.icon ?? ''}" alt="" loading="lazy"
                onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'icon-ph ach-icon-ph'}))">
           <div class="ach-main">
-            <div class="ach-name" title="${escapeHtml(a.name)}">${escapeHtml(a.name)}</div>
+            <div class="ach-name${rare}" title="${escapeHtml(a.name)}">${escapeHtml(a.name)}</div>
             <div class="ach-sub"><span class="ach-game">${escapeHtml(a.game)}</span>${a.desc ? ` · ${escapeHtml(a.desc)}` : ''}</div>
           </div>
           <span class="ach-meta">

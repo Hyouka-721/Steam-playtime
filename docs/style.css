@@ -51,6 +51,11 @@
   --logo-glow: drop-shadow(0 1px 2px rgba(90, 60, 25, 0.12));
   --medal-1: #c58a00; --medal-2: #8d8175; --medal-3: #b3703c;
   --medal-shadow-1: none; --medal-shadow-2: none; --medal-shadow-3: none;
+  /* 金色高亮唯一入口：指向本主题的奖牌金，切主题时自动换成对应金色调。
+     稀有成就名（.is-gold）与全成就胶囊图描边（.is-perfect）都用它，不要另写色值。 */
+  --gold: var(--medal-1);
+  /* 胶囊图外发光的柔和金（与奖牌金同色相，仅降低不透明度，浅底上不刺眼） */
+  --gold-glow: rgba(197, 138, 0, 0.32);
   --track: rgba(36, 28, 21, 0.09);
   --bar-grad: linear-gradient(90deg, #b85c1c, #e08b3f);
   --badge-bg: rgba(255, 255, 255, 0.92); --badge-text: #241c15;
@@ -404,9 +409,24 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   background: var(--sunken); display: block;
 }
 .rank-capsule.is-icon { width: 30px; height: 30px; object-fit: contain; margin: 15px 0; }
+/* 全成就解锁：胶囊图描一圈金色（2026-10-19）
+   用 box-shadow（外描边 + 柔光）而不是 border —— box-shadow 不参与布局，
+   图片的 130×60 尺寸、网格列宽、行高全部不受影响；给占位图、真图、
+   以及 onerror 退化成 30×30 图标的三种状态一并生效（都挂在 .rank-capsule 上）。
+   圆角比图片本身大 1px，让描边贴合圆角外侧、不压住画面内容。 */
+.rank-capsule.is-perfect {
+  border-radius: 9px;               /* 8 + 1：描边落在原圆角外侧 */
+  box-shadow:
+    0 0 0 2px var(--gold),
+    0 0 10px 1px var(--gold-glow);
+}
 .rank-name {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-strong);
 }
+/* 稀有成就名（全球完成率 < 10%）：统一走 --gold，只改颜色，不动字号字重，布局零影响。
+   通用工具类放这儿；落在 .ach-name 上时需要提权——见成就列表段的 .ach-name.is-gold
+   （.ach-name 自带 color 且在本文件更靠后，单类选择器会被它按「后来居上」盖掉）。 */
+.is-gold { color: var(--gold); }
 /* 进度条不再 overflow:hidden——加菲猫要趴在条上（绝对定位、可溢出条体）。
    填充span自带 border-radius，不依赖外层裁剪。 */
 .rank-bar { height: 7px; background: var(--track); border-radius: 4px; position: relative; }
@@ -540,6 +560,9 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   color: var(--text-strong); font-weight: 600; font-size: 13.5px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+/* 稀有成就（全球完成率 < 10%）名标金：双类选择器提权，稳胜上面的 .ach-name。
+   只换 color，字号/字重/行高全不变，列表布局与行高不受影响。 */
+.ach-name.is-gold { color: var(--gold); }
 .ach-sub {
   color: var(--text-dim); font-size: 12px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;

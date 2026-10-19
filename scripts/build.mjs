@@ -57,8 +57,21 @@ function loadLatestAchievements() {
   }
 }
 
+/** 判断一款游戏是否「全部成就已解锁」。
+ *  边界：total 必须 > 0 —— 0/0（无成就系统的游戏或缺字段）不算全解锁，
+ *  否则 0 === 0 会把一大批没有成就的游戏误判成"已全解锁"。 */
+function isAchComplete(g) {
+  const total = Number(g?.total);
+  const unlocked = Number(g?.unlocked);
+  if (!Number.isFinite(total) || total <= 0) return false;
+  if (!Number.isFinite(unlocked)) return false;
+  return unlocked >= total;
+}
+
 /** 生成 docs/data/achievements.json；无成就数据时写占位文件，前端据此显示待采集
- *  返回值：摘要 stats（供写进 meta.json 的 ach_stats 字段）。
+ *  返回值：{ stats, perfect } —— stats 摘要写进 meta.ach_stats（首屏概览卡用），
+ *          perfect 是「全成就已解锁」游戏的 appid 列表，写进 meta.ach_perfect
+ *          （主界面胶囊图的金色描边要用，同样不能为此下载 285KB 明细）。
  *  2026-10-18 首屏优化：前端首屏只需要 unlocked/total/pct 三个数，不该为此下载
  *  285KB 的明细文件；把摘要同步进 meta（13KB）后，概览卡可立即渲染，明细推迟到
  *  用户真正打开「成就」页时再取。 */
@@ -72,6 +85,7 @@ function buildAchievementsDoc(nameOverrides) {
   }
 
   const games = {};
+  const perfect = [];
   let unlockedTotal = 0;
   let totalTotal = 0;
   for (const [appid, g] of Object.entries(ach.games ?? {})) {
@@ -87,7 +101,9 @@ function buildAchievementsDoc(nameOverrides) {
     };
     unlockedTotal += g.unlocked ?? 0;
     totalTotal += g.total ?? 0;
+    if (isAchComplete(games[appid])) perfect.push(String(appid));
   }
+  perfect.sort(); // 顺序稳定，便于比对差异
 
   const doc = {
     schema: 1,
@@ -103,8 +119,8 @@ function buildAchievementsDoc(nameOverrides) {
     games,
   };
   fs.writeFileSync(OUT_ACH, JSON.stringify(doc, null, 2) + '\n', 'utf8');
-  log(`已生成 docs/data/achievements.json（${unlockedTotal}/${totalTotal}，${doc.stats.pct}%，${doc.stats.games} 款游戏）`);
-  return doc.stats; // 摘要写进 meta.ach_stats，供首屏直接使用
+  log(`已生成 docs/data/achievements.json（${unlockedTotal}/${totalTotal}，${doc.stats.pct}%，${doc.stats.games} 款游戏，其中 ${perfect.length} 款已全解锁）`);
+  return { stats: doc.stats, perfect }; // 摘要与全解锁列表写进 meta，供首屏直接使用
 }
 
 function computeStreaks(allDays) {
@@ -255,9 +271,10 @@ function main() {
   const activeDays = dates.filter((d) => (allDays[d].total_minutes ?? 0) > 0).length;
   const playedGames = Object.values(gamesIndex).filter((g) => g.total_minutes > 0).length;
 
-  // 先算成就摘要：要写进 meta.ach_stats（首屏用），所以得早于 meta 落盘
+  // 先算成就摘要与全解锁列表：要写进 meta.ach_stats / meta.ach_perfect（首屏用），
+  // 所以得早于 meta 落盘
   fs.mkdirSync(OUT_DIR, { recursive: true });
-  const achStats = buildAchievementsDoc(nameOverrides);
+  const { stats: achStats, perfect: achPerfect } = buildAchievementsDoc(nameOverrides) ?? { stats: null, perfect: [] };
 
   const meta = {
     schema: 2,
@@ -272,6 +289,9 @@ function main() {
     // 成就摘要（2026-10-18 起）：前端首屏只读这里，不再为首屏一个百分比
     // 下载 285KB 的 achievements.json；明细按需加载
     ach_stats: achStats,
+    // 「全部成就已解锁」的游戏 appid（2026-10-19 起）：主界面胶囊图要描一圈金光，
+    // 但首屏不能为此下载明细，故构建期算好随 meta 下发
+    ach_perfect: achPerfect,
     stats: {
       // 终身累计（截至最新快照日，Steam 服务器统计）
       lifetime_minutes: lifetimeMinutes,
