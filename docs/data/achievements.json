@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "ready": true,
-  "generated_at": "2026-10-19T14:24:23.317Z",
-  "snapshot_date": "2026-10-18",
+  "generated_at": "2026-10-19T20:40:03.832Z",
+  "snapshot_date": "2026-10-19",
   "stats": {
     "unlocked": 834,
     "total": 2504,
@@ -612,7 +612,7 @@
           "name": "Going Oldschool",
           "desc": "Bring back the original title screen.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/04998850ce652bde23901e5a4a5838d03d88c725.jpg",
-          "percent": 10.7,
+          "percent": 10.6,
           "ts": 1787912064
         },
         {
@@ -628,7 +628,7 @@
           "name": "Temple Raider",
           "desc": "Breach the impenetrable walls of the jungle temple.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/cd11c08ea1a436e8156e1d3ebeccd1c9ba5cb22f.jpg",
-          "percent": 26.6,
+          "percent": 26.5,
           "ts": 1787893060
         },
         {
@@ -732,7 +732,7 @@
           "name": "Walk the Plank",
           "desc": "Triumph over a pirate invasion, a group of pillagers from the sea out for your booty... and your life!",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/ce10d46dae4218e320e2ae46188507aa39ddf12b.jpg",
-          "percent": 32.1,
+          "percent": 32,
           "ts": 1787470449
         },
         {
@@ -772,7 +772,7 @@
           "name": "Fortune Favors the Bould",
           "desc": "Discover a friendly boulder.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/60f21cf3ca3149c7c61d15dd1042d7a0ad71cfbc.jpg",
-          "percent": 7.6,
+          "percent": 7.5,
           "ts": 1787382486
         },
         {
@@ -932,7 +932,7 @@
           "name": "Feeling Petty",
           "desc": "Deliver headpats to the town pet.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/89ae5fc62de83ed0c5b472dba2434a2f91940bd1.jpg",
-          "percent": 32.6,
+          "percent": 32.5,
           "ts": 1786965943
         },
         {
@@ -964,7 +964,7 @@
           "name": "Marathon Medalist",
           "desc": "Travel a total of 26.2 miles on foot.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/c624a2f9b28c26d804f22337d4c46efffc2d4563.jpg",
-          "percent": 45.1,
+          "percent": 45,
           "ts": 1786940537
         },
         {
@@ -1308,7 +1308,7 @@
           "name": "Great Defender",
           "desc": "Complete the campaign.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/891b60bda9108ded465713a61ac900fc3c0cd3f6.jpg",
-          "percent": 51.5,
+          "percent": 51.6,
           "ts": 1792289838
         },
         {
@@ -1340,7 +1340,7 @@
           "name": "Energy Network",
           "desc": "Build 4 Tesla towers in any stage.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/9d4107ad32a78ad41ad87aec36ed086d4765b2c0.jpg",
-          "percent": 36.9,
+          "percent": 37,
           "ts": 1791986543
         },
         {
@@ -1372,7 +1372,7 @@
           "name": "Is he dead yeti?",
           "desc": "Defeat J.T.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/5e3c4682dc5e8b73a57e2895c60fe219c17075e8.jpg",
-          "percent": 62.3,
+          "percent": 62.4,
           "ts": 1791982453
         },
         {
@@ -1380,7 +1380,7 @@
           "name": "Legend of Linirea.",
           "desc": "Train a hero up to max level.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/f6acfbaa8cfae8ff0457789315a7103d0db898d4.jpg",
-          "percent": 63,
+          "percent": 63.1,
           "ts": 1791976501
         },
         {
@@ -1683,7 +1683,7 @@
           "name": "丁香与醋栗",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/292030/6078587189483353f06f48d0eefdaaa0791e9e13.jpg",
-          "percent": 60.2,
+          "percent": 60.3,
           "ts": 1782090904
         },
         {
@@ -2091,7 +2091,7 @@
           "name": "阻挡去路的巨影",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/502500/70e61c557b4976ce0cc54051205d3cb865dd0f7d.jpg",
-          "percent": 63.8,
+          "percent": 63.7,
           "ts": 1765255504
         },
         {
@@ -2227,7 +2227,7 @@
           "name": "精密提取",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/8c0f5f930579d79d552ce39fe00f86b6d2dec08d.jpg",
-          "percent": 11.8,
+          "percent": 11.7,
           "ts": 1747916710
         },
         {
@@ -2291,7 +2291,7 @@
           "name": "没什么好怕的！",
           "desc": "杀死100名精英怪物。了不起！",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/7defcc0b376a6230e3f9fe1b095dd2a41903b5e8.jpg",
-          "percent": 25.7,
+          "percent": 25.6,
           "ts": 1743396512
         },
         {
@@ -2299,7 +2299,7 @@
           "name": "刀刃之舞",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/6b0198aca19d5f42b173593403247f39346e416a.jpg",
-          "percent": 12.2,
+          "percent": 12.1,
           "ts": 1743395262
         },
         {
@@ -2323,7 +2323,7 @@
           "name": "熟练提取",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/a36d80e10e1335d0f933ab3f550c03c71dd40e11.jpg",
-          "percent": 23,
+          "percent": 22.9,
           "ts": 1743253423
         },
         {
@@ -2331,7 +2331,7 @@
           "name": "巧妙提取",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/6b9bd4007fc2d4e43b929f004f5a57fbc5d2835e.jpg",
-          "percent": 15.2,
+          "percent": 15.1,
           "ts": 1743253423
         },
         {
@@ -2339,7 +2339,7 @@
           "name": "退回寄信人",
           "desc": "你用感染工人自己的木桶杀死了他！",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/e49489029dfaf7277cfe9804b0aeb4ff4948ae8f.jpg",
-          "percent": 15.5,
+          "percent": 15.4,
           "ts": 1743252634
         },
         {
@@ -2427,7 +2427,7 @@
           "name": "我可看着你呢……",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/4f843ae65f7e1f60911d768171bbd7011622f5af.jpg",
-          "percent": 23,
+          "percent": 22.9,
           "ts": 1743148903
         },
         {
@@ -2459,7 +2459,7 @@
           "name": "我在沼泽玩泥巴",
           "desc": "第一次到达被弃者沼泽。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/c5c37de7230222e79a0451d5dc6313c60b4575c9.jpg",
-          "percent": 31.2,
+          "percent": 31.1,
           "ts": 1742998090
         },
         {
@@ -2555,7 +2555,7 @@
           "name": "横冲直撞",
           "desc": "吸收牧羊符文。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/91108f070ec4da405ad07b2c89320b284bbdd7d3.jpg",
-          "percent": 45.5,
+          "percent": 45.4,
           "ts": 1742826781
         },
         {
@@ -2579,7 +2579,7 @@
           "name": "王国的末路",
           "desc": "打败国王之手！",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/1c9a2666a9da0fbf94f2a58359f89d427a185dc9.jpg",
-          "percent": 40.4,
+          "percent": 40.3,
           "ts": 1742614762
         },
         {
@@ -2699,7 +2699,7 @@
           "name": "这是什么味儿？",
           "desc": "初次到达猛毒下水道。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/a29a4bec0f27a7de2ac488064c45922608f4de75.jpg",
-          "percent": 78.1,
+          "percent": 78.2,
           "ts": 1742462937
         },
         {
@@ -2771,7 +2771,7 @@
           "name": "永存者",
           "desc": "获得其他所有成就。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/646570/e503b760dbcd72030f7a0fced686fadce853c4de.jpg",
-          "percent": 2.8,
+          "percent": 2.7,
           "ts": 1775385205
         },
         {
@@ -3515,7 +3515,7 @@
           "name": "0",
           "desc": "0",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/22192c7063475192a6e7f3c35dbc28e559d2050c.jpg",
-          "percent": 25.1,
+          "percent": 25.2,
           "ts": 1759389126
         },
         {
@@ -3531,7 +3531,7 @@
           "name": "8",
           "desc": "8",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/43a3d11f270b9650a5550bc7661c9d273da5cc95.jpg",
-          "percent": 26.5,
+          "percent": 26.6,
           "ts": 1759371043
         },
         {
@@ -3603,7 +3603,7 @@
           "name": "N",
           "desc": "N",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/319a97abc9ad1411f0ef92da5417ef56edf949d2.jpg",
-          "percent": 32.7,
+          "percent": 32.8,
           "ts": 1759299013
         },
         {
@@ -4155,7 +4155,7 @@
           "name": "醉生梦死",
           "desc": "遗忘卡牌6次",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/769560/326a34fff2fbbadadd62aa5327dda43709ee070d.jpg",
-          "percent": 43.7,
+          "percent": 43.6,
           "ts": 1727940168
         },
         {
@@ -4355,7 +4355,7 @@
           "name": "一段旅程告终",
           "desc": "找到回家的路……",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/990630/5477a59da8090acb0ecf85035c0a6d250297ec37.jpg",
-          "percent": 26.4,
+          "percent": 26.5,
           "ts": 1775538011
         },
         {
@@ -4379,7 +4379,7 @@
           "name": "洞穴篝火",
           "desc": "黑暗中的一束不起眼的火焰…",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/990630/0885ee91651a249e7bd77895157118b3fd7aaf64.jpg",
-          "percent": 25.3,
+          "percent": 25.4,
           "ts": 1775486292
         },
         {
@@ -4579,7 +4579,7 @@
           "name": "Ho Ho Ho!",
           "desc": "Find the special christmas level!",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1333910/720512e70b2e534ebc09f8fa7579a69809ae030a.jpg",
-          "percent": 22.7,
+          "percent": 22.8,
           "ts": 1766384305
         },
         {
@@ -4619,7 +4619,7 @@
           "name": "The 5 Wonders of Sizeable!",
           "desc": "Unlock all Wonders of the World levels!",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1333910/5a0ed31abb3f60fe94879baa1db31dede63b7d97.jpg",
-          "percent": 55.4,
+          "percent": 55.5,
           "ts": 1751166891
         },
         {
@@ -5139,7 +5139,7 @@
           "name": "好奇之人 - 深渊",
           "desc": "使用好奇之人在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/4b4c4c97436fb7f958b11aed78d7733df2014337.jpg",
-          "percent": 4.3,
+          "percent": 4.2,
           "ts": 1776393002
         },
         {
@@ -5347,7 +5347,7 @@
           "name": "受虐狂 - 深渊",
           "desc": "使用受虐狂在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/e7499ff90dde5bb1d888adb8b2ad29252021c3f0.jpg",
-          "percent": 4.5,
+          "percent": 4.4,
           "ts": 1775134837
         },
         {
@@ -6003,7 +6003,7 @@
           "name": "实验",
           "desc": "同时拥有6个不同的武器",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/a897188f49e06e54ca4aeb234602513a9153a2f0.jpg",
-          "percent": 45.9,
+          "percent": 45.8,
           "ts": 1766760443
         },
         {
@@ -6059,7 +6059,7 @@
           "name": "草药师",
           "desc": "到第20波袭击结束时收集250个消耗品",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/f2a182cab2f75225386f8b03a2f7a7aca40d9fd2.jpg",
-          "percent": 17.6,
+          "percent": 17.5,
           "ts": 1766415006
         },
         {
@@ -6115,7 +6115,7 @@
           "name": "魔法与机械",
           "desc": "达到10元素伤害的同时获得3个构筑物",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/885d493e3ce09f35b0c647f5ab66f0eda2ad1b11.jpg",
-          "percent": 38.8,
+          "percent": 38.7,
           "ts": 1766154665
         },
         {
@@ -6219,7 +6219,7 @@
           "name": "濒死",
           "desc": "达到-5生命再生",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/7fa5e6afe61c1a0e79c978c16b09e7f0672e8ad8.jpg",
-          "percent": 53.6,
+          "percent": 53.5,
           "ts": 1765874649
         },
         {
@@ -6275,7 +6275,7 @@
           "name": "危险2",
           "desc": "在危险2中赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/f1402a4648bcb88755b5f205bab44f6e2bde02ad.jpg",
-          "percent": 54.8,
+          "percent": 54.7,
           "ts": 1759037149
         },
         {
@@ -6371,7 +6371,7 @@
           "name": "危险0",
           "desc": "在危险0中赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/c4f994ce0471cb82eedbcc9915db9d23658d54ce.jpg",
-          "percent": 73,
+          "percent": 72.9,
           "ts": 1758947664
         },
         {
@@ -6403,7 +6403,7 @@
           "name": "清道夫",
           "desc": "在比赛期间获得10个不同的I级别的物品",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/e21b25485c503c224ca790483fe4d92bd1612c19.jpg",
-          "percent": 75.6,
+          "percent": 75.5,
           "ts": 1758947464
         },
         {
