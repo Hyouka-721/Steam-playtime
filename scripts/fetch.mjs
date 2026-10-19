@@ -24,6 +24,7 @@ import {
   fetchRecentlyPlayedGames,
   fetchPlayerAchievements,
   fetchAchievementSchema,
+  fetchGlobalAchievementPercent,
   mergeSources,
   SteamApiError,
 } from './lib/steam.mjs';
@@ -126,6 +127,19 @@ async function collectAchievements({ key, steamid, date, snapshot }) {
       }
       if (!schema.length) continue; // 无成就系统的游戏
 
+      // 全球完成率单独走 GetGlobalAchievementPercentagesForApp：
+      // GetSchemaForGame v2 的 percent 实测恒为 null（2504 条无一非空），
+      // 这里是 percent 的**唯一真实来源**。调用失败只丢完成率，不影响解锁记录。
+      let globalPct = {};
+      if (schema.some((a) => a.percent == null)) {
+        try {
+          globalPct = await fetchGlobalAchievementPercent(g.appid);
+          await sleep(200);
+        } catch (e) {
+          console.warn(`[fetch] WARN 全球完成率获取失败 ${g.name}(${g.appid}):`, e.message);
+        }
+      }
+
       const player = await fetchPlayerAchievements(key, steamid, g.appid);
       if (!player) continue;
       await sleep(200);
@@ -140,7 +154,8 @@ async function collectAchievements({ key, steamid, date, snapshot }) {
           name: s?.name ?? p.api,
           desc: s?.desc ?? null,
           icon: s?.icon ?? null,
-          percent: s?.percent ?? null,
+          // 优先级：Schema 自带 percent（若上游某天补上）→ 全球完成率接口 → null
+          percent: s?.percent ?? globalPct[p.api] ?? null,
           ts: p.ts || null,
         });
       }
@@ -179,7 +194,19 @@ async function collectAchievements({ key, steamid, date, snapshot }) {
   fs.writeFileSync(path.join(ACH_DIR, `${date}.json`), JSON.stringify(out, null, 2) + '\n', 'utf8');
   const u = Object.values(games).reduce((a, g) => a + g.unlocked, 0);
   const t = Object.values(games).reduce((a, g) => a + g.total, 0);
-  log(`成就数据已写入 data/achievements/${date}.json（${out.game_count} 款游戏，${u}/${t} 项）`);
+  const withPct = Object.values(games).reduce(
+    (a, g) => a + g.achievements.filter((x) => x.percent != null).length,
+    0,
+  );
+  log(`成就数据已写入 data/achievements/${date}.json（${out.game_count} 款游戏，${u}/${t} 项，其中 ${withPct} 项带全球完成率）`);
+  // 异常信号：有解锁记录却一条完成率都没拿到 —— 说明完成率链路断了，
+  // 前端会把每条的百分比渲染成空（表现为"全部 0.0%"）。必须大声暴露。
+  if (u > 0 && withPct === 0) {
+    console.warn(
+      '[fetch] WARN 全部成就的全球完成率均为空，前端将无法展示百分比。\n' +
+        '  请检查 GetGlobalAchievementPercentagesForApp 是否可达 / 返回结构是否变化。',
+    );
+  }
 }
 
 /** 读取并解析单个快照文件；损坏返回 null */

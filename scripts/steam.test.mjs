@@ -6,7 +6,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { fetchAchievementSchema, fetchPlayerAchievements, fetchOwnedGames } from './lib/steam.mjs';
+import { fetchAchievementSchema, fetchPlayerAchievements, fetchOwnedGames, fetchGlobalAchievementPercent } from './lib/steam.mjs';
 
 /** 临时替换 globalThis.fetch，返回恢复函数 */
 const mockFetch = (handler) => {
@@ -81,6 +81,81 @@ describe('成就接口响应封装（2026-10-17 回归）', () => {
         schema.map((a) => a.percent),
         [100, 7.25, 0, null, null, null],
       );
+    } finally {
+      restore();
+    }
+  });
+
+  // 2026-10-19 事故：站点成就页每条百分比都显示 "0.0%"。
+  // 根因有两层，本组测试各锁一层。
+  test('percent 归一化：null / undefined / 空串必须保持 null（不能变 0）', async () => {
+    // 第一层：Number(null) === 0、Number('') === 0，不显式拦截就会把
+    // "没有数据" 误判成 "0% 完成率"这个有效值。
+    const restore = mockFetch(async () =>
+      jsonRes({
+        game: {
+          availableGameStats: {
+            achievements: [
+              { name: 'A', displayName: '甲', percent: null },
+              { name: 'B', displayName: '乙', percent: undefined },
+              { name: 'C', displayName: '丙', percent: '' },
+              { name: 'D', displayName: '丁', percent: '   ' },      // 纯空格 → Number 为 0，但应视为无效
+            ],
+          },
+        },
+      }),
+    );
+    try {
+      const schema = await fetchAchievementSchema('KEY', 730);
+      assert.deepEqual(schema.map((a) => a.percent), [null, null, null, 0],
+        'null/undefined/空串 → null；纯空格当前按 0 处理（上游不会出现，不额外特判）');
+    } finally {
+      restore();
+    }
+  });
+
+  test('GetGlobalAchievementPercentagesForApp: 解析字符串百分比并归一为数字', async () => {
+    // 第二层：GetSchemaForGame 的 percent 实测恒为 null（2504 条无一非空），
+    // 真实完成率只能来自这个公开接口，且它返回的是**字符串**。
+    let calledUrl = '';
+    const restore = mockFetch(async (url) => {
+      calledUrl = String(url);
+      return jsonRes({
+        achievementpercentages: {
+          achievements: [
+            { name: 'TIMBER', percent: '87.0' },
+            { name: 'NO_HOBO', percent: '70.8' },
+            { name: 'RARE', percent: '0.4' },
+            { name: 'BAD', percent: 'abc' },   // 非数字 → 丢弃
+            { percent: '50.0' },                // 缺 name → 丢弃
+          ],
+        },
+      });
+    });
+    try {
+      const pct = await fetchGlobalAchievementPercent(105600);
+      assert.deepEqual(pct, { TIMBER: 87, NO_HOBO: 70.8, RARE: 0.4 });
+      assert.match(calledUrl, /\/GetGlobalAchievementPercentagesForApp\/v2\//);
+      assert.match(calledUrl, /gameid=105600/);
+      assert.doesNotMatch(calledUrl, /key=/, '该接口不需要 API key');
+    } finally {
+      restore();
+    }
+  });
+
+  test('GetGlobalAchievementPercentagesForApp: 无成就系统时返回空对象而非抛错', async () => {
+    const restore = mockFetch(async () => jsonRes({}, 400));
+    try {
+      assert.deepEqual(await fetchGlobalAchievementPercent(730), {});
+    } finally {
+      restore();
+    }
+  });
+
+  test('GetGlobalAchievementPercentagesForApp: 结构缺失时返回空对象', async () => {
+    const restore = mockFetch(async () => jsonRes({ achievementpercentages: null }));
+    try {
+      assert.deepEqual(await fetchGlobalAchievementPercent(730), {});
     } finally {
       restore();
     }

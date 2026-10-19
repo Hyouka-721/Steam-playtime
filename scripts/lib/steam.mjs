@@ -7,8 +7,11 @@
 //   ⚠ IPlayerService 系列payload 在 response 里，ISteamUserStats 系列在顶层自定义键里。
 //     因此 call() 提供 raw 选项：raw=true 时原样返回整个 JSON，由调用方自行取键。
 //   ⚠ GetSchemaForGame 现行版本是 v2（v1 为遗留版本），必须显式传 version: 2。
-//   GetSchemaForGame 的 achievements[] 含 percent（全球玩家完成率，float 百分比），
-//     站点成就页在完成日期左侧展示该值；缺失时归一为 null，前端不渲染。
+//   GetSchemaForGame 的 achievements[] 含 percent 字段，但**实测值恒为 null**
+//     （2026-10-19 查证：2504 条成就全为 null，key 存在、值为空，不是解析 bug）。
+//     真正的全球完成率要走 GetGlobalAchievementPercentagesForApp（无需 API key），
+//     该接口返回 {"achievementpercentages":{"achievements":[{name,percent:"87.0"}]}}，
+//     percent 是**字符串**，需 Number() 归一化。
 //   ⚠ 隐私「游戏详情」非公开时，GetOwnedGames 返回 HTTP 200 + {"response":{}}（静默为空）。
 
 const BASE = 'https://api.steampowered.com/IPlayerService';
@@ -73,8 +76,12 @@ async function call(path, params, { attempts = 4, timeoutMs = 30000, base = BASE
 }
 
 /** 归一化 Steam 的 percent 字段（全球玩家完成率，float 百分比，如 45.6 = 45.6%）。
+ *  ⚠ 必须先判 null/undefined/空串：Number(null) === 0、Number('') === 0，
+ *  不拦就会被当成"0% 完成率"这个**有效值**，前端渲染出一片 0.0%。
+ *  这正是 2026-10-19「成就完成率全为 0」事故的第二层成因。
  *  缺失 / 非数字 / 负数一律置 null，由前端决定不渲染。 */
 function normalizePercent(v) {
+  if (v === null || v === undefined || v === '') return null;
   const n = Number(v);
   return Number.isFinite(n) && n >= 0 ? n : null;
 }
@@ -135,6 +142,8 @@ export async function fetchAchievementSchema(key, appid) {
     const res = await call('GetSchemaForGame', { key, appid, l: 'schinese' }, { base: STATS_BASE, attempts: 2, version: 2, raw: true });
     const stats = res.game?.availableGameStats;
     if (!stats || !Array.isArray(stats.achievements)) return null;
+    // 注意：v2 的 a.percent 实测恒为 null（见文件头注释），此处保留只为兜底；
+    // 真正的全球完成率由 fetchGlobalAchievementPercent 单独拉取并合并。
     return stats.achievements.map((a) => ({
       api: a.name,
       name: a.displayName ?? a.name,
@@ -146,6 +155,32 @@ export async function fetchAchievementSchema(key, appid) {
     if (e instanceof SteamApiError && e.code === 'HTTP') return null;
     throw e;
   }
+}
+
+/** 取某款游戏全部成就的**全球玩家完成率**。
+ *  接口：ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2（**无需 API key**）
+ *  返回：{ [apiname]: number }，如 { TIMBER: 87, NO_HOBO: 70.8 }
+ *  无成就系统 / 无数据 → 空对象（不抛错，调用方按"无完成率"处理）。
+ *  为什么不用 GetSchemaForGame 的 percent：实测该字段恒为 null（2026-10-19 查证
+ *  2504 条成就无一非空），与字段级 bug 无关，是上游不填。 */
+export async function fetchGlobalAchievementPercent(appid) {
+  let res;
+  try {
+    res = await call('GetGlobalAchievementPercentagesForApp', { gameid: appid }, { base: STATS_BASE, attempts: 3, version: 2, raw: true });
+  } catch (e) {
+    // 400/403（无成就系统、私密游戏）按"无完成率"处理，不让单款游戏拖垮整体采集
+    if (e instanceof SteamApiError && (e.code === 'HTTP' || e.code === 'BAD_RESPONSE')) return {};
+    throw e;
+  }
+  const list = res?.achievementpercentages?.achievements;
+  if (!Array.isArray(list)) return {};
+  const out = {};
+  for (const a of list) {
+    if (!a?.name) continue;
+    const n = normalizePercent(a.percent); // 接口给的是字符串 "87.0"
+    if (n !== null) out[a.name] = n;
+  }
+  return out;
 }
 
 /**

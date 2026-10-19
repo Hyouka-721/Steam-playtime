@@ -800,8 +800,12 @@
     return new Date(ts * 1000 + 8 * 3600 * 1000).toISOString().slice(0, 10);
   };
 
-  /** Steam 全球完成率 → 显示文本：>=10% 取整，<10% 保留一位小数；无数据返回 null */
+  /** Steam 全球完成率 → 显示文本：>=10% 取整，<10% 保留一位小数；无数据返回 null
+   *  ⚠ 必须先拦 null/undefined/空串：Number(null) === 0、Number('') === 0，
+   *  否则缺失值会被格式化成 "0.0%"，整列看起来像"完成率全为 0"。
+   *  这里刻意返回 null 而非 "—"：调用方据此整段不渲染（保持原来的留白设计）。 */
   const achPctText = (p) => {
+    if (p === null || p === undefined || p === '') return null;
     const n = Number(p);
     if (!Number.isFinite(n) || n < 0) return null;
     return n >= 10 ? `${Math.round(n)}%` : `${n.toFixed(1)}%`;
