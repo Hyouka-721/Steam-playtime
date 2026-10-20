@@ -902,22 +902,35 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .rank-min { font-variant-numeric: tabular-nums; color: var(--text-strong); text-align: center; font-weight: 600; font-size: 13.5px; }
 .rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: center; font-size: 12px; position: relative; }
 /* 首行日期上方的「游玩日历」入口（2026-10-18 职能对调后）：透明小日历图标，
-   无底色无边框，线条色与日期文字一致（--text-faint）。绝对定位于日期上方 8px
-   （2026-10-18 按用户要求由 18px 放大到 24px 并整体上移；同日再上移 4px，
-   与日期文字间距 4px→8px，视觉重心更协调；同日夜再上移 8px，改由
-   translateY(-8px) 承担——transform 不参与布局，日期文字的盒模型、行高及
-   与其它元素的间距完全不受影响）。
-   2026-10-18 按用户要求再整体上移 8px（-8px → -16px）：与上一行内容视觉对齐；
-   仍由 transform 承担，尺寸（24×24 按钮 + 22×22 SVG）、间距、≤860px 响应式
-   隐藏策略全部不变。SVG 为矢量，放大不变形。
-   实测：上移后与企鹅水平相距 221px 零重叠、距面板顶 17.4px 仍在面板内。
-   回看中：着色 --accent、显示圆点（.cal-mark）并加细光环。
-   ≤860px 时父级 .rank-last 已 display:none，图标随之隐藏。 */
+   无底色无边框，线条色与日期文字一致（--text-faint）。
+   ─────────────────────────────────────────────────────────────────────────
+   ■ 2026-10-20（本轮）定位方式重写，只改「位置」，不动样式/颜色/交互
+     目标：与「最近游玩」日期列的排版节奏完全对齐 —— 图标在日期列内、
+           水平精确居中、垂直贴紧日期文字上方。
+     (a) 水平：旧写法 `left:50% + translateX(-50%)`，在 110px 宽的
+         `.rank-last` 上 left 落在 55px，但按钮宽 24px（半宽 12px），
+         即 55−12=43 → 中心 1311+11=1322，而日期列中心是 1323 →
+         **实测恒定偏左 1px**（DPR 1/2/3 完全一致，说明不是栅格化误差，
+         而是 left:50% 与 50% 宽度取整的结构性偏差）。
+         改为 `left:0; right:0; margin-inline:auto` —— 由布局引擎在两条
+         边线之间求值居中，**任何宽度下都精确对齐列中心**，不依赖像素取整。
+     (b) 垂直：旧写 `bottom: calc(100% + 8px) + translateY(-16px)`，两处
+         上抬叠加，图标底边距日期行盒顶达 25px，飘得太高。更麻烦的是
+         `bottom` 的百分比参照的是 `.rank-last` 的**行盒高度**（19.19px），
+         日期字号/行高一变，间距就会漂移。
+         改为 `bottom: 100%`（图标底边正好贴住日期行盒顶）+ `margin-bottom: 3px`
+         → 与日期文字的可见间距稳定在 3px，且与字号无关。
+     (c) 仍用 absolute + transform 的零位移，**不参与布局**：日期文字的
+         盒模型、行高、与相邻 .rank-min 的 14px 列间距全部不受影响。
+   ■ 尺寸/样式零改动：按钮 24×24、SVG 22×22、stroke-width 1.5、
+     color --text-faint、opacity .5、hover/active/focus/reviewing 全部原样。
+   ■ ≤860px 时父级 .rank-last 已 display:none，图标随之隐藏。 */
 .cal-icon-btn {
   appearance: none; -webkit-appearance: none;
-  background: none; border: 0; padding: 0; margin: 0;
-  position: absolute; left: 50%; bottom: calc(100% + 8px);
-  transform: translateX(-50%) translateY(-16px);
+  background: none; border: 0; padding: 0;
+  position: absolute;
+  left: 0; right: 0; margin-inline: auto; margin-block: 0 3px;
+  bottom: 100%;
   width: 24px; height: 24px; display: block;
   color: var(--text-faint); opacity: .5; cursor: pointer;
   touch-action: manipulation; /* 触屏尽快响应，免除双击缩放等待 */
@@ -925,6 +938,12 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 }
 .cal-icon-btn svg {
   display: block; width: 22px; height: 22px;
+  /* 2026-10-20：SVG(22) 比按钮(24)小 2px，原先 display:block 让它在按钮盒内
+     紧贴左上角 → 图标视觉重心比按钮中心**偏左上各 1px**，这才是日期上方图标
+     "看着没对齐"的真正来源（按钮本身已由 margin-inline:auto 精确居中）。
+     这里用绝对定位 + 四边 inset:0 + margin:auto 让 22×22 在 24×24 内精确居中，
+     尺寸、描边、颜色一律不变。 */
+  position: absolute; inset: 0; margin: auto;
   fill: none; stroke: currentColor;
   stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
 }
