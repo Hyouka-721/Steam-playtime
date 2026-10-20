@@ -940,7 +940,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
      只调 --cal-lift 一个值即可改高低。参考量程：起点 0（贴住日期文字）；
      10 时图标顶进入 .rank-list 的 18px 上内边距约 7.6px、距上方提示行仍有 24px
      余量；约 24 时图标整体抬到行顶之上；再大会撞到列表上方的「近 14 天」提示。 */
-  --cal-lift: 10px;
+  --cal-lift: 25px;
   transform: translateY(calc(-1 * var(--cal-lift)));
   width: 24px; height: 24px; display: block;
   color: var(--text-faint); opacity: .5; cursor: pointer;

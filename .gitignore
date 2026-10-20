@@ -6,3 +6,4 @@ Thumbs.db
 .env.*
 !.env.example
 *.local
+.workbuddy_bak/
