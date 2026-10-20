@@ -588,13 +588,19 @@
         const barStyle = i < topPalette.length ? `width:${pct}%;background:${topPalette[i]}` : `width:${pct}%`;
         const noCls = i < 3 ? ` r${i + 1}` : '';
         const perfectCls = perfect.has(String(g.appid)) ? ' is-perfect' : '';
+        // 首行日期上方同样放「游玩日历」入口（2026-10-20）：与累计榜首行**同一个常量、
+        // 同一套 CSS**，因此位置/尺寸/间距/样式天然一致。图标绝对定位，不占布局，
+        // 日期文字位置与行高不受影响；两处图标共用 data-cal-toggle 与 openCal()。
+        const lastHtml = i === 0
+          ? `<span class="rank-last">${CAL_ICON_BTN}${g.last_played ?? '—'}</span>`
+          : `<span class="rank-last">${g.last_played ?? '—'}</span>`;
         return `<div class="rank-item">
           <span class="rank-no${noCls}">${i + 1}</span>
           ${capsuleHtml(g.appid, { perfect: !!perfectCls, icon })}
           <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}</span>
           <span class="rank-bar"><span style="${barStyle}"></span></span>
           <span class="rank-min">${hm(g.recent)}</span>
-          <span class="rank-last">${g.last_played ?? '—'}</span>
+          ${lastHtml}
         </div>`;
       })
       .join('');
@@ -1640,6 +1646,13 @@
       const row = e.target.closest('.rank-item');
       if (!row) return;
       openDrill(row.dataset.appid).catch((e) => console.warn('趋势图打开失败', e));
+    });
+
+    // 最近游玩列表：首行日期上方也有同一个日历入口（2026-10-20）。
+    // 该列表原本没有任何点击行为（行不下钻），所以这里**只**处理日历按钮，
+    // 不新增行点击逻辑，避免改变既有交互。
+    $('recent-list').addEventListener('click', (e) => {
+      if (e.target.closest('[data-cal-toggle]')) openCal();
     });
 
     $('btn-drill-back').addEventListener('click', () => {
