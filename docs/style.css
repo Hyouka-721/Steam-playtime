@@ -855,10 +855,19 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    4px（先上移 10px、再下移 5px、再下移 1px，净偏移 -4px）。
    pointer-events:none 保证整行仍可点击下钻。
    2026-10-17 放大 70px → 84px：transform 用的是自身高度的百分比，
-   放大后图内地平线仍钉在进度条中线 -3.9px 处，"站在条上"的关系不变。 */
+   放大后图内地平线仍钉在进度条中线 -3.9px 处，"站在条上"的关系不变。
+   2026-10-20 第 42 轮：整体下移 1px（--cat-drop）。
+     原因：第 41 轮把素材自带的柱子四行（y=135~138）在"猫身两侧的裸列"清零，
+     但猫身覆盖的那部分列仍保留着这四行 —— 于是柱体只出现在猫身的轮廓内。
+     素材柱子在素材坐标里占 y135~138.9，而页面真柱体（.rank-bar > span）占
+     y137.20~155.95，即素材柱子顶边比页面条顶高出约 2.2 素材行（≈0.82 CSS px）。
+     猫身底边与页面条顶之间就空出一条透出页面底色的 1px 亮带 —— 用户看到的
+     "白色横线间隙"。把整张图下移 1px 后，素材柱子落到条体内部，间隙闭合。
+     仍是 pure transform：尺寸 / 比例 / 层级 / 行高 / 其它元素位置全部不变。 */
 .rank-cat {
+  --cat-drop: 1px;   /* 整张猫图的纵向附加偏移；改这一个值即可微调贴合度 */
   position: absolute; left: 0; top: 50%;
-  transform: translate(0, calc(-60.5% - 3.9px));
+  transform: translate(0, calc(-60.5% - 3.9px + var(--cat-drop)));
   height: 84px; width: auto;
   filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
   pointer-events: none;
