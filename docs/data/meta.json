@@ -2,10 +2,10 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-19T20:40:03.836Z",
-  "generated_at_local": "2026-10-20",
+  "generated_at": "2026-10-20T19:26:43.625Z",
+  "generated_at_local": "2026-10-21",
   "tracking_since": "2026-10-13",
-  "last_snapshot_date": "2026-10-19",
+  "last_snapshot_date": "2026-10-20",
   "steamid_hash": "a8474caf",
   "months": [
     "2026-10"
@@ -26,17 +26,17 @@
     "990630"
   ],
   "stats": {
-    "lifetime_minutes": 82516,
-    "lifetime_hours": 1375.3,
+    "lifetime_minutes": 82541,
+    "lifetime_hours": 1375.7,
     "owned_games": 53,
     "lifetime_played_games": 38,
-    "total_minutes": 792,
-    "total_hours": 13.2,
-    "tracked_days": 6,
-    "active_days": 6,
-    "current_streak": 4,
-    "longest_streak": 6,
-    "week_minutes": 62,
+    "total_minutes": 817,
+    "total_hours": 13.6,
+    "tracked_days": 7,
+    "active_days": 7,
+    "current_streak": 5,
+    "longest_streak": 7,
+    "week_minutes": 87,
     "played_games": 6,
     "best_day": {
       "date": "2026-10-18",
@@ -64,9 +64,9 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "total_minutes": 414,
+      "total_minutes": 439,
       "first_day": "2026-10-13",
-      "last_day": "2026-10-19"
+      "last_day": "2026-10-20"
     },
     "431960": {
       "appid": "431960",
@@ -126,8 +126,8 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "lifetime_minutes": 634,
-      "last_played": "2026-10-19"
+      "lifetime_minutes": 659,
+      "last_played": "2026-10-20"
     },
     "250900": {
       "appid": "250900",

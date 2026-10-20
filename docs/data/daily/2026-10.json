@@ -3,7 +3,7 @@
   "month": "2026-10",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-19T20:40:03.829Z",
+  "generated_at": "2026-10-20T19:26:43.614Z",
   "days": {
     "2026-10-13": {
       "total_minutes": 49,
@@ -161,6 +161,21 @@
           "appid": "3009140",
           "name": "Salt Player",
           "minutes": 2,
+          "is_new": false
+        }
+      ]
+    },
+    "2026-10-20": {
+      "total_minutes": 25,
+      "span_days": 1,
+      "confidence": "high",
+      "source": "auto",
+      "flags": [],
+      "games": [
+        {
+          "appid": "246420",
+          "name": "王国保卫战",
+          "minutes": 25,
           "is_new": false
         }
       ]
