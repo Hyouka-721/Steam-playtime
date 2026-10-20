@@ -397,12 +397,17 @@
     '#9d8cff', '#66c0f4', '#e8766a', '#5ad0c0', '#b8d45a',
   ];
 
-  /* 首行日期上方的「游玩日历」入口图标（2026-10-18 职能对调后）：
+  /* 「最近游玩」首行日期上方的「游玩日历」入口图标（2026-10-20 收敛为全站唯一入口）：
      透明小日历（无底色无边框），CSS 里绝对定位于日期文字上方，不占布局、不改行高；
      点击打开月历浮层选日期回看（即原先挂在右上史蒂夫头像上的职能）；
      史蒂夫头像已改为氛围特效开关（单击 开 / 关，仅流星）。
-     点击在 #lt-list 的委托里最先拦截，不会误触发行下钻；日期文字本身的
-     点击行为不变（仍下钻）。回看中：图标着色 --accent 并显示圆点（.cal-mark）。 */
+
+     2026-10-20 收敛：累计榜（#lt-list）里的同一枚图标已整体摘除，相关渲染分支、
+     事件拦截、状态同步全部删干净，日历入口只保留在「最近游玩」首行。
+     累计榜首行现在与其它行结构完全一致（.rank-last 里只有日期文字），
+     不会留下空节点、多余占位或高度变化。#recent-list 的委托负责点击；
+     该列表的行本身没有下钻行为，因此这里只处理日历按钮。
+     回看中：图标着色 --accent 并显示圆点（.cal-mark）。 */
   const CAL_ICON_BTN =
     '<button class="cal-icon-btn" type="button" data-cal-toggle ' +
     'title="点击打开游玩日历，选择日期进行数据回看" aria-label="打开游玩日历，选择有游玩记录的日期进行数据回看">' +
@@ -430,17 +435,16 @@
     // 全成就解锁集合只算一次，供所有行复用（不在每行里重建 Set）
     const perfect = perfectGameSet();
 
-    const rowHtml = (g, i, noCal) => {
+    const rowHtml = (g, i) => {
       const icon = ICON(g.appid, g.img_icon_url);
       const pct = Math.max(g.lifetime_minutes > 0 ? 1.5 : 0, (g.lifetime_minutes / max) * 100);
       const barStyle = i < topPalette.length ? `width:${pct}%;background:${topPalette[i]}` : `width:${pct}%`;
       const playing = (recent.get(g.appid) ?? 0) > 0;
       const noCls = i < 3 ? ` r${i + 1}` : '';
-      // 仅首行（折叠区 noCal=true 不渲染）在日期文字上方放日历入口图标；
-      // 图标为绝对定位，日期文字本身的位置与行高不受影响
-      const lastHtml = !noCal && i === 0
-        ? `<span class="rank-last">${CAL_ICON_BTN}${g.last_played ?? '—'}</span>`
-        : `<span class="rank-last">${g.last_played ?? '—'}</span>`;
+      // 2026-10-20：累计榜已不再挂载日历入口（该入口收敛到「最近游玩」，
+      // 见 CAL_ICON_BTN 处注释）。这里与其它行结构完全一致 —— .rank-last 里
+      // 只有日期文字，没有多余按钮节点，也不会因缺少绝对定位子元素而改变高度。
+      const lastHtml = `<span class="rank-last">${g.last_played ?? '—'}</span>`;
       // 胶囊图按需加载（2026-10-18 首屏优化）：原生 loading="lazy" 的判定时机
       // 在各浏览器/无头环境下差异很大——实测 53 行会一次性发起 53 个 Steam CDN
       // 请求，首屏带宽被远端的列表图抢走，反而拖慢首屏那几张关键图。
@@ -469,7 +473,7 @@
         `<span class="idle-caret">▸</span>` +
         `<span class="idle-label">展开 ${idle.length} 款未游玩的游戏</span>` +
         `</div>` +
-        `<div id="idle-list" class="rank-list" hidden>${idle.map((g, i) => rowHtml(g, played.length + i, true)).join('')}</div>`;
+        `<div id="idle-list" class="rank-list" hidden>${idle.map((g, i) => rowHtml(g, played.length + i)).join('')}</div>`;
     }
     html +=
       `<p class="list-foot">共 ${played.length} 款已游玩游戏 · 合计 ${hm(totalShown)}` +
@@ -478,7 +482,7 @@
 
     box.innerHTML = html;
     observeCapsules(box); // 登记新渲染出的胶囊图（视口临近才真正下载）
-    syncCalIcon(); // 列表重渲染后，把日历图标状态对齐当前回看日期
+    // 日历入口已不在本榜（收敛到「最近游玩」），这里无需 syncCalIcon()
     if (idle.length) bindIdleToggle(idle.length);
   }
 
@@ -507,9 +511,11 @@
     });
   }
 
-  /* ---- 首行日期上方的「游玩日历」入口（状态随回看变化） ---- */
+  /* ---- 「最近游玩」首行日期上方的「游玩日历」入口（状态随回看变化） ----
+   * 2026-10-20：日历入口已收敛为全站唯一一处，因此选择器只查 #recent-list。
+   * 未切换到「最近游玩」视图时 renderRecent() 还没跑过 → 返回 null，syncCalIcon 直接跳过。 */
   function calIconEl() {
-    return document.querySelector('#lt-list [data-cal-toggle]');
+    return document.querySelector('#recent-list [data-cal-toggle]');
   }
 
   /** 把日历图标的视觉状态（回看着色 / 圆点 / 提示文案）对齐到当前回看日期 */
@@ -588,9 +594,10 @@
         const barStyle = i < topPalette.length ? `width:${pct}%;background:${topPalette[i]}` : `width:${pct}%`;
         const noCls = i < 3 ? ` r${i + 1}` : '';
         const perfectCls = perfect.has(String(g.appid)) ? ' is-perfect' : '';
-        // 首行日期上方同样放「游玩日历」入口（2026-10-20）：与累计榜首行**同一个常量、
-        // 同一套 CSS**，因此位置/尺寸/间距/样式天然一致。图标绝对定位，不占布局，
-        // 日期文字位置与行高不受影响；两处图标共用 data-cal-toggle 与 openCal()。
+        // 「最近游玩」首行日期上方的「游玩日历」入口（2026-10-20 起全站唯一）：
+        // 与原先累计榜那个按钮**同一个常量、同一套 CSS**，因此尺寸/样式/居中方式一致。
+        // 图标绝对定位在日期文字上方，不占布局，日期文字位置与行高不受影响；
+        // 点击由 #recent-list 委托处理（共用的 data-cal-toggle + openCal()）。
         const lastHtml = i === 0
           ? `<span class="rank-last">${CAL_ICON_BTN}${g.last_played ?? '—'}</span>`
           : `<span class="rank-last">${g.last_played ?? '—'}</span>`;
@@ -605,6 +612,7 @@
       })
       .join('');
     observeCapsules(box); // 与累计榜同一套按需加载
+    syncCalIcon(); // 本榜重渲染后，把唯一那枚日历图标的状态对齐当前回看日期
   }
 
   // ---------- ①c 二级趋势界面（游戏累计下钻） ----------
@@ -1635,20 +1643,15 @@
     });
 
     // 游戏累计列表：点击整行 → 该游戏每日时长趋势
-    // 首行日期上方的日历图标只打开月历浮层，必须最先拦截，避免误触发行下钻
-    // （日期文字本身仍是行的一部分，点击行为与以往一致 = 下钻）
+    // （2026-10-20：原先挂在这里的日历图标入口已随「日历收敛到最近游玩」一并移除，
+    //  所以不再需要 [data-cal-toggle] 的提前拦截；整行点击行为回到纯粹的下一级趋势图）
     $('lt-list').addEventListener('click', (e) => {
-      const calBtn = e.target.closest('[data-cal-toggle]');
-      if (calBtn) {
-        openCal();
-        return;
-      }
       const row = e.target.closest('.rank-item');
       if (!row) return;
       openDrill(row.dataset.appid).catch((e) => console.warn('趋势图打开失败', e));
     });
 
-    // 最近游玩列表：首行日期上方也有同一个日历入口（2026-10-20）。
+    // 最近游玩列表：全站唯一的日历入口（2026-10-20）。
     // 该列表原本没有任何点击行为（行不下钻），所以这里**只**处理日历按钮，
     // 不新增行点击逻辑，避免改变既有交互。
     $('recent-list').addEventListener('click', (e) => {

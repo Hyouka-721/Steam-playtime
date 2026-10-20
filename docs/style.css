@@ -931,6 +931,17 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   position: absolute;
   left: 0; right: 0; margin-inline: auto; margin-block: 0 3px;
   bottom: 100%;
+  /* 2026-10-20：日历入口收敛到「最近游玩」后整体再上移。原先图标紧贴日期文字
+     （可见间距仅约 3~4px），看起来像"挂在"文字上，和行里其它内容的上缘也不齐。
+     **用 transform 而不是改 bottom / margin**：
+       · transform 完全不参与布局 → 行高、列宽、日期文字盒模型、与 .rank-min
+         的 14px 列间距全部不变（这也是"该行高度不变"的要求）；
+       · 命中测试跟随 transform → 24×24 热区与肉眼看到的图标严格重合，不会错位。
+     只调 --cal-lift 一个值即可改高低。参考量程：起点 0（贴住日期文字）；
+     10 时图标顶进入 .rank-list 的 18px 上内边距约 7.6px、距上方提示行仍有 24px
+     余量；约 24 时图标整体抬到行顶之上；再大会撞到列表上方的「近 14 天」提示。 */
+  --cal-lift: 10px;
+  transform: translateY(calc(-1 * var(--cal-lift)));
   width: 24px; height: 24px; display: block;
   color: var(--text-faint); opacity: .5; cursor: pointer;
   touch-action: manipulation; /* 触屏尽快响应，免除双击缩放等待 */
