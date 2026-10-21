@@ -238,7 +238,16 @@
     <div class="cal-page" id="cal-page-day" hidden>
       <div class="cal-head cal-head-day">
         <button class="cal-nav" id="cal-back" type="button" aria-label="返回月历">‹</button>
-        <div class="cal-title" id="cal-day-title">—</div>
+        <!-- 日期文本两侧的「前一天 / 后一天」：步进的是日历日（不跳过没有记录的日子） -->
+        <div class="cal-day-nav">
+          <button class="cal-step" id="cal-day-prev" type="button" title="前一天" aria-label="前一天">
+            <span class="cal-step-ico" aria-hidden="true">‹</span><span class="cal-step-txt">前一天</span>
+          </button>
+          <div class="cal-title" id="cal-day-title">—</div>
+          <button class="cal-step" id="cal-day-next" type="button" title="后一天" aria-label="后一天">
+            <span class="cal-step-txt">后一天</span><span class="cal-step-ico" aria-hidden="true">›</span>
+          </button>
+        </div>
         <button class="cal-close" id="cal-day-close" type="button" aria-label="关闭日历">×</button>
       </div>
       <div class="cal-day-summary">
@@ -261,6 +270,6 @@
 
 <!-- fx.js 先于 app.js 加载：app.js 绑定时需读取 window.__fx（特效状态的唯一来源） -->
 <script src="fx.js?v=15"></script>
-<script src="app.js?v=90" onerror="__appFail()"></script>
+<script src="app.js?v=91" onerror="__appFail()"></script>
 </body>
 </html>

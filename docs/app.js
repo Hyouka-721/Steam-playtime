@@ -1318,26 +1318,77 @@
     $('cal-page-day').hidden = true;
   }
 
+  /** 二级界面可步进的日期范围：首条每日记录 ~ 最新快照日。
+      刻意不拿「今天」当上界：数据滞后一天，翻到没有数据的月份会渲染出整月灰格，
+      而月历的可翻页范围（meta.months）本来就只覆盖有数据的月份。
+      范围内**允许**落到没有记录的日子（如采集缺口），此时展示空状态。 */
+  function calDayRange() {
+    const min = state.allDatesFull[0];
+    const max = state.metaFull?.last_snapshot_date ?? state.allDatesFull[state.allDatesFull.length - 1];
+    return min && max ? { min, max } : null;
+  }
+
+  /** 按当前日期刷新「前一天 / 后一天」的可用状态，并在状态行说明边界原因 */
+  function syncCalDayNav(date, gamesCount) {
+    const prev = $('cal-day-prev');
+    const next = $('cal-day-next');
+    const status = $('cal-day-status');
+    if (!prev || !next) return;
+    const r = calDayRange();
+    const atMin = !r || addDaysStr(date, -1) < r.min;
+    const atMax = !r || addDaysStr(date, 1) > r.max;
+    prev.disabled = atMin;
+    next.disabled = atMax;
+    // 焦点不能落在被禁用的按钮上：浏览器会把它丢到 body，键盘用户就迷路了
+    const a = document.activeElement;
+    if (a && a !== document.body && a.matches('.cal-step') && a.disabled) {
+      const other = a === prev ? next : prev;
+      if (other && !other.disabled) other.focus();
+    }
+    if (status) {
+      status.classList.remove('err');
+      status.textContent = !gamesCount
+        ? '该日没有游玩记录'
+        : atMin
+          ? '已是最早一天的记录'
+          : atMax
+            ? '已是最新一天的记录'
+            : '按当天时长从高到低';
+    }
+  }
+
+  /** 二级界面里切换前一天 / 后一天（日期文本两侧的按钮） */
+  function stepCalDay(delta) {
+    if (state.cal.busy) return;
+    const cur = state.cal.day;
+    if (!cur) return;
+    const to = addDaysStr(cur, delta);
+    // 越界时静默返回：按钮此时是 disabled，键盘方向键同样不该有动作
+    // （否则会步进到没有快照的日期，applyReview 抛错会把用户踢回一级月历）
+    const r = calDayRange();
+    if (r && (to < r.min || to > r.max)) return;
+    openCalDay(to);
+  }
+
   function renderCalDay(date) {
     const day = state.days.get(date);
-    const total = day?.total_minutes ?? 0;
     const games = calDayGames(date);
+    // total_minutes 缺失或为 0 时退回合并和，避免摘要与列表对不上
+    const total = (day?.total_minutes ?? 0) || games.reduce((a, g) => a + g.minutes, 0);
     const wd = '周' + '日一二三四五六'[new Date(`${date}T12:00:00Z`).getUTCDay()];
     const [, m, d] = date.split('-').map(Number);
     $('cal-day-title').textContent = `${m} 月 ${d} 日 ${wd}`;
-    $('cal-day-total').textContent = hmText(total);
+    // 没有明细时显示 0 分钟，不能用 hmText(0)（那是"不足 1 分钟"，语义相反）
+    $('cal-day-total').textContent = games.length ? hmText(total) : '0 分钟';
     $('cal-day-note').textContent = `${date} · 共 ${games.length} 款游戏`;
 
-    const status = $('cal-day-status');
-    status.classList.remove('err');
     const box = $('cal-day-games');
     if (!games.length) {
-      // 有记录的日子一定点得进来，这里是兜底：当日快照缺 games 明细时也给明确提示
+      // 范围内但当日没有明细：采集缺口，或尚未采集的日期
       box.innerHTML = '<p class="cal-empty">当天没有游玩记录</p>';
-      status.textContent = '该日没有游戏明细';
+      syncCalDayNav(date, 0);
       return;
     }
-    status.textContent = '按当天时长从高到低';
     const max = Math.max(...games.map((g) => g.minutes), 1);
     box.innerHTML = games
       .map((g, i) => {
@@ -1357,32 +1408,34 @@
         );
       })
       .join('');
+    syncCalDayNav(date, games.length);
     observeCapsules(box); // 与其它列表同一套按需加载
   }
 
-  /** 点击某一天 → 进入二级界面；同时把页面切到该日的回看态 */
+  /** 点击某一天 / 前一天 / 后一天 → 进入（或在）二级界面；同时把页面切到该日的回看态 */
   function openCalDay(date) {
     if (state.cal.busy) return;
     if (!state.metaFull) {
       setCalStatus('数据尚未加载完成，请稍候再试', true);
       return;
     }
-    if (!hasPlay(date)) {
-      setCalStatus('该日期没有游玩记录', true);
-      return;
-    }
     setCalStatus('');
-    setCalBusy(true, '正在载入当天明细…');
+    // 已经在二级界面里 → 这是步进，不要抢焦点（用户正盯着某个按钮）
+    const stepping = state.cal.day !== null;
+    setCalBusy(true, stepping ? '正在切换日期…' : '正在载入当天明细…');
     // 派生快照是同步 CPU 操作，先让浏览器把遮罩画出来再算
     requestAnimationFrame(() => {
       try {
         renderCalDay(date);
         state.cal.day = date;
+        // 跨月步进时同步月历视图：返回一级后看到的还是这个月
+        const ym = date.slice(0, 7);
+        if (ym !== state.cal.ym) state.cal.ym = ym;
         $('cal-page-month').hidden = true;
         $('cal-page-day').hidden = false;
         if (state.review !== date) applyReview(date);
         setCalBusy(false);
-        $('cal-back').focus();
+        if (!stepping) $('cal-back').focus();
       } catch (err) {
         // 失败只提示，绝不改动 state.meta / state.allDates，页面保持原样
         console.error('载入当天明细失败', err);
@@ -1437,10 +1490,13 @@
       // 二级界面里 Esc 先退回一级月历，再按才关闭浮层
       if (state.cal.day) backToCalMonth();
       else closeCal();
-    } else if (e.key === 'ArrowLeft' && !state.cal.busy && !state.cal.day) {
-      stepMonth(-1);
-    } else if (e.key === 'ArrowRight' && !state.cal.busy && !state.cal.day) {
-      stepMonth(1);
+    } else if (e.key === 'ArrowLeft' && !state.cal.busy) {
+      // 二级界面里方向键步进「前一天 / 后一天」，一级月历里才是上下月
+      if (state.cal.day) stepCalDay(-1);
+      else stepMonth(-1);
+    } else if (e.key === 'ArrowRight' && !state.cal.busy) {
+      if (state.cal.day) stepCalDay(1);
+      else stepMonth(1);
     }
   }
 
@@ -1718,6 +1774,9 @@
     $('cal-close').addEventListener('click', () => closeCal());
     $('cal-back').addEventListener('click', () => backToCalMonth());
     $('cal-day-close').addEventListener('click', () => closeCal());
+    // 二级界面：日期文本两侧的「前一天 / 后一天」
+    $('cal-day-prev').addEventListener('click', () => stepCalDay(-1));
+    $('cal-day-next').addEventListener('click', () => stepCalDay(1));
     $('cal-overlay').addEventListener('click', (e) => {
       if (e.target.closest('.cal-panel')) return; // 面板内的点击不关闭
       if (!state.cal.busy) closeCal();
