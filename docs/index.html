@@ -28,7 +28,7 @@
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=97">
+<link rel="stylesheet" href="style.css?v=98">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -69,17 +69,6 @@
        title="氛围效果：关 · 单击开启"
        aria-label="氛围效果已关闭，单击开启"></div>
 </header>
-
-<!-- 数据回看状态条：通过首行日期上方小日历图标的月历选定日期后显示，平时隐藏 -->
-<div class="review-bar" id="review-bar" hidden>
-  <span class="review-badge">回看</span>
-  <span class="review-date" id="review-date">—</span>
-  <span class="review-note" id="review-note"></span>
-  <span class="review-actions">
-    <button class="btn btn-ghost" id="btn-review-cal">更改日期</button>
-    <button class="btn" id="btn-review-exit" title="退出回看，恢复为最新快照的数据">← 返回今天</button>
-  </span>
-</div>
 
 <!-- 概览 · 五张统计卡（其中四张可点击导航，替代原 Tab 栏） -->
 <section class="cards" id="cards">
@@ -262,7 +251,7 @@
         <span class="cal-status" id="cal-day-status"></span>
       </div>
     </div>
-    <!-- 载入 / 回溯进行中的遮罩（失败时不改变页面状态，仅在此提示） -->
+    <!-- 载入当天明细进行中的遮罩（失败时不改变页面状态，仅在此提示） -->
     <div class="cal-mask" id="cal-mask" hidden>
       <span class="cal-spin"></span><span class="cal-mask-text">加载中…</span>
     </div>
@@ -271,6 +260,6 @@
 
 <!-- fx.js 先于 app.js 加载：app.js 绑定时需读取 window.__fx（特效状态的唯一来源） -->
 <script src="fx.js?v=15"></script>
-<script src="app.js?v=92" onerror="__appFail()"></script>
+<script src="app.js?v=93" onerror="__appFail()"></script>
 </body>
 </html>

@@ -53,22 +53,18 @@
   }
 
   const state = {
-    meta: null,       // 当前生效的 meta：正常态为原始值，回看态为按目标日反推的派生快照
+    meta: null,       // 站点 meta（唯一一份：2026-10-21 起不再有"按回看日期反推"的派生快照）
     ach: null,        // 成就数据：首屏只有 stats（轻量摘要），明细按需加载后才有 games
     achReady: false,  // 成就**明细**（games / achievements）是否已加载
     achLoading: null, // 明细加载中的 Promise（并发去重）
     achFilter: null,  // 成就页游戏筛选
-    days: new Map(),  // 'YYYY-MM-DD' -> day（始终保留全量，回看只截断日期索引）
-    allDates: [],
+    days: new Map(),  // 'YYYY-MM-DD' -> day（全量；日历二级界面按日期直接取用）
+    allDates: [],     // 有记录的日期索引（升序）
     view: 'lifetime',
     drill: { appid: null },   // 二级趋势界面：null = 每日总时长
     drillRange: 30,
     charts: {},
-    // ---- 数据回看（史蒂夫头像 → 游玩日历）----
-    review: null,       // 回看日期 'YYYY-MM-DD'；null = 最新数据（今天）
-    metaFull: null,     // 原始 meta 留底，退出回看时还原
-    achFull: null,      // 原始成就留底
-    allDatesFull: [],   // 原始日期索引留底
+    // ---- 游玩日历浮层（点击「最近游玩」首行日期上方的小日历图标打开）----
     cal: { open: false, ym: '2026-10', busy: false, lastFocus: null, day: null },
   };
 
@@ -219,8 +215,7 @@
   }
 
   /** 同步站标（小黄人）的 title 提示（首屏内联脚本先于本脚本应用了持久化主题，
-      文案也要随之更新）。头像（史蒂夫）自 2026-10-18 起不再参与主题切换——它改作
-      「游玩日历」入口，提示文案由 renderReviewBar / exitReview 负责维护，故不在此同步。 */
+      文案也要随之更新）。 */
   function syncThemeUi(id = currentTheme()) {
     const light = $('theme-light');
     if (light) light.title = `当前主题：${themeName(id)} · 点击切换浅色主题`;
@@ -303,16 +298,12 @@
       });
     }
     state.allDates = [...state.days.keys()].sort();
-    // 留底：进入「数据回看」时会被按目标日截断，退出时靠这两份还原
-    state.allDatesFull = state.allDates;
-    state.metaFull = state.meta;
 
     // 成就摘要（轻量）：优先用 meta 里 CI 同步过来的 ach_stats，
     // 这样概览卡立刻有值，不必等 285KB 的明细文件。
     const s = state.meta.ach_stats;
     if (s && Number(s.total) > 0) {
       state.ach = { stats: s }; // 只有 stats，games 待 ensureAchDetail 补齐
-      state.achFull = state.ach;
     }
     return true;
   }
@@ -329,10 +320,7 @@
         const ach = await jget('data/achievements.json', 2);
         if (ach && ach.ready && ach.stats?.total > 0) {
           state.achReady = true;
-          state.achFull = ach;
-          // 处于回看态时，state.ach 必须是"按回看日期截断"的派生快照，
-          // 不能直接塞完整数据（否则成就页会显示未来才解锁的成就）
-          state.ach = state.review ? buildAchSnapshot(state.review) ?? ach : ach;
+          state.ach = ach;
         }
       } catch (e) {
         console.warn('成就明细加载失败（每日采集任务自明日开始产出）', e);
@@ -361,17 +349,11 @@
 
     $('c-lifetime').textContent = hm(s.lifetime_minutes ?? 0);
 
-    // 最近游玩卡：常态为「近两周总时长」；回看态改为「回看当天的总时长」，
-    // 与二级界面（当天游玩明细）的口径一致，避免回溯后卡片还显示 14 天窗口。
-    $('c-recent').textContent = state.review
-      ? hm(state.days.get(state.review)?.total_minutes ?? 0)
-      : hm(lastNDaysTotal(14).minutes);
+    // 最近游玩卡：近两周总时长。口径固定，不随日历浮层里选了哪一天而变化
+    // （2026-10-21 前此处会跟随"回看态"显示当天总时长，整页回看已移除）
+    $('c-recent').textContent = hm(lastNDaysTotal(14).minutes);
     const recentCard = $('card-recent');
-    if (recentCard) {
-      recentCard.title = state.review
-        ? `正在回看 ${state.review} · 此处显示当天的游玩时长，点击查看最近游玩列表`
-        : '点击查看近两周的游玩记录';
-    }
+    if (recentCard) recentCard.title = '点击查看近两周的游玩记录';
 
     // 游戏库卡：玩过 / 拥有
     $('c-games').textContent = `${s.lifetime_played_games ?? 0} / ${s.owned_games ?? 0}`;
@@ -418,22 +400,21 @@
 
   /* 「最近游玩」首行日期上方的「游玩日历」入口图标（2026-10-20 收敛为全站唯一入口）：
      透明小日历（无底色无边框），CSS 里绝对定位于日期文字上方，不占布局、不改行高；
-     点击打开月历浮层选日期回看（即原先挂在右上史蒂夫头像上的职能）；
+     点击只做一件事：弹出日历浮层（一级月历 → 二级当天明细），不改变浮层以外的
+     任何页面状态（2026-10-21 前点它会把整页切到"回看态"，该逻辑已整体移除）。
      史蒂夫头像已改为氛围特效开关（单击 开 / 关，仅流星）。
 
      2026-10-20 收敛：累计榜（#lt-list）里的同一枚图标已整体摘除，相关渲染分支、
      事件拦截、状态同步全部删干净，日历入口只保留在「最近游玩」首行。
      累计榜首行现在与其它行结构完全一致（.rank-last 里只有日期文字），
      不会留下空节点、多余占位或高度变化。#recent-list 的委托负责点击；
-     该列表的行本身没有下钻行为，因此这里只处理日历按钮。
-     回看中：图标着色 --accent 并显示圆点（.cal-mark）。 */
+     该列表的行本身没有下钻行为，因此这里只处理日历按钮。 */
   const CAL_ICON_BTN =
     '<button class="cal-icon-btn" type="button" data-cal-toggle ' +
-    'title="点击打开游玩日历，选择日期进行数据回看" aria-label="打开游玩日历，选择有游玩记录的日期进行数据回看">' +
+    'title="点击打开游玩日历，查看某一天的游戏明细" aria-label="打开游玩日历，查看有游玩记录的那一天的游戏明细">' +
     '<svg viewBox="0 0 20 20" width="22" height="22" aria-hidden="true" focusable="false">' +
     '<rect x="2.6" y="4.2" width="14.8" height="13.6" rx="2.2"></rect>' +
     '<path d="M2.6 8.6h14.8M7 2.6v3M13 2.6v3"></path>' +
-    '<circle class="cal-mark" cx="10" cy="13.4" r="1.3"></circle>' +
     '</svg></button>';
 
   function renderLifetime() {
@@ -501,7 +482,6 @@
 
     box.innerHTML = html;
     observeCapsules(box); // 登记新渲染出的胶囊图（视口临近才真正下载）
-    // 日历入口已不在本榜（收敛到「最近游玩」），这里无需 syncCalIcon()
     if (idle.length) bindIdleToggle(idle.length);
   }
 
@@ -528,22 +508,6 @@
         flip();
       }
     });
-  }
-
-  /* ---- 「最近游玩」首行日期上方的「游玩日历」入口（状态随回看变化） ----
-   * 2026-10-20：日历入口已收敛为全站唯一一处，因此选择器只查 #recent-list。
-   * 未切换到「最近游玩」视图时 renderRecent() 还没跑过 → 返回 null，syncCalIcon 直接跳过。 */
-  function calIconEl() {
-    return document.querySelector('#recent-list [data-cal-toggle]');
-  }
-
-  /** 把日历图标的视觉状态（回看着色 / 圆点 / 提示文案）对齐到当前回看日期 */
-  function syncCalIcon() {
-    const btn = calIconEl();
-    if (!btn) return;
-    const d = state.review;
-    btn.classList.toggle('reviewing', !!d);
-    btn.title = d ? `正在回看 ${d} · 点击选择其它日期` : '点击打开游玩日历，选择日期进行数据回看';
   }
 
   /* ---- 右上史蒂夫头像 → 氛围特效开关 ----
@@ -631,7 +595,6 @@
       })
       .join('');
     observeCapsules(box); // 与累计榜同一套按需加载
-    syncCalIcon(); // 本榜重渲染后，把唯一那枚日历图标的状态对齐当前回看日期
   }
 
   // ---------- ①c 二级趋势界面（游戏累计下钻） ----------
@@ -883,8 +846,7 @@
 
   /** 「全成就已解锁」游戏的 appid 集合（胶囊图标金用）。
    *  两条数据来源，优先前者：
-   *   1) 当前生效的成就快照 state.ach.games —— 打开过成就页或回看态下可用，
-   *      回看时是**按回看日期截断**后的结果，最精确；
+   *   1) 已加载的成就明细 state.ach.games —— 打开过成就页后可用，最精确；
    *   2) meta.ach_perfect —— 构建期算好随 meta 下发（已内联进首屏），
    *      首屏明细尚未加载时用它，避免为主界面一个边框去下载 285KB 明细。
    *  每次列表渲染只调用一次（结果传给行渲染函数），不在每行里重复建 Set。 */
@@ -1172,7 +1134,7 @@
     return rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
   }
 
-  // ---------- 史蒂夫头像 → 游玩日历 + 数据回看 ----------
+  // ---------- 游玩日历浮层（月历 → 当天明细） ----------
   /** 一周从周一起算，与 renderTimeline 的 weekStart 保持一致 */
   const todayStr = () => ymd(new Date());
   /** 有游玩记录 = 当日分钟数 > 0（CI 可能写入 0 分钟的占位日，那也按无记录处理） */
@@ -1180,13 +1142,13 @@
 
   /** 可翻阅的月份范围受限于已落盘的 data/daily/*.json（meta.months），避免翻到空月份 */
   function calRange() {
-    const ms = (state.metaFull?.months ?? []).slice().sort();
+    const ms = (state.meta?.months ?? []).slice().sort();
     return ms.length ? { min: ms[0], max: ms[ms.length - 1] } : null;
   }
 
   /** 打开日历时的默认月：最新快照所在月（当前数据即 2026-10），退化到有数据的最后一个月 */
   function calDefaultMonth() {
-    const snap = state.metaFull?.last_snapshot_date;
+    const snap = state.meta?.last_snapshot_date;
     if (snap) {
       const r = calRange();
       const m = snap.slice(0, 7);
@@ -1214,7 +1176,7 @@
     }
   }
 
-  function renderCalGrid() {
+  function renderCalGrid(selDate) {
     const grid = $('cal-grid');
     if (!grid) return;
     const ym = state.cal.ym;
@@ -1227,7 +1189,7 @@
     if (prev) prev.disabled = !!range && ym <= range.min;
     if (next) next.disabled = !!range && ym >= range.max;
 
-    if (!state.metaFull) {
+    if (!state.meta) {
       grid.innerHTML = '<div class="cal-empty">数据尚未加载完成，请稍候再试</div>';
       setCalStatus('数据未就绪', true);
       return;
@@ -1248,7 +1210,11 @@
       if (play) activeCount++;
       const cls = ['cal-day', play ? 'on' : 'off'];
       if (ds === today) cls.push('today');
-      if (ds === state.review) cls.push('sel');
+      // 选中态 = 二级界面当前（或刚才）看的那一天，从二级返回一级时便于定位。
+      // 2026-10-21 前这里跟随"回看日期"，整页回看移除后改跟 state.cal.day。
+      // 注意 backToCalMonth 会先 resetCalLevel()（把 day 置空）再重绘，
+      // 所以选中日必须由调用方用参数显式传进来，不能只读 state.cal.day。
+      if (ds === (selDate ?? state.cal.day)) cls.push('sel');
       const tip = play
         ? `${ds} · 游玩 ${hm(day.total_minutes)}　点击查看当天明细`
         : `${ds} · 无游玩记录`;
@@ -1262,7 +1228,7 @@
       );
     }
     grid.innerHTML = cells.join('');
-    setCalStatus(state.review ? `正在回看 ${state.review}` : `本月 ${activeCount} 天有记录`);
+    setCalStatus(`本月 ${activeCount} 天有记录`);
   }
 
   function stepMonth(delta) {
@@ -1279,11 +1245,7 @@
   /** 图标 hash 查表：daily 数据里只有 appid/name/minutes，图标要从 meta 的 games_lifetime 取 */
   function gameIconHash(appid) {
     const k = String(appid);
-    return (
-      state.metaFull?.games_lifetime?.[k]?.img_icon_url ??
-      state.meta?.games_lifetime?.[k]?.img_icon_url ??
-      ''
-    );
+    return state.meta?.games_lifetime?.[k]?.img_icon_url ?? '';
   }
 
   /** 当天游玩明细：同一游戏当天的多条记录合并为「当天总时长」；
@@ -1323,8 +1285,8 @@
       而月历的可翻页范围（meta.months）本来就只覆盖有数据的月份。
       范围内**允许**落到没有记录的日子（如采集缺口），此时展示空状态。 */
   function calDayRange() {
-    const min = state.allDatesFull[0];
-    const max = state.metaFull?.last_snapshot_date ?? state.allDatesFull[state.allDatesFull.length - 1];
+    const min = state.allDates[0];
+    const max = state.meta?.last_snapshot_date ?? state.allDates[state.allDates.length - 1];
     return min && max ? { min, max } : null;
   }
 
@@ -1364,7 +1326,7 @@
     if (!cur) return;
     const to = addDaysStr(cur, delta);
     // 越界时静默返回：按钮此时是 disabled，键盘方向键同样不该有动作
-    // （否则会步进到没有快照的日期，applyReview 抛错会把用户踢回一级月历）
+    // （越界日没有每日记录，二级界面只会显示空态，翻过去没有意义）
     const r = calDayRange();
     if (r && (to < r.min || to > r.max)) return;
     openCalDay(to);
@@ -1412,10 +1374,12 @@
     observeCapsules(box); // 与其它列表同一套按需加载
   }
 
-  /** 点击某一天 / 前一天 / 后一天 → 进入（或在）二级界面；同时把页面切到该日的回看态 */
+  /** 点击某一天 / 前一天 / 后一天 → 进入（或在）二级界面看当天明细。
+      只影响浮层内部状态：浮层外的页面布局与数据一律不动
+      （2026-10-21 前此处会把整页切到"回看态"，该逻辑已移除）。 */
   function openCalDay(date) {
     if (state.cal.busy) return;
-    if (!state.metaFull) {
+    if (!state.meta) {
       setCalStatus('数据尚未加载完成，请稍候再试', true);
       return;
     }
@@ -1423,7 +1387,7 @@
     // 已经在二级界面里 → 这是步进，不要抢焦点（用户正盯着某个按钮）
     const stepping = state.cal.day !== null;
     setCalBusy(true, stepping ? '正在切换日期…' : '正在载入当天明细…');
-    // 派生快照是同步 CPU 操作，先让浏览器把遮罩画出来再算
+    // 渲染是同步 CPU 操作，先让浏览器把遮罩画出来再算
     requestAnimationFrame(() => {
       try {
         renderCalDay(date);
@@ -1433,32 +1397,41 @@
         if (ym !== state.cal.ym) state.cal.ym = ym;
         $('cal-page-month').hidden = true;
         $('cal-page-day').hidden = false;
-        if (state.review !== date) applyReview(date);
         setCalBusy(false);
         if (!stepping) $('cal-back').focus();
       } catch (err) {
-        // 失败只提示，绝不改动 state.meta / state.allDates，页面保持原样
+        // 失败只提示，浮层外的页面与浮层内已渲染的内容都不受影响
         console.error('载入当天明细失败', err);
         setCalBusy(false);
         backToCalMonth();
-        setCalStatus(`载入失败：${err.message}（页面状态未改变）`, true);
+        setCalStatus(`载入失败：${err.message}`, true);
       }
     });
   }
 
-  /** 二级界面 → 返回一级月历（回看态保留，用户可继续选别的日期） */
+  /** 二级界面 → 返回一级月历（selection = 刚才看的那一天，便于继续选别的日期） */
   function backToCalMonth() {
+    const sel = state.cal.day;
     resetCalLevel();
-    renderCalGrid();
-    const sel = $('cal-grid').querySelector('.cal-day.sel');
-    (sel ?? $('cal-close')).focus();
+    renderCalGrid(sel);
+    focusCalDay();
+  }
+
+  /** 一级月历的初始焦点：优先选中日 → 最后一个有记录的日期 → 关闭按钮 */
+  function focusCalDay() {
+    const grid = $('cal-grid');
+    const target =
+      grid?.querySelector('.cal-day.sel') ??
+      grid?.querySelector('.cal-day.on:last-of-type') ??
+      $('cal-close');
+    if (target) target.focus();
   }
 
   function openCal(ym) {
     if (state.cal.open) return;
     state.cal.open = true;
     state.cal.lastFocus = document.activeElement;
-    state.cal.ym = (ym || state.review || calDefaultMonth()).slice(0, 7);
+    state.cal.ym = (ym || calDefaultMonth()).slice(0, 7);
     const ov = $('cal-overlay');
     ov.hidden = false;
     setCalBusy(false);
@@ -1467,8 +1440,7 @@
     resetCalLevel();
     renderCalGrid();
     document.addEventListener('keydown', onCalKey, true);
-    const first = $('cal-grid').querySelector('.cal-day.sel') ?? $('cal-close');
-    if (first) first.focus();
+    focusCalDay();
   }
 
   function closeCal() {
@@ -1498,218 +1470,6 @@
       if (state.cal.day) stepCalDay(1);
       else stepMonth(1);
     }
-  }
-
-  /** 按目标日重建一份「当时的 meta 快照」。
-      仓库只保存每日差分（以及一份当前终身累计），没有历史全量快照，因此：
-        · 每日相关统计 —— 在截断到该日的每日记录上真实重算（精确）
-        · 终身累计 —— 用「当前值 − 该日之后的每日增量」反推（估算）
-        · 成就 —— 按解锁时间过滤（精确）
-      无法精确还原的部分统一记进 notes，由状态条明示给用户。 */
-  function buildSnapshot(date) {
-    const full = state.metaFull;
-    if (!full) throw new Error('数据尚未加载完成');
-    const within = state.allDatesFull.filter((d) => d <= date);
-    const after = state.allDatesFull.filter((d) => d > date);
-    if (!within.length) throw new Error('该日之前没有任何每日记录，无法回溯');
-    if (!full.games_lifetime || !Object.keys(full.games_lifetime).length) {
-      throw new Error('缺少游戏终身时长数据，无法还原');
-    }
-
-    const notes = [];
-    // 之后的每日增量 / 每款游戏的增量
-    const laterTotal = after.reduce((a, d) => a + (state.days.get(d)?.total_minutes ?? 0), 0);
-    const laterByApp = new Map();
-    for (const d of after) {
-      for (const g of state.days.get(d)?.games ?? []) {
-        const k = String(g.appid);
-        laterByApp.set(k, (laterByApp.get(k) ?? 0) + g.minutes);
-      }
-    }
-
-    const day = state.days.get(date);
-    if (laterTotal > 0) notes.push('终身累计为按「当前值 − 之后增量」反推的估算值');
-    if (!day) {
-      notes.push('当日没有独立快照，展示的是此前最近一次记录的状态');
-    } else {
-      if ((day.span_days ?? 1) > 1) notes.push(`当日覆盖 ${day.span_days} 天（含补采），数值偏高`);
-      if (day.confidence === 'low') notes.push('当日为低置信度快照');
-      else if (day.confidence === 'medium') notes.push('当日置信度中等');
-      if ((day.flags ?? []).length) notes.push(`标记：${day.flags.join('、')}`);
-    }
-
-    // ---- 每日维度：精确重算 ----
-    const totalMin = within.reduce((a, d) => a + (state.days.get(d)?.total_minutes ?? 0), 0);
-    const appSet = new Set();
-    for (const d of within) {
-      for (const g of state.days.get(d)?.games ?? []) appSet.add(String(g.appid));
-    }
-    let cur = 0;
-    let p = date;
-    while (hasPlay(p)) {
-      cur++;
-      p = addDaysStr(p, -1);
-    }
-    let longest = 0;
-    let run = 0;
-    for (const d of eachDate(within[0], date)) {
-      if (hasPlay(d)) {
-        run++;
-        if (run > longest) longest = run;
-      } else run = 0;
-    }
-    const weekMin = eachDate(addDaysStr(date, -6), date).reduce(
-      (a, d) => a + (state.days.get(d)?.total_minutes ?? 0),
-      0,
-    );
-    let best = null;
-    for (const d of within) {
-      const mm = state.days.get(d)?.total_minutes ?? 0;
-      if (mm > 0 && (!best || mm > best.minutes)) best = { date: d, minutes: mm };
-    }
-    const lifetimeMin = Math.max(0, (full.stats?.lifetime_minutes ?? 0) - laterTotal);
-    const stats = {
-      ...(full.stats ?? {}),
-      lifetime_minutes: lifetimeMin,
-      lifetime_hours: Math.round((lifetimeMin / 60) * 10) / 10,
-      total_minutes: totalMin,
-      total_hours: Math.round((totalMin / 60) * 10) / 10,
-      tracked_days: within.length,
-      active_days: within.filter(hasPlay).length,
-      current_streak: cur,
-      longest_streak: longest,
-      week_minutes: weekMin,
-      played_games: appSet.size,
-      best_day: best,
-    };
-
-    // ---- 每款游戏的终身时长：减去之后增量反推；last_played 一并截断 ----
-    const gl = {};
-    for (const [k, g] of Object.entries(full.games_lifetime ?? {})) {
-      const later = laterByApp.get(String(g.appid)) ?? 0;
-      let last = g.last_played ?? null;
-      if (last && last > date) {
-        last = null;
-        for (const d of within) {
-          if ((state.days.get(d)?.games ?? []).some((x) => String(x.appid) === String(g.appid))) last = d;
-        }
-      }
-      gl[k] = { ...g, lifetime_minutes: Math.max(0, (g.lifetime_minutes ?? 0) - later), last_played: last };
-    }
-
-    // ---- games_index 同步重算（保持派生 meta 的形状完整） ----
-    const gi = {};
-    for (const d of within) {
-      for (const g of state.days.get(d)?.games ?? []) {
-        const k = String(g.appid);
-        const it =
-          gi[k] ??
-          (gi[k] = {
-            appid: g.appid,
-            name: g.name,
-            img_icon_url: full.games_lifetime?.[k]?.img_icon_url ?? '',
-            total_minutes: 0,
-            first_day: d,
-            last_day: d,
-          });
-        it.total_minutes += g.minutes;
-        it.last_day = d;
-      }
-    }
-
-    const health = {
-      ...(full.health ?? {}),
-      gap_days: within.filter((d) => (state.days.get(d)?.span_days ?? 1) > 1).length,
-      low_confidence_days: within.filter((d) => state.days.get(d)?.confidence === 'low').length,
-    };
-
-    return {
-      meta: { ...full, last_snapshot_date: date, stats, games_lifetime: gl, games_index: gi, health },
-      notes,
-    };
-  }
-
-  /** 成就回看：按解锁时间（Asia/Shanghai）截断，重算解锁数与完成度 */
-  function buildAchSnapshot(date) {
-    const full = state.achFull;
-    if (!full?.stats) return null;
-    // 明细未加载时（首屏只带了 stats 摘要）不能按日期推算解锁数——那会把
-    // unlocked 算成 0、完成度显示成 0%。此时原样返回摘要，宁可"不回溯成就"
-    // 也不给错数；用户打开成就页触发 ensureAchDetail 后再回看即可精确。
-    if (!state.achReady) return full;
-    const games = {};
-    let unlocked = 0;
-    for (const [k, g] of Object.entries(full.games ?? {})) {
-      const list = (g.achievements ?? []).filter((a) => (achDate(a.ts) ?? '') <= date);
-      unlocked += list.length;
-      games[k] = { ...g, unlocked: list.length, achievements: list };
-    }
-    const total = full.stats.total ?? 0;
-    return {
-      ...full,
-      games,
-      stats: { ...full.stats, unlocked, pct: total ? Math.round((unlocked / total) * 1000) / 10 : 0 },
-    };
-  }
-
-  /** 所有模块按「当前生效的 meta / allDates」重渲染（回看进入与退出共用） */
-  function renderAll() {
-    renderCards();
-    renderLifetime();
-    renderRecent();
-    renderAch();
-    renderHealth();
-    buildAchSelect();
-    renderTimeline();
-    switchView(state.view);
-    // switchView('lifetime') 会 closeDrill，所以要在其后判断下钻界面是否仍然打开
-    if (!$('lt-detail').hidden && window.echarts) {
-      try {
-        renderDrill();
-      } catch (e) {
-        console.warn('回看态重绘趋势图失败', e);
-      }
-    }
-  }
-
-  function renderReviewBar(date, notes = []) {
-    const bar = $('review-bar');
-    if (!bar) return;
-    bar.hidden = false;
-    $('review-date').textContent = date;
-    const latest = state.metaFull?.last_snapshot_date;
-    const note = notes.length
-      ? notes.map(escapeHtml).join('；')
-      : '已按该日状态重建全部模块（每日数据为精确重算）';
-    const tail = latest && latest !== date ? `<span class="review-dim">　最新快照：${escapeHtml(latest)}</span>` : '';
-    $('review-note').innerHTML = note + tail;
-    syncCalIcon(); // 回看标识落在首行日历图标上（着色 + 圆点）
-  }
-
-  /** 把页面切到目标日的回看态。
-      注意：不关日历浮层、不滚动、不弹 toast —— 这些交互由调用方决定
-      （openCalDay 要留在浮层里看当天明细，所以这里只做状态与重绘）。 */
-  function applyReview(date) {
-    const snap = buildSnapshot(date);
-    state.review = date;
-    state.meta = snap.meta;
-    state.ach = buildAchSnapshot(date);
-    state.allDates = state.allDatesFull.filter((d) => d <= date);
-    renderReviewBar(date, snap.notes);
-    renderAll();
-  }
-
-  function exitReview() {
-    if (!state.review) return;
-    state.review = null;
-    state.meta = state.metaFull;
-    state.ach = state.achFull;
-    state.allDates = state.allDatesFull;
-    $('review-bar').hidden = true;
-    syncCalIcon();
-    renderAll();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    toast('已返回最新数据');
   }
 
   // ---------- tabs / init ----------
@@ -1748,7 +1508,7 @@
       });
     };
     // 只有站标（小黄人）绑定主题切换；史蒂夫头像是氛围特效开关（下方），
-    // 游玩日历入口为首行日期上方的小日历图标 + 回看状态条的「更改日期」按钮。
+    // 游玩日历入口是「最近游玩」首行日期上方的小日历图标（全站唯一）。
     bindFlip($('theme-light'), 'light');
 
     // 史蒂夫头像 → 氛围特效开关（单击 开 / 关，仅流星；
@@ -1792,10 +1552,6 @@
       e.preventDefault();
       openCalDay(cell.dataset.date);
     });
-
-    // 回看状态条：更改日期 / 返回今天
-    $('btn-review-cal').addEventListener('click', () => openCal());
-    $('btn-review-exit').addEventListener('click', exitReview);
 
     // 网站名：点击返回顶部（键盘 Enter / 空格同样支持）
     const titleHome = $('site-title');

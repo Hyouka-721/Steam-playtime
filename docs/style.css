@@ -275,7 +275,6 @@ a { color: var(--accent); }
    2026-10-18 换成 Minecraft 史蒂夫+狼（原 docs/minecraft.png 438×423 RGBA，
    同日夜首屏优化时压到 264×255/64 色并内联为 data URI，源文件已删），
    并**移除「点击切换主题」交互**（原来绑在它身上的主题切换逻辑已删）；
-   同日又改成「游玩日历」入口：点击弹出月历，可选择有记录的日期做数据回看。
    2026-10-18 职能再对调：头像改为**氛围特效开关**（单击 开 / 关；
    2026-10-18 按用户要求仅保留流星一种效果，雨 / 雪已移除），
    日历入口移到游戏累计列表首行日期上方的小日历图标。
@@ -932,7 +931,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
      (c) 仍用 absolute + transform 的零位移，**不参与布局**：日期文字的
          盒模型、行高、与相邻 .rank-min 的 14px 列间距全部不受影响。
    ■ 尺寸/样式零改动：按钮 24×24、SVG 22×22、stroke-width 1.5、
-     color --text-faint、opacity .5、hover/active/focus/reviewing 全部原样。
+     color --text-faint、opacity .5、hover/active/focus 全部原样。
    ■ ≤860px 时父级 .rank-last 已 display:none，图标随之隐藏。 */
 .cal-icon-btn {
   appearance: none; -webkit-appearance: none;
@@ -969,13 +968,9 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   fill: none; stroke: currentColor;
   stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
 }
-.cal-icon-btn .cal-mark { fill: currentColor; stroke: none; opacity: 0; transition: opacity .18s ease; }
 .cal-icon-btn:hover { opacity: .8; }
 .cal-icon-btn:active { opacity: 1; }
 .cal-icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 5px; opacity: .9; }
-/* 回看中：着色 + 圆点 + 细光环，与顶部回看状态条互相印证 */
-.cal-icon-btn.reviewing { color: var(--accent); opacity: 1; box-shadow: 0 0 0 1.5px var(--accent); border-radius: 5px; }
-.cal-icon-btn.reviewing .cal-mark { opacity: 1; }
 .list-foot { text-align: right; color: var(--text-faint); font-size: 12px; margin: 10px 4px 2px; }
 .list-foot-dim { opacity: .75; }
 
@@ -1193,34 +1188,6 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .site-title { font-size: 44px; letter-spacing: 1px; }
 }
 
-/* ================= 数据回看状态条 ================= */
-/* 史蒂夫头像 → 月历选中有游玩记录的日期后出现；「返回今天」退出回看 */
-.review-bar {
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-  margin: 16px 28px 0; padding: 10px 16px;
-  background:
-    linear-gradient(150deg, var(--tint-2), transparent 60%),
-    var(--panel);
-  border: 1px solid var(--tint-border); border-radius: var(--radius);
-  box-shadow: 0 0 0 1px var(--ring), var(--card-shadow);
-  font-size: 12.5px; color: var(--text-dim); line-height: 1.6;
-}
-/* flex 会覆盖 UA 的 [hidden]，必须显式声明 */
-.review-bar[hidden] { display: none; }
-.review-badge {
-  background: var(--accent); color: #fff; border-radius: 999px;
-  padding: 1px 12px; font-size: 12px; letter-spacing: .8px; white-space: nowrap;
-  font-weight: 600;
-}
-.review-date {
-  color: var(--text-strong); font-weight: 700; font-size: 15px;
-  font-variant-numeric: tabular-nums;
-}
-.review-note { flex: 1 1 320px; min-width: 0; }
-.review-dim { opacity: .7; }
-.review-actions { display: flex; gap: 8px; margin-left: auto; }
-.review-actions .btn { padding: 5px 12px; font-size: 12.5px; }
-
 /* ================= 背景氛围层（流星）================= */
 /* 2026-10-18 新增：由 fx.js 驱动的 Canvas 层。
    - pointer-events:none —— 不拦截列表点击、卡片导航、日历浮层等任何交互
@@ -1304,7 +1271,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 /* 无记录 / 未来日期：灰色 + 禁用 */
 .cal-day.off { color: var(--text-faint); opacity: .7; cursor: not-allowed; }
 .cal-day.today { box-shadow: inset 0 0 0 1px var(--border-hi); }
-/* 当前正在回看的日期 */
+/* 二级界面当前（或刚才）看的那一天：从二级返回一级时便于定位 */
 .cal-day.sel { background: var(--accent); border-color: var(--accent-2); color: #fff; }
 .cal-day.sel .cal-min { color: rgba(255, 255, 255, .88); }
 .cal-min { font-size: 10px; font-weight: 500; color: var(--text-dim); margin-top: 1px; }
@@ -1326,7 +1293,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .cal-dot.off { background: var(--sunken); border-color: var(--border); }
 .cal-status { margin-left: auto; text-align: right; }
 .cal-status.err { color: var(--warn); }
-/* 回溯进行中的遮罩：失败时也在此提示，且不动页面原有状态 */
+/* 载入当天明细进行中的遮罩：失败时也在此提示，且不动页面原有状态 */
 .cal-mask {
   position: absolute; inset: 0; border-radius: 14px;
   display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -1435,7 +1402,6 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 }
 
 @media (max-width: 480px) {
-  .review-bar { margin: 12px 16px 0; }
   .cal-overlay { padding: 12px; }
   .cal-panel { width: 100%; }
   .cal-day { min-height: 38px; font-size: 13px; }
