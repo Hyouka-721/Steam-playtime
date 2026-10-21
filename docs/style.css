@@ -1341,9 +1341,78 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 }
 @keyframes cal-spin { to { transform: rotate(360deg); } }
 
+/* ── 日历两级结构：一级月历 / 二级「某一天的游戏游玩明细」 ──
+   两页是 .cal-panel 的直接子元素，靠 hidden 属性切换。
+   注意：**不要给 .cal-page 设 display**，否则 [hidden] 的 UA 样式会被覆盖、
+   页面永远不隐藏（同 .rank-list[hidden] 的坑）。 */
+.cal-head-day { grid-template-columns: 34px 1fr 34px; }
+
+/* 二级界面顶部摘要卡：刻意复用概览卡的背景/圆角/字号，视觉上与站内一致 */
+.cal-day-summary {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 14px 16px 13px;
+  margin-bottom: 12px;
+}
+.cal-day-sum-label { font-size: 12px; color: var(--text-dim); letter-spacing: .8px; }
+.cal-day-sum-value {
+  font-size: 26px; font-weight: 700; color: var(--text-strong);
+  margin-top: 4px; line-height: 1.25; font-variant-numeric: tabular-nums;
+}
+.cal-day-sum-note { font-size: 11.5px; color: var(--text-faint); margin-top: 5px; }
+
+/* 当天游玩明细列表：面板只有 372px，用紧凑四列（序号/胶囊/名称/时长）+ 第二行占比条 */
+.cal-games { max-height: min(46vh, 380px); overflow-y: auto; overscroll-behavior: contain; }
+.cal-game {
+  display: grid; grid-template-columns: 20px 64px minmax(0, 1fr) auto;
+  gap: 3px 10px; align-items: center;
+  padding: 7px 8px; border-radius: 9px;
+  transition: background .15s;
+}
+.cal-game + .cal-game { margin-top: 2px; }
+.cal-game:hover { background: var(--tint-1); }
+.cal-game-no {
+  color: var(--text-faint); font-variant-numeric: tabular-nums;
+  text-align: center; font-size: 14px; font-weight: 600;
+}
+.cal-game-no.r1, .cal-game-no.r2, .cal-game-no.r3 { font-size: 17px; font-weight: 800; }
+.cal-game-no.r1 { color: var(--medal-1); text-shadow: var(--medal-shadow-1); }
+.cal-game-no.r2 { color: var(--medal-2); text-shadow: var(--medal-shadow-2); }
+.cal-game-no.r3 { color: var(--medal-3); text-shadow: var(--medal-shadow-3); }
+.cal-game-name {
+  min-width: 0; font-size: 13.5px; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cal-game-min {
+  font-variant-numeric: tabular-nums; font-size: 12.5px; font-weight: 600;
+  color: var(--text-strong); white-space: nowrap;
+}
+.cal-game-bar {
+  grid-column: 1 / -1; height: 5px; border-radius: 3px;
+  background: var(--track); overflow: hidden;
+}
+.cal-game-bar > span { display: block; height: 100%; border-radius: 3px; background: var(--accent); }
+/* 二级界面里的胶囊图缩到 64×30。同心条件仍是 R_外 = R_内图 + 环厚 → 7 = 5 + 2，
+   所以四个 --cap-* 一起改，只改尺寸会破坏圆角同心（角部环带宽窄不匀）。
+   **width/height 必须显式重写**：站点既有 `@media (max-width:860px)` 里有一条
+   `.rank-capsule-wrap { width: calc(100px + 2*var(--ring-w)) }`（缩到 104px），
+   与基础规则同特异度但位置更靠后 —— 只覆盖 CSS 变量的话窄屏下宽度会被它抢走。 */
+.cal-games .rank-capsule-wrap {
+  --cap-box-w: 64px; --cap-box-h: 30px; --cap-box-r: 7px; --cap-img-r: 5px;
+  width: var(--cap-box-w); height: var(--cap-box-h);
+  margin: 0; /* 列表里那 -2px 是给 134×64 外框收回布局用的，小尺寸下不需要 */
+}
+.cal-games .rank-capsule-wrap:has(> .rank-capsule.is-icon) > .rank-capsule.is-icon {
+  width: 22px; height: 22px; margin: 0;
+}
+
 @media (max-width: 480px) {
   .review-bar { margin: 12px 16px 0; }
   .cal-overlay { padding: 12px; }
   .cal-panel { width: 100%; }
   .cal-day { min-height: 38px; font-size: 13px; }
+  .cal-games { max-height: 52vh; }
+  .cal-game { grid-template-columns: 18px 56px minmax(0, 1fr) auto; gap: 3px 8px; }
+  .cal-games .rank-capsule-wrap { --cap-box-w: 56px; --cap-box-h: 27px; }
 }

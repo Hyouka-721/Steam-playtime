@@ -69,7 +69,7 @@
     metaFull: null,     // 原始 meta 留底，退出回看时还原
     achFull: null,      // 原始成就留底
     allDatesFull: [],   // 原始日期索引留底
-    cal: { open: false, ym: '2026-10', busy: false, lastFocus: null },
+    cal: { open: false, ym: '2026-10', busy: false, lastFocus: null, day: null },
   };
 
   // ---------- utils ----------
@@ -80,6 +80,16 @@
     const h = Math.floor(n / 60);
     const r = n % 60;
     return r === 0 ? `${h} h` : `${h} h ${r} min`;
+  }
+  /** 当天明细用的可读时长：'2 小时 11 分钟' / '45 分钟' / '不足 1 分钟'。
+      整分钟数据里 0 分钟 = 玩了一下但不足一分钟，不能显示成 '0 分钟'（会被当成没玩） */
+  function hmText(m) {
+    const n = Math.round(Number(m) || 0);
+    if (n <= 0) return '不足 1 分钟';
+    if (n < 60) return `${n} 分钟`;
+    const h = Math.floor(n / 60);
+    const r = n % 60;
+    return r === 0 ? `${h} 小时` : `${h} 小时 ${r} 分钟`;
   }
   const ymd = (d) => (d instanceof Date ? d : new Date(d)).toISOString().slice(0, 10);
   function addDaysStr(dateStr, n) {
@@ -351,8 +361,17 @@
 
     $('c-lifetime').textContent = hm(s.lifetime_minutes ?? 0);
 
-    // 最近游玩卡：近两周总时长
-    $('c-recent').textContent = hm(lastNDaysTotal(14).minutes);
+    // 最近游玩卡：常态为「近两周总时长」；回看态改为「回看当天的总时长」，
+    // 与二级界面（当天游玩明细）的口径一致，避免回溯后卡片还显示 14 天窗口。
+    $('c-recent').textContent = state.review
+      ? hm(state.days.get(state.review)?.total_minutes ?? 0)
+      : hm(lastNDaysTotal(14).minutes);
+    const recentCard = $('card-recent');
+    if (recentCard) {
+      recentCard.title = state.review
+        ? `正在回看 ${state.review} · 此处显示当天的游玩时长，点击查看最近游玩列表`
+        : '点击查看近两周的游玩记录';
+    }
 
     // 游戏库卡：玩过 / 拥有
     $('c-games').textContent = `${s.lifetime_played_games ?? 0} / ${s.owned_games ?? 0}`;
@@ -1231,7 +1250,7 @@
       if (ds === today) cls.push('today');
       if (ds === state.review) cls.push('sel');
       const tip = play
-        ? `${ds} · 游玩 ${hm(day.total_minutes)}　点击回溯到这一天`
+        ? `${ds} · 游玩 ${hm(day.total_minutes)}　点击查看当天明细`
         : `${ds} · 无游玩记录`;
       cells.push(
         `<span class="${cls.join(' ')}" data-date="${ds}"` +
@@ -1256,6 +1275,132 @@
     renderCalGrid();
   }
 
+  // ---------- 日历二级界面：某一天的游戏游玩明细 ----------
+  /** 图标 hash 查表：daily 数据里只有 appid/name/minutes，图标要从 meta 的 games_lifetime 取 */
+  function gameIconHash(appid) {
+    const k = String(appid);
+    return (
+      state.metaFull?.games_lifetime?.[k]?.img_icon_url ??
+      state.meta?.games_lifetime?.[k]?.img_icon_url ??
+      ''
+    );
+  }
+
+  /** 当天游玩明细：同一游戏当天的多条记录合并为「当天总时长」；
+      按当天时长降序，时长相同按游戏名称排序（中文按拼音，localeCompare 稳定）。
+      只收录当天 games 里出现过的游戏 —— 没记录的根本不会进这个数组。 */
+  function calDayGames(date) {
+    const day = state.days.get(date);
+    const merged = new Map();
+    for (const g of day?.games ?? []) {
+      const k = String(g.appid);
+      const cur = merged.get(k);
+      if (cur) {
+        cur.minutes += Number(g.minutes) || 0;
+        if (!cur.name && g.name) cur.name = g.name; // 个别记录可能缺 name，用已知的补上
+      } else {
+        merged.set(k, {
+          appid: g.appid,
+          name: g.name ?? String(g.appid),
+          minutes: Number(g.minutes) || 0,
+        });
+      }
+    }
+    return [...merged.values()].sort(
+      (a, b) => b.minutes - a.minutes || String(a.name).localeCompare(String(b.name), 'zh-Hans-CN'),
+    );
+  }
+
+  /** 只切两级页面的显隐，不重绘（openCal / closeCal / backToCalMonth 共用） */
+  function resetCalLevel() {
+    state.cal.day = null;
+    $('cal-page-month').hidden = false;
+    $('cal-page-day').hidden = true;
+  }
+
+  function renderCalDay(date) {
+    const day = state.days.get(date);
+    const total = day?.total_minutes ?? 0;
+    const games = calDayGames(date);
+    const wd = '周' + '日一二三四五六'[new Date(`${date}T12:00:00Z`).getUTCDay()];
+    const [, m, d] = date.split('-').map(Number);
+    $('cal-day-title').textContent = `${m} 月 ${d} 日 ${wd}`;
+    $('cal-day-total').textContent = hmText(total);
+    $('cal-day-note').textContent = `${date} · 共 ${games.length} 款游戏`;
+
+    const status = $('cal-day-status');
+    status.classList.remove('err');
+    const box = $('cal-day-games');
+    if (!games.length) {
+      // 有记录的日子一定点得进来，这里是兜底：当日快照缺 games 明细时也给明确提示
+      box.innerHTML = '<p class="cal-empty">当天没有游玩记录</p>';
+      status.textContent = '该日没有游戏明细';
+      return;
+    }
+    status.textContent = '按当天时长从高到低';
+    const max = Math.max(...games.map((g) => g.minutes), 1);
+    box.innerHTML = games
+      .map((g, i) => {
+        const hash = gameIconHash(g.appid);
+        // 查不到图标时给透明占位：否则 onerror 会把 src 设成空串（解析成当前页 URL）
+        const icon = hash ? ICON(g.appid, hash) : BLANK_GIF;
+        const pct = Math.max(2, (g.minutes / max) * 100);
+        const noCls = i < 3 ? ` r${i + 1}` : '';
+        return (
+          `<div class="cal-game">` +
+          `<span class="cal-game-no${noCls}">${i + 1}</span>` +
+          capsuleHtml(g.appid, { icon }) +
+          `<span class="cal-game-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}</span>` +
+          `<span class="cal-game-min">${hmText(g.minutes)}</span>` +
+          `<span class="cal-game-bar"><span style="width:${pct}%"></span></span>` +
+          `</div>`
+        );
+      })
+      .join('');
+    observeCapsules(box); // 与其它列表同一套按需加载
+  }
+
+  /** 点击某一天 → 进入二级界面；同时把页面切到该日的回看态 */
+  function openCalDay(date) {
+    if (state.cal.busy) return;
+    if (!state.metaFull) {
+      setCalStatus('数据尚未加载完成，请稍候再试', true);
+      return;
+    }
+    if (!hasPlay(date)) {
+      setCalStatus('该日期没有游玩记录', true);
+      return;
+    }
+    setCalStatus('');
+    setCalBusy(true, '正在载入当天明细…');
+    // 派生快照是同步 CPU 操作，先让浏览器把遮罩画出来再算
+    requestAnimationFrame(() => {
+      try {
+        renderCalDay(date);
+        state.cal.day = date;
+        $('cal-page-month').hidden = true;
+        $('cal-page-day').hidden = false;
+        if (state.review !== date) applyReview(date);
+        setCalBusy(false);
+        $('cal-back').focus();
+      } catch (err) {
+        // 失败只提示，绝不改动 state.meta / state.allDates，页面保持原样
+        console.error('载入当天明细失败', err);
+        setCalBusy(false);
+        backToCalMonth();
+        setCalStatus(`载入失败：${err.message}（页面状态未改变）`, true);
+      }
+    });
+  }
+
+  /** 二级界面 → 返回一级月历（回看态保留，用户可继续选别的日期） */
+  function backToCalMonth() {
+    resetCalLevel();
+    renderCalGrid();
+    const sel = $('cal-grid').querySelector('.cal-day.sel');
+    (sel ?? $('cal-close')).focus();
+  }
+
   function openCal(ym) {
     if (state.cal.open) return;
     state.cal.open = true;
@@ -1265,6 +1410,8 @@
     ov.hidden = false;
     setCalBusy(false);
     setCalStatus('');
+    // 每次打开都停在一级月历；二级界面只能由「点击某一天」进入
+    resetCalLevel();
     renderCalGrid();
     document.addEventListener('keydown', onCalKey, true);
     const first = $('cal-grid').querySelector('.cal-day.sel') ?? $('cal-close');
@@ -1275,6 +1422,7 @@
     if (!state.cal.open) return;
     state.cal.open = false;
     setCalBusy(false);
+    resetCalLevel(); // 下次打开一律从一级月历开始
     $('cal-overlay').hidden = true;
     document.removeEventListener('keydown', onCalKey, true);
     const f = state.cal.lastFocus;
@@ -1286,10 +1434,12 @@
       if (state.cal.busy) return;
       e.preventDefault();
       e.stopPropagation();
-      closeCal();
-    } else if (e.key === 'ArrowLeft' && !state.cal.busy) {
+      // 二级界面里 Esc 先退回一级月历，再按才关闭浮层
+      if (state.cal.day) backToCalMonth();
+      else closeCal();
+    } else if (e.key === 'ArrowLeft' && !state.cal.busy && !state.cal.day) {
       stepMonth(-1);
-    } else if (e.key === 'ArrowRight' && !state.cal.busy) {
+    } else if (e.key === 'ArrowRight' && !state.cal.busy && !state.cal.day) {
       stepMonth(1);
     }
   }
@@ -1480,38 +1630,17 @@
     syncCalIcon(); // 回看标识落在首行日历图标上（着色 + 圆点）
   }
 
-  async function enterReview(date) {
-    if (state.cal.busy) return;
-    if (!state.metaFull) {
-      setCalStatus('数据尚未加载完成，请稍候再试', true);
-      return;
-    }
-    if (!hasPlay(date)) {
-      setCalStatus('该日期没有游玩记录', true);
-      return;
-    }
-    setCalStatus('');
-    setCalBusy(true, '正在回溯数据…');
-    try {
-      // 派生快照是同步 CPU 操作，先让浏览器把 loading 画出来
-      await new Promise((r) => setTimeout(r, 60));
-      const snap = buildSnapshot(date);
-      state.review = date;
-      state.meta = snap.meta;
-      state.ach = buildAchSnapshot(date);
-      state.allDates = state.allDatesFull.filter((d) => d <= date);
-      renderReviewBar(date, snap.notes);
-      renderAll();
-      closeCal();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      toast(`已回溯到 ${date}`);
-    } catch (err) {
-      // 关键：失败只提示，绝不改动 state.meta / state.allDates，页面保持原样
-      console.error('回溯失败', err);
-      setCalStatus(`回溯失败：${err.message}（页面状态未改变）`, true);
-    } finally {
-      setCalBusy(false);
-    }
+  /** 把页面切到目标日的回看态。
+      注意：不关日历浮层、不滚动、不弹 toast —— 这些交互由调用方决定
+      （openCalDay 要留在浮层里看当天明细，所以这里只做状态与重绘）。 */
+  function applyReview(date) {
+    const snap = buildSnapshot(date);
+    state.review = date;
+    state.meta = snap.meta;
+    state.ach = buildAchSnapshot(date);
+    state.allDates = state.allDatesFull.filter((d) => d <= date);
+    renderReviewBar(date, snap.notes);
+    renderAll();
   }
 
   function exitReview() {
@@ -1583,24 +1712,26 @@
     // 特效状态变化（头像开关 / 系统偏好）→ 同步头像的提示文案
     if (window.__fx && window.__fx.onChange) window.__fx.onChange(syncSteveFx);
 
-    // 日历浮层：上下月、关闭、点空白关闭、点有记录的日期回溯
+    // 日历浮层：上下月、关闭、点空白关闭、二级界面返回/关闭、点有记录的日期看当天明细
     $('cal-prev').addEventListener('click', () => stepMonth(-1));
     $('cal-next').addEventListener('click', () => stepMonth(1));
     $('cal-close').addEventListener('click', () => closeCal());
+    $('cal-back').addEventListener('click', () => backToCalMonth());
+    $('cal-day-close').addEventListener('click', () => closeCal());
     $('cal-overlay').addEventListener('click', (e) => {
       if (e.target.closest('.cal-panel')) return; // 面板内的点击不关闭
       if (!state.cal.busy) closeCal();
     });
     $('cal-grid').addEventListener('click', (e) => {
       const cell = e.target.closest('.cal-day.on');
-      if (cell && !state.cal.busy) enterReview(cell.dataset.date);
+      if (cell && !state.cal.busy) openCalDay(cell.dataset.date);
     });
     $('cal-grid').addEventListener('keydown', (e) => {
       if (e.key !== 'Enter' && e.key !== ' ') return;
       const cell = e.target.closest('.cal-day.on');
       if (!cell || state.cal.busy) return;
       e.preventDefault();
-      enterReview(cell.dataset.date);
+      openCalDay(cell.dataset.date);
     });
 
     // 回看状态条：更改日期 / 返回今天

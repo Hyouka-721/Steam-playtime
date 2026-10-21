@@ -211,26 +211,48 @@
   <span>数据每日 23:30（北京时间）自动更新</span>
 </footer>
 
-<!-- 游玩日历浮层（点击游戏累计列表首行日期上方的小日历图标打开；Esc / 点击空白处关闭） -->
+<!-- 游玩日历浮层（点击「最近游玩」首行日期上方的小日历图标打开；Esc / 点击空白处关闭）
+     两级结构：一级 = 月历（原有结构原样保留），二级 = 某一天的游戏游玩明细 -->
 <div class="cal-overlay" id="cal-overlay" hidden>
   <div class="cal-backdrop"></div>
   <div class="cal-panel" id="cal-panel" role="dialog" aria-modal="true" aria-labelledby="cal-title">
-    <div class="cal-head">
-      <button class="cal-nav" id="cal-prev" type="button" aria-label="上一月">‹</button>
-      <div class="cal-title" id="cal-title">—</div>
-      <button class="cal-nav" id="cal-next" type="button" aria-label="下一月">›</button>
-      <button class="cal-close" id="cal-close" type="button" aria-label="关闭日历">×</button>
+    <!-- ── 一级界面：月历（head / weekdays / grid / foot 均保持原有结构与 id） ── -->
+    <div class="cal-page" id="cal-page-month">
+      <div class="cal-head">
+        <button class="cal-nav" id="cal-prev" type="button" aria-label="上一月">‹</button>
+        <div class="cal-title" id="cal-title">—</div>
+        <button class="cal-nav" id="cal-next" type="button" aria-label="下一月">›</button>
+        <button class="cal-close" id="cal-close" type="button" aria-label="关闭日历">×</button>
+      </div>
+      <div class="cal-weekdays" aria-hidden="true">
+        <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-foot">
+        <span class="cal-legend"><i class="cal-dot"></i>有游玩记录 · 可点击</span>
+        <span class="cal-legend"><i class="cal-dot off"></i>无记录 · 不可点击</span>
+        <span class="cal-status" id="cal-status"></span>
+      </div>
     </div>
-    <div class="cal-weekdays" aria-hidden="true">
-      <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+    <!-- ── 二级界面：某一天的游戏游玩明细（‹ 返回一级月历，× 关闭整个浮层） ── -->
+    <div class="cal-page" id="cal-page-day" hidden>
+      <div class="cal-head cal-head-day">
+        <button class="cal-nav" id="cal-back" type="button" aria-label="返回月历">‹</button>
+        <div class="cal-title" id="cal-day-title">—</div>
+        <button class="cal-close" id="cal-day-close" type="button" aria-label="关闭日历">×</button>
+      </div>
+      <div class="cal-day-summary">
+        <div class="cal-day-sum-label" id="cal-day-label">当天游玩时长</div>
+        <div class="cal-day-sum-value" id="cal-day-total">—</div>
+        <div class="cal-day-sum-note" id="cal-day-note"></div>
+      </div>
+      <div class="cal-games" id="cal-day-games"></div>
+      <div class="cal-foot">
+        <span class="cal-legend"><i class="cal-dot"></i>仅当天有游玩的游戏</span>
+        <span class="cal-status" id="cal-day-status"></span>
+      </div>
     </div>
-    <div class="cal-grid" id="cal-grid"></div>
-    <div class="cal-foot">
-      <span class="cal-legend"><i class="cal-dot"></i>有游玩记录 · 可点击</span>
-      <span class="cal-legend"><i class="cal-dot off"></i>无记录 · 不可点击</span>
-      <span class="cal-status" id="cal-status"></span>
-    </div>
-    <!-- 回溯进行中的遮罩（失败时不改变页面状态，仅在此提示） -->
+    <!-- 载入 / 回溯进行中的遮罩（失败时不改变页面状态，仅在此提示） -->
     <div class="cal-mask" id="cal-mask" hidden>
       <span class="cal-spin"></span><span class="cal-mask-text">加载中…</span>
     </div>
@@ -239,6 +261,6 @@
 
 <!-- fx.js 先于 app.js 加载：app.js 绑定时需读取 window.__fx（特效状态的唯一来源） -->
 <script src="fx.js?v=15"></script>
-<script src="app.js?v=89" onerror="__appFail()"></script>
+<script src="app.js?v=90" onerror="__appFail()"></script>
 </body>
 </html>
