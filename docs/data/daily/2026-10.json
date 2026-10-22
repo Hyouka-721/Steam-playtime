@@ -3,7 +3,7 @@
   "month": "2026-10",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-21T19:26:30.030Z",
+  "generated_at": "2026-10-22T19:20:10.771Z",
   "days": {
     "2026-10-13": {
       "total_minutes": 49,
@@ -187,6 +187,27 @@
       "source": "auto",
       "flags": [],
       "games": []
+    },
+    "2026-10-22": {
+      "total_minutes": 64,
+      "span_days": 1,
+      "confidence": "high",
+      "source": "auto",
+      "flags": [],
+      "games": [
+        {
+          "appid": "246420",
+          "name": "王国保卫战",
+          "minutes": 63,
+          "is_new": false
+        },
+        {
+          "appid": "646570",
+          "name": "杀戮尖塔",
+          "minutes": 1,
+          "is_new": false
+        }
+      ]
     }
   }
 }

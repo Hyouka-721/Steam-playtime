@@ -1,10 +1,10 @@
 {
   "schema": 1,
   "ready": true,
-  "generated_at": "2026-10-21T19:26:30.049Z",
-  "snapshot_date": "2026-10-21",
+  "generated_at": "2026-10-22T19:20:10.776Z",
+  "snapshot_date": "2026-10-22",
   "stats": {
-    "unlocked": 834,
+    "unlocked": 835,
     "total": 2504,
     "pct": 33.3,
     "games": 31
@@ -44,7 +44,7 @@
           "name": "Trash Compactor",
           "desc": "Research 50% of all items in Journey Mode.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/9f6daa8811878bef7e34a7e0b147f1795985ca44.jpg",
-          "percent": 0.5,
+          "percent": 0.6,
           "ts": 1788931527
         },
         {
@@ -444,7 +444,7 @@
           "name": "Real Estate Agent",
           "desc": "Have all possible town NPCs living in your world.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/bb38f0b5c56803197bd87c5de580ede512a0ae59.jpg",
-          "percent": 16.2,
+          "percent": 16.3,
           "ts": 1788436162
         },
         {
@@ -1301,14 +1301,22 @@
       "appid": "246420",
       "name": "王国保卫战",
       "total": 74,
-      "unlocked": 29,
+      "unlocked": 30,
       "achievements": [
+        {
+          "api": "ACH_OVINOPHOBIA",
+          "name": "Ovinophobia",
+          "desc": "Kill 10 or more sheep with your hands.",
+          "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/5a66bb1dd32cfad0ab52ac0b454cfc6d9f29bad5.jpg",
+          "percent": 42.3,
+          "ts": 1792666524
+        },
         {
           "api": "ACH_GREAT_DEFENDER",
           "name": "Great Defender",
           "desc": "Complete the campaign.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/891b60bda9108ded465713a61ac900fc3c0cd3f6.jpg",
-          "percent": 51.7,
+          "percent": 51.6,
           "ts": 1792289838
         },
         {
@@ -1332,7 +1340,7 @@
           "name": "Super Mario",
           "desc": "Earn 30 stars.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/72f1ca38b815bb34023c4f95f378b5f79db1107b.jpg",
-          "percent": 58.5,
+          "percent": 58.4,
           "ts": 1792148790
         },
         {
@@ -1340,7 +1348,7 @@
           "name": "Energy Network",
           "desc": "Build 4 Tesla towers in any stage.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/9d4107ad32a78ad41ad87aec36ed086d4765b2c0.jpg",
-          "percent": 37.1,
+          "percent": 37,
           "ts": 1791986543
         },
         {
@@ -1356,7 +1364,7 @@
           "name": "Specialist",
           "desc": "Build all 8 towers specializations.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/34de6e0805268e4ec775b20f0eb9d7d08f5ce321.jpg",
-          "percent": 53.5,
+          "percent": 53.4,
           "ts": 1791985425
         },
         {
@@ -1396,7 +1404,7 @@
           "name": "Die Hard",
           "desc": "Have your soldiers regenerate a total of 50.000 life.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/4065991aeca0e29706ba457f678f63726ae2f31c.jpg",
-          "percent": 62,
+          "percent": 61.9,
           "ts": 1791806481
         },
         {
@@ -1404,7 +1412,7 @@
           "name": "Nuts and Bolts",
           "desc": "Defeat The Juggernaut",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/81e4bfcfc0b19a261d191113cb2ab69be423a485.jpg",
-          "percent": 70.3,
+          "percent": 70.2,
           "ts": 1791803759
         },
         {
@@ -1436,7 +1444,7 @@
           "name": "Home Improvement",
           "desc": "Upgrade all basic tower types to level3.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/0201c64923bb76d87293a39f355906cf82913311.jpg",
-          "percent": 71.3,
+          "percent": 71.2,
           "ts": 1791717618
         },
         {
@@ -1492,7 +1500,7 @@
           "name": "Death from above",
           "desc": "Kill 100 enemies with meteor showers.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/9ca872a1d9e13eb19adf3d02bf7e95acba02f0ab.jpg",
-          "percent": 74.9,
+          "percent": 74.8,
           "ts": 1791713311
         },
         {
@@ -2083,7 +2091,7 @@
           "name": "重罪",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/502500/121dd51617941aff1b25dfa5fcbe6163e412ca22.jpg",
-          "percent": 58,
+          "percent": 58.1,
           "ts": 1765451033
         },
         {
@@ -3483,7 +3491,7 @@
           "name": "К",
           "desc": "К",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/535f1998e3f76b5bbf44be72136825205b6ce67b.jpg",
-          "percent": 23,
+          "percent": 22.9,
           "ts": 1759415684
         },
         {
@@ -3563,7 +3571,7 @@
           "name": "4",
           "desc": "4",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/a83e3be747f7eb40a7b215a88859994b71c5024b.jpg",
-          "percent": 30.8,
+          "percent": 30.7,
           "ts": 1759327322
         },
         {
@@ -3723,7 +3731,7 @@
           "name": "P",
           "desc": "P",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/196533d19d9a4536dcb277e4dde037e2d5921974.jpg",
-          "percent": 47,
+          "percent": 46.9,
           "ts": 1759236871
         },
         {
@@ -3763,7 +3771,7 @@
           "name": "T",
           "desc": "T",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/9536a025219891f5f725d230c1f18f51cbc1f220.jpg",
-          "percent": 57.6,
+          "percent": 57.5,
           "ts": 1759226164
         },
         {
@@ -4243,7 +4251,7 @@
           "name": "巨型猴子",
           "desc": "部署一个5级猴子塔",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/960090/f7b4af35d8eaad1611f5a219dbc3b088ca3622a7.jpg",
-          "percent": 71.9,
+          "percent": 71.8,
           "ts": 1751285163
         },
         {
@@ -4251,7 +4259,7 @@
           "name": "猴复仇者联盟",
           "desc": "使用4个不同英雄赢得游戏",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/960090/7b2ed13c725a15f4e8c6461aa608c22ab1a51a1e.jpg",
-          "percent": 53.5,
+          "percent": 53.4,
           "ts": 1751247971
         },
         {
@@ -4267,7 +4275,7 @@
           "name": "猴子粉丝俱乐部",
           "desc": "创建或登录您的Ninja Kiwi账户，在云端保存您的进度",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/960090/a387c0b4943507c7c9ac73e8a16ac17cc6989956.jpg",
-          "percent": 74.7,
+          "percent": 74.6,
           "ts": 1751101750
         },
         {
@@ -4355,7 +4363,7 @@
           "name": "一段旅程告终",
           "desc": "找到回家的路……",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/990630/5477a59da8090acb0ecf85035c0a6d250297ec37.jpg",
-          "percent": 26.5,
+          "percent": 26.4,
           "ts": 1775538011
         },
         {
@@ -4363,7 +4371,7 @@
           "name": "重逢",
           "desc": "他们的路不像你的路这么顺利。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/990630/8be6cc3972f3a883886d63ec20729858a493e510.jpg",
-          "percent": 26.5,
+          "percent": 26.4,
           "ts": 1775537582
         },
         {
@@ -4379,7 +4387,7 @@
           "name": "洞穴篝火",
           "desc": "黑暗中的一束不起眼的火焰…",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/990630/0885ee91651a249e7bd77895157118b3fd7aaf64.jpg",
-          "percent": 25.4,
+          "percent": 25.3,
           "ts": 1775486292
         },
         {
@@ -4675,7 +4683,7 @@
           "name": "爱子的选择",
           "desc": "完成全部任务。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1579380/e689b352099abddf7492acf99a2b18f3a635c062.jpg",
-          "percent": 48.7,
+          "percent": 48.6,
           "ts": 1776509320
         },
         {
@@ -4763,7 +4771,7 @@
           "name": "心思周密",
           "desc": "隐藏100具尸体。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1579380/35c45aa802ed56b0c60729791d1e98a108e72a17.jpg",
-          "percent": 52,
+          "percent": 52.1,
           "ts": 1775822990
         },
         {
@@ -4795,7 +4803,7 @@
           "name": "鸠占鹊巢",
           "desc": "杀死名古屋豪宅中的全部敌人。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1579380/1c42e16f8efec472f228fc99c8279d9f81adb7c7.jpg",
-          "percent": 35.4,
+          "percent": 35.5,
           "ts": 1775737962
         },
         {
@@ -4899,7 +4907,7 @@
           "name": "帕鲁工作研究实习生",
           "desc": "完成10种帕鲁工作研究",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1623730/2c4f240cfc43182301fbfdb8e55da274f9d70ac1.jpg",
-          "percent": 23.1,
+          "percent": 23,
           "ts": 1774879850
         }
       ]
@@ -5555,7 +5563,7 @@
           "name": "食人魔 - 碰撞区域",
           "desc": "使用食人魔在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/9d7caaac179eae1d420ac621d0a5c12885e7f09c.jpg",
-          "percent": 5.6,
+          "percent": 5.7,
           "ts": 1773554301
         },
         {
@@ -5635,7 +5643,7 @@
           "name": "生物 - 碰撞区域",
           "desc": "使用生物在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/7021ae1d9acd60427e6841a2261689c6a50477e5.jpg",
-          "percent": 7.9,
+          "percent": 8,
           "ts": 1769785389
         },
         {
@@ -5699,7 +5707,7 @@
           "name": "宝宝 - 碰撞区域",
           "desc": "使用宝宝在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/75c8652932b92fd4a18af4d9329eec2fdf782226.jpg",
-          "percent": 11,
+          "percent": 11.1,
           "ts": 1769144282
         },
         {
@@ -5763,7 +5771,7 @@
           "name": "公牛 - 碰撞区域",
           "desc": "使用公牛在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/ae021d7ac176c173db7f69c23e3ca58be1c6269c.jpg",
-          "percent": 29.5,
+          "percent": 29.6,
           "ts": 1768911693
         },
         {
@@ -6123,7 +6131,7 @@
           "name": "臭脚",
           "desc": "总计行走20000步",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/d1316b38489701daf44fd3d750085305859e57d2.jpg",
-          "percent": 19.3,
+          "percent": 19.4,
           "ts": 1766154315
         },
         {
@@ -6219,7 +6227,7 @@
           "name": "濒死",
           "desc": "达到-5生命再生",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/7fa5e6afe61c1a0e79c978c16b09e7f0672e8ad8.jpg",
-          "percent": 53.6,
+          "percent": 53.7,
           "ts": 1765874649
         },
         {
@@ -6731,7 +6739,7 @@
           "name": "被动收入",
           "desc": "用机器赚钱。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/3167020/503e993aa7bd2fa031ce6ec13abe29c6fd2f672d.jpg",
-          "percent": 37,
+          "percent": 36.9,
           "ts": 1763002886
         },
         {
@@ -6827,7 +6835,7 @@
           "name": "仓库区",
           "desc": "抵达仓库区。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/3167020/825c2811eb46116624d15525c1a03aa3291113c2.jpg",
-          "percent": 59.6,
+          "percent": 59.5,
           "ts": 1762698089
         },
         {
@@ -6851,7 +6859,7 @@
           "name": "零号区霸主",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/3167020/88e69db1a1878f814b6d2dccc2563b51add166cc.jpg",
-          "percent": 65,
+          "percent": 64.9,
           "ts": 1762678065
         },
         {
