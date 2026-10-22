@@ -397,6 +397,9 @@
     '#f0a35c', '#4ba3e3', '#7fd1a8', '#e8b13a', '#c98ad1',
     '#9d8cff', '#66c0f4', '#e8766a', '#5ad0c0', '#b8d45a',
   ];
+  /* 三处榜单行共用的序号类名 / 进度条样式 */
+  const noCls = (i) => (i < 3 ? ` r${i + 1}` : '');
+  const barStyle = (pct, i) => `width:${pct}%` + (topPalette[i] ? `;background:${topPalette[i]}` : '');
 
   /* 「最近游玩」首行日期上方的「游玩日历」入口图标（2026-10-20 收敛为全站唯一入口）：
      透明小日历（无底色无边框），CSS 里绝对定位于日期文字上方，不占布局、不改行高；
@@ -438,9 +441,7 @@
     const rowHtml = (g, i) => {
       const icon = ICON(g.appid, g.img_icon_url);
       const pct = Math.max(g.lifetime_minutes > 0 ? 1.5 : 0, (g.lifetime_minutes / max) * 100);
-      const barStyle = i < topPalette.length ? `width:${pct}%;background:${topPalette[i]}` : `width:${pct}%`;
       const playing = (recent.get(g.appid) ?? 0) > 0;
-      const noCls = i < 3 ? ` r${i + 1}` : '';
       // 2026-10-20：累计榜已不再挂载日历入口（该入口收敛到「最近游玩」，
       // 见 CAL_ICON_BTN 处注释）。这里与其它行结构完全一致 —— .rank-last 里
       // 只有日期文字，没有多余按钮节点，也不会因缺少绝对定位子元素而改变高度。
@@ -455,12 +456,12 @@
       // 全部成就已解锁 → 给整个 wrap 加 .is-perfect，内嵌的「多色流动渐变环」就此显形
       // （见 style.css .rank-capsule-wrap / .ring-*）。img 自身不加任何类，
       // 宽高与 object-fit 保持原样，网格列宽、行高、序号位置全不受影响。
-      const perfectCls = perfect.has(String(g.appid)) ? ' is-perfect' : '';
+      const isPerfect = perfect.has(String(g.appid));
       return `<div class="rank-item${g.lifetime_minutes === 0 ? ' zero' : ''}" data-appid="${g.appid}" title="点击查看该游戏每日时长趋势">
-          <span class="rank-no${noCls}">${i + 1}</span>
-          ${capsuleHtml(g.appid, { perfect: !!perfectCls, eager, icon })}
+          <span class="rank-no${noCls(i)}">${i + 1}</span>
+          ${capsuleHtml(g.appid, { perfect: isPerfect, eager, icon })}
           <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
-          <span class="rank-bar"><span style="${barStyle}"></span>${i === 0 ? '<img class="rank-cat" src="img/rank-cat-4657a654.webp" alt="" draggable="false" width="400" height="225" decoding="async"><img class="rank-tj" src="img/rank-tj-b9b7fccd.webp" alt="" draggable="false" width="560" height="420" decoding="async"><img class="rank-penguin" src="img/rank-penguin-fb2f58a8.webp" alt="" draggable="false" width="520" height="210" decoding="async">' : ''}</span>
+          <span class="rank-bar"><span style="${barStyle(pct, i)}"></span>${i === 0 ? '<img class="rank-cat" src="img/rank-cat-4657a654.webp" alt="" draggable="false" width="400" height="225" decoding="async"><img class="rank-tj" src="img/rank-tj-b9b7fccd.webp" alt="" draggable="false" width="560" height="420" decoding="async"><img class="rank-penguin" src="img/rank-penguin-fb2f58a8.webp" alt="" draggable="false" width="520" height="210" decoding="async">' : ''}</span>
           <span class="rank-min">${hm(g.lifetime_minutes)}</span>
           ${lastHtml}
         </div>`;
@@ -573,9 +574,7 @@
       .map((g, i) => {
         const icon = ICON(g.appid, g.img_icon_url);
         const pct = Math.max(1.5, (g.recent / max) * 100);
-        const barStyle = i < topPalette.length ? `width:${pct}%;background:${topPalette[i]}` : `width:${pct}%`;
-        const noCls = i < 3 ? ` r${i + 1}` : '';
-        const perfectCls = perfect.has(String(g.appid)) ? ' is-perfect' : '';
+        const isPerfect = perfect.has(String(g.appid));
         // 「最近游玩」首行日期上方的「游玩日历」入口（2026-10-20 起全站唯一）：
         // 与原先累计榜那个按钮**同一个常量、同一套 CSS**，因此尺寸/样式/居中方式一致。
         // 图标绝对定位在日期文字上方，不占布局，日期文字位置与行高不受影响；
@@ -584,10 +583,10 @@
           ? `<span class="rank-last">${CAL_ICON_BTN}${g.last_played ?? '—'}</span>`
           : `<span class="rank-last">${g.last_played ?? '—'}</span>`;
         return `<div class="rank-item">
-          <span class="rank-no${noCls}">${i + 1}</span>
-          ${capsuleHtml(g.appid, { perfect: !!perfectCls, icon })}
+          <span class="rank-no${noCls(i)}">${i + 1}</span>
+          ${capsuleHtml(g.appid, { perfect: isPerfect, icon })}
           <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}</span>
-          <span class="rank-bar"><span style="${barStyle}"></span></span>
+          <span class="rank-bar"><span style="${barStyle(pct, i)}"></span></span>
           <span class="rank-min">${hm(g.recent)}</span>
           ${lastHtml}
         </div>`;
@@ -1357,10 +1356,9 @@
         // 查不到图标时给透明占位：否则 onerror 会把 src 设成空串（解析成当前页 URL）
         const icon = hash ? ICON(g.appid, hash) : BLANK_GIF;
         const pct = Math.max(2, (g.minutes / max) * 100);
-        const noCls = i < 3 ? ` r${i + 1}` : '';
         return (
           `<div class="cal-game">` +
-          `<span class="cal-game-no${noCls}">${i + 1}</span>` +
+          `<span class="cal-game-no${noCls(i)}">${i + 1}</span>` +
           capsuleHtml(g.appid, { icon }) +
           `<span class="cal-game-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}</span>` +
           `<span class="cal-game-min">${hmText(g.minutes)}</span>` +

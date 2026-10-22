@@ -47,8 +47,6 @@
   --card-shadow: 0 1px 2px rgba(60, 40, 20, 0.05), 0 6px 18px rgba(90, 60, 25, 0.07);
   --card-hover-shadow: 0 12px 28px rgba(90, 60, 25, 0.12);
   --header-bg: rgba(255, 250, 243, 0.8);
-  --logo-bg: linear-gradient(160deg, #ffffff, #fdf6ee);
-  --logo-glow: drop-shadow(0 1px 2px rgba(90, 60, 25, 0.12));
   --medal-1: #c58a00; --medal-2: #8d8175; --medal-3: #b3703c;
   --medal-shadow-1: none; --medal-shadow-2: none; --medal-shadow-3: none;
   /* 金色高亮唯一入口：指向本主题的奖牌金，切主题时自动换成对应金色调。
@@ -147,8 +145,6 @@
   --card-shadow: 0 1px 2px rgba(10, 50, 42, 0.05), 0 6px 18px rgba(10, 60, 50, 0.07);
   --card-hover-shadow: 0 12px 28px rgba(10, 60, 50, 0.12);
   --header-bg: rgba(247, 253, 251, 0.8);
-  --logo-bg: linear-gradient(160deg, #ffffff, #f1faf7);
-  --logo-glow: drop-shadow(0 1px 2px rgba(10, 60, 50, 0.12));
   --medal-1: #c08a00; --medal-2: #82968f; --medal-3: #a9753c;
   --medal-shadow-1: none; --medal-shadow-2: none; --medal-shadow-3: none;
   --track: rgba(18, 38, 32, 0.09);
@@ -190,8 +186,6 @@
   --card-shadow: 0 1px 2px rgba(40, 25, 80, 0.05), 0 6px 18px rgba(50, 30, 100, 0.07);
   --card-hover-shadow: 0 12px 28px rgba(50, 30, 100, 0.12);
   --header-bg: rgba(251, 250, 255, 0.8);
-  --logo-bg: linear-gradient(160deg, #ffffff, #f4f2fd);
-  --logo-glow: drop-shadow(0 1px 2px rgba(50, 30, 100, 0.12));
   --medal-1: #c98a00; --medal-2: #8b85a3; --medal-3: #b06f3c;
   --medal-shadow-1: none; --medal-shadow-2: none; --medal-shadow-3: none;
   --track: rgba(27, 23, 48, 0.09);

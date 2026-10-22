@@ -28,7 +28,7 @@
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=99">
+<link rel="stylesheet" href="style.css?v=100">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -240,7 +240,7 @@
         <button class="cal-close" id="cal-day-close" type="button" aria-label="关闭日历">×</button>
       </div>
       <div class="cal-day-summary">
-        <div class="cal-day-sum-label" id="cal-day-label">当天游玩时长</div>
+        <div class="cal-day-sum-label">当天游玩时长</div>
         <div class="cal-day-sum-value" id="cal-day-total">—</div>
         <div class="cal-day-sum-note" id="cal-day-note"></div>
       </div>
@@ -259,6 +259,6 @@
 
 <!-- fx.js 先于 app.js 加载：app.js 绑定时需读取 window.__fx（特效状态的唯一来源） -->
 <script src="fx.js?v=15"></script>
-<script src="app.js?v=94" onerror="__appFail()"></script>
+<script src="app.js?v=95" onerror="__appFail()"></script>
 </body>
 </html>

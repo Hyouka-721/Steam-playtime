@@ -1,8 +1,9 @@
 // 差分核心（纯函数，无 IO，可被 node:test 直接覆盖 18 条边界用例）
 import { daysBetween } from './dates.mjs';
 
-export const MINUTES_PER_DAY = 1440;
-export const TOLERANCE = 1.1; // 10% 容差
+// 2026-10-22 清理：这两个常量只在本文件内使用（外部从未 import），去掉 export。
+const MINUTES_PER_DAY = 1440;
+const TOLERANCE = 1.1; // 10% 容差
 
 const ORDER = ['high', 'medium', 'low'];
 const worse = (a, b) => (ORDER.indexOf(a) >= ORDER.indexOf(b) ? a : b);
@@ -27,7 +28,8 @@ function emptyDay(date, spanDays = 1) {
  * 首次快照：没有对比基准，无法计算增量。产出一条占位记录，保证日历连续。
  * 用例 #1
  */
-export function firstDay(snapshot) {
+// 同样只被本文件的 computeDay 调用，去掉 export
+function firstDay(snapshot) {
   return {
     ...emptyDay(snapshot.date, 1),
     total_minutes: 0,
