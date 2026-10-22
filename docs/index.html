@@ -28,7 +28,7 @@
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=98">
+<link rel="stylesheet" href="style.css?v=99">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -135,11 +135,10 @@
 </section>
 
 <!-- ①b 最近游玩 -->
+<!-- 2026-10-22：删掉仅承载「近 14 天 · 共 N 款游戏」提示的 .panel-head（含内层 .ctrl），
+     本面板结构与「游戏时长」面板一致，首行上移到底后不再有多余占位 -->
 <section class="view" id="view-recent">
   <div class="panel">
-    <div class="panel-head">
-      <div class="ctrl"><span class="hint" id="recent-hint">—</span></div>
-    </div>
     <div id="recent-list" class="rank-list"></div>
   </div>
 </section>
@@ -260,6 +259,6 @@
 
 <!-- fx.js 先于 app.js 加载：app.js 绑定时需读取 window.__fx（特效状态的唯一来源） -->
 <script src="fx.js?v=15"></script>
-<script src="app.js?v=93" onerror="__appFail()"></script>
+<script src="app.js?v=94" onerror="__appFail()"></script>
 </body>
 </html>

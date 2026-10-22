@@ -550,9 +550,10 @@
   }
 
   // ---------- ①b 最近游玩（近两周时长） ----------
+  // 2026-10-22：头部「近 14 天 · 共 N 款游戏」提示行已按用户要求删除，
+  // #recent-hint 元素与这里的两处赋值一并移除（不再有 hint 引用）。
   function renderRecent() {
     const box = $('recent-list');
-    const hint = $('recent-hint');
     const lifetime = state.meta.games_lifetime ?? {};
     const recent = recentMinutesByApp(14);
     const list = Object.values(lifetime)
@@ -561,11 +562,9 @@
       .sort((a, b) => b.recent - a.recent);
 
     if (!list.length) {
-      hint.textContent = '—';
       box.innerHTML = '<p class="empty">最近两周还没有游玩记录（每日数据自首次快照后开始积累）。</p>';
       return;
     }
-    hint.textContent = `近 14 天 · 共 ${list.length} 款游戏`;
     const max = Math.max(...list.map((g) => g.recent), 1);
     // 与累计榜同一口径：全成就解锁的游戏胶囊图标金（集合只建一次）
     const perfect = perfectGameSet();
