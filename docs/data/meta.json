@@ -2,10 +2,10 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-22T19:20:10.781Z",
-  "generated_at_local": "2026-10-23",
+  "generated_at": "2026-10-23T19:23:52.664Z",
+  "generated_at_local": "2026-10-24",
   "tracking_since": "2026-10-13",
-  "last_snapshot_date": "2026-10-22",
+  "last_snapshot_date": "2026-10-23",
   "steamid_hash": "a8474caf",
   "months": [
     "2026-10"
@@ -26,17 +26,17 @@
     "990630"
   ],
   "stats": {
-    "lifetime_minutes": 82605,
-    "lifetime_hours": 1376.8,
+    "lifetime_minutes": 82668,
+    "lifetime_hours": 1377.8,
     "owned_games": 53,
     "lifetime_played_games": 38,
-    "total_minutes": 881,
-    "total_hours": 14.7,
-    "tracked_days": 9,
-    "active_days": 8,
-    "current_streak": 1,
+    "total_minutes": 944,
+    "total_hours": 15.7,
+    "tracked_days": 10,
+    "active_days": 9,
+    "current_streak": 2,
     "longest_streak": 7,
-    "week_minutes": 151,
+    "week_minutes": 214,
     "played_games": 6,
     "best_day": {
       "date": "2026-10-18",
@@ -56,17 +56,17 @@
       "appid": "227300",
       "name": "欧洲卡车模拟2",
       "img_icon_url": "adc18a4fc9adc0330144b76d61cbda68bb2394a0",
-      "total_minutes": 92,
+      "total_minutes": 127,
       "first_day": "2026-10-13",
-      "last_day": "2026-10-19"
+      "last_day": "2026-10-23"
     },
     "246420": {
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "total_minutes": 502,
+      "total_minutes": 527,
       "first_day": "2026-10-13",
-      "last_day": "2026-10-22"
+      "last_day": "2026-10-23"
     },
     "431960": {
       "appid": "431960",
@@ -88,9 +88,9 @@
       "appid": "3009140",
       "name": "Salt Player",
       "img_icon_url": "a2a0483be79a4082e0b50abccb3b67c979d3a457",
-      "total_minutes": 2,
+      "total_minutes": 5,
       "first_day": "2026-10-19",
-      "last_day": "2026-10-19"
+      "last_day": "2026-10-23"
     }
   },
   "games_lifetime": {
@@ -119,15 +119,15 @@
       "appid": "227300",
       "name": "欧洲卡车模拟2",
       "img_icon_url": "adc18a4fc9adc0330144b76d61cbda68bb2394a0",
-      "lifetime_minutes": 7889,
-      "last_played": "2026-10-19"
+      "lifetime_minutes": 7924,
+      "last_played": "2026-10-23"
     },
     "246420": {
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "lifetime_minutes": 722,
-      "last_played": "2026-10-22"
+      "lifetime_minutes": 747,
+      "last_played": "2026-10-23"
     },
     "250900": {
       "appid": "250900",
@@ -448,8 +448,8 @@
       "appid": "3009140",
       "name": "Salt Player",
       "img_icon_url": "a2a0483be79a4082e0b50abccb3b67c979d3a457",
-      "lifetime_minutes": 859,
-      "last_played": "2026-10-19"
+      "lifetime_minutes": 862,
+      "last_played": "2026-10-23"
     },
     "3167020": {
       "appid": "3167020",
