@@ -461,7 +461,7 @@
           <span class="rank-no${noCls(i)}">${i + 1}</span>
           ${capsuleHtml(g.appid, { perfect: isPerfect, eager, icon })}
           <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
-          <span class="rank-bar"><span style="${barStyle(pct, i)}"></span>${i === 0 ? '<img class="rank-cat" src="img/rank-cat-4657a654.webp" alt="" draggable="false" width="400" height="225" decoding="async"><img class="rank-tj" src="img/rank-tj-b9b7fccd.webp" alt="" draggable="false" width="560" height="420" decoding="async"><img class="rank-penguin" src="img/rank-penguin-fb2f58a8.webp" alt="" draggable="false" width="520" height="210" decoding="async">' : ''}</span>
+          <span class="rank-bar"><span style="${barStyle(pct, i)}"></span>${i === 0 ? '<img class="rank-cat" src="img/rank-cat-8b4e55ad.webp" alt="" draggable="false" width="400" height="225" decoding="async"><img class="rank-tj" src="img/rank-tj-b9b7fccd.webp" alt="" draggable="false" width="560" height="420" decoding="async"><img class="rank-penguin" src="img/rank-penguin-fb2f58a8.webp" alt="" draggable="false" width="520" height="210" decoding="async">' : ''}</span>
           <span class="rank-min">${hm(g.lifetime_minutes)}</span>
           ${lastHtml}
         </div>`;

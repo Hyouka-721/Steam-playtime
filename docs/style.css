@@ -843,7 +843,8 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   transition: width .5s ease;
 }
 /* 加菲猫（2026-10-17）：趴在首行时长条的横线上，左端与进度条左边缘对齐（用户 18:15 要求）。
-   源图 600×338，内部横线位于高度 60.5% 处（实测 rows 202-207 满宽浅灰线）；
+   锚点不变量：素材画布 400×225（ratio 1.7778，决定 width:auto 的渲染宽度），
+   平肚皮底线落在画布高度 60.5% 处（=row 134），下方留出爪子下垂的部分；
    用 translate(0, calc(-60.5% - 4px)) 把图片自身 60.5% 处钉在进度条竖直中线上方
    4px（先上移 10px、再下移 5px、再下移 1px，净偏移 -4px）。
    pointer-events:none 保证整行仍可点击下钻。
@@ -856,7 +857,14 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
      y137.20~155.95，即素材柱子顶边比页面条顶高出约 2.2 素材行（≈0.82 CSS px）。
      猫身底边与页面条顶之间就空出一条透出页面底色的 1px 亮带 —— 用户看到的
      "白色横线间隙"。把整张图下移 1px 后，素材柱子落到条体内部，间隙闭合。
-     仍是 pure transform：尺寸 / 比例 / 层级 / 行高 / 其它元素位置全部不变。 */
+     仍是 pure transform：尺寸 / 比例 / 层级 / 行高 / 其它元素位置全部不变。
+   2026-10-23 换精修素材：rank-cat-4657a654 → rank-cat-8b4e55ad（400×225 WebP q85，12,078 B）。
+     新素材从白底原画重抠后，按「同画布 + 同内容 bbox + 平肚皮底线同样落在 row 134」
+     重建，因此上面的 transform / --cat-drop / height / left 一个字都没改 ——
+     实测 .rank-cat 的 rect 与换图前逐项相等（618, 367.967, 149.328, 84）。
+     以后换图请照此办理：先量旧图「可见内容 bbox + 肚皮底线所在行」，把新图缩放/裁切到
+     与旧图同宽同底线再输出 400×225，否则 transform 的百分比会把整只猫拉走。 */
+
 .rank-cat {
   --cat-drop: 1px;   /* 整张猫图的纵向附加偏移；改这一个值即可微调贴合度 */
   position: absolute; left: 0; top: 50%;
