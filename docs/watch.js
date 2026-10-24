@@ -58,17 +58,18 @@
     return k === 'series' ? '剧集' : '电影';
   }
 
+  // 第 66 轮：统一保留一位小数 —— 9 显示成 9.0、8.5 仍是 8.5，整数不再省略小数位
   function scoreHtml(r, cls) {
     var n = Number(r);
     if (!isFinite(n) || n <= 0) return '';
-    return '<span class="' + (cls || 'poster-score') + '"><i>★</i>' + (n % 1 === 0 ? n : n.toFixed(1)) + '</span>';
+    return '<span class="' + (cls || 'poster-score') + '"><i>★</i>' + n.toFixed(1) + '</span>';
   }
 
-  function subLine(it) {
-    var parts = [];
-    if (it.year) parts.push(it.year);
-    if (it.watched_at) parts.push(it.watched_at);
-    return esc(parts.join(' · '));
+  // 第 66 轮：网格视图不再显示上映年份，观看日期挪到片名同排右侧 → subLine 退休；
+  // 上映字段（时间轴用）优先取完整日期 release_date，没有才退回 year
+  function releaseText(it) {
+    if (it.release_date) return String(it.release_date);
+    return it.year ? String(it.year) : '';
   }
 
   /* ---------- 筛选后的数据 ---------- */
@@ -105,11 +106,12 @@
             '<img src="' + esc(it.poster) + '" alt="' + esc(it.title) + '"' + dim +
               (eager ? ' loading="eager" fetchpriority="high"' : ' loading="lazy"') +
               ' decoding="async">' +
-            '<span class="poster-kind">' + kindLabel(it.kind) + '</span>' +
-            scoreHtml(it.rating) +
+            scoreHtml(it.rating) +   /* 第 66 轮：左上角「电影 / 剧集」角标已按需求删除 */
           '</div>' +
-          '<h3 class="poster-name">' + esc(it.title) + '</h3>' +
-          '<p class="poster-sub">' + subLine(it) + '</p>' +
+          '<div class="poster-head">' +
+            '<h3 class="poster-name">' + esc(it.title) + '</h3>' +
+            (it.watched_at ? '<span class="poster-date">' + esc(it.watched_at) + '</span>' : '') +
+          '</div>' +
           (it.note ? '<p class="poster-note" title="' + esc(it.note) + '">' + esc(it.note) + '</p>' : '') +
         '</article>';
     }).join('');
@@ -144,7 +146,7 @@
               '<div class="tl-meta">' +
                 '<span class="tl-date">' + (it.watched_at ? esc(it.watched_at) : '时间未知') + '</span>' +
                 '<span class="tl-kind">' + kindLabel(it.kind) + '</span>' +
-                (it.year ? '<span class="tl-year">' + esc(it.year) + '</span>' : '') +
+                (releaseText(it) ? '<span class="tl-year">' + esc(releaseText(it)) + '</span>' : '') +
                 scoreHtml(it.rating, 'tl-score') +
               '</div>' +
               (it.note ? '<p class="tl-note" title="' + esc(it.note) + '">' + esc(it.note) + '</p>' : '') +

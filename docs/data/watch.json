@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T23:39:53+08:00",
+  "updated_at": "2026-10-25T00:27:17+08:00",
   "items": [
     {
       "id": "2026-10-24-swords-into-plowshares",
@@ -11,6 +11,8 @@
       "poster_h": 1138,
       "title_en": "Swords into Plowshares",
       "year": 2026,
+      "release_date": "2026-02-14",
+      "rating": 8.5,
       "note": "就算有三千轮日月春秋"
     },
     {
@@ -179,7 +181,7 @@
     {
       "id": "2025-10-06-soldiers-sortie",
       "title": "士兵突击",
-      "kind": "movie",
+      "kind": "series",
       "watched_at": "2025-10-06",
       "poster": "img/watch/soldiers-sortie-820a09b0.webp",
       "poster_w": 640,
@@ -256,7 +258,7 @@
     {
       "id": "2024-11-27-cyberpunk-edgerunners",
       "title": "赛博朋克：边缘行者",
-      "kind": "movie",
+      "kind": "series",
       "watched_at": "2024-11-27",
       "poster": "img/watch/cyberpunk-edgerunners-8d0ae9f0.webp",
       "poster_w": 640,
@@ -282,7 +284,7 @@
     {
       "id": "2024-11-23-arcane",
       "title": "英雄联盟：双城之战",
-      "kind": "movie",
+      "kind": "series",
       "watched_at": "2024-11-23",
       "poster": "img/watch/arcane-2e38f6df.webp",
       "poster_w": 640,

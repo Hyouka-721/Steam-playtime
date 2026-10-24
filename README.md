@@ -200,6 +200,7 @@ grep -rn "STEAM_API_KEY" .github/          # 只应出现 ${{ secrets.STEAM_API_
       "title_en": "Oppenheimer",
       "kind": "movie",
       "year": 2023,
+      "release_date": "2023-07-21",
       "watched_at": "2026-10-24",
       "rating": 9,
       "poster": "img/watch/oppenheimer-9ea6bb79.webp",
@@ -218,7 +219,8 @@ grep -rn "STEAM_API_KEY" .github/          # 只应出现 ${{ secrets.STEAM_API_
 | `poster` / `poster_w` / `poster_h` | 海报相对路径与真实像素（写宽高是为了让页面提前占位、不抖动） |
 | `watched_at` | 支持 `2026-10-24` / `2026-10` / `2026` 三种粒度，混排也能正确排序 |
 | `kind` | `movie` 或 `series`，对应筛选条的「电影 / 剧集」 |
-| `rating` | 0~10，可小数；不填则不显示评分角标 |
+| `rating` | 0~10，可小数；不填则不显示评分角标。**显示时统一保留一位小数**（9 → `★9.0`、8.5 → `★8.5`） |
+| `release_date` | 可选，上映日期 `YYYY-MM-DD`。时间轴的「上映」一栏优先显示它，没有则回退到 `year`（只显示年份） |
 
 ---
 

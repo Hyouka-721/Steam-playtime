@@ -212,17 +212,7 @@ code {
 }
 .poster:hover .poster-pic img { transform: scale(1.05); }
 
-/* 左上角类型角标 */
-.poster-kind {
-  position: absolute; left: 8px; top: 8px;
-  padding: 2px 8px;
-  font-size: 11px; letter-spacing: .5px;
-  color: #f0e6d2;
-  background: rgba(10, 10, 14, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 999px;
-  backdrop-filter: blur(4px);
-}
+/* 第 66 轮：左上角「电影 / 剧集」角标已按需求删除（.poster-kind 规则整条移除） */
 /* 评分：金色，放右下角，压在图上 */
 .poster-score {
   position: absolute; right: 8px; bottom: 8px;
@@ -237,6 +227,12 @@ code {
 }
 .poster-score i { font-style: normal; font-size: 10px; opacity: .85; }
 
+/* 第 66 轮：片名与观看日期同一排 —— 片名占左侧可折行、日期靠右且不换行；
+   上映年份不再出现在网格视图，短评因此上移一行紧贴片名 */
+.poster-head {
+  display: flex; align-items: baseline; gap: 8px;
+  min-width: 0;
+}
 .poster-name {
   margin: 0;
   font-size: 14.5px; font-weight: 600; line-height: 1.35;
@@ -244,12 +240,13 @@ code {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden;
   word-break: break-word;
+  flex: 1 1 auto; min-width: 0;
 }
-.poster-sub {
-  margin: 0;
-  font-size: 12px; color: var(--text-dim);
+.poster-date {
+  flex: 0 0 auto;
+  font-size: 11.5px; color: var(--text-dim);
   font-variant-numeric: tabular-nums;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .poster-note {
   margin: 0;
@@ -354,6 +351,12 @@ code {
   font-size: 18.5px; line-height: 1.35;
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
+}
+/* 第 66 轮：>860px 是「整行不折」布局，此时 .tl-meta 再被压缩就会把四项拆成两行
+   （真实数据《太平年》上映写成 2026-02-14 后，861~1100px 会差 14~33px 装不下）。
+   评语本来就是单行省略号、可以自由变窄，所以让评语去承担收缩，四项固定不折。 */
+@media (min-width: 861px) {
+  .tl-head, .tl-meta { flex-shrink: 0; }   /* 名称块与四项都按内容宽度站定，只让评语收缩 */
 }
 .tl-meta > span { display: block; white-space: nowrap; }
 .tl-meta .tl-score { color: var(--accent); font-weight: 600; }
@@ -624,6 +627,7 @@ select.w-input { cursor: pointer; }
   .w-title { font-size: 44px; letter-spacing: 1px; }   /* 首页 ≤480px 也是 44px，不缩 */
   .w-grid { grid-template-columns: repeat(auto-fill, minmax(156px, 1fr)); gap: 24px 10px; }
   .poster-name { font-size: 13px; }
+  .poster-date { font-size: 11px; }   /* 第 66 轮：窄屏日期再收一档，给片名留宽度 */
   .tl-item { padding: 12px 8px 12px 24px; gap: 14px; }
   .tl-thumb { width: 66px; }
   /* 第 62 轮：窄屏一行装不下，评语整段折到下一行（其余仍横向并排） */
