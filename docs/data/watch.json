@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T23:19:40+08:00",
+  "updated_at": "2026-10-24T23:21:38+08:00",
   "items": [
     {
       "id": "2026-10-24-swords-into-plowshares",
@@ -252,6 +252,19 @@
       "year": 2016,
       "rating": 9,
       "note": "不是所有人都能和过去和解"
+    },
+    {
+      "id": "2024-11-27-cyberpunk-edgerunners",
+      "title": "赛博朋克：边缘行者",
+      "kind": "movie",
+      "watched_at": "2024-11-27",
+      "poster": "img/watch/cyberpunk-edgerunners-8d0ae9f0.webp",
+      "poster_w": 640,
+      "poster_h": 960,
+      "title_en": "Cyberpunk: Edgerunners",
+      "year": 2022,
+      "rating": 8.5,
+      "note": "边缘行者"
     },
     {
       "id": "2024-11-26-item",
