@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T22:39:22+08:00",
+  "updated_at": "2026-10-24T22:42:53+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -85,6 +85,19 @@
         "冒险"
       ],
       "note": "美丽新世界"
+    },
+    {
+      "id": "2026-04-05-the-secret-life-of-walter-mitty",
+      "title": "白日梦想家",
+      "kind": "movie",
+      "watched_at": "2026-04-05",
+      "poster": "img/watch/the-secret-life-of-walter-mitty-a89dc6fc.webp",
+      "poster_w": 640,
+      "poster_h": 948,
+      "title_en": "The Secret Life of Walter Mitty",
+      "year": 2013,
+      "rating": 7,
+      "note": "To see the world, to draw closer, to find each other"
     }
   ]
 }
