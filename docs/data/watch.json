@@ -1,4 +1,21 @@
 {
-  "updated_at": "2026-10-24T18:23:31+08:00",
-  "items": []
+  "updated_at": "2026-10-24T21:41:44+08:00",
+  "items": [
+    {
+      "id": "2026-10-24-dead-to-rights",
+      "title": "南京照相馆",
+      "kind": "movie",
+      "watched_at": "2026-10-24",
+      "poster": "img/watch/dead-to-rights-5fbb0d46.webp",
+      "poster_w": 640,
+      "poster_h": 960,
+      "title_en": "Dead To Rights",
+      "year": 2025,
+      "rating": 9,
+      "tags": [
+        "剧情，历史，战争"
+      ],
+      "note": "靖康耻，犹未雪"
+    }
+  ]
 }
