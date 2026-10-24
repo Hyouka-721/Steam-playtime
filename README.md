@@ -186,6 +186,106 @@ grep -rn "STEAM_API_KEY" .github/          # 只应出现 ${{ secrets.STEAM_API_
 
 ---
 
+### `docs/data/watch.json`
+
+观影记录（`watch.html` 的唯一数据源）。`items` 按 `watched_at` 倒序，由 `scripts/watch-add.mjs` 维护，一般不用手写。
+
+```json
+{
+  "updated_at": "2026-10-24T20:37:00+08:00",
+  "items": [
+    {
+      "id": "2026-10-24-oppenheimer",
+      "title": "奥本海默",
+      "title_en": "Oppenheimer",
+      "kind": "movie",
+      "year": 2023,
+      "watched_at": "2026-10-24",
+      "rating": 9,
+      "poster": "img/watch/oppenheimer-9ea6bb79.webp",
+      "poster_w": 640,
+      "poster_h": 960,
+      "tags": ["传记"],
+      "note": "诺兰的原子弹三小时"
+    }
+  ]
+}
+```
+
+| 字段 | 说明 |
+|---|---|
+| `id` | 主键。默认 `<watched_at>-<英文 slug>`；**同 id 再录一次 = 更新该条**（改感想、换海报） |
+| `poster` / `poster_w` / `poster_h` | 海报相对路径与真实像素（写宽高是为了让页面提前占位、不抖动） |
+| `watched_at` | 支持 `2026-10-24` / `2026-10` / `2026` 三种粒度，混排也能正确排序 |
+| `kind` | `movie` 或 `series`，对应筛选条的「电影 / 剧集」 |
+| `rating` | 0~10，可小数；不填则不显示评分角标 |
+
+---
+
+## 添加观影记录
+
+入口：`watch.html`（页眉右上角史蒂夫切换「网格 / 时间轴」两种视图）。
+
+### 方式一：一条命令（推荐）
+
+在**仓库根目录**执行（需要 `sharp`，`npm i` 时已装）：
+
+```bash
+node scripts/watch-add.mjs \
+  --img ~/Downloads/海报.jpg \
+  --title "奥本海默" \
+  --en Oppenheimer \
+  --year 2023 \
+  --watched 2026-10-24 \
+  --rating 9 \
+  --note "诺兰的原子弹三小时"
+```
+
+它一条命令做完四件事：**压成 WebP → 按内容哈希命名写进 `docs/img/watch/` → 去重合并 `docs/data/watch.json` → 按观影时间倒序重排**。
+
+| 参数 | 必填 | 说明 |
+|---|---|---|
+| `--img` | ✅ | 海报图，jpg / png / webp / avif 均可 |
+| `--title` | ✅ | 片名 |
+| `--en` | | 英文原名，同时用来生成文件名与 id 的 slug |
+| `--kind` | | `movie`（默认）/ `series` |
+| `--year` | | 年份 |
+| `--watched` | | 观影时间，默认今天；支持 `2026-10-24` / `2026-10` / `2026` |
+| `--rating` | | 0~10，可小数 |
+| `--tags` | | 逗号分隔，如 `--tags 传记,历史` |
+| `--note` | | 一两句短评 |
+| `--id` | | 自定义 id，用于精确覆盖某一条 |
+| `--width` | | 海报目标宽度，默认 640（**只缩不放**） |
+| `--quality` | | WebP 质量，默认 80 |
+| `--crop 2:3` | | 裁到指定比例；**默认不裁**，交给 CSS 的 `aspect-ratio` + `object-fit: cover` |
+| `--dry` | | 只打印结果，不写文件（先预览一下很值） |
+
+然后提交上线（README 改动不影响站点，但 `docs/` 下的改动必须推送才会生效）：
+
+```bash
+git add docs/data/watch.json docs/img/watch && git commit -m "data(watch): 新增《奥本海默》" && git push
+```
+
+push 后约 15~40 秒 GitHub Pages 生效，刷新页面即可看到。
+
+### 方式二：直接在 GitHub 网页改
+
+1. 把海报传到 `docs/img/watch/`（文件名随意，建议带哈希或英文名）；
+2. 编辑 `docs/data/watch.json`，往 `items` 里加一条（字段见上面的 schema），顺手改 `updated_at`；
+3. Commit —— 页面大约 1 分钟后生效。
+
+> 手写时**别漏 `poster_w` / `poster_h`**：它们让海报占位不抖动；填错只会导致轻微布局跳动，不会报错。
+
+### 几个要点
+
+- **同一条重录不会重复**：`id` 相同就是「更新」，可用来改评分、换海报、补感想；换海报时旧图会被自动删除
+- **海报建议竖版**：网格视图按 2:3 裁切显示，横版图会被裁掉两侧；想精确控制就用 `--crop 2:3`
+- **换图一定会刷新**：文件名带内容哈希，不会被 CDN 或浏览器缓存住
+- **`--dry` 先看看**：会打印 `id`、压缩前后体积、目标尺寸与总条数，不落任何文件
+- 数据为空时页面显示空态指引，加第一条即可自动切换到正常视图
+
+---
+
 ## flags 含义
 
 | flag | 含义 |
