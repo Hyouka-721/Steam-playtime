@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T23:12:50+08:00",
+  "updated_at": "2026-10-24T23:17:31+08:00",
   "items": [
     {
       "id": "2026-10-24-swords-into-plowshares",
@@ -239,6 +239,19 @@
       "title_en": "Three Billboards Outside Ebbing, Missouri",
       "year": 2017,
       "note": "生活为每个人都留下了疤痕"
+    },
+    {
+      "id": "2024-12-12-manchester-by-the-sea",
+      "title": "海边的曼彻斯特",
+      "kind": "movie",
+      "watched_at": "2024-12-12",
+      "poster": "img/watch/manchester-by-the-sea-521b167c.webp",
+      "poster_w": 640,
+      "poster_h": 948,
+      "title_en": "Manchester by the Sea",
+      "year": 2016,
+      "rating": 9,
+      "note": "不是所有人都能和过去和解"
     }
   ]
 }
