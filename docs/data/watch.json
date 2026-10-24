@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T22:36:55+08:00",
+  "updated_at": "2026-10-24T22:39:22+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -68,6 +68,23 @@
         "灾难"
       ],
       "note": "我心永恒"
+    },
+    {
+      "id": "2026-05-03-avatar",
+      "title": "阿凡达",
+      "kind": "movie",
+      "watched_at": "2026-05-03",
+      "poster": "img/watch/avatar-7f23b0af.webp",
+      "poster_w": 400,
+      "poster_h": 592,
+      "title_en": "Avatar",
+      "year": 2009,
+      "rating": 6.5,
+      "tags": [
+        "科幻",
+        "冒险"
+      ],
+      "note": "美丽新世界"
     }
   ]
 }
