@@ -28,7 +28,7 @@
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=101">
+<link rel="stylesheet" href="style.css?v=102">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -58,6 +58,15 @@
           title="点击切换浅色主题" aria-label="切换浅色主题">
       <img src="img/minion-0ef9a202.webp" alt="小黄人" draggable="false" width="460" height="420" decoding="async">
     </span>
+    <!-- 观影记录入口（2026-10-24 新增）：三只小黄人叠挂，垂在站标右侧。
+         素材 minions-trio-562d4fc3.webp 已裁掉透明留白（144×488 @2x），
+         「可见 bbox == 元素尺寸」，故 CSS 只写 width、height:auto 由固有比例定高；
+         宽高属性写在这里用于占位防 CLS。点击 / 垂直拖拽 >70px 均进入 watch.html。 -->
+    <a class="watch-entry" id="watch-entry" href="watch.html" draggable="false"
+       title="进入观影记录" aria-label="进入观影记录">
+      <img src="img/minions-trio-562d4fc3.webp" alt="" width="144" height="488"
+           decoding="async" draggable="false">
+    </a>
   </div>
   <h1 class="site-title" id="site-title" role="button" tabindex="0"
       title="点击返回顶部" aria-label="返回顶部">My Game Time</h1>
@@ -197,6 +206,10 @@
   <span id="footer-gen">—</span>
   <span class="dot">·</span>
   <span>数据每日 23:30（北京时间）自动更新</span>
+  <span class="dot">·</span>
+  <!-- 观影记录的第二个入口：≤380px 时 header 里的三连挂图标会隐藏（那里三列排不下），
+       窄屏用户仍可从这里进入 -->
+  <a class="footer-watch" href="watch.html">观影记录 →</a>
 </footer>
 
 <!-- 游玩日历浮层（点击「最近游玩」首行日期上方的小日历图标打开；Esc / 点击空白处关闭）
@@ -259,6 +272,6 @@
 
 <!-- fx.js 先于 app.js 加载：app.js 绑定时需读取 window.__fx（特效状态的唯一来源） -->
 <script src="fx.js?v=15"></script>
-<script src="app.js?v=96" onerror="__appFail()"></script>
+<script src="app.js?v=97" onerror="__appFail()"></script>
 </body>
 </html>

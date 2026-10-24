@@ -1,0 +1,249 @@
+#!/usr/bin/env node
+/* ============================================================
+   watch-add.mjs · 观影记录录入（2026-10-24 新建）
+   ------------------------------------------------------------
+   一条命令完成：压图 → 按内容哈希命名 → 写入 docs/img/watch/
+                → 去重合并 docs/data/watch.json → 按观影时间倒序重排
+   设计要点：
+   · 文件名带内容哈希：换图必然换名，不会被 CDN / 浏览器缓存住
+   · 按 id 去重：同一条目重复录入是「更新」而不是新增（可用来改感想、换海报）
+   · 只缩不放：原图比目标宽度小时不放大，避免糊
+   · 默认不裁剪：海报交给 CSS 的 aspect-ratio + object-fit:cover 处理，
+     需要固定比例时用 --crop 2:3 显式裁
+   用法：
+     node scripts/watch-add.mjs --img 海报.jpg --title "奥本海默" \
+       --watched 2026-10-24 --rating 9 --note "一两句感想"
+     node scripts/watch-add.mjs --help
+   ============================================================ */
+
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import sharp from 'sharp';
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(HERE, '..');
+const DOCS = path.join(ROOT, 'docs');
+const POSTER_DIR = path.join(DOCS, 'img', 'watch');
+const DATA_FILE = path.join(DOCS, 'data', 'watch.json');
+
+const HELP = `
+观影记录录入
+
+必填：
+  --img <路径>        海报图片（jpg / png / webp / avif 等 sharp 支持的格式）
+  --title <片名>
+
+可选：
+  --en <英文名>       英文原名，同时用于生成文件名
+  --kind <movie|series>   默认 movie
+  --year <年份>       如 2023
+  --watched <日期>    观影时间，支持 2026-10-24 / 2026-10 / 2026，默认今天
+  --rating <0-10>     评分，可小数
+  --tags <a,b,c>      逗号分隔
+  --note <感想>       一两句短评
+  --id <自定义 id>    默认 <watched>-<slug>，指定它可精确覆盖某条
+  --width <像素>      海报目标宽度，默认 640（不放大）
+  --quality <1-100>   WebP 质量，默认 80
+  --crop <W:H>        裁剪到指定比例，如 2:3；默认不裁
+  --position <位置>   裁剪定位 centre|attention|top…，默认 centre
+  --dry               只打印结果，不写任何文件
+  --help              显示本帮助
+`;
+
+function parseArgs(argv) {
+  const out = {};
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (!a.startsWith('--')) continue;
+    const key = a.slice(2);
+    const next = argv[i + 1];
+    if (next === undefined || next.startsWith('--')) out[key] = true;
+    else { out[key] = next; i++; }
+  }
+  return out;
+}
+
+function die(msg) {
+  console.error('\n✗ ' + msg + '\n');
+  process.exit(1);
+}
+
+// ASCII slug：优先英文名，其次标题里的 ASCII 片段，最后回落 item
+function slugify(s) {
+  return String(s || '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48);
+}
+
+function makeSlug(en, title) {
+  return slugify(en) || slugify(title) || 'item';
+}
+
+// 本地时间带 +08:00 偏移（不用 toISOString，避免 UTC 漂移）
+function nowLocal() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, '0');
+  const off = -d.getTimezoneOffset();
+  const sign = off >= 0 ? '+' : '-';
+  const oh = p(Math.floor(Math.abs(off) / 60));
+  const om = p(Math.abs(off) % 60);
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T` +
+         `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}${sign}${oh}:${om}`;
+}
+
+function todayLocal() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+// 与 watch.js 里的 sortKey 完全一致：补零成定长串再比较
+function sortKey(v) {
+  const m = /^(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?$/.exec(String(v || '').trim());
+  if (!m) return '0000-00-00';
+  return `${m[1]}-${m[2] || '00'}-${m[3] || '00'}`;
+}
+
+function readData() {
+  if (!fs.existsSync(DATA_FILE)) return { updated_at: nowLocal(), items: [] };
+  try {
+    const j = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    if (Array.isArray(j)) return { updated_at: nowLocal(), items: j };
+    return { updated_at: j.updated_at || nowLocal(), items: Array.isArray(j.items) ? j.items : [] };
+  } catch (e) {
+    die(`data/watch.json 解析失败：${e.message}\n  请先修好这个文件再执行，以免覆盖已有数据。`);
+  }
+}
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  if (args.help) { console.log(HELP); return; }
+  if (args.img === undefined || args.title === undefined) {
+    console.log(HELP);
+    die('缺少必填参数 --img 与 --title');
+  }
+  if (args.img === true || args.title === true) die('--img 与 --title 都需要一个值');
+
+  const imgPath = path.resolve(String(args.img));
+  if (!fs.existsSync(imgPath)) die(`找不到图片：${imgPath}`);
+
+  const kind = args.kind === 'series' ? 'series' : 'movie';
+  const watchedAt = String(args.watched || todayLocal()).trim();
+  if (!/^\d{4}(-\d{2}(-\d{2})?)?$/.test(watchedAt)) {
+    die(`--watched 格式不对：${watchedAt}（支持 2026-10-24 / 2026-10 / 2026）`);
+  }
+
+  const title = String(args.title).trim();
+  const titleEn = args.en ? String(args.en).trim() : '';
+  const slug = makeSlug(titleEn, title);
+  const id = String(args.id || `${watchedAt}-${slug}`).trim();
+
+  const width = Math.max(64, Math.min(2400, parseInt(args.width || '640', 10) || 640));
+  const quality = Math.max(1, Math.min(100, parseInt(args.quality || '80', 10) || 80));
+
+  let rating;
+  if (args.rating !== undefined && args.rating !== true) {
+    const r = Number(args.rating);
+    if (!Number.isFinite(r) || r < 0 || r > 10) die(`--rating 需要 0~10 的数字，收到：${args.rating}`);
+    rating = r;
+  }
+
+  // ---- 图片处理 ----
+  const meta = await sharp(imgPath).metadata();
+  let pipe = sharp(imgPath).rotate();          // rotate() 无参 = 按 EXIF 自动摆正
+  if (args.crop && args.crop !== true) {
+    const m = /^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/.exec(String(args.crop));
+    if (!m) die(`--crop 格式应为 W:H，例如 2:3，收到：${args.crop}`);
+    const rw = Number(m[1]);
+    const rh = Number(m[2]);
+    pipe = pipe.resize({ width, height: Math.round(width * rh / rw), fit: 'cover', position: args.position || 'centre' });
+  } else {
+    pipe = pipe.resize({ width, withoutEnlargement: true });
+  }
+  const buf = await pipe.webp({ quality, effort: 4 }).toBuffer();
+
+  const outMeta = await sharp(buf).metadata();
+  const hash = crypto.createHash('sha256').update(buf).digest('hex').slice(0, 8);
+  const fileName = `${slug}-${hash}.webp`;
+  const outPath = path.join(POSTER_DIR, fileName);
+  const relPoster = `img/watch/${fileName}`;
+
+  // ---- 合并数据 ----
+  const data = readData();
+  const prevIdx = data.items.findIndex((it) => it.id === id);
+  const prev = prevIdx >= 0 ? data.items[prevIdx] : null;
+
+  const item = {
+    id,
+    title,
+    ...(titleEn ? { title_en: titleEn } : {}),
+    kind,
+    ...(args.year ? { year: Number(args.year) || String(args.year) } : (prev && prev.year ? { year: prev.year } : {})),
+    watched_at: watchedAt,
+    ...(rating !== undefined ? { rating } : (prev && prev.rating !== undefined ? { rating: prev.rating } : {})),
+    poster: relPoster,
+    poster_w: outMeta.width,
+    poster_h: outMeta.height,
+    ...(args.tags && args.tags !== true
+      ? { tags: String(args.tags).split(',').map((s) => s.trim()).filter(Boolean) }
+      : (prev && prev.tags ? { tags: prev.tags } : {})),
+    ...(args.note !== undefined && args.note !== true
+      ? { note: String(args.note).trim() }
+      : (prev && prev.note ? { note: prev.note } : {})),
+  };
+
+  if (prevIdx >= 0) data.items[prevIdx] = item;
+  else data.items.push(item);
+  data.items.sort((a, b) => {
+    const d = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
+    if (d !== 0) return d;
+    return String(b.id || '').localeCompare(String(a.id || ''));
+  });
+  data.updated_at = nowLocal();
+
+  // ---- 报告 ----
+  const kb = (n) => (n / 1024).toFixed(1) + ' KB';
+  const srcKb = fs.statSync(imgPath).size;
+  console.log('');
+  console.log(prev ? '↻ 更新已有条目' : '＋ 新增条目');
+  console.log(`  标题     ${title}${titleEn ? ' / ' + titleEn : ''}`);
+  console.log(`  id       ${id}`);
+  console.log(`  观影时间 ${watchedAt}   类型 ${kind}${args.year ? '   年份 ' + args.year : ''}`);
+  if (rating !== undefined) console.log(`  评分     ${rating}`);
+  console.log(`  海报     ${relPoster}  (${outMeta.width}×${outMeta.height})`);
+  console.log(`  体积     原图 ${kb(srcKb)} → WebP ${kb(buf.length)}` +
+              (srcKb > 0 ? `（${Math.round((1 - buf.length / srcKb) * 100)}% 更小）` : ''));
+  console.log(`  总数     ${data.items.length} 条`);
+
+  if (prev && prev.poster && prev.poster !== relPoster) {
+    const oldAbs = path.join(DOCS, prev.poster);
+    if (fs.existsSync(oldAbs)) {
+      console.log(`\n  旧海报已不再被引用：${prev.poster}`);
+      if (args.dry) console.log('  （--dry：不删除）');
+      else { fs.unlinkSync(oldAbs); console.log('  已删除旧海报文件'); }
+    }
+  }
+
+  if (args.dry) {
+    console.log('\n--dry：未写入任何文件。\n');
+    return;
+  }
+
+  fs.mkdirSync(POSTER_DIR, { recursive: true });
+  fs.writeFileSync(outPath, buf);
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2) + '\n', 'utf8');
+
+  console.log('\n已写入。下一步：');
+  console.log(`  git add docs/img/watch/${fileName} docs/data/watch.json`);
+  console.log(`  git commit -m "watch: add ${title}"`);
+  console.log('');
+}
+
+main().catch((e) => die(e && e.stack ? e.stack : String(e)));

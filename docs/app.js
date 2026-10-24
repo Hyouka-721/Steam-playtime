@@ -1654,3 +1654,82 @@
     }
   })();
 })();
+
+/* ===== 观影记录入口交互（2026-10-24 新增，独立 IIFE，不碰上方任何逻辑）=====
+   需求：点击进入 watch.html；同时兼容「垂直向下拖拽 >70px」触发。
+   设计取舍：
+   · 保留 <a href> 的语义与键盘可达性：Ctrl/⌘/Shift+点击 与 中键仍走浏览器原生（新标签）
+   · 不设 touch-action:none，页面照常滚动；靠「纵向位移明显大于横向」判断拖拽意图，避免抢滚动
+   · 拖拽用 setPointerCapture，否则元素跟随下移时指针会离开元素、手势被中断
+   · 过场时长 LEAVE_MS 与 style.css 里 .is-leaving 的 .42s 对齐，改一个要同步改另一个 */
+(function () {
+  var el = document.getElementById('watch-entry');
+  if (!el) return;
+
+  var THRESHOLD = 70;   // 拖拽触发阈值（px）
+  var LEAVE_MS = 420;   // 与 CSS .is-leaving transition 的 .42s 对齐
+  var startY = 0, startX = 0, curY = 0;
+  var dragging = false, leaved = false, pid = null;
+
+  function leave() {
+    if (leaved) return;
+    leaved = true;
+    dragging = false;
+    el.classList.remove('is-dragging');
+    el.classList.add('is-leaving');
+    el.style.removeProperty('--drag-y');
+    setTimeout(function () { location.href = el.getAttribute('href'); }, LEAVE_MS);
+  }
+
+  // 双保险：<a> 默认是可拖拽对象，浏览器会把它识别成原生链接拖拽，
+  // 原生拖拽一旦开始就会派发 pointercancel，把下面的自定义拖拽手势直接打断。
+  // 因此必须同时用 draggable="false"（HTML 侧）+ 这里 preventDefault 关掉。
+  el.addEventListener('dragstart', function (e) { e.preventDefault(); });
+  el.addEventListener('click', function (e) {
+    // 带修饰键或非主键：交回浏览器原生行为（新标签打开等）
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    leave();
+  });
+
+  el.addEventListener('pointerdown', function (e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    dragging = true;
+    startY = curY = e.clientY;
+    startX = e.clientX;
+    pid = e.pointerId;
+    if (!leaved) { el.classList.remove('is-leaving'); el.style.removeProperty('--drag-y'); }
+    try { el.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+
+  el.addEventListener('pointermove', function (e) {
+    if (!dragging || e.pointerId !== pid) return;
+    curY = e.clientY;
+    var dy = curY - startY;
+    var dx = e.clientX - startX;
+    // 纵向意图明显（向下且 |dy| > |dx|）才接管，否则视作普通点击 / 页面滚动
+    if (dy > 12 && Math.abs(dy) > Math.abs(dx)) {
+      el.classList.add('is-dragging');
+      el.style.setProperty('--drag-y', Math.min(dy, 160) + 'px');
+      if (dy >= THRESHOLD) leave();
+    }
+  });
+
+  function endDrag(e) {
+    if (!dragging) return;
+    dragging = false;
+    pid = null;
+    try { el.releasePointerCapture(e.pointerId); } catch (_) {}
+    if (el.classList.contains('is-dragging')) {
+      el.classList.remove('is-dragging');
+      el.style.setProperty('--drag-y', '0px');   // 未达阈值则回弹
+      setTimeout(function () { if (!leaved) el.style.removeProperty('--drag-y'); }, 200);
+    }
+  }
+  el.addEventListener('pointerup', endDrag);
+  el.addEventListener('pointercancel', endDrag);
+
+  el.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); leave(); }
+  });
+})();

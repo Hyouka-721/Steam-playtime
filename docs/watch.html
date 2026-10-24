@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="cinema">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Watch List</title>
+<!-- 图标直接复用站标，省一个新增素材请求 -->
+<link rel="icon" type="image/webp" href="img/minion-0ef9a202.webp">
+<!-- 与游戏站同一套本地花体字，保持品牌一致；preload + font-display:block 消除 FOUT -->
+<link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="watch.css?v=1">
+</head>
+<body>
+
+<header class="w-header">
+  <!-- 返回游戏站：与游戏站的小黄人入口对称 -->
+  <a class="w-home" href="./" title="回到游戏时长" aria-label="回到游戏时长">
+    <img src="img/minion-0ef9a202.webp" alt="小黄人" width="460" height="420" decoding="async">
+  </a>
+  <h1 class="w-title">My Watch List</h1>
+  <!-- 视图切换：网格 = 豆瓣式海报墙；时间轴 = 按观影时间倒序 -->
+  <div class="w-layout" role="group" aria-label="切换展示方式">
+    <button type="button" class="w-layout-btn is-on" data-layout="grid" aria-pressed="true">网格</button>
+    <button type="button" class="w-layout-btn" data-layout="timeline" aria-pressed="false">时间轴</button>
+  </div>
+</header>
+
+<div class="w-bar">
+  <div class="w-seg" role="group" aria-label="按类型筛选">
+    <button type="button" class="w-seg-btn is-on" data-kind="all" aria-pressed="true">全部</button>
+    <button type="button" class="w-seg-btn" data-kind="movie" aria-pressed="false">电影</button>
+    <button type="button" class="w-seg-btn" data-kind="series" aria-pressed="false">剧集</button>
+  </div>
+  <div class="w-count" id="w-count">—</div>
+</div>
+
+<main class="w-main">
+  <!-- 网格视图 -->
+  <section class="w-grid" id="w-grid" aria-label="海报墙"></section>
+  <!-- 时间轴视图 -->
+  <section class="w-tl" id="w-tl" aria-label="观影时间轴" hidden></section>
+
+  <!-- 空态：同时充当录入指引，避免用户不知道数据从哪来 -->
+  <div class="w-empty" id="w-empty" hidden>
+    <div class="w-empty-icon" aria-hidden="true">
+      <svg viewBox="0 0 48 48" width="46" height="46" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="5" y="11" width="38" height="26" rx="3"></rect>
+        <path d="M13 11v26M35 11v26M5 18h8M5 30h8M35 18h8M35 30h8"></path>
+      </svg>
+    </div>
+    <p class="w-empty-title">还没有观影记录</p>
+    <p class="w-empty-tip">在电脑上跑一条命令就能加第一条（会自动压图、按内容哈希命名、写进 <code>data/watch.json</code>）：</p>
+    <pre class="w-empty-code">node scripts/watch-add.mjs --img 海报.jpg \
+  --title "片名" --watched 2026-10-24 --note "一两句感想"</pre>
+    <p class="w-empty-tip">也可以直接在 GitHub 网页编辑 <code>docs/data/watch.json</code>、把海报传到 <code>docs/img/watch/</code>。</p>
+  </div>
+</main>
+
+<footer class="w-foot">
+  <span id="w-updated">—</span>
+  <span class="w-foot-sep">·</span>
+  <a href="./">← 回到 My Game Time</a>
+</footer>
+
+<script src="watch.js?v=1"></script>
+</body>
+</html>

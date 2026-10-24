@@ -14,5 +14,9 @@
     "build": "node scripts/build.mjs",
     "pipeline": "node scripts/diff.mjs && node scripts/build.mjs"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "sharp": "^0.35.5",
+    "undici": "^8.12.3"
+  }
 }
