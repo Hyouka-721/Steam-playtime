@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T23:21:38+08:00",
+  "updated_at": "2026-10-24T23:23:26+08:00",
   "items": [
     {
       "id": "2026-10-24-swords-into-plowshares",
@@ -278,6 +278,19 @@
       "year": 1992,
       "rating": 7,
       "note": "娜乌西卡"
+    },
+    {
+      "id": "2024-11-23-arcane",
+      "title": "英雄联盟：双城之战",
+      "kind": "movie",
+      "watched_at": "2024-11-23",
+      "poster": "img/watch/arcane-2e38f6df.webp",
+      "poster_w": 640,
+      "poster_h": 948,
+      "title_en": "Arcane",
+      "year": 2021,
+      "rating": 8.5,
+      "note": "你所讨厌的人或许正是自己"
     }
   ]
 }
