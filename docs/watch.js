@@ -226,6 +226,25 @@
     b.addEventListener('click', function () { setKind(b.getAttribute('data-kind')); });
   });
 
+  // 标题「My Watch List」：点一下回到页面顶部；键盘 Enter / 空格同样可用。
+  // 尊重 prefers-reduced-motion —— 该设置下直接跳，不做平滑滚动。
+  var titleEl = document.getElementById('w-title');
+  if (titleEl) {
+    var backToTop = function () {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) { window.scrollTo(0, 0); return; }
+      try { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      catch (e) { window.scrollTo(0, 0); }
+    };
+    titleEl.addEventListener('click', backToTop);
+    titleEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        backToTop();
+      }
+    });
+  }
+
   /* ---------- 手动添加：加号 → 表单 → 直接提交进 GitHub 仓库 ----------
      纯静态站没有后端，所以这里的「保存」= 用本机保存的 fine-grained PAT 调
      GitHub Contents API，把海报与 docs/data/watch.json 一起提交进仓库，

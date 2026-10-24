@@ -115,7 +115,14 @@ code {
   letter-spacing: 2px;
   color: var(--text-strong);
   text-shadow: 0 0 26px rgba(232, 176, 75, 0.18);
+  /* 2026-10-24 第 64 轮：点击标题回到页面顶部（鼠标/键盘都可用） */
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color .18s ease;
 }
+.w-title:hover { color: var(--accent); }
+.w-title:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 8px; }
 
 /* 史蒂夫：与首页 style.css 的 .header-avatar **逐条同值**（同一素材、同一尺寸、同一套反馈），
    2026-10-24 第 56 轮复制到观影页，职责 = 网格视图 ⇄ 时间轴视图 的切换器
@@ -311,7 +318,7 @@ code {
 
 /* 2026-10-24 第 62 轮：横向一行。名称与英文名同占一列（.tl-head，英文名在中文名正下方），
    其余五项与名称基线对齐排在同一行；装不下时按 flex-wrap 依次折行（窄屏兜底）。
-   字号沿用第 61 轮的 +2 档：名称 17 / 其余 14.5 / 评语 15。 */
+   2026-10-24 第 64 轮：时间轴文字再统一 +4px —— 名称 21 / 英文名与副信息 18.5 / 评语 19。 */
 .tl-body {
   min-width: 0; flex: 1 1 auto;
   display: flex; flex-wrap: nowrap; align-items: center;   /* 第 63 轮：改为垂直居中（原 baseline）；桌面不折行，超长评语走省略 */
@@ -326,14 +333,14 @@ code {
 }
 .tl-name {
   margin: 0;
-  font-size: 17px; font-weight: 600; line-height: 1.3;
+  font-size: 21px; font-weight: 600; line-height: 1.3;
   color: var(--text-strong);
   word-break: break-word;
 }
 /* 英文名：始终紧贴中文名正下方 */
 .tl-en {
   margin: 0;
-  font-size: 14.5px; font-weight: 400; line-height: 1.3;
+  font-size: 18.5px; font-weight: 400; line-height: 1.3;
   color: var(--text-dim);
   word-break: break-word;
 }
@@ -341,19 +348,19 @@ code {
 .tl-meta {
   margin: 0;
   display: flex; flex-direction: row; align-items: center; gap: 14px;   /* 第 63 轮：同 baseline 视觉等价，统一写 center */
-  flex: 0 0 auto;
-  font-size: 14.5px; line-height: 1.35;
+  flex: 0 0 auto; flex-wrap: wrap; min-width: 0;   /* 第 64 轮：字号变大后窄屏放不下，四项按需折行，不许溢出 */
+  font-size: 18.5px; line-height: 1.35;
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
 }
 .tl-meta > span { display: block; white-space: nowrap; }
 .tl-meta .tl-score { color: var(--accent); font-weight: 600; }
-.tl-meta .tl-score i { font-style: normal; font-size: 12px; opacity: .85; }
+.tl-meta .tl-score i { font-style: normal; font-size: 16px; opacity: .85; }
 /* 评语吃剩余宽度，单行超长则省略（hover 看全文，title 由 JS 写入） */
 .tl-note {
   margin: 0;
   flex: 1 1 160px; min-width: 0;
-  font-size: 15px; line-height: 1.5; color: #a8a8b4;
+  font-size: 19px; line-height: 1.5; color: #a8a8b4;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
@@ -619,6 +626,8 @@ select.w-input { cursor: pointer; }
   .tl-thumb { width: 66px; }
   /* 第 62 轮：窄屏一行装不下，评语整段折到下一行（其余仍横向并排） */
   .tl-note { flex: 1 1 100%; white-space: normal; }
+  /* 第 64 轮：字号 +4 后 18.5px 的四项在 390px 下宽于正文，改为独占一行并在行内折行 */
+  .tl-meta { flex: 1 1 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
