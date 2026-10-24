@@ -28,7 +28,7 @@
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=102">
+<link rel="stylesheet" href="style.css?v=103">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -58,25 +58,29 @@
           title="点击切换浅色主题" aria-label="切换浅色主题">
       <img src="img/minion-0ef9a202.webp" alt="小黄人" draggable="false" width="460" height="420" decoding="async">
     </span>
-    <!-- 观影记录入口（2026-10-24 新增）：三只小黄人叠挂，垂在站标右侧。
-         素材 minions-trio-562d4fc3.webp 已裁掉透明留白（144×488 @2x），
-         「可见 bbox == 元素尺寸」，故 CSS 只写 width、height:auto 由固有比例定高；
+  </div>
+  <h1 class="site-title" id="site-title" role="button" tabindex="0"
+      title="点击返回顶部" aria-label="返回顶部">My Game Time</h1>
+  <!-- 右列 = 观影入口 + 史蒂夫头像（2026-10-24 第 2 版：图标从左侧移到标题与史蒂夫之间，
+       宽度缩到 72 × 0.8 = 57.6px）。用 flex 包一层，排列与间距都交给 .header-right 管，
+       避免为了塞进第 4 个子元素而改动 header 的三列网格。 -->
+  <div class="header-right">
+    <!-- 观影记录入口：三只小黄人叠挂。素材 minions-trio-562d4fc3.webp 已裁掉透明留白
+         （144×488 @2x），「可见 bbox == 元素尺寸」，故 CSS 只写 width、height:auto 由固有比例定高；
          宽高属性写在这里用于占位防 CLS。点击 / 垂直拖拽 >70px 均进入 watch.html。 -->
     <a class="watch-entry" id="watch-entry" href="watch.html" draggable="false"
        title="进入观影记录" aria-label="进入观影记录">
       <img src="img/minions-trio-562d4fc3.webp" alt="" width="144" height="488"
            decoding="async" draggable="false">
     </a>
+    <!-- Minecraft 史蒂夫+狼：2026-10-18 起改作「氛围特效」开关——
+         单击 开 / 关（仅流星一种效果，2026-10-18 按用户要求移除雨 / 雪），
+         状态由 title 文案标示。游玩日历入口已改为游戏累计列表首行日期上方的小日历图标。
+         不参与主题切换（主题切换仍由左侧小黄人承担） -->
+    <div class="header-avatar" id="fx-toggle" role="button" tabindex="0"
+         title="氛围效果：关 · 单击开启"
+         aria-label="氛围效果已关闭，单击开启"></div>
   </div>
-  <h1 class="site-title" id="site-title" role="button" tabindex="0"
-      title="点击返回顶部" aria-label="返回顶部">My Game Time</h1>
-  <!-- Minecraft 史蒂夫+狼：2026-10-18 起改作「氛围特效」开关——
-       单击 开 / 关（仅流星一种效果，2026-10-18 按用户要求移除雨 / 雪），
-       状态由 title 文案标示。游玩日历入口已改为游戏累计列表首行日期上方的小日历图标。
-       不参与主题切换（主题切换仍由左侧小黄人承担） -->
-  <div class="header-avatar" id="fx-toggle" role="button" tabindex="0"
-       title="氛围效果：关 · 单击开启"
-       aria-label="氛围效果已关闭，单击开启"></div>
 </header>
 
 <!-- 概览 · 五张统计卡（其中四张可点击导航，替代原 Tab 栏） -->
