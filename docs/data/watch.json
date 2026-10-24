@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T22:48:46+08:00",
+  "updated_at": "2026-10-24T22:52:37+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -124,6 +124,18 @@
       "year": 2015,
       "rating": 9,
       "note": "生命的单纯和美好"
+    },
+    {
+      "id": "2025-03-30-three-billboards-outside-ebbing-missouri",
+      "title": "三块广告牌",
+      "kind": "movie",
+      "watched_at": "2025-03-30",
+      "poster": "img/watch/three-billboards-outside-ebbing-missouri-a81a4086.webp",
+      "poster_w": 640,
+      "poster_h": 949,
+      "title_en": "Three Billboards Outside Ebbing, Missouri",
+      "year": 2017,
+      "note": "生活为每个人都留下了疤痕"
     }
   ]
 }
