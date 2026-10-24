@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T22:35:11+08:00",
+  "updated_at": "2026-10-24T22:36:55+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -51,6 +51,23 @@
         "奇幻"
       ],
       "note": "未披锦襕袈裟者，亦是菩提树下人"
+    },
+    {
+      "id": "2026-05-09-titanic",
+      "title": "泰坦尼克号",
+      "kind": "movie",
+      "watched_at": "2026-05-09",
+      "poster": "img/watch/titanic-a91c0af8.webp",
+      "poster_w": 640,
+      "poster_h": 953,
+      "title_en": "Titanic",
+      "year": 1997,
+      "rating": 7.5,
+      "tags": [
+        "爱情",
+        "灾难"
+      ],
+      "note": "我心永恒"
     }
   ]
 }
