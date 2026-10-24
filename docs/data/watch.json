@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T23:10:06+08:00",
+  "updated_at": "2026-10-24T23:12:50+08:00",
   "items": [
     {
       "id": "2026-10-24-swords-into-plowshares",
@@ -201,6 +201,19 @@
       "year": 2017,
       "rating": 6.5,
       "note": "疲惫的战争片"
+    },
+    {
+      "id": "2025-05-14-prison-break",
+      "title": "越狱",
+      "kind": "series",
+      "watched_at": "2025-05-14",
+      "poster": "img/watch/prison-break-f7d9cf71.webp",
+      "poster_w": 640,
+      "poster_h": 896,
+      "title_en": "Prison Break",
+      "year": 2005,
+      "rating": 8,
+      "note": "纯粹的越狱"
     },
     {
       "id": "2025-04-03-heidi",
