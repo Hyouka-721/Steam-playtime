@@ -109,7 +109,9 @@ code {
   text-align: center;
   font-family: 'Black Rose', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   font-weight: normal;
-  font-size: 52px;
+  /* 2026-10-24 第 58 轮：52px -> 70px，与首页 style.css:262 的 .site-title 三档同值，
+     两页标题视觉重量对齐。三档（桌面 / ≤860 / ≤480）必须一起改，verify58 会逐档比对 computed。 */
+  font-size: 70px;
   letter-spacing: 2px;
   color: var(--text-strong);
   text-shadow: 0 0 26px rgba(232, 176, 75, 0.18);
@@ -552,7 +554,9 @@ select.w-input { cursor: pointer; }
   .w-header { padding: 14px 16px; gap: 10px; }   /* 横向 18 -> 16，与首页 ≤860px 的 14px 16px 对齐 */
   /* 2026-10-24：这里原本写死 .w-home 60px，放大后取消该覆盖，
      图标与首页一样在 ≤860px 保持 132（间距靠 padding/gap 收紧，不再缩图标）。 */
-  .w-title { font-size: 34px; letter-spacing: 1px; }
+  /* 2026-10-24 第 58 轮：原先这里把 .w-title 缩到 34px（44px），
+     但首页 .site-title 在 ≤860px 不缩、仍 70px（它只在 ≤480px 缩到 44px），
+     所以整条覆盖删除，让 .w-title 在 860~481px 也保持 70px。 */
   .w-bar { padding: 18px 18px 4px; }
   .w-main { padding: 14px 18px 48px; }
   .w-grid { grid-template-columns: repeat(auto-fill, minmax(126px, 1fr)); gap: 22px 14px; }
@@ -568,7 +572,7 @@ select.w-input { cursor: pointer; }
   .w-toast { bottom: 80px; }
   .w-home { width: 88px; height: 88px; }   /* 与首页 .logo 的 88px 同值（style.css ≤480px 断点） */
   .w-avatar { width: 88px; height: 88px; } /* 与首页 .header-avatar 的 88px 同值 */
-  .w-title { font-size: 26px; letter-spacing: 0; }
+  .w-title { font-size: 44px; letter-spacing: 1px; }   /* 首页 ≤480px 也是 44px，不缩 */
   .w-grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 18px 12px; }
   .poster-name { font-size: 13px; }
   .tl-item { padding: 8px 6px 8px 24px; gap: 12px; }
