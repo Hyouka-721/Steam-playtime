@@ -299,6 +299,7 @@ code {
 
 .tl-thumb {
   flex: 0 0 auto;
+  align-self: flex-start;   /* 第 61 轮：七行文字比缩略图高，缩略图贴顶才与片名对齐（少字段条目里文字仍居中） */
   width: 76px;
   aspect-ratio: 2 / 3;
   border-radius: 8px;
@@ -309,21 +310,33 @@ code {
 .tl-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .tl-body { min-width: 0; flex: 1 1 auto; }
+/* 2026-10-24 第 61 轮：时间轴文字统一 +2px，七项按序各占一行
+   （名称 15→17、英文名与副信息 12.5→14.5、评语 13→15） */
 .tl-name {
-  margin: 0 0 5px;
-  font-size: 15px; font-weight: 600; line-height: 1.35;
+  margin: 0 0 3px;
+  font-size: 17px; font-weight: 600; line-height: 1.3;
   color: var(--text-strong);
   word-break: break-word;
 }
-.tl-en { font-size: 12.5px; font-weight: 400; color: var(--text-dim); margin-left: 10px; }
-.tl-sub {
-  font-size: 12.5px; line-height: 1.5; color: var(--text-dim);
-  font-variant-numeric: tabular-nums;
-  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+/* 英文名：原先跟在名称后面（margin-left:10px），现在独占一行 */
+.tl-en {
+  margin: 0 0 7px;
+  font-size: 14.5px; font-weight: 400; line-height: 1.3;
+  color: var(--text-dim);
+  word-break: break-word;
 }
-.tl-sub .tl-score { color: var(--accent); font-weight: 600; }
-.tl-sub .tl-score i { font-style: normal; font-size: 10px; opacity: .85; }
-.tl-note { margin: 10px 0 0; font-size: 13px; line-height: 1.7; color: #a8a8b4; word-break: break-word; }
+/* 日期 / 类别 / 上映时间 / 评级：四行竖排，顺序固定，不换行不并排 */
+.tl-meta {
+  margin: 0;
+  display: flex; flex-direction: column; gap: 3px;
+  font-size: 14.5px; line-height: 1.35;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.tl-meta > span { display: block; white-space: nowrap; }
+.tl-meta .tl-score { color: var(--accent); font-weight: 600; }
+.tl-meta .tl-score i { font-style: normal; font-size: 12px; opacity: .85; }
+.tl-note { margin: 9px 0 0; font-size: 15px; line-height: 1.6; color: #a8a8b4; word-break: break-word; }
 
 /* ================= 空态 / 页脚 ================= */
 .w-empty {

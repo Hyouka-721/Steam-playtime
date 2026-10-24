@@ -133,13 +133,16 @@
             '<div class="tl-thumb">' +
               '<img src="' + esc(it.poster) + '" alt="' + esc(it.title) + '" loading="lazy" decoding="async">' +
             '</div>' +
+            /* 2026-10-24 第 61 轮：按用户指定顺序竖排 ——
+               名称 / 英文名 / 日期 / 类别 / 上映时间 / 评级 / 评语，
+               每项独占一行（英文名从 h3 里拆出来，类别与年份也拆开）。 */
             '<div class="tl-body">' +
-              '<h3 class="tl-name">' + esc(it.title) +
-                (it.title_en ? '<span class="tl-en">' + esc(it.title_en) + '</span>' : '') +
-              '</h3>' +
-              '<div class="tl-sub">' +
-                '<span>' + (it.watched_at ? esc(it.watched_at) : '时间未知') + '</span>' +
-                '<span>' + kindLabel(it.kind) + (it.year ? ' · ' + esc(it.year) : '') + '</span>' +
+              '<h3 class="tl-name">' + esc(it.title) + '</h3>' +
+              (it.title_en ? '<p class="tl-en">' + esc(it.title_en) + '</p>' : '') +
+              '<div class="tl-meta">' +
+                '<span class="tl-date">' + (it.watched_at ? esc(it.watched_at) : '时间未知') + '</span>' +
+                '<span class="tl-kind">' + kindLabel(it.kind) + '</span>' +
+                (it.year ? '<span class="tl-year">' + esc(it.year) + '</span>' : '') +
                 scoreHtml(it.rating, 'tl-score') +
               '</div>' +
               (it.note ? '<p class="tl-note">' + esc(it.note) + '</p>' : '') +
