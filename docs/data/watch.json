@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T22:54:27+08:00",
+  "updated_at": "2026-10-24T22:56:03+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -47,6 +47,19 @@
       "year": 2025,
       "rating": 8,
       "note": "赛道即归途"
+    },
+    {
+      "id": "2026-09-05-robot-dreams",
+      "title": "机器人之梦",
+      "kind": "movie",
+      "watched_at": "2026-09-05",
+      "poster": "img/watch/robot-dreams-37fc156f.webp",
+      "poster_w": 640,
+      "poster_h": 901,
+      "title_en": "Robot Dreams",
+      "year": 2023,
+      "rating": 8,
+      "note": "现在我们都明白如何去爱了"
     },
     {
       "id": "2026-08-15-nobody",
