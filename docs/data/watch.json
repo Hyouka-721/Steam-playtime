@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T23:23:26+08:00",
+  "updated_at": "2026-10-24T23:24:59+08:00",
   "items": [
     {
       "id": "2026-10-24-swords-into-plowshares",
@@ -291,6 +291,19 @@
       "year": 2021,
       "rating": 8.5,
       "note": "你所讨厌的人或许正是自己"
+    },
+    {
+      "id": "2024-11-17-item",
+      "title": "侧耳倾听",
+      "kind": "movie",
+      "watched_at": "2024-11-17",
+      "poster": "img/watch/item-cd76b567.webp",
+      "poster_w": 640,
+      "poster_h": 910,
+      "title_en": "耳をすませば",
+      "year": 1995,
+      "rating": 8,
+      "note": "Country roads take me home"
     }
   ]
 }
