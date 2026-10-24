@@ -299,7 +299,7 @@ code {
 
 .tl-thumb {
   flex: 0 0 auto;
-  align-self: flex-start;   /* 第 61 轮：七行文字比缩略图高，缩略图贴顶才与片名对齐（少字段条目里文字仍居中） */
+  /* 第 62 轮：文字块回到单行（约 41px）比缩略图矮，撤掉第 61 轮的贴顶，交回 .tl-item 的 align-items:center 居中 */
   width: 76px;
   aspect-ratio: 2 / 3;
   border-radius: 8px;
@@ -309,26 +309,37 @@ code {
 }
 .tl-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-.tl-body { min-width: 0; flex: 1 1 auto; }
-/* 2026-10-24 第 61 轮：时间轴文字统一 +2px，七项按序各占一行
-   （名称 15→17、英文名与副信息 12.5→14.5、评语 13→15） */
+/* 2026-10-24 第 62 轮：横向一行。名称与英文名同占一列（.tl-head，英文名在中文名正下方），
+   其余五项与名称基线对齐排在同一行；装不下时按 flex-wrap 依次折行（窄屏兜底）。
+   字号沿用第 61 轮的 +2 档：名称 17 / 其余 14.5 / 评语 15。 */
+.tl-body {
+  min-width: 0; flex: 1 1 auto;
+  display: flex; flex-wrap: nowrap; align-items: baseline;   /* 桌面必须单行：评语超长就省略，不许折行 */
+  gap: 6px 18px;
+}
+/* 名称 + 英文名：上下堆叠的一小列，宽度按内容收缩 */
+.tl-head {
+  display: flex; flex-direction: column; gap: 1px;
+  flex: 0 0 auto; min-width: 0;
+}
 .tl-name {
-  margin: 0 0 3px;
+  margin: 0;
   font-size: 17px; font-weight: 600; line-height: 1.3;
   color: var(--text-strong);
   word-break: break-word;
 }
-/* 英文名：原先跟在名称后面（margin-left:10px），现在独占一行 */
+/* 英文名：始终紧贴中文名正下方 */
 .tl-en {
-  margin: 0 0 7px;
+  margin: 0;
   font-size: 14.5px; font-weight: 400; line-height: 1.3;
   color: var(--text-dim);
   word-break: break-word;
 }
-/* 日期 / 类别 / 上映时间 / 评级：四行竖排，顺序固定，不换行不并排 */
+/* 日期 / 类别 / 上映时间 / 评级：横向并排，顺序固定 */
 .tl-meta {
   margin: 0;
-  display: flex; flex-direction: column; gap: 3px;
+  display: flex; flex-direction: row; align-items: baseline; gap: 14px;
+  flex: 0 0 auto;
   font-size: 14.5px; line-height: 1.35;
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
@@ -336,7 +347,13 @@ code {
 .tl-meta > span { display: block; white-space: nowrap; }
 .tl-meta .tl-score { color: var(--accent); font-weight: 600; }
 .tl-meta .tl-score i { font-style: normal; font-size: 12px; opacity: .85; }
-.tl-note { margin: 9px 0 0; font-size: 15px; line-height: 1.6; color: #a8a8b4; word-break: break-word; }
+/* 评语吃剩余宽度，单行超长则省略（hover 看全文，title 由 JS 写入） */
+.tl-note {
+  margin: 0;
+  flex: 1 1 160px; min-width: 0;
+  font-size: 15px; line-height: 1.5; color: #a8a8b4;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
 /* ================= 空态 / 页脚 ================= */
 .w-empty {
@@ -576,6 +593,8 @@ select.w-input { cursor: pointer; }
   /* 2026-10-24 第 58 轮：原先这里把 .w-title 缩到 34px（44px），
      但首页 .site-title 在 ≤860px 不缩、仍 70px（它只在 ≤480px 缩到 44px），
      所以整条覆盖删除，让 .w-title 在 860~481px 也保持 70px。 */
+  /* 第 62 轮：≤860 允许折行，评语长时整段换行而不是被压成省略号 */
+  .tl-body { flex-wrap: wrap; }
   .w-bar { padding: 18px 18px 4px; }
   .w-main { padding: 14px 18px 84px; }   /* 同上，窄屏加号占底部 66px */
   .w-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 28px 12px; }
@@ -596,6 +615,8 @@ select.w-input { cursor: pointer; }
   .poster-name { font-size: 13px; }
   .tl-item { padding: 12px 8px 12px 24px; gap: 14px; }
   .tl-thumb { width: 66px; }
+  /* 第 62 轮：窄屏一行装不下，评语整段折到下一行（其余仍横向并排） */
+  .tl-note { flex: 1 1 100%; white-space: normal; }
 }
 
 @media (prefers-reduced-motion: reduce) {

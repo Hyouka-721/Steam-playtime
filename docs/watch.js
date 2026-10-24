@@ -133,19 +133,21 @@
             '<div class="tl-thumb">' +
               '<img src="' + esc(it.poster) + '" alt="' + esc(it.title) + '" loading="lazy" decoding="async">' +
             '</div>' +
-            /* 2026-10-24 第 61 轮：按用户指定顺序竖排 ——
-               名称 / 英文名 / 日期 / 类别 / 上映时间 / 评级 / 评语，
-               每项独占一行（英文名从 h3 里拆出来，类别与年份也拆开）。 */
+            /* 2026-10-24 第 62 轮：改为横向一行 —— 名称与英文名同占一列（英文名在中文名正下方），
+               日期 / 类别 / 上映时间 / 评级 / 评语 与名称同一行依次排列，
+               顺序仍是 名称 → 英文名 → 日期 → 类别 → 上映时间 → 评级 → 评语。 */
             '<div class="tl-body">' +
-              '<h3 class="tl-name">' + esc(it.title) + '</h3>' +
-              (it.title_en ? '<p class="tl-en">' + esc(it.title_en) + '</p>' : '') +
+              '<div class="tl-head">' +
+                '<h3 class="tl-name">' + esc(it.title) + '</h3>' +
+                (it.title_en ? '<p class="tl-en">' + esc(it.title_en) + '</p>' : '') +
+              '</div>' +
               '<div class="tl-meta">' +
                 '<span class="tl-date">' + (it.watched_at ? esc(it.watched_at) : '时间未知') + '</span>' +
                 '<span class="tl-kind">' + kindLabel(it.kind) + '</span>' +
                 (it.year ? '<span class="tl-year">' + esc(it.year) + '</span>' : '') +
                 scoreHtml(it.rating, 'tl-score') +
               '</div>' +
-              (it.note ? '<p class="tl-note">' + esc(it.note) + '</p>' : '') +
+              (it.note ? '<p class="tl-note" title="' + esc(it.note) + '">' + esc(it.note) + '</p>' : '') +
             '</div>' +
           '</article>';
       }).join('');
