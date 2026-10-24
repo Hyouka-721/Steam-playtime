@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T22:56:03+08:00",
+  "updated_at": "2026-10-24T22:59:34+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -77,6 +77,19 @@
         "奇幻"
       ],
       "note": "未披锦襕袈裟者，亦是菩提树下人"
+    },
+    {
+      "id": "2026-05-19-the-million-pound-note",
+      "title": "百万英镑",
+      "kind": "movie",
+      "watched_at": "2026-05-19",
+      "poster": "img/watch/the-million-pound-note-703e3519.webp",
+      "poster_w": 640,
+      "poster_h": 977,
+      "title_en": "The Million Pound Note",
+      "year": 1954,
+      "rating": 8.5,
+      "note": "金钱的象征"
     },
     {
       "id": "2026-05-09-titanic",
