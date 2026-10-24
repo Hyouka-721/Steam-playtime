@@ -161,12 +161,16 @@ code {
 .w-count { font-size: 13px; color: var(--text-dim); letter-spacing: .4px; font-variant-numeric: tabular-nums; }
 
 /* ================= 网格视图（豆瓣式海报墙）================= */
-.w-main { padding: 18px 28px 60px; }
+.w-main { padding: 18px 28px 96px; }   /* 第 60 轮：底部 60 -> 96，滚到底时最后一行不会被右下角加号（底部占 82px）压住 */
 
 .w-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
-  gap: 26px 20px;
+  /* 2026-10-24 第 60 轮：海报放大到 1.5 倍。minmax 156 -> 234（156×1.5）；
+     列间距 20 -> 12，让常见桌面宽度仍保持 5 列 —— 1440 实测列宽 267.19（1.48×）、
+     1280 实测 235.19（1.49×）。行间距 26 -> 34 同步放大，大图上下才不贴。
+     注意：auto-fill + 1fr 的列数只能取整，所以「恰好 1.5 倍」只在部分宽度成立。 */
+  grid-template-columns: repeat(auto-fill, minmax(234px, 1fr));
+  gap: 34px 12px;
   align-items: start;
 }
 .w-grid[hidden] { display: none; }
@@ -284,16 +288,18 @@ code {
 }
 
 .tl-item {
-  display: flex; gap: 16px;
-  padding: 10px 14px 10px 30px;
+  display: flex; gap: 18px; align-items: center;   /* 文字块比缩略图矮时垂直居中，不贴着图顶 */
+  padding: 14px 16px 14px 30px;
   border-radius: 12px;
   transition: background .18s;
 }
+/* 2026-10-24 第 60 轮：条目之间留缝 —— 原来靠 padding 首尾相接，视觉上挤成一整块 */
+.tl-item + .tl-item { margin-top: 6px; }
 .tl-item:hover { background: rgba(255, 255, 255, 0.028); }
 
 .tl-thumb {
   flex: 0 0 auto;
-  width: 62px;
+  width: 76px;
   aspect-ratio: 2 / 3;
   border-radius: 8px;
   overflow: hidden;
@@ -304,20 +310,20 @@ code {
 
 .tl-body { min-width: 0; flex: 1 1 auto; }
 .tl-name {
-  margin: 0 0 2px;
-  font-size: 15px; font-weight: 600;
+  margin: 0 0 5px;
+  font-size: 15px; font-weight: 600; line-height: 1.35;
   color: var(--text-strong);
   word-break: break-word;
 }
-.tl-en { font-size: 12.5px; font-weight: 400; color: var(--text-dim); margin-left: 8px; }
+.tl-en { font-size: 12.5px; font-weight: 400; color: var(--text-dim); margin-left: 10px; }
 .tl-sub {
-  font-size: 12.5px; color: var(--text-dim);
+  font-size: 12.5px; line-height: 1.5; color: var(--text-dim);
   font-variant-numeric: tabular-nums;
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
 }
 .tl-sub .tl-score { color: var(--accent); font-weight: 600; }
 .tl-sub .tl-score i { font-style: normal; font-size: 10px; opacity: .85; }
-.tl-note { margin: 6px 0 0; font-size: 13px; line-height: 1.62; color: #a8a8b4; word-break: break-word; }
+.tl-note { margin: 10px 0 0; font-size: 13px; line-height: 1.7; color: #a8a8b4; word-break: break-word; }
 
 /* ================= 空态 / 页脚 ================= */
 .w-empty {
@@ -558,8 +564,8 @@ select.w-input { cursor: pointer; }
      但首页 .site-title 在 ≤860px 不缩、仍 70px（它只在 ≤480px 缩到 44px），
      所以整条覆盖删除，让 .w-title 在 860~481px 也保持 70px。 */
   .w-bar { padding: 18px 18px 4px; }
-  .w-main { padding: 14px 18px 48px; }
-  .w-grid { grid-template-columns: repeat(auto-fill, minmax(126px, 1fr)); gap: 22px 14px; }
+  .w-main { padding: 14px 18px 84px; }   /* 同上，窄屏加号占底部 66px */
+  .w-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 28px 12px; }
   .poster-note { display: none; }       /* 窄屏优先保证海报与标题，短评移入详情不显示 */
   .w-foot { padding: 8px 18px 36px; }
 }
@@ -573,10 +579,10 @@ select.w-input { cursor: pointer; }
   .w-home { width: 88px; height: 88px; }   /* 与首页 .logo 的 88px 同值（style.css ≤480px 断点） */
   .w-avatar { width: 88px; height: 88px; } /* 与首页 .header-avatar 的 88px 同值 */
   .w-title { font-size: 44px; letter-spacing: 1px; }   /* 首页 ≤480px 也是 44px，不缩 */
-  .w-grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 18px 12px; }
+  .w-grid { grid-template-columns: repeat(auto-fill, minmax(156px, 1fr)); gap: 24px 10px; }
   .poster-name { font-size: 13px; }
-  .tl-item { padding: 8px 6px 8px 24px; gap: 12px; }
-  .tl-thumb { width: 52px; }
+  .tl-item { padding: 12px 8px 12px 24px; gap: 14px; }
+  .tl-thumb { width: 66px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
