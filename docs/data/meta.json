@@ -2,18 +2,18 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-23T19:23:52.664Z",
-  "generated_at_local": "2026-10-24",
+  "generated_at": "2026-10-24T18:16:39.997Z",
+  "generated_at_local": "2026-10-25",
   "tracking_since": "2026-10-13",
-  "last_snapshot_date": "2026-10-23",
+  "last_snapshot_date": "2026-10-24",
   "steamid_hash": "a8474caf",
   "months": [
     "2026-10"
   ],
   "ach_stats": {
-    "unlocked": 835,
+    "unlocked": 837,
     "total": 2504,
-    "pct": 33.3,
+    "pct": 33.4,
     "games": 31
   },
   "ach_perfect": [
@@ -26,17 +26,17 @@
     "990630"
   ],
   "stats": {
-    "lifetime_minutes": 82668,
-    "lifetime_hours": 1377.8,
+    "lifetime_minutes": 82911,
+    "lifetime_hours": 1381.9,
     "owned_games": 53,
     "lifetime_played_games": 38,
-    "total_minutes": 944,
-    "total_hours": 15.7,
-    "tracked_days": 10,
-    "active_days": 9,
-    "current_streak": 2,
+    "total_minutes": 1187,
+    "total_hours": 19.8,
+    "tracked_days": 11,
+    "active_days": 10,
+    "current_streak": 3,
     "longest_streak": 7,
-    "week_minutes": 214,
+    "week_minutes": 457,
     "played_games": 6,
     "best_day": {
       "date": "2026-10-18",
@@ -48,9 +48,9 @@
       "appid": "105600",
       "name": "泰拉瑞亚",
       "img_icon_url": "858961e95fbf869f136e1770d586e0caefd4cfac",
-      "total_minutes": 71,
+      "total_minutes": 224,
       "first_day": "2026-10-17",
-      "last_day": "2026-10-19"
+      "last_day": "2026-10-24"
     },
     "227300": {
       "appid": "227300",
@@ -64,9 +64,9 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "total_minutes": 527,
+      "total_minutes": 616,
       "first_day": "2026-10-13",
-      "last_day": "2026-10-23"
+      "last_day": "2026-10-24"
     },
     "431960": {
       "appid": "431960",
@@ -80,9 +80,9 @@
       "appid": "646570",
       "name": "杀戮尖塔",
       "img_icon_url": "33ea124ea8c03a9ce7012d34c3b348a351612fca",
-      "total_minutes": 206,
+      "total_minutes": 207,
       "first_day": "2026-10-16",
-      "last_day": "2026-10-22"
+      "last_day": "2026-10-24"
     },
     "3009140": {
       "appid": "3009140",
@@ -112,8 +112,8 @@
       "appid": "105600",
       "name": "泰拉瑞亚",
       "img_icon_url": "858961e95fbf869f136e1770d586e0caefd4cfac",
-      "lifetime_minutes": 9793,
-      "last_played": "2026-10-19"
+      "lifetime_minutes": 9946,
+      "last_played": "2026-10-24"
     },
     "227300": {
       "appid": "227300",
@@ -126,8 +126,8 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "lifetime_minutes": 747,
-      "last_played": "2026-10-23"
+      "lifetime_minutes": 836,
+      "last_played": "2026-10-24"
     },
     "250900": {
       "appid": "250900",
@@ -287,8 +287,8 @@
       "appid": "646570",
       "name": "杀戮尖塔",
       "img_icon_url": "33ea124ea8c03a9ce7012d34c3b348a351612fca",
-      "lifetime_minutes": 29998,
-      "last_played": "2026-10-22"
+      "lifetime_minutes": 29999,
+      "last_played": "2026-10-24"
     },
     "683320": {
       "appid": "683320",

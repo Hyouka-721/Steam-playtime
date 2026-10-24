@@ -3,7 +3,7 @@
   "month": "2026-10",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-23T19:23:52.539Z",
+  "generated_at": "2026-10-24T18:16:39.872Z",
   "days": {
     "2026-10-13": {
       "total_minutes": 49,
@@ -232,6 +232,33 @@
           "appid": "3009140",
           "name": "Salt Player for Windows",
           "minutes": 3,
+          "is_new": false
+        }
+      ]
+    },
+    "2026-10-24": {
+      "total_minutes": 243,
+      "span_days": 1,
+      "confidence": "high",
+      "source": "auto",
+      "flags": [],
+      "games": [
+        {
+          "appid": "105600",
+          "name": "Terraria",
+          "minutes": 153,
+          "is_new": false
+        },
+        {
+          "appid": "246420",
+          "name": "Kingdom Rush",
+          "minutes": 89,
+          "is_new": false
+        },
+        {
+          "appid": "646570",
+          "name": "Slay the Spire",
+          "minutes": 1,
           "is_new": false
         }
       ]
