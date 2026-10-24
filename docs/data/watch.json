@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T23:24:59+08:00",
+  "updated_at": "2026-10-24T23:34:14+08:00",
   "items": [
     {
       "id": "2026-10-24-swords-into-plowshares",
@@ -304,6 +304,19 @@
       "year": 1995,
       "rating": 8,
       "note": "Country roads take me home"
+    },
+    {
+      "id": "2024-11-09-item",
+      "title": "铃芽之旅",
+      "kind": "movie",
+      "watched_at": "2024-11-09",
+      "poster": "img/watch/item-782b5b7f.webp",
+      "poster_w": 640,
+      "poster_h": 903,
+      "title_en": "すずめの戸締まり",
+      "year": 2022,
+      "rating": 6.5,
+      "note": "旅途和废墟"
     }
   ]
 }
