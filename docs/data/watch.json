@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T23:36:50+08:00",
+  "updated_at": "2026-10-24T23:38:17+08:00",
   "items": [
     {
       "id": "2026-10-24-swords-into-plowshares",
@@ -330,6 +330,19 @@
       "year": 2023,
       "rating": 9,
       "note": "他只是做了一件正确的事"
+    },
+    {
+      "id": "2024-03-11-oppenheimer",
+      "title": "奥本海默",
+      "kind": "movie",
+      "watched_at": "2024-03-11",
+      "poster": "img/watch/oppenheimer-04368923.webp",
+      "poster_w": 640,
+      "poster_h": 948,
+      "title_en": "Oppenheimer",
+      "year": 2023,
+      "rating": 8,
+      "note": "我正变成死亡，世界的毁灭者"
     }
   ]
 }
