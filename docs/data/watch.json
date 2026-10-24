@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T23:17:31+08:00",
+  "updated_at": "2026-10-24T23:19:40+08:00",
   "items": [
     {
       "id": "2026-10-24-swords-into-plowshares",
@@ -252,6 +252,19 @@
       "year": 2016,
       "rating": 9,
       "note": "不是所有人都能和过去和解"
+    },
+    {
+      "id": "2024-11-26-item",
+      "title": "风之谷",
+      "kind": "movie",
+      "watched_at": "2024-11-26",
+      "poster": "img/watch/item-82759817.webp",
+      "poster_w": 640,
+      "poster_h": 906,
+      "title_en": "風の谷のナウシカ",
+      "year": 1992,
+      "rating": 7,
+      "note": "娜乌西卡"
     }
   ]
 }
