@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T22:46:37+08:00",
+  "updated_at": "2026-10-24T22:48:46+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -111,6 +111,19 @@
       "year": 2017,
       "rating": 6.5,
       "note": "疲惫的战争片"
+    },
+    {
+      "id": "2025-04-03-heidi",
+      "title": "海蒂和爷爷",
+      "kind": "movie",
+      "watched_at": "2025-04-03",
+      "poster": "img/watch/heidi-48aa0042.webp",
+      "poster_w": 640,
+      "poster_h": 897,
+      "title_en": "Heidi",
+      "year": 2015,
+      "rating": 9,
+      "note": "生命的单纯和美好"
     }
   ]
 }
