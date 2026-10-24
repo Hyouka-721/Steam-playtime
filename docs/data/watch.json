@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T22:42:53+08:00",
+  "updated_at": "2026-10-24T22:46:37+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -98,6 +98,19 @@
       "year": 2013,
       "rating": 7,
       "note": "To see the world, to draw closer, to find each other"
+    },
+    {
+      "id": "2025-06-13-dunkirk",
+      "title": "敦刻尔克",
+      "kind": "movie",
+      "watched_at": "2025-06-13",
+      "poster": "img/watch/dunkirk-5730ef3d.webp",
+      "poster_w": 640,
+      "poster_h": 948,
+      "title_en": "Dunkirk",
+      "year": 2017,
+      "rating": 6.5,
+      "note": "疲惫的战争片"
     }
   ]
 }
