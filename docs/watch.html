@@ -8,7 +8,7 @@
 <link rel="icon" type="image/webp" href="img/minion-0ef9a202.webp">
 <!-- 与游戏站同一套本地花体字，保持品牌一致；preload + font-display:block 消除 FOUT -->
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="watch.css?v=2">
+<link rel="stylesheet" href="watch.css?v=3">
 </head>
 <body>
 
@@ -19,11 +19,13 @@
     <img src="img/minion-0ef9a202.webp" alt="小黄人" width="460" height="420" decoding="async">
   </a>
   <h1 class="w-title">My Watch List</h1>
-  <!-- 视图切换：网格 = 豆瓣式海报墙；时间轴 = 按观影时间倒序 -->
-  <div class="w-layout" role="group" aria-label="切换展示方式">
-    <button type="button" class="w-layout-btn is-on" data-layout="grid" aria-pressed="true">网格</button>
-    <button type="button" class="w-layout-btn" data-layout="timeline" aria-pressed="false">时间轴</button>
-  </div>
+  <!-- 史蒂夫：2026-10-24 第 56 轮从首页复制过来，**位置与尺寸与首页 .header-avatar 完全一致**
+       （第三个 grid 单元、justify-self:end、132×132、≤480px 88×88、同一张素材、同一套 hover/active/focus 反馈）。
+       首页上它切换浅色主题，这里它切换**网格视图 ⇄ 时间轴视图**；
+       原来的「网格 / 时间轴」两个文字按钮已按用户确认由它取代（grid 视图 = 豆瓣式海报墙，
+       timeline 视图 = 按观影时间倒序）。aria-pressed 表示「时间轴是否开启」。 -->
+  <div class="w-avatar" id="w-avatar" role="button" tabindex="0"
+       aria-pressed="false" title="切换到时间轴视图" aria-label="切换到时间轴视图"></div>
 </header>
 
 <div class="w-bar">
@@ -63,6 +65,6 @@
   <a href="./">← 回到 My Game Time</a>
 </footer>
 
-<script src="watch.js?v=1"></script>
+<script src="watch.js?v=2"></script>
 </body>
 </html>

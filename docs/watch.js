@@ -18,7 +18,9 @@
   var emptyEl = document.getElementById('w-empty');
   var countEl = document.getElementById('w-count');
   var updatedEl = document.getElementById('w-updated');
-  var layoutBtns = Array.prototype.slice.call(document.querySelectorAll('.w-layout-btn'));
+  // 2026-10-24 第 56 轮：网格 / 时间轴改由史蒂夫头像单选切换（原 .w-layout-btn 组已删除），
+  // 头像同时负责 aria-pressed 与 title / aria-label 的动态同步。
+  var avatarEl = document.getElementById('w-avatar');
   var kindBtns = Array.prototype.slice.call(document.querySelectorAll('.w-seg-btn'));
 
   var ALL = [];             // 全量数据（已按观影时间倒序）
@@ -174,13 +176,20 @@
   }
 
   /* ---------- 视图 / 筛选切换（状态持久化） ---------- */
+  // 头像的可见状态：aria-pressed = 「时间轴是否开启」；
+  // title / aria-label 描述「点下去会发生什么」，与首页 syncThemeUi() 的写法一致。
+  function syncAvatar() {
+    if (!avatarEl) return;
+    var timeline = layout === 'timeline';
+    avatarEl.setAttribute('aria-pressed', timeline ? 'true' : 'false');
+    var label = timeline ? '切换到网格视图' : '切换到时间轴视图';
+    avatarEl.title = label;
+    avatarEl.setAttribute('aria-label', label);
+  }
+
   function setLayout(next, silent) {
     layout = next === 'timeline' ? 'timeline' : 'grid';
-    layoutBtns.forEach(function (b) {
-      var on = b.getAttribute('data-layout') === layout;
-      b.classList.toggle('is-on', on);
-      b.setAttribute('aria-pressed', on ? 'true' : 'false');
-    });
+    syncAvatar();
     try { localStorage.setItem(LAYOUT_KEY, layout); } catch (e) {}
     if (!silent) paint();
   }
@@ -196,9 +205,18 @@
     if (!silent) paint();
   }
 
-  layoutBtns.forEach(function (b) {
-    b.addEventListener('click', function () { setLayout(b.getAttribute('data-layout')); });
-  });
+  // 史蒂夫：点一下在网格 / 时间轴之间切换；键盘 Enter / 空格同样可用
+  // （事件与 preventDefault 写法照搬首页 bindFlip，保证两页交互手感一致）
+  if (avatarEl) {
+    var toggleLayout = function () { setLayout(layout === 'grid' ? 'timeline' : 'grid'); };
+    avatarEl.addEventListener('click', toggleLayout);
+    avatarEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleLayout();
+      }
+    });
+  }
   kindBtns.forEach(function (b) {
     b.addEventListener('click', function () { setKind(b.getAttribute('data-kind')); });
   });

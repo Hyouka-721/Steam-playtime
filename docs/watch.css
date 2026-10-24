@@ -76,7 +76,9 @@ code {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 16px;
-  padding: 18px 28px;
+  /* 2026-10-24 第 56 轮：18px → 20px，与首页 .site-header 的 20px 28px 对齐。
+     这样复制过来的史蒂夫 top / right 偏移与首页**逐像素相同**，页眉总高同为 173px。 */
+  padding: 20px 28px;
   background: var(--header-bg);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
@@ -113,26 +115,21 @@ code {
   text-shadow: 0 0 26px rgba(232, 176, 75, 0.18);
 }
 
-.w-layout {
+/* 史蒂夫：与首页 style.css 的 .header-avatar **逐条同值**（同一素材、同一尺寸、同一套反馈），
+   2026-10-24 第 56 轮复制到观影页，职责 = 网格视图 ⇄ 时间轴视图 的切换器
+   （原「网格 / 时间轴」文字按钮组已按用户确认删除）。
+   想改这里先看 style.css:279 的 .header-avatar，两处必须同步，否则两页会出现「同图不同手感」。 */
+.w-avatar {
+  width: 132px; height: 132px;
+  background: url("img/steve-ceb15b8a.webp") center / contain no-repeat;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
   justify-self: end;
-  display: flex; gap: 4px;
-  padding: 4px;
-  background: var(--panel);
-  border: 1px solid var(--card-border);
-  border-radius: 11px;
+  cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+  transition: transform .18s ease;
 }
-.w-layout-btn {
-  appearance: none; border: 0; background: none;
-  padding: 7px 16px;
-  font: inherit; font-size: 13.5px;
-  color: var(--text-dim);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: color .16s, background .16s;
-}
-.w-layout-btn:hover { color: var(--text); }
-.w-layout-btn.is-on { color: #1a1408; background: linear-gradient(150deg, var(--accent), var(--accent-2)); font-weight: 600; }
-.w-layout-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.w-avatar:hover { transform: scale(1.05); }
+.w-avatar:active { transform: scale(0.96); }
+.w-avatar:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 12px; }
 
 /* ================= 筛选条 ================= */
 .w-bar {
@@ -363,11 +360,10 @@ code {
 
 /* ================= 响应式 ================= */
 @media (max-width: 860px) {
-  .w-header { padding: 14px 18px; gap: 10px; }
+  .w-header { padding: 14px 16px; gap: 10px; }   /* 横向 18 -> 16，与首页 ≤860px 的 14px 16px 对齐 */
   /* 2026-10-24：这里原本写死 .w-home 60px，放大后取消该覆盖，
      图标与首页一样在 ≤860px 保持 132（间距靠 padding/gap 收紧，不再缩图标）。 */
   .w-title { font-size: 34px; letter-spacing: 1px; }
-  .w-layout-btn { padding: 6px 12px; font-size: 12.5px; }
   .w-bar { padding: 18px 18px 4px; }
   .w-main { padding: 14px 18px 48px; }
   .w-grid { grid-template-columns: repeat(auto-fill, minmax(126px, 1fr)); gap: 22px 14px; }
@@ -378,6 +374,7 @@ code {
 @media (max-width: 480px) {
   .w-header { grid-template-columns: auto 1fr auto; }
   .w-home { width: 88px; height: 88px; }   /* 与首页 .logo 的 88px 同值（style.css ≤480px 断点） */
+  .w-avatar { width: 88px; height: 88px; } /* 与首页 .header-avatar 的 88px 同值 */
   .w-title { font-size: 26px; letter-spacing: 0; }
   .w-grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 18px 12px; }
   .poster-name { font-size: 13px; }
