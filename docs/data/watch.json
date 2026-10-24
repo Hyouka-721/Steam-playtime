@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T22:52:37+08:00",
+  "updated_at": "2026-10-24T22:54:27+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -34,6 +34,19 @@
         "冒险"
       ],
       "note": "成长，就是有能力重建破碎的自己"
+    },
+    {
+      "id": "2026-09-26-f1-the-movie",
+      "title": "F1：狂飙飞车",
+      "kind": "movie",
+      "watched_at": "2026-09-26",
+      "poster": "img/watch/f1-the-movie-25578d79.webp",
+      "poster_w": 640,
+      "poster_h": 800,
+      "title_en": "F1: The Movie",
+      "year": 2025,
+      "rating": 8,
+      "note": "赛道即归途"
     },
     {
       "id": "2026-08-15-nobody",
