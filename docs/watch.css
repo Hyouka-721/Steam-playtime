@@ -314,12 +314,14 @@ code {
    字号沿用第 61 轮的 +2 档：名称 17 / 其余 14.5 / 评语 15。 */
 .tl-body {
   min-width: 0; flex: 1 1 auto;
-  display: flex; flex-wrap: nowrap; align-items: baseline;   /* 桌面必须单行：评语超长就省略，不许折行 */
+  display: flex; flex-wrap: nowrap; align-items: center;   /* 第 63 轮：改为垂直居中（原 baseline）；桌面不折行，超长评语走省略 */
   gap: 6px 18px;
 }
 /* 名称 + 英文名：上下堆叠的一小列，宽度按内容收缩 */
 .tl-head {
-  display: flex; flex-direction: column; gap: 1px;
+  /* 第 63 轮：中英文之间 1px → 12px（≈0.7 倍中文字号），两行之间有明显留白；
+     整块作为 .tl-body 的一个子项垂直居中 */
+  display: flex; flex-direction: column; gap: 12px;
   flex: 0 0 auto; min-width: 0;
 }
 .tl-name {
@@ -338,7 +340,7 @@ code {
 /* 日期 / 类别 / 上映时间 / 评级：横向并排，顺序固定 */
 .tl-meta {
   margin: 0;
-  display: flex; flex-direction: row; align-items: baseline; gap: 14px;
+  display: flex; flex-direction: row; align-items: center; gap: 14px;   /* 第 63 轮：同 baseline 视觉等价，统一写 center */
   flex: 0 0 auto;
   font-size: 14.5px; line-height: 1.35;
   color: var(--text-dim);
