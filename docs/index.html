@@ -28,7 +28,7 @@
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=103">
+<link rel="stylesheet" href="style.css?v=104">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -61,26 +61,11 @@
   </div>
   <h1 class="site-title" id="site-title" role="button" tabindex="0"
       title="点击返回顶部" aria-label="返回顶部">My Game Time</h1>
-  <!-- 右列 = 观影入口 + 史蒂夫头像（2026-10-24 第 2 版：图标从左侧移到标题与史蒂夫之间，
-       宽度缩到 72 × 0.8 = 57.6px）。用 flex 包一层，排列与间距都交给 .header-right 管，
-       避免为了塞进第 4 个子元素而改动 header 的三列网格。 -->
-  <div class="header-right">
-    <!-- 观影记录入口：三只小黄人叠挂。素材 minions-trio-562d4fc3.webp 已裁掉透明留白
-         （144×488 @2x），「可见 bbox == 元素尺寸」，故 CSS 只写 width、height:auto 由固有比例定高；
-         宽高属性写在这里用于占位防 CLS。点击 / 垂直拖拽 >70px 均进入 watch.html。 -->
-    <a class="watch-entry" id="watch-entry" href="watch.html" draggable="false"
-       title="进入观影记录" aria-label="进入观影记录">
-      <img src="img/minions-trio-562d4fc3.webp" alt="" width="144" height="488"
-           decoding="async" draggable="false">
-    </a>
-    <!-- Minecraft 史蒂夫+狼：2026-10-18 起改作「氛围特效」开关——
-         单击 开 / 关（仅流星一种效果，2026-10-18 按用户要求移除雨 / 雪），
-         状态由 title 文案标示。游玩日历入口已改为游戏累计列表首行日期上方的小日历图标。
-         不参与主题切换（主题切换仍由左侧小黄人承担） -->
-    <div class="header-avatar" id="fx-toggle" role="button" tabindex="0"
-         title="氛围效果：关 · 单击开启"
-         aria-label="氛围效果已关闭，单击开启"></div>
-  </div>
+  <!-- Minecraft 史蒂夫+狼：2026-10-24 起是**纯装饰**。
+       它原先承担的「氛围特效开关」已按用户要求移到页脚右侧的文字开关（#fx-seg），
+       故这里不再有 role / tabindex / title / id，也不参与主题切换
+       （主题切换仍由左侧小黄人承担）。aria-hidden 让读屏跳过这个装饰图。 -->
+  <div class="header-avatar" aria-hidden="true"></div>
 </header>
 
 <!-- 概览 · 五张统计卡（其中四张可点击导航，替代原 Tab 栏） -->
@@ -211,9 +196,19 @@
   <span class="dot">·</span>
   <span>数据每日 23:30（北京时间）自动更新</span>
   <span class="dot">·</span>
-  <!-- 观影记录的第二个入口：≤380px 时 header 里的三连挂图标会隐藏（那里三列排不下），
-       窄屏用户仍可从这里进入 -->
+  <!-- 观影记录入口（2026-10-24 起全站唯一入口：header 里的三连挂小黄人已按用户要求移除） -->
   <a class="footer-watch" href="watch.html">观影记录 →</a>
+  <!-- 氛围切换：关 / 流星 二选一（互斥，不叠加），选择记入 localStorage。
+       2026-10-24 由史蒂夫头像改回页脚文字开关（沿用此前一版的 .seg 分段控件外观）；
+       雨 / 雪 已于 2026-10-18 移除，故只剩两项。
+       .active / aria-pressed / 减少动效时禁用，全部由 fx.js 的 syncButtons() 统一负责。 -->
+  <span class="fx-switch">
+    <span class="fx-label">氛围</span>
+    <span class="seg" id="fx-seg" role="group" aria-label="背景氛围效果">
+      <button type="button" data-fx="off" class="active" aria-pressed="true">关</button>
+      <button type="button" data-fx="meteor" aria-pressed="false">流星</button>
+    </span>
+  </span>
 </footer>
 
 <!-- 游玩日历浮层（点击「最近游玩」首行日期上方的小日历图标打开；Esc / 点击空白处关闭）
@@ -274,8 +269,9 @@
   </div>
 </div>
 
-<!-- fx.js 先于 app.js 加载：app.js 绑定时需读取 window.__fx（特效状态的唯一来源） -->
-<script src="fx.js?v=15"></script>
-<script src="app.js?v=97" onerror="__appFail()"></script>
+<!-- fx.js 自己绑定页脚的氛围开关（#fx-seg），app.js 不再参与特效状态；
+     仍保持它先加载，任何外部脚本都能安全读取 window.__fx -->
+<script src="fx.js?v=16"></script>
+<script src="app.js?v=98" onerror="__appFail()"></script>
 </body>
 </html>

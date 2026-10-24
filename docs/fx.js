@@ -50,6 +50,7 @@
 
   /* ========================== ② 基础工具 ========================== */
   const canvas = document.getElementById('fx-canvas');
+  const seg = document.getElementById('fx-seg');
   if (!canvas || !canvas.getContext) return;
   const ctx = canvas.getContext('2d');
 
@@ -226,6 +227,23 @@
   }
 
   /* ========================== ⑦ 开关与状态 ========================== */
+
+  /** 把当前状态同步到页脚的分段控件：#fx-seg 里的按钮来自 data-fx */
+  function syncButtons() {
+    if (!seg) return;
+    const off = reduced.matches;
+    seg.querySelectorAll('button').forEach((b) => {
+      const fx = b.dataset.fx;
+      b.classList.toggle('active', fx === mode);
+      b.setAttribute('aria-pressed', fx === mode ? 'true' : 'false');
+      // 系统偏好「减少动态效果」时只允许「关」，并给出原因提示
+      const disabled = off && fx !== 'off';
+      b.disabled = disabled;
+      b.title = disabled ? '系统已开启「减少动态效果」，暂不启用动画' : '';
+      if (disabled && fx === mode) b.classList.remove('active');
+    });
+  }
+
   function setMode(next, persist) {
     const valid = next === 'off' || !!ENGINES[next];
     mode = valid ? next : 'off';
@@ -236,7 +254,8 @@
         /* 隐私模式下忽略 */
       }
     }
-    notifyFxChange(); // 外部 UI（史蒂夫头像）同步状态
+    syncButtons();
+    notifyFxChange(); // 外部 UI（页脚开关以外的监听者）同步状态
     if (!active()) {
       stop();
       clearCanvas();
@@ -258,6 +277,15 @@
   }
 
   /* ========================== ⑧ 事件绑定 ========================== */
+  // 页脚氛围切换器：点按钮 → setMode（与 __fx.toggle() 共用同一套状态）
+  if (seg) {
+    seg.addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b || b.disabled) return;
+      if (b.dataset.fx !== mode) setMode(b.dataset.fx);
+    });
+  }
+
   // 切标签 / 最小化 → 暂停；回来 → 续播
   document.addEventListener('visibilitychange', () => {
     if (!active()) {
@@ -296,6 +324,7 @@
   /* ========================== ⑨ 启动 ========================== */
   resize();
   refreshColors();
+  syncButtons();
   // 默认开着；但系统要求减少动效、且用户从未显式选择过时，保持"关"——
   // 不替系统偏好做决定（显式选过则尊重其选择）
   let initial = readStored();
@@ -306,6 +335,7 @@
   }
   if (initial !== 'off' && ENGINES[initial]) {
     mode = initial;
+    syncButtons();
     if (active()) {
       ENGINES[mode].build();
       start();
@@ -315,8 +345,8 @@
   /* ========================== ⑩ 对外最小 API ==========================
    * 供页面元素复用同一套状态管理（开关 + localStorage），避免第二份真相：
    * · mode()       当前状态（'off' | 'meteor'）
-   * · toggle()     单击语义（史蒂夫头像）：关 → 开；开 → 关
-   * · onChange(cb) 状态每次变化后触发（头像同步；系统偏好变化也含）
+   * · toggle()     单击语义（两态互换）：关 → 开；开 → 关
+   * · onChange(cb) 状态每次变化后触发（外部 UI 同步；系统偏好变化也含）
    * 注意：index.html 中本脚本先于 app.js 加载，保证 app.js 绑定时就已就绪。 */
   const fxListeners = [];
   function notifyFxChange() {

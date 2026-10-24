@@ -20,7 +20,6 @@
   font-display: block;
 }
 
-
 /* ⑥ 暖阳米：米白底 + 暖橙强调（浅色） */
 :root,
 [data-theme="cream"] {
@@ -228,81 +227,13 @@ a { color: var(--accent); }
 .site-header {
   display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
   gap: 16px;
-  padding: var(--header-pad-y, 20px) 28px;
+  padding: 20px 28px;
   background: var(--header-bg);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
   position: sticky; top: 0; z-index: 10;
 }
 .brand { display: flex; align-items: center; gap: 16px; justify-self: start; }
-/* 右列容器（2026-10-24 第 2 版新增）：观影入口 + 史蒂夫头像。
-   单独包一层 flex，而不是给 header 加第 4 个 grid 子元素——
-   header 是 1fr auto 1fr 三列，多一个子项会换行，改网格又会牵动标题居中。 */
-.header-right {
-  justify-self: end;
-  display: flex; align-items: center; gap: 16px;
-  /* 必须贴内容区顶边：≤720px 时标题换行会把行高撑到 200px 以上，
-     若继续 center 居中，图标的负 margin 就不足以把它推到页面最顶端
-     （实测 720px 落在 y=43、390px 落在 y=58）。宽屏下行高等于右列高，start 与 center 等效。 */
-  align-self: start;
-}
-
-/* ===== 观影记录入口 · 三只小黄人叠挂（2026-10-24 新增，第 2 版移到右列）=====
-   素材 minions-trio-562d4fc3.webp 已裁掉透明留白，「可见 bbox == 元素尺寸」，
-   固有比例 144:488（≈1:3.389）。**只写 width，height 交给固有比例**——
-   改宽度时不会失真。宽高属性在 HTML 里已写 144×488 用于占位防 CLS。
-   --watch-icon-w 是唯一的宽度开关：57.6px（= 首版 72px × 0.8）→ 高 ≈195.2px
-   （alies 计算：图标高 = 宽度 × 488/144 = 宽度 × 3.3889；header 高 = 图标高 − 20 + 40） */
-:root { --watch-icon-w: 57.6px; --header-pad-y: 20px; }
-.watch-entry {
-  display: block; flex-shrink: 0;
-  width: var(--watch-icon-w); height: auto;
-  align-self: start;          /* 覆盖 .brand 的 align-items:center，顶部对齐内容区顶边 */
-  /* 抵消 .site-header 的 padding-top → 图标上部贴到页面最顶端。
-     必须用变量而不能写死 -20px：≤860px 时 header padding 会降到 14px，
-     写死就会把图标顶出页面上沿 6px */
-  margin-top: calc(-1 * var(--header-pad-y, 20px));
-  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.32));
-  cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
-  transition: transform .18s ease;
-}
-/* 两层分工：外层 a 只负责位移（下沉/拖拽/坠落），内层 img 只负责摆动装饰，
-   两者作用在不同元素上，不会互相覆盖 transform。
-   摆动只在 hover 时触发——常驻动画会一直动，费电且干扰阅读（也别让自动化测试永远等不到 stable）。 */
-.watch-entry img {
-  display: block; width: 100%; height: auto;
-  user-select: none; -webkit-user-drag: none;
-  transform-origin: 50% 0;    /* 摆轴放在最上面那只举起的手上，像被挂在顶部 */
-}
-.watch-entry:hover { transform: translateY(7px); }
-.watch-entry:hover img { animation: watch-swing 1.9s ease-in-out infinite; }
-.watch-entry:active { transform: translateY(16px); }
-.watch-entry:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 12px; }
-/* 拖拽中：跟随指针纵向位移（--drag-y 由 app.js 实时写入） */
-.watch-entry.is-dragging { transition: none; transform: translateY(var(--drag-y, 0px)); }
-.watch-entry.is-dragging img { animation: none; }
-/* 点击 / 拖拽达标后的「坠落」过场 */
-.watch-entry.is-leaving {
-  transform: translateY(120px) scale(0.88) rotate(3deg);
-  opacity: 0;
-  transition: transform .42s cubic-bezier(.36, 0, .86, 1), opacity .42s ease-in;
-}
-.watch-entry.is-leaving img { animation: none; }
-@keyframes watch-swing {
-  0%, 100% { transform: rotate(-1.6deg) translateY(0); }
-  50%      { transform: rotate(1.6deg) translateY(4px); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .watch-entry:hover img { animation: none; }
-  .watch-entry.is-leaving { transition: opacity .2s linear; }
-}
-/* 窄屏同步缩小，避免超长纵向图标把 sticky header 撑得过高（均为首版 × 0.8） */
-@media (max-width: 860px) { :root { --watch-icon-w: 44.8px; } }
-@media (max-width: 480px) { :root { --watch-icon-w: 32px; } }
-/* ≤380px（如 360px 宽的安卓机）：header 的 1fr auto 1fr 三列装不下
-   「标题 + 右列（图标 + gap + 头像 88）」，实测文档会横向溢出。
-   这里把 header 内的图标收起，改走页脚的 .footer-watch 入口。 */
-@media (max-width: 380px) { .watch-entry { display: none; } }
 
 /* 2026-10-18 站标与史蒂夫头像同比放大 ×1.222（108 → 132px），保持原比例不失真；
    两者用同一缩放系数，视觉体量一致。≤480px 断点同步 72 → 88px。 */
@@ -335,30 +266,17 @@ a { color: var(--accent); }
    用户满意后可随时恢复（快照 index_with_gametime_v49_snapshot.html）。 */
 /* 2026-10-18 首屏优化：.subtitle / .header-meta 已无引用（旧页头元素），删除 */
 /* 头像：CSS 背景呈现，不可拖动/另存。
-   2026-10-18 换成 Minecraft 史蒂夫+狼（原 docs/minecraft.png 438×423 RGBA，
-   同日夜首屏优化时压到 264×255/64 色并内联为 data URI，源文件已删），
-   并**移除「点击切换主题」交互**（原来绑在它身上的主题切换逻辑已删）；
-   2026-10-18 职能再对调：头像改为**氛围特效开关**（单击 开 / 关；
-   2026-10-18 按用户要求仅保留流星一种效果，雨 / 雪已移除），
-   日历入口移到游戏累计列表首行日期上方的小日历图标。
-   2026-10-18 按用户要求**移除全部边框装饰**（原有效果状态环/外框/背景框已删），
-   呈现干净的无框显示；当前特效状态仅由 title 提示文案承载（悬停可见）。
-   指针态与 hover/active 反馈保留（与左侧站标同一套手感），focus-visible
-   的键盘焦点环也保留（仅 Tab 聚焦时出现，属可访问性设施，非装饰边框）。
+   2026-10-18 换成 Minecraft 史蒂夫+狼（264×255 / 64 色，后改外部 WebP）。
+   2026-10-24 按用户要求**移除它的氛围特效开关职能**（改由页脚 #fx-seg 文字开关承担）：
+   role / tabindex / title / cursor:pointer / hover 缩放 / focus 环全部删除，
+   现在是纯装饰（HTML 上加了 aria-hidden="true"），只保留尺寸、背景与投影。
    注意：contain 保证等比不拉伸；去掉 scaleX(-1) 保持原图朝向。 */
 .header-avatar {
   width: 132px; height: 132px;
   background: url("img/steve-ceb15b8a.webp") center / contain no-repeat;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
-  flex-shrink: 0;
   justify-self: end;
-  cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
-  transition: transform .18s ease;
 }
-.header-avatar:hover { transform: scale(1.05); }
-.header-avatar:active { transform: scale(0.96); }
-.header-avatar:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 12px; }
-
 /* 切换主题时的一闪提示 */
 .toast {
   position: fixed; left: 50%; bottom: 34px; transform: translateX(-50%);
@@ -1224,17 +1142,28 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
 }
 .dot { opacity: .5; }
-/* 观影记录的第二个入口（页脚）。桌面与窄屏都保留，不只当窄屏兜底 */
+/* 观影记录入口（页脚）。2026-10-24 起是全站唯一入口（header 里的三连挂图标已移除） */
 .footer-watch { color: var(--text-faint); text-decoration: none; border-bottom: 1px solid transparent; transition: color .15s, border-color .15s; }
 .footer-watch:hover { color: var(--accent); border-bottom-color: var(--tint-border); }
 .footer-watch:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 5px; }
+/* 页脚右侧的「氛围」切换器（2026-10-24 从史蒂夫头像改回此处）：
+   直接复用已有的 .seg 分段控件样式，只把尺寸压小并贴右（margin-left:auto）。 */
+.fx-switch {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-left: auto;
+}
+.fx-label { font-size: 12px; color: var(--text-faint); letter-spacing: .5px; }
+.fx-switch .seg button { padding: 3px 11px; font-size: 12px; line-height: 1.5; }
+.fx-switch .seg button[disabled] { opacity: .45; cursor: not-allowed; }
+.fx-switch .seg button[disabled]:hover { border-color: var(--border); }
 
 @media (max-width: 860px) {
-  :root { --header-pad-y: 14px; }   /* header padding 变矮，观影图标靠它同步收紧 */
   .cards { padding: 26px 16px 8px; }
   .view { padding: 22px 16px 8px; }
   .tabs { padding: 12px 16px 0; }
-  .site-header { padding: var(--header-pad-y, 14px) 16px; }
+  .site-header { padding: 14px 16px; }
+  /* 窄屏页脚会换行，氛围切换器占满一行并靠右 */
+  .fx-switch { margin-left: 0; width: 100%; justify-content: flex-end; }
   .rank-item { grid-template-columns: 34px 100px 1fr auto; }
   /* 窄屏：图片 100×46（网格列宽仍按 100px 留位，外框的 2px 由负 margin 溢出吸收），
      外框 = 图片 + 2×环厚 = 104×50。图片尺寸由 .rank-capsule-wrap > .rank-capsule

@@ -511,45 +511,6 @@
     });
   }
 
-  /* ---- 右上史蒂夫头像 → 氛围特效开关 ----
-   * 单击：开 → 关 → 开 ……（2026-10-18 起仅剩流星一种效果，策略在 fx.js 的
-   * toggle()；此前的 雨/雪/流星 循环与「双击关闭」已按用户要求整体移除）。
-   * 状态提示（title 文案）由 syncSteveFx 统一同步。 */
-  const FX_NAME = '流星';
-
-  /** 同步头像的特效状态标识：data-fx（状态标记）+ title 文案 */
-  function syncSteveFx() {
-    const el = $('fx-toggle');
-    if (!el) return;
-    const m = window.__fx ? window.__fx.mode() : 'off';
-    if (m === 'off') delete el.dataset.fx;
-    else el.dataset.fx = m;
-    el.title = m === 'off'
-      ? '氛围效果：关 · 单击开启'
-      : `氛围效果：${FX_NAME} · 单击关闭`;
-    el.setAttribute('aria-label', m === 'off' ? '氛围效果已关闭，单击开启' : `氛围效果：${FX_NAME}`);
-  }
-
-  /** 头像被激活（点击 / 回车 / 空格）→ 开关特效 */
-  function onSteveActivate() {
-    const fx = window.__fx;
-    if (!fx) return;
-    const before = fx.mode();
-    const after = fx.toggle();
-    // 被系统「减少动态效果」拦住（状态没变）→ 给个两秒临时说明
-    if (after === before && before === 'off') flashSteve('系统已开启「减少动态效果」，暂不启用动画');
-  }
-
-  /** 在头像 title 上显示 2 秒临时说明（不改变任何状态） */
-  function flashSteve(text) {
-    const el = $('fx-toggle');
-    if (!el) return;
-    el.title = text;
-    setTimeout(() => {
-      if (el.isConnected && el.title === text) syncSteveFx();
-    }, 2000);
-  }
-
   // ---------- ①b 最近游玩（近两周时长） ----------
   // 2026-10-22：头部「近 14 天 · 共 N 款游戏」提示行已按用户要求删除，
   // #recent-hint 元素与这里的两处赋值一并移除（不再有 hint 引用）。
@@ -1504,26 +1465,9 @@
         }
       });
     };
-    // 只有站标（小黄人）绑定主题切换；史蒂夫头像是氛围特效开关（下方），
+    // 只有站标（小黄人）绑定主题切换；氛围特效开关在页脚（fx.js 自己绑定 #fx-seg），
     // 游玩日历入口是「最近游玩」首行日期上方的小日历图标（全站唯一）。
     bindFlip($('theme-light'), 'light');
-
-    // 史蒂夫头像 → 氛围特效开关（单击 开 / 关，仅流星；
-    // 回车 / 空格同样支持，长按重复不算多次激活）。
-    const steve = $('fx-toggle');
-    if (steve) {
-      steve.addEventListener('click', onSteveActivate);
-      steve.addEventListener('keydown', (e) => {
-        if (e.repeat) return;
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onSteveActivate();
-        }
-      });
-      syncSteveFx();
-    }
-    // 特效状态变化（头像开关 / 系统偏好）→ 同步头像的提示文案
-    if (window.__fx && window.__fx.onChange) window.__fx.onChange(syncSteveFx);
 
     // 日历浮层：上下月、关闭、点空白关闭、二级界面返回/关闭、点有记录的日期看当天明细
     $('cal-prev').addEventListener('click', () => stepMonth(-1));
@@ -1653,83 +1597,4 @@
       showFatal('页面初始化出错');
     }
   })();
-})();
-
-/* ===== 观影记录入口交互（2026-10-24 新增，独立 IIFE，不碰上方任何逻辑）=====
-   需求：点击进入 watch.html；同时兼容「垂直向下拖拽 >70px」触发。
-   设计取舍：
-   · 保留 <a href> 的语义与键盘可达性：Ctrl/⌘/Shift+点击 与 中键仍走浏览器原生（新标签）
-   · 不设 touch-action:none，页面照常滚动；靠「纵向位移明显大于横向」判断拖拽意图，避免抢滚动
-   · 拖拽用 setPointerCapture，否则元素跟随下移时指针会离开元素、手势被中断
-   · 过场时长 LEAVE_MS 与 style.css 里 .is-leaving 的 .42s 对齐，改一个要同步改另一个 */
-(function () {
-  var el = document.getElementById('watch-entry');
-  if (!el) return;
-
-  var THRESHOLD = 70;   // 拖拽触发阈值（px）
-  var LEAVE_MS = 420;   // 与 CSS .is-leaving transition 的 .42s 对齐
-  var startY = 0, startX = 0, curY = 0;
-  var dragging = false, leaved = false, pid = null;
-
-  function leave() {
-    if (leaved) return;
-    leaved = true;
-    dragging = false;
-    el.classList.remove('is-dragging');
-    el.classList.add('is-leaving');
-    el.style.removeProperty('--drag-y');
-    setTimeout(function () { location.href = el.getAttribute('href'); }, LEAVE_MS);
-  }
-
-  // 双保险：<a> 默认是可拖拽对象，浏览器会把它识别成原生链接拖拽，
-  // 原生拖拽一旦开始就会派发 pointercancel，把下面的自定义拖拽手势直接打断。
-  // 因此必须同时用 draggable="false"（HTML 侧）+ 这里 preventDefault 关掉。
-  el.addEventListener('dragstart', function (e) { e.preventDefault(); });
-  el.addEventListener('click', function (e) {
-    // 带修饰键或非主键：交回浏览器原生行为（新标签打开等）
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    e.preventDefault();
-    leave();
-  });
-
-  el.addEventListener('pointerdown', function (e) {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    dragging = true;
-    startY = curY = e.clientY;
-    startX = e.clientX;
-    pid = e.pointerId;
-    if (!leaved) { el.classList.remove('is-leaving'); el.style.removeProperty('--drag-y'); }
-    try { el.setPointerCapture(e.pointerId); } catch (_) {}
-  });
-
-  el.addEventListener('pointermove', function (e) {
-    if (!dragging || e.pointerId !== pid) return;
-    curY = e.clientY;
-    var dy = curY - startY;
-    var dx = e.clientX - startX;
-    // 纵向意图明显（向下且 |dy| > |dx|）才接管，否则视作普通点击 / 页面滚动
-    if (dy > 12 && Math.abs(dy) > Math.abs(dx)) {
-      el.classList.add('is-dragging');
-      el.style.setProperty('--drag-y', Math.min(dy, 160) + 'px');
-      if (dy >= THRESHOLD) leave();
-    }
-  });
-
-  function endDrag(e) {
-    if (!dragging) return;
-    dragging = false;
-    pid = null;
-    try { el.releasePointerCapture(e.pointerId); } catch (_) {}
-    if (el.classList.contains('is-dragging')) {
-      el.classList.remove('is-dragging');
-      el.style.setProperty('--drag-y', '0px');   // 未达阈值则回弹
-      setTimeout(function () { if (!leaved) el.style.removeProperty('--drag-y'); }, 200);
-    }
-  }
-  el.addEventListener('pointerup', endDrag);
-  el.addEventListener('pointercancel', endDrag);
-
-  el.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') { e.preventDefault(); leave(); }
-  });
 })();
