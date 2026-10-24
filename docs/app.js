@@ -214,8 +214,8 @@
     if (announce) toast(`主题：${themeName(id)}`);
   }
 
-  /** 同步站标（小黄人）的 title 提示（首屏内联脚本先于本脚本应用了持久化主题，
-      文案也要随之更新）。 */
+  /** 同步主题开关（史蒂夫头像）的 title 提示（首屏内联脚本先于本脚本应用了
+      持久化主题，文案也要随之更新）。2026-10-24 起这个 id 挂在头像上，不再是小黄人。 */
   function syncThemeUi(id = currentTheme()) {
     const light = $('theme-light');
     if (light) light.title = `当前主题：${themeName(id)} · 点击切换浅色主题`;
@@ -1465,7 +1465,10 @@
         }
       });
     };
-    // 只有站标（小黄人）绑定主题切换；氛围特效开关在页脚（fx.js 自己绑定 #fx-seg），
+    // 只有史蒂夫头像绑定主题切换（2026-10-24 起从左侧小黄人搬过来，id 仍是 #theme-light，
+    // 所以 bindFlip / syncThemeUi 一行都不用改）；
+    // 左侧小黄人是观影记录入口（<a href="watch.html">，纯导航、无 JS）；
+    // 氛围特效开关在页脚（fx.js 自己绑定 #fx-seg）；
     // 游玩日历入口是「最近游玩」首行日期上方的小日历图标（全站唯一）。
     bindFlip($('theme-light'), 'light');
 

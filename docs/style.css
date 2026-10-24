@@ -236,7 +236,9 @@ a { color: var(--accent); }
 .brand { display: flex; align-items: center; gap: 16px; justify-self: start; }
 
 /* 2026-10-18 站标与史蒂夫头像同比放大 ×1.222（108 → 132px），保持原比例不失真；
-   两者用同一缩放系数，视觉体量一致。≤480px 断点同步 72 → 88px。 */
+   两者用同一缩放系数，视觉体量一致。≤480px 断点同步 72 → 88px。
+   2026-10-24 站标（小黄人）改为 <a> 观影记录入口（原为「主题切换」按钮），
+   hover / active / focus-visible 的反馈保持不变——它仍是一个可点击控件。 */
 .logo {
   color: var(--accent);
   width: 132px; height: 132px; display: grid; place-items: center;
@@ -250,6 +252,8 @@ a { color: var(--accent); }
   width: 100%; height: auto; display: block;
   user-select: none; -webkit-user-drag: none;
 }
+/* <a> 元素的默认外观（下划线/主题色）在这里无意义，就地抹掉 */
+.logo { text-decoration: none; }
 .logo:hover { transform: scale(1.06); }
 .logo:active { transform: scale(0.96); }
 .logo:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
@@ -267,16 +271,22 @@ a { color: var(--accent); }
 /* 2026-10-18 首屏优化：.subtitle / .header-meta 已无引用（旧页头元素），删除 */
 /* 头像：CSS 背景呈现，不可拖动/另存。
    2026-10-18 换成 Minecraft 史蒂夫+狼（264×255 / 64 色，后改外部 WebP）。
-   2026-10-24 按用户要求**移除它的氛围特效开关职能**（改由页脚 #fx-seg 文字开关承担）：
-   role / tabindex / title / cursor:pointer / hover 缩放 / focus 环全部删除，
-   现在是纯装饰（HTML 上加了 aria-hidden="true"），只保留尺寸、背景与投影。
+   2026-10-24 起是**主题切换开关**（职能从左侧小黄人搬过来）：
+   指针态 / hover 缩放 / active 回弹 / focus-visible 键盘焦点环全部恢复，
+   与小黄人当年那套手感一致（130/132px 同尺寸元素，同一套 scale 系数）。
+   它不再负责氛围特效（页脚 #fx-seg），也不再用 aria-hidden（现在是可聚焦控件）。
    注意：contain 保证等比不拉伸；去掉 scaleX(-1) 保持原图朝向。 */
 .header-avatar {
   width: 132px; height: 132px;
   background: url("img/steve-ceb15b8a.webp") center / contain no-repeat;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
   justify-self: end;
+  cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+  transition: transform .18s ease;
 }
+.header-avatar:hover { transform: scale(1.05); }
+.header-avatar:active { transform: scale(0.96); }
+.header-avatar:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 12px; }
 /* 切换主题时的一闪提示 */
 .toast {
   position: fixed; left: 50%; bottom: 34px; transform: translateX(-50%);
