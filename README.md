@@ -232,12 +232,29 @@ grep -rn "STEAM_API_KEY" .github/          # 只应出现 ${{ secrets.STEAM_API_
 
 **首次使用要先配一次 Token**（只需一次，存在本机浏览器里）：
 
-1. 打开 <https://github.com/settings/personal-access-tokens/new>（Fine-grained token）
-2. **Repository access** → Only select repositories → 勾选 `Steam-playtime`
-3. **Permissions** → Repository permissions → **Contents: Read and write**（其余全部留 No access）
-4. 生成后复制 `github_pat_…`，回到页面点加号 → 展开最下方「GitHub Token」→ 粘贴 → 「保存」
+1. 打开这个**参数已预填**的链接（`contents=write`、永不过期、owner 指向你账号）：
+
+   <https://github.com/settings/personal-access-tokens/new?name=Steam-playtime+watch&description=Watch+list+upload&contents=write&expires_in=none&target_name=Hyouka-721>
+
+2. **Repository access** → 选 **Only select repositories** → 勾 `Steam-playtime`
+   （这一项无法用 URL 参数预填，必须手选）
+3. 扫一眼 **Permissions → Repository permissions → Contents** 是否为 **Read and write**（预填已设好；其余全部留 No access）
+4. 滚到底点 **Generate token** → 复制页面上的 `github_pat_…`
+   ⚠️ **只显示这一次**，关掉页面就再也看不到，只能重建
+5. 回到页面点加号 → 展开最下方「GitHub Token」→ 粘贴 → 「保存」，右侧状态从「未设置」变成「**已设置**」
 
 > 用 Classic token（`ghp_…`）也行，勾 `repo` 权限即可，但授权面大得多，不推荐。
+>
+> ⚠️ **本机 hosts 把 `github.com` 指向了 `127.0.0.1`**（系统级配置）。浏览器没走代理时点上面的链接会显示「无法访问此网站」。三种解法：① 让浏览器走代理；② **用手机（移动数据）登录 GitHub 建好 token 再复制过来** —— token 与设备无关，在哪台设备生成都行；③ 临时注释掉 hosts 里 `127.0.0.1 github.com` 那一行（改完 `ipconfig /flushdns`）。
+
+保存后小试一次提交，页面底部提示区会直接告诉你哪里不对：
+
+| 提示 | 含义 | 怎么办 |
+|---|---|---|
+| `401` | token 无效 / 过期 / 已被撤销 | 重新生成一个 |
+| `403` | 权限不够 | 确认 `Contents` 是 **Read and write** |
+| `404` | 仓库没被包含 | `Only select repositories` 里必须勾上 `Steam-playtime` |
+| `409` | 同一时刻另有提交在改 `watch.json` | 等 10 秒重试一次 |
 
 Token **只写进本机 `localStorage`**（键名 `watch-gh-token`），页面代码里没有任何硬编码密钥，也不会随仓库发布出去。换电脑/换浏览器要重填一次；公共电脑用完点「清除」。
 
