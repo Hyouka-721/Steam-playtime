@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T22:59:34+08:00",
+  "updated_at": "2026-10-24T23:01:33+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -124,6 +124,19 @@
         "冒险"
       ],
       "note": "美丽新世界"
+    },
+    {
+      "id": "2026-04-15-the-long-season",
+      "title": "漫长的季节",
+      "kind": "series",
+      "watched_at": "2026-04-15",
+      "poster": "img/watch/the-long-season-07d210f8.webp",
+      "poster_w": 640,
+      "poster_h": 960,
+      "title_en": "The Long Season",
+      "year": 2023,
+      "rating": 9,
+      "note": "慢慢把遥远的事物震碎"
     },
     {
       "id": "2026-04-05-the-secret-life-of-walter-mitty",
