@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T21:41:44+08:00",
+  "updated_at": "2026-10-24T22:28:03+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -16,6 +16,24 @@
         "剧情，历史，战争"
       ],
       "note": "靖康耻，犹未雪"
+    },
+    {
+      "id": "2026-10-17-inside-out-2",
+      "title": "头脑特工队2",
+      "kind": "movie",
+      "watched_at": "2026-10-17",
+      "poster": "img/watch/inside-out-2-3d6419ef.webp",
+      "poster_w": 640,
+      "poster_h": 914,
+      "title_en": "Inside Out 2",
+      "year": 2024,
+      "rating": 7,
+      "tags": [
+        "动画",
+        "奇幻",
+        "冒险"
+      ],
+      "note": "成长，就是有能力重建破碎的自己"
     }
   ]
 }
