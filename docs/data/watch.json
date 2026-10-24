@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T22:28:03+08:00",
+  "updated_at": "2026-10-24T22:35:11+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -34,6 +34,23 @@
         "冒险"
       ],
       "note": "成长，就是有能力重建破碎的自己"
+    },
+    {
+      "id": "2026-08-15-nobody",
+      "title": "浪浪山小妖怪",
+      "kind": "movie",
+      "watched_at": "2026-08-15",
+      "poster": "img/watch/nobody-8cfc1289.webp",
+      "poster_w": 640,
+      "poster_h": 1066,
+      "title_en": "Nobody",
+      "year": 2025,
+      "rating": 8,
+      "tags": [
+        "动画",
+        "奇幻"
+      ],
+      "note": "未披锦襕袈裟者，亦是菩提树下人"
     }
   ]
 }
