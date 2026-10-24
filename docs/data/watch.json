@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-24T23:06:14+08:00",
+  "updated_at": "2026-10-24T23:10:06+08:00",
   "items": [
     {
       "id": "2026-10-24-swords-into-plowshares",
@@ -175,6 +175,19 @@
       "year": 2013,
       "rating": 7,
       "note": "To see the world, to draw closer, to find each other"
+    },
+    {
+      "id": "2025-10-06-soldiers-sortie",
+      "title": "士兵突击",
+      "kind": "movie",
+      "watched_at": "2025-10-06",
+      "poster": "img/watch/soldiers-sortie-820a09b0.webp",
+      "poster_w": 640,
+      "poster_h": 960,
+      "title_en": "Soldiers Sortie",
+      "year": 2006,
+      "rating": 9,
+      "note": "好好活，就有意义"
     },
     {
       "id": "2025-06-13-dunkirk",
