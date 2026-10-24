@@ -327,9 +327,11 @@ code {
 /* 名称 + 英文名：上下堆叠的一小列，宽度按内容收缩 */
 .tl-head {
   /* 第 63 轮：中英文之间 1px → 12px（≈0.7 倍中文字号），两行之间有明显留白；
-     整块作为 .tl-body 的一个子项垂直居中 */
+     整块作为 .tl-body 的一个子项垂直居中。
+     第 65 轮：flex 0 0 auto → 0 1 auto —— 真实数据里存在超长英文名
+     （three-billboards-outside-ebbing-missouri），不让它收缩就会把页面顶宽。 */
   display: flex; flex-direction: column; gap: 12px;
-  flex: 0 0 auto; min-width: 0;
+  flex: 0 1 auto; min-width: 0;
 }
 .tl-name {
   margin: 0;
@@ -348,7 +350,7 @@ code {
 .tl-meta {
   margin: 0;
   display: flex; flex-direction: row; align-items: center; gap: 14px;   /* 第 63 轮：同 baseline 视觉等价，统一写 center */
-  flex: 0 0 auto; flex-wrap: wrap; min-width: 0;   /* 第 64 轮：字号变大后窄屏放不下，四项按需折行，不许溢出 */
+  flex: 0 1 auto; flex-wrap: wrap; min-width: 0;   /* 第 64 轮：字号变大后窄屏放不下，四项按需折行；第 65 轮改 0 1 以允许收缩 */
   font-size: 18.5px; line-height: 1.35;
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
@@ -628,6 +630,8 @@ select.w-input { cursor: pointer; }
   .tl-note { flex: 1 1 100%; white-space: normal; }
   /* 第 64 轮：字号 +4 后 18.5px 的四项在 390px 下宽于正文，改为独占一行并在行内折行 */
   .tl-meta { flex: 1 1 100%; }
+  /* 第 65 轮：窄屏英文名可能比正文长（超长原名），让名称块独占一行、内部自行折行 */
+  .tl-head { flex: 1 1 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
