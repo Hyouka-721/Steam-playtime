@@ -221,6 +221,346 @@
     b.addEventListener('click', function () { setKind(b.getAttribute('data-kind')); });
   });
 
+  /* ---------- 手动添加：加号 → 表单 → 直接提交进 GitHub 仓库 ----------
+     纯静态站没有后端，所以这里的「保存」= 用本机保存的 fine-grained PAT 调
+     GitHub Contents API，把海报与 docs/data/watch.json 一起提交进仓库，
+     Pages 约 15~40 秒后全设备可见。
+     · Token 只存本机 localStorage（键 watch-gh-token），页面源码里没有任何密钥
+     · 压图 / 内容哈希命名 / 同 id 即更新 / 倒序重排 —— 与 scripts/watch-add.mjs 同一套规则
+     · 不选海报时自动生成一张带片名的 2:3 深色占位图，保证网格视图不缺图 */
+  var GH = { owner: 'Hyouka-721', repo: 'Steam-playtime', branch: 'main' };
+  var GH_API = 'https://api.github.com';
+  var TOKEN_KEY = 'watch-gh-token';
+  var DATA_PATH = 'docs/data/watch.json';
+  var POSTER_DIR = 'docs/img/watch';
+  var POSTER_W = 640;
+  var POSTER_Q = 0.8;
+
+  var fabEl = document.getElementById('w-fab');
+  var dlgEl = document.getElementById('w-add');
+  var formEl = document.getElementById('w-add-form');
+  var msgEl = document.getElementById('w-add-msg');
+  var submitEl = document.getElementById('w-add-submit');
+  var fileEl = document.getElementById('add-poster');
+  var previewEl = document.getElementById('add-preview');
+  var previewPhEl = document.getElementById('add-poster-ph');
+  var tokenEl = document.getElementById('add-token');
+  var tokenStateEl = document.getElementById('add-token-state');
+  var toastEl = document.getElementById('w-toast');
+
+  function getToken() {
+    try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; }
+  }
+  function syncTokenState() {
+    if (tokenStateEl) tokenStateEl.textContent = getToken() ? '已设置' : '未设置';
+  }
+  var toastTimer = 0;
+  function toast(text, kind) {
+    if (!toastEl) return;
+    toastEl.textContent = text;
+    if (kind) toastEl.dataset.kind = kind; else toastEl.removeAttribute('data-kind');
+    toastEl.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.hidden = true; }, 4600);
+  }
+  function setMsg(text, kind) {
+    if (!msgEl) return;
+    msgEl.textContent = text || '';
+    if (kind) msgEl.dataset.kind = kind; else msgEl.removeAttribute('data-kind');
+  }
+  function pad2(n) { return n < 10 ? '0' + n : String(n); }
+  function localDateValue(d) {
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+  function localStamp(d) {
+    var off = -d.getTimezoneOffset();
+    var sign = off >= 0 ? '+' : '-';
+    var m = Math.abs(off);
+    return localDateValue(d) + 'T' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' +
+      pad2(d.getSeconds()) + sign + pad2(Math.floor(m / 60)) + ':' + pad2(m % 60);
+  }
+  // 与 scripts/watch-add.mjs 的 slugify / makeSlug 完全一致
+  function slugify(s) {
+    return String(s || '').toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 48);
+  }
+  function makeSlug(en, title) {
+    return slugify(en) || slugify(title) || 'item';
+  }
+  function bytesToB64(bytes) {
+    var s = '';
+    for (var i = 0; i < bytes.length; i += 0x8000) {
+      s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    }
+    return btoa(s);
+  }
+  function textToB64(text) {
+    return bytesToB64(new TextEncoder().encode(text));
+  }
+  function b64ToText(b64) {
+    var bin = atob(String(b64 || '').replace(/\s/g, ''));
+    var arr = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(arr);
+  }
+  function sha8(bytes) {
+    return crypto.subtle.digest('SHA-256', bytes).then(function (buf) {
+      return Array.prototype.map.call(new Uint8Array(buf), function (b) {
+        return ('0' + b.toString(16)).slice(-2);
+      }).join('').slice(0, 8);
+    });
+  }
+  function canvasToWebp(cv) {
+    return new Promise(function (res, rej) {
+      cv.toBlob(function (blob) {
+        if (!blob) { rej(new Error('这个浏览器导出不了 WebP，请换 Chrome / Edge / Safari 14+')); return; }
+        blob.arrayBuffer().then(function (ab) {
+          res({ bytes: new Uint8Array(ab), blob: blob, w: cv.width, h: cv.height });
+        });
+      }, 'image/webp', POSTER_Q);
+    });
+  }
+  function posterFromFile(file) {
+    return createImageBitmap(file).then(function (bmp) {
+      var w = Math.min(POSTER_W, bmp.width);          // 只缩不放
+      var h = Math.max(1, Math.round(bmp.height * (w / bmp.width)));
+      var cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(bmp, 0, 0, w, h);
+      if (bmp.close) bmp.close();
+      return canvasToWebp(cv);
+    });
+  }
+  function posterPlaceholder(title) {
+    var w = POSTER_W, h = Math.round(POSTER_W * 1.5);   // 2:3
+    var cv = document.createElement('canvas');
+    cv.width = w; cv.height = h;
+    var ctx = cv.getContext('2d');
+    var g = ctx.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, '#1b1b23'); g.addColorStop(0.55, '#14141a'); g.addColorStop(1, '#22222c');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+    ctx.strokeStyle = 'rgba(232,176,75,.42)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(18, 18, w - 36, h - 36);
+    var chars = Array.from(String(title || '未命名'));
+    var per = 7, lines = [], i;
+    for (i = 0; i < chars.length && lines.length < 4; i += per) lines.push(chars.slice(i, i + per).join(''));
+    ctx.fillStyle = '#e8b04b';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = '600 46px "PingFang SC","Microsoft YaHei",sans-serif';
+    var lh = 62;
+    var top = h / 2 - ((lines.length - 1) * lh) / 2;
+    for (i = 0; i < lines.length; i++) ctx.fillText(lines[i], w / 2, top + i * lh);
+    return canvasToWebp(cv);
+  }
+
+  /* ---- GitHub Contents API ---- */
+  function ghHeaders() {
+    return {
+      Authorization: 'Bearer ' + getToken(),
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      'Content-Type': 'application/json'
+    };
+  }
+  function ghError(r, what) {
+    if (r.status === 401) return new Error(what + '失败：Token 无效或已过期（401）');
+    if (r.status === 403) return new Error(what + '失败：Token 没有该仓库的 Contents 写权限（403）');
+    if (r.status === 404) return new Error(what + '失败：仓库/路径不存在，或 Token 无权限（404）');
+    if (r.status === 409) return new Error(what + '失败：文件刚被别处改动，请重试（409）');
+    return new Error(what + '失败：HTTP ' + r.status);
+  }
+  function ghGet(path) {
+    var url = GH_API + '/repos/' + GH.owner + '/' + GH.repo + '/contents/' + path +
+      '?ref=' + GH.branch + '&t=' + Date.now();
+    return fetch(url, { headers: ghHeaders(), cache: 'no-store' }).then(function (r) {
+      if (r.status === 404) return null;
+      if (!r.ok) throw ghError(r, '读取');
+      return r.json();
+    });
+  }
+  function ghPut(path, b64, message, sha) {
+    var body = { message: message, content: b64, branch: GH.branch };
+    if (sha) body.sha = sha;
+    return fetch(GH_API + '/repos/' + GH.owner + '/' + GH.repo + '/contents/' + path, {
+      method: 'PUT', headers: ghHeaders(), body: JSON.stringify(body)
+    }).then(function (r) {
+      if (!r.ok) throw ghError(r, '提交');
+      return r.json();
+    });
+  }
+
+  /* ---- 表单交互 ---- */
+  var previewUrl = '';
+  function resetPreview() {
+    if (previewEl) { previewEl.hidden = true; previewEl.removeAttribute('src'); }
+    if (previewPhEl) previewPhEl.hidden = false;
+    if (fileEl) fileEl.value = '';
+    if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = ''; }
+  }
+  function onPick() {
+    var f = fileEl && fileEl.files && fileEl.files[0];
+    if (!f) { resetPreview(); return; }
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(f);
+    previewEl.src = previewUrl;
+    previewEl.hidden = false;
+    previewPhEl.hidden = true;
+  }
+  function openAdd() {
+    setMsg('');
+    syncTokenState();
+    var d = document.getElementById('add-watched');
+    if (d && !d.value) d.value = localDateValue(new Date());
+    if (!dlgEl) return;
+    if (typeof dlgEl.showModal === 'function') dlgEl.showModal();
+    else dlgEl.setAttribute('open', '');
+    setTimeout(function () {
+      var t = document.getElementById('add-title');
+      if (t) t.focus();
+    }, 40);
+  }
+  function closeAdd() {
+    if (!dlgEl) return;
+    if (typeof dlgEl.close === 'function') dlgEl.close();
+    else dlgEl.removeAttribute('open');
+  }
+
+  function submitAdd(e) {
+    if (e) e.preventDefault();
+    var titleEl = document.getElementById('add-title');
+    var title = titleEl ? titleEl.value.trim() : '';
+    if (!title) { setMsg('片名不能为空', 'err'); if (titleEl) titleEl.focus(); return; }
+    if (!getToken()) {
+      setMsg('还没设置 GitHub Token —— 展开最下方「GitHub Token」填一次即可', 'err');
+      var box = document.getElementById('add-token-box');
+      if (box) box.open = true;
+      return;
+    }
+    var watchedEl = document.getElementById('add-watched');
+    var watched = (watchedEl && watchedEl.value) || localDateValue(new Date());
+    var kindEl = document.getElementById('add-kind');
+    var kind = kindEl && kindEl.value === 'series' ? 'series' : 'movie';
+    var enEl = document.getElementById('add-en');
+    var en = enEl ? enEl.value.trim() : '';
+    var yearEl = document.getElementById('add-year');
+    var yearRaw = yearEl ? yearEl.value.trim() : '';
+    var ratingEl = document.getElementById('add-rating');
+    var ratingRaw = ratingEl ? ratingEl.value.trim() : '';
+    var tagsEl = document.getElementById('add-tags');
+    var tagsRaw = tagsEl ? tagsEl.value.trim() : '';
+    var noteEl = document.getElementById('add-note');
+    var note = noteEl ? noteEl.value.trim() : '';
+
+    var slug = makeSlug(en, title);
+    var id = watched + '-' + slug;
+
+    submitEl.disabled = true;
+    var file = fileEl && fileEl.files && fileEl.files[0];
+    setMsg(file ? '正在压缩海报…' : '正在生成占位海报…', 'busy');
+
+    var pic = null;
+    var posterName = '';
+    var posterPath = '';
+    (file ? posterFromFile(file) : posterPlaceholder(title))
+      .then(function (p) {
+        pic = p;
+        return sha8(p.bytes);
+      })
+      .then(function (hash) {
+        posterName = slug + '-' + hash + '.webp';
+        posterPath = 'img/watch/' + posterName;
+        setMsg('正在上传海报…', 'busy');
+        return ghGet(POSTER_DIR + '/' + posterName);
+      })
+      .then(function (existing) {
+        // 同名说明内容哈希相同（之前传过同一张图），跳过上传
+        if (existing) return null;
+        return ghPut(POSTER_DIR + '/' + posterName, bytesToB64(pic.bytes),
+          'data(watch): 海报 ' + posterName, null);
+      })
+      .then(function () {
+        setMsg('正在写入 watch.json…', 'busy');
+        return ghGet(DATA_PATH);
+      })
+      .then(function (cur) {
+        var data = cur ? JSON.parse(b64ToText(cur.content)) : { updated_at: '', items: [] };
+        if (!Array.isArray(data.items)) data.items = [];
+        var item = {
+          id: id, title: title, kind: kind, watched_at: watched,
+          poster: posterPath, poster_w: pic.w, poster_h: pic.h
+        };
+        if (en) item.title_en = en;
+        if (yearRaw) item.year = Number(yearRaw) || yearRaw;
+        if (ratingRaw !== '' && !isNaN(Number(ratingRaw))) item.rating = Number(ratingRaw);
+        if (tagsRaw) item.tags = tagsRaw.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+        if (note) item.note = note;
+
+        // 同 id 即更新：先移除旧的同 id 条目
+        data.items = data.items.filter(function (it) { return it && it.id !== id; });
+        data.items.push(item);
+        data.items.sort(function (a, b) {
+          var d2 = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
+          if (d2 !== 0) return d2;
+          return String(b.id || '').localeCompare(String(a.id || ''));
+        });
+        data.updated_at = localStamp(new Date());
+        var text = JSON.stringify(data, null, 2) + '\n';
+        return ghPut(DATA_PATH, textToB64(text), 'data(watch): 添加《' + title + '》', cur ? cur.sha : null)
+          .then(function () { return item; });
+      })
+      .then(function (item) {
+        // 本机立刻可见：海报先用 blob URL 顶着，Pages 生效后刷新即为正式路径
+        item.poster = URL.createObjectURL(pic.blob);
+        ALL = ALL.filter(function (it) { return it && it.id !== item.id; });
+        ALL.push(item);
+        ALL.sort(function (a, b) {
+          var d2 = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
+          return d2 !== 0 ? d2 : String(b.id || '').localeCompare(String(a.id || ''));
+        });
+        paint();
+        if (formEl) formEl.reset();
+        resetPreview();
+        closeAdd();
+        toast('已提交 · 约 15~40 秒后全设备生效', 'ok');
+      })
+      .catch(function (err) {
+        console.error('[watch] add failed', err);
+        setMsg(String(err && err.message ? err.message : err), 'err');
+      })
+      .then(function () {
+        submitEl.disabled = false;
+      });
+  }
+
+  if (fabEl) fabEl.addEventListener('click', openAdd);
+  var closeBtn = document.getElementById('w-add-close');
+  if (closeBtn) closeBtn.addEventListener('click', closeAdd);
+  var cancelBtn = document.getElementById('w-add-cancel');
+  if (cancelBtn) cancelBtn.addEventListener('click', closeAdd);
+  if (fileEl) fileEl.addEventListener('change', onPick);
+  if (formEl) formEl.addEventListener('submit', submitAdd);
+  var tokenSave = document.getElementById('add-token-save');
+  if (tokenSave) tokenSave.addEventListener('click', function () {
+    var v = (tokenEl.value || '').trim();
+    if (!v) { setMsg('Token 为空', 'err'); return; }
+    try { localStorage.setItem(TOKEN_KEY, v); } catch (e) {}
+    tokenEl.value = '';
+    syncTokenState();
+    setMsg('Token 已保存到本机（不会上传到任何地方）', 'ok');
+  });
+  var tokenClear = document.getElementById('add-token-clear');
+  if (tokenClear) tokenClear.addEventListener('click', function () {
+    try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
+    syncTokenState();
+    setMsg('Token 已清除', 'ok');
+  });
+  syncTokenState();
+
   /* ---------- 启动 ---------- */
   var savedLayout = null, savedKind = null;
   try {

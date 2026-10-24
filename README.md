@@ -224,9 +224,29 @@ grep -rn "STEAM_API_KEY" .github/          # 只应出现 ${{ secrets.STEAM_API_
 
 ## 添加观影记录
 
-入口：`watch.html`（页眉右上角史蒂夫切换「网格 / 时间轴」两种视图）。
+入口：`watch.html`（页眉右上角史蒂夫切换「网格 / 时间轴」两种视图）。三种添加方式，日常随手记用**网页加号**，批量导入用**命令**。
 
-### 方式一：一条命令（推荐）
+### 方式一：点网页右下角的加号（最简单）
+
+`watch.html` 右下角有个圆形 **+** 按钮，点开就是表单：海报（可选）、片名、英文名、类型、年份、观影日期、评分、标签、短评。填完点「提交」，页面直接调 GitHub API 把**海报 + `watch.json`** 提交进仓库 —— 本机立刻能看到新条目，其他设备约 **15~40 秒**后随 Pages 生效。
+
+**首次使用要先配一次 Token**（只需一次，存在本机浏览器里）：
+
+1. 打开 <https://github.com/settings/personal-access-tokens/new>（Fine-grained token）
+2. **Repository access** → Only select repositories → 勾选 `Steam-playtime`
+3. **Permissions** → Repository permissions → **Contents: Read and write**（其余全部留 No access）
+4. 生成后复制 `github_pat_…`，回到页面点加号 → 展开最下方「GitHub Token」→ 粘贴 → 「保存」
+
+> 用 Classic token（`ghp_…`）也行，勾 `repo` 权限即可，但授权面大得多，不推荐。
+
+Token **只写进本机 `localStorage`**（键名 `watch-gh-token`），页面代码里没有任何硬编码密钥，也不会随仓库发布出去。换电脑/换浏览器要重填一次；公共电脑用完点「清除」。
+
+表单里的几个细节：
+- **海报可以不传** —— 会自动生成一张 640×960、带片名的深色占位图，先记着以后补
+- 压图规则与下面命令行**完全一致**：宽 640、只缩不放、WebP q0.8、按内容哈希命名，所以同一张图不会重复上传
+- `id` 由「观影日期 + slug」拼成（如 `2026-10-24-oppenheimer`），同 id 再提交一次就是**覆盖那一条**
+
+### 方式二：一条命令（批量 / 本地已有图）
 
 在**仓库根目录**执行（需要 `sharp`，`npm i` 时已装）：
 
@@ -268,7 +288,7 @@ git add docs/data/watch.json docs/img/watch && git commit -m "data(watch): 新�
 
 push 后约 15~40 秒 GitHub Pages 生效，刷新页面即可看到。
 
-### 方式二：直接在 GitHub 网页改
+### 方式三：直接在 GitHub 网页改
 
 1. 把海报传到 `docs/img/watch/`（文件名随意，建议带哈希或英文名）；
 2. 编辑 `docs/data/watch.json`，往 `items` 里加一条（字段见上面的 schema），顺手改 `updated_at`；
