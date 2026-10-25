@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T14:36:53+08:00",
+  "updated_at": "2026-10-25T14:38:27+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -865,6 +865,19 @@
       "year": 1998,
       "rating": 8,
       "note": "如果再也见不到你，祝你早安，午安，晚安"
+    },
+    {
+      "id": "2020-08-31-the-last-emperor",
+      "title": "末代皇帝",
+      "kind": "series",
+      "watched_at": "2020-08-31",
+      "poster": "img/watch/the-last-emperor-c2df81f0.webp",
+      "poster_w": 400,
+      "poster_h": 519,
+      "title_en": "The Last Emperor",
+      "year": 1987,
+      "rating": 8,
+      "note": "一生都在告别的男人"
     },
     {
       "id": "2020-08-18-fog-hill-of-five-elements",
