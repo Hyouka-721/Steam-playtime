@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T12:18:32+08:00",
+  "updated_at": "2026-10-25T12:19:16+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -712,14 +712,14 @@
     },
     {
       "id": "2021-03-21-item",
-      "title": "玉子爱情故事",
-      "kind": "movie",
+      "title": "玉子市场",
+      "kind": "series",
       "watched_at": "2021-03-21",
-      "poster": "img/watch/item-4667b16a.webp",
-      "poster_w": 640,
-      "poster_h": 905,
-      "title_en": "たまこラブストーリー",
-      "year": 2014,
+      "poster": "img/watch/item-5e1496bd.webp",
+      "poster_w": 602,
+      "poster_h": 867,
+      "title_en": "たまこまーけっと",
+      "year": 2013,
       "rating": 8.5,
       "note": "最喜欢了饼藏了！请讲！どうぞ"
     }
