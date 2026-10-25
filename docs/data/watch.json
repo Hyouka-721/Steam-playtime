@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T13:56:42+08:00",
+  "updated_at": "2026-10-25T13:58:55+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -852,6 +852,19 @@
       "year": 2018,
       "rating": 8,
       "note": "最后，记得保持健康哦"
+    },
+    {
+      "id": "2020-05-02-item",
+      "title": "紫罗兰永恒花园外传：永远与自动手记人偶",
+      "kind": "movie",
+      "watched_at": "2020-05-02",
+      "poster": "img/watch/item-4483ed8c.webp",
+      "poster_w": 640,
+      "poster_h": 905,
+      "title_en": "ヴァイオレット・エヴァーガーデン 外伝 - 永遠と自動手記人形",
+      "year": 2020,
+      "rating": 8,
+      "note": "花无凋零之日，意无传递之时，爱情亘古不变，紫罗兰永世长存"
     },
     {
       "id": "2020-04-30-the-great-gatsby",
