@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T15:32:25+08:00",
+  "updated_at": "2026-10-25T15:34:04+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1000,6 +1000,20 @@
       "year": 2019,
       "rating": 7.5,
       "note": "Long live the king"
+    },
+    {
+      "id": "2020-10-22-hexi-corridor",
+      "title": "河西走廊",
+      "kind": "series",
+      "watched_at": "2020-10-22",
+      "added_at": "2026-10-25T15:34:04+08:00",
+      "poster": "img/watch/hexi-corridor-ee058c61.webp",
+      "poster_w": 640,
+      "poster_h": 960,
+      "title_en": "HeXi Corridor",
+      "year": 2015,
+      "rating": 8.5,
+      "note": "河西走廊之梦"
     },
     {
       "id": "2020-08-31-the-last-emperor",
