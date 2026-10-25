@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T12:03:41+08:00",
+  "updated_at": "2026-10-25T12:05:35+08:00",
   "items": [
     {
       "id": "2026-10-25-the-age-of-awakening",
@@ -683,6 +683,19 @@
       "year": 2014,
       "rating": 7.5,
       "note": "每个人都有宿命"
+    },
+    {
+      "id": "2021-04-03-black",
+      "title": "工作细胞BLACK",
+      "kind": "series",
+      "watched_at": "2021-04-03",
+      "poster": "img/watch/black-aaef0f11.webp",
+      "poster_w": 640,
+      "poster_h": 906,
+      "title_en": "はたらく細胞BLACK",
+      "year": 2021,
+      "rating": 7.5,
+      "note": "健康生活起来吧"
     }
   ]
 }
