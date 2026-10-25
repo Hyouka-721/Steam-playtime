@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:02:51+08:00",
+  "updated_at": "2026-10-25T16:03:02+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1329,13 +1329,13 @@
       "kind": "movie",
       "watched_at": "2020-04-30",
       "poster": "img/watch/the-great-gatsby-8abeda03.webp",
+      "added_at": "2026-10-25T13:56:43+08:00",
       "poster_w": 640,
       "poster_h": 960,
       "title_en": "The Great Gatsby",
       "year": 2013,
-      "rating": 7.5,
-      "note": "盖茨比和咆哮的二十年代",
-      "added_at": "2026-10-25T13:56:43+08:00"
+      "rating": 7,
+      "note": "盖茨比和咆哮的二十年代"
     },
     {
       "id": "2020-04-21-item",
