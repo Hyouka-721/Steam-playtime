@@ -1,6 +1,19 @@
 {
-  "updated_at": "2026-10-25T13:27:33+08:00",
+  "updated_at": "2026-10-25T13:28:45+08:00",
   "items": [
+    {
+      "id": "2026-10-25-item",
+      "title": "小林家的龙女仆",
+      "kind": "series",
+      "watched_at": "2026-10-25",
+      "poster": "img/watch/item-b6839409.webp",
+      "poster_w": 640,
+      "poster_h": 907,
+      "title_en": "小林さんちのメイドラゴン",
+      "year": 2017,
+      "rating": 7.5,
+      "note": "心有归处便是家"
+    },
     {
       "id": "2026-10-24-dead-to-rights",
       "title": "南京照相馆",
