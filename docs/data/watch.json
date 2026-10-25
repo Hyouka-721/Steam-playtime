@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T15:40:28+08:00",
+  "updated_at": "2026-10-25T15:41:57+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1084,6 +1084,20 @@
       "year": 2020,
       "rating": 8.5,
       "note": "入坑作！！"
+    },
+    {
+      "id": "2020-09-29-item",
+      "title": "异度侵入",
+      "kind": "series",
+      "watched_at": "2020-09-29",
+      "added_at": "2026-10-25T15:41:57+08:00",
+      "poster": "img/watch/item-bd1b9821.webp",
+      "poster_w": 640,
+      "poster_h": 903,
+      "title_en": "イド：インヴェイデッド",
+      "year": 2020,
+      "rating": 8,
+      "note": "我的终点是想救你，而起点却是你的死因"
     },
     {
       "id": "2020-08-31-the-last-emperor",
