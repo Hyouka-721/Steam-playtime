@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:06:15+08:00",
+  "updated_at": "2026-10-25T16:06:26+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -629,13 +629,13 @@
       "kind": "movie",
       "watched_at": "2021-08-02",
       "poster": "img/watch/item-bb238709.webp",
+      "added_at": "2026-10-25T11:12:19+08:00",
       "poster_w": 640,
       "poster_h": 903,
       "title_en": "ヴィンランド・サガ",
       "year": 2019,
-      "rating": 7,
-      "note": "找寻遗世独立的自我",
-      "added_at": "2026-10-25T11:12:19+08:00"
+      "rating": 6,
+      "note": "找寻自我"
     },
     {
       "id": "2021-07-29-item",
