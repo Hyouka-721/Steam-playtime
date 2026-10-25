@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:02:37+08:00",
+  "updated_at": "2026-10-25T16:02:43+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1371,13 +1371,13 @@
       "kind": "movie",
       "watched_at": "2019-12-13",
       "poster": "img/watch/the-pursuit-of-happyness-e27bbbc0.webp",
+      "added_at": "2026-10-25T13:51:13+08:00",
       "poster_w": 640,
       "poster_h": 951,
       "title_en": "The Pursuit of Happyness",
       "year": 2006,
-      "rating": 8,
-      "note": "总会找到一个上帝，端坐天堂",
-      "added_at": "2026-10-25T13:51:13+08:00"
+      "rating": 7.5,
+      "note": "总会找到一个上帝，端坐天堂"
     },
     {
       "id": "2019-08-02-forrest-gump",
