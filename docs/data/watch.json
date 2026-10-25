@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T11:54:53+08:00",
+  "updated_at": "2026-10-25T11:56:10+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -618,6 +618,19 @@
       "year": 2020,
       "rating": 8.5,
       "note": "炼狱杏寿郎"
+    },
+    {
+      "id": "2021-07-19-loki",
+      "title": "洛基",
+      "kind": "movie",
+      "watched_at": "2021-07-19",
+      "poster": "img/watch/loki-419b354e.webp",
+      "poster_w": 640,
+      "poster_h": 948,
+      "title_en": "Loki",
+      "year": 2021,
+      "rating": 6.5,
+      "note": "Loki"
     }
   ]
 }
