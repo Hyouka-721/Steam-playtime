@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:06:35+08:00",
+  "updated_at": "2026-10-25T16:06:40+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -587,13 +587,13 @@
       "kind": "series",
       "watched_at": "2022-01-27",
       "poster": "img/watch/re-0185cb4e.webp",
+      "added_at": "2026-10-25T11:05:39+08:00",
       "poster_w": 640,
       "poster_h": 910,
       "title_en": "Re:ゼロから始める異世界生活",
       "year": 2016,
-      "rating": 7,
-      "note": "异世界",
-      "added_at": "2026-10-25T11:05:39+08:00"
+      "rating": 6,
+      "note": "异世界"
     },
     {
       "id": "2021-09-15-item",
