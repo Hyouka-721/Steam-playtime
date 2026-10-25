@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:07:49+08:00",
+  "updated_at": "2026-10-25T16:07:56+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -293,13 +293,13 @@
       "kind": "series",
       "watched_at": "2024-11-27",
       "poster": "img/watch/cyberpunk-edgerunners-8d0ae9f0.webp",
+      "added_at": "2026-10-24T23:21:38+08:00",
       "poster_w": 640,
       "poster_h": 960,
       "title_en": "Cyberpunk: Edgerunners",
       "year": 2022,
-      "rating": 8.5,
-      "note": "边缘行者",
-      "added_at": "2026-10-24T23:21:38+08:00"
+      "rating": 8,
+      "note": "边缘行者"
     },
     {
       "id": "2024-11-26-item",
