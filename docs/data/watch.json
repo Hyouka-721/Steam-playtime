@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T15:35:10+08:00",
+  "updated_at": "2026-10-25T15:36:20+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1028,6 +1028,20 @@
       "year": 2002,
       "rating": 6.5,
       "note": "每个人心中都有一个福尔摩斯"
+    },
+    {
+      "id": "2020-10-16-item",
+      "title": "穿越时空的少女",
+      "kind": "movie",
+      "watched_at": "2020-10-16",
+      "added_at": "2026-10-25T15:36:20+08:00",
+      "poster": "img/watch/item-d3496dfa.webp",
+      "poster_w": 550,
+      "poster_h": 782,
+      "title_en": "時をかける少女",
+      "year": 2006,
+      "rating": 7,
+      "note": "白驹飞驰，青春过隙"
     },
     {
       "id": "2020-08-31-the-last-emperor",
