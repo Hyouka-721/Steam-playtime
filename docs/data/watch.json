@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T13:49:43+08:00",
+  "updated_at": "2026-10-25T13:51:12+08:00",
   "items": [
     {
       "id": "2026-10-25-item",
@@ -865,6 +865,19 @@
       "year": 2012,
       "rating": 10,
       "note": "一口冰菓,一个夏天"
+    },
+    {
+      "id": "2019-12-13-the-pursuit-of-happyness",
+      "title": "当幸福来敲门",
+      "kind": "movie",
+      "watched_at": "2019-12-13",
+      "poster": "img/watch/the-pursuit-of-happyness-e27bbbc0.webp",
+      "poster_w": 640,
+      "poster_h": 951,
+      "title_en": "The Pursuit of Happyness",
+      "year": 2006,
+      "rating": 8,
+      "note": "总会找到一个上帝，端坐天堂"
     }
   ]
 }
