@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T13:45:54+08:00",
+  "updated_at": "2026-10-25T13:48:09+08:00",
   "items": [
     {
       "id": "2026-10-25-item",
@@ -826,6 +826,19 @@
       "year": 2018,
       "rating": 9,
       "note": "时至今日，你仍是我的光"
+    },
+    {
+      "id": "2020-12-06-item",
+      "title": "轻音少女",
+      "kind": "movie",
+      "watched_at": "2020-12-06",
+      "poster": "img/watch/item-b0b5d4df.webp",
+      "poster_w": 640,
+      "poster_h": 960,
+      "title_en": "けいおん!",
+      "year": 2009,
+      "rating": 9.9,
+      "note": "K-ON!!!"
     },
     {
       "id": "2020-07-16-item",
