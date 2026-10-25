@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T14:32:47+08:00",
+  "updated_at": "2026-10-25T14:36:14+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -865,6 +865,18 @@
       "year": 1998,
       "rating": 8,
       "note": "如果再也见不到你，祝你早安，午安，晚安"
+    },
+    {
+      "id": "2020-08-18-fog-hill-of-five-elements",
+      "title": "雾山五行",
+      "kind": "series",
+      "watched_at": "2020-08-18",
+      "poster": "img/watch/fog-hill-of-five-elements-1648bbe4.webp",
+      "poster_w": 640,
+      "poster_h": 994,
+      "title_en": "Fog Hill of Five Elements",
+      "year": 2020,
+      "rating": 8.5
     },
     {
       "id": "2020-07-22-knives-out",
