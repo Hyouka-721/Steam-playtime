@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:07:22+08:00",
+  "updated_at": "2026-10-25T16:07:31+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -363,13 +363,13 @@
       "kind": "movie",
       "watched_at": "2024-03-25",
       "poster": "img/watch/the-pig-the-snake-and-the-pigeon-c1cd154a.webp",
+      "added_at": "2026-10-24T23:36:50+08:00",
       "poster_w": 640,
       "poster_h": 960,
       "title_en": "The Pig, the Snake, and the Pigeon",
       "year": 2023,
-      "rating": 9,
-      "note": "他只是做了一件正确的事",
-      "added_at": "2026-10-24T23:36:50+08:00"
+      "rating": 8.5,
+      "note": "他只是做了一件正确的事"
     },
     {
       "id": "2024-03-11-oppenheimer",
