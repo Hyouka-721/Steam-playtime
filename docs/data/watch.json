@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T12:08:58+08:00",
+  "updated_at": "2026-10-25T12:11:37+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -683,6 +683,19 @@
       "year": 2021,
       "rating": 8,
       "note": "天若有情天亦老，人间正道是沧桑"
+    },
+    {
+      "id": "2021-04-03-item",
+      "title": "咒术回战",
+      "kind": "series",
+      "watched_at": "2021-04-03",
+      "poster": "img/watch/item-cf4f8a1b.webp",
+      "poster_w": 640,
+      "poster_h": 906,
+      "title_en": "呪術廻戦",
+      "year": 2020,
+      "rating": 8,
+      "note": "你要在众人的簇拥下死去"
     },
     {
       "id": "2021-04-03-black",
