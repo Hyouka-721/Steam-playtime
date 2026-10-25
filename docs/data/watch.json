@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:04:04+08:00",
+  "updated_at": "2026-10-25T16:04:12+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1175,13 +1175,13 @@
       "kind": "movie",
       "watched_at": "2020-07-22",
       "poster": "img/watch/knives-out-df925302.webp",
+      "added_at": "2026-10-25T14:00:05+08:00",
       "poster_w": 640,
       "poster_h": 948,
       "title_en": "Knives Out",
       "year": 2019,
-      "rating": 8,
-      "note": "Knives Out",
-      "added_at": "2026-10-25T14:00:05+08:00"
+      "rating": 7.5,
+      "note": "Knives Out"
     },
     {
       "id": "2020-07-19-item",
