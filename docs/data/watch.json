@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:05:27+08:00",
+  "updated_at": "2026-10-25T16:05:41+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -727,13 +727,13 @@
       "kind": "series",
       "watched_at": "2021-06-07",
       "poster": "img/watch/the-age-of-awakening-9d740972.webp",
+      "added_at": "2026-10-25T12:08:59+08:00",
       "poster_w": 640,
       "poster_h": 853,
       "title_en": "The Age of Awakening",
       "year": 2021,
-      "rating": 8,
-      "note": "天若有情天亦老，人间正道是沧桑",
-      "added_at": "2026-10-25T12:08:59+08:00"
+      "rating": 7.5,
+      "note": "天若有情天亦老，人间正道是沧桑"
     },
     {
       "id": "2021-04-03-black",
