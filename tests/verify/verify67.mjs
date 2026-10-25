@@ -77,10 +77,20 @@ const geo = (p) => p.evaluate(() => {
     enClipped: en.filter((e) => e.scrollWidth > Math.ceil(e.clientWidth) + 1).length,
     itemH: uniq(items.map((it) => Math.round(it.getBoundingClientRect().height))),
     headW: uniq(items.map((it) => Math.round(it.querySelector('.tl-head').getBoundingClientRect().width * 10) / 10)),
-    // 第 72 轮补记：中文名折行（>220px 的超长片名，如《Re：从零开始的异世界生活》）条目们的高度集合。
-    // 第 71 轮已定「折两行是预期行为」，当时放松的是临时副本，收编进 tests/ 的这份漏了，这里补上。
+    // 第 71 轮定「中文名折两行是预期行为」（名称列固定 220/224px，超长片名必然折行），
+    // 当时放松的是临时副本，收编进 tests/ 的这份漏了，第 72 轮补上。
     wrapH: uniq(items.filter((it) => lines(it.querySelector('.tl-name')) > 1)
       .map((it) => Math.round(it.getBoundingClientRect().height))),
+    // 第 72 轮上线补：条目高的**真不变量**是「条目高 = max(缩略图高, 名称头高) + 固定 chrome」。
+    // 旧判据「折行条目只高 1px」只是 (中文名2行/英文名2行) 这一种组合下的代理观测值，
+    // 用户新录《紫罗兰永恒花园外传：永远与自动手记人偶》后出现 (2行/3行) 组合 → 167px，代理失效。
+    // 改为直接断言这个差值恒为常数：与折几行、折几行无关，也不会再被新数据打破。
+    chrome: uniq(items.map((it) => {
+      const hh = it.querySelector('.tl-head').getBoundingClientRect().height;
+      const th = it.querySelector('.tl-thumb');
+      const thh = th ? th.getBoundingClientRect().height : 0;
+      return Math.round((it.getBoundingClientRect().height - Math.max(hh, thh)) * 10) / 10;
+    })),
     overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     gridCount: document.querySelectorAll('#w-grid .poster').length,
   };
@@ -93,18 +103,15 @@ for (const W of [1440, 1280, 1180, 1179, 1100, 1000, 900, 861]) {
     r.dateX.length === 1 && r.kindX.length === 1 && r.yearX.length === 1 &&
     r.scoreX.length === 1 && r.headX.length === 1 && r.noteX.length === 1,
     `日期 ${r.dateX.join(',')} | 类别 ${r.kindX.join(',')} | 上映 ${r.yearX.join(',')} | 评级 ${r.scoreX.join(',')} | 评语 ${r.noteX.join(',')}`);
+  // 英文名行数不设 2 行上限：第 65 轮契约是「折行而不是顶宽、不截断」，
+  // 名称列固定 220/224px 下最长的日文片名（31 字符）需要 3 行；4 行以上才该人工review。
   ok(`B[${W}] 名称列宽一致 ${r.headW.join(',')}px、中文名最多 2 行、英文名最多 ${r.enMax} 行`,
-    r.headW.length === 1 && r.nameLines.every((l) => l >= 1 && l <= 2) && r.enMax <= 2,
+    r.headW.length === 1 && r.nameLines.every((l) => l >= 1 && l <= 2) && r.enMax <= 3,
     `名称行数 ${r.nameLines.join(',')} / 英文名最多 ${r.enMax} 行`);
-  // 中文名折行的条目（名称列固定 220/224px，超长片名必然折行）允许比其余高 1px，列对齐不受影响
-  const base = Math.min(...r.itemH);
-  const wrapped = r.wrapH.length > 0;
-  ok(`B[${W}] 英文名零截断、条目高一致（折行条目只高 1px）、整页无横向溢出`,
-    r.enClipped === 0 && r.overflow === 0 &&
-    (wrapped
-      ? (r.itemH.length === 2 && r.wrapH.every((h) => h === base + 1))
-      : r.itemH.length === 1),
-    `裁剪 ${r.enClipped} 条 / 条目高 ${r.itemH.join(',')} / 折行条目 ${r.wrapH.join(',')} / overflow=${r.overflow}`);
+  // 条目高 = max(缩略图, 名称头) + 固定 chrome（差值恒为常数）——见 geo() 里 chrome 的注释
+  ok(`B[${W}] 英文名零截断、条目高 = max(缩略图,名称头)+固定值、整页无横向溢出`,
+    r.enClipped === 0 && r.overflow === 0 && r.chrome.length === 1,
+    `裁剪 ${r.enClipped} 条 / 条目高 ${r.itemH.join(',')} / 差值恒 ${r.chrome.join(',')} / 折行条目 ${r.wrapH.join(',')} / overflow=${r.overflow}`);
   if (W === 1440) await p.screenshot({ path: OUT + 'C1_列对齐_1440.png' });
   await c.close();
 }
