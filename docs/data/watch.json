@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:03:29+08:00",
+  "updated_at": "2026-10-25T16:03:36+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1245,13 +1245,13 @@
       "kind": "movie",
       "watched_at": "2020-07-16",
       "poster": "img/watch/item-a4b3b480.webp",
+      "added_at": "2026-10-25T14:26:28+08:00",
       "poster_w": 640,
       "poster_h": 960,
       "title_en": "中二病でも恋がしたい！",
       "year": 2010,
-      "rating": 9,
-      "note": "人生就是中二病",
-      "added_at": "2026-10-25T14:26:28+08:00"
+      "rating": 8.5,
+      "note": "人生就是中二病"
     },
     {
       "id": "2020-07-13-let-the-bullets-fly",
