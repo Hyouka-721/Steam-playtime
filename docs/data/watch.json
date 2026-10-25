@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:01:27+08:00",
+  "updated_at": "2026-10-25T16:01:37+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -545,13 +545,13 @@
       "kind": "movie",
       "watched_at": "2022-02-05",
       "poster": "img/watch/harry-potter-and-the-chamber-of-secrets-e6de52af.webp",
+      "added_at": "2026-10-25T10:18:21+08:00",
       "poster_w": 640,
       "poster_h": 918,
       "title_en": "Harry Potter and the Chamber of Secrets",
       "year": 2002,
-      "rating": 7.5,
-      "note": "选择决定我是谁",
-      "added_at": "2026-10-25T10:18:21+08:00"
+      "rating": 7,
+      "note": "选择决定我是谁"
     },
     {
       "id": "2022-02-05-harry-potter-and-the-sorcerer-s-stone",
