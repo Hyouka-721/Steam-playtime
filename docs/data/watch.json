@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:09:06+08:00",
+  "updated_at": "2026-10-25T16:09:13+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -7,16 +7,16 @@
       "kind": "movie",
       "watched_at": "2026-10-24",
       "poster": "img/watch/dead-to-rights-5fbb0d46.webp",
+      "added_at": "2026-10-24T21:41:45+08:00",
       "poster_w": 640,
       "poster_h": 960,
       "title_en": "Dead To Rights",
       "year": 2025,
-      "rating": 9,
+      "rating": 8.5,
       "tags": [
         "剧情，历史，战争"
       ],
-      "note": "靖康耻，犹未雪",
-      "added_at": "2026-10-24T21:41:45+08:00"
+      "note": "靖康耻，犹未雪"
     },
     {
       "id": "2026-10-17-inside-out-2",
