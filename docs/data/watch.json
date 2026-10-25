@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:01:12+08:00",
+  "updated_at": "2026-10-25T16:01:20+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -517,13 +517,13 @@
       "kind": "series",
       "watched_at": "2022-03-12",
       "poster": "img/watch/item-9515c5e4.webp",
+      "added_at": "2026-10-25T10:13:31+08:00",
       "poster_w": 640,
       "poster_h": 909,
       "title_en": "オッドタクシー",
       "year": 2021,
-      "rating": 8.5,
-      "note": "Odd Life",
-      "added_at": "2026-10-25T10:13:31+08:00"
+      "rating": 8,
+      "note": "Odd Life"
     },
     {
       "id": "2022-02-18-empresses-in-the-palace",
