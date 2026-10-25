@@ -1,8 +1,10 @@
 /* 第 72 轮线上复验（push 后跑）：
    ① 页眉 My Watch List / <title> Watch List / watch.css?v=16 / watch.js?v=9 生效
-   ② 玉子市场恢复（2021-03-21-item-2）与玉子爱情故事同日并存
-   ③ 工作细胞新海报 item-4bb7a3f7.webp 字节级一致
-   ④ 排序切换（评分/观看时间）线上可用、时间轴不受影响
+   ② 玉子市场恢复（2021-03-21-item-2）与玉子爱情故事同日并存，且两条短评已拆分
+   ③ 另两条撞车受害者一并恢复：工作细胞（2020-07-16-item-2，新海报）、境界的彼方（2020-12-18-item-2）
+   ④ 三个同日组（2021-03-21 / 2020-12-18 / 2020-07-16）都按上传时间正序
+   ⑤ 工作细胞新海报 item-4bb7a3f7.webp 字节级一致
+   ⑥ 排序切换（评分/观看时间）线上可用、时间轴不受影响
    指纹用「页眉文案 + 数据字段」，不能只看 200 */
 import { createRequire } from 'module';
 import fs from 'fs';
@@ -54,10 +56,12 @@ for (let i = 1; i <= 30; i++) {
   const verOK = /watch\.css\?v=16"/.test(snap.h) && /watch\.js\?v=9"/.test(snap.h);
   const items = live && Array.isArray(live.items) ? live.items : [];
   const tamako = items.filter((x) => /玉子/.test(x.title));
-  const cells = items.find((x) => x.title === '工作细胞') || {};
+  const cells = items.find((x) => x.id === '2020-07-16-item-2') || {};
+  const kyokai = items.find((x) => x.id === '2020-12-18-item-2') || {};
   const dataOK = items.length >= localData.items.length &&
     tamako.length === 2 && tamako.some((x) => x.id === '2021-03-21-item-2') &&
     cells.poster === 'img/watch/item-4bb7a3f7.webp' &&
+    kyokai.poster === 'img/watch/item-e0e18532.webp' &&
     items.every((x) => x.added_at);
   console.log(`  第 ${i} 次：title ${titleOK} / h1 ${h1OK} / 版本 ${verOK} / 数据 ${dataOK}（${items.length} 条，累计 ${waited}s）`);
   if (titleOK && h1OK && verOK && dataOK) { hit = true; break; }
@@ -65,6 +69,14 @@ for (let i = 1; i <= 30; i++) {
 }
 ok('A1 Pages 已生效（页眉 My Watch List + 站名 Watch List + v16/v9 + 玉子两部 + 新海报 + added_at）', hit, `约 ${waited}s`);
 ok('A2 线上 watch.html 与本地 md5 全等', md5(norm(snap.h)) === md5(local('watch.html')), md5(norm(snap.h)));
+
+/* ---- A5 两条短评按用户要求拆分 ---- */
+const live0 = JSON.parse(snap.d);
+const noteLove = (live0.items.find((x) => x.id === '2021-03-21-item') || {}).note;
+const noteMarket = (live0.items.find((x) => x.id === '2021-03-21-item-2') || {}).note;
+ok('A5 玉子两部短评已拆分',
+  noteLove === '餅が一番好きです！どうぞ！' && noteMarket === '最喜欢了饼藏了！请讲！',
+  `爱情故事=${JSON.stringify(noteLove)} / 市场=${JSON.stringify(noteMarket)}`);
 
 const posterBuf = await page.evaluate(async (base) => {
   const r = await fetch(base + 'img/watch/item-4bb7a3f7.webp?cb=' + Date.now(), { cache: 'reload' });
@@ -136,12 +148,20 @@ const errs = [];
       n: names.length,
       love: names.indexOf('玉子爱情故事'),
       market: names.indexOf('玉子市场'),
+      kyokai: names.indexOf('境界的彼方'),
+      sakamoto: names.indexOf('在下坂本，有何贵干？'),
+      cells: names.indexOf('工作细胞'),
+      chunibyo: names.indexOf('中二病也要谈恋爱！'),
       dates: [...document.querySelectorAll('#w-tl .tl-date')].map((x) => x.textContent.trim()),
     };
   });
   ok('B4 时间轴渲染全部条目、排序切换隐藏', r3.n === N && r3.sortHidden === true, `tl=${r3.n}/${N} hidden=${r3.sortHidden}`);
   ok('B5 玉子两部同日并存，先上传的《玉子爱情故事》居前',
     r3.love >= 0 && r3.market >= 0 && r3.love < r3.market, `爱情故事 #${r3.love} / 市场 #${r3.market}`);
+  ok('B5b 境界的彼方与在下坂本同日并存，先上传的《境界的彼方》居前',
+    r3.kyokai >= 0 && r3.sakamoto >= 0 && r3.kyokai < r3.sakamoto, `境界的彼方 #${r3.kyokai} / 在下坂本 #${r3.sakamoto}`);
+  ok('B5c 工作细胞与中二病同日并存，先上传的《工作细胞》居前',
+    r3.cells >= 0 && r3.chunibyo >= 0 && r3.cells < r3.chunibyo, `工作细胞 #${r3.cells} / 中二病 #${r3.chunibyo}`);
   const keys = r3.dates.map((d) => (d.match(/^(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?$/) || []).slice(1).concat(['00', '00']).slice(0, 3).join('-'));
   ok('B6 时间轴仍按观影时间倒序', keys.every((v, i) => i === 0 || keys[i - 1] >= v), `首 ${r3.dates[0]} 尾 ${r3.dates[r3.dates.length - 1]}`);
   await p.screenshot({ path: OUT + 'B6_时间轴_1440.png' });
