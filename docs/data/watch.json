@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T10:13:29+08:00",
+  "updated_at": "2026-10-25T10:15:24+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -487,6 +487,19 @@
       "year": 2021,
       "rating": 8.5,
       "note": "Odd Life"
+    },
+    {
+      "id": "2022-02-18-empresses-in-the-palace",
+      "title": "甄嬛传",
+      "kind": "series",
+      "watched_at": "2022-02-18",
+      "poster": "img/watch/empresses-in-the-palace-f648f123.webp",
+      "poster_w": 640,
+      "poster_h": 960,
+      "title_en": "Empresses in the Palace",
+      "year": 2011,
+      "rating": 8,
+      "note": "长相思，长相守"
     }
   ]
 }
