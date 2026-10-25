@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T12:00:50+08:00",
+  "updated_at": "2026-10-25T12:02:23+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -657,6 +657,19 @@
       "year": 2020,
       "rating": 8,
       "note": "あとどれくらいの距離を\n月へ歩いたら"
+    },
+    {
+      "id": "2021-06-20-brotherhood-of-blades",
+      "title": "绣春刀",
+      "kind": "movie",
+      "watched_at": "2021-06-20",
+      "poster": "img/watch/brotherhood-of-blades-cf30f1aa.webp",
+      "poster_w": 640,
+      "poster_h": 966,
+      "title_en": "Brotherhood of Blades",
+      "year": 2014,
+      "rating": 7.5,
+      "note": "每个人都有宿命"
     }
   ]
 }
