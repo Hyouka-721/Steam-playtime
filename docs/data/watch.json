@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T15:39:15+08:00",
+  "updated_at": "2026-10-25T15:40:28+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1070,6 +1070,20 @@
       "year": 2019,
       "rating": 7,
       "note": "不知大海广阔，却知晓天空之蓝"
+    },
+    {
+      "id": "2020-09-30-t",
+      "title": "某科学的超电磁炮T",
+      "kind": "movie",
+      "watched_at": "2020-09-30",
+      "added_at": "2026-10-25T15:40:28+08:00",
+      "poster": "img/watch/t-6e4920e2.webp",
+      "poster_w": 640,
+      "poster_h": 909,
+      "title_en": "とある科学の超電磁砲T",
+      "year": 2020,
+      "rating": 8.5,
+      "note": "入坑作！！"
     },
     {
       "id": "2020-08-31-the-last-emperor",
