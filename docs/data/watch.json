@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T11:05:39+08:00",
+  "updated_at": "2026-10-25T11:07:42+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -553,6 +553,19 @@
       "year": 2016,
       "rating": 7,
       "note": "异世界"
+    },
+    {
+      "id": "2021-09-15-item",
+      "title": "重启咲良田",
+      "kind": "series",
+      "watched_at": "2021-09-15",
+      "poster": "img/watch/item-67ea0d9c.webp",
+      "poster_w": 640,
+      "poster_h": 905,
+      "title_en": "サクラダリセット",
+      "year": 2017,
+      "rating": 9,
+      "note": "正确、自我与爱"
     }
   ]
 }
