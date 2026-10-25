@@ -1,9 +1,12 @@
 /* 第 73 轮回归：
    ① 影视类别新增「番剧」（动画剧集）：筛选条四档、录入/编辑表单、kind 标签映射全链路
    ② 《她和她的猫》换海报（p2249039182.jpg → item-b73c9fed.webp，537×800，hash 命名自洽）
-   ③ 既有条目按用户确认范围重分类：仅日本动画 → 番剧（29 条）；
+   ③ 既有条目按用户确认范围重分类：仅日本动画 → 番剧（上线合并时共 34 部，
+      含用户随后用网页加号新录的某科学的超电磁炮/T、埃罗芒阿老师、异度侵入、神之塔）；
       国漫（雾山五行/大理寺日志）与欧美动画（双城之战/变形金刚）留「剧集」，动画电影留「电影」
-   ④ 顺带修两处客观错分：半泽直树（TBS 日剧）、洛基（Disney+ 剧集）movie → series */
+   ④ 顺带修两处客观错分：半泽直树（TBS 日剧）、洛基（Disney+ 剧集）movie → series
+   ⚠️ 条数相关断言全部从数据推导（用户会持续用网页加号加片），只对「必须是/必须不是番剧」的清单做强断言
+   ⚠️ B1 的 rating 期望 7.5 = 用户在网页端改过的值（合并窗口期编辑，须保留用户改动，不回退 8） */
 import { createRequire } from 'module';
 import fs from 'fs';
 import crypto from 'crypto';
@@ -67,10 +70,10 @@ ok('B1 《她和她的猫》：kind=anime、id 不变、added_at 保留首录时
     const it = data.items.find((x) => x.title === '她和她的猫');
     return !!it && it.kind === 'anime' && it.id === '2020-07-17-item' &&
       it.added_at === '2026-10-25T14:27:13+08:00' &&
-      it.watched_at === '2020-07-17' && it.year === 1999 && it.rating === 8 &&
+      it.watched_at === '2020-07-17' && it.year === 1999 && it.rating === 7.5 &&
       it.title_en === '彼女と彼女の猫' && it.note === '猫和遥远星星的声音';
   })(),
-  (() => { const it = data.items.find((x) => x.title === '她和她的猫'); return it && `${it.id} ${it.kind} ${it.added_at}`; })());
+  (() => { const it = data.items.find((x) => x.title === '她和她的猫'); return it && `${it.id} ${it.kind} ${it.added_at} r=${it.rating}`; })());
 ok('B2 《她和她的猫》海报换成 item-b73c9fed.webp：文件在、hash 自洽、537×800',
   (() => {
     const it = data.items.find((x) => x.title === '她和她的猫');
@@ -103,18 +106,21 @@ ok('B4 海报库无孤儿：每个 img/watch/*.webp 都被恰好一条引用',
 const anime = data.items.filter((x) => x.kind === 'anime').map((x) => x.title);
 const series = data.items.filter((x) => x.kind === 'series').map((x) => x.title);
 const movie = data.items.filter((x) => (x.kind || 'movie') === 'movie').map((x) => x.title);
-ok('B5 kind 分布：番剧 29 / 剧集 16 / 电影 41，总数不变',
-  anime.length === 29 && series.length === 16 && movie.length === 41 && N === 86,
+ok('B5 kind 三值齐全、总数自洽（anime ≥ 34，movie/series 非空）',
+  anime.length >= 34 && series.length > 0 && movie.length > 0 &&
+  anime.length + series.length + movie.length === N,
   `anime=${anime.length} series=${series.length} movie=${movie.length} 总=${N}`);
 const EXPECT_ANIME = ['冰菓', '青春猪头少年不会梦到兔女郎学姐', '徒然喜欢你', '辉夜大小姐想让我告白',
   '工作细胞', '中二病也要谈恋爱！', '她和她的猫', '欢迎来到实力至上主义教室', '轻音少女',
   '境界的彼方', '在下坂本，有何贵干？', '末日三问', '小林家的龙女仆', '魔女之旅',
   '工作细胞2', '玉子市场', '工作细胞BLACK', '咒术回战', '总之就是非常可爱',
   '多罗罗', '冰海战记', '在魔王城说晚安', '重启咲良田', 'Re：从零开始的异世界生活',
-  '奇巧出租车', '鬼灭之刃：游郭篇', '新世纪福音战士', '游戏人生', '赛博朋克：边缘行者'];
-ok('B6 番剧清单 = 用户确认的 29 部日本动画（一部不差）',
-  JSON.stringify(anime.slice().sort()) === JSON.stringify(EXPECT_ANIME.slice().sort()),
-  `差集：${EXPECT_ANIME.filter((t) => !anime.includes(t)).concat(anime.filter((t) => !EXPECT_ANIME.includes(t))).join('、') || '无'}`);
+  '奇巧出租车', '鬼灭之刃：游郭篇', '新世纪福音战士', '游戏人生', '赛博朋克：边缘行者',
+  // 第 73 轮上线合并后新增的日本动画剧集（用户网页加号录入，默认落成 movie/series）
+  '某科学的超电磁炮', '某科学的超电磁炮T', '埃罗芒阿老师', '异度侵入', '神之塔'];
+ok('B6 清单内 34 部日本动画全是番剧（一部不差；用户后续新录的番剧不在清单内也允许）',
+  EXPECT_ANIME.every((t) => anime.includes(t)) && anime.length >= EXPECT_ANIME.length,
+  `缺：${EXPECT_ANIME.filter((t) => !anime.includes(t)).join('、') || '无'}`);
 ok('B7 国漫与欧美动画按确认范围留在「剧集」',
   ['雾山五行', '大理寺日志', '英雄联盟：双城之战', '变形金刚 领袖之证'].every((t) => series.includes(t)),
   series.join('、'));
