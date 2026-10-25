@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T12:46:43+08:00",
+  "updated_at": "2026-10-25T13:27:33+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -735,6 +735,19 @@
       "year": 2021,
       "rating": 7.5,
       "note": "每一个细胞都很重要"
+    },
+    {
+      "id": "2021-01-25-item",
+      "title": "魔女之旅",
+      "kind": "series",
+      "watched_at": "2021-01-25",
+      "poster": "img/watch/item-335fe398.webp",
+      "poster_w": 640,
+      "poster_h": 960,
+      "title_en": "魔女の旅々",
+      "year": 2020,
+      "rating": 8,
+      "note": "“有缘再见吧 约定好了哟”"
     },
     {
       "id": "2020-07-16-item",
