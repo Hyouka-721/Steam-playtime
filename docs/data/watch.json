@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:08:24+08:00",
+  "updated_at": "2026-10-25T16:08:36+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -89,13 +89,13 @@
       "kind": "movie",
       "watched_at": "2026-05-19",
       "poster": "img/watch/the-million-pound-note-703e3519.webp",
+      "added_at": "2026-10-24T22:59:35+08:00",
       "poster_w": 640,
       "poster_h": 977,
       "title_en": "The Million Pound Note",
       "year": 1954,
-      "rating": 8.5,
-      "note": "金钱的象征",
-      "added_at": "2026-10-24T22:59:35+08:00"
+      "rating": 8,
+      "note": "金钱的象征"
     },
     {
       "id": "2026-05-09-titanic",
