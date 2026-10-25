@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T15:34:04+08:00",
+  "updated_at": "2026-10-25T15:35:10+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1014,6 +1014,20 @@
       "year": 2015,
       "rating": 8.5,
       "note": "河西走廊之梦"
+    },
+    {
+      "id": "2020-10-17-item",
+      "title": "名侦探柯南：贝克街的亡灵",
+      "kind": "movie",
+      "watched_at": "2020-10-17",
+      "added_at": "2026-10-25T15:35:10+08:00",
+      "poster": "img/watch/item-c30d1366.webp",
+      "poster_w": 640,
+      "poster_h": 910,
+      "title_en": "名探偵コナン ベイカー街の亡霊",
+      "year": 2002,
+      "rating": 6.5,
+      "note": "每个人心中都有一个福尔摩斯"
     },
     {
       "id": "2020-08-31-the-last-emperor",
