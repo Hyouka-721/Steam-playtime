@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:12:24+08:00",
+  "updated_at": "2026-10-25T16:14:10+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1406,6 +1406,20 @@
       "year": 1994,
       "rating": 7.5,
       "note": "人生就像一盒巧克力"
+    },
+    {
+      "id": "2019-07-11-item",
+      "title": "我想吃掉你的胰脏",
+      "kind": "movie",
+      "watched_at": "2019-07-11",
+      "added_at": "2026-10-25T16:14:10+08:00",
+      "poster": "img/watch/item-dada35c9.webp",
+      "poster_w": 640,
+      "poster_h": 903,
+      "title_en": "君の膵臓をたべたい",
+      "year": 2018,
+      "rating": 9,
+      "note": "死不是生的对立面，而是作为生的一部分永恒"
     },
     {
       "id": "2019-07-10-item",
