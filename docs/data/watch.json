@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T14:27:51+08:00",
+  "updated_at": "2026-10-25T14:30:07+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -891,6 +891,19 @@
       "year": 1999,
       "rating": 8,
       "note": "猫和遥远星星的声音"
+    },
+    {
+      "id": "2020-07-17-300",
+      "title": "斯巴达300勇士",
+      "kind": "movie",
+      "watched_at": "2020-07-17",
+      "poster": "img/watch/300-1c02ecbf.webp",
+      "poster_w": 640,
+      "poster_h": 948,
+      "title_en": "300",
+      "year": 2006,
+      "rating": 7,
+      "note": "斯巴达"
     },
     {
       "id": "2020-07-16-item",
