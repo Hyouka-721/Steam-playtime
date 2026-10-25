@@ -33,8 +33,8 @@ docs/                 # = 发布根 = 源码（零构建；docs/ 就是 GitHub P
 scripts/              # 数据管线（fetch/diff/build/backfill/inline-boot/localize）+ watch-add.mjs + lib/
 data/                 # 管线原始数据（achievements/daily/manual/overrides/snapshots/cache），git 跟踪
 tests/                # 第 70 轮新收编：回归测试套件
-├── verify/           # 19 个本地回归脚本 verify6/47~70.mjs
-├── online/           # 上线复验 online65/66/68/69/70.mjs
+├── verify/           # 20 个本地回归脚本 verify6/47~72.mjs
+├── online/           # 上线复验 online65/66/68/69/70/72.mjs
 ├── tools/            # rebase 数据冲突合并器 merge*.py
 └── README.md         # 怎么跑 + 约定
 .github/workflows/daily.yml  # 每晚 CI 快照
@@ -76,7 +76,7 @@ tests/                # 第 70 轮新收编：回归测试套件
 
 ## 五、如何继续（标准工作流）
 
-1. **改代码** → 2. **bump 版本号并同步回归脚本里的硬编码** → 3. **起本地服务 + 跑 19 个套件**（`tests/README.md` 有命令）→ 4. **`git commit`** → 5. 用户说「上线」才 **fetch → rebase（解 `watch.json` 冲突用 merge 脚本）→ 重跑 → push** → 6. **轮询 Pages 内容指纹** → 7. **跑 `tests/online/online*.mjs` 复验** → 8. **归档到 Documents + 追加索引 + 写记忆**。
+1. **改代码** → 2. **bump 版本号并同步回归脚本里的硬编码** → 3. **起本地服务 + 跑 20 个套件**（`tests/README.md` 有命令）→ 4. **`git commit`** → 5. 用户说「上线」才 **fetch → rebase（解 `watch.json` 冲突用 merge 脚本）→ 重跑 → push** → 6. **轮询 Pages 内容指纹** → 7. **跑 `tests/online/online*.mjs` 复验** → 8. **归档到 Documents + 追加索引 + 写记忆**。
 
 新增功能/改动通常是「新轮次」：新建 `tests/verify/<下一号>.mjs` 专门覆盖新契约，旧套件原样留档（只为真契约变更改判据，不为跑绿调阈值）。
 
