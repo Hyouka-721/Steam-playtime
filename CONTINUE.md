@@ -33,17 +33,18 @@ docs/                 # = 发布根 = 源码（零构建；docs/ 就是 GitHub P
 scripts/              # 数据管线（fetch/diff/build/backfill/inline-boot/localize）+ watch-add.mjs + lib/
 data/                 # 管线原始数据（achievements/daily/manual/overrides/snapshots/cache），git 跟踪
 tests/                # 第 70 轮新收编：回归测试套件
-├── verify/           # 20 个本地回归脚本 verify6/47~72.mjs
+├── verify/           # 21 个本地回归脚本 verify6/47~73.mjs
 ├── online/           # 上线复验 online65/66/68/69/70/72.mjs
 ├── tools/            # rebase 数据冲突合并器 merge*.py
 └── README.md         # 怎么跑 + 约定
 .github/workflows/daily.yml  # 每晚 CI 快照
 ```
 
-## 三、当前进度（截至 2026-10-25 15:20，第 72 轮已上线）
+## 三、当前进度（截至 2026-10-25 16:10，第 73 轮已本地提交 b5284a5，**未推送**）
 
 - 已上线到 `0a13b04`（推送 `b1c8845..0a13b04`，7 个提交，线上 **86 条**；线上复验 `online72` **14/14**，Pages 约 0s 命中）
-- 版本号当前取值：`style.css?v=105` / `app.js?v=99` / `fx.js?v=16` / **`watch.css?v=16`** / **`watch.js?v=9`**。
+- 第 73 轮（番剧类别 + 她和她的猫海报 + 重分类）已本地提交 **`b5284a5`**（16 文件，**未推送**，等「上线」指令；届时先 fetch/rebase——用户可能又用网页加号录了数据）
+- 版本号当前取值：`style.css?v=105` / `app.js?v=99` / `fx.js?v=16` / **`watch.css?v=16`** / **`watch.js?v=10`**。
 - 观影页已完成的关键轮次（按时间）：
   - 第 57 轮 网页加号录入（Contents API 直写 + Token 存 localStorage）
   - 第 60 轮 网格 1.5 倍密度（1440 = 5 列）
@@ -63,14 +64,22 @@ tests/                # 第 70 轮新收编：回归测试套件
     ⑦ 上线时又恢复两条撞车受害者（同一个 id 撞车 bug 在线上旧代码上多发生了两次，靠全量扫描才发现）：
       《工作细胞》→ `2020-07-16-item-2`（被《中二病也要谈恋爱！》覆盖）、
       《境界的彼方》→ `2020-12-18-item-2`（被《在下坂本，有何贵干？》覆盖，海报 `item-e0e18532.webp` 一直是孤儿）
-- 回归基线：**20 个脚本 0 FAIL**（86 条数据；`verify72.mjs` 21 条 + 线上 `online72` 14 条）。
+  - 第 73 轮 ① 影视类别新增「番剧」（动画剧集）：筛选条 全部/电影/剧集/**番剧** 四档，录入/编辑表单类型选择器加选项；
+    watch.js 全链路支持 anime（kindLabel / setKind / submitAdd / submitEdit / openEdit），scripts/watch-add.mjs --kind 也接受 anime
+    ② 《她和她的猫》换海报：用户图 p2249039182.jpg（537×800 <640 只缩不放）→ item-b73c9fed.webp（16.0KB），id 与 added_at 不变，旧海报删除
+    ③ 既有条目按**用户确认的范围**重分类：仅日本动画剧集 → 番剧（29 条）；国漫（雾山五行/大理寺日志）与欧美动画（双城之战/变形金刚）留「剧集」，动画电影留「电影」
+    ④ 顺带修两处客观错分：半泽直树（TBS 日剧）、洛基（Disney+ 剧集）movie → series → 分布 movie 41 / series 16 / anime 29
+    ⑤ watch.js?v=9→v=10 波及 8 个回归脚本，**每个文件两处**（ok() 描述纯文本 + 正则断言转义形态），只换一处会漏；
+    verify66/verify72 判据随真契约变更更新（赛博朋克：边缘行者改进番剧、玉子市场 kind=anime）
+    ⑥ 新增 tests/verify/verify73.mjs（27 条：筛选四档/表单链路/标签映射/海报 hash/重分类清单/持久化），全量 **21 套件 853/853 0 FAIL**
+- 回归基线：**21 个脚本 0 FAIL**（86 条数据，共 853 条断言；`verify73.mjs` 27 条 + 线上 `online72` 14 条）。
   `verify67` 的高度判据已从代理观测值升级为**真不变量**：`条目高 ≡ max(缩略图高, 名称头高) + 固定 chrome`（8 档视口实测差值恒为 28），
   取代原来的「折行条目只高 1px」和「英文名最多 2 行」——后两者只是 (中文名2行/英文名2行) 一种组合下的快照，第 65 轮契约本就是「折行而不是顶宽、不截断」。
 - 归档：每轮成果在 `C:\Users\33329\Documents\Misc\对话成果\Steam游戏时长站\06_验证截图\<日期>_<主题>\`（含 `归档清单.md` + 截图 + 脚本），索引在 `Documents\Misc\对话成果\索引.md`。
 
 ## 四、硬约束（违反必炸，务必遵守）
 
-1. **改 `docs/` 里的静态资源必须 bump `?v=N`**（每个文件独立计数）。版本号在 10+ 个回归脚本里**硬编码**，bump 必须同步（`tests/verify/*.mjs` 里 `watch.css?v=16` / `watch.js?v=9`）。
+1. **改 `docs/` 里的静态资源必须 bump `?v=N`**（每个文件独立计数）。版本号在 10+ 个回归脚本里**硬编码**，bump 必须同步（`tests/verify/*.mjs` 里 `watch.css?v=16` / `watch.js?v=10`）。
 2. **`docs/` 是发布根，不要往里面塞构建步骤/源码目录**；两个页面资源互不引用。
 3. **不要动 `data/` 管线的原始数据**（achievements/daily/manual/overrides/snapshots/cache），它们是每晚 diff 的源。
 4. **不要用 `https://github.com` 根路径判断可达性**；本机 `hosts` 把 github 系列域名指到 127.0.0.1。判断能否推送用 `git ls-remote origin main`。
@@ -82,7 +91,7 @@ tests/                # 第 70 轮新收编：回归测试套件
 
 ## 五、如何继续（标准工作流）
 
-1. **改代码** → 2. **bump 版本号并同步回归脚本里的硬编码** → 3. **起本地服务 + 跑 20 个套件**（`tests/README.md` 有命令）→ 4. **`git commit`** → 5. 用户说「上线」才 **fetch → rebase（解 `watch.json` 冲突用 merge 脚本）→ 重跑 → push** → 6. **轮询 Pages 内容指纹** → 7. **跑 `tests/online/online*.mjs` 复验** → 8. **归档到 Documents + 追加索引 + 写记忆**。
+1. **改代码** → 2. **bump 版本号并同步回归脚本里的硬编码** → 3. **起本地服务 + 跑 21 个套件**（`tests/README.md` 有命令）→ 4. **`git commit`** → 5. 用户说「上线」才 **fetch → rebase（解 `watch.json` 冲突用 merge 脚本）→ 重跑 → push** → 6. **轮询 Pages 内容指纹** → 7. **跑 `tests/online/online*.mjs` 复验** → 8. **归档到 Documents + 追加索引 + 写记忆**。
 
 新增功能/改动通常是「新轮次」：新建 `tests/verify/<下一号>.mjs` 专门覆盖新契约，旧套件原样留档（只为真契约变更改判据，不为跑绿调阈值）。
 
