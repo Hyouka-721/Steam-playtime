@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T14:22:16+08:00",
+  "updated_at": "2026-10-25T14:23:40+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -891,6 +891,19 @@
       "year": 2018,
       "rating": 8,
       "note": "最后，记得保持健康哦"
+    },
+    {
+      "id": "2020-07-04-item",
+      "title": "辉夜大小姐想让我告白",
+      "kind": "series",
+      "watched_at": "2020-07-04",
+      "poster": "img/watch/item-3bf1c0c9.webp",
+      "poster_w": 640,
+      "poster_h": 893,
+      "title_en": "かぐや様は告らせたい",
+      "year": 2019,
+      "rating": 8.5,
+      "note": "恋爱真是一件羞耻的事情"
     },
     {
       "id": "2020-06-28-item",
