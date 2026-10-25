@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T15:08:39+08:00",
+  "updated_at": "2026-10-25T15:19:53+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -475,13 +475,13 @@
       "kind": "series",
       "watched_at": "2022-07-31",
       "poster": "img/watch/the-grand-mansion-gate-cb1c25f4.webp",
+      "added_at": "2026-10-25T09:44:16+08:00",
       "poster_w": 448,
       "poster_h": 672,
       "title_en": "The Grand Mansion Gate",
       "year": 2001,
       "rating": 8,
-      "note": "尽人力，听天命",
-      "added_at": "2026-10-25T09:44:16+08:00"
+      "note": "波谲云诡"
     },
     {
       "id": "2022-05-04-transformers-prime",
