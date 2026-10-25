@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T14:26:27+08:00",
+  "updated_at": "2026-10-25T14:27:12+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -878,6 +878,17 @@
       "year": 2019,
       "rating": 8,
       "note": "Knives Out"
+    },
+    {
+      "id": "2020-07-17-item",
+      "title": "她和她的猫",
+      "kind": "movie",
+      "watched_at": "2020-07-17",
+      "poster": "img/watch/item-58c40d47.webp",
+      "poster_w": 640,
+      "poster_h": 960,
+      "year": 1999,
+      "rating": 8
     },
     {
       "id": "2020-07-16-item",
