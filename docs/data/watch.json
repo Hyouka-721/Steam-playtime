@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T12:20:07+08:00",
+  "updated_at": "2026-10-25T12:29:37+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -722,6 +722,19 @@
       "year": 2013,
       "rating": 8.5,
       "note": "最喜欢了饼藏了！请讲！どうぞ"
+    },
+    {
+      "id": "2021-03-07-2",
+      "title": "工作细胞2",
+      "kind": "series",
+      "watched_at": "2021-03-07",
+      "poster": "img/watch/2-5480e3e4.webp",
+      "poster_w": 640,
+      "poster_h": 902,
+      "title_en": "はたらく細胞!!",
+      "year": 2021,
+      "rating": 7.5,
+      "note": "每一个细胞都很重要"
     }
   ]
 }
