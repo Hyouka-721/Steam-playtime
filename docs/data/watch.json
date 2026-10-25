@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T09:29:08+08:00",
+  "updated_at": "2026-10-25T09:44:16+08:00",
   "items": [
     {
       "id": "2026-10-24-swords-into-plowshares",
@@ -410,6 +410,19 @@
       "year": 1995,
       "rating": 8.5,
       "note": "在世界的中心呼唤爱的野兽"
+    },
+    {
+      "id": "2022-07-31-the-grand-mansion-gate",
+      "title": "大宅门",
+      "kind": "series",
+      "watched_at": "2022-07-31",
+      "poster": "img/watch/the-grand-mansion-gate-cb1c25f4.webp",
+      "poster_w": 448,
+      "poster_h": 672,
+      "title_en": "The Grand Mansion Gate",
+      "year": 2001,
+      "rating": 8,
+      "note": "尽人力，听天命"
     }
   ]
 }
