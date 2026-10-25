@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:05:07+08:00",
+  "updated_at": "2026-10-25T16:05:15+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -881,13 +881,13 @@
       "kind": "series",
       "watched_at": "2020-12-18",
       "poster": "img/watch/item-e0e18532.webp",
+      "added_at": "2026-10-25T13:35:13+08:00",
       "poster_w": 640,
       "poster_h": 897,
       "title_en": "境界の彼方",
       "year": 2013,
-      "rating": 7.5,
-      "note": "没有未来的未来不是我想要的未来",
-      "added_at": "2026-10-25T13:35:13+08:00"
+      "rating": 7,
+      "note": "没有未来的未来不是我想要的未来"
     },
     {
       "id": "2020-12-18-item",
