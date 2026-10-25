@@ -90,7 +90,7 @@ const N = liveData.items.length;
 const first = liveData.items[0];
 
 /* 抽查三档海报（base / 320 / 480）是否可下载且与本地逐字节相同 */
-const probe = await page.evaluate(async (base, rels) => {
+const probe = await page.evaluate(async ({ base, rels }) => {
   const out = [];
   for (const rel of rels) {
     const r = await fetch(base + rel + '?cb=' + Date.now(), { cache: 'reload' });
@@ -100,7 +100,7 @@ const probe = await page.evaluate(async (base, rels) => {
     out.push({ rel, status: r.status, len: b.length, b64: btoa(bin) });
   }
   return out;
-}, SITE, [first.poster, first.poster_320, first.poster_480].filter(Boolean));
+}, { base: SITE, rels: [first.poster, first.poster_320, first.poster_480].filter(Boolean) });
 let posterOK = probe.length >= 2 && probe.every((p) => p.status === 200);
 let detail = [];
 for (const p of probe) {
@@ -189,6 +189,13 @@ console.log('\n== C Service Worker ==');
   const c = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const p = await c.newPage();
   p.on('pageerror', (e) => errs.push(String(e)));
+  /* 硬证据：海报响应是否由 Service Worker 提供（fromServiceWorker） */
+  const swResp = [];
+  p.on('response', (r) => {
+    if (/\/img\/watch\/[^?#]+\.webp$/.test(r.url())) {
+      try { swResp.push({ sw: r.fromServiceWorker(), st: r.status() }); } catch (e) { swResp.push({ sw: 'err', st: r.status() }); }
+    }
+  });
   await gotoRetry(p, SITE + 'watch.html');
   await p.waitForFunction(() => document.querySelectorAll('#w-grid .poster').length > 0, null, { timeout: 60000 });
   await p.evaluate(() => navigator.serviceWorker.ready);
@@ -196,38 +203,51 @@ console.log('\n== C Service Worker ==');
   await p.waitForFunction(() => navigator.serviceWorker.controller !== null, null, { timeout: 30000 }).catch(() => {});
   await p.waitForFunction(() => document.querySelectorAll('#w-grid .poster').length > 0, null, { timeout: 60000 });
   const ctrl = await p.evaluate(() => !!(navigator.serviceWorker.controller && navigator.serviceWorker.controller.scriptURL));
-  const cacheKeys = await p.evaluate(async () => {
-    const cch = await caches.open('watch-posters-v1');
-    const ks = await cch.keys();
-    return ks.map((r) => r.url).filter((u) => /\.webp$/.test(u));
-  });
-  ok('C1 线上 SW 已注册并控制页面（sw.js 生效）', ctrl, `controller=${ctrl}`);
-  ok('C2 SW 缓存 watch-posters-v1 已收录海报', cacheKeys.length > 0, `${cacheKeys.length} 个 URL`);
-
-  /* 第三次访问：海报应零网络 */
-  await p.reload({ waitUntil: 'domcontentloaded' });
-  await p.waitForFunction(() => document.querySelectorAll('#w-grid .poster').length > 0, null, { timeout: 60000 });
-  await p.evaluate(async () => {
+  /* 滚动触发懒加载：进入视口的海报才会被请求 → 才会进 SW 缓存 */
+  const scroll = async () => p.evaluate(async () => {
     const step = window.innerHeight;
     for (let y = 0; y <= document.body.scrollHeight; y += step) {
       window.scrollTo(0, y);
-      await new Promise((r) => setTimeout(r, 120));
+      await new Promise((r) => setTimeout(r, 200));
     }
   });
+  await scroll();
+  await p.waitForTimeout(6000);
+  const cacheInfo = await p.evaluate(async () => {
+    const cch = await caches.open('watch-posters-v1');
+    const ks = await cch.keys();
+    const urls = ks.map((r) => r.url).filter((u) => /\.webp$/.test(u));
+    const es = performance.getEntriesByType('resource').filter((e) => /\/img\/watch\/[^?#]+\.webp$/.test(e.name));
+    return { n: urls.length, timing: es.length, zero: es.filter((e) => e.transferSize === 0).length };
+  });
+  ok('C1 线上 SW 已注册并控制页面（sw.js 生效）', ctrl, `controller=${ctrl}`);
+  ok('C2 SW 缓存 watch-posters-v1 已收录海报（缓存数 = 本次请求的海报数）',
+    cacheInfo.n > 0 && cacheInfo.n === cacheInfo.timing, `缓存 ${cacheInfo.n} / 请求 ${cacheInfo.timing}`);
+
+  /* 再访问一次：海报全部由 SW 提供（fromServiceWorker）且零网络传输 */
+  swResp.length = 0;
+  await p.reload({ waitUntil: 'domcontentloaded' });
+  await p.waitForFunction(() => document.querySelectorAll('#w-grid .poster').length > 0, null, { timeout: 60000 });
+  await scroll();
   await p.waitForFunction(() => {
     const imgs = [...document.querySelectorAll('#w-grid img')];
     return imgs.length > 0 && imgs.every((im) => im.complete);
   }, null, { timeout: 90000 }).catch(() => {});
+  await p.waitForTimeout(1500);
   const timing = await p.evaluate(() => {
     const es = performance.getEntriesByType('resource').filter((e) => /\/img\/watch\/[^?#]+\.webp$/.test(e.name));
     return { n: es.length, bad: es.filter((e) => e.transferSize !== 0).map((e) => `${e.name.split('/').pop()}:${e.transferSize}`) };
   });
-  ok('C3 线上二次访问海报 transferSize=0（SW cache-first，刷新不再等协商）',
+  const swCount = swResp.filter((r) => r.sw === true).length;
+  ok('C3 线上二次访问：海报响应全部由 Service Worker 提供（fromServiceWorker）',
+    swResp.length > 0 && swCount === swResp.length,
+    `${swCount}/${swResp.length} 个海报响应来自 SW（状态分布 ${JSON.stringify(swResp.reduce((a, r) => { a[r.st] = (a[r.st] || 0) + 1; return a; }, {}))}）`);
+  ok('C4 线上二次访问海报 transferSize=0（刷新不再等协商）',
     timing.n >= 5 && timing.bad.length === 0,
     `${timing.n} 个海报资源${timing.bad.length ? '，非零：' + timing.bad.slice(0, 3).join(' ') : '，全部 0'}`);
   await c.close();
 }
 
-ok('C4 全程零 JS 异常', errs.length === 0, errs.slice(0, 3).join(' | '));
+ok('C5 全程零 JS 异常', errs.length === 0, errs.slice(0, 3).join(' | '));
 console.log(`\n第 75 轮线上复验：PASS ${pass} / FAIL ${fail}`);
 process.exit(fail ? 1 : 0);
