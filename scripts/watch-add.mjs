@@ -3,10 +3,12 @@
    watch-add.mjs · 观影记录录入（2026-10-24 新建）
    ------------------------------------------------------------
    一条命令完成：压图 → 按内容哈希命名 → 写入 docs/img/watch/
-                → 去重合并 docs/data/watch.json → 按观影时间倒序重排
+                → 去重合并 docs/data/watch.json → 按观影时间倒序重排（同日按上传时间正序）
    设计要点：
    · 文件名带内容哈希：换图必然换名，不会被 CDN / 浏览器缓存住
-   · 按 id 去重：同一条目重复录入是「更新」而不是新增（可用来改感想、换海报）
+   · 同 id 且同片名才是「更新」；同 id 不同片名会追 -2/-3 换新 id（第 72 轮，
+     防同日两部都没英文名的条目互相覆盖 —— 玉子市场 / 玉子爱情故事事故的根因）
+   · 每条记录带 added_at（上传时间），同日记录按它正序排列，先上传居前
    · 只缩不放：原图比目标宽度小时不放大，避免糊
    · 默认不裁剪：海报交给 CSS 的 aspect-ratio + object-fit:cover 处理，
      需要固定比例时用 --crop 2:3 显式裁
@@ -111,6 +113,21 @@ function sortKey(v) {
   return `${m[1]}-${m[2] || '00'}-${m[3] || '00'}`;
 }
 
+// 第 72 轮：上传时间比较键（ISO 8601 本地串），与 watch.js 的 stampKey 一致
+function stampKey(s) {
+  const t = Date.parse(String(s || ''));
+  return Number.isNaN(t) ? 0 : t;
+}
+
+// 第 72 轮：观影时间倒序 → 同日按上传时间正序（先上传居前）→ id 字典序稳定收尾
+function cmpTime(a, b) {
+  const d = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
+  if (d !== 0) return d;
+  const s = stampKey(a.added_at) - stampKey(b.added_at);
+  if (s !== 0) return s;
+  return String(a.id || '').localeCompare(String(b.id || ''));
+}
+
 function readData() {
   if (!fs.existsSync(DATA_FILE)) return { updated_at: nowLocal(), items: [] };
   try {
@@ -143,7 +160,26 @@ async function main() {
   const title = String(args.title).trim();
   const titleEn = args.en ? String(args.en).trim() : '';
   const slug = makeSlug(titleEn, title);
-  const id = String(args.id || `${watchedAt}-${slug}`).trim();
+
+  // ---- 合并数据（先读数据：id 防撞车要对照现有条目）----
+  const data = readData();
+
+  // id 规则（第 72 轮起与网页加号完全一致）：
+  // · --id 指定则精确覆盖；否则默认 <watched>-<slug>
+  // · 同 id 且同片名 = 更新（上传时间沿用首次录入）
+  // · 同 id 但不同片名 = 追 -2 / -3 换新 id，避免同日两部都没英文名（slug 都回落 item）时互相覆盖
+  let id = String(args.id || `${watchedAt}-${slug}`).trim();
+  if (!args.id) {
+    let n = 2;
+    for (;;) {
+      const clash = data.items.find((it) => it && it.id === id);
+      if (!clash || clash.title === title) break;
+      id = `${watchedAt}-${slug}-${n}`;
+      n++;
+    }
+  }
+  const prevIdx = data.items.findIndex((it) => it && it.id === id);
+  const prev = prevIdx >= 0 ? data.items[prevIdx] : null;
 
   const width = Math.max(64, Math.min(2400, parseInt(args.width || '640', 10) || 640));
   const quality = Math.max(1, Math.min(100, parseInt(args.quality || '80', 10) || 80));
@@ -175,11 +211,7 @@ async function main() {
   const outPath = path.join(POSTER_DIR, fileName);
   const relPoster = `img/watch/${fileName}`;
 
-  // ---- 合并数据 ----
-  const data = readData();
-  const prevIdx = data.items.findIndex((it) => it.id === id);
-  const prev = prevIdx >= 0 ? data.items[prevIdx] : null;
-
+  // ---- 合并数据（data / prev 已在上面读好）----
   const item = {
     id,
     title,
@@ -197,15 +229,13 @@ async function main() {
     ...(args.note !== undefined && args.note !== true
       ? { note: String(args.note).trim() }
       : (prev && prev.note ? { note: prev.note } : {})),
+    // 第 72 轮：上传时间。同 id 更新沿用首次录入时间，新条目取当前时间
+    ...(prev && prev.added_at ? { added_at: prev.added_at } : { added_at: nowLocal() }),
   };
 
   if (prevIdx >= 0) data.items[prevIdx] = item;
   else data.items.push(item);
-  data.items.sort((a, b) => {
-    const d = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
-    if (d !== 0) return d;
-    return String(b.id || '').localeCompare(String(a.id || ''));
-  });
+  data.items.sort(cmpTime);
   data.updated_at = nowLocal();
 
   // ---- 报告 ----

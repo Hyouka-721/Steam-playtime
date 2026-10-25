@@ -8,7 +8,7 @@
 <link rel="icon" type="image/webp" href="img/minion-0ef9a202.webp">
 <!-- 与游戏站同一套本地花体字，保持品牌一致；preload + font-display:block 消除 FOUT -->
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="watch.css?v=15">
+<link rel="stylesheet" href="watch.css?v=16">
 </head>
 <body>
 
@@ -20,9 +20,11 @@
   </a>
   <!-- 2026-10-24 第 64 轮：标题兼作「回到顶部」按钮（页面滚很长时才用得上）。
        第 66 轮：去掉 title 属性 —— 鼠标悬停会弹原生「回到页面顶部」提示，按需求移除；
-       无障碍语义仍在 aria-label 上，点击 / Enter / 空格的行为不变。 -->
+       无障碍语义仍在 aria-label 上，点击 / Enter / 空格的行为不变。
+       第 72 轮：页眉文案回到「My Watch List」，而 <title>（浏览器标签/站名）保持
+       「Watch List」不变 —— 两处从此分工：页眉是品牌全称，站名是简称。 -->
   <h1 class="w-title" id="w-title" role="button" tabindex="0"
-      aria-label="回到页面顶部">Watch List</h1>
+      aria-label="回到页面顶部">My Watch List</h1>
   <!-- 史蒂夫：2026-10-24 第 56 轮从首页复制过来，**位置与尺寸与首页 .header-avatar 完全一致**
        （第三个 grid 单元、justify-self:end、132×132、≤480px 88×88、同一张素材、同一套 hover/active/focus 反馈）。
        首页上它切换浅色主题，这里它切换**网格视图 ⇄ 时间轴视图**；
@@ -38,7 +40,13 @@
     <button type="button" class="w-seg-btn" data-kind="movie" aria-pressed="false">电影</button>
     <button type="button" class="w-seg-btn" data-kind="series" aria-pressed="false">剧集</button>
   </div>
-  <div class="w-count" id="w-count">—</div>
+  <!-- 第 72 轮：原「共 N 部」计数条改为排序切换（仅网格视图生效，时间轴恒按观影时间倒序）。
+       默认「观看时间」= 观影日期倒序，同日按上传时间正序（先上传居前）；
+       「评分」= 高评分在前，无评分沉底。选择记 localStorage('watch-sort')。 -->
+  <div class="w-sort" id="w-sort" role="group" aria-label="网格排序方式">
+    <button type="button" class="w-sort-btn is-on" data-sort="time" aria-pressed="true">观看时间</button>
+    <button type="button" class="w-sort-btn" data-sort="rating" aria-pressed="false">评分</button>
+  </div>
 </div>
 
 <main class="w-main">
@@ -165,6 +173,6 @@
 </dialog>
 
 <div class="w-toast" id="w-toast" role="status" hidden></div>
-<script src="watch.js?v=8"></script>
+<script src="watch.js?v=9"></script>
 </body>
 </html>

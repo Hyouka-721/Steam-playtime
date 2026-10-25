@@ -23,8 +23,8 @@ ok('A2 表单字段齐全（片名/英文名/类型/年份/日期/评分/标签/
 ok('A3 使用原生 <dialog>（Esc / 焦点圈免费拿到）', /<dialog class="w-add" id="w-add"/.test(html));
 ok('A4 有 Token 折叠区与保存/清除按钮',
   /id="add-token-box"/.test(html) && /id="add-token-save"/.test(html) && /id="add-token-clear"/.test(html));
-ok('A5 版本号 bump：watch.css?v=15 / watch.js?v=8',
-  /watch\.css\?v=15"/.test(html) && /watch\.js\?v=8"/.test(html));
+ok('A5 版本号 bump：watch.css?v=16 / watch.js?v=9',
+  /watch\.css\?v=16"/.test(html) && /watch\.js\?v=9"/.test(html));
 ok('A6 watch.js 走 GitHub Contents API 且仓库/分支可核',
   /api\.github\.com/.test(js) && /owner: 'Hyouka-721'/.test(js) && /repo: 'Steam-playtime'/.test(js) && /branch: 'main'/.test(js));
 ok('A7 压图规则与 CLI 一致（宽 640 / WebP / 只缩不放 / 内容哈希命名）',
@@ -195,12 +195,12 @@ for (const mode of ['withPoster', 'noPoster']) {
     open: document.getElementById('w-add').hasAttribute('open'),
     toast: document.getElementById('w-toast').hidden ? '' : document.getElementById('w-toast').textContent,
     posters: document.querySelectorAll('#w-grid .poster').length,
-    count: document.getElementById('w-count').textContent,
+    sortOn: document.querySelector('.w-sort-btn.is-on').getAttribute('data-sort'),
     first: document.querySelector('#w-grid .poster .poster-name') && document.querySelector('#w-grid .poster .poster-name').textContent,
   }));
   ok(`B7[${mode}] 提交成功后自动关闭对话框并弹出提示`, !after.open && /已提交/.test(after.toast), JSON.stringify(after));
   ok(`B7a[${mode}] 本机立即看到新条目（网格 2 张、最新在最前）`, after.posters === 2 && after.first === (mode === 'withPoster' ? '奥本海默' : '无海报测试'),
-    `posters=${after.posters} first=${after.first} count=${after.count}`);
+    `posters=${after.posters} first=${after.first} sort=${after.sortOn}`);
   ok(`B8[${mode}] 零 JS 异常`, errs.length === 0, errs.join(' | '));
   await ctx.close();
 }

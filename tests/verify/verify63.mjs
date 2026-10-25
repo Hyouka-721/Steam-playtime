@@ -23,7 +23,7 @@ ok('A2 .tl-body 改为 align-items: center（原 baseline）',
   /align-items: center/.test(body) && !/align-items: baseline/.test(body), body.replace(/\s+/g, ' ').trim());
 const meta = (cssNC.match(/\.tl-meta \{([^}]*)\}/) || [, ''])[1];
 ok('A3 .tl-meta 也是 align-items: center', /align-items: center/.test(meta));
-ok('A4 版本号 bump：watch.css?v=15', /watch\.css\?v=15"/.test(html));
+ok('A4 版本号 bump：watch.css?v=16', /watch\.css\?v=16"/.test(html));
 
 /* ================= B 桌面实测 ================= */
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });

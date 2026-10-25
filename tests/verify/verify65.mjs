@@ -25,7 +25,7 @@ ok('A2 .tl-meta flex: 0 1 auto + flex-wrap: wrap + min-width: 0',
 const b480 = blk(cssNC, '@media (max-width: 480px)');
 ok('A3 ≤480px：.tl-head 与 .tl-meta 都独占一行（1 1 100%）',
   /\.tl-head \{ flex: 1 1 100%; \}/.test(b480) && /\.tl-meta \{ flex: 1 1 100%; \}/.test(b480));
-ok('A4 版本号 bump：watch.css?v=15', /watch\.css\?v=15"/.test(html));
+ok('A4 版本号 bump：watch.css?v=16', /watch\.css\?v=16"/.test(html));
 
 /* ================= B 浏览器 ================= */
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });

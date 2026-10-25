@@ -31,8 +31,8 @@ ok('A8 .w-title 有 pointer 光标与 focus-visible 环',
 ok('A9 JS 绑定了标题的 click 与 Enter/空格，并尊重 reduced-motion',
   /getElementById\('w-title'\)/.test(js) && /prefers-reduced-motion/.test(js) &&
   /'Enter' \|\| e\.key === ' '/.test(js));
-ok('A10 版本号 bump：watch.css?v=15 / watch.js?v=8',
-  /watch\.css\?v=15"/.test(html) && /watch\.js\?v=8"/.test(html));
+ok('A10 版本号 bump：watch.css?v=16 / watch.js?v=9',
+  /watch\.css\?v=16"/.test(html) && /watch\.js\?v=9"/.test(html));
 
 /* ================= B 字号与布局实测 ================= */
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });
@@ -91,8 +91,8 @@ const titleInfo = await p.evaluate(() => {
 });
 ok('C1 标题可识别为按钮（role/tabindex/label/cursor）',
   titleInfo.cursor === 'pointer' && titleInfo.role === 'button' && titleInfo.tab === '0' &&
-  /* 第 70 轮：站名由 My Watch List 改为 Watch List */
-  titleInfo.label === '回到页面顶部' && titleInfo.text === 'Watch List', JSON.stringify(titleInfo));
+  /* 第 72 轮：页眉文案由 Watch List 改回 My Watch List（<title> 站名仍 Watch List） */
+  titleInfo.label === '回到页面顶部' && titleInfo.text === 'My Watch List', JSON.stringify(titleInfo));
 
 const openAdd = async () => { await p.click('#w-fab'); await p.waitForTimeout(250); };
 const closeAdd = async () => { await p.keyboard.press('Escape'); await p.waitForTimeout(250); };

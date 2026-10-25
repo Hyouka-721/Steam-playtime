@@ -57,11 +57,14 @@ ok('A8 海报目录没有孤儿文件（引用的集合 = 目录里 potter 相�
   })());
 
 /* ================= B 站名 ================= */
-console.log('\n== B 站名 My Watch List → Watch List ==');
-ok('B1 <title> 已改为 Watch List', /<title>Watch List<\/title>/.test(html));
-ok('B2 页眉 <h1 class="w-title"> 文本已改为 Watch List',
-  /<h1[^>]*class="w-title"[^>]*>\s*Watch List\s*<\/h1>/.test(html), (html.match(/<h1[^>]*w-title[^>]*>[\s\S]{0,40}/) || [''])[0].replace(/\s+/g, ' '));
-ok('B3 watch.html 里不再出现旧站名', !/My Watch List/.test(html));
+/* 第 72 轮：站名分工调整 —— <title>（站名）保持 Watch List，页眉 <h1> 改回 My Watch List。
+   第 70 轮「全文统一 Watch List」的 B2/B3 判据据此更新（页眉与站名从此是两处文案）。 */
+console.log('\n== B 站名：<title> Watch List / 页眉 My Watch List ==');
+ok('B1 <title>（站名）仍是 Watch List', /<title>Watch List<\/title>/.test(html));
+ok('B2 页眉 <h1 class="w-title"> 文本是 My Watch List',
+  /<h1[^>]*class="w-title"[^>]*>\s*My Watch List\s*<\/h1>/.test(html), (html.match(/<h1[^>]*w-title[^>]*>[\s\S]{0,40}/) || [''])[0].replace(/\s+/g, ' '));
+ok('B3 页眉与站名分离（My Watch List 只出现在 h1，不进 <title>）',
+  /<h1[^>]*class="w-title"[^>]*>\s*My Watch List\s*<\/h1>/.test(html) && !/<title>[^<]*My Watch List/.test(html));
 ok('B4 标题仍是可点按钮（role / tabindex / aria-label 未丢）',
   /id="w-title"[^>]*role="button"[^>]*tabindex="0"/s.test(html) && /aria-label="回到页面顶部"/.test(html));
 
@@ -82,7 +85,7 @@ const errs = [];
     h1: document.getElementById('w-title').textContent.trim(),
     posters: document.querySelectorAll('#w-grid .poster').length,
   }));
-  ok('C1 浏览器标题与页眉标题都是 Watch List', r.title === 'Watch List' && r.h1 === 'Watch List', `${r.title} / ${r.h1}`);
+  ok('C1 浏览器标题 Watch List、页眉 My Watch List', r.title === 'Watch List' && r.h1 === 'My Watch List', `${r.title} / ${r.h1}`);
   ok(`C2 网格渲染全部 ${N} 条`, r.posters === N, `grid=${r.posters}/${N}`);
 
   /* 新海报能真的加载出来（complete + naturalWidth），且解码为 640 宽 */

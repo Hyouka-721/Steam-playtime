@@ -165,7 +165,27 @@ code {
 .w-seg-btn:hover { color: var(--text); }
 .w-seg-btn.is-on { color: var(--accent); background: rgba(232, 176, 75, 0.13); font-weight: 600; }
 .w-seg-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.w-count { font-size: 13px; color: var(--text-dim); letter-spacing: .4px; font-variant-numeric: tabular-nums; }
+/* 第 72 轮：「共 N 部」计数条 → 排序切换（评分 / 观看时间），视觉与左侧筛选条同款。
+   单独起规则而不并进 .w-seg：静态断言按「首个 .w-seg{} 片段」取声明，合并会污染它。 */
+.w-sort {
+  display: flex; gap: 4px;
+  padding: 4px;
+  background: var(--panel);
+  border: 1px solid var(--card-border);
+  border-radius: 11px;
+}
+.w-sort-btn {
+  appearance: none; border: 0; background: none;
+  padding: 6px 18px;
+  font: inherit; font-size: 13.5px;
+  color: var(--text-dim);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color .16s, background .16s;
+}
+.w-sort-btn:hover { color: var(--text); }
+.w-sort-btn.is-on { color: var(--accent); background: rgba(232, 176, 75, 0.13); font-weight: 600; }
+.w-sort-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ================= 网格视图（豆瓣式海报墙）================= */
 .w-main { padding: 18px 28px 96px; }   /* 第 60 轮：底部 60 -> 96，滚到底时最后一行不会被右下角加号（底部占 82px）压住 */

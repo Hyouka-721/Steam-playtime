@@ -195,7 +195,7 @@ grep -rn "STEAM_API_KEY" .github/          # 只应出现 ${{ secrets.STEAM_API_
 
 ### `docs/data/watch.json`
 
-观影记录（`watch.html` 的唯一数据源）。`items` 按 `watched_at` 倒序，由 `scripts/watch-add.mjs` 维护，一般不用手写。
+观影记录（`watch.html` 的唯一数据源）。`items` 按 `watched_at` 倒序排，**同一天的按 `added_at` 正序（先上传的居前）**，由 `scripts/watch-add.mjs` 与网页加号共同维护，一般不用手写。
 
 ```json
 {
@@ -222,7 +222,8 @@ grep -rn "STEAM_API_KEY" .github/          # 只应出现 ${{ secrets.STEAM_API_
 
 | 字段 | 说明 |
 |---|---|
-| `id` | 主键。默认 `<watched_at>-<英文 slug>`；**同 id 再录一次 = 更新该条**（改感想、换海报） |
+| `id` | 主键。默认 `<watched_at>-<英文 slug>`；**同 id 且同片名再录一次 = 更新该条**（改感想、换海报，上传时间沿用首次录入）；同 id 但不同片名会自动追 `-2`/`-3` 后缀换成新 id（防同日两部都没英文名的条目互相覆盖） |
+| `added_at` | 上传时间（ISO 8601 本地串，如 `2026-10-25T12:46:43+08:00`）。**同日记录按它正序排列，先上传居前**；编辑条目不会刷新它 |
 | `poster` / `poster_w` / `poster_h` | 海报相对路径与真实像素（写宽高是为了让页面提前占位、不抖动） |
 | `watched_at` | 支持 `2026-10-24` / `2026-10` / `2026` 三种粒度，混排也能正确排序 |
 | `kind` | `movie` 或 `series`，对应筛选条的「电影 / 剧集」 |
@@ -287,7 +288,7 @@ node scripts/watch-add.mjs \
   --note "诺兰的原子弹三小时"
 ```
 
-它一条命令做完四件事：**压成 WebP → 按内容哈希命名写进 `docs/img/watch/` → 去重合并 `docs/data/watch.json` → 按观影时间倒序重排**。
+它一条命令做完四件事：**压成 WebP → 按内容哈希命名写进 `docs/img/watch/` → 去重合并 `docs/data/watch.json` → 按观影时间倒序重排（同日按上传时间正序）**。
 
 | 参数 | 必填 | 说明 |
 |---|---|---|

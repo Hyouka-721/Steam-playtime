@@ -39,7 +39,7 @@ ok('A4 .tl-item 的缩略图宽度固定（列对齐的基准，所有条目同�
 const enRule = (cssNC.match(/\.tl-en \{([^}]*)\}/) || [, ''])[1];
 ok('A5 英文名不截断：没有 ellipsis / line-clamp，且允许 break-word 折行',
   !/text-overflow/.test(enRule) && !/line-clamp/.test(enRule) && /word-break: break-word/.test(enRule), enRule.replace(/\s+/g, ' '));
-ok('A6 版本号 bump：watch.css?v=15', /watch\.css\?v=15"/.test(html));
+ok('A6 版本号 bump：watch.css?v=16', /watch\.css\?v=16"/.test(html));
 
 /* ================= B 桌面：列对齐 ================= */
 console.log('\n== B 桌面：六列跨条目对齐（1440 / 1280 / 1180 / 1179 / 1100 / 1000 / 900 / 861） ==');
@@ -77,6 +77,10 @@ const geo = (p) => p.evaluate(() => {
     enClipped: en.filter((e) => e.scrollWidth > Math.ceil(e.clientWidth) + 1).length,
     itemH: uniq(items.map((it) => Math.round(it.getBoundingClientRect().height))),
     headW: uniq(items.map((it) => Math.round(it.querySelector('.tl-head').getBoundingClientRect().width * 10) / 10)),
+    // 第 72 轮补记：中文名折行（>220px 的超长片名，如《Re：从零开始的异世界生活》）条目们的高度集合。
+    // 第 71 轮已定「折两行是预期行为」，当时放松的是临时副本，收编进 tests/ 的这份漏了，这里补上。
+    wrapH: uniq(items.filter((it) => lines(it.querySelector('.tl-name')) > 1)
+      .map((it) => Math.round(it.getBoundingClientRect().height))),
     overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     gridCount: document.querySelectorAll('#w-grid .poster').length,
   };
@@ -89,12 +93,18 @@ for (const W of [1440, 1280, 1180, 1179, 1100, 1000, 900, 861]) {
     r.dateX.length === 1 && r.kindX.length === 1 && r.yearX.length === 1 &&
     r.scoreX.length === 1 && r.headX.length === 1 && r.noteX.length === 1,
     `日期 ${r.dateX.join(',')} | 类别 ${r.kindX.join(',')} | 上映 ${r.yearX.join(',')} | 评级 ${r.scoreX.join(',')} | 评语 ${r.noteX.join(',')}`);
-  ok(`B[${W}] 名称列宽一致 ${r.headW.join(',')}px、中文名全部单行、英文名最多 ${r.enMax} 行`,
-    r.headW.length === 1 && r.nameLines.length === 1 && r.nameLines[0] === 1 && r.enMax <= 2,
+  ok(`B[${W}] 名称列宽一致 ${r.headW.join(',')}px、中文名最多 2 行、英文名最多 ${r.enMax} 行`,
+    r.headW.length === 1 && r.nameLines.every((l) => l >= 1 && l <= 2) && r.enMax <= 2,
     `名称行数 ${r.nameLines.join(',')} / 英文名最多 ${r.enMax} 行`);
-  ok(`B[${W}] 英文名零截断、条目高一致 ${r.itemH.join(',')}、整页无横向溢出`,
-    r.enClipped === 0 && r.itemH.length === 1 && r.overflow === 0,
-    `裁剪 ${r.enClipped} 条 / overflow=${r.overflow}`);
+  // 中文名折行的条目（名称列固定 220/224px，超长片名必然折行）允许比其余高 1px，列对齐不受影响
+  const base = Math.min(...r.itemH);
+  const wrapped = r.wrapH.length > 0;
+  ok(`B[${W}] 英文名零截断、条目高一致（折行条目只高 1px）、整页无横向溢出`,
+    r.enClipped === 0 && r.overflow === 0 &&
+    (wrapped
+      ? (r.itemH.length === 2 && r.wrapH.every((h) => h === base + 1))
+      : r.itemH.length === 1),
+    `裁剪 ${r.enClipped} 条 / 条目高 ${r.itemH.join(',')} / 折行条目 ${r.wrapH.join(',')} / overflow=${r.overflow}`);
   if (W === 1440) await p.screenshot({ path: OUT + 'C1_列对齐_1440.png' });
   await c.close();
 }

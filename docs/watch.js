@@ -11,21 +11,25 @@
   var DATA_URL = 'data/watch.json';
   var LAYOUT_KEY = 'watch-layout';
   var KIND_KEY = 'watch-kind';
+  var SORT_KEY = 'watch-sort';   // 第 72 轮：网格排序方式 time|rating
   var EAGER_N = 6;          // 前 N 张图改为 eager + high，其余懒加载
 
   var gridEl = document.getElementById('w-grid');
   var tlEl = document.getElementById('w-tl');
   var emptyEl = document.getElementById('w-empty');
-  var countEl = document.getElementById('w-count');
   var updatedEl = document.getElementById('w-updated');
   // 2026-10-24 第 56 轮：网格 / 时间轴改由史蒂夫头像单选切换（原 .w-layout-btn 组已删除），
   // 头像同时负责 aria-pressed 与 title / aria-label 的动态同步。
   var avatarEl = document.getElementById('w-avatar');
   var kindBtns = Array.prototype.slice.call(document.querySelectorAll('.w-seg-btn'));
+  // 第 72 轮：排序切换取代原「共 N 部」计数条（.w-count 已删），只作用于网格视图
+  var sortEl = document.getElementById('w-sort');
+  var sortBtns = Array.prototype.slice.call(document.querySelectorAll('.w-sort-btn'));
 
-  var ALL = [];             // 全量数据（已按观影时间倒序）
+  var ALL = [];             // 全量数据（已按观影时间倒序，同日按上传时间正序）
   var layout = 'grid';
   var kind = 'all';
+  var sort = 'time';        // 第 72 轮：网格排序 time|rating
 
   /* ---------- 工具 ---------- */
   function esc(s) {
@@ -40,6 +44,35 @@
     var m = /^(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?$/.exec(String(d || '').trim());
     if (!m) return '0000-00-00';
     return m[1] + '-' + (m[2] || '00') + '-' + (m[3] || '00');
+  }
+
+  /* ---------- 第 72 轮：排序 ----------
+     added_at = 上传时间（录入这条记录的时间，ISO 8601 本地串，如 2026-10-25T12:46:43+08:00）。
+     同日记录按上传时间正序（先上传居前）；解析不了的时间串按 0 处理（排最前，兼容旧数据）。 */
+  function stampKey(s) {
+    var t = Date.parse(String(s || ''));
+    return isNaN(t) ? 0 : t;
+  }
+  function ratingVal(it) {
+    var n = Number(it && it.rating);
+    return isFinite(n) && n > 0 ? n : -1;   // 无评分沉底
+  }
+  // 默认序：观影时间倒序 → 同日按上传时间正序 → id 字典序稳定收尾
+  function cmpTime(a, b) {
+    var d = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
+    if (d !== 0) return d;
+    var s = stampKey(a.added_at) - stampKey(b.added_at);
+    if (s !== 0) return s;
+    return String(a.id || '').localeCompare(String(b.id || ''));
+  }
+  // 评分序：高评分在前（无评分沉底），并列回落默认序
+  function cmpRating(a, b) {
+    var vb = ratingVal(b), va = ratingVal(a);
+    if (vb !== va) return vb - va;
+    return cmpTime(a, b);
+  }
+  function ordered(list) {
+    return list.slice().sort(sort === 'rating' ? cmpRating : cmpTime);
   }
 
   function monthKey(d) {
@@ -164,23 +197,17 @@
   function paint() {
     var list = visible();
 
-    var total = ALL.length;
-    var shown = list.length;
-    if (total === 0) {
-      countEl.textContent = '共 0 部';
-    } else if (kind === 'all') {
-      countEl.textContent = '共 ' + total + ' 部';
-    } else {
-      countEl.textContent = shown + ' / ' + total + ' 部';
-    }
+    // 第 72 轮：排序切换只作用于网格视图；时间轴恒按观影时间倒序（月份分组的前提）
+    if (sortEl) sortEl.hidden = layout !== 'grid';
 
+    var total = ALL.length;
     emptyEl.hidden = total > 0;
     gridEl.hidden = !(layout === 'grid' && total > 0);
     tlEl.hidden = !(layout === 'timeline' && total > 0);
 
     if (total === 0) return;
-    if (layout === 'grid') renderGrid(list);
-    else renderTimeline(list);
+    if (layout === 'grid') renderGrid(ordered(list));
+    else renderTimeline(list.slice().sort(cmpTime));
   }
 
   /* ---------- 视图 / 筛选切换（状态持久化） ---------- */
@@ -213,6 +240,18 @@
     if (!silent) paint();
   }
 
+  // 第 72 轮：网格排序切换（time|rating），与 setKind 同一套按钮态写法
+  function setSort(next, silent) {
+    sort = next === 'rating' ? 'rating' : 'time';
+    sortBtns.forEach(function (b) {
+      var on = b.getAttribute('data-sort') === sort;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    try { localStorage.setItem(SORT_KEY, sort); } catch (e) {}
+    if (!silent) paint();
+  }
+
   // 史蒂夫：点一下在网格 / 时间轴之间切换；键盘 Enter / 空格同样可用
   // （事件与 preventDefault 写法照搬首页 bindFlip，保证两页交互手感一致）
   if (avatarEl) {
@@ -227,6 +266,10 @@
   }
   kindBtns.forEach(function (b) {
     b.addEventListener('click', function () { setKind(b.getAttribute('data-kind')); });
+  });
+  // 第 72 轮：排序按钮（网格视图专用）
+  sortBtns.forEach(function (b) {
+    b.addEventListener('click', function () { setSort(b.getAttribute('data-sort')); });
   });
 
   // 第 69 轮：时间轴条目可点击编辑（事件委托，避免每次重绘都重新绑定）。
@@ -583,6 +626,7 @@
     var note = fieldVal('add-note');
 
     var next = { id: old.id, title: title, kind: kind, watched_at: watched, poster: posterPath };
+    if (old.added_at) next.added_at = old.added_at;   // 第 72 轮：编辑只改字段，上传时间保持首次录入
     if (old.poster_w) next.poster_w = old.poster_w;
     if (old.poster_h) next.poster_h = old.poster_h;
     if (en) next.title_en = en;
@@ -611,10 +655,7 @@
         }
         if (idx < 0) throw new Error('仓库里找不到这条记录，可能刚被别处改动 —— 刷新页面后重试');
         data.items[idx] = next;
-        data.items.sort(function (a, b) {
-          var d2 = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
-          return d2 !== 0 ? d2 : String(b.id || '').localeCompare(String(a.id || ''));
-        });
+        data.items.sort(cmpTime);
         data.updated_at = localStamp(new Date());
         var text = JSON.stringify(data, null, 2) + '\n';
         return ghPut(DATA_PATH, textToB64(text), 'data(watch): 更新《' + title + '》', cur ? cur.sha : null)
@@ -623,11 +664,8 @@
       .then(function (item) {
         ALL = ALL.filter(function (x) { return x && x.id !== oldId; });
         ALL.push(item);
-        ALL.sort(function (a, b) {
-          var d2 = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
-          return d2 !== 0 ? d2 : String(b.id || '').localeCompare(String(a.id || ''));
-        });
-        // 更新数据来源时间，页脚与「共 N 部」跟着走
+        ALL.sort(cmpTime);
+        // 更新数据来源时间，页脚「更新于 …」跟着走
         updatedEl.textContent = '更新于 ' + localStamp(new Date()).slice(0, 10);
         paint();
         resetAddChrome();
@@ -672,8 +710,8 @@
     // 第 69 轮：编辑模式走另外一条路径（保留原 id 与海报，只改表单字段）
     if (editingId) { submitEdit(); return; }
 
+    // id 延迟到拿到仓库数据后解析：同 id 同片名 = 更新；同 id 不同片名 = 追 -2/-3 后缀
     var slug = makeSlug(en, title);
-    var id = watched + '-' + slug;
 
     submitEl.disabled = true;
     var file = fileEl && fileEl.files && fileEl.files[0];
@@ -706,8 +744,22 @@
       .then(function (cur) {
         var data = cur ? JSON.parse(b64ToText(cur.content)) : { updated_at: '', items: [] };
         if (!Array.isArray(data.items)) data.items = [];
+        // 第 72 轮：同 id 且同片名 = 更新（上传时间沿用首次录入）；同 id 但不同片名 =
+        // 追 -2 / -3 换新 id，避免同日两部都没英文名（slug 都回落 item）时后者把前者覆盖掉
+        var baseId = watched + '-' + slug;
+        var id = baseId, upd = null, n = 2;
+        for (;;) {
+          var clash = null;
+          for (var ci = 0; ci < data.items.length; ci++) {
+            if (data.items[ci] && data.items[ci].id === id) { clash = data.items[ci]; break; }
+          }
+          if (!clash) break;
+          if (clash.title === title) { upd = clash; break; }
+          id = baseId + '-' + n; n++;
+        }
         var item = {
           id: id, title: title, kind: kind, watched_at: watched,
+          added_at: (upd && upd.added_at) || localStamp(new Date()),
           poster: posterPath, poster_w: pic.w, poster_h: pic.h
         };
         if (en) item.title_en = en;
@@ -719,11 +771,7 @@
         // 同 id 即更新：先移除旧的同 id 条目
         data.items = data.items.filter(function (it) { return it && it.id !== id; });
         data.items.push(item);
-        data.items.sort(function (a, b) {
-          var d2 = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
-          if (d2 !== 0) return d2;
-          return String(b.id || '').localeCompare(String(a.id || ''));
-        });
+        data.items.sort(cmpTime);
         data.updated_at = localStamp(new Date());
         var text = JSON.stringify(data, null, 2) + '\n';
         return ghPut(DATA_PATH, textToB64(text), 'data(watch): 添加《' + title + '》', cur ? cur.sha : null)
@@ -735,10 +783,7 @@
         item.poster = URL.createObjectURL(pic.blob);
         ALL = ALL.filter(function (it) { return it && it.id !== item.id; });
         ALL.push(item);
-        ALL.sort(function (a, b) {
-          var d2 = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
-          return d2 !== 0 ? d2 : String(b.id || '').localeCompare(String(a.id || ''));
-        });
+        ALL.sort(cmpTime);
         paint();
         if (formEl) formEl.reset();
         resetPreview();
@@ -779,13 +824,15 @@
   syncTokenState();
 
   /* ---------- 启动 ---------- */
-  var savedLayout = null, savedKind = null;
+  var savedLayout = null, savedKind = null, savedSort = null;
   try {
     savedLayout = localStorage.getItem(LAYOUT_KEY);
     savedKind = localStorage.getItem(KIND_KEY);
+    savedSort = localStorage.getItem(SORT_KEY);
   } catch (e) {}
   setLayout(savedLayout, true);
   setKind(savedKind, true);
+  setSort(savedSort, true);
 
   // 加了 no-cache：每次向服务器做一次协商（GitHub Pages 会给 304），
   // 改完 json 刷新即见，不必等 CDN 的 10 分钟缓存过期
@@ -796,17 +843,12 @@
     })
     .then(function (data) {
       var items = Array.isArray(data) ? data : (data && data.items) || [];
-      ALL = items.slice().sort(function (a, b) {
-        var d = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
-        if (d !== 0) return d;
-        return String(b.id || '').localeCompare(String(a.id || ''));
-      });
+      ALL = items.slice().sort(cmpTime);
       var upd = (data && data.updated_at) || '';
       updatedEl.textContent = upd ? '更新于 ' + String(upd).slice(0, 10) : '';
       paint();
     })
     .catch(function (err) {
-      countEl.textContent = '加载失败';
       emptyEl.hidden = false;
       emptyEl.querySelector('.w-empty-title').textContent = '数据加载失败';
       emptyEl.querySelector('.w-empty-tip').textContent =
