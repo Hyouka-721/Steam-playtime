@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T13:33:26+08:00",
+  "updated_at": "2026-10-25T13:35:13+08:00",
   "items": [
     {
       "id": "2026-10-25-item",
@@ -800,6 +800,19 @@
       "year": 2017,
       "rating": 7.5,
       "note": "末日时在做什么？有没有空？可以来拯救吗？"
+    },
+    {
+      "id": "2020-12-18-item",
+      "title": "境界的彼方",
+      "kind": "series",
+      "watched_at": "2020-12-18",
+      "poster": "img/watch/item-e0e18532.webp",
+      "poster_w": 640,
+      "poster_h": 897,
+      "title_en": "境界の彼方",
+      "year": 2013,
+      "rating": 7.5,
+      "note": "没有未来的未来不是我想要的未来"
     },
     {
       "id": "2020-07-16-item",
