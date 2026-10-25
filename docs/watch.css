@@ -352,11 +352,35 @@ code {
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
 }
-/* 第 66 轮：>860px 是「整行不折」布局，此时 .tl-meta 再被压缩就会把四项拆成两行
-   （真实数据《太平年》上映写成 2026-02-14 后，861~1100px 会差 14~33px 装不下）。
-   评语本来就是单行省略号、可以自由变窄，所以让评语去承担收缩，四项固定不折。 */
+/* 第 67 轮：>860px 改为「表格式列网格」—— 名称 / 观看时间 / 类别 / 上映时间 / 评级 / 评语
+   各占一列且列宽固定，于是每条记录的同名字段严格落在同一个 x 上（跨条目竖向一一对应），
+   整体从正文左缘起排。名称列容得下最宽的中文片名（紫罗兰永恒花园 剧场版 = 216.3px）；
+   英文名一旦超出列宽就自动折行（允许两行），不截断、也不影响其他列的对齐。
+   ≤860px 仍回到上面的 flex + wrap 兜底（窄屏放不下六列）。 */
 @media (min-width: 861px) {
-  .tl-head, .tl-meta { flex-shrink: 0; }   /* 名称块与四项都按内容宽度站定，只让评语收缩 */
+  .tl-body {
+    display: grid;
+    grid-template-columns: 220px 330px minmax(0, 1fr);
+    column-gap: 14px;
+    align-items: center;
+  }
+  .tl-meta {
+    display: grid;
+    grid-template-columns: 106px 40px 104px 44px;   /* 日期 / 类别 / 上映 / 评级 */
+    column-gap: 12px;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+}
+@media (min-width: 1180px) {
+  .tl-body {
+    grid-template-columns: 224px 352px minmax(0, 1fr);
+    column-gap: 18px;
+  }
+  .tl-meta {
+    grid-template-columns: 108px 42px 108px 46px;
+    column-gap: 16px;
+  }
 }
 .tl-meta > span { display: block; white-space: nowrap; }
 .tl-meta .tl-score { color: var(--accent); font-weight: 600; }

@@ -1,20 +1,6 @@
 {
-  "updated_at": "2026-10-25T09:46:41+08:00",
+  "updated_at": "2026-10-25T09:53:34+08:00",
   "items": [
-    {
-      "id": "2026-10-24-swords-into-plowshares",
-      "title": "太平年",
-      "kind": "series",
-      "watched_at": "2026-10-24",
-      "poster": "img/watch/swords-into-plowshares-bbd8bfc2.webp",
-      "poster_w": 640,
-      "poster_h": 1138,
-      "title_en": "Swords into Plowshares",
-      "year": 2026,
-      "release_date": "2026-02-14",
-      "rating": 8.5,
-      "note": "就算有三千轮日月春秋"
-    },
     {
       "id": "2026-10-24-dead-to-rights",
       "title": "南京照相馆",
@@ -177,6 +163,19 @@
       "year": 2013,
       "rating": 7,
       "note": "To see the world, to draw closer, to find each other"
+    },
+    {
+      "id": "2026-02-14-swords-into-plowshares",
+      "title": "太平年",
+      "kind": "series",
+      "watched_at": "2026-02-14",
+      "poster": "img/watch/swords-into-plowshares-bbd8bfc2.webp",
+      "poster_w": 640,
+      "poster_h": 1138,
+      "title_en": "Swords into Plowshares",
+      "year": 2026,
+      "rating": 8.5,
+      "note": "就算有三千轮日月春秋"
     },
     {
       "id": "2025-10-06-soldiers-sortie",
