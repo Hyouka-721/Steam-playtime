@@ -1,6 +1,19 @@
 {
-  "updated_at": "2026-10-25T14:42:28+08:00",
+  "updated_at": "2026-10-25T14:55:44+08:00",
   "items": [
+    {
+      "id": "2026-10-25-legend-of-deification",
+      "title": "姜子牙",
+      "kind": "movie",
+      "watched_at": "2026-10-25",
+      "poster": "img/watch/legend-of-deification-7ccac0b4.webp",
+      "poster_w": 640,
+      "poster_h": 932,
+      "title_en": "Legend of Deification",
+      "year": 2020,
+      "rating": 6.5,
+      "note": "只问鬼神，不见苍生"
+    },
     {
       "id": "2026-10-24-dead-to-rights",
       "title": "南京照相馆",
