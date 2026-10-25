@@ -23,16 +23,16 @@ tests/
   ```
   C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe tests/verify/verify70.mjs
   ```
-- 跑全部 20 个套件（在 bash 里循环）：
+- 跑全部 21 个套件（在 bash 里循环）：
   ```bash
   NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
   for s in verify6 verify47 verify48 verify49 verify54 verify55 verify56 verify57 verify58 \
-           verify60 verify62 verify63 verify64 verify65 verify66 verify67 verify68 verify69 verify70 verify72; do
+           verify60 verify62 verify63 verify64 verify65 verify66 verify67 verify68 verify69 verify70 verify72 verify73; do
     echo "== $s =="; "$NODE" tests/verify/$s.mjs 2>&1 | tail -2
   done
   ```
 
-## 套件清单与当前基线（第 72 轮，共 825 条）
+## 套件清单与当前基线（第 73 轮，共 853 条）
 
 | 脚本 | 覆盖轮次 / 契约 | 条数 |
 |---|---|---|
@@ -50,12 +50,13 @@ tests/
 | `verify63` | 垂直居中 | 35（数据相关浮动 33~35） |
 | `verify64` | 时间轴文字统一 +4px | 40 |
 | `verify65` | 超长英文名防溢出 | 16 |
-| `verify66` | 六项界面修正（角标/评分小数/网格重排/分类/上映/标题） | 72 |
+| `verify66` | 六项界面修正（角标/评分小数/网格重排/分类/上映/标题） | 73 |
 | `verify67` | 表格式列对齐（第 71 轮起中文名允许折 2 行） | 45 |
 | `verify68` | 全站左轨统一 | 47 |
 | `verify69` | 条目点击编辑（`page.route` 拦 api.github.com） | 32 |
 | `verify70` | 换海报 + 站名（数据驱动：文件名 hash 反查） | 18 |
 | `verify72` | 页眉 My Watch List / 排序切换 / 同日按上传时间 / 玉子修复 / 防撞车 | 21 |
+| `verify73` | 「番剧」类别全链路（筛选/表单/标签/脚本）+ 她和她的猫海报 + 29 部日本动画重分类 | 27 |
 
 `online/`：`online65/66/68/69/70/72.mjs` —— 上线后对 Pages 做内容指纹复验（判定线上/本地 md5 一致、功能生效），**线上验证写操作时要设计安全边界**（如 online69 故意在无 Token 的浏览器点保存，用 `page.on('request')` 数 PUT 必须为 0）。旧 online 脚本是一次性历史记录（online70 的海报 hash / 站名判据已被后续轮次改旧），复验当轮用最新那个。
 
@@ -63,7 +64,7 @@ tests/
 
 ## 关键约定（改代码/改回归前必读）
 
-- **版本号 `?v=N` 是硬编码在多个脚本里的**，bump 必须同步。`watch.css?v=16` / `watch.js?v=9` 现在散落在 verify55/56/57/58/60/62/63/64/65/66/67/68/69/72 的断言里（有的脚本只有 css，有的两者都有）。
+- **版本号 `?v=N` 是硬编码在多个脚本里的**，bump 必须同步。`watch.css?v=16` / `watch.js?v=10` 现在散落在 verify55/56/57/58/60/62/63/64/65/66/67/68/69/72/73 的断言里（有的脚本只有 css，有的两者都有）。**注意每个文件里有两处**：ok() 描述里的纯文本 + 正则断言里的转义形态（`watch\.js\?v=10`），只换一处会漏。
 - **条数要从数据推导**（`N = data.items.length`），别写死 `22` / `26` / `39`。
 - **快照/用户数据算出来的值（百分比、条数）期望都从数据里读**，别写死（`verify6` 的成就卡就是教训）。
 - **判据分「契约」与「代理」**：`行数相同`、`页眉高相同` 是「两页文案相同」时的代理，文案一变就失效，要回到契约本身。

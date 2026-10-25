@@ -46,8 +46,8 @@ ok('A7 评分格式改为 toFixed(1)（整数也带小数位）', /n\.toFixed\(1
 ok('A8 上映字段优先取 release_date，缺省回退 year',
   /function releaseText\(it\)/.test(js) && /it\.release_date/.test(js) && /releaseText\(it\)/.test(js));
 
-ok('A9 版本号 bump：watch.css?v=16 / watch.js?v=9',
-  /watch\.css\?v=16"/.test(html) && /watch\.js\?v=9"/.test(html));
+ok('A9 版本号 bump：watch.css?v=16 / watch.js?v=10',
+  /watch\.css\?v=16"/.test(html) && /watch\.js\?v=10"/.test(html));
 
 /* -- 数据 -- */
 const byTitle = (t) => data.items.filter((x) => x.title === t);
@@ -59,11 +59,17 @@ ok('A11 太平年：上映只有年份 2026、无 release_date，观看时间 = 
   `year=${tp.year} release_date=${tp.release_date} watched=${tp.watched_at}`);
 ok('A12 太平年仍是剧集（未被误改）', tp.kind === 'series', tp.kind);
 
+/* 第 73 轮：新增「番剧」类别（用户确认范围：仅日本动画）。
+   赛博朋克：边缘行者是日本动画 → anime；士兵突击（真人剧）与
+   英雄联盟：双城之战（美国动画）不在该范围，留在 series。 */
 const three = ['士兵突击', '赛博朋克：边缘行者', '英雄联盟：双城之战'];
 const kinds = three.map((t) => (byTitle(t)[0] || {}).kind);
-ok('A13 三部剧集分类已改为 series', kinds.every((k) => k === 'series'), three.map((t, i) => `${t}=${kinds[i]}`).join(' / '));
+ok('A13 三部：真人剧与欧美动画留 series、日本动画改进 anime',
+  kinds[0] === 'series' && kinds[1] === 'anime' && kinds[2] === 'series',
+  three.map((t, i) => `${t}=${kinds[i]}`).join(' / '));
 const N = data.items.length;
 const nSeries = data.items.filter(function (x) { return x.kind === 'series'; }).length;
+const nAnime = data.items.filter(function (x) { return x.kind === 'anime'; }).length;
 ok('A14 数据条数合理、无重复 id（' + N + ' 条）',
   N >= 22 && new Set(data.items.map(function (x) { return x.id; })).size === N,
   N + ' 条 / series ' + nSeries);
@@ -191,7 +197,9 @@ for (const W of [1440, 860, 390]) {
   ok(`C[${W}] 太平年：评级 ★8.5 / 上映 2026 / 类别 剧集 / 观看 2026-02-14`,
     r.tpRating === '★8.5' && r.tpYear === '2026' && r.tpKind === '剧集' && r.tpDate === '2026-02-14',
     `${r.tpRating} | ${r.tpYear} | ${r.tpKind} | ${r.tpDate}`);
-  ok(`C[${W}] 三部剧集在时间轴里显示「剧集」`, r.three.every((x) => x === '剧集'), r.three.join(' / '));
+  // 第 73 轮：赛博朋克：边缘行者改归「番剧」，另两部仍显示「剧集」
+  ok(`C[${W}] 三部在时间轴里显示「剧集 / 番剧 / 剧集」`,
+    r.three[0] === '剧集' && r.three[1] === '番剧' && r.three[2] === '剧集', r.three.join(' / '));
   ok(`C[${W}] 时间轴评分全部一位小数`, r.scores.every((t) => /^★\d+\.\d$/.test(t)), r.scores.slice(0, 5).join(' '));
   ok(`C[${W}] 加了完整上映日期后仍无横向溢出`, r.overflow === 0 && r.worstBodyX <= 0,
     `overflow=${r.overflow} bodyX=${r.worstBodyX}`);
@@ -208,21 +216,29 @@ console.log('\n== D 分类筛选 ==');
     click('series');
     await new Promise((r) => setTimeout(r, 120));
     const series = names();
+    click('anime');
+    await new Promise((r) => setTimeout(r, 120));
+    const anime = names();
     click('movie');
     await new Promise((r) => setTimeout(r, 120));
     const movie = names();
     click('all');
     await new Promise((r) => setTimeout(r, 120));
-    return { series, movie, all: names(), sortOn: document.querySelector('.w-sort-btn.is-on').getAttribute('data-sort'), sortHidden: document.getElementById('w-sort').hidden };
+    return { series, anime, movie, all: names(), sortOn: document.querySelector('.w-sort-btn.is-on').getAttribute('data-sort'), sortHidden: document.getElementById('w-sort').hidden };
   });
-  const three = ['士兵突击', '赛博朋克：边缘行者', '英雄联盟：双城之战', '太平年', '漫长的季节', '越狱'];
-  ok('D1 筛「剧集」共 ' + nSeries + ' 部，且三部新归位的都在', r.series.length === nSeries && three.every((t) => r.series.includes(t)),
+  const seriesSix = ['士兵突击', '英雄联盟：双城之战', '太平年', '漫长的季节', '越狱'];
+  ok('D1 筛「剧集」共 ' + nSeries + ' 部，真人剧与欧美动画都在',
+    r.series.length === nSeries && seriesSix.every((t) => r.series.includes(t)),
     `${r.series.length} 部：${r.series.join('、')}`);
+  ok('D1b 筛「番剧」共 ' + nAnime + ' 部，日本动画都在（赛博朋克：边缘行者 / 冰菓）',
+    r.anime.length === nAnime && r.anime.includes('赛博朋克：边缘行者') && r.anime.includes('冰菓'),
+    `${r.anime.length} 部：${r.anime.join('、')}`);
   ok('D2 三部已不属于「电影」', ['士兵突击', '赛博朋克：边缘行者', '英雄联盟：双城之战'].every((t) => !r.movie.includes(t)),
     `电影 ${r.movie.length} 部`);
   // 第 72 轮：原「共 N 部」计数条已换成排序切换（.w-count 删除），默认观看时间、网格视图可见
   ok('D3 排序切换在位（默认观看时间、网格视图可见）',
-    r.sortOn === 'time' && r.sortHidden === false && r.all.length === N && r.movie.length === N - nSeries,
+    r.sortOn === 'time' && r.sortHidden === false && r.all.length === N &&
+      r.movie.length === N - nSeries - nAnime,
     `sort=${r.sortOn} hidden=${r.sortHidden}`);
   await c.close();
 }

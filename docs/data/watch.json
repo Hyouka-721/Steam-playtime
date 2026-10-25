@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:18:24+08:00",
+  "updated_at": "2026-10-25T16:46:33+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -290,7 +290,7 @@
     {
       "id": "2024-11-27-cyberpunk-edgerunners",
       "title": "赛博朋克：边缘行者",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2024-11-27",
       "poster": "img/watch/cyberpunk-edgerunners-8d0ae9f0.webp",
       "added_at": "2026-10-24T23:21:38+08:00",
@@ -430,7 +430,7 @@
     {
       "id": "2023-10-26-item",
       "title": "游戏人生",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2023-10-26",
       "poster": "img/watch/item-6bde2f2d.webp",
       "poster_w": 640,
@@ -444,7 +444,7 @@
     {
       "id": "2022-08-09-item",
       "title": "新世纪福音战士",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2022-08-09",
       "poster": "img/watch/item-53246496.webp",
       "added_at": "2026-10-25T09:29:09+08:00",
@@ -458,7 +458,7 @@
     {
       "id": "2022-08-01-item",
       "title": "鬼灭之刃：游郭篇",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2022-08-01",
       "poster": "img/watch/item-ead03295.webp",
       "poster_w": 640,
@@ -514,7 +514,7 @@
     {
       "id": "2022-03-12-item",
       "title": "奇巧出租车",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2022-03-12",
       "poster": "img/watch/item-9515c5e4.webp",
       "added_at": "2026-10-25T10:13:31+08:00",
@@ -584,7 +584,7 @@
     {
       "id": "2022-01-27-re",
       "title": "Re：从零开始的异世界生活",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2022-01-27",
       "poster": "img/watch/re-0185cb4e.webp",
       "added_at": "2026-10-25T11:05:39+08:00",
@@ -598,7 +598,7 @@
     {
       "id": "2021-09-15-item",
       "title": "重启咲良田",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2021-09-15",
       "poster": "img/watch/item-67ea0d9c.webp",
       "added_at": "2026-10-25T11:07:42+08:00",
@@ -626,7 +626,7 @@
     {
       "id": "2021-08-02-item",
       "title": "冰海战记",
-      "kind": "movie",
+      "kind": "anime",
       "watched_at": "2021-08-02",
       "poster": "img/watch/item-bb238709.webp",
       "added_at": "2026-10-25T11:12:19+08:00",
@@ -640,7 +640,7 @@
     {
       "id": "2021-07-29-item",
       "title": "在魔王城说晚安",
-      "kind": "movie",
+      "kind": "anime",
       "watched_at": "2021-07-29",
       "poster": "img/watch/item-e52d97df.webp",
       "added_at": "2026-10-25T11:14:04+08:00",
@@ -668,7 +668,7 @@
     {
       "id": "2021-07-19-loki",
       "title": "洛基",
-      "kind": "movie",
+      "kind": "series",
       "watched_at": "2021-07-19",
       "poster": "img/watch/loki-419b354e.webp",
       "poster_w": 640,
@@ -682,7 +682,7 @@
     {
       "id": "2021-07-16-item",
       "title": "多罗罗",
-      "kind": "movie",
+      "kind": "anime",
       "watched_at": "2021-07-16",
       "poster": "img/watch/item-2dfd5c7d.webp",
       "added_at": "2026-10-25T11:57:45+08:00",
@@ -696,7 +696,7 @@
     {
       "id": "2021-06-26-item",
       "title": "总之就是非常可爱",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2021-06-26",
       "poster": "img/watch/item-3f3b0001.webp",
       "added_at": "2026-10-25T12:00:51+08:00",
@@ -738,7 +738,7 @@
     {
       "id": "2021-04-03-black",
       "title": "工作细胞BLACK",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2021-04-03",
       "poster": "img/watch/black-aaef0f11.webp",
       "poster_w": 640,
@@ -752,7 +752,7 @@
     {
       "id": "2021-04-03-item",
       "title": "咒术回战",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2021-04-03",
       "poster": "img/watch/item-cf4f8a1b.webp",
       "poster_w": 640,
@@ -780,7 +780,7 @@
     {
       "id": "2021-03-21-item-2",
       "title": "玉子市场",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2021-03-21",
       "poster": "img/watch/item-5e1496bd.webp",
       "poster_w": 602,
@@ -794,7 +794,7 @@
     {
       "id": "2021-03-07-2",
       "title": "工作细胞2",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2021-03-07",
       "poster": "img/watch/2-5480e3e4.webp",
       "poster_w": 640,
@@ -808,7 +808,7 @@
     {
       "id": "2021-01-25-item",
       "title": "魔女之旅",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2021-01-25",
       "poster": "img/watch/item-335fe398.webp",
       "poster_w": 640,
@@ -822,7 +822,7 @@
     {
       "id": "2021-01-19-item",
       "title": "小林家的龙女仆",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2021-01-19",
       "poster": "img/watch/item-b6839409.webp",
       "added_at": "2026-10-25T13:54:46+08:00",
@@ -836,7 +836,7 @@
     {
       "id": "2021-01-17-item",
       "title": "半泽直树",
-      "kind": "movie",
+      "kind": "series",
       "watched_at": "2021-01-17",
       "poster": "img/watch/item-b60713b9.webp",
       "poster_w": 640,
@@ -864,7 +864,7 @@
     {
       "id": "2020-12-25-item",
       "title": "末日三问",
-      "kind": "movie",
+      "kind": "anime",
       "watched_at": "2020-12-25",
       "poster": "img/watch/item-053b7504.webp",
       "added_at": "2026-10-25T13:33:26+08:00",
@@ -878,7 +878,7 @@
     {
       "id": "2020-12-18-item-2",
       "title": "境界的彼方",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2020-12-18",
       "poster": "img/watch/item-e0e18532.webp",
       "added_at": "2026-10-25T13:35:13+08:00",
@@ -892,7 +892,7 @@
     {
       "id": "2020-12-18-item",
       "title": "在下坂本，有何贵干？",
-      "kind": "movie",
+      "kind": "anime",
       "watched_at": "2020-12-18",
       "poster": "img/watch/item-291d9b00.webp",
       "added_at": "2026-10-25T13:44:24+08:00",
@@ -920,7 +920,7 @@
     {
       "id": "2020-12-06-item",
       "title": "轻音少女",
-      "kind": "movie",
+      "kind": "anime",
       "watched_at": "2020-12-06",
       "poster": "img/watch/item-b0b5d4df.webp",
       "poster_w": 640,
@@ -990,7 +990,7 @@
     {
       "id": "2020-11-10-tower-of-god",
       "title": "神之塔",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2020-11-10",
       "added_at": "2026-10-25T15:37:51+08:00",
       "poster": "img/watch/tower-of-god-45c0b168.webp",
@@ -1060,7 +1060,7 @@
     {
       "id": "2020-09-30-t",
       "title": "某科学的超电磁炮T",
-      "kind": "movie",
+      "kind": "anime",
       "watched_at": "2020-09-30",
       "poster": "img/watch/t-6e4920e2.webp",
       "added_at": "2026-10-25T15:40:28+08:00",
@@ -1074,7 +1074,7 @@
     {
       "id": "2020-09-29-item",
       "title": "异度侵入",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2020-09-29",
       "added_at": "2026-10-25T15:41:57+08:00",
       "poster": "img/watch/item-bd1b9821.webp",
@@ -1102,7 +1102,7 @@
     {
       "id": "2020-09-12-item",
       "title": "埃罗芒阿老师",
-      "kind": "movie",
+      "kind": "anime",
       "watched_at": "2020-09-12",
       "added_at": "2026-10-25T15:46:59+08:00",
       "poster": "img/watch/item-6d9997c3.webp",
@@ -1130,7 +1130,7 @@
     {
       "id": "2020-08-31-the-last-emperor",
       "title": "末代皇帝",
-      "kind": "series",
+      "kind": "movie",
       "watched_at": "2020-08-31",
       "poster": "img/watch/the-last-emperor-c2df81f0.webp",
       "added_at": "2026-10-25T14:38:27+08:00",
@@ -1172,7 +1172,7 @@
     {
       "id": "2020-07-19-item",
       "title": "欢迎来到实力至上主义教室",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2020-07-19",
       "poster": "img/watch/item-8c2aa588.webp",
       "added_at": "2026-10-25T14:32:47+08:00",
@@ -1186,12 +1186,12 @@
     {
       "id": "2020-07-17-item",
       "title": "她和她的猫",
-      "kind": "movie",
+      "kind": "anime",
       "watched_at": "2020-07-17",
-      "poster": "img/watch/item-58c40d47.webp",
+      "poster": "img/watch/item-b73c9fed.webp",
       "added_at": "2026-10-25T14:27:13+08:00",
-      "poster_w": 640,
-      "poster_h": 960,
+      "poster_w": 537,
+      "poster_h": 800,
       "title_en": "彼女と彼女の猫",
       "year": 1999,
       "rating": 7.5,
@@ -1214,7 +1214,7 @@
     {
       "id": "2020-07-16-item-2",
       "title": "工作细胞",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2020-07-16",
       "poster": "img/watch/item-4bb7a3f7.webp",
       "added_at": "2026-10-25T12:32:40+08:00",
@@ -1228,14 +1228,14 @@
     {
       "id": "2020-07-16-item",
       "title": "中二病也要谈恋爱！",
-      "kind": "movie",
+      "kind": "anime",
       "watched_at": "2020-07-16",
       "poster": "img/watch/item-a4b3b480.webp",
       "added_at": "2026-10-25T14:26:28+08:00",
       "poster_w": 640,
       "poster_h": 960,
       "title_en": "中二病でも恋がしたい！",
-      "year": 2010,
+      "year": 2012,
       "rating": 8.5,
       "note": "人生就是中二病"
     },
@@ -1256,7 +1256,7 @@
     {
       "id": "2020-07-04-item",
       "title": "辉夜大小姐想让我告白",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2020-07-04",
       "poster": "img/watch/item-3bf1c0c9.webp",
       "added_at": "2026-10-25T14:23:40+08:00",
@@ -1270,7 +1270,7 @@
     {
       "id": "2020-06-28-item",
       "title": "徒然喜欢你",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2020-06-28",
       "poster": "img/watch/item-947df89d.webp",
       "added_at": "2026-10-25T14:22:16+08:00",
@@ -1284,7 +1284,7 @@
     {
       "id": "2020-06-24-item",
       "title": "青春猪头少年不会梦到兔女郎学姐",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2020-06-24",
       "poster": "img/watch/item-f52b2160.webp",
       "added_at": "2026-10-25T14:20:56+08:00",
@@ -1340,7 +1340,7 @@
     {
       "id": "2020-02-12-item",
       "title": "冰菓",
-      "kind": "series",
+      "kind": "anime",
       "watched_at": "2020-02-12",
       "poster": "img/watch/item-46923bdc.webp",
       "poster_w": 640,
@@ -1354,14 +1354,14 @@
     {
       "id": "2020-01-21-item",
       "title": "某科学的超电磁炮",
-      "kind": "movie",
+      "kind": "anime",
       "watched_at": "2020-01-21",
       "added_at": "2026-10-25T16:11:45+08:00",
       "poster": "img/watch/item-344426b0.webp",
       "poster_w": 640,
       "poster_h": 960,
       "title_en": "とある科学の超電磁砲",
-      "year": 20009,
+      "year": 2009,
       "rating": 9,
       "note": "Only My Railgun"
     },

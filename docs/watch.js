@@ -87,8 +87,9 @@
     return m[2] ? m[1] + ' 年 ' + parseInt(m[2], 10) + ' 月' : m[1] + ' 年';
   }
 
+  // 第 73 轮：新增「番剧」类别（动画剧集），kind 三选一 movie|series|anime
   function kindLabel(k) {
-    return k === 'series' ? '剧集' : '电影';
+    return k === 'series' ? '剧集' : k === 'anime' ? '番剧' : '电影';
   }
 
   // 第 66 轮：统一保留一位小数 —— 9 显示成 9.0、8.5 仍是 8.5，整数不再省略小数位
@@ -230,7 +231,7 @@
   }
 
   function setKind(next, silent) {
-    kind = (next === 'movie' || next === 'series') ? next : 'all';
+    kind = (next === 'movie' || next === 'series' || next === 'anime') ? next : 'all';
     kindBtns.forEach(function (b) {
       var on = b.getAttribute('data-kind') === kind;
       b.classList.toggle('is-on', on);
@@ -571,7 +572,7 @@
 
     setField('add-title', it.title);
     setField('add-en', it.title_en || '');
-    setField('add-kind', it.kind === 'series' ? 'series' : 'movie');
+    setField('add-kind', (it.kind === 'series' || it.kind === 'anime') ? it.kind : 'movie');
     setField('add-year', it.year || '');
     // date 控件只认 YYYY-MM-DD；「2026」「2026-10」这种粗粒度留空，保存时回退原值
     setField('add-watched', /^\d{4}-\d{2}-\d{2}$/.test(String(it.watched_at || '')) ? it.watched_at : '');
@@ -618,7 +619,8 @@
     if (!posterPath) { setMsg('这条记录的海报还没落库，请刷新页面后再编辑', 'err'); return; }
 
     var en = fieldVal('add-en');
-    var kind = fieldVal('add-kind') === 'series' ? 'series' : 'movie';
+    var kind = fieldVal('add-kind');
+    kind = (kind === 'series' || kind === 'anime') ? kind : 'movie';   // 第 73 轮：番剧
     var watched = fieldVal('add-watched') || String(old.watched_at || '');
     var yearRaw = fieldVal('add-year');
     var ratingRaw = fieldVal('add-rating');
@@ -695,7 +697,7 @@
     var watchedEl = document.getElementById('add-watched');
     var watched = (watchedEl && watchedEl.value) || localDateValue(new Date());
     var kindEl = document.getElementById('add-kind');
-    var kind = kindEl && kindEl.value === 'series' ? 'series' : 'movie';
+    var kind = kindEl && (kindEl.value === 'series' || kindEl.value === 'anime') ? kindEl.value : 'movie';
     var enEl = document.getElementById('add-en');
     var en = enEl ? enEl.value.trim() : '';
     var yearEl = document.getElementById('add-year');

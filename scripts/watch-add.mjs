@@ -40,7 +40,7 @@ const HELP = `
 
 可选：
   --en <英文名>       英文原名，同时用于生成文件名
-  --kind <movie|series>   默认 movie
+  --kind <movie|series|anime>   默认 movie（第 73 轮新增 anime 番剧）
   --year <年份>       如 2023
   --watched <日期>    观影时间，支持 2026-10-24 / 2026-10 / 2026，默认今天
   --rating <0-10>     评分，可小数
@@ -151,7 +151,8 @@ async function main() {
   const imgPath = path.resolve(String(args.img));
   if (!fs.existsSync(imgPath)) die(`找不到图片：${imgPath}`);
 
-  const kind = args.kind === 'series' ? 'series' : 'movie';
+  // 第 73 轮：番剧（动画剧集）成为第三种 kind
+  const kind = args.kind === 'series' || args.kind === 'anime' ? args.kind : 'movie';
   const watchedAt = String(args.watched || todayLocal()).trim();
   if (!/^\d{4}(-\d{2}(-\d{2})?)?$/.test(watchedAt)) {
     die(`--watched 格式不对：${watchedAt}（支持 2026-10-24 / 2026-10 / 2026）`);

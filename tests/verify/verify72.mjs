@@ -53,15 +53,15 @@ ok('A1 页眉是 My Watch List、<title> 站名仍是 Watch List（两处分工�
 ok('A2 「共 N 部」计数条已删，换成 #w-sort 两按钮（默认观看时间）',
   !/w-count/.test(html) && /id="w-sort"/.test(html) &&
   /data-sort="time"[^>]*aria-pressed="true"/.test(html) && /data-sort="rating"[^>]*aria-pressed="false"/.test(html));
-ok('A3 版本号 bump：watch.css?v=16 / watch.js?v=9',
-  /watch\.css\?v=16"/.test(html) && /watch\.js\?v=9"/.test(html));
+ok('A3 版本号 bump：watch.css?v=16 / watch.js?v=10',
+  /watch\.css\?v=16"/.test(html) && /watch\.js\?v=10"/.test(html));
 ok('A4 玉子两部并存：id 不同、同日、按上传时间正序',
   (() => {
     const a = data.items.find((x) => x.title === '玉子爱情故事');
     const m = data.items.find((x) => x.title === '玉子市场');
     return !!a && !!m && a.id !== m.id && a.watched_at === m.watched_at &&
       stampKey(a.added_at) < stampKey(m.added_at) &&
-      m.kind === 'series' && m.year === 2013 && m.rating === 8.5 && m.poster.endsWith('item-5e1496bd.webp') &&
+      m.kind === 'anime' && m.year === 2013 && m.rating === 8.5 && m.poster.endsWith('item-5e1496bd.webp') &&
       fs.existsSync(ROOT + m.poster);
   })(),
   data.items.filter((x) => /玉子/.test(x.title)).map((x) => `${x.title}(${x.id})`).join(' / '));

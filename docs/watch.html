@@ -39,6 +39,8 @@
     <button type="button" class="w-seg-btn is-on" data-kind="all" aria-pressed="true">全部</button>
     <button type="button" class="w-seg-btn" data-kind="movie" aria-pressed="false">电影</button>
     <button type="button" class="w-seg-btn" data-kind="series" aria-pressed="false">剧集</button>
+    <!-- 第 73 轮：新增「番剧」类别（动画剧集），筛选条从三档变四档 -->
+    <button type="button" class="w-seg-btn" data-kind="anime" aria-pressed="false">番剧</button>
   </div>
   <!-- 第 72 轮：原「共 N 部」计数条改为排序切换（仅网格视图生效，时间轴恒按观影时间倒序）。
        默认「观看时间」= 观影日期倒序，同日按上传时间正序（先上传居前）；
@@ -121,6 +123,7 @@
           <select class="w-input" id="add-kind">
             <option value="movie">电影</option>
             <option value="series">剧集</option>
+            <option value="anime">番剧</option>
           </select>
         </div>
       </div>
@@ -173,6 +176,6 @@
 </dialog>
 
 <div class="w-toast" id="w-toast" role="status" hidden></div>
-<script src="watch.js?v=9"></script>
+<script src="watch.js?v=10"></script>
 </body>
 </html>
