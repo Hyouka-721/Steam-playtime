@@ -1,12 +1,12 @@
 {
   "schema": 1,
   "ready": true,
-  "generated_at": "2026-10-24T18:16:39.993Z",
-  "snapshot_date": "2026-10-24",
+  "generated_at": "2026-10-25T18:31:19.317Z",
+  "snapshot_date": "2026-10-25",
   "stats": {
-    "unlocked": 837,
+    "unlocked": 838,
     "total": 2504,
-    "pct": 33.4,
+    "pct": 33.5,
     "games": 31
   },
   "games": {
@@ -612,7 +612,7 @@
           "name": "Going Oldschool",
           "desc": "Bring back the original title screen.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/04998850ce652bde23901e5a4a5838d03d88c725.jpg",
-          "percent": 10.7,
+          "percent": 10.8,
           "ts": 1787912064
         },
         {
@@ -724,7 +724,7 @@
           "name": "Til Death...",
           "desc": "Kill the groom.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/67c95d83892c06d5d3cfb9070e0260da72500d4a.jpg",
-          "percent": 36.4,
+          "percent": 36.5,
           "ts": 1787630710
         },
         {
@@ -772,7 +772,7 @@
           "name": "Fortune Favors the Bould",
           "desc": "Discover a friendly boulder.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/60f21cf3ca3149c7c61d15dd1042d7a0ad71cfbc.jpg",
-          "percent": 7.6,
+          "percent": 7.7,
           "ts": 1787382486
         },
         {
@@ -892,7 +892,7 @@
           "name": "Heliophobia",
           "desc": "Trick a gnome into turning into stone!",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/0d7088cea84ce1cdbb400285318dd138ffac3a21.jpg",
-          "percent": 28.2,
+          "percent": 28.3,
           "ts": 1787114669
         },
         {
@@ -900,7 +900,7 @@
           "name": "Fashion Statement",
           "desc": "Equip armor or vanity clothing in all three social slots.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/a21ac001c8eb0eece9a498b094d5c1f8e121727a.jpg",
-          "percent": 48,
+          "percent": 48.1,
           "ts": 1787031973
         },
         {
@@ -1164,7 +1164,7 @@
           "name": "足不出户",
           "desc": "在线购买卡车",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/227300/e93a6b50924c6754bab19e1eaf734696d987964a.jpg",
-          "percent": 46.4,
+          "percent": 46.5,
           "ts": 1776144849
         },
         {
@@ -1268,7 +1268,7 @@
           "name": "火车轰鸣",
           "desc": "搭乘火车穿越海峡",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/227300/bf03aee6c5acf3fa496eaf00c2be1200163ceffa.jpg",
-          "percent": 45,
+          "percent": 45.1,
           "ts": 1754658766
         },
         {
@@ -1301,8 +1301,16 @@
       "appid": "246420",
       "name": "王国保卫战",
       "total": 74,
-      "unlocked": 32,
+      "unlocked": 33,
       "achievements": [
+        {
+          "api": "ACH_GI_JOE",
+          "name": "G.I. Joe",
+          "desc": "Train 1.00 soldiers.",
+          "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/997b88e6b72915657f90aa162d1ab91b36029e93.jpg",
+          "percent": 54.5,
+          "ts": 1792902392
+        },
         {
           "api": "ACH_SUPERSTAR",
           "name": "Superstar",
@@ -3259,7 +3267,7 @@
           "name": "Э",
           "desc": "Э",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/67657c80361aba040dae51f9a93fb000d7bd6b27.jpg",
-          "percent": 13.3,
+          "percent": 13.4,
           "ts": 1761134995
         },
         {
@@ -5107,7 +5115,7 @@
           "name": "多面手 - 深渊",
           "desc": "使用多面手在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/9ab485785e99a9629440da2e39c7b75b98401ee1.jpg",
-          "percent": 5.1,
+          "percent": 5.2,
           "ts": 1776667539
         },
         {
@@ -5651,7 +5659,7 @@
           "name": "厨师 - 碰撞区域",
           "desc": "使用厨师在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/d060c106f5cd81e96af3bc4e1cea7c2b6359427f.jpg",
-          "percent": 4.9,
+          "percent": 5,
           "ts": 1769873645
         },
         {
@@ -5763,7 +5771,7 @@
           "name": "恶魔 - 碰撞区域",
           "desc": "使用恶魔在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/c1869cfdf506347f02058e5b59e286a59e2e1422.jpg",
-          "percent": 17.2,
+          "percent": 17.3,
           "ts": 1769058603
         },
         {
@@ -6179,7 +6187,7 @@
           "name": "过度杀戮",
           "desc": "单次攻击对敌人造成1000伤害",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/4da1da5be36d3dcb7cbb90d4dd24619e8775cafb.jpg",
-          "percent": 20.4,
+          "percent": 20.5,
           "ts": 1765969879
         },
         {
@@ -6387,7 +6395,7 @@
           "name": "采集者3",
           "desc": "搜集5000材料",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/5a6009548d75340b0276b75a2c4faf76d757a58b.jpg",
-          "percent": 80.5,
+          "percent": 80.6,
           "ts": 1758959421
         },
         {
@@ -6755,7 +6763,7 @@
           "name": "被动收入",
           "desc": "用机器赚钱。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/3167020/503e993aa7bd2fa031ce6ec13abe29c6fd2f672d.jpg",
-          "percent": 36.9,
+          "percent": 37,
           "ts": 1763002886
         },
         {
@@ -6803,7 +6811,7 @@
           "name": "十里坡枪神",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/3167020/5ad6f9a326c0126308ee1f7c10f5b698a2ef46b4.jpg",
-          "percent": 41.1,
+          "percent": 41.2,
           "ts": 1762936989
         },
         {

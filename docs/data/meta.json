@@ -2,18 +2,18 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-24T18:16:39.997Z",
-  "generated_at_local": "2026-10-25",
+  "generated_at": "2026-10-25T18:31:19.322Z",
+  "generated_at_local": "2026-10-26",
   "tracking_since": "2026-10-13",
-  "last_snapshot_date": "2026-10-24",
+  "last_snapshot_date": "2026-10-25",
   "steamid_hash": "a8474caf",
   "months": [
     "2026-10"
   ],
   "ach_stats": {
-    "unlocked": 837,
+    "unlocked": 838,
     "total": 2504,
-    "pct": 33.4,
+    "pct": 33.5,
     "games": 31
   },
   "ach_perfect": [
@@ -26,17 +26,17 @@
     "990630"
   ],
   "stats": {
-    "lifetime_minutes": 82911,
-    "lifetime_hours": 1381.9,
+    "lifetime_minutes": 83031,
+    "lifetime_hours": 1383.9,
     "owned_games": 53,
     "lifetime_played_games": 38,
-    "total_minutes": 1187,
-    "total_hours": 19.8,
-    "tracked_days": 11,
-    "active_days": 10,
-    "current_streak": 3,
+    "total_minutes": 1307,
+    "total_hours": 21.8,
+    "tracked_days": 12,
+    "active_days": 11,
+    "current_streak": 4,
     "longest_streak": 7,
-    "week_minutes": 457,
+    "week_minutes": 0,
     "played_games": 6,
     "best_day": {
       "date": "2026-10-18",
@@ -48,9 +48,9 @@
       "appid": "105600",
       "name": "泰拉瑞亚",
       "img_icon_url": "858961e95fbf869f136e1770d586e0caefd4cfac",
-      "total_minutes": 224,
+      "total_minutes": 325,
       "first_day": "2026-10-17",
-      "last_day": "2026-10-24"
+      "last_day": "2026-10-25"
     },
     "227300": {
       "appid": "227300",
@@ -64,9 +64,9 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "total_minutes": 616,
+      "total_minutes": 633,
       "first_day": "2026-10-13",
-      "last_day": "2026-10-24"
+      "last_day": "2026-10-25"
     },
     "431960": {
       "appid": "431960",
@@ -80,17 +80,17 @@
       "appid": "646570",
       "name": "杀戮尖塔",
       "img_icon_url": "33ea124ea8c03a9ce7012d34c3b348a351612fca",
-      "total_minutes": 207,
+      "total_minutes": 208,
       "first_day": "2026-10-16",
-      "last_day": "2026-10-24"
+      "last_day": "2026-10-25"
     },
     "3009140": {
       "appid": "3009140",
       "name": "Salt Player",
       "img_icon_url": "a2a0483be79a4082e0b50abccb3b67c979d3a457",
-      "total_minutes": 5,
+      "total_minutes": 6,
       "first_day": "2026-10-19",
-      "last_day": "2026-10-23"
+      "last_day": "2026-10-25"
     }
   },
   "games_lifetime": {
@@ -112,8 +112,8 @@
       "appid": "105600",
       "name": "泰拉瑞亚",
       "img_icon_url": "858961e95fbf869f136e1770d586e0caefd4cfac",
-      "lifetime_minutes": 9946,
-      "last_played": "2026-10-24"
+      "lifetime_minutes": 10047,
+      "last_played": "2026-10-25"
     },
     "227300": {
       "appid": "227300",
@@ -126,8 +126,8 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "lifetime_minutes": 836,
-      "last_played": "2026-10-24"
+      "lifetime_minutes": 853,
+      "last_played": "2026-10-25"
     },
     "250900": {
       "appid": "250900",
@@ -287,8 +287,8 @@
       "appid": "646570",
       "name": "杀戮尖塔",
       "img_icon_url": "33ea124ea8c03a9ce7012d34c3b348a351612fca",
-      "lifetime_minutes": 29999,
-      "last_played": "2026-10-24"
+      "lifetime_minutes": 30000,
+      "last_played": "2026-10-25"
     },
     "683320": {
       "appid": "683320",
@@ -448,8 +448,8 @@
       "appid": "3009140",
       "name": "Salt Player",
       "img_icon_url": "a2a0483be79a4082e0b50abccb3b67c979d3a457",
-      "lifetime_minutes": 862,
-      "last_played": "2026-10-23"
+      "lifetime_minutes": 863,
+      "last_played": "2026-10-25"
     },
     "3167020": {
       "appid": "3167020",
