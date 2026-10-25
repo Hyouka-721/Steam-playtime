@@ -258,7 +258,9 @@ code {
 }
 
 /* ================= 时间轴视图 ================= */
-.w-tl { position: relative; padding-left: 4px; }
+/* 第 68 轮：时间轴内容改为与网格卡片同一条左轨（.w-main 的 padding-left）。
+   轴线不再占用内容区，而是画在页面留白里，距内容左轨由 --tl-axis 控制。 */
+.w-tl { position: relative; padding-left: 0; --tl-axis: 12px; }
 .w-tl[hidden] { display: none; }
 
 .tl-group { position: relative; }
@@ -268,7 +270,7 @@ code {
 .tl-group::before {
   content: '';
   position: absolute;
-  left: 8px; top: 30px; bottom: -6px;
+  left: calc(-1 * var(--tl-axis)); top: 30px; bottom: -6px;
   width: 1px;
   background: linear-gradient(180deg, var(--border-hi), var(--border) 70%, transparent);
 }
@@ -277,14 +279,14 @@ code {
 .tl-month {
   position: relative;
   display: flex; align-items: center; gap: 10px;
-  padding: 16px 0 10px 30px;
+  padding: 16px 0 10px 0;   /* 第 68 轮：左内边距归 0，与内容左轨对齐 */
   font-size: 14px; font-weight: 600; letter-spacing: .6px;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
 }
 .tl-month::before {
   content: '';
-  position: absolute; left: 4px; top: 50%;
+  position: absolute; left: calc(-1 * var(--tl-axis) - 5px); top: 50%;
   width: 9px; height: 9px; margin-top: -4.5px;
   border-radius: 50%;
   background: var(--accent);
@@ -293,7 +295,7 @@ code {
 
 .tl-item {
   display: flex; gap: 18px; align-items: center;   /* 文字块比缩略图矮时垂直居中，不贴着图顶 */
-  padding: 14px 16px 14px 30px;
+  padding: 14px 16px 14px 0;   /* 第 68 轮：缩略图落到内容左轨（与网格卡片同一 x） */
   border-radius: 12px;
   transition: background .18s;
 }
@@ -633,6 +635,7 @@ select.w-input { cursor: pointer; }
      所以整条覆盖删除，让 .w-title 在 860~481px 也保持 70px。 */
   /* 第 62 轮：≤860 允许折行，评语长时整段换行而不是被压成省略号 */
   .tl-body { flex-wrap: wrap; }
+  .w-tl { --tl-axis: 8px; }   /* 第 68 轮：窄屏留白 18px，轴线离轨 8px 仍够放 9px 圆点 */
   .w-bar { padding: 18px 18px 4px; }
   .w-main { padding: 14px 18px 84px; }   /* 同上，窄屏加号占底部 66px */
   .w-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 28px 12px; }
@@ -652,7 +655,7 @@ select.w-input { cursor: pointer; }
   .w-grid { grid-template-columns: repeat(auto-fill, minmax(156px, 1fr)); gap: 24px 10px; }
   .poster-name { font-size: 13px; }
   .poster-date { font-size: 11px; }   /* 第 66 轮：窄屏日期再收一档，给片名留宽度 */
-  .tl-item { padding: 12px 8px 12px 24px; gap: 14px; }
+  .tl-item { padding: 12px 8px 12px 0; gap: 14px; }   /* 第 68 轮：同左轨 */
   .tl-thumb { width: 66px; }
   /* 第 62 轮：窄屏一行装不下，评语整段折到下一行（其余仍横向并排） */
   .tl-note { flex: 1 1 100%; white-space: normal; }
