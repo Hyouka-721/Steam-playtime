@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T15:29:30+08:00",
+  "updated_at": "2026-10-25T15:29:42+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -853,13 +853,13 @@
       "kind": "movie",
       "watched_at": "2020-12-30",
       "poster": "img/watch/leap-6ab17b95.webp",
+      "added_at": "2026-10-25T13:31:57+08:00",
       "poster_w": 640,
       "poster_h": 894,
       "title_en": "Leap",
       "year": 2020,
-      "rating": 6,
-      "note": "Leap",
-      "added_at": "2026-10-25T13:31:57+08:00"
+      "rating": 5,
+      "note": "Leap"
     },
     {
       "id": "2020-12-25-item",
