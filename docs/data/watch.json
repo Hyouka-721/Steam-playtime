@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:07:31+08:00",
+  "updated_at": "2026-10-25T16:07:49+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -307,13 +307,13 @@
       "kind": "movie",
       "watched_at": "2024-11-26",
       "poster": "img/watch/item-82759817.webp",
+      "added_at": "2026-10-24T23:19:41+08:00",
       "poster_w": 640,
       "poster_h": 906,
       "title_en": "風の谷のナウシカ",
       "year": 1992,
-      "rating": 7,
-      "note": "娜乌西卡",
-      "added_at": "2026-10-24T23:19:41+08:00"
+      "rating": 6.5,
+      "note": "娜乌西卡"
     },
     {
       "id": "2024-11-23-arcane",
