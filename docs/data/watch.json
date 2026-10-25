@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T13:48:09+08:00",
+  "updated_at": "2026-10-25T13:49:43+08:00",
   "items": [
     {
       "id": "2026-10-25-item",
@@ -852,6 +852,19 @@
       "year": 2018,
       "rating": 8,
       "note": "最后，记得保持健康哦"
+    },
+    {
+      "id": "2020-02-12-item",
+      "title": "冰菓",
+      "kind": "series",
+      "watched_at": "2020-02-12",
+      "poster": "img/watch/item-46923bdc.webp",
+      "poster_w": 640,
+      "poster_h": 910,
+      "title_en": "氷菓",
+      "year": 2012,
+      "rating": 10,
+      "note": "一口冰菓,一个夏天"
     }
   ]
 }
