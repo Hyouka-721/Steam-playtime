@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:07:10+08:00",
+  "updated_at": "2026-10-25T16:07:22+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -391,13 +391,13 @@
       "kind": "movie",
       "watched_at": "2023-12-27",
       "poster": "img/watch/item-8a0e290a.webp",
+      "added_at": "2026-10-24T23:39:54+08:00",
       "poster_w": 640,
       "poster_h": 894,
       "title_en": "ヴァイオレット・エヴァーガーデン",
       "year": 2020,
-      "rating": 6.5,
-      "note": "紫罗兰的花语",
-      "added_at": "2026-10-24T23:39:54+08:00"
+      "rating": 7,
+      "note": "紫罗兰的花语"
     },
     {
       "id": "2023-12-24-chang-an",
