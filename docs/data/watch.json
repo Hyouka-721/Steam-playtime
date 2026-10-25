@@ -1,19 +1,6 @@
 {
-  "updated_at": "2026-10-25T12:05:35+08:00",
+  "updated_at": "2026-10-25T12:08:58+08:00",
   "items": [
-    {
-      "id": "2026-10-25-the-age-of-awakening",
-      "title": "觉醒年代",
-      "kind": "series",
-      "watched_at": "2026-10-25",
-      "poster": "img/watch/the-age-of-awakening-9d740972.webp",
-      "poster_w": 640,
-      "poster_h": 853,
-      "title_en": "The Age of Awakening",
-      "year": 2021,
-      "rating": 8,
-      "note": "天若有情天亦老，人间正道是沧桑"
-    },
     {
       "id": "2026-10-24-dead-to-rights",
       "title": "南京照相馆",
@@ -683,6 +670,19 @@
       "year": 2014,
       "rating": 7.5,
       "note": "每个人都有宿命"
+    },
+    {
+      "id": "2021-06-07-the-age-of-awakening",
+      "title": "觉醒年代",
+      "kind": "series",
+      "watched_at": "2021-06-07",
+      "poster": "img/watch/the-age-of-awakening-9d740972.webp",
+      "poster_w": 640,
+      "poster_h": 853,
+      "title_en": "The Age of Awakening",
+      "year": 2021,
+      "rating": 8,
+      "note": "天若有情天亦老，人间正道是沧桑"
     },
     {
       "id": "2021-04-03-black",
