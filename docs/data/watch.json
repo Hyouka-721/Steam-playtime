@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:09:13+08:00",
+  "updated_at": "2026-10-25T16:11:45+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1364,6 +1364,20 @@
       "rating": 10,
       "note": "一口冰菓，一个夏天",
       "added_at": "2026-10-25T13:49:43+08:00"
+    },
+    {
+      "id": "2020-01-21-item",
+      "title": "某科学的超电磁炮",
+      "kind": "movie",
+      "watched_at": "2020-01-21",
+      "added_at": "2026-10-25T16:11:45+08:00",
+      "poster": "img/watch/item-344426b0.webp",
+      "poster_w": 640,
+      "poster_h": 960,
+      "title_en": "とある科学の超電磁砲",
+      "year": 20009,
+      "rating": 9,
+      "note": "Only My Railgun"
     },
     {
       "id": "2019-12-13-the-pursuit-of-happyness",
