@@ -302,6 +302,12 @@ code {
 /* 2026-10-24 第 60 轮：条目之间留缝 —— 原来靠 padding 首尾相接，视觉上挤成一整块 */
 .tl-item + .tl-item { margin-top: 6px; }
 .tl-item:hover { background: rgba(255, 255, 255, 0.028); }
+/* 第 69 轮：整条时间轴记录可点击 → 打开编辑弹窗 */
+.tl-item { cursor: pointer; }
+.tl-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 
 .tl-thumb {
   flex: 0 0 auto;
@@ -338,6 +344,9 @@ code {
   color: var(--text-strong);
   word-break: break-word;
 }
+/* 第 69 轮：悬停时片名变金，提示「整条可点」（放在 .tl-name 主规则之后，避免污染「取首个 .tl-name{…} 取 font-size」的静态断言） */
+.tl-item:hover .tl-name { color: var(--accent); }
+
 /* 英文名：始终紧贴中文名正下方 */
 .tl-en {
   margin: 0;
@@ -484,6 +493,8 @@ code {
   font-family: 'Black Rose', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   font-weight: normal; font-size: 24px; letter-spacing: 1px;
   color: var(--text-strong);
+  /* 第 69 轮：编辑《片名》可能很长 → 单行省略，别把右上角 ✕ 挤走 */
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .w-add-x {
   appearance: none; border: 0; background: none;

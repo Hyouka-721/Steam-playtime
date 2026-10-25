@@ -131,7 +131,8 @@
     tlEl.innerHTML = groups.map(function (k) {
       var rows = map[k].map(function (it) {
         return '' +
-          '<article class="tl-item">' +
+          '<article class="tl-item" data-id="' + esc(it.id || '') + '"' +
+            ' role="button" tabindex="0" aria-label="编辑《' + esc(it.title) + '》">' +
             '<div class="tl-thumb">' +
               '<img src="' + esc(it.poster) + '" alt="' + esc(it.title) + '" loading="lazy" decoding="async">' +
             '</div>' +
@@ -227,6 +228,34 @@
   kindBtns.forEach(function (b) {
     b.addEventListener('click', function () { setKind(b.getAttribute('data-kind')); });
   });
+
+  // 第 69 轮：时间轴条目可点击编辑（事件委托，避免每次重绘都重新绑定）。
+  // 点击 / Enter / 空格 → 打开 #w-add 的「编辑模式」，预填该条记录。
+  function closestItem(node) {
+    while (node && node !== tlEl) {
+      if (node.classList && node.classList.contains('tl-item')) return node;
+      node = node.parentNode;
+    }
+    return null;
+  }
+  function openEditById(id) {
+    for (var i = 0; i < ALL.length; i++) {
+      if (ALL[i] && ALL[i].id === id) { openEdit(ALL[i]); return; }
+    }
+  }
+  if (tlEl) {
+    tlEl.addEventListener('click', function (e) {
+      var el = closestItem(e.target);
+      if (el) openEditById(el.getAttribute('data-id'));
+    });
+    tlEl.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      var el = closestItem(e.target);
+      if (!el) return;
+      e.preventDefault();
+      openEditById(el.getAttribute('data-id'));
+    });
+  }
 
   // 标题「My Watch List」：点一下回到页面顶部；键盘 Enter / 空格同样可用。
   // 尊重 prefers-reduced-motion —— 该设置下直接跳，不做平滑滚动。
@@ -438,6 +467,7 @@
     previewPhEl.hidden = true;
   }
   function openAdd() {
+    resetAddChrome();
     setMsg('');
     syncTokenState();
     var d = document.getElementById('add-watched');
@@ -454,6 +484,163 @@
     if (!dlgEl) return;
     if (typeof dlgEl.close === 'function') dlgEl.close();
     else dlgEl.removeAttribute('open');
+  }
+
+  /* ---- 第 69 轮：编辑模式 ---- */
+  var editingId = '';
+  var addTitleEl = document.getElementById('w-add-title');
+  var posterFieldEl = document.getElementById('add-poster-field');
+  var posterTipEl = document.getElementById('add-poster-tip');
+  var posterTipHtml = posterTipEl ? posterTipEl.innerHTML : '';
+  var ADD_TITLE = '添加观影记录';
+  var ADD_SUBMIT = '提交';
+
+  // 弹窗复位成「添加模式」（打开加号、或编辑保存后关闭都走这里）
+  function resetAddChrome() {
+    editingId = '';
+    if (addTitleEl) addTitleEl.textContent = ADD_TITLE;
+    if (submitEl) submitEl.textContent = ADD_SUBMIT;
+    if (posterFieldEl) posterFieldEl.hidden = false;
+    if (fileEl) { fileEl.disabled = false; fileEl.hidden = false; }
+    if (posterTipEl && posterTipHtml) posterTipEl.innerHTML = posterTipHtml;
+    resetPreview();
+  }
+
+  var FIELD_IDS = ['add-title', 'add-en', 'add-kind', 'add-year', 'add-watched', 'add-rating', 'add-tags', 'add-note'];
+  function setField(id, v) {
+    var el = document.getElementById(id);
+    if (el) el.value = v == null ? '' : String(v);
+  }
+  function fieldVal(id) {
+    var el = document.getElementById(id);
+    return el ? String(el.value == null ? '' : el.value).trim() : '';
+  }
+
+  // 打开编辑：预填现有字段 + 展示当前海报（编辑时不换图，避免旧图变孤儿文件）
+  function openEdit(it) {
+    if (!dlgEl || !it) return;
+    editingId = it.id;
+    setMsg('');
+    syncTokenState();
+
+    if (addTitleEl) addTitleEl.textContent = '编辑《' + it.title + '》';
+    if (submitEl) submitEl.textContent = '保存修改';
+
+    setField('add-title', it.title);
+    setField('add-en', it.title_en || '');
+    setField('add-kind', it.kind === 'series' ? 'series' : 'movie');
+    setField('add-year', it.year || '');
+    // date 控件只认 YYYY-MM-DD；「2026」「2026-10」这种粗粒度留空，保存时回退原值
+    setField('add-watched', /^\d{4}-\d{2}-\d{2}$/.test(String(it.watched_at || '')) ? it.watched_at : '');
+    setField('add-rating', it.rating == null ? '' : it.rating);
+    setField('add-tags', Array.isArray(it.tags) ? it.tags.join(', ') : '');
+    setField('add-note', it.note || '');
+
+    // 海报：只读展示当前图，禁用选图
+    if (posterFieldEl) posterFieldEl.hidden = false;
+    if (it.poster && previewEl) {
+      previewEl.src = it.poster;
+      previewEl.hidden = false;
+      if (previewPhEl) previewPhEl.hidden = true;
+    }
+    if (fileEl) { fileEl.disabled = true; fileEl.hidden = true; }
+    if (posterTipEl) posterTipEl.textContent = '编辑时保持原海报不变；如需换图，可先用脚本或网页重新录入该条。';
+
+    if (typeof dlgEl.showModal === 'function') dlgEl.showModal();
+    else dlgEl.setAttribute('open', '');
+    setTimeout(function () {
+      var t = document.getElementById('add-title');
+      if (t) { t.focus(); t.select && t.select(); }
+    }, 40);
+  }
+
+  // 保存编辑：保留 id / 海报 / 未改动的可选字段，只改表单里出现的字段
+  function submitEdit() {
+    var old = null;
+    for (var i = 0; i < ALL.length; i++) if (ALL[i] && ALL[i].id === editingId) { old = ALL[i]; break; }
+    if (!old) { setMsg('找不到这条记录，请刷新页面后重试', 'err'); return; }
+
+    var title = fieldVal('add-title');
+    if (!title) { setMsg('片名不能为空', 'err'); return; }
+    if (!getToken()) {
+      setMsg('还没设置 GitHub Token —— 展开最下方「GitHub Token」填一次即可', 'err');
+      var box = document.getElementById('add-token-box');
+      if (box) box.open = true;
+      return;
+    }
+
+    // 海报路径：刚添加的条目在内存里是 blob URL，真实路径另存了一份
+    var posterPath = old.__posterPath ||
+      (String(old.poster || '').indexOf('blob:') === 0 ? '' : old.poster);
+    if (!posterPath) { setMsg('这条记录的海报还没落库，请刷新页面后再编辑', 'err'); return; }
+
+    var en = fieldVal('add-en');
+    var kind = fieldVal('add-kind') === 'series' ? 'series' : 'movie';
+    var watched = fieldVal('add-watched') || String(old.watched_at || '');
+    var yearRaw = fieldVal('add-year');
+    var ratingRaw = fieldVal('add-rating');
+    var tagsRaw = fieldVal('add-tags');
+    var note = fieldVal('add-note');
+
+    var next = { id: old.id, title: title, kind: kind, watched_at: watched, poster: posterPath };
+    if (old.poster_w) next.poster_w = old.poster_w;
+    if (old.poster_h) next.poster_h = old.poster_h;
+    if (en) next.title_en = en;
+    if (yearRaw) next.year = Number(yearRaw) || yearRaw;
+    if (ratingRaw !== '' && !isNaN(Number(ratingRaw))) next.rating = Number(ratingRaw);
+    if (tagsRaw) next.tags = tagsRaw.split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+    if (note) next.note = note;
+
+    // id 跟随「观看日期 + slug」，但不与任何其他条目撞车（撞了就保持原 id）
+    var candidate = watched + '-' + makeSlug(en, title);
+    if (candidate !== old.id && !ALL.some(function (x) { return x && x.id === candidate; })) {
+      next.id = candidate;
+    }
+
+    submitEl.disabled = true;
+    setMsg('正在保存修改…', 'busy');
+    var oldId = old.id;
+
+    ghGet(DATA_PATH)
+      .then(function (cur) {
+        var data = cur ? JSON.parse(b64ToText(cur.content)) : { updated_at: '', items: [] };
+        if (!Array.isArray(data.items)) data.items = [];
+        var idx = -1;
+        for (var k = 0; k < data.items.length; k++) {
+          if (data.items[k] && data.items[k].id === oldId) { idx = k; break; }
+        }
+        if (idx < 0) throw new Error('仓库里找不到这条记录，可能刚被别处改动 —— 刷新页面后重试');
+        data.items[idx] = next;
+        data.items.sort(function (a, b) {
+          var d2 = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
+          return d2 !== 0 ? d2 : String(b.id || '').localeCompare(String(a.id || ''));
+        });
+        data.updated_at = localStamp(new Date());
+        var text = JSON.stringify(data, null, 2) + '\n';
+        return ghPut(DATA_PATH, textToB64(text), 'data(watch): 更新《' + title + '》', cur ? cur.sha : null)
+          .then(function () { return next; });
+      })
+      .then(function (item) {
+        ALL = ALL.filter(function (x) { return x && x.id !== oldId; });
+        ALL.push(item);
+        ALL.sort(function (a, b) {
+          var d2 = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
+          return d2 !== 0 ? d2 : String(b.id || '').localeCompare(String(a.id || ''));
+        });
+        // 更新数据来源时间，页脚与「共 N 部」跟着走
+        updatedEl.textContent = '更新于 ' + localStamp(new Date()).slice(0, 10);
+        paint();
+        resetAddChrome();
+        closeAdd();
+        toast('已保存修改 · 约 15~40 秒后全设备生效', 'ok');
+      })
+      .catch(function (err) {
+        console.error('[watch] edit failed', err);
+        setMsg(String(err && err.message ? err.message : err), 'err');
+      })
+      .then(function () {
+        submitEl.disabled = false;
+      });
   }
 
   function submitAdd(e) {
@@ -481,6 +668,9 @@
     var tagsRaw = tagsEl ? tagsEl.value.trim() : '';
     var noteEl = document.getElementById('add-note');
     var note = noteEl ? noteEl.value.trim() : '';
+
+    // 第 69 轮：编辑模式走另外一条路径（保留原 id 与海报，只改表单字段）
+    if (editingId) { submitEdit(); return; }
 
     var slug = makeSlug(en, title);
     var id = watched + '-' + slug;
@@ -541,6 +731,7 @@
       })
       .then(function (item) {
         // 本机立刻可见：海报先用 blob URL 顶着，Pages 生效后刷新即为正式路径
+        item.__posterPath = item.poster;          // 第 69 轮：留一份真实路径给「编辑」用
         item.poster = URL.createObjectURL(pic.blob);
         ALL = ALL.filter(function (it) { return it && it.id !== item.id; });
         ALL.push(item);
