@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T15:29:51+08:00",
+  "updated_at": "2026-10-25T15:32:25+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -986,6 +986,20 @@
       "year": 2020,
       "rating": 5.5,
       "note": "只问鬼神，不见苍生"
+    },
+    {
+      "id": "2020-11-20-the-lion-king",
+      "title": "狮子王",
+      "kind": "movie",
+      "watched_at": "2020-11-20",
+      "added_at": "2026-10-25T15:32:25+08:00",
+      "poster": "img/watch/the-lion-king-e4ca8a7f.webp",
+      "poster_w": 640,
+      "poster_h": 948,
+      "title_en": "The Lion King",
+      "year": 2019,
+      "rating": 7.5,
+      "note": "Long live the king"
     },
     {
       "id": "2020-08-31-the-last-emperor",
