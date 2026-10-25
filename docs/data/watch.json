@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:03:57+08:00",
+  "updated_at": "2026-10-25T16:04:04+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1189,13 +1189,13 @@
       "kind": "series",
       "watched_at": "2020-07-19",
       "poster": "img/watch/item-8c2aa588.webp",
+      "added_at": "2026-10-25T14:32:47+08:00",
       "poster_w": 640,
       "poster_h": 999,
       "title_en": "ようこそ実力至上主義の教室へ",
       "year": 2017,
-      "rating": 7.5,
-      "note": "无法成为中心的我们",
-      "added_at": "2026-10-25T14:32:47+08:00"
+      "rating": 6.5,
+      "note": "无法成为中心的我们"
     },
     {
       "id": "2020-07-17-item",
