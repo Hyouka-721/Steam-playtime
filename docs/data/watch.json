@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T10:03:04+08:00",
+  "updated_at": "2026-10-25T10:07:01+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -422,6 +422,19 @@
       "year": 1995,
       "rating": 8.5,
       "note": "在世界的中心呼唤爱的野兽"
+    },
+    {
+      "id": "2022-08-01-item",
+      "title": "鬼灭之刃：游郭篇",
+      "kind": "series",
+      "watched_at": "2022-08-01",
+      "poster": "img/watch/item-ead03295.webp",
+      "poster_w": 640,
+      "poster_h": 905,
+      "title_en": "鬼滅の刃 遊郭編",
+      "year": 2021,
+      "rating": 7.5,
+      "note": "从此开始，华丽至极地上吧"
     },
     {
       "id": "2022-07-31-the-grand-mansion-gate",
