@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T15:44:45+08:00",
+  "updated_at": "2026-10-25T15:46:59+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1112,6 +1112,20 @@
       "year": 2019,
       "rating": 7,
       "note": "“呐，天要开始放晴了哟。”"
+    },
+    {
+      "id": "2020-09-12-item",
+      "title": "埃罗芒阿老师",
+      "kind": "movie",
+      "watched_at": "2020-09-12",
+      "added_at": "2026-10-25T15:46:59+08:00",
+      "poster": "img/watch/item-6d9997c3.webp",
+      "poster_w": 640,
+      "poster_h": 960,
+      "title_en": "エロマンガ先生",
+      "year": 2017,
+      "rating": 5,
+      "note": "エロマンガ先生"
     },
     {
       "id": "2020-08-31-the-last-emperor",
