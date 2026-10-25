@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T18:17:43+08:00",
+  "updated_at": "2026-10-25T18:19:23+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1420,6 +1420,20 @@
       "year": 1994,
       "rating": 9,
       "note": "恐惧让你沦为囚犯，希望让你重获自由"
+    },
+    {
+      "id": "2019-11-24-frozen-ii",
+      "title": "冰雪奇缘2",
+      "kind": "movie",
+      "watched_at": "2019-11-24",
+      "added_at": "2026-10-25T18:19:23+08:00",
+      "poster": "img/watch/frozen-ii-f6eac50c.webp",
+      "poster_w": 640,
+      "poster_h": 914,
+      "title_en": "Frozen II",
+      "year": 2019,
+      "rating": 8.5,
+      "note": "Let it go~"
     },
     {
       "id": "2019-08-02-forrest-gump",
