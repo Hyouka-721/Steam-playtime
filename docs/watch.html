@@ -81,7 +81,8 @@
 
 <!-- 手动添加：右下角加号 → 原生 <dialog> 表单 → 直接提交进 GitHub 仓库
      纯静态站没有后端，所以提交走 GitHub Contents API（Token 由用户在本机填一次）。
-     表单字段与 scripts/watch-add.mjs 的参数一一对应，压图 / 哈希命名 / 去重合并规则也完全一致。 -->
+     表单字段与 scripts/watch-add.mjs 的参数一一对应，压图 / 哈希命名 / 去重合并规则也完全一致；
+     第 75 轮起海报除 640 主图外还会一起生成并上传 320 / 480 两张响应式变体。 -->
 <button class="w-fab" id="w-fab" type="button" title="添加观影记录" aria-label="添加观影记录">
   <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
 </button>
@@ -176,6 +177,15 @@
 </dialog>
 
 <div class="w-toast" id="w-toast" role="status" hidden></div>
-<script src="watch.js?v=10"></script>
+<script src="watch.js?v=11"></script>
+<script>
+/* 第 75 轮：注册 Service Worker（docs/sw.js）。
+   海报是内容哈希命名的不可变资源，Pages 只给 max-age=600，刷新超 10 分钟就要
+   102 张图逐一协商；SW 只对 img/watch/*.webp 走 cache-first，二次访问零网络，
+   其余请求（html/css/js/watch.json）一律不拦截。file:// 等非安全上下文注册失败，静默忽略。 */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(function () {});
+}
+</script>
 </body>
 </html>

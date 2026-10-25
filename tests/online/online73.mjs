@@ -1,5 +1,5 @@
 /* 第 73 轮线上复验（push 后跑）：
-   ① 番剧类别上线：watch.js?v=10 + 筛选条四档（data-kind="anime"）+ 表单三选项
+   ① 番剧类别上线：watch.js?v=11 + 筛选条四档（data-kind="anime"）+ 表单三选项
    ② 《她和她的猫》新海报 item-b73c9fed.webp（537×800）线上可下载且与本地逐字节相同
    ③ 线上 kind 重分类生效：她和她的猫/冰菓 = 番剧，雾山五行 = 剧集，玉子爱情故事 = 电影
    ④ 番剧筛选线上可用（只剩动画剧集），localStorage 持久化
@@ -34,6 +34,13 @@ function cmpTime(a, b) {
   if (s !== 0) return s;
   return String(a.id || '').localeCompare(String(b.id || ''));
 }
+// 第 75 轮：网格默认评分序（与 watch.js cmpRating 同规则）
+function ratingVal(it) { const n = Number(it && it.rating); return isFinite(n) && n > 0 ? n : -1; }
+function cmpRating(a, b) {
+  const vb = ratingVal(b), va = ratingVal(a);
+  if (vb !== va) return vb - va;
+  return cmpTime(a, b);
+}
 
 let pass = 0, fail = 0;
 const ok = (n, c, extra = '') => { c ? (pass++, console.log(`PASS ${n}${extra ? '  — ' + extra : ''}`)) : (fail++, console.log(`FAIL ${n}  — ${extra}`)); };
@@ -63,7 +70,7 @@ for (let i = 1; i <= 30; i++) {
   } catch (e) { console.log('  第 ' + i + ' 次拉取失败'); await page.waitForTimeout(4000); waited += 4; continue; }
   let live = null;
   try { live = JSON.parse(snap.d); } catch (e) {}
-  const verOK = /watch\.css\?v=16"/.test(snap.h) && /watch\.js\?v=10"/.test(snap.h);
+  const verOK = /watch\.css\?v=16"/.test(snap.h) && /watch\.js\?v=11"/.test(snap.h);
   const segOK = /data-kind="anime"[^>]*aria-pressed="false">番剧/.test(snap.h) &&
     /<option value="anime">番剧<\/option>/.test(snap.h);
   const items = live && Array.isArray(live.items) ? live.items : [];
@@ -77,7 +84,7 @@ for (let i = 1; i <= 30; i++) {
   if (verOK && segOK && dataOK) { hit = true; break; }
   waited += 5; await page.waitForTimeout(5000);
 }
-ok('A1 Pages 已生效（watch.js?v=10 + 筛选条四档 + 表单番剧 + 她和她的猫新海报/番剧 + added_at）', hit, `约 ${waited}s`);
+ok('A1 Pages 已生效（watch.js?v=11 + 筛选条四档 + 表单番剧 + 她和她的猫新海报/番剧 + added_at）', hit, `约 ${waited}s`);
 ok('A2 线上 watch.html 与本地 md5 全等', md5(norm(snap.h)) === md5(local('watch.html')), md5(norm(snap.h)));
 
 const posterBuf = await page.evaluate(async (base) => {
@@ -128,7 +135,7 @@ const errs = [];
     kindOpts: [...document.querySelectorAll('#add-kind option')].map((o) => o.value),
   }));
   ok('B1 浏览器标题 Watch List、页眉 My Watch List', r.docTitle === 'Watch List' && r.h1 === 'My Watch List', `${r.docTitle} / ${r.h1}`);
-  ok(`B2 网格渲染全部 ${N} 条、默认观看时间序`, r.n === N && r.sortOn === 'time', `grid=${r.n}/${N} sort=${r.sortOn}`);
+  ok(`B2 网格渲染全部 ${N} 条、默认评分序（第 75 轮起）`, r.n === N && r.sortOn === 'rating', `grid=${r.n}/${N} sort=${r.sortOn}`);
   ok('B3 筛选条四档（all/movie/series/anime）、表单三选项（movie/series/anime）',
     JSON.stringify(r.segs) === JSON.stringify(['all', 'movie', 'series', 'anime']) &&
     JSON.stringify(r.kindOpts) === JSON.stringify(['movie', 'series', 'anime']),
@@ -142,8 +149,8 @@ const errs = [];
     stored: localStorage.getItem('watch-kind'),
     names: [...document.querySelectorAll('#w-grid .poster-name')].map((x) => x.textContent.trim()),
   }));
-  const expectAnime = liveData.items.filter((x) => x.kind === 'anime').slice().sort(cmpTime).map((x) => x.title);
-  ok(`B4 筛「番剧」只剩 ${nAnimeLive} 部动画剧集（数量/名单与线上数据一致）`,
+  const expectAnime = liveData.items.filter((x) => x.kind === 'anime').slice().sort(cmpRating).map((x) => x.title);
+  ok(`B4 筛「番剧」只剩 ${nAnimeLive} 部动画剧集（数量/名单与线上数据一致，第 75 轮起评分序）`,
     rA.on === 'anime' && rA.stored === 'anime' &&
     JSON.stringify(rA.names) === JSON.stringify(expectAnime),
     `grid=${rA.names.length} 期望=${expectAnime.length}`);

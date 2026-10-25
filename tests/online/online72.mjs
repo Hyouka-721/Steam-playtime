@@ -123,7 +123,7 @@ const errs = [];
     first: (document.querySelector('#w-grid .poster-name') || {}).textContent,
   }));
   ok('B1 浏览器标题 Watch List、页眉 My Watch List', r.docTitle === 'Watch List' && r.h1 === 'My Watch List', `${r.docTitle} / ${r.h1}`);
-  ok(`B2 网格渲染全部 ${N} 条、默认观看时间序`, r.n === N && r.sortOn === 'time', `grid=${r.n}/${N} sort=${r.sortOn} 首条=${r.first}`);
+  ok(`B2 网格渲染全部 ${N} 条、默认评分序（第 75 轮起）`, r.n === N && r.sortOn === 'rating', `grid=${r.n}/${N} sort=${r.sortOn} 首条=${r.first}`);
 
   // 评分序：第一名应是线上数据里的最高分
   const top = liveData.items.slice().sort((a, b) => (b.rating || 0) - (a.rating || 0))[0];
@@ -133,8 +133,8 @@ const errs = [];
     first: (document.querySelector('#w-grid .poster-name') || {}).textContent,
     stored: localStorage.getItem('watch-sort'),
   }));
-  ok('B3 点评分：最高分条目跳到首位且选择已持久化',
-    r2.first === top.title && r2.stored === 'rating', `首位=${r2.first}（期望《${top.title}》★${top.rating}）stored=${r2.stored}`);
+  ok('B3 点评分：最高分条目跳到首位（第 75 轮起排序不持久化，stored=null）',
+    r2.first === top.title && r2.stored === null, `首位=${r2.first}（期望《${top.title}》★${top.rating}）stored=${r2.stored}`);
   await p.screenshot({ path: OUT + 'B3_评分序_1440.png' });
 
   // 时间轴：玉子两部同日并存、爱情故事在前；排序切换隐藏

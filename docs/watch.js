@@ -4,15 +4,22 @@
    · 网格视图：豆瓣式海报墙（2:3 固定比例，避免不同尺寸图把网格拉歪）
    · 时间轴视图：按 watched_at 倒序 + 年月分组
    · 两种视图共用同一份内存数据，只是渲染函数不同
+   第 75 轮（性能 + 默认态）：
+   · 海报响应式变体：poster_320 / poster_480（可选，缺省回退 base），
+     网格用 srcset + sizes 按 DPR/栏宽选图；时间轴缩略图直接用 320 变体
+   · 默认态改为「网格视图 + 评分序」，且不再跨刷新持久化
+     （用户明确要求默认展示网格、默认按评分排序；会话内切换仍生效）
    ============================================================ */
 (function () {
   'use strict';
 
   var DATA_URL = 'data/watch.json';
-  var LAYOUT_KEY = 'watch-layout';
   var KIND_KEY = 'watch-kind';
-  var SORT_KEY = 'watch-sort';   // 第 72 轮：网格排序方式 time|rating
+  // 第 75 轮：LAYOUT_KEY / SORT_KEY 已废弃——视图与排序不写 localStorage，
+  // 每次加载都回到默认（网格 + 评分序）。kind（筛选类别）仍持久化。
   var EAGER_N = 6;          // 前 N 张图改为 eager + high，其余懒加载
+  // 网格卡片实测渲染宽：390→170 / 860→265 / 1280→233 / 1440→265（5 列）
+  var SIZES_ATTR = '(max-width: 480px) 45vw, (max-width: 860px) 32vw, (min-width: 1440px) 266px, 234px';
 
   var gridEl = document.getElementById('w-grid');
   var tlEl = document.getElementById('w-tl');
@@ -27,9 +34,9 @@
   var sortBtns = Array.prototype.slice.call(document.querySelectorAll('.w-sort-btn'));
 
   var ALL = [];             // 全量数据（已按观影时间倒序，同日按上传时间正序）
-  var layout = 'grid';
+  var layout = 'grid';      // 第 75 轮：默认网格视图，不持久化
   var kind = 'all';
-  var sort = 'time';        // 第 72 轮：网格排序 time|rating
+  var sort = 'rating';      // 第 75 轮：默认评分序（time|rating），不持久化
 
   /* ---------- 工具 ---------- */
   function esc(s) {
@@ -129,15 +136,28 @@
   }
 
   /* ---------- 网格视图 ---------- */
+  // 第 75 轮：响应式候选。变体由 scripts/watch-variants.mjs 生成（只缩不放，
+  // WebP q80），JSON 里记 poster_320 / poster_480；老数据没有这两个字段时
+  // 只列 base 一档，行为与之前完全一致。
+  function posterSrcset(it) {
+    var c = [];
+    if (it.poster_320) c.push(it.poster_320 + ' 320w');
+    if (it.poster_480) c.push(it.poster_480 + ' 480w');
+    if (it.poster) c.push(it.poster + ' ' + (it.poster_w || 640) + 'w');
+    return c.join(', ');
+  }
   function renderGrid(list) {
     gridEl.innerHTML = list.map(function (it, i) {
       var eager = i < EAGER_N;
       var dim = (it.poster_w ? ' width="' + esc(it.poster_w) + '"' : '') +
                 (it.poster_h ? ' height="' + esc(it.poster_h) + '"' : '');
+      var srcset = posterSrcset(it);
       return '' +
         '<article class="poster">' +
           '<div class="poster-pic">' +
-            '<img src="' + esc(it.poster) + '" alt="' + esc(it.title) + '"' + dim +
+            '<img src="' + esc(it.poster) + '" alt="' + esc(it.title) + '"' +
+              (srcset ? ' srcset="' + esc(srcset) + '" sizes="' + SIZES_ATTR + '"' : '') +
+              dim +
               (eager ? ' loading="eager" fetchpriority="high"' : ' loading="lazy"') +
               ' decoding="async">' +
             scoreHtml(it.rating) +   /* 第 66 轮：左上角「电影 / 剧集」角标已按需求删除 */
@@ -168,7 +188,8 @@
           '<article class="tl-item" data-id="' + esc(it.id || '') + '"' +
             ' role="button" tabindex="0" aria-label="编辑《' + esc(it.title) + '》">' +
             '<div class="tl-thumb">' +
-              '<img src="' + esc(it.poster) + '" alt="' + esc(it.title) + '" loading="lazy" decoding="async">' +
+              // 第 75 轮：缩略图只用 320 变体（卡片 114px，2x 也够）；老数据没有则回退 base
+              '<img src="' + esc(it.poster_320 || it.poster) + '" alt="' + esc(it.title) + '" loading="lazy" decoding="async">' +
             '</div>' +
             /* 2026-10-24 第 62 轮：改为横向一行 —— 名称与英文名同占一列（英文名在中文名正下方），
                日期 / 类别 / 上映时间 / 评级 / 评语 与名称同一行依次排列，
@@ -226,7 +247,7 @@
   function setLayout(next, silent) {
     layout = next === 'timeline' ? 'timeline' : 'grid';
     syncAvatar();
-    try { localStorage.setItem(LAYOUT_KEY, layout); } catch (e) {}
+    // 第 75 轮：不再写 localStorage（默认每次加载都是网格，见文件头说明）
     if (!silent) paint();
   }
 
@@ -241,7 +262,7 @@
     if (!silent) paint();
   }
 
-  // 第 72 轮：网格排序切换（time|rating），与 setKind 同一套按钮态写法
+  // 第 72 轮：排序切换（time|rating）——第 75 轮起默认 rating 且不持久化
   function setSort(next, silent) {
     sort = next === 'rating' ? 'rating' : 'time';
     sortBtns.forEach(function (b) {
@@ -249,7 +270,6 @@
       b.classList.toggle('is-on', on);
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
-    try { localStorage.setItem(SORT_KEY, sort); } catch (e) {}
     if (!silent) paint();
   }
 
@@ -334,6 +354,8 @@
   var POSTER_DIR = 'docs/img/watch';
   var POSTER_W = 640;
   var POSTER_Q = 0.8;
+  // 第 75 轮：随主图一起生成响应式变体（只缩不放；网格 srcset 按 DPR/栏宽选图）
+  var VARIANT_WIDTHS = [320, 480];
 
   var fabEl = document.getElementById('w-fab');
   var dlgEl = document.getElementById('w-add');
@@ -430,6 +452,24 @@
       cv.getContext('2d').drawImage(bmp, 0, 0, w, h);
       if (bmp.close) bmp.close();
       return canvasToWebp(cv);
+    });
+  }
+  // 第 75 轮：从主图 blob 渲染 320/480 变体（主图不够宽的档位跳过，不放大）
+  function variantsFromBase(pic) {
+    return createImageBitmap(pic.blob).then(function (bmp) {
+      var jobs = [];
+      VARIANT_WIDTHS.forEach(function (w) {
+        if (pic.w <= w) return;
+        var h = Math.max(1, Math.round(bmp.height * (w / bmp.width)));
+        var cv = document.createElement('canvas');
+        cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(bmp, 0, 0, w, h);
+        jobs.push(canvasToWebp(cv).then(function (v) {
+          return { w: w, bytes: v.bytes, blob: v.blob, h: v.h };
+        }));
+      });
+      if (bmp.close) bmp.close();
+      return Promise.all(jobs);
     });
   }
   function posterPlaceholder(title) {
@@ -631,6 +671,12 @@
     if (old.added_at) next.added_at = old.added_at;   // 第 72 轮：编辑只改字段，上传时间保持首次录入
     if (old.poster_w) next.poster_w = old.poster_w;
     if (old.poster_h) next.poster_h = old.poster_h;
+    // 第 75 轮：变体字段随编辑保留（刚添加的条目内存里是 blob URL，真实路径在 __poster<N>Path）
+    VARIANT_WIDTHS.forEach(function (w) {
+      var real = old['__poster' + w + 'Path'] ||
+        (String(old['poster_' + w] || '').indexOf('blob:') === 0 ? '' : old['poster_' + w]);
+      if (real) next['poster_' + w] = real;
+    });
     if (en) next.title_en = en;
     if (yearRaw) next.year = Number(yearRaw) || yearRaw;
     if (ratingRaw !== '' && !isNaN(Number(ratingRaw))) next.rating = Number(ratingRaw);
@@ -720,16 +766,25 @@
     setMsg(file ? '正在压缩海报…' : '正在生成占位海报…', 'busy');
 
     var pic = null;
+    var variants = [];
     var posterName = '';
     var posterPath = '';
     (file ? posterFromFile(file) : posterPlaceholder(title))
       .then(function (p) {
         pic = p;
-        return sha8(p.bytes);
+        return variantsFromBase(p);          // 第 75 轮：320/480 变体
+      })
+      .then(function (vs) {
+        variants = vs || [];
+        return sha8(pic.bytes);
       })
       .then(function (hash) {
         posterName = slug + '-' + hash + '.webp';
         posterPath = 'img/watch/' + posterName;
+        variants.forEach(function (v) {
+          v.name = posterName.replace(/\.webp$/, '-' + v.w + '.webp');
+          v.rel = 'img/watch/' + v.name;
+        });
         setMsg('正在上传海报…', 'busy');
         return ghGet(POSTER_DIR + '/' + posterName);
       })
@@ -738,6 +793,21 @@
         if (existing) return null;
         return ghPut(POSTER_DIR + '/' + posterName, bytesToB64(pic.bytes),
           'data(watch): 海报 ' + posterName, null);
+      })
+      .then(function () {
+        // 第 75 轮：依次上传变体（内容哈希命名，已存在则跳过；任一步失败则整体失败重试）
+        var chain = Promise.resolve();
+        variants.forEach(function (v) {
+          chain = chain.then(function () {
+            setMsg('正在上传海报 ' + v.w + 'px…', 'busy');
+            return ghGet(POSTER_DIR + '/' + v.name);
+          }).then(function (existing) {
+            if (existing) return null;
+            return ghPut(POSTER_DIR + '/' + v.name, bytesToB64(v.bytes),
+              'data(watch): 海报 ' + v.name, null);
+          });
+        });
+        return chain;
       })
       .then(function () {
         setMsg('正在写入 watch.json…', 'busy');
@@ -764,6 +834,8 @@
           added_at: (upd && upd.added_at) || localStamp(new Date()),
           poster: posterPath, poster_w: pic.w, poster_h: pic.h
         };
+        // 第 75 轮：变体路径写进 json（没有变体的老条目/窄图则没有这两个字段）
+        variants.forEach(function (v) { item['poster_' + v.w] = v.rel; });
         if (en) item.title_en = en;
         if (yearRaw) item.year = Number(yearRaw) || yearRaw;
         if (ratingRaw !== '' && !isNaN(Number(ratingRaw))) item.rating = Number(ratingRaw);
@@ -783,6 +855,11 @@
         // 本机立刻可见：海报先用 blob URL 顶着，Pages 生效后刷新即为正式路径
         item.__posterPath = item.poster;          // 第 69 轮：留一份真实路径给「编辑」用
         item.poster = URL.createObjectURL(pic.blob);
+        // 第 75 轮：变体同样先顶 blob URL，真实路径留底（__poster<N>Path）供编辑回写
+        variants.forEach(function (v) {
+          item['__poster' + v.w + 'Path'] = item['poster_' + v.w];
+          item['poster_' + v.w] = URL.createObjectURL(v.blob);
+        });
         ALL = ALL.filter(function (it) { return it && it.id !== item.id; });
         ALL.push(item);
         ALL.sort(cmpTime);
@@ -826,15 +903,13 @@
   syncTokenState();
 
   /* ---------- 启动 ---------- */
-  var savedLayout = null, savedKind = null, savedSort = null;
-  try {
-    savedLayout = localStorage.getItem(LAYOUT_KEY);
-    savedKind = localStorage.getItem(KIND_KEY);
-    savedSort = localStorage.getItem(SORT_KEY);
-  } catch (e) {}
-  setLayout(savedLayout, true);
+  // 第 75 轮：视图/排序用固定默认值（网格 + 评分序），不再读 localStorage；
+  // 只有筛选类别 kind 还持久化。遗留的 watch-layout / watch-sort 键不再读取。
+  var savedKind = null;
+  try { savedKind = localStorage.getItem(KIND_KEY); } catch (e) {}
+  setLayout('grid', true);
   setKind(savedKind, true);
-  setSort(savedSort, true);
+  setSort('rating', true);
 
   // 加了 no-cache：每次向服务器做一次协商（GitHub Pages 会给 304），
   // 改完 json 刷新即见，不必等 CDN 的 10 分钟缓存过期

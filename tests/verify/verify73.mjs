@@ -41,6 +41,13 @@ function cmpTime(a, b) {
   if (s !== 0) return s;
   return String(a.id || '').localeCompare(String(b.id || ''));
 }
+// 第 75 轮：网格默认评分序（与 watch.js cmpRating 同规则：评分降序 → 回落 cmpTime）
+function ratingVal(it) { const n = Number(it && it.rating); return isFinite(n) && n > 0 ? n : -1; }
+function cmpRating(a, b) {
+  const vb = ratingVal(b), va = ratingVal(a);
+  if (vb !== va) return vb - va;
+  return cmpTime(a, b);
+}
 
 /* ================= A 静态：番剧类别全链路 ================= */
 console.log('== A 静态 ==');
@@ -60,8 +67,8 @@ ok('A6 watch.js：编辑保存解析 anime', /kind = \(kind === 'series' \|\| ki
 ok('A7 watch.js：编辑回填 anime（select 预置）',
   /setField\('add-kind', \(it\.kind === 'series' \|\| it\.kind === 'anime'\) \? it\.kind : 'movie'\)/.test(js));
 ok('A8 scripts/watch-add.mjs：--kind 接受 anime', /args\.kind === 'series' \|\| args\.kind === 'anime'/.test(addJs));
-ok('A9 版本号 bump：watch.css?v=16 / watch.js?v=10',
-  /watch\.css\?v=16"/.test(html) && /watch\.js\?v=10"/.test(html));
+ok('A9 版本号 bump：watch.css?v=16 / watch.js?v=11',
+  /watch\.css\?v=16"/.test(html) && /watch\.js\?v=11"/.test(html));
 
 /* ================= B 数据：海报 + 重分类 ================= */
 console.log('\n== B 数据 ==');
@@ -88,19 +95,37 @@ ok('B2 《她和她的猫》海报换成 item-b73c9fed.webp：文件在、hash �
 ok('B3 旧海报 item-58c40d47.webp 已删除（无死链）',
   !fs.existsSync(ROOT + 'img/watch/item-58c40d47.webp') &&
   !data.items.some((x) => String(x.poster || '').includes('58c40d47')));
-ok('B4 海报库无孤儿：每个 img/watch/*.webp 都被恰好一条引用',
+ok('B4 海报库无孤儿（第 75 轮变体契约：base 恰好一条引用；变体只能是 <base>-320/-480.webp 且被对应条目 poster_<w> 字段引用）',
   (() => {
     const dir = ROOT + 'img/watch/';
     const files = fs.readdirSync(dir).filter((f) => f.endsWith('.webp'));
-    const used = data.items.map((x) => String(x.poster || '').replace('img/watch/', ''));
-    const orphan = files.filter((f) => !used.includes(f));
-    const missing = used.filter((u) => !files.includes(u));
-    return orphan.length === 0 && missing.length === 0 && used.length === new Set(used).size;
+    const base = (p) => String(p || '').replace('img/watch/', '');
+    const used = data.items.map((x) => base(x.poster));
+    // ① base：无死链、无重复引用
+    if (used.length !== new Set(used).size) return false;
+    if (used.some((u) => !files.includes(u))) return false;
+    // ② 变体：字段指向的文件必须存在，且文件名 = 该条目 base 的主干 + -<宽>
+    const refs = [];
+    for (const x of data.items) {
+      for (const w of [320, 480]) {
+        const rel = base(x['poster_' + w]);
+        if (!rel) continue;
+        if (!files.includes(rel)) return false;
+        const stem = base(x.poster).replace(/\.webp$/, '');
+        if (rel !== stem + '-' + w + '.webp') return false;
+        refs.push(rel);
+      }
+    }
+    if (refs.length !== new Set(refs).size) return false;
+    // ③ 磁盘上每个文件：要么是被引用的 base，要么是被字段引用的变体——不允许第三者
+    const allowed = new Set(used.concat(refs));
+    return files.every((f) => allowed.has(f));
   })(),
   (() => {
     const dir = ROOT + 'img/watch/';
     const files = fs.readdirSync(dir).filter((f) => f.endsWith('.webp'));
-    return `${files.length} 个海报文件 / ${data.items.length} 条记录`;
+    const nV = data.items.filter((x) => x.poster_320 || x.poster_480).length;
+    return `${files.length} 个文件（base ${data.items.length} + 变体 ${files.length - data.items.length}）/ ${data.items.length} 条记录，${nV} 条带变体`;
   })());
 
 const anime = data.items.filter((x) => x.kind === 'anime').map((x) => x.title);
@@ -157,7 +182,8 @@ const gridNames = (p) => p.evaluate(() =>
     others: [...document.querySelectorAll('.w-seg-btn')].map((b) => b.getAttribute('aria-pressed')),
     stored: localStorage.getItem('watch-kind'),
   }));
-  const expectAnime = data.items.filter((x) => x.kind === 'anime').slice().sort(cmpTime).map((i) => i.title);
+  // 第 75 轮起网格默认评分序 → 番剧视图同样按评分序
+  const expectAnime = data.items.filter((x) => x.kind === 'anime').slice().sort(cmpRating).map((i) => i.title);
   const namesA = await gridNames(p);
   ok('C1 点「番剧」：按钮态/aria-pressed/localStorage 正确，网格只剩 29 部番剧',
     r.on === 'anime' && r.pressed === 'true' && r.stored === 'anime' &&

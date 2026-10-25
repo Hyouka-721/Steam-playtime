@@ -23,8 +23,8 @@ ok('A2 表单字段齐全（片名/英文名/类型/年份/日期/评分/标签/
 ok('A3 使用原生 <dialog>（Esc / 焦点圈免费拿到）', /<dialog class="w-add" id="w-add"/.test(html));
 ok('A4 有 Token 折叠区与保存/清除按钮',
   /id="add-token-box"/.test(html) && /id="add-token-save"/.test(html) && /id="add-token-clear"/.test(html));
-ok('A5 版本号 bump：watch.css?v=16 / watch.js?v=10',
-  /watch\.css\?v=16"/.test(html) && /watch\.js\?v=10"/.test(html));
+ok('A5 版本号 bump：watch.css?v=16 / watch.js?v=11',
+  /watch\.css\?v=16"/.test(html) && /watch\.js\?v=11"/.test(html));
 ok('A6 watch.js 走 GitHub Contents API 且仓库/分支可核',
   /api\.github\.com/.test(js) && /owner: 'Hyouka-721'/.test(js) && /repo: 'Steam-playtime'/.test(js) && /branch: 'main'/.test(js));
 ok('A7 压图规则与 CLI 一致（宽 640 / WebP / 只缩不放 / 内容哈希命名）',

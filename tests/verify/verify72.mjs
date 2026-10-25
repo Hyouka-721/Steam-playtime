@@ -53,8 +53,8 @@ ok('A1 页眉是 My Watch List、<title> 站名仍是 Watch List（两处分工�
 ok('A2 「共 N 部」计数条已删，换成 #w-sort 两按钮（默认观看时间）',
   !/w-count/.test(html) && /id="w-sort"/.test(html) &&
   /data-sort="time"[^>]*aria-pressed="true"/.test(html) && /data-sort="rating"[^>]*aria-pressed="false"/.test(html));
-ok('A3 版本号 bump：watch.css?v=16 / watch.js?v=10',
-  /watch\.css\?v=16"/.test(html) && /watch\.js\?v=10"/.test(html));
+ok('A3 版本号 bump：watch.css?v=16 / watch.js?v=11',
+  /watch\.css\?v=16"/.test(html) && /watch\.js\?v=11"/.test(html));
 ok('A4 玉子两部并存：id 不同、同日、按上传时间正序',
   (() => {
     const a = data.items.find((x) => x.title === '玉子爱情故事');
@@ -80,8 +80,8 @@ ok('A6 全部条目都有可解析的 added_at', data.items.every((it) => stampK
 ok('A7 items 数组顺序就是 cmpTime 序（观影倒序 + 同日上传正序）',
   JSON.stringify(data.items.map((i) => i.id)) ===
   JSON.stringify(data.items.slice().sort(cmpTime).map((i) => i.id)));
-ok('A8 watch.js 有新排序/上传时间/防撞车实现',
-  /SORT_KEY = 'watch-sort'/.test(js) && /function cmpTime/.test(js) && /function cmpRating/.test(js) &&
+ok('A8 watch.js 有排序/上传时间/防撞车实现（第 75 轮起默认 rating 且不持久化）',
+  /var sort = 'rating'/.test(js) && /function cmpTime/.test(js) && /function cmpRating/.test(js) &&
   /function stampKey/.test(js) && /baseId/.test(js) && /next.added_at = old.added_at/.test(js));
 
 /* ================= B 运行时：网格排序 ================= */
@@ -102,14 +102,15 @@ const gridNames = (p) => p.evaluate(() =>
   const expectTime = data.items.slice().sort(cmpTime).map((i) => i.title);
   const expectRating = data.items.slice().sort(cmpRating).map((i) => i.title);
 
-  ok('B1 默认（观看时间）网格顺序 = 数据 cmpTime 序', JSON.stringify(await gridNames(p)) === JSON.stringify(expectTime));
+  // 第 75 轮起默认评分序（用户要求「默认按评分排序」，且不再持久化）
+  ok('B1 默认（评分）网格顺序 = 数据 cmpRating 序', JSON.stringify(await gridNames(p)) === JSON.stringify(expectRating));
 
-  // 每个同日组：网格里的先后必须与 added_at 正序一致
+  // 每个同日组：网格里的先后必须与「评分降序 → 上传正序」一致（评分序下的同日规则）
   const byDay = {};
   data.items.forEach((it) => { (byDay[it.watched_at] = byDay[it.watched_at] || []).push(it); });
   const names0 = await gridNames(p);
   const dayOK = Object.keys(byDay).filter((k) => byDay[k].length > 1).every((k) => {
-    const seq = byDay[k].slice().sort(cmpTime).map((i) => names0.indexOf(i.title));
+    const seq = byDay[k].slice().sort(cmpRating).map((i) => names0.indexOf(i.title));
     return seq.every((v, i) => i === 0 || seq[i - 1] < v);
   });
   const groups = Object.keys(byDay).filter((k) => byDay[k].length > 1).length;
@@ -123,8 +124,8 @@ const gridNames = (p) => p.evaluate(() =>
     timePressed: document.querySelector('.w-sort-btn[data-sort="time"]').getAttribute('aria-pressed'),
     stored: localStorage.getItem('watch-sort'),
   }));
-  ok('B3 点评分：按钮态/aria-pressed/localStorage 都切过去',
-    r1.on === 'rating' && r1.pressed === 'true' && r1.timePressed === 'false' && r1.stored === 'rating', JSON.stringify(r1));
+  ok('B3 点评分：按钮态/aria-pressed 切过去（第 75 轮起不再写 localStorage）',
+    r1.on === 'rating' && r1.pressed === 'true' && r1.timePressed === 'false' && r1.stored === null, JSON.stringify(r1));
   const namesR = await gridNames(p);
   ok('B4 评分序 = 数据 cmpRating 序（高分段在前，无评分沉底）',
     JSON.stringify(namesR) === JSON.stringify(expectRating));
@@ -133,14 +134,14 @@ const gridNames = (p) => p.evaluate(() =>
   await p.reload({ waitUntil: 'load' });
   await p.waitForFunction(() => document.querySelectorAll('#w-grid .poster').length > 0, null, { timeout: 25000 });
   await p.waitForTimeout(400);
-  ok('B5 刷新后仍是评分序（localStorage 持久化）',
+  ok('B5 刷新后回到默认评分序（第 75 轮起默认即评分序、不持久化）',
     JSON.stringify(await gridNames(p)) === JSON.stringify(expectRating));
 
   await p.click('.w-sort-btn[data-sort="time"]');
   await p.waitForTimeout(250);
-  ok('B6 点回观看时间即恢复时间序',
+  ok('B6 点回观看时间即恢复时间序（同样不持久化）',
     JSON.stringify(await gridNames(p)) === JSON.stringify(expectTime) &&
-    (await p.evaluate(() => localStorage.getItem('watch-sort'))) === 'time');
+    (await p.evaluate(() => localStorage.getItem('watch-sort'))) === null);
   await c.close();
 }
 

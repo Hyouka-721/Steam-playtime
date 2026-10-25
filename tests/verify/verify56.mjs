@@ -20,8 +20,8 @@ ok('A1 watch.html 用史蒂夫取代文字按钮（#w-avatar 存在、无 .w-lay
   /id="w-avatar"/.test(html) && !/w-layout-btn/.test(html) && !/class="w-layout"/.test(html));
 ok('A2 头像具备与原图标一致的交互属性（role/tabindex/aria-pressed/title/aria-label）',
   /class="w-avatar" id="w-avatar" role="button" tabindex="0"\s*\n?\s*aria-pressed="false" title="切换到时间轴视图" aria-label="切换到时间轴视图"/.test(html));
-ok('A3 版本号 bump：watch.css?v=16 / watch.js?v=10',
-  /watch\.css\?v=16"/.test(html) && /watch\.js\?v=10"/.test(html));
+ok('A3 版本号 bump：watch.css?v=16 / watch.js?v=11',
+  /watch\.css\?v=16"/.test(html) && /watch\.js\?v=11"/.test(html));
 
 const wav = (cssNC.match(/\.w-avatar \{[^}]*\}/) || [''])[0];
 ok('A4 .w-avatar 132×132 + 同一素材 + 同一投影',
@@ -142,12 +142,13 @@ s = await state();
 ok('C2 点史蒂夫 → 时间轴视图（tl 可见、grid 隐藏、aria-pressed=true、title 变为「切换到网格视图」）',
   s.gridHidden === true && s.tlHidden === false && s.pressed === 'true' && s.title === '切换到网格视图' && s.tlItems === 3,
   JSON.stringify(s));
-ok('C3 选择已持久化（localStorage watch-layout=timeline）', s.stored === 'timeline', String(s.stored));
+// 第 75 轮契约变更：视图选择不再持久化（用户要求「默认展示网格」），localStorage 不再写
+ok('C3 视图选择不再持久化（watch-layout 不再写入，第 75 轮起）', s.stored === null, String(s.stored));
 
 await page.click('#w-avatar');
 await page.waitForTimeout(250);
 s = await state();
-ok('C4 再点一次 → 回到网格视图', s.gridHidden === false && s.tlHidden === true && s.pressed === 'false' && s.stored === 'grid');
+ok('C4 再点一次 → 回到网格视图', s.gridHidden === false && s.tlHidden === true && s.pressed === 'false' && s.stored === null);
 
 /* 键盘：Enter / Space */
 await page.focus('#w-avatar');
@@ -160,16 +161,15 @@ await page.waitForTimeout(220);
 s = await state();
 ok('C6 键盘 空格 可切回网格', s.gridHidden === false && s.pressed === 'false');
 
-/* 刷新保持 */
+/* 刷新保持 → 第 75 轮起改为「刷新回到默认网格」 */
 await page.click('#w-avatar');
 await page.waitForTimeout(220);
 await page.reload({ waitUntil: 'load' });
-await page.waitForSelector('#w-tl .tl-item', { timeout: 8000 }).catch(() => {});
+await page.waitForSelector('#w-grid .poster', { timeout: 8000 }).catch(() => {});
 await page.waitForTimeout(300);
 s = await state();
-ok('C7 刷新后仍停在时间轴（持久化生效）', s.tlHidden === false && s.pressed === 'true', JSON.stringify(s));
-await page.click('#w-avatar');
-await page.waitForTimeout(200);
+ok('C7 刷新后回到默认网格视图（第 75 轮起视图不持久化）',
+  s.gridHidden === false && s.tlHidden === true && s.pressed === 'false', JSON.stringify(s));
 
 /* 点击区域 = 整个 132×132：四角内缩 4px + 中心共 5 点**逐个真实点击**，每次都应切换。
    ⚠️ 不能用 elementFromPoint 判点击区域（第 56 轮踩到）：元素只要获得焦点，

@@ -23,16 +23,16 @@ tests/
   ```
   C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe tests/verify/verify70.mjs
   ```
-- 跑全部 21 个套件（在 bash 里循环）：
+- 跑全部 22 个套件（在 bash 里循环）：
   ```bash
   NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
   for s in verify6 verify47 verify48 verify49 verify54 verify55 verify56 verify57 verify58 \
-           verify60 verify62 verify63 verify64 verify65 verify66 verify67 verify68 verify69 verify70 verify72 verify73; do
+           verify60 verify62 verify63 verify64 verify65 verify66 verify67 verify68 verify69 verify70 verify72 verify73 verify75; do
     echo "== $s =="; "$NODE" tests/verify/$s.mjs 2>&1 | tail -2
   done
   ```
 
-## 套件清单与当前基线（第 73 轮，共 853 条）
+## 套件清单与当前基线（第 75 轮，共 870 条）
 
 | 脚本 | 覆盖轮次 / 契约 | 条数 |
 |---|---|---|
@@ -57,6 +57,7 @@ tests/
 | `verify70` | 换海报 + 站名（数据驱动：文件名 hash 反查） | 18 |
 | `verify72` | 页眉 My Watch List / 排序切换 / 同日按上传时间 / 玉子修复 / 防撞车 | 21 |
 | `verify73` | 「番剧」类别全链路（筛选/表单/标签/脚本）+ 她和她的猫海报 + 29 部日本动画重分类 | 27 |
+| `verify75` | 图片加载性能（srcset 320/480 变体 + SW cache-first）+ 默认网格 + 默认评分序 | 17 |
 
 `online/`：`online65/66/68/69/70/72.mjs` —— 上线后对 Pages 做内容指纹复验（判定线上/本地 md5 一致、功能生效），**线上验证写操作时要设计安全边界**（如 online69 故意在无 Token 的浏览器点保存，用 `page.on('request')` 数 PUT 必须为 0）。旧 online 脚本是一次性历史记录（online70 的海报 hash / 站名判据已被后续轮次改旧），复验当轮用最新那个。
 
@@ -64,12 +65,13 @@ tests/
 
 ## 关键约定（改代码/改回归前必读）
 
-- **版本号 `?v=N` 是硬编码在多个脚本里的**，bump 必须同步。`watch.css?v=16` / `watch.js?v=10` 现在散落在 verify55/56/57/58/60/62/63/64/65/66/67/68/69/72/73 的断言里（有的脚本只有 css，有的两者都有）。**注意每个文件里有两处**：ok() 描述里的纯文本 + 正则断言里的转义形态（`watch\.js\?v=10`），只换一处会漏。
+- **版本号 `?v=N` 是硬编码在多个脚本里的**，bump 必须同步。`watch.css?v=16` / `watch.js?v=11` 现在散落在 verify55/56/57/58/60/62/63/64/65/66/67/68/69/72/73 的断言里（有的脚本只有 css，有的两者都有）。**注意每个文件里有两处**：ok() 描述里的纯文本 + 正则断言里的转义形态（`watch\.js\?v=11`），只换一处会漏。
 - **条数要从数据推导**（`N = data.items.length`），别写死 `22` / `26` / `39`。
 - **快照/用户数据算出来的值（百分比、条数）期望都从数据里读**，别写死（`verify6` 的成就卡就是教训）。
 - **判据分「契约」与「代理」**：`行数相同`、`页眉高相同` 是「两页文案相同」时的代理，文案一变就失效，要回到契约本身。
 - **截图像素比对要「取稳定帧」**：字体 swap 会污染前几张，连续截到两次 md5 相同才采信。
 - **截图前预热图片**：`.poster-pic img` 默认 `opacity:0`，靠 load 事件加 `is-loaded` 淡入；首屏外的图是 `loading="lazy"`，要先 `scrollIntoView` 再等 `complete && naturalWidth>0`。
+- **⚠️ 带 `w` 描述符的 srcset，`naturalWidth` 是「密度校正 intrinsic 尺寸」**（≈ 卡片布局宽，不是被选中文件的原始像素宽）——断言图片真实尺寸要 `fetch(currentSrc)` + `createImageBitmap` 单独量（verify70 C3 / verify75 B6 的写法）；变体高度是 sharp 按比例算的（472.5 → 472），断言用 ±1 容差。
 - **本地服务 curl 加 `--noproxy '*'`**；本机 `hosts` 把 github 系列域名指向 127.0.0.1，线上探测一律用 Playwright（`--no-proxy-server`）+ 页内 `fetch(url,{cache:'reload'})`。
 - 脚本里的绝对路径（`ROOT` / `OUT` / `createRequire`）是本机专用；换机器要改这几处。
 

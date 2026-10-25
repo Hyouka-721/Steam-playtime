@@ -46,8 +46,8 @@ ok('A7 评分格式改为 toFixed(1)（整数也带小数位）', /n\.toFixed\(1
 ok('A8 上映字段优先取 release_date，缺省回退 year',
   /function releaseText\(it\)/.test(js) && /it\.release_date/.test(js) && /releaseText\(it\)/.test(js));
 
-ok('A9 版本号 bump：watch.css?v=16 / watch.js?v=10',
-  /watch\.css\?v=16"/.test(html) && /watch\.js\?v=10"/.test(html));
+ok('A9 版本号 bump：watch.css?v=16 / watch.js?v=11',
+  /watch\.css\?v=16"/.test(html) && /watch\.js\?v=11"/.test(html));
 
 /* -- 数据 -- */
 const byTitle = (t) => data.items.filter((x) => x.title === t);
@@ -235,9 +235,9 @@ console.log('\n== D 分类筛选 ==');
     `${r.anime.length} 部：${r.anime.join('、')}`);
   ok('D2 三部已不属于「电影」', ['士兵突击', '赛博朋克：边缘行者', '英雄联盟：双城之战'].every((t) => !r.movie.includes(t)),
     `电影 ${r.movie.length} 部`);
-  // 第 72 轮：原「共 N 部」计数条已换成排序切换（.w-count 删除），默认观看时间、网格视图可见
-  ok('D3 排序切换在位（默认观看时间、网格视图可见）',
-    r.sortOn === 'time' && r.sortHidden === false && r.all.length === N &&
+  // 第 72 轮：原「共 N 部」计数条已换成排序切换（.w-count 删除）；第 75 轮起默认评分序、网格视图可见
+  ok('D3 排序切换在位（默认评分、网格视图可见）',
+    r.sortOn === 'rating' && r.sortHidden === false && r.all.length === N &&
       r.movie.length === N - nSeries - nAnime,
     `sort=${r.sortOn} hidden=${r.sortHidden}`);
   await c.close();

@@ -49,11 +49,13 @@ ok('A6 旧海报 e6de52af 已被替换且无任何条目引用、文件已删除
 ok('A7 每条记录的 poster 都是仓库里的真实文件（无死链）',
   data.items.every((x) => fs.existsSync(ROOT + x.poster)),
   data.items.filter((x) => !fs.existsSync(ROOT + x.poster)).map((x) => x.poster).join(',') || '全部存在');
-ok('A8 海报目录没有孤儿文件（引用的集合 = 目录里 potter 相关文件集合）',
+// 第 75 轮：每个 base 可附带 <base>-320/-480.webp 两个响应式变体，同属合法文件
+ok('A8 海报目录没有孤儿文件（potter 相关的 base + 320/480 变体都在，无第三者）',
   (() => {
     const onDisk = fs.readdirSync(ROOT + 'img/watch').filter((f) => f.includes('potter')).sort();
     const used = refs.filter((p) => p.includes('potter')).map((p) => p.split('/').pop()).sort();
-    return JSON.stringify(onDisk) === JSON.stringify(used);
+    const allowed = new Set(used.flatMap((b) => [b, b.replace(/\.webp$/, '-320.webp'), b.replace(/\.webp$/, '-480.webp')]));
+    return onDisk.every((f) => allowed.has(f)) && used.every((b) => onDisk.includes(b));
   })());
 
 /* ================= B 站名 ================= */
@@ -88,17 +90,52 @@ const errs = [];
   ok('C1 浏览器标题 Watch List、页眉 My Watch List', r.title === 'Watch List' && r.h1 === 'My Watch List', `${r.title} / ${r.h1}`);
   ok(`C2 网格渲染全部 ${N} 条`, r.posters === N, `grid=${r.posters}/${N}`);
 
-  /* 新海报能真的加载出来（complete + naturalWidth），且解码为 640 宽 */
-  const img = await p.evaluate(() => {
+  /* 第 75 轮起网格用 srcset：src 属性仍是 json 里的 base，浏览器按 DPR/栏宽
+     从 base / 320 / 480 候选里挑一个（currentSrc）。
+     ⚠️ Chromium 对带 w 描述符的 srcset 返回的是「密度校正 intrinsic 尺寸」
+     （≈ 卡片布局宽），naturalWidth 不再等于被选中文件的原始像素宽
+     → 真实像素宽必须 fetch currentSrc 后用 createImageBitmap 单独量。 */
+  const cands = [posterRel, item.poster_320, item.poster_480].filter(Boolean);
+  // 第 75 轮：评分序下该卡片可能不在首屏 → 先滚进视口并等图片真正加载完
+  await p.evaluate(() => {
+    const cards = [...document.querySelectorAll('#w-grid .poster')];
+    const card = cards.find((x) => (x.querySelector('.poster-name') || {}).textContent === '哈利·波特与魔法石');
+    if (card) card.scrollIntoView({ block: 'center' });
+  });
+  await p.waitForFunction(() => {
+    const cards = [...document.querySelectorAll('#w-grid .poster')];
+    const card = cards.find((x) => (x.querySelector('.poster-name') || {}).textContent === '哈利·波特与魔法石');
+    const im = card && card.querySelector('img');
+    return im && im.complete && im.naturalWidth > 0;
+  }, null, { timeout: 15000 }).catch(() => {});
+  await p.waitForTimeout(300);
+  const img = await p.evaluate(async () => {
     const cards = [...document.querySelectorAll('#w-grid .poster')];
     const card = cards.find((x) => (x.querySelector('.poster-name') || {}).textContent === '哈利·波特与魔法石');
     if (!card) return null;
     const im = card.querySelector('img');
-    return { src: im.getAttribute('src'), nw: im.naturalWidth, nh: im.naturalHeight, complete: im.complete };
+    const out = { src: im.getAttribute('src'), srcset: im.getAttribute('srcset'), sizes: im.getAttribute('sizes'),
+      cur: im.currentSrc, nw: im.naturalWidth, nh: im.naturalHeight, complete: im.complete, realW: 0, realH: 0 };
+    if (im.complete && im.currentSrc) {
+      try {
+        const res = await fetch(im.currentSrc);
+        const bmp = await createImageBitmap(await res.blob());
+        out.realW = bmp.width; out.realH = bmp.height;
+        if (bmp.close) bmp.close();
+      } catch (e) { out.err = String(e); }
+    }
+    return out;
   });
-  ok('C3 网格里该卡片用的正是 json 里那张海报，且解码尺寸 = poster_w/poster_h',
+  const curName = img && img.cur ? img.cur.split('/').pop() : '';
+  const expectW = curName.endsWith('-320.webp') ? 320 : curName.endsWith('-480.webp') ? 480 : item.poster_w;
+  // 变体高由 sharp 按比例算（472.5 会向下取 472），故高度容差 ±1
+  const expectH = Math.round(expectW * item.poster_h / item.poster_w);
+  ok('C3 网格卡片 src=json 海报、srcset 候选齐全、选中候选真实像素宽 = 标注宽',
     img && img.src === posterRel && img.complete &&
-    img.nw === item.poster_w && img.nh === item.poster_h, JSON.stringify({ img, posterRel }));
+    cands.some((c) => img.cur.endsWith(c.split('/').pop())) &&
+    cands.every((c) => (img.srcset || '').includes(c.split('/').pop())) &&
+    !!img.sizes && img.realW === expectW && Math.abs(img.realH - expectH) <= 1,
+    JSON.stringify({ cur: img && img.cur, expectW, expectH, real: img && [img.realW, img.realH], err: img && img.err }));
 
   await p.evaluate(() => {
     const cards = [...document.querySelectorAll('#w-grid .poster')];
@@ -117,14 +154,25 @@ const errs = [];
   await p.click('#w-avatar');
   await p.waitForFunction(() => document.querySelectorAll('#w-tl .tl-item').length > 0, null, { timeout: 20000 });
   await p.waitForTimeout(700);
+  /* 时间轴缩略图懒加载：先把目标条目滚进视口再等加载完（第 75 轮改造后同样需要） */
+  await p.evaluate(() => {
+    const it = [...document.querySelectorAll('#w-tl .tl-item')].find((x) => x.textContent.includes('哈利·波特与魔法石'));
+    if (it) it.scrollIntoView({ block: 'center' });
+  });
+  await p.waitForFunction(() => {
+    const it = [...document.querySelectorAll('#w-tl .tl-item')].find((x) => x.textContent.includes('哈利·波特与魔法石'));
+    const im = it && it.querySelector('.tl-thumb img');
+    return im && im.complete && im.naturalWidth > 0;
+  }, null, { timeout: 15000 }).catch(() => {});
   const tl = await p.evaluate(() => {
     const it = [...document.querySelectorAll('#w-tl .tl-item')].find((x) => x.textContent.includes('哈利·波特与魔法石'));
     if (!it) return null;
     const im = it.querySelector('.tl-thumb img');
     return { src: im.getAttribute('src'), nw: im.naturalWidth, seed: it.querySelector('.tl-note') ? it.querySelector('.tl-note').textContent.trim() : '' };
   });
-  ok('C4 时间轴缩略图同样用 json 里那张海报',
-    tl && tl.src === posterRel, JSON.stringify(tl));
+  // 第 75 轮起时间轴缩略图改用 poster_320 变体（114px 卡片，2x 也够）；没有变体的老条目回退 base
+  ok('C4 时间轴缩略图用 poster_320 变体（无则回退 base），解码宽 320',
+    tl && tl.src === (item.poster_320 || posterRel) && (!item.poster_320 || tl.nw === 320), JSON.stringify(tl));
   const cols = await p.evaluate(() => {
     const items = [...document.querySelectorAll('#w-tl .tl-item')];
     const u = (sel) => [...new Set(items.map((it) => { const e = it.querySelector(sel); return e ? Math.round(e.getBoundingClientRect().left) : null; }).filter((x) => x != null))];

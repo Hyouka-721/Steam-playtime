@@ -47,7 +47,8 @@ const HELP = `
   --tags <a,b,c>      逗号分隔
   --note <感想>       一两句短评
   --id <自定义 id>    默认 <watched>-<slug>，指定它可精确覆盖某条
-  --width <像素>      海报目标宽度，默认 640（不放大）
+  --width <像素>      海报目标宽度，默认 640（不放大）；第 75 轮起自动附带
+                      320 / 480 两张响应式变体（同样只缩不放，网格 srcset 用）
   --quality <1-100>   WebP 质量，默认 80
   --crop <W:H>        裁剪到指定比例，如 2:3；默认不裁
   --position <位置>   裁剪定位 centre|attention|top…，默认 centre
@@ -193,24 +194,37 @@ async function main() {
   }
 
   // ---- 图片处理 ----
+  // 第 75 轮：resize 管道提成函数——主图与 320/480 变体共用同一套裁剪/压缩参数
+  const VARIANT_WIDTHS = [320, 480];
   const meta = await sharp(imgPath).metadata();
-  let pipe = sharp(imgPath).rotate();          // rotate() 无参 = 按 EXIF 自动摆正
-  if (args.crop && args.crop !== true) {
-    const m = /^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/.exec(String(args.crop));
-    if (!m) die(`--crop 格式应为 W:H，例如 2:3，收到：${args.crop}`);
-    const rw = Number(m[1]);
-    const rh = Number(m[2]);
-    pipe = pipe.resize({ width, height: Math.round(width * rh / rw), fit: 'cover', position: args.position || 'centre' });
-  } else {
-    pipe = pipe.resize({ width, withoutEnlargement: true });
+  function pipeAt(width) {
+    let p = sharp(imgPath).rotate();          // rotate() 无参 = 按 EXIF 自动摆正
+    if (args.crop && args.crop !== true) {
+      const m = /^(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)$/.exec(String(args.crop));
+      if (!m) die(`--crop 格式应为 W:H，例如 2:3，收到：${args.crop}`);
+      const rw = Number(m[1]);
+      const rh = Number(m[2]);
+      return p.resize({ width, height: Math.round(width * rh / rw), fit: 'cover', position: args.position || 'centre' });
+    }
+    return p.resize({ width, withoutEnlargement: true });
   }
-  const buf = await pipe.webp({ quality, effort: 4 }).toBuffer();
+
+  const buf = await pipeAt(width).webp({ quality, effort: 4 }).toBuffer();
 
   const outMeta = await sharp(buf).metadata();
   const hash = crypto.createHash('sha256').update(buf).digest('hex').slice(0, 8);
   const fileName = `${slug}-${hash}.webp`;
   const outPath = path.join(POSTER_DIR, fileName);
   const relPoster = `img/watch/${fileName}`;
+
+  // 变体：只缩不放（原图不够宽就跳过），与主图同参数；文件名 <主图名>-<宽>.webp
+  const variants = [];
+  for (const vw of VARIANT_WIDTHS) {
+    if (outMeta.width <= vw) continue;
+    const vBuf = await pipeAt(vw).webp({ quality, effort: 4 }).toBuffer();
+    const vName = `${fileName.replace(/\.webp$/, '')}-${vw}.webp`;
+    variants.push({ w: vw, name: vName, rel: `img/watch/${vName}`, bytes: vBuf });
+  }
 
   // ---- 合并数据（data / prev 已在上面读好）----
   const item = {
@@ -224,6 +238,10 @@ async function main() {
     poster: relPoster,
     poster_w: outMeta.width,
     poster_h: outMeta.height,
+    // 第 75 轮：响应式变体（网格 srcset 用；老数据没有这两个字段时前端回退主图）
+    ...(variants.length
+      ? Object.fromEntries(variants.map((v) => [`poster_${v.w}`, v.rel]))
+      : {}),
     ...(args.tags && args.tags !== true
       ? { tags: String(args.tags).split(',').map((s) => s.trim()).filter(Boolean) }
       : (prev && prev.tags ? { tags: prev.tags } : {})),
@@ -249,6 +267,9 @@ async function main() {
   console.log(`  观影时间 ${watchedAt}   类型 ${kind}${args.year ? '   年份 ' + args.year : ''}`);
   if (rating !== undefined) console.log(`  评分     ${rating}`);
   console.log(`  海报     ${relPoster}  (${outMeta.width}×${outMeta.height})`);
+  if (variants.length) {
+    console.log(`  变体     ${variants.map((v) => `${v.rel} (${v.w}px, ${kb(v.bytes.length)})`).join(' / ')}`);
+  }
   console.log(`  体积     原图 ${kb(srcKb)} → WebP ${kb(buf.length)}` +
               (srcKb > 0 ? `（${Math.round((1 - buf.length / srcKb) * 100)}% 更小）` : ''));
   console.log(`  总数     ${data.items.length} 条`);
@@ -260,6 +281,14 @@ async function main() {
       if (args.dry) console.log('  （--dry：不删除）');
       else { fs.unlinkSync(oldAbs); console.log('  已删除旧海报文件'); }
     }
+    // 第 75 轮：旧变体一并清理（命名规则 <旧主图名>-<宽>.webp）
+    for (const vw of VARIANT_WIDTHS) {
+      const oldV = path.join(DOCS, prev.poster.replace(/\.webp$/, '') + `-${vw}.webp`);
+      if (fs.existsSync(oldV)) {
+        if (args.dry) console.log(`  （--dry：不删除旧变体 ${oldV}）`);
+        else { fs.unlinkSync(oldV); console.log(`  已删除旧变体 ${path.basename(oldV)}`); }
+      }
+    }
   }
 
   if (args.dry) {
@@ -269,10 +298,12 @@ async function main() {
 
   fs.mkdirSync(POSTER_DIR, { recursive: true });
   fs.writeFileSync(outPath, buf);
+  for (const v of variants) fs.writeFileSync(path.join(POSTER_DIR, v.name), v.bytes);
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2) + '\n', 'utf8');
 
   console.log('\n已写入。下一步：');
-  console.log(`  git add docs/img/watch/${fileName} docs/data/watch.json`);
+  const files = [`docs/img/watch/${fileName}`, ...variants.map((v) => `docs/img/watch/${v.name}`), 'docs/data/watch.json'];
+  console.log(`  git add ${files.join(' ')}`);
   console.log(`  git commit -m "watch: add ${title}"`);
   console.log('');
 }
