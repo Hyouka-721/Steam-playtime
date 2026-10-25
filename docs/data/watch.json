@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T14:17:00+08:00",
+  "updated_at": "2026-10-25T14:18:11+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -852,6 +852,19 @@
       "year": 2015,
       "rating": 9.5,
       "note": "我回来了，欢迎回来"
+    },
+    {
+      "id": "2020-12-01-the-truman-show",
+      "title": "楚门的世界",
+      "kind": "movie",
+      "watched_at": "2020-12-01",
+      "poster": "img/watch/the-truman-show-5ad1d462.webp",
+      "poster_w": 640,
+      "poster_h": 963,
+      "title_en": "The Truman Show",
+      "year": 1998,
+      "rating": 8,
+      "note": "如果再也见不到你，祝你早安，午安，晚安"
     },
     {
       "id": "2020-07-22-knives-out",
