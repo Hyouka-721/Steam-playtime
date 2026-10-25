@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T15:37:51+08:00",
+  "updated_at": "2026-10-25T15:39:15+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1056,6 +1056,20 @@
       "year": 2006,
       "rating": 7,
       "note": "白驹飞驰，青春过隙"
+    },
+    {
+      "id": "2020-10-02-item",
+      "title": "知晓天空之蓝的人啊",
+      "kind": "movie",
+      "watched_at": "2020-10-02",
+      "added_at": "2026-10-25T15:39:15+08:00",
+      "poster": "img/watch/item-1524c3b8.webp",
+      "poster_w": 640,
+      "poster_h": 903,
+      "title_en": "空の青さを知る人よ",
+      "year": 2019,
+      "rating": 7,
+      "note": "不知大海广阔，却知晓天空之蓝"
     },
     {
       "id": "2020-08-31-the-last-emperor",
