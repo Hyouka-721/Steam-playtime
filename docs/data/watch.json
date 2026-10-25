@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T09:44:16+08:00",
+  "updated_at": "2026-10-25T09:46:41+08:00",
   "items": [
     {
       "id": "2026-10-24-swords-into-plowshares",
@@ -254,6 +254,19 @@
       "year": 2016,
       "rating": 9,
       "note": "不是所有人都能和过去和解"
+    },
+    {
+      "id": "2024-12-05-item",
+      "title": "超时空大决战",
+      "kind": "movie",
+      "watched_at": "2024-12-05",
+      "poster": "img/watch/item-4716dc49.webp",
+      "poster_w": 600,
+      "poster_h": 900,
+      "title_en": "超時空の大決戦",
+      "year": 1999,
+      "rating": 7,
+      "note": "可惜长大了二十岁"
     },
     {
       "id": "2024-11-27-cyberpunk-edgerunners",
