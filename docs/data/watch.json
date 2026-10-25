@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:04:48+08:00",
+  "updated_at": "2026-10-25T16:05:07+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -895,13 +895,13 @@
       "kind": "movie",
       "watched_at": "2020-12-18",
       "poster": "img/watch/item-291d9b00.webp",
+      "added_at": "2026-10-25T13:44:24+08:00",
       "poster_w": 640,
       "poster_h": 907,
       "title_en": "坂本ですが？",
       "year": 2016,
-      "rating": 7.5,
-      "note": "？",
-      "added_at": "2026-10-25T13:44:24+08:00"
+      "rating": 7,
+      "note": "？"
     },
     {
       "id": "2020-12-12-item",
