@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T11:14:03+08:00",
+  "updated_at": "2026-10-25T11:22:41+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -507,9 +507,9 @@
       "title": "哈利·波特与魔法石",
       "kind": "movie",
       "watched_at": "2022-02-05",
-      "poster": "img/watch/harry-potter-and-the-sorcerer-s-stone-eb96d8a4.webp",
+      "poster": "img/watch/harry-potter-and-the-sorcerer-s-stone-70ce4e93.webp",
       "poster_w": 640,
-      "poster_h": 918,
+      "poster_h": 945,
       "title_en": "Harry Potter and the Sorcerer's Stone",
       "year": 2001,
       "rating": 8,
