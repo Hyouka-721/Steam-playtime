@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T12:11:37+08:00",
+  "updated_at": "2026-10-25T12:13:23+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -709,6 +709,19 @@
       "year": 2021,
       "rating": 7.5,
       "note": "健康生活起来吧"
+    },
+    {
+      "id": "2021-03-21-item",
+      "title": "玉子爱情故事",
+      "kind": "movie",
+      "watched_at": "2021-03-21",
+      "poster": "img/watch/item-4667b16a.webp",
+      "poster_w": 640,
+      "poster_h": 905,
+      "title_en": "たまこラブストーリー",
+      "year": 2014,
+      "rating": 8.5,
+      "note": "我喜欢你，我最喜欢你，你呢，请讲！"
     }
   ]
 }
