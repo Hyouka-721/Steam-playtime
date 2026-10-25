@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T14:30:07+08:00",
+  "updated_at": "2026-10-25T14:32:47+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -878,6 +878,19 @@
       "year": 2019,
       "rating": 8,
       "note": "Knives Out"
+    },
+    {
+      "id": "2020-07-19-item",
+      "title": "欢迎来到实力至上主义教室",
+      "kind": "series",
+      "watched_at": "2020-07-19",
+      "poster": "img/watch/item-8c2aa588.webp",
+      "poster_w": 640,
+      "poster_h": 999,
+      "title_en": "ようこそ実力至上主義の教室へ",
+      "year": 2017,
+      "rating": 7.5,
+      "note": "无法成为中心的我们"
     },
     {
       "id": "2020-07-17-item",
