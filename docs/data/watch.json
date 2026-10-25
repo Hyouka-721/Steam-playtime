@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T11:00:20+08:00",
+  "updated_at": "2026-10-25T11:02:27+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -527,6 +527,19 @@
       "year": 2002,
       "rating": 7.5,
       "note": "选择决定我是谁"
+    },
+    {
+      "id": "2022-02-04-item",
+      "title": "白色巨塔",
+      "kind": "series",
+      "watched_at": "2022-02-04",
+      "poster": "img/watch/item-6e8cd1c7.webp",
+      "poster_w": 640,
+      "poster_h": 853,
+      "title_en": "白い巨塔",
+      "year": 2003,
+      "rating": 9.5,
+      "note": "里見、僕に不安がないよただ、ただ、無念だ"
     }
   ]
 }
