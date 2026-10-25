@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T14:36:14+08:00",
+  "updated_at": "2026-10-25T14:36:53+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -876,7 +876,8 @@
       "poster_h": 994,
       "title_en": "Fog Hill of Five Elements",
       "year": 2020,
-      "rating": 8.5
+      "rating": 8.5,
+      "note": "雾山五行"
     },
     {
       "id": "2020-07-22-knives-out",
