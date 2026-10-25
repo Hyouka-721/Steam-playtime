@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T15:41:57+08:00",
+  "updated_at": "2026-10-25T15:44:45+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1098,6 +1098,20 @@
       "year": 2020,
       "rating": 8,
       "note": "我的终点是想救你，而起点却是你的死因"
+    },
+    {
+      "id": "2020-09-19-item",
+      "title": "天气之子",
+      "kind": "movie",
+      "watched_at": "2020-09-19",
+      "added_at": "2026-10-25T15:44:45+08:00",
+      "poster": "img/watch/item-7747fa51.webp",
+      "poster_w": 640,
+      "poster_h": 903,
+      "title_en": "天気の子",
+      "year": 2019,
+      "rating": 7,
+      "note": "“呐，天要开始放晴了哟。”"
     },
     {
       "id": "2020-08-31-the-last-emperor",
