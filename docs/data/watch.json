@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T09:53:34+08:00",
+  "updated_at": "2026-10-25T10:03:04+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -435,6 +435,19 @@
       "year": 2001,
       "rating": 8,
       "note": "尽人力，听天命"
+    },
+    {
+      "id": "2022-05-04-transformers-prime",
+      "title": "变形金刚 领袖之证",
+      "kind": "movie",
+      "watched_at": "2022-05-04",
+      "poster": "img/watch/transformers-prime-25f593ea.webp",
+      "poster_w": 600,
+      "poster_h": 846,
+      "title_en": "Transformers Prime",
+      "year": 2010,
+      "rating": 9,
+      "note": "永远的变形金刚"
     }
   ]
 }
