@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T13:44:23+08:00",
+  "updated_at": "2026-10-25T13:45:54+08:00",
   "items": [
     {
       "id": "2026-10-25-item",
@@ -813,6 +813,19 @@
       "year": 2016,
       "rating": 7.5,
       "note": "？"
+    },
+    {
+      "id": "2020-12-12-item",
+      "title": "非自然死亡",
+      "kind": "series",
+      "watched_at": "2020-12-12",
+      "poster": "img/watch/item-1db61517.webp",
+      "poster_w": 640,
+      "poster_h": 960,
+      "title_en": "アンナチュラル",
+      "year": 2018,
+      "rating": 9,
+      "note": "时至今日，你仍是我的光"
     },
     {
       "id": "2020-07-16-item",
