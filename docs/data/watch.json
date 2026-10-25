@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T11:07:42+08:00",
+  "updated_at": "2026-10-25T11:10:47+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -566,6 +566,19 @@
       "year": 2017,
       "rating": 9,
       "note": "正确、自我与爱"
+    },
+    {
+      "id": "2021-08-02-love-letter",
+      "title": "情书",
+      "kind": "movie",
+      "watched_at": "2021-08-02",
+      "poster": "img/watch/love-letter-a5aa0f14.webp",
+      "poster_w": 510,
+      "poster_h": 723,
+      "title_en": "Love Letter",
+      "year": 1995,
+      "rating": 9.9,
+      "note": "然而不凑巧，我喜欢的围裙，上下没有一个兜。"
     }
   ]
 }
