@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T14:56:16+08:00",
+  "updated_at": "2026-10-25T15:08:39+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -15,7 +15,8 @@
       "tags": [
         "剧情，历史，战争"
       ],
-      "note": "靖康耻，犹未雪"
+      "note": "靖康耻，犹未雪",
+      "added_at": "2026-10-24T21:41:45+08:00"
     },
     {
       "id": "2026-10-17-inside-out-2",
@@ -33,7 +34,8 @@
         "奇幻",
         "冒险"
       ],
-      "note": "成长，就是有能力重建破碎的自己"
+      "note": "成长，就是有能力重建破碎的自己",
+      "added_at": "2026-10-24T22:28:04+08:00"
     },
     {
       "id": "2026-09-26-f1-the-movie",
@@ -46,7 +48,8 @@
       "title_en": "F1: The Movie",
       "year": 2025,
       "rating": 8,
-      "note": "赛道即归途"
+      "note": "赛道即归途",
+      "added_at": "2026-10-24T22:54:27+08:00"
     },
     {
       "id": "2026-09-05-robot-dreams",
@@ -59,7 +62,8 @@
       "title_en": "Robot Dreams",
       "year": 2023,
       "rating": 8,
-      "note": "现在我们都明白如何去爱了"
+      "note": "现在我们都明白如何去爱了",
+      "added_at": "2026-10-24T22:56:03+08:00"
     },
     {
       "id": "2026-08-15-nobody",
@@ -76,7 +80,8 @@
         "动画",
         "奇幻"
       ],
-      "note": "未披锦襕袈裟者，亦是菩提树下人"
+      "note": "未披锦襕袈裟者，亦是菩提树下人",
+      "added_at": "2026-10-24T22:35:12+08:00"
     },
     {
       "id": "2026-05-19-the-million-pound-note",
@@ -89,7 +94,8 @@
       "title_en": "The Million Pound Note",
       "year": 1954,
       "rating": 8.5,
-      "note": "金钱的象征"
+      "note": "金钱的象征",
+      "added_at": "2026-10-24T22:59:35+08:00"
     },
     {
       "id": "2026-05-09-titanic",
@@ -106,7 +112,8 @@
         "爱情",
         "灾难"
       ],
-      "note": "我心永恒"
+      "note": "我心永恒",
+      "added_at": "2026-10-24T22:36:55+08:00"
     },
     {
       "id": "2026-05-03-avatar",
@@ -123,7 +130,8 @@
         "科幻",
         "冒险"
       ],
-      "note": "美丽新世界"
+      "note": "美丽新世界",
+      "added_at": "2026-10-24T22:39:23+08:00"
     },
     {
       "id": "2026-04-15-the-long-season",
@@ -136,7 +144,8 @@
       "title_en": "The Long Season",
       "year": 2023,
       "rating": 9,
-      "note": "慢慢把遥远的事物震碎"
+      "note": "慢慢把遥远的事物震碎",
+      "added_at": "2026-10-24T23:01:33+08:00"
     },
     {
       "id": "2026-04-07-item",
@@ -149,7 +158,8 @@
       "title_en": "花束みたいな恋をした",
       "year": 2021,
       "rating": 9,
-      "note": "爱情的底色，是成长命题"
+      "note": "爱情的底色，是成长命题",
+      "added_at": "2026-10-24T23:04:06+08:00"
     },
     {
       "id": "2026-04-05-the-secret-life-of-walter-mitty",
@@ -162,7 +172,8 @@
       "title_en": "The Secret Life of Walter Mitty",
       "year": 2013,
       "rating": 7,
-      "note": "To see the world, to draw closer, to find each other"
+      "note": "To see the world, to draw closer, to find each other",
+      "added_at": "2026-10-24T22:42:53+08:00"
     },
     {
       "id": "2026-02-14-swords-into-plowshares",
@@ -175,7 +186,8 @@
       "title_en": "Swords into Plowshares",
       "year": 2026,
       "rating": 8.5,
-      "note": "就算有三千轮日月春秋"
+      "note": "就算有三千轮日月春秋",
+      "added_at": "2026-10-25T09:53:34+08:00"
     },
     {
       "id": "2025-10-06-soldiers-sortie",
@@ -188,7 +200,8 @@
       "title_en": "Soldiers Sortie",
       "year": 2006,
       "rating": 9,
-      "note": "好好活，就有意义"
+      "note": "好好活，就有意义",
+      "added_at": "2026-10-24T23:10:06+08:00"
     },
     {
       "id": "2025-06-13-dunkirk",
@@ -201,7 +214,8 @@
       "title_en": "Dunkirk",
       "year": 2017,
       "rating": 6.5,
-      "note": "疲惫的战争"
+      "note": "疲惫的战争",
+      "added_at": "2026-10-24T22:46:37+08:00"
     },
     {
       "id": "2025-05-14-prison-break",
@@ -214,7 +228,8 @@
       "title_en": "Prison Break",
       "year": 2005,
       "rating": 8,
-      "note": "纯粹的越狱"
+      "note": "纯粹的越狱",
+      "added_at": "2026-10-24T23:12:50+08:00"
     },
     {
       "id": "2025-04-03-heidi",
@@ -227,7 +242,8 @@
       "title_en": "Heidi",
       "year": 2015,
       "rating": 9,
-      "note": "生命的单纯和美好"
+      "note": "生命的单纯和美好",
+      "added_at": "2026-10-24T22:48:47+08:00"
     },
     {
       "id": "2025-03-30-three-billboards-outside-ebbing-missouri",
@@ -240,7 +256,8 @@
       "title_en": "Three Billboards Outside Ebbing, Missouri",
       "year": 2017,
       "rating": 7,
-      "note": "生活为每个人都留下了疤痕"
+      "note": "生活为每个人都留下了疤痕",
+      "added_at": "2026-10-24T22:52:37+08:00"
     },
     {
       "id": "2024-12-12-manchester-by-the-sea",
@@ -253,7 +270,8 @@
       "title_en": "Manchester by the Sea",
       "year": 2016,
       "rating": 9,
-      "note": "遗憾大约占了真实人生的一半长度"
+      "note": "遗憾大约占了真实人生的一半长度",
+      "added_at": "2026-10-24T23:17:32+08:00"
     },
     {
       "id": "2024-12-05-item",
@@ -266,7 +284,8 @@
       "title_en": "超時空の大決戦",
       "year": 1999,
       "rating": 7,
-      "note": "可惜长大了二十岁"
+      "note": "可惜长大了二十岁",
+      "added_at": "2026-10-25T09:46:42+08:00"
     },
     {
       "id": "2024-11-27-cyberpunk-edgerunners",
@@ -279,7 +298,8 @@
       "title_en": "Cyberpunk: Edgerunners",
       "year": 2022,
       "rating": 8.5,
-      "note": "边缘行者"
+      "note": "边缘行者",
+      "added_at": "2026-10-24T23:21:38+08:00"
     },
     {
       "id": "2024-11-26-item",
@@ -292,7 +312,8 @@
       "title_en": "風の谷のナウシカ",
       "year": 1992,
       "rating": 7,
-      "note": "娜乌西卡"
+      "note": "娜乌西卡",
+      "added_at": "2026-10-24T23:19:41+08:00"
     },
     {
       "id": "2024-11-23-arcane",
@@ -305,7 +326,8 @@
       "title_en": "Arcane",
       "year": 2021,
       "rating": 8.5,
-      "note": "你所讨厌的人或许正是自己"
+      "note": "你所讨厌的人或许正是自己",
+      "added_at": "2026-10-24T23:23:27+08:00"
     },
     {
       "id": "2024-11-17-item",
@@ -318,7 +340,8 @@
       "title_en": "耳をすませば",
       "year": 1995,
       "rating": 8,
-      "note": "Country roads take me home"
+      "note": "Country roads take me home",
+      "added_at": "2026-10-24T23:24:59+08:00"
     },
     {
       "id": "2024-11-09-item",
@@ -331,7 +354,8 @@
       "title_en": "すずめの戸締まり",
       "year": 2022,
       "rating": 6.5,
-      "note": "旅途和废墟"
+      "note": "旅途和废墟",
+      "added_at": "2026-10-24T23:34:14+08:00"
     },
     {
       "id": "2024-03-25-the-pig-the-snake-and-the-pigeon",
@@ -344,7 +368,8 @@
       "title_en": "The Pig, the Snake, and the Pigeon",
       "year": 2023,
       "rating": 9,
-      "note": "他只是做了一件正确的事"
+      "note": "他只是做了一件正确的事",
+      "added_at": "2026-10-24T23:36:50+08:00"
     },
     {
       "id": "2024-03-11-oppenheimer",
@@ -357,7 +382,8 @@
       "title_en": "Oppenheimer",
       "year": 2023,
       "rating": 8,
-      "note": "我正变成死亡，世界的毁灭者"
+      "note": "我正变成死亡，世界的毁灭者",
+      "added_at": "2026-10-24T23:38:18+08:00"
     },
     {
       "id": "2023-12-27-item",
@@ -370,7 +396,8 @@
       "title_en": "ヴァイオレット・エヴァーガーデン",
       "year": 2020,
       "rating": 6.5,
-      "note": "紫罗兰的花语"
+      "note": "紫罗兰的花语",
+      "added_at": "2026-10-24T23:39:54+08:00"
     },
     {
       "id": "2023-12-24-chang-an",
@@ -383,7 +410,8 @@
       "title_en": "Chang An",
       "year": 2023,
       "rating": 7.5,
-      "note": "每个人都回不到长安"
+      "note": "每个人都回不到长安",
+      "added_at": "2026-10-25T09:22:05+08:00"
     },
     {
       "id": "2023-10-26-spider-man-across-the-spider-verse",
@@ -396,7 +424,8 @@
       "title_en": "Spider-Man: Across the Spider-Verse",
       "year": 2023,
       "rating": 7.5,
-      "note": "爽"
+      "note": "爽",
+      "added_at": "2026-10-25T09:25:21+08:00"
     },
     {
       "id": "2023-10-26-item",
@@ -409,7 +438,8 @@
       "title_en": "ノーゲーム・ノーライフ",
       "year": 2014,
       "rating": 5,
-      "note": "莫名其妙"
+      "note": "莫名其妙",
+      "added_at": "2026-10-25T09:26:55+08:00"
     },
     {
       "id": "2022-08-09-item",
@@ -422,7 +452,8 @@
       "title_en": "新世紀エヴァンゲリオン",
       "year": 1995,
       "rating": 8.5,
-      "note": "在世界的中心呼唤爱的野兽"
+      "note": "在世界的中心呼唤爱的野兽",
+      "added_at": "2026-10-25T09:29:09+08:00"
     },
     {
       "id": "2022-08-01-item",
@@ -435,7 +466,8 @@
       "title_en": "鬼滅の刃 遊郭編",
       "year": 2021,
       "rating": 7.5,
-      "note": "从此开始，华丽至极地上吧"
+      "note": "从此开始，华丽至极地上吧",
+      "added_at": "2026-10-25T10:07:01+08:00"
     },
     {
       "id": "2022-07-31-the-grand-mansion-gate",
@@ -448,7 +480,8 @@
       "title_en": "The Grand Mansion Gate",
       "year": 2001,
       "rating": 8,
-      "note": "尽人力，听天命"
+      "note": "尽人力，听天命",
+      "added_at": "2026-10-25T09:44:16+08:00"
     },
     {
       "id": "2022-05-04-transformers-prime",
@@ -461,7 +494,8 @@
       "title_en": "Transformers Prime",
       "year": 2010,
       "rating": 9,
-      "note": "永远的变形金刚"
+      "note": "永远的变形金刚",
+      "added_at": "2026-10-25T10:03:05+08:00"
     },
     {
       "id": "2022-04-09-little-women",
@@ -474,7 +508,8 @@
       "title_en": "Little Women",
       "year": 2019,
       "rating": 8,
-      "note": "Imagined heroines"
+      "note": "Imagined heroines",
+      "added_at": "2026-10-25T10:09:43+08:00"
     },
     {
       "id": "2022-03-12-item",
@@ -487,7 +522,8 @@
       "title_en": "オッドタクシー",
       "year": 2021,
       "rating": 8.5,
-      "note": "Odd Life"
+      "note": "Odd Life",
+      "added_at": "2026-10-25T10:13:31+08:00"
     },
     {
       "id": "2022-02-18-empresses-in-the-palace",
@@ -500,20 +536,8 @@
       "title_en": "Empresses in the Palace",
       "year": 2011,
       "rating": 8,
-      "note": "长相思，长相守"
-    },
-    {
-      "id": "2022-02-05-harry-potter-and-the-sorcerer-s-stone",
-      "title": "哈利·波特与魔法石",
-      "kind": "movie",
-      "watched_at": "2022-02-05",
-      "poster": "img/watch/harry-potter-and-the-sorcerer-s-stone-70ce4e93.webp",
-      "poster_w": 640,
-      "poster_h": 945,
-      "title_en": "Harry Potter and the Sorcerer's Stone",
-      "year": 2001,
-      "rating": 8,
-      "note": "打开魔法之门"
+      "note": "长相思，长相守",
+      "added_at": "2026-10-25T10:15:25+08:00"
     },
     {
       "id": "2022-02-05-harry-potter-and-the-chamber-of-secrets",
@@ -526,7 +550,22 @@
       "title_en": "Harry Potter and the Chamber of Secrets",
       "year": 2002,
       "rating": 7.5,
-      "note": "选择决定我是谁"
+      "note": "选择决定我是谁",
+      "added_at": "2026-10-25T10:18:21+08:00"
+    },
+    {
+      "id": "2022-02-05-harry-potter-and-the-sorcerer-s-stone",
+      "title": "哈利·波特与魔法石",
+      "kind": "movie",
+      "watched_at": "2022-02-05",
+      "poster": "img/watch/harry-potter-and-the-sorcerer-s-stone-70ce4e93.webp",
+      "poster_w": 640,
+      "poster_h": 945,
+      "title_en": "Harry Potter and the Sorcerer's Stone",
+      "year": 2001,
+      "rating": 8,
+      "note": "打开魔法之门",
+      "added_at": "2026-10-25T10:19:45+08:00"
     },
     {
       "id": "2022-02-04-item",
@@ -539,7 +578,8 @@
       "title_en": "白い巨塔",
       "year": 2003,
       "rating": 9.5,
-      "note": "里見、僕に不安がないよただ、ただ、無念だ"
+      "note": "里見、僕に不安がないよただ、ただ、無念だ",
+      "added_at": "2026-10-25T11:02:28+08:00"
     },
     {
       "id": "2022-01-27-re",
@@ -552,7 +592,8 @@
       "title_en": "Re:ゼロから始める異世界生活",
       "year": 2016,
       "rating": 7,
-      "note": "异世界"
+      "note": "异世界",
+      "added_at": "2026-10-25T11:05:39+08:00"
     },
     {
       "id": "2021-09-15-item",
@@ -565,7 +606,8 @@
       "title_en": "サクラダリセット",
       "year": 2017,
       "rating": 9,
-      "note": "正确、自我与爱"
+      "note": "正确、自我与爱",
+      "added_at": "2026-10-25T11:07:42+08:00"
     },
     {
       "id": "2021-08-02-love-letter",
@@ -578,7 +620,8 @@
       "title_en": "Love Letter",
       "year": 1995,
       "rating": 9.9,
-      "note": "然而不凑巧，我喜欢的围裙，上下没有一个兜。"
+      "note": "然而不凑巧，我喜欢的围裙，上下没有一个兜。",
+      "added_at": "2026-10-25T11:10:47+08:00"
     },
     {
       "id": "2021-08-02-item",
@@ -591,7 +634,8 @@
       "title_en": "ヴィンランド・サガ",
       "year": 2019,
       "rating": 7,
-      "note": "找寻遗世独立的自我"
+      "note": "找寻遗世独立的自我",
+      "added_at": "2026-10-25T11:12:19+08:00"
     },
     {
       "id": "2021-07-29-item",
@@ -604,7 +648,8 @@
       "title_en": "魔王城でおやすみ",
       "year": 2020,
       "rating": 7.5,
-      "note": "晚安"
+      "note": "晚安",
+      "added_at": "2026-10-25T11:14:04+08:00"
     },
     {
       "id": "2021-07-25-item",
@@ -617,7 +662,8 @@
       "title_en": "鬼滅の刃 無限列車編",
       "year": 2020,
       "rating": 8.5,
-      "note": "炼狱杏寿郎"
+      "note": "炼狱杏寿郎",
+      "added_at": "2026-10-25T11:54:54+08:00"
     },
     {
       "id": "2021-07-19-loki",
@@ -630,7 +676,8 @@
       "title_en": "Loki",
       "year": 2021,
       "rating": 6.5,
-      "note": "Loki"
+      "note": "Loki",
+      "added_at": "2026-10-25T11:56:11+08:00"
     },
     {
       "id": "2021-07-16-item",
@@ -643,7 +690,8 @@
       "title_en": "どろろ",
       "year": 2019,
       "rating": 7.5,
-      "note": "どろろ"
+      "note": "どろろ",
+      "added_at": "2026-10-25T11:57:45+08:00"
     },
     {
       "id": "2021-06-26-item",
@@ -656,7 +704,8 @@
       "title_en": "トニカクカワイイ",
       "year": 2020,
       "rating": 8,
-      "note": "あとどれくらいの距離を\n月へ歩いたら"
+      "note": "あとどれくらいの距離を\n月へ歩いたら",
+      "added_at": "2026-10-25T12:00:51+08:00"
     },
     {
       "id": "2021-06-20-brotherhood-of-blades",
@@ -669,7 +718,8 @@
       "title_en": "Brotherhood of Blades",
       "year": 2014,
       "rating": 7.5,
-      "note": "每个人都有宿命"
+      "note": "每个人都有宿命",
+      "added_at": "2026-10-25T12:02:24+08:00"
     },
     {
       "id": "2021-06-07-the-age-of-awakening",
@@ -682,20 +732,8 @@
       "title_en": "The Age of Awakening",
       "year": 2021,
       "rating": 8,
-      "note": "天若有情天亦老，人间正道是沧桑"
-    },
-    {
-      "id": "2021-04-03-item",
-      "title": "咒术回战",
-      "kind": "series",
-      "watched_at": "2021-04-03",
-      "poster": "img/watch/item-cf4f8a1b.webp",
-      "poster_w": 640,
-      "poster_h": 906,
-      "title_en": "呪術廻戦",
-      "year": 2020,
-      "rating": 8,
-      "note": "你要在众人的簇拥下死去"
+      "note": "天若有情天亦老，人间正道是沧桑",
+      "added_at": "2026-10-25T12:08:59+08:00"
     },
     {
       "id": "2021-04-03-black",
@@ -708,7 +746,22 @@
       "title_en": "はたらく細胞BLACK",
       "year": 2021,
       "rating": 7.5,
-      "note": "健康生活起来吧"
+      "note": "健康生活起来吧",
+      "added_at": "2026-10-25T12:05:36+08:00"
+    },
+    {
+      "id": "2021-04-03-item",
+      "title": "咒术回战",
+      "kind": "series",
+      "watched_at": "2021-04-03",
+      "poster": "img/watch/item-cf4f8a1b.webp",
+      "poster_w": 640,
+      "poster_h": 906,
+      "title_en": "呪術廻戦",
+      "year": 2020,
+      "rating": 8,
+      "note": "你要在众人的簇拥下死去",
+      "added_at": "2026-10-25T12:11:38+08:00"
     },
     {
       "id": "2021-03-21-item",
@@ -721,7 +774,22 @@
       "title_en": "たまこラブストーリー",
       "year": 2014,
       "rating": 8,
-      "note": "最喜欢了饼藏了！请讲！どうぞ"
+      "note": "最喜欢了饼藏了！请讲！どうぞ",
+      "added_at": "2026-10-25T12:13:24+08:00"
+    },
+    {
+      "id": "2021-03-21-item-2",
+      "title": "玉子市场",
+      "kind": "series",
+      "watched_at": "2021-03-21",
+      "poster": "img/watch/item-5e1496bd.webp",
+      "poster_w": 602,
+      "poster_h": 867,
+      "title_en": "たまこまーけっと",
+      "year": 2013,
+      "rating": 8.5,
+      "note": "最喜欢了饼藏了！请讲！どうぞ",
+      "added_at": "2026-10-25T12:17:22+08:00"
     },
     {
       "id": "2021-03-07-2",
@@ -734,7 +802,8 @@
       "title_en": "はたらく細胞!!",
       "year": 2021,
       "rating": 7.5,
-      "note": "每一个细胞都很重要"
+      "note": "每一个细胞都很重要",
+      "added_at": "2026-10-25T12:29:38+08:00"
     },
     {
       "id": "2021-01-25-item",
@@ -747,7 +816,8 @@
       "title_en": "魔女の旅々",
       "year": 2020,
       "rating": 8,
-      "note": "“有缘再见吧 约定好了哟”"
+      "note": "“有缘再见吧 约定好了哟”",
+      "added_at": "2026-10-25T13:27:33+08:00"
     },
     {
       "id": "2021-01-19-item",
@@ -760,7 +830,8 @@
       "title_en": "小林さんちのメイドラゴン",
       "year": 2017,
       "rating": 7.5,
-      "note": "心有归处便是家"
+      "note": "心有归处便是家",
+      "added_at": "2026-10-25T13:54:46+08:00"
     },
     {
       "id": "2021-01-17-item",
@@ -773,7 +844,8 @@
       "title_en": "半沢直樹",
       "year": 2013,
       "rating": 8.5,
-      "note": "以牙还牙"
+      "note": "以牙还牙",
+      "added_at": "2026-10-25T13:30:34+08:00"
     },
     {
       "id": "2020-12-30-leap",
@@ -786,7 +858,8 @@
       "title_en": "Leap",
       "year": 2020,
       "rating": 6,
-      "note": "Leap"
+      "note": "Leap",
+      "added_at": "2026-10-25T13:31:57+08:00"
     },
     {
       "id": "2020-12-25-item",
@@ -799,7 +872,22 @@
       "title_en": "終末なにしてますか？忙しいですか？救ってもらっていいですか？",
       "year": 2017,
       "rating": 7.5,
-      "note": "末日时在做什么？有没有空？可以来拯救吗？"
+      "note": "末日时在做什么？有没有空？可以来拯救吗？",
+      "added_at": "2026-10-25T13:33:26+08:00"
+    },
+    {
+      "id": "2020-12-18-item-2",
+      "title": "境界的彼方",
+      "kind": "series",
+      "watched_at": "2020-12-18",
+      "poster": "img/watch/item-e0e18532.webp",
+      "poster_w": 640,
+      "poster_h": 897,
+      "title_en": "境界の彼方",
+      "year": 2013,
+      "rating": 7.5,
+      "note": "没有未来的未来不是我想要的未来",
+      "added_at": "2026-10-25T13:35:13+08:00"
     },
     {
       "id": "2020-12-18-item",
@@ -812,7 +900,8 @@
       "title_en": "坂本ですが？",
       "year": 2016,
       "rating": 7.5,
-      "note": "？"
+      "note": "？",
+      "added_at": "2026-10-25T13:44:24+08:00"
     },
     {
       "id": "2020-12-12-item",
@@ -825,7 +914,8 @@
       "title_en": "アンナチュラル",
       "year": 2018,
       "rating": 9,
-      "note": "时至今日，你仍是我的光"
+      "note": "时至今日，你仍是我的光",
+      "added_at": "2026-10-25T13:45:55+08:00"
     },
     {
       "id": "2020-12-06-item",
@@ -838,7 +928,8 @@
       "title_en": "けいおん!",
       "year": 2009,
       "rating": 9.9,
-      "note": "K-ON!!!"
+      "note": "K-ON!!!",
+      "added_at": "2026-10-25T13:48:09+08:00"
     },
     {
       "id": "2020-12-02-little-forest",
@@ -851,7 +942,8 @@
       "title_en": "Little Forest",
       "year": 2015,
       "rating": 9.5,
-      "note": "我回来了，欢迎回来"
+      "note": "我回来了，欢迎回来",
+      "added_at": "2026-10-25T14:17:01+08:00"
     },
     {
       "id": "2020-12-01-the-truman-show",
@@ -864,7 +956,8 @@
       "title_en": "The Truman Show",
       "year": 1998,
       "rating": 8,
-      "note": "如果再也见不到你，祝你早安，午安，晚安"
+      "note": "如果再也见不到你，祝你早安，午安，晚安",
+      "added_at": "2026-10-25T14:18:12+08:00"
     },
     {
       "id": "2020-11-22-white-cat-legend",
@@ -877,7 +970,8 @@
       "title_en": "White Cat Legend",
       "year": 2020,
       "rating": 8,
-      "note": "少卿猫首人形"
+      "note": "少卿猫首人形",
+      "added_at": "2026-10-25T14:42:29+08:00"
     },
     {
       "id": "2020-11-20-legend-of-deification",
@@ -890,7 +984,8 @@
       "title_en": "Legend of Deification",
       "year": 2020,
       "rating": 6.5,
-      "note": "只问鬼神，不见苍生"
+      "note": "只问鬼神，不见苍生",
+      "added_at": "2026-10-25T14:56:17+08:00"
     },
     {
       "id": "2020-08-31-the-last-emperor",
@@ -903,7 +998,8 @@
       "title_en": "The Last Emperor",
       "year": 1987,
       "rating": 8,
-      "note": "一生都在告别的男人"
+      "note": "一生都在告别的男人",
+      "added_at": "2026-10-25T14:38:27+08:00"
     },
     {
       "id": "2020-08-18-fog-hill-of-five-elements",
@@ -916,7 +1012,8 @@
       "title_en": "Fog Hill of Five Elements",
       "year": 2020,
       "rating": 8.5,
-      "note": "雾山五行"
+      "note": "雾山五行",
+      "added_at": "2026-10-25T14:36:15+08:00"
     },
     {
       "id": "2020-07-22-knives-out",
@@ -929,7 +1026,8 @@
       "title_en": "Knives Out",
       "year": 2019,
       "rating": 8,
-      "note": "Knives Out"
+      "note": "Knives Out",
+      "added_at": "2026-10-25T14:00:05+08:00"
     },
     {
       "id": "2020-07-19-item",
@@ -942,7 +1040,8 @@
       "title_en": "ようこそ実力至上主義の教室へ",
       "year": 2017,
       "rating": 7.5,
-      "note": "无法成为中心的我们"
+      "note": "无法成为中心的我们",
+      "added_at": "2026-10-25T14:32:47+08:00"
     },
     {
       "id": "2020-07-17-item",
@@ -955,7 +1054,8 @@
       "title_en": "彼女と彼女の猫",
       "year": 1999,
       "rating": 8,
-      "note": "猫和遥远星星的声音"
+      "note": "猫和遥远星星的声音",
+      "added_at": "2026-10-25T14:27:13+08:00"
     },
     {
       "id": "2020-07-17-300",
@@ -968,7 +1068,22 @@
       "title_en": "300",
       "year": 2006,
       "rating": 7,
-      "note": "斯巴达"
+      "note": "斯巴达",
+      "added_at": "2026-10-25T14:30:07+08:00"
+    },
+    {
+      "id": "2020-07-16-item-2",
+      "title": "工作细胞",
+      "kind": "series",
+      "watched_at": "2020-07-16",
+      "poster": "img/watch/item-4bb7a3f7.webp",
+      "poster_w": 640,
+      "poster_h": 959,
+      "title_en": "はたらく細胞",
+      "year": 2018,
+      "rating": 8,
+      "note": "最后，记得保持健康哦",
+      "added_at": "2026-10-25T12:32:40+08:00"
     },
     {
       "id": "2020-07-16-item",
@@ -981,7 +1096,8 @@
       "title_en": "中二病でも恋がしたい！",
       "year": 2010,
       "rating": 9,
-      "note": "人生就是中二病"
+      "note": "人生就是中二病",
+      "added_at": "2026-10-25T14:26:28+08:00"
     },
     {
       "id": "2020-07-13-let-the-bullets-fly",
@@ -994,7 +1110,8 @@
       "title_en": "Let The Bullets Fly",
       "year": 2010,
       "rating": 8,
-      "note": "让子弹飞"
+      "note": "让子弹飞",
+      "added_at": "2026-10-25T14:25:10+08:00"
     },
     {
       "id": "2020-07-04-item",
@@ -1007,7 +1124,8 @@
       "title_en": "かぐや様は告らせたい",
       "year": 2019,
       "rating": 8.5,
-      "note": "恋爱真是一件羞耻的事情"
+      "note": "恋爱真是一件羞耻的事情",
+      "added_at": "2026-10-25T14:23:40+08:00"
     },
     {
       "id": "2020-06-28-item",
@@ -1020,7 +1138,8 @@
       "title_en": "徒然チルドレン",
       "year": 2017,
       "rating": 8,
-      "note": "喜欢从来就是小心翼翼"
+      "note": "喜欢从来就是小心翼翼",
+      "added_at": "2026-10-25T14:22:16+08:00"
     },
     {
       "id": "2020-06-24-item",
@@ -1033,7 +1152,8 @@
       "title_en": "青春ブタ野郎はバニーガール先輩の夢を見ない",
       "year": 2018,
       "rating": 9.5,
-      "note": "人活着就是为了樱岛麻衣"
+      "note": "人活着就是为了樱岛麻衣",
+      "added_at": "2026-10-25T14:20:56+08:00"
     },
     {
       "id": "2020-05-02-item",
@@ -1046,7 +1166,8 @@
       "title_en": "ヴァイオレット・エヴァーガーデン 外伝 - 永遠と自動手記人形",
       "year": 2020,
       "rating": 8,
-      "note": "花无凋零之日，意无传递之时，爱情亘古不变，紫罗兰永世长存"
+      "note": "花无凋零之日，意无传递之时，爱情亘古不变，紫罗兰永世长存",
+      "added_at": "2026-10-25T13:58:56+08:00"
     },
     {
       "id": "2020-04-30-the-great-gatsby",
@@ -1059,7 +1180,8 @@
       "title_en": "The Great Gatsby",
       "year": 2013,
       "rating": 7.5,
-      "note": "盖茨比和咆哮的二十年代"
+      "note": "盖茨比和咆哮的二十年代",
+      "added_at": "2026-10-25T13:56:43+08:00"
     },
     {
       "id": "2020-04-21-item",
@@ -1072,7 +1194,8 @@
       "title_en": "蛍火の杜へ",
       "year": 2011,
       "rating": 8,
-      "note": "其实我一直在等那个有你的夏天"
+      "note": "其实我一直在等那个有你的夏天",
+      "added_at": "2026-10-25T13:53:38+08:00"
     },
     {
       "id": "2020-02-12-item",
@@ -1085,7 +1208,8 @@
       "title_en": "氷菓",
       "year": 2012,
       "rating": 10,
-      "note": "一口冰菓，一个夏天"
+      "note": "一口冰菓，一个夏天",
+      "added_at": "2026-10-25T13:49:43+08:00"
     },
     {
       "id": "2019-12-13-the-pursuit-of-happyness",
@@ -1098,7 +1222,8 @@
       "title_en": "The Pursuit of Happyness",
       "year": 2006,
       "rating": 8,
-      "note": "总会找到一个上帝，端坐天堂"
+      "note": "总会找到一个上帝，端坐天堂",
+      "added_at": "2026-10-25T13:51:13+08:00"
     }
   ]
 }
