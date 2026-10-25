@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:07:00+08:00",
+  "updated_at": "2026-10-25T16:07:10+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -447,13 +447,13 @@
       "kind": "series",
       "watched_at": "2022-08-09",
       "poster": "img/watch/item-53246496.webp",
+      "added_at": "2026-10-25T09:29:09+08:00",
       "poster_w": 428,
       "poster_h": 606,
       "title_en": "新世紀エヴァンゲリオン",
       "year": 1995,
-      "rating": 8.5,
-      "note": "在世界的中心呼唤爱的野兽",
-      "added_at": "2026-10-25T09:29:09+08:00"
+      "rating": 8,
+      "note": "在世界的中心呼唤爱的野兽"
     },
     {
       "id": "2022-08-01-item",
