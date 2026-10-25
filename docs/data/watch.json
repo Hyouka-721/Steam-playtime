@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T14:25:09+08:00",
+  "updated_at": "2026-10-25T14:26:27+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -881,16 +881,16 @@
     },
     {
       "id": "2020-07-16-item",
-      "title": "工作细胞",
-      "kind": "series",
+      "title": "中二病也要谈恋爱！",
+      "kind": "movie",
       "watched_at": "2020-07-16",
-      "poster": "img/watch/item-5480e3e4.webp",
+      "poster": "img/watch/item-a4b3b480.webp",
       "poster_w": 640,
-      "poster_h": 902,
-      "title_en": "はたらく細胞",
-      "year": 2018,
-      "rating": 8,
-      "note": "最后，记得保持健康哦"
+      "poster_h": 960,
+      "title_en": "中二病でも恋がしたい！",
+      "year": 2010,
+      "rating": 9,
+      "note": "人生就是中二病"
     },
     {
       "id": "2020-07-13-let-the-bullets-fly",
