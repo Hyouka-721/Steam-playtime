@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T11:02:27+08:00",
+  "updated_at": "2026-10-25T11:05:39+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -540,6 +540,19 @@
       "year": 2003,
       "rating": 9.5,
       "note": "里見、僕に不安がないよただ、ただ、無念だ"
+    },
+    {
+      "id": "2022-01-27-re",
+      "title": "Re：从零开始的异世界生活",
+      "kind": "series",
+      "watched_at": "2022-01-27",
+      "poster": "img/watch/re-0185cb4e.webp",
+      "poster_w": 640,
+      "poster_h": 910,
+      "title_en": "Re:ゼロから始める異世界生活",
+      "year": 2016,
+      "rating": 7,
+      "note": "异世界"
     }
   ]
 }
