@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T17:17:12+08:00",
+  "updated_at": "2026-10-25T18:03:02+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -50,6 +50,20 @@
       "year": 2025,
       "rating": 7.5,
       "note": "赛道即归途"
+    },
+    {
+      "id": "2026-09-06-the-legend-of-hei-2",
+      "title": "罗小黑战记2",
+      "kind": "movie",
+      "watched_at": "2026-09-06",
+      "added_at": "2026-10-25T18:03:02+08:00",
+      "poster": "img/watch/the-legend-of-hei-2-a9974493.webp",
+      "poster_w": 640,
+      "poster_h": 916,
+      "title_en": "The Legend of Hei 2",
+      "year": 2025,
+      "rating": 8.5,
+      "note": "呦呦鹿鸣，食野之苹"
     },
     {
       "id": "2026-09-05-robot-dreams",
