@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T11:10:47+08:00",
+  "updated_at": "2026-10-25T11:12:19+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -579,6 +579,19 @@
       "year": 1995,
       "rating": 9.9,
       "note": "然而不凑巧，我喜欢的围裙，上下没有一个兜。"
+    },
+    {
+      "id": "2021-08-02-item",
+      "title": "冰海战记",
+      "kind": "movie",
+      "watched_at": "2021-08-02",
+      "poster": "img/watch/item-bb238709.webp",
+      "poster_w": 640,
+      "poster_h": 903,
+      "title_en": "ヴィンランド・サガ",
+      "year": 2019,
+      "rating": 7,
+      "note": "找寻遗世独立的自我"
     }
   ]
 }
