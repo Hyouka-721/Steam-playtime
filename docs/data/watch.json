@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:08:36+08:00",
+  "updated_at": "2026-10-25T16:08:50+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -71,17 +71,17 @@
       "kind": "movie",
       "watched_at": "2026-08-15",
       "poster": "img/watch/nobody-8cfc1289.webp",
+      "added_at": "2026-10-24T22:35:12+08:00",
       "poster_w": 640,
       "poster_h": 1066,
       "title_en": "Nobody",
       "year": 2025,
-      "rating": 8,
+      "rating": 7.5,
       "tags": [
         "动画",
         "奇幻"
       ],
-      "note": "未披锦襕袈裟者，亦是菩提树下人",
-      "added_at": "2026-10-24T22:35:12+08:00"
+      "note": "未披锦襕袈裟者，亦是菩提树下人"
     },
     {
       "id": "2026-05-19-the-million-pound-note",
