@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:04:26+08:00",
+  "updated_at": "2026-10-25T16:04:48+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -965,13 +965,13 @@
       "kind": "series",
       "watched_at": "2020-11-22",
       "poster": "img/watch/white-cat-legend-0b95de01.webp",
+      "added_at": "2026-10-25T14:42:29+08:00",
       "poster_w": 640,
       "poster_h": 960,
       "title_en": "White Cat Legend",
       "year": 2020,
-      "rating": 8,
-      "note": "少卿猫首人形",
-      "added_at": "2026-10-25T14:42:29+08:00"
+      "rating": 7.5,
+      "note": "少卿猫首人形"
     },
     {
       "id": "2020-11-20-legend-of-deification",
