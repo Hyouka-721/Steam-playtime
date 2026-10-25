@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:46:33+08:00",
+  "updated_at": "2026-10-25T17:16:22+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -237,13 +237,13 @@
       "kind": "movie",
       "watched_at": "2025-04-03",
       "poster": "img/watch/heidi-48aa0042.webp",
+      "added_at": "2026-10-24T22:48:47+08:00",
       "poster_w": 640,
       "poster_h": 897,
       "title_en": "Heidi",
       "year": 2015,
-      "rating": 9,
-      "note": "生命的单纯和美好",
-      "added_at": "2026-10-24T22:48:47+08:00"
+      "rating": 8.5,
+      "note": "生命的单纯和美好"
     },
     {
       "id": "2025-03-30-three-billboards-outside-ebbing-missouri",
