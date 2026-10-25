@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:14:10+08:00",
+  "updated_at": "2026-10-25T16:17:19+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1392,6 +1392,20 @@
       "year": 2006,
       "rating": 7.5,
       "note": "总会找到一个上帝，端坐天堂"
+    },
+    {
+      "id": "2019-12-07-the-shawshank-redemption",
+      "title": "肖申克的救赎",
+      "kind": "movie",
+      "watched_at": "2019-12-07",
+      "added_at": "2026-10-25T16:17:19+08:00",
+      "poster": "img/watch/the-shawshank-redemption-ab6e9e1f.webp",
+      "poster_w": 640,
+      "poster_h": 948,
+      "title_en": "The Shawshank Redemption",
+      "year": 1994,
+      "rating": 9,
+      "note": "恐惧让你沦为囚犯，希望让你重获自由"
     },
     {
       "id": "2019-08-02-forrest-gump",
