@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T00:27:17+08:00",
+  "updated_at": "2026-10-25T09:22:04+08:00",
   "items": [
     {
       "id": "2026-10-24-swords-into-plowshares",
@@ -358,6 +358,19 @@
       "year": 2020,
       "rating": 6.5,
       "note": "紫罗兰的花语"
+    },
+    {
+      "id": "2023-12-24-chang-an",
+      "title": "长安三万里",
+      "kind": "movie",
+      "watched_at": "2023-12-24",
+      "poster": "img/watch/chang-an-664d753a.webp",
+      "poster_w": 640,
+      "poster_h": 1022,
+      "title_en": "Chang An",
+      "year": 2023,
+      "rating": 7.5,
+      "note": "每个人都回不到长安"
     }
   ]
 }
