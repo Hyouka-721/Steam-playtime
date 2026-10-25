@@ -43,6 +43,13 @@ data/
   manual/              手动补录（见该目录 README）
   overrides/           中文名映射
 docs/                  GitHub Pages 发布源（index.html / app.js / style.css / data/）
+  watch.html/.css/.js  观影记录页（完全独立，自带影院黑主题，不加载 index 的资源）
+  data/watch.json      观影数据唯一来源；img/watch/*.webp 电影海报
+tests/                 回归测试套件（第 70 轮起收编，见 tests/README.md）
+  verify/              19 个本地回归脚本（verify6 / verify47~70.mjs）
+  online/              上线后对 Pages 的内容指纹复验
+  tools/               rebase 时 watch.json 冲突合并器
+CONTINUE.md            项目交接提示词（可直接复制到新对话无缝续做）
 ```
 
 ---
