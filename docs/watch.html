@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Watch List</title>
+<title>Watch List</title>
 <!-- 图标直接复用站标，省一个新增素材请求 -->
 <link rel="icon" type="image/webp" href="img/minion-0ef9a202.webp">
 <!-- 与游戏站同一套本地花体字，保持品牌一致；preload + font-display:block 消除 FOUT -->
@@ -22,7 +22,7 @@
        第 66 轮：去掉 title 属性 —— 鼠标悬停会弹原生「回到页面顶部」提示，按需求移除；
        无障碍语义仍在 aria-label 上，点击 / Enter / 空格的行为不变。 -->
   <h1 class="w-title" id="w-title" role="button" tabindex="0"
-      aria-label="回到页面顶部">My Watch List</h1>
+      aria-label="回到页面顶部">Watch List</h1>
   <!-- 史蒂夫：2026-10-24 第 56 轮从首页复制过来，**位置与尺寸与首页 .header-avatar 完全一致**
        （第三个 grid 单元、justify-self:end、132×132、≤480px 88×88、同一张素材、同一套 hover/active/focus 反馈）。
        首页上它切换浅色主题，这里它切换**网格视图 ⇄ 时间轴视图**；
