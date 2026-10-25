@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:08:02+08:00",
+  "updated_at": "2026-10-25T16:08:24+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -153,13 +153,13 @@
       "kind": "movie",
       "watched_at": "2026-04-07",
       "poster": "img/watch/item-684468df.webp",
+      "added_at": "2026-10-24T23:04:06+08:00",
       "poster_w": 640,
       "poster_h": 905,
       "title_en": "花束みたいな恋をした",
       "year": 2021,
-      "rating": 9,
-      "note": "爱情的底色，是成长命题",
-      "added_at": "2026-10-24T23:04:06+08:00"
+      "rating": 8.5,
+      "note": "爱情的底色，是成长命题"
     },
     {
       "id": "2026-04-05-the-secret-life-of-walter-mitty",
