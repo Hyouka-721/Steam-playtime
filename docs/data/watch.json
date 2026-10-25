@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T14:10:19+08:00",
+  "updated_at": "2026-10-25T14:17:00+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -839,6 +839,19 @@
       "year": 2009,
       "rating": 9.9,
       "note": "K-ON!!!"
+    },
+    {
+      "id": "2020-12-02-little-forest",
+      "title": "小森林",
+      "kind": "movie",
+      "watched_at": "2020-12-02",
+      "poster": "img/watch/little-forest-3d667be7.webp",
+      "poster_w": 640,
+      "poster_h": 908,
+      "title_en": "Little Forest",
+      "year": 2015,
+      "rating": 9.5,
+      "note": "我回来了，欢迎回来"
     },
     {
       "id": "2020-07-22-knives-out",
