@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T16:02:43+08:00",
+  "updated_at": "2026-10-25T16:02:51+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1343,13 +1343,13 @@
       "kind": "movie",
       "watched_at": "2020-04-21",
       "poster": "img/watch/item-83fb1b19.webp",
+      "added_at": "2026-10-25T13:53:38+08:00",
       "poster_w": 640,
       "poster_h": 904,
       "title_en": "蛍火の杜へ",
       "year": 2011,
-      "rating": 8,
-      "note": "其实我一直在等那个有你的夏天",
-      "added_at": "2026-10-25T13:53:38+08:00"
+      "rating": 7.5,
+      "note": "其实我一直在等那个有你的夏天"
     },
     {
       "id": "2020-02-12-item",
