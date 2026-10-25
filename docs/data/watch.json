@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T15:36:20+08:00",
+  "updated_at": "2026-10-25T15:37:51+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1000,6 +1000,20 @@
       "year": 2019,
       "rating": 7.5,
       "note": "Long live the king"
+    },
+    {
+      "id": "2020-11-10-tower-of-god",
+      "title": "神之塔",
+      "kind": "series",
+      "watched_at": "2020-11-10",
+      "added_at": "2026-10-25T15:37:51+08:00",
+      "poster": "img/watch/tower-of-god-45c0b168.webp",
+      "poster_w": 640,
+      "poster_h": 905,
+      "title_en": "Tower of God",
+      "year": 2020,
+      "rating": 6,
+      "note": "神之塔"
     },
     {
       "id": "2020-10-22-hexi-corridor",
