@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T09:26:55+08:00",
+  "updated_at": "2026-10-25T09:29:08+08:00",
   "items": [
     {
       "id": "2026-10-24-swords-into-plowshares",
@@ -397,6 +397,19 @@
       "year": 2014,
       "rating": 5,
       "note": "莫名其妙"
+    },
+    {
+      "id": "2022-08-09-item",
+      "title": "新世纪福音战士",
+      "kind": "series",
+      "watched_at": "2022-08-09",
+      "poster": "img/watch/item-53246496.webp",
+      "poster_w": 428,
+      "poster_h": 606,
+      "title_en": "新世紀エヴァンゲリオン",
+      "year": 1995,
+      "rating": 8.5,
+      "note": "在世界的中心呼唤爱的野兽"
     }
   ]
 }
