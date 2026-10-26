@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-26T18:25:38+08:00",
+  "updated_at": "2026-10-26T18:27:33+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1550,6 +1550,22 @@
       "year": 2011,
       "rating": 7.5,
       "note": "其实我一直在等那个有你的夏天"
+    },
+    {
+      "id": "2020-02-16-da-ming-wang-chao",
+      "title": "大明王朝1566",
+      "kind": "series",
+      "watched_at": "2020-02-16",
+      "added_at": "2026-10-26T18:27:33+08:00",
+      "poster": "img/watch/da-ming-wang-chao-41dea423.webp",
+      "poster_w": 640,
+      "poster_h": 855,
+      "poster_320": "img/watch/da-ming-wang-chao-41dea423-320.webp",
+      "poster_480": "img/watch/da-ming-wang-chao-41dea423-480.webp",
+      "title_en": "Da Ming Wang Chao",
+      "year": 2007,
+      "rating": 9.9,
+      "note": "在史册里，在人心里"
     },
     {
       "id": "2020-02-12-item",
