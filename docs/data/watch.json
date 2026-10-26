@@ -1,6 +1,22 @@
 {
-  "updated_at": "2026-10-26T18:33:40+08:00",
+  "updated_at": "2026-10-26T18:35:55+08:00",
   "items": [
+    {
+      "id": "2026-10-26-item",
+      "title": "烟花",
+      "kind": "movie",
+      "watched_at": "2026-10-26",
+      "added_at": "2026-10-26T18:35:55+08:00",
+      "poster": "img/watch/item-649cfb14.webp",
+      "poster_w": 640,
+      "poster_h": 906,
+      "poster_320": "img/watch/item-649cfb14-320.webp",
+      "poster_480": "img/watch/item-649cfb14-480.webp",
+      "title_en": "打ち上げ花火、下から見るか？横から見るか？",
+      "year": 2017,
+      "rating": 6.5,
+      "note": "升起的烟花，从下面看？还是从侧面看？"
+    },
     {
       "id": "2026-10-24-dead-to-rights",
       "title": "南京照相馆",
