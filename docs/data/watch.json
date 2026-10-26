@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-26T18:29:55+08:00",
+  "updated_at": "2026-10-26T18:32:03+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1678,6 +1678,22 @@
       "year": 2019,
       "rating": 6.5,
       "note": "The Bravest"
+    },
+    {
+      "id": "2019-10-22-the-legend-of-hei",
+      "title": "罗小黑战记",
+      "kind": "movie",
+      "watched_at": "2019-10-22",
+      "added_at": "2026-10-26T18:32:03+08:00",
+      "poster": "img/watch/the-legend-of-hei-e0857026.webp",
+      "poster_w": 640,
+      "poster_h": 1027,
+      "poster_320": "img/watch/the-legend-of-hei-e0857026-320.webp",
+      "poster_480": "img/watch/the-legend-of-hei-e0857026-480.webp",
+      "title_en": "The Legend of Hei",
+      "year": 2019,
+      "rating": 8.5,
+      "note": "相遇 分离 快乐 忧伤 心动 慌张 希望 绝望"
     },
     {
       "id": "2019-09-22-the-black-troop",
