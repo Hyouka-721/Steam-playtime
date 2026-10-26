@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-25T19:06:17+08:00",
+  "updated_at": "2026-10-26T18:25:38+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1646,6 +1646,22 @@
       "year": 2019,
       "rating": 8.5,
       "note": "Let it go~"
+    },
+    {
+      "id": "2019-11-10-the-bravest",
+      "title": "烈火英雄",
+      "kind": "movie",
+      "watched_at": "2019-11-10",
+      "added_at": "2026-10-26T18:25:38+08:00",
+      "poster": "img/watch/the-bravest-06da95b6.webp",
+      "poster_w": 640,
+      "poster_h": 896,
+      "poster_320": "img/watch/the-bravest-06da95b6-320.webp",
+      "poster_480": "img/watch/the-bravest-06da95b6-480.webp",
+      "title_en": "The Bravest",
+      "year": 2019,
+      "rating": 6.5,
+      "note": "The Bravest"
     },
     {
       "id": "2019-08-02-forrest-gump",
