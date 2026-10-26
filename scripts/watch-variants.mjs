@@ -47,6 +47,12 @@ for (const it of items) {
 console.log(`待生成 ${todo.length} 个变体（跳过已存在 ${skipped} 个${force ? '，--force 模式' : ''}）`);
 if (dry) { todo.forEach((t) => console.log('  [dry]', t.outRel)); process.exit(0); }
 
+/* ⚠️ 第 76 轮修 bug：只把「本次真的生成过」的字段写回 JSON。
+   旧实现按「条目有没有这个字段」逐条重插，在已经补过字段的文件上重跑
+   会把 198 个字段再插一遍 → 每个条目出现重复键（JSON 解析取最后一个，
+   站点不报错，但文件脏且 git diff 难看）。
+   现在用 generated 集合精确记录「主图文件名 + 宽」。 */
+const generated = new Set();
 for (const t of todo) {
   const meta = await sharp(t.baseAbs).metadata();
   if (!meta.width || meta.width <= t.w) {   // 只缩不放：原图不够宽就不生成
@@ -59,6 +65,7 @@ for (const t of todo) {
     .webp({ quality: 80, effort: 4 })
     .toFile(t.outAbs);
   t.it[t.key] = t.outRel;
+  generated.add(`${path.basename(t.baseAbs)}|${t.w}`);
   made++;
 }
 
@@ -66,29 +73,76 @@ for (const t of todo) {
 if (made > 0) {
   const lines = raw.split(/\r?\n/);
   const eol = raw.includes('\r\n') ? '\r\n' : '\n';
-  const out = [];
-  let curPoster = null, inserted = 0;
-  for (const line of lines) {
-    out.push(line);
-    let m = /^ {6}"poster": "(.+)",$/.exec(line);
-    if (m) { curPoster = m[1]; continue; }
-    m = /^ {6}"poster_h": (\d+),$/.exec(line);
-    if (m && curPoster) {
-      const it = items.find((x) => x.poster === curPoster);
-      if (it) {
-        for (const w of WIDTHS) {
-          const key = `poster_${w}`;
-          if (it[key]) { out.push(`      "${key}": "${it[key]}",`); inserted++; }
-        }
-      }
-      curPoster = null;
+  /* 第一遍：按条目块收集「原文已有的键」和 poster_h 的行号。
+     ⚠️ 必须先整体扫一遍：字段在块内的位置不固定（poster/poster_w/poster_h
+     之后可能还跟着 title_en 等），只靠「遇到 poster 行后往下跳过变体行」
+     这种位置式判断会漏 —— 第 76 轮实测 titanic 就因此插出 1 个重复键。 */
+  const blocks = [];
+  let curBlock = null;
+  lines.forEach((line, i) => {
+    if (/^ {4}\{/.test(line)) {
+      curBlock = { poster: null, keys: new Set(), hLine: -1 };
+      blocks.push(curBlock);
+      return;
     }
-  }
+    if (!curBlock) return;
+    if (/^ {4}\}/.test(line)) { curBlock = null; return; }
+    const mk = /^ {6}"([A-Za-z_0-9]+)":/.exec(line);
+    if (!mk) return;
+    curBlock.keys.add(mk[1]);
+    if (mk[1] === 'poster') {
+      const mv = /^ {6}"poster": "(.+)",?$/.exec(line);
+      if (mv) curBlock.poster = mv[1];
+    }
+    if (mk[1] === 'poster_h') curBlock.hLine = i;
+  });
+  const byHLine = new Map();
+  for (const b of blocks) if (b.hLine >= 0 && b.poster) byHLine.set(b.hLine, b);
+
+  /* 第二遍：在 poster_h 之后插入，三个条件必须同时满足才算「该插」
+     ① 本次真的生成过（generated）② 原文块里没有这个键（keys）③ 条目数据里有该字段 */
+  const out = [];
+  let inserted = 0;
+  lines.forEach((line, i) => {
+    out.push(line);
+    const b = byHLine.get(i);
+    if (!b) return;
+    const it = items.find((x) => x.poster === b.poster);
+    if (!it) return;
+    for (const w of WIDTHS) {
+      const key = `poster_${w}`;
+      if (!it[key]) continue;
+      if (b.keys.has(key)) continue;
+      if (!generated.has(`${path.basename(b.poster)}|${w}`)) continue;
+      out.push(`      "${key}": "${it[key]}",`);
+      inserted++;
+    }
+  });
   fs.writeFileSync(DATA, out.join(eol));
-  console.log(`JSON 已插入 ${inserted} 个字段`);
+  console.log(`JSON 已插入 ${inserted} 个字段（仅本次新生成的）`);
 }
 
 // ---- 校验 ----
+/* 重复键守卫：同一 item 块里不该出现两次同名键（第 76 轮踩过） */
+{
+  const txt = fs.readFileSync(DATA, 'utf8');
+  const seen = {};
+  let curId = '';
+  const dups = [];
+  for (const ln of txt.split(/\r?\n/)) {
+    let m = /^ {6}"id": "([^"]+)",?$/.exec(ln);
+    if (m) { curId = m[1]; seen[curId] = seen[curId] || new Set(); continue; }
+    m = /^ {6}"([^"]+)":/.exec(ln);
+    if (m && curId) {
+      if (seen[curId].has(m[1])) dups.push(`${curId}.${m[1]}`);
+      seen[curId].add(m[1]);
+    }
+  }
+  if (dups.length) {
+    console.error(`✗ JSON 出现重复键 ${dups.length} 个：${dups.slice(0, 5).join(', ')}`);
+    process.exit(1);
+  }
+}
 const d2 = JSON.parse(fs.readFileSync(DATA, 'utf8'));
 const its2 = Array.isArray(d2) ? d2 : d2.items;
 let n320 = 0, n480 = 0, bad = 0;
