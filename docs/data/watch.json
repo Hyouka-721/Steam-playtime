@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-26T18:27:33+08:00",
+  "updated_at": "2026-10-26T18:29:55+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1678,6 +1678,22 @@
       "year": 2019,
       "rating": 6.5,
       "note": "The Bravest"
+    },
+    {
+      "id": "2019-09-22-the-black-troop",
+      "title": "雄兵连2诸天降临",
+      "kind": "series",
+      "watched_at": "2019-09-22",
+      "added_at": "2026-10-26T18:29:55+08:00",
+      "poster": "img/watch/the-black-troop-497dce30.webp",
+      "poster_w": 500,
+      "poster_h": 889,
+      "poster_320": "img/watch/the-black-troop-497dce30-320.webp",
+      "poster_480": "img/watch/the-black-troop-497dce30-480.webp",
+      "title_en": "The Black Troop",
+      "year": 2019,
+      "rating": 7,
+      "note": "诸天降临"
     },
     {
       "id": "2019-08-02-forrest-gump",
