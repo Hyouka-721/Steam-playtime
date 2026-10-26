@@ -60,10 +60,15 @@ tests/
 | `verify75` | 图片加载性能（srcset 320/480 变体 + SW cache-first）+ 默认网格 + 默认评分序 | 17 |
 
 `online75`（14 条）：Pages 生效 + 海报三档逐字节 + 线上默认态 + **SW 硬证据**（`response.fromServiceWorker()`）。
+`online77`（14 条）：《情书》海报替换全链路 —— 线上五字段 + **整份 watch.json md5 全等** + 新三档逐字节 + **旧三档必须 404** + 网格 `currentSrc` 命中变体 + 时间轴缩略图 + 该海报的 SW 命中。⚠️ 里面「故意探旧图 404」用 `probing404` 开关把浏览器的 404 控制台日志排除掉，否则会把自己的探针算成站点 JS 异常。
 
-`online/`：`online65/66/68/69/70/72/75.mjs` —— 上线后对 Pages 做内容指纹复验（判定线上/本地 md5 一致、功能生效），**线上验证写操作时要设计安全边界**（如 online69 故意在无 Token 的浏览器点保存，用 `page.on('request')` 数 PUT 必须为 0）。旧 online 脚本是一次性历史记录（online70 的海报 hash / 站名判据已被后续轮次改旧），复验当轮用最新那个。`online75` 额外验 **Service Worker**：海报响应必须 `response.fromServiceWorker() === true`（硬证据，不能只看 `transferSize=0`——HTTP 缓存也会给 0）。
+`online/`：`online65/66/68/69/70/72/75/77.mjs` —— 上线后对 Pages 做内容指纹复验（判定线上/本地 md5 一致、功能生效），**线上验证写操作时要设计安全边界**（如 online69 故意在无 Token 的浏览器点保存，用 `page.on('request')` 数 PUT 必须为 0）。旧 online 脚本是一次性历史记录（online70 的海报 hash / 站名判据已被后续轮次改旧），复验当轮用最新那个。`online75` 额外验 **Service Worker**：海报响应必须 `response.fromServiceWorker() === true`（硬证据，不能只看 `transferSize=0`——HTTP 缓存也会给 0）。
 
-`tools/merge*.py`：`watch.json` 在 rebase 时与远端冲突 → 用「远端为基底 + 重放本地改动」一键合并。⚠️ 第 72 轮起同日记录的 tie-break 从「id 倒序」改为「added_at 正序（先上传居前）」——合并器若按老规则重排，存储顺序会与渲染顺序不一致（页面加载时会用 cmpTime 重排兜底，不影响功能，但 diff 会难看）；要同步就照 `cmpTime` 抄。
+`tools/merge*.py`：`watch.json` 在 rebase 时与远端冲突 → 用「远端为基底 + 重放本地改动」一键合并。⚠️ 第 72 轮起同日记录的 tie-break 从「id 倒序」改为「added_at 正序（先上传居前）」——合并器若按老规则重排，存储顺序会与渲染顺序不一致（页面加载时会用 cmpTime 重排兜底，不影响功能，但 diff 会难看）；要同步就照 `cmpTime` 抄。⚠️ 第 77 轮 `merge77_rebase.py` 是**另一种形态**：当本地对数据的改动只有「某一条的几个字段」时，它不重排、不重序列化，直接在远端文本里**原地换值**，其余行逐字节沿用远端（体积最小、diff 最干净，适合「换海报」这类单点改动）。
+
+## 踩过的坑（脚本层面）
+
+- ⚠️ **`scripts/watch-variants.mjs` 的回写曾经会给同一张海报插两遍变体字段**（远端出现过 198 个重复键）。根因：写回用「遇到 `poster` 行后往下跳过变体行」这种**位置式**判断，而 `watch.json` 里字段顺序是 `poster` → `poster_w` → `poster_h` → `poster_320` → `poster_480`，插入点在 `poster_h` 之后 → 插入的字段落在原文变体行**之前**，跳过逻辑永远走不到。第 77 轮改成**两遍扫描**（第一遍收集块内已有键 + `poster_h` 行号，第二遍只在「本次真生成过 + 块内没有该键 + 数据里有该字段」三条全满足时插入），并加了重复键守卫（发现即 `exit 1`）。**JSON 重复键不会报错（解析取最后一个值），站点看起来完全正常**，只能靠文本级扫描发现 —— 改回写逻辑后务必跑一次「删掉一个变体文件再重跑」验证幂等。
 
 ## 关键约定（改代码/改回归前必读）
 
