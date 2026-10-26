@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-26T18:54:07+08:00",
+  "updated_at": "2026-10-26T20:47:59+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -515,6 +515,22 @@
       "rating": 5,
       "note": "莫名其妙",
       "added_at": "2026-10-25T09:26:55+08:00"
+    },
+    {
+      "id": "2023-05-06-three-body",
+      "title": "三体",
+      "kind": "movie",
+      "watched_at": "2023-05-06",
+      "added_at": "2026-10-26T20:47:59+08:00",
+      "poster": "img/watch/three-body-0d024e88.webp",
+      "poster_w": 640,
+      "poster_h": 1138,
+      "poster_320": "img/watch/three-body-0d024e88-320.webp",
+      "poster_480": "img/watch/three-body-0d024e88-480.webp",
+      "title_en": "Three-Body",
+      "year": 2023,
+      "rating": 8,
+      "note": "时间的尽头~"
     },
     {
       "id": "2023-01-29-the-wandering-earth",
