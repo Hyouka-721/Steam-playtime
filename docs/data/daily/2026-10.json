@@ -3,7 +3,7 @@
   "month": "2026-10",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-26T20:39:34.861Z",
+  "generated_at": "2026-10-27T20:10:08.719Z",
   "days": {
     "2026-10-13": {
       "total_minutes": 49,
@@ -325,6 +325,33 @@
           "appid": "3009140",
           "name": "Salt Player",
           "minutes": 2,
+          "is_new": false
+        }
+      ]
+    },
+    "2026-10-27": {
+      "total_minutes": 63,
+      "span_days": 1,
+      "confidence": "high",
+      "source": "auto",
+      "flags": [],
+      "games": [
+        {
+          "appid": "105600",
+          "name": "泰拉瑞亚",
+          "minutes": 23,
+          "is_new": false
+        },
+        {
+          "appid": "246420",
+          "name": "王国保卫战",
+          "minutes": 23,
+          "is_new": false
+        },
+        {
+          "appid": "227300",
+          "name": "欧洲卡车模拟2",
+          "minutes": 17,
           "is_new": false
         }
       ]
