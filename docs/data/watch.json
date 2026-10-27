@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-27T22:20:43+08:00",
+  "updated_at": "2026-10-27T22:31:02+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -744,6 +744,7 @@
       "kind": "movie",
       "watched_at": "2021-08-02",
       "poster": "img/watch/love-letter-5b3706ed.webp",
+      "added_at": "2026-10-25T11:10:47+08:00",
       "poster_w": 640,
       "poster_h": 914,
       "poster_320": "img/watch/love-letter-5b3706ed-320.webp",
@@ -751,8 +752,7 @@
       "title_en": "Love Letter",
       "year": 1995,
       "rating": 9.9,
-      "note": "然而不凑巧，我喜欢的围裙，上下没有一个兜。",
-      "added_at": "2026-10-25T11:10:47+08:00"
+      "note": "亲爱的渡边博子小姐，因为我太害羞所以没有把这封信寄出去"
     },
     {
       "id": "2021-08-02-item",
