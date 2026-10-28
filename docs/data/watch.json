@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-27T22:31:02+08:00",
+  "updated_at": "2026-10-28T17:59:44+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1632,22 +1632,6 @@
       "note": "Only My Railgun"
     },
     {
-      "id": "2019-12-31-la-leggenda-del-pianista-sull-oceano",
-      "title": "海上钢琴师",
-      "kind": "movie",
-      "watched_at": "2019-12-31",
-      "added_at": "2026-10-26T18:33:40+08:00",
-      "poster": "img/watch/la-leggenda-del-pianista-sull-oceano-f97b71de.webp",
-      "poster_w": 640,
-      "poster_h": 918,
-      "poster_320": "img/watch/la-leggenda-del-pianista-sull-oceano-f97b71de-320.webp",
-      "poster_480": "img/watch/la-leggenda-del-pianista-sull-oceano-f97b71de-480.webp",
-      "title_en": "La leggenda del pianista sull'oceano",
-      "year": 1998,
-      "rating": 8.5,
-      "note": "每个人的心里都有自己的一艘船"
-    },
-    {
       "id": "2019-12-22-little-forest",
       "title": "小森林",
       "kind": "movie",
@@ -1662,6 +1646,22 @@
       "year": 2015,
       "rating": 9.5,
       "note": "我回来了，欢迎回来"
+    },
+    {
+      "id": "2019-12-21-la-leggenda-del-pianista-sull-oceano",
+      "title": "海上钢琴师",
+      "kind": "movie",
+      "watched_at": "2019-12-21",
+      "poster": "img/watch/la-leggenda-del-pianista-sull-oceano-f97b71de.webp",
+      "added_at": "2026-10-26T18:33:40+08:00",
+      "poster_w": 640,
+      "poster_h": 918,
+      "poster_320": "img/watch/la-leggenda-del-pianista-sull-oceano-f97b71de-320.webp",
+      "poster_480": "img/watch/la-leggenda-del-pianista-sull-oceano-f97b71de-480.webp",
+      "title_en": "La leggenda del pianista sull'oceano",
+      "year": 1998,
+      "rating": 8.5,
+      "note": "每个人的心里都有自己的一艘船"
     },
     {
       "id": "2019-12-13-the-pursuit-of-happyness",
