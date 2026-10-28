@@ -3,7 +3,7 @@
   "month": "2026-10",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-27T20:10:08.719Z",
+  "generated_at": "2026-10-28T20:25:25.808Z",
   "days": {
     "2026-10-13": {
       "total_minutes": 49,
@@ -352,6 +352,33 @@
           "appid": "227300",
           "name": "欧洲卡车模拟2",
           "minutes": 17,
+          "is_new": false
+        }
+      ]
+    },
+    "2026-10-28": {
+      "total_minutes": 39,
+      "span_days": 1,
+      "confidence": "high",
+      "source": "auto",
+      "flags": [],
+      "games": [
+        {
+          "appid": "105600",
+          "name": "泰拉瑞亚",
+          "minutes": 28,
+          "is_new": false
+        },
+        {
+          "appid": "246420",
+          "name": "王国保卫战",
+          "minutes": 10,
+          "is_new": false
+        },
+        {
+          "appid": "431960",
+          "name": "Wallpaper Engine：壁纸引擎",
+          "minutes": 1,
           "is_new": false
         }
       ]

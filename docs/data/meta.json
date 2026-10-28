@@ -2,10 +2,10 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-27T20:10:08.727Z",
-  "generated_at_local": "2026-10-28",
+  "generated_at": "2026-10-28T20:25:25.816Z",
+  "generated_at_local": "2026-10-29",
   "tracking_since": "2026-10-13",
-  "last_snapshot_date": "2026-10-27",
+  "last_snapshot_date": "2026-10-28",
   "steamid_hash": "a8474caf",
   "months": [
     "2026-10"
@@ -26,17 +26,17 @@
     "990630"
   ],
   "stats": {
-    "lifetime_minutes": 83170,
-    "lifetime_hours": 1386.2,
+    "lifetime_minutes": 83209,
+    "lifetime_hours": 1386.8,
     "owned_games": 53,
     "lifetime_played_games": 38,
-    "total_minutes": 1446,
-    "total_hours": 24.1,
-    "tracked_days": 14,
-    "active_days": 13,
-    "current_streak": 6,
+    "total_minutes": 1485,
+    "total_hours": 24.8,
+    "tracked_days": 15,
+    "active_days": 14,
+    "current_streak": 7,
     "longest_streak": 7,
-    "week_minutes": 139,
+    "week_minutes": 178,
     "played_games": 6,
     "best_day": {
       "date": "2026-10-18",
@@ -48,9 +48,9 @@
       "appid": "105600",
       "name": "泰拉瑞亚",
       "img_icon_url": "858961e95fbf869f136e1770d586e0caefd4cfac",
-      "total_minutes": 363,
+      "total_minutes": 391,
       "first_day": "2026-10-17",
-      "last_day": "2026-10-27"
+      "last_day": "2026-10-28"
     },
     "227300": {
       "appid": "227300",
@@ -64,17 +64,17 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "total_minutes": 672,
+      "total_minutes": 682,
       "first_day": "2026-10-13",
-      "last_day": "2026-10-27"
+      "last_day": "2026-10-28"
     },
     "431960": {
       "appid": "431960",
       "name": "Wallpaper Engine：壁纸引擎",
       "img_icon_url": "72edaed9d748c6cf7397ffb1c83f0b837b9ebd9d",
-      "total_minutes": 8,
+      "total_minutes": 9,
       "first_day": "2026-10-18",
-      "last_day": "2026-10-18"
+      "last_day": "2026-10-28"
     },
     "646570": {
       "appid": "646570",
@@ -112,8 +112,8 @@
       "appid": "105600",
       "name": "泰拉瑞亚",
       "img_icon_url": "858961e95fbf869f136e1770d586e0caefd4cfac",
-      "lifetime_minutes": 10085,
-      "last_played": "2026-10-27"
+      "lifetime_minutes": 10113,
+      "last_played": "2026-10-28"
     },
     "227300": {
       "appid": "227300",
@@ -126,8 +126,8 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "lifetime_minutes": 892,
-      "last_played": "2026-10-27"
+      "lifetime_minutes": 902,
+      "last_played": "2026-10-28"
     },
     "250900": {
       "appid": "250900",
@@ -231,8 +231,8 @@
       "appid": "431960",
       "name": "Wallpaper Engine：壁纸引擎",
       "img_icon_url": "72edaed9d748c6cf7397ffb1c83f0b837b9ebd9d",
-      "lifetime_minutes": 3561,
-      "last_played": "2026-10-18"
+      "lifetime_minutes": 3562,
+      "last_played": "2026-10-28"
     },
     "489830": {
       "appid": "489830",
