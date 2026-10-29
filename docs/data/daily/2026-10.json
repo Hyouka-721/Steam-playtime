@@ -3,7 +3,7 @@
   "month": "2026-10",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-28T20:25:25.808Z",
+  "generated_at": "2026-10-29T20:24:27.926Z",
   "days": {
     "2026-10-13": {
       "total_minutes": 49,
@@ -379,6 +379,21 @@
           "appid": "431960",
           "name": "Wallpaper Engine：壁纸引擎",
           "minutes": 1,
+          "is_new": false
+        }
+      ]
+    },
+    "2026-10-29": {
+      "total_minutes": 30,
+      "span_days": 1,
+      "confidence": "high",
+      "source": "auto",
+      "flags": [],
+      "games": [
+        {
+          "appid": "246420",
+          "name": "王国保卫战",
+          "minutes": 30,
           "is_new": false
         }
       ]

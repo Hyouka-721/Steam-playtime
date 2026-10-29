@@ -1,12 +1,12 @@
 {
   "schema": 1,
   "ready": true,
-  "generated_at": "2026-10-28T20:25:25.812Z",
-  "snapshot_date": "2026-10-28",
+  "generated_at": "2026-10-29T20:24:27.929Z",
+  "snapshot_date": "2026-10-29",
   "stats": {
-    "unlocked": 839,
+    "unlocked": 841,
     "total": 2504,
-    "pct": 33.5,
+    "pct": 33.6,
     "games": 31
   },
   "games": {
@@ -324,7 +324,7 @@
           "name": "On Fleek",
           "desc": "Spot the sun on a “cool” day.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/f82e79301ae9bbdb2d95a69527ac5ab44faf00a2.jpg",
-          "percent": 1.2,
+          "percent": 1.3,
           "ts": 1788586142
         },
         {
@@ -1276,7 +1276,7 @@
           "name": "要柴油，不要汽油！",
           "desc": "使用一次加油站",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/227300/03bb2fa5f8457019406c34edf4b90f3656b51b1e.jpg",
-          "percent": 71,
+          "percent": 71.1,
           "ts": 1754657044
         },
         {
@@ -1301,8 +1301,24 @@
       "appid": "246420",
       "name": "王国保卫战",
       "total": 74,
-      "unlocked": 34,
+      "unlocked": 36,
       "achievements": [
+        {
+          "api": "ACH_ARACHNOPHOBIA",
+          "name": "Arachnophobia",
+          "desc": "Defeat Sarelgaz and its minions.",
+          "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/c384b484ce229bb8e9e6d4ecfbc3634de47fe87c.jpg",
+          "percent": 32.7,
+          "ts": 1793279110
+        },
+        {
+          "api": "ACH_ELEMENTALIST",
+          "name": "Elementalist",
+          "desc": "Summon 5 rock elementals in any one stage.",
+          "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/f8fe3ef5a578154b61aea11033987270e40271f2.jpg",
+          "percent": 20.3,
+          "ts": 1793278827
+        },
         {
           "api": "ACH_BEAM_ME_UP",
           "name": "Beam me up, Scotty",
@@ -1316,7 +1332,7 @@
           "name": "G.I. Joe",
           "desc": "Train 1.00 soldiers.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/997b88e6b72915657f90aa162d1ab91b36029e93.jpg",
-          "percent": 54.6,
+          "percent": 54.5,
           "ts": 1792902392
         },
         {
@@ -1340,7 +1356,7 @@
           "name": "Ovinophobia",
           "desc": "Kill 10 or more sheep with your hands.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/5a66bb1dd32cfad0ab52ac0b454cfc6d9f29bad5.jpg",
-          "percent": 42.5,
+          "percent": 42.4,
           "ts": 1792666524
         },
         {
@@ -1380,7 +1396,7 @@
           "name": "Energy Network",
           "desc": "Build 4 Tesla towers in any stage.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/9d4107ad32a78ad41ad87aec36ed086d4765b2c0.jpg",
-          "percent": 37.4,
+          "percent": 37.3,
           "ts": 1791986543
         },
         {
@@ -1787,7 +1803,7 @@
           "name": "第一件橙装",
           "desc": "打造第一件传奇装备。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/391730/52a20f1743642d5ae679d820d72b7621d58a3d2f.jpg",
-          "percent": 56.2,
+          "percent": 56.3,
           "ts": 1771569297
         }
       ]
@@ -2259,7 +2275,7 @@
           "name": "更高，更快，更强",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/754e88ddfb53cfe2bd274c264b248b7aa8da0540.jpg",
-          "percent": 10.6,
+          "percent": 10.7,
           "ts": 1747916731
         },
         {
@@ -2283,7 +2299,7 @@
           "name": "放牧者",
           "desc": "同时激活2只宠物",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/409342f362db4ea000ff039ee5a9fc9e642e7f9d.jpg",
-          "percent": 18,
+          "percent": 18.1,
           "ts": 1744517539
         },
         {
@@ -2291,7 +2307,7 @@
           "name": "自作自受",
           "desc": "在崩坏神庙利用环境困住一名敌人！",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/1aec079643aa1358a797645b946607ca73bbbea1.jpg",
-          "percent": 24.7,
+          "percent": 24.8,
           "ts": 1743915988
         },
         {
@@ -2499,7 +2515,7 @@
           "name": "我在沼泽玩泥巴",
           "desc": "第一次到达被弃者沼泽。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/c5c37de7230222e79a0451d5dc6313c60b4575c9.jpg",
-          "percent": 31.1,
+          "percent": 31.2,
           "ts": 1742998090
         },
         {
@@ -2675,7 +2691,7 @@
           "name": "是结实，不是胖",
           "desc": "打败看守者！",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/60f87063c94de13e7791fb4e1c84a35405299f62.jpg",
-          "percent": 72.3,
+          "percent": 72.2,
           "ts": 1742565369
         },
         {
@@ -3163,7 +3179,7 @@
           "name": "耸肩无视",
           "desc": "在只剩1点生命的情况下赢得一场战斗。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/646570/f2b4b55470d774f304b1b41da617955bec09806b.jpg",
-          "percent": 58.9,
+          "percent": 59,
           "ts": 1744612882
         }
       ]
@@ -3451,7 +3467,7 @@
           "name": "Ф",
           "desc": "Ф",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/505b48c855e695cb0dc97ccf8ec29574aa48657d.jpg",
-          "percent": 19,
+          "percent": 18.9,
           "ts": 1759760710
         },
         {
@@ -4939,7 +4955,7 @@
           "name": "帕鲁工作研究实习生",
           "desc": "完成10种帕鲁工作研究",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1623730/2c4f240cfc43182301fbfdb8e55da274f9d70ac1.jpg",
-          "percent": 23.1,
+          "percent": 23.2,
           "ts": 1774879850
         }
       ]
@@ -5523,7 +5539,7 @@
           "name": "法师 - 深渊",
           "desc": "使用法师在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/7c137f698df724b83640368cd9b073782f1ba2ac.jpg",
-          "percent": 6.1,
+          "percent": 6,
           "ts": 1774175385
         },
         {
@@ -6003,7 +6019,7 @@
           "name": "学徒 - 碰撞区域",
           "desc": "使用学徒在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/592c89eda683293359346d9bc5d1a1af66944001.jpg",
-          "percent": 15.5,
+          "percent": 15.4,
           "ts": 1766995813
         },
         {
@@ -6227,7 +6243,7 @@
           "name": "盲目贪婪",
           "desc": "达到100%拾取范围",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/60705eb8f220f2da61c175779bbcde92d2000579.jpg",
-          "percent": 21,
+          "percent": 20.9,
           "ts": 1765968857
         },
         {
@@ -6595,7 +6611,7 @@
           "name": "口口口口",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/3167020/b83696a7e3c0e506f5ca76fb248c08f2ee158d1e.jpg",
-          "percent": 14.5,
+          "percent": 14.4,
           "ts": 1764165289
         },
         {

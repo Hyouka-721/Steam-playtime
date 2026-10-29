@@ -2,18 +2,18 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-28T20:25:25.816Z",
-  "generated_at_local": "2026-10-29",
+  "generated_at": "2026-10-29T20:24:27.932Z",
+  "generated_at_local": "2026-10-30",
   "tracking_since": "2026-10-13",
-  "last_snapshot_date": "2026-10-28",
+  "last_snapshot_date": "2026-10-29",
   "steamid_hash": "a8474caf",
   "months": [
     "2026-10"
   ],
   "ach_stats": {
-    "unlocked": 839,
+    "unlocked": 841,
     "total": 2504,
-    "pct": 33.5,
+    "pct": 33.6,
     "games": 31
   },
   "ach_perfect": [
@@ -26,17 +26,17 @@
     "990630"
   ],
   "stats": {
-    "lifetime_minutes": 83209,
-    "lifetime_hours": 1386.8,
+    "lifetime_minutes": 83239,
+    "lifetime_hours": 1387.3,
     "owned_games": 53,
     "lifetime_played_games": 38,
-    "total_minutes": 1485,
-    "total_hours": 24.8,
-    "tracked_days": 15,
-    "active_days": 14,
-    "current_streak": 7,
-    "longest_streak": 7,
-    "week_minutes": 178,
+    "total_minutes": 1515,
+    "total_hours": 25.3,
+    "tracked_days": 16,
+    "active_days": 15,
+    "current_streak": 8,
+    "longest_streak": 8,
+    "week_minutes": 208,
     "played_games": 6,
     "best_day": {
       "date": "2026-10-18",
@@ -64,9 +64,9 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "total_minutes": 682,
+      "total_minutes": 712,
       "first_day": "2026-10-13",
-      "last_day": "2026-10-28"
+      "last_day": "2026-10-29"
     },
     "431960": {
       "appid": "431960",
@@ -126,8 +126,8 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "lifetime_minutes": 902,
-      "last_played": "2026-10-28"
+      "lifetime_minutes": 932,
+      "last_played": "2026-10-29"
     },
     "250900": {
       "appid": "250900",
@@ -449,7 +449,7 @@
       "name": "Salt Player",
       "img_icon_url": "a2a0483be79a4082e0b50abccb3b67c979d3a457",
       "lifetime_minutes": 865,
-      "last_played": "2026-10-26"
+      "last_played": "2026-10-29"
     },
     "3167020": {
       "appid": "3167020",
