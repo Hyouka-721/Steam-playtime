@@ -66,7 +66,8 @@ tests/
 `online77`（14 条）：《情书》海报替换全链路 —— 线上五字段 + **整份 watch.json md5 全等** + 新三档逐字节 + **旧三档必须 404** + 网格 `currentSrc` 命中变体 + 时间轴缩略图 + 该海报的 SW 命中。⚠️ 里面「故意探旧图 404」用 `probing404` 开关把浏览器的 404 控制台日志排除掉，否则会把自己的探针算成站点 JS 异常。
 `online79`（17 条）：第 79 轮上线复验 —— ① 内容指纹（`watch.js`/`watch.css` **字节 md5 与本地全等**，⚠️ 比之前必须把 CRLF 归一成 LF，否则本地工作区永远"不一样"）② 排序字段线上预填 3 + 非法值阻断且 **PUT 计数必须为 0**（线上安全边界）③ **线上 119 条顺序与「不含 order 的旧比较器」算出的期望逐条相同**（证明老数据零影响）④ 网格点击不开弹窗、时间轴条目不点得开。
 
-`online/`：`online65/66/68/69/70/72/75/77/79.mjs` —— 上线后对 Pages 做内容指纹复验（判定线上/本地 md5 一致、功能生效），**线上验证写操作时要设计安全边界**（如 online69 故意在无 Token 的浏览器点保存，用 `page.on('request')` 数 PUT 必须为 0）。旧 online 脚本是一次性历史记录（online70 的海报 hash / 站名判据已被后续轮次改旧），复验当轮用最新那个。`online75` 额外验 **Service Worker**：海报响应必须 `response.fromServiceWorker() === true`（硬证据，不能只看 `transferSize=0`——HTTP 缓存也会给 0）。
+`online/`：`online65/66/68/69/70/72/75/77/79/80.mjs` —— 上线后对 Pages 做内容指纹复验（判定线上/本地 md5 一致、功能生效），**线上验证写操作时要设计安全边界**（如 online69 故意在无 Token 的浏览器点保存，用 `page.on('request')` 数 PUT 必须为 0）。旧 online 脚本是一次性历史记录（online70 的海报 hash / 站名判据已被后续轮次改旧），复验当轮用最新那个。`online75` 额外验 **Service Worker**：海报响应必须 `response.fromServiceWorker() === true`（硬证据，不能只看 `transferSize=0`——HTTP 缓存也会给 0）。
+`online80`（20 条）：第 80 轮上线复验 —— watch.css/watch.js/sw.js **字节 md5 与本地全等**、线上 119 条 tags 与本地逐条相同（词表 14 个，含用户加的「灾难」）、**A1 已回退**（CSS 无 `data-score`、网格 0 张卡片带该属性）、六项各自的静态指纹、chip 点选/取消、删除按钮只在编辑模式且**第一下只举手、PUT 必须 0**、watch.json 经 SW 且已入 `watch-data-v1`。⚠️ 验 SW 必须先 `navigator.serviceWorker.ready` 再 **reload 一次**，否则首屏那次请求没经过 SW，`workerStart` 恒 0。
 
 `tools/merge*.py`：`watch.json` 在 rebase 时与远端冲突 → 用「远端为基底 + 重放本地改动」一键合并。⚠️ 第 72 轮起同日记录的 tie-break 从「id 倒序」改为「added_at 正序（先上传居前）」——合并器若按老规则重排，存储顺序会与渲染顺序不一致（页面加载时会用 cmpTime 重排兜底，不影响功能，但 diff 会难看）；要同步就照 `cmpTime` 抄。⚠️ 第 77 轮 `merge77_rebase.py` 是**另一种形态**：当本地对数据的改动只有「某一条的几个字段」时，它不重排、不重序列化，直接在远端文本里**原地换值**，其余行逐字节沿用远端（体积最小、diff 最干净，适合「换海报」这类单点改动）。
 

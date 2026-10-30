@@ -27,9 +27,12 @@ function sortKey(d) {
   return m ? m[1] + '-' + (m[2] || '00') + '-' + (m[3] || '00') : '0000-00-00';
 }
 function stampKey(s) { const t = Date.parse(String(s || '')); return Number.isNaN(t) ? 0 : t; }
+const orderVal = (it) => { const raw = it == null ? null : it.order; if (raw == null || raw === '') return 3; const n = Number(raw); return (!Number.isFinite(n) || Math.floor(n) !== n || n < 0 || n > 5) ? 3 : n; };
 function cmpTime(a, b) {
   const d = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
   if (d !== 0) return d;
+  const o = orderVal(a) - orderVal(b);   // 第 78 轮的 order 级
+  if (o !== 0) return o;
   const s = stampKey(a.added_at) - stampKey(b.added_at);
   if (s !== 0) return s;
   return String(a.id || '').localeCompare(String(b.id || ''));
@@ -38,7 +41,8 @@ function ratingVal(it) { const n = Number(it && it.rating); return isFinite(n) &
 function cmpRating(a, b) {
   const vb = ratingVal(b), va = ratingVal(a);
   if (vb !== va) return vb - va;
-  return cmpTime(a, b);
+  const o = orderVal(a) - orderVal(b);
+  return o !== 0 ? o : cmpTime(a, b);
 }
 
 let pass = 0, fail = 0;

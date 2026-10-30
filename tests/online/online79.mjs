@@ -3,7 +3,8 @@
 
    ① 内容指纹：线上 watch.html 引用 v17/v12；watch.js、watch.css、watch.json 与本地 md5 全等
    ② 排序字段：新增面板预填 3；编辑老条目也预填 3（默认值读取时生效）；非法值阻断且零 PUT
-   ③ 零影响：线上 119 条在「全部 order 缺省=3」下，顺序与改动前旧比较器算出的期望逐条相同
+   ③ 顺序一致：线上 119 条顺序 = 数据推算的期望（当前含 order 级；第 80 轮用户真设了 order 后，
+      原先「不含 order 的旧比较器」已不能当期望，否则会要求功能失效）
    ④ 契约：网格卡片点不开编辑（无 data-id/role/tabindex），时间轴条目点得开
    写操作安全边界：非法输入被拦 → 全程 PUT 请求必须为 0。 */
 import { createRequire } from 'module';
@@ -34,21 +35,26 @@ const ok = (n, c, extra = '') => {
     : (fail++, console.log(`FAIL ${n}  — ${extra}`));
 };
 
-/* 旧比较器（第 78 轮之前，不含 order）——用来算「本该一模一样」的期望顺序 */
+/* 期望比较器：与 watch.js 的 cmpTime / cmpRating 逐字对齐（含第 78 轮的 order 级）
+   ⚠️ 第 80 轮之前这里是「不含 order 的旧比较器」，当时用来证明老数据零影响；
+   用户一旦真的填了 order，旧比较器就不再是期望 —— 会变成「要求这个功能别生效」。 */
 const sk = (d) => {
   const m = /^(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?$/.exec(String(d || '').trim());
   return m ? `${m[1]}-${m[2] || '00'}-${m[3] || '00'}` : '0000-00-00';
 };
 const stamp = (s) => { const t = Date.parse(String(s || '')); return Number.isNaN(t) ? 0 : t; };
 const rv = (it) => { const n = Number(it.rating); return isFinite(n) && n > 0 ? n : -1; };
+const orderVal = (it) => { const raw = it == null ? null : it.order; if (raw == null || raw === '') return 3; const n = Number(raw); return (!Number.isFinite(n) || Math.floor(n) !== n || n < 0 || n > 5) ? 3 : n; };
 const oldCmpTime = (a, b) => {
   const d = sk(b.watched_at).localeCompare(sk(a.watched_at));
   if (d !== 0) return d;
+  const o = orderVal(a) - orderVal(b);   // 第 78 轮的 order 级：用户真设了值就必须算
+  if (o !== 0) return o;
   const s = stamp(a.added_at) - stamp(b.added_at);
   if (s !== 0) return s;
   return String(a.id || '').localeCompare(String(b.id || ''));
 };
-const oldCmpRating = (a, b) => { const vb = rv(b), va = rv(a); return vb !== va ? vb - va : oldCmpTime(a, b); };
+const oldCmpRating = (a, b) => { const vb = rv(b), va = rv(a); if (vb !== va) return vb - va; const o = orderVal(a) - orderVal(b); return o !== 0 ? o : oldCmpTime(a, b); };
 
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });
 async function gotoRetry(p, url, tries = 4) {
@@ -177,7 +183,7 @@ await page.waitForTimeout(900);
 
 const gridNames = await page.$$eval('#w-grid .poster .poster-name', (els) => els.map((e) => e.textContent.trim()));
 const expGrid = live.items.slice().sort(oldCmpRating).map((x) => x.title.trim());
-ok('C1 线上网格（默认评分序）顺序 = 旧比较器算出的期望（逐条相同）',
+ok('C1 线上网格（默认评分序）顺序 = 数据推算的期望（含 order 级，逐条相同）',
   gridNames.length === expGrid.length && gridNames.every((v, i) => v === expGrid[i]),
   `${gridNames.length} 条；首个不同位置 ${gridNames.findIndex((v, i) => v !== expGrid[i])}`);
 await page.screenshot({ path: OUT + 'C_线上网格_评分序.png' });
