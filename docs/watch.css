@@ -302,40 +302,6 @@ code {
 }
 .poster:hover .poster-pic img { transform: scale(1.05); }
 
-/* 第 80 轮 A1：评分 → 海报描边发光。分档由 watch.js 的 scoreBand() 给出：
-   hi（≥9.5）金边外发光 ／ mid（8~9.5）半透明金边 ／ 无标记（7~8）维持原样 ／ low（<7）暗哑。
-   目的：一眼扫过时高分片「自己会亮」，不必去读右下角那枚 13px 的数字。 */
-.poster[data-score="hi"] .poster-pic {
-  border-color: rgba(232, 176, 75, 0.82);
-  box-shadow: 0 0 0 1px rgba(232, 176, 75, 0.50),
-              0 0 20px rgba(232, 176, 75, 0.26),
-              var(--card-shadow);
-}
-.poster[data-score="hi"]:hover .poster-pic {
-  box-shadow: 0 0 0 1px rgba(232, 176, 75, 0.78),
-              0 0 30px rgba(232, 176, 75, 0.44),
-              var(--card-hover-shadow);
-}
-.poster[data-score="mid"] .poster-pic {
-  border-color: rgba(232, 176, 75, 0.32);
-  box-shadow: 0 0 0 1px rgba(232, 176, 75, 0.15),
-              0 8px 22px rgba(232, 176, 75, 0.07),
-              var(--card-shadow);
-}
-.poster[data-score="mid"]:hover .poster-pic {
-  border-color: rgba(232, 176, 75, 0.55);
-}
-/* 低分：边框更暗、图略微去饱和压暗（hover 时恢复，确认「这不是坏图，是低分」） */
-.poster[data-score="low"] .poster-pic {
-  border-color: #191920;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 4px 14px rgba(0, 0, 0, 0.40);
-}
-.poster[data-score="low"] .poster-pic img {
-  filter: grayscale(0.42) brightness(0.76);
-}
-.poster[data-score="low"]:hover .poster-pic img {
-  filter: grayscale(0) brightness(1);
-}
 
 /* 第 66 轮：左上角「电影 / 剧集」角标已按需求删除（.poster-kind 规则整条移除） */
 /* 评分：金色，放右下角，压在图上 */

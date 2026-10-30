@@ -39,7 +39,7 @@ ok('A1 网格与时间轴是两个独立容器（w-grid / w-tl），互不复用
   const tSeg = jsNC.slice(tStart, jsNC.indexOf('function wireImages', tStart) > 0 ? jsNC.indexOf('function wireImages', tStart) : tStart + 2600);
 
   ok('A2 网格卡片模板：无 data-id / 无 role="button" / 无 tabindex（点不开、也聚焦不到）',
-    /'<article class="poster"'/.test(gSeg) &&
+    /'<article class="poster">'/.test(gSeg) &&
     !/data-id/.test(gSeg) && !/role="button"/.test(gSeg) && !/tabindex/.test(gSeg),
     `data-id=${/data-id/.test(gSeg)} role=${/role="button"/.test(gSeg)} tabindex=${/tabindex/.test(gSeg)}`);
 

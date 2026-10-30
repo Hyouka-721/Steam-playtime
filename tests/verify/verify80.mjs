@@ -1,11 +1,12 @@
-/* 第 80 轮回归：A1 评分描边发光 / A2 胶片颗粒+放映机光晕 / A3 时间轴 hover 统一 /
-   A4 次要文字提亮 / P2 标签 chip 筛选 / P6 网页端删除 / P7 SW 缓存 watch.json
+/* 第 80 轮回归：A2 胶片颗粒+放映机光晕 / A3 时间轴 hover 统一 / A4 次要文字提亮 /
+   P2 标签 chip 筛选 / P6 网页端删除 / P7 SW 缓存 watch.json
+   ⚠️ A1「评分 → 海报描边三档」已被用户回退，本套件不再覆盖它。
 
    断言分组：
-   A 静态指纹（10）：CSS 规则、HTML 结构、JS 函数、sw.js 策略顺序
-   B 评分成像（3）：mock 数据分档 + 计算样式真的生效
-   C 标签筛选（8）：chip 生成 / 点选 / 取消 / 叠加 / 空态 / 时间轴 / 脏数据归一
-   D 删除（5）：只在编辑模式出现、两段确认、无 Token 零请求、有 Token 一次 PUT 且数据真的少了
+   A 静态指纹（9）：CSS 规则、HTML 结构、JS 函数、sw.js 策略顺序
+   C 标签筛选（9）：chip 生成 / 点选 / 取消 / 叠加 / 空态 / 时间轴 / 脏数据归一
+   D 删除（7）：只在编辑模式出现、两段确认、无 Token 零请求、有 Token 一次 PUT 且数据真的少了、
+      390px 页脚不把提示压成一字一行
    E 实体数据（2）：全部条目有标签、词表符合约定
    ⚠️ 版本号：watch.css?v=18 / watch.js?v=13（第 80 轮 bump）
    ⚠️ 所有 mock 上下文都带 serviceWorkers:'block' —— 第 80 轮起 SW 也拦 watch.json
@@ -35,44 +36,35 @@ console.log('== A 静态指纹 ==');
 ok('A1 版本号 bump：watch.css?v=18 / watch.js?v=13',
   /watch\.css\?v=18"/.test(html) && /watch\.js\?v=13"/.test(html));
 
-ok('A2 A1 三档描边规则齐全：hi 金边 + 外发光、mid 半透明、low 压暗',
-  /\.poster\[data-score="hi"\] \.poster-pic \{[\s\S]{0,220}rgba\(232, 176, 75, 0\.82\)/.test(cssNC) &&
-  /\.poster\[data-score="hi"\] \.poster-pic \{[\s\S]{0,300}0 0 20px/.test(cssNC) &&
-  /\.poster\[data-score="mid"\] \.poster-pic \{[\s\S]{0,220}rgba\(232, 176, 75, 0\.32\)/.test(cssNC) &&
-  /\.poster\[data-score="low"\] \.poster-pic \{[\s\S]{0,220}#191920/.test(cssNC) &&
-  /* 去饱和强度只判 ≥0.3：低于这个数肉眼看不出来（首版 0.22 就属于「写了等于没写」），
-     在 0.3~0.9 之间微调参数不该被测试挡住 */
-  /\.poster\[data-score="low"\] \.poster-pic img \{[\s\S]{0,90}grayscale\(0\.[3-9]/.test(cssNC));
-
-ok('A3 A2 胶片颗粒：body::before 两层点阵 + pointer-events:none（不挡点击）',
+ok('A2 胶片颗粒：body::before 两层点阵 + pointer-events:none（不挡点击）',
   /body::before \{[\s\S]{0,420}pointer-events: none/.test(cssNC) &&
   /body::before \{[\s\S]{0,640}background-size: 3px 3px, 5px 5px/.test(cssNC));
 
-ok('A4 A2 顶部放映机光晕：--bg-glow 首层收窄成 560×152 的暖光束',
+ok('A3 顶部放映机光晕：--bg-glow 首层收窄成 560×152 的暖光束',
   /--bg-glow: radial-gradient\(560px 152px at 50% -34px/.test(cssNC));
 
-ok('A5 A3 时间轴 hover 与网格统一：位移 + 金线 + 缩略图放大',
+ok('A4 时间轴 hover 与网格统一：位移 + 金线 + 缩略图放大',
   /\.tl-item:hover \{[^}]*transform: translateX\(3px\)/.test(cssNC) &&
   /\.tl-item:hover::after \{[^}]*opacity: \.85/.test(cssNC) &&
   /\.tl-item:hover \.tl-thumb img \{ transform: scale\(1\.04\); \}/.test(cssNC));
 
-ok('A6 A4 次要文字提亮：--text-dim 已是 #9696a6，旧值 #82828f 不再出现',
+ok('A5 次要文字提亮：--text-dim 已是 #9696a6，旧值 #82828f 不再出现',
   /--text-dim: #9696a6;/.test(cssNC) && !/#82828f/.test(cssNC));
 
-ok('A7 P2 标签 chip：HTML 有容器、JS 有聚合与筛选四件套',
+ok('A6 P2 标签 chip：HTML 有容器、JS 有聚合与筛选四件套',
   /<div class="w-tags" id="w-tags"/.test(html) &&
   /function tagList\(it\)/.test(jsNC) && /function allTags\(\)/.test(jsNC) &&
   /function renderTags\(\)/.test(jsNC) && /function setTag\(next\)/.test(jsNC) &&
   /tagList\(it\)\.indexOf\(tagFilter\) >= 0/.test(jsNC));
 
-ok('A8 P6 删除：按钮在表单页脚、两段式确认、走 PUT 覆盖 JSON（不删图片）',
+ok('A7 P6 删除：按钮在表单页脚、两段式确认、走 PUT 覆盖 JSON（不删图片）',
   /id="w-add-delete"/.test(html) &&
   /var DELETE_ARMED = '确认删除？';/.test(jsNC) &&
   /function submitDelete\(id\)/.test(jsNC) &&
   /data\(watch\): 删除《/.test(jsNC) &&
   /deleteBtn\.hidden = true/.test(jsNC) && /deleteBtn\.hidden = false/.test(jsNC));
 
-ok('A9 P7 SW 缓存数据：独立缓存名 + 网络优先（先 fetch，失败才读缓存）',
+ok('A8 P7 SW 缓存数据：独立缓存名 + 网络优先（先 fetch，失败才读缓存）',
   /var DATA_CACHE = 'watch-data-v1';/.test(swNC) &&
   /var DATA_RE = \/\\\/data\\\/watch\\\.json\$\/;/.test(swNC) &&
   (() => {
@@ -85,7 +77,7 @@ ok('A9 P7 SW 缓存数据：独立缓存名 + 网络优先（先 fetch，失败�
     return a > 0 && b > a && iFetch >= 0 && iCatch > iFetch && iMatch > iCatch;
   })(), '网络优先：fetch → catch → cache.match');
 
-ok('A10 P7 activate 保留两个缓存（否则每次发布都把数据缓存清掉）',
+ok('A9 P7 activate 保留两个缓存（否则每次发布都把数据缓存清掉）',
   /\(k === CACHE \|\| k === DATA_CACHE\) \? null : caches\.delete\(k\)/.test(swNC));
 
 /* ================= mock 数据 ================= */
@@ -154,45 +146,6 @@ async function clickChip(page, tag) {
     if (el) el.click();
   }, tag);
   await page.waitForTimeout(350);
-}
-
-/* ================= B 评分成像 ================= */
-console.log('\n== B 评分成像（A1）==');
-{
-  const { ctx, page } = await newPage();
-  const info = await page.evaluate(() => {
-    const out = {};
-    [...document.querySelectorAll('#w-grid .poster')].forEach((c) => {
-      const t = ((c.querySelector('.poster-name') || {}).textContent || '').trim();
-      const pic = c.querySelector('.poster-pic');
-      const img = c.querySelector('.poster-pic img');
-      out[t] = {
-        score: c.getAttribute('data-score'),
-        border: getComputedStyle(pic).borderTopColor,
-        shadow: getComputedStyle(pic).boxShadow,
-        filter: img ? getComputedStyle(img).filter : '',
-      };
-    });
-    return out;
-  });
-
-  ok('B1 9.9 分 → data-score="hi"，且真的带外发光（box-shadow 里有金色光晕）',
-    info['九点九'].score === 'hi' && /rgba\(232, 176, 75/.test(info['九点九'].shadow) &&
-    info['九点九'].shadow.split(',').length >= 4,
-    `${info['九点九'].score}｜${info['九点九'].border}｜${info['九点九'].shadow.slice(0, 60)}…`);
-
-  /* 档位边界：hi = [9.5, ∞)、mid = [8, 9.5)、无标记 = [7, 8)、low = [0, 7)
-     —— 8.0 落在 mid 下沿（8~9.5 半透明），7.5 才是「维持原样」那一档 */
-  ok('B2 8.5 与 8.0 都 → "mid"（半透明金边）；7.5 → 无标记（7~8 档维持原样）',
-    info['八点五'].score === 'mid' && info['无标签'].score === 'mid' && !info['七点五'].score,
-    `${info['八点五'].score} / ${info['无标签'].score} / ${info['七点五'].score}`);
-
-  ok('B3 5.0 → "low"，且海报被去饱和压暗（computed filter 含 grayscale）',
-    info['五点零'].score === 'low' && /grayscale\(0\.[3-9]/.test(info['五点零'].filter) &&
-    info['五点零'].filter !== info['九点九'].filter,
-    `${info['五点零'].filter}`);
-
-  await ctx.close();
 }
 
 /* ================= C 标签 chip ================= */

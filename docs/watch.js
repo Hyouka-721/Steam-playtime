@@ -67,20 +67,6 @@
     var n = Number(it && it.rating);
     return isFinite(n) && n > 0 ? n : -1;   // 无评分沉底
   }
-  /* 第 80 轮 A1：评分分档 → 海报描边发光强度（样式见 watch.css 的 .poster[data-score]）
-     hi   ≥ 9.5   金边 + 外发光
-     mid  8 ~ 9.5 半透明金边
-     ''   7 ~ 8   原样（这档占多数，不加效果才不至于全屏发光）
-     low  < 7     描边压暗 + 图去饱和，hover 恢复 */
-  function scoreBand(it) {
-    var n = Number(it && it.rating);
-    if (!isFinite(n) || n <= 0) return '';
-    if (n >= 9.5) return 'hi';
-    if (n >= 8) return 'mid';
-    if (n < 7) return 'low';
-    return '';
-  }
-
   /* 第 80 轮 P2：标签读取。历史数据里有两种脏写法（单个字符串含全角逗号、
      数组里塞了「剧情，历史，战争」这种合串），统一在这里拆开、去空、去重，
      这样 chip 与筛选都不会被脏数据带偏。 */
@@ -225,10 +211,8 @@
       var dim = (it.poster_w ? ' width="' + esc(it.poster_w) + '"' : '') +
                 (it.poster_h ? ' height="' + esc(it.poster_h) + '"' : '');
       var srcset = posterSrcset(it);
-      // 第 80 轮 A1：评分档位挂到卡片上，CSS 据此给海报描边发光
-      var band = scoreBand(it);
       return '' +
-        '<article class="poster"' + (band ? ' data-score="' + band + '"' : '') + '>' +
+        '<article class="poster">' +
           '<div class="poster-pic">' +
             '<img src="' + esc(it.poster) + '" alt="' + esc(it.title) + '"' +
               (srcset ? ' srcset="' + esc(srcset) + '" sizes="' + SIZES_ATTR + '"' : '') +
