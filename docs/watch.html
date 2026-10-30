@@ -8,7 +8,7 @@
 <link rel="icon" type="image/webp" href="img/minion-0ef9a202.webp">
 <!-- 与游戏站同一套本地花体字，保持品牌一致；preload + font-display:block 消除 FOUT -->
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="watch.css?v=16">
+<link rel="stylesheet" href="watch.css?v=17">
 </head>
 <body>
 
@@ -145,6 +145,11 @@
       </div>
 
       <div class="w-field">
+        <label class="w-label" for="add-order">排序<span class="w-hint">0~5 的整数，默认 3；观看时间或评分相同时，数值小的排在前</span></label>
+        <input class="w-input w-input-order" type="number" id="add-order" min="0" max="5" step="1" inputmode="numeric" placeholder="3">
+      </div>
+
+      <div class="w-field">
         <label class="w-label" for="add-tags">标签<span class="w-hint">逗号分隔</span></label>
         <input class="w-input" type="text" id="add-tags" placeholder="传记, 历史" autocomplete="off">
       </div>
@@ -177,7 +182,7 @@
 </dialog>
 
 <div class="w-toast" id="w-toast" role="status" hidden></div>
-<script src="watch.js?v=11"></script>
+<script src="watch.js?v=12"></script>
 <script>
 /* 第 75 轮：注册 Service Worker（docs/sw.js）。
    海报是内容哈希命名的不可变资源，Pages 只给 max-age=600，刷新超 10 分钟就要

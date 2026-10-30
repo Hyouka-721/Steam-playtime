@@ -557,6 +557,8 @@ code {
 .w-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring); }
 .w-textarea { resize: vertical; min-height: 58px; }
 select.w-input { cursor: pointer; }
+/* 第 78 轮：排序是 0~5 的个位数，不必占满整行；标签提示另起一行，输入框靠左收窄 */
+.w-input.w-input-order { width: 118px; }
 
 /* 海报选择 */
 .w-pick { display: flex; gap: 12px; align-items: flex-start; }

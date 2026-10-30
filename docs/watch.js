@@ -64,18 +64,42 @@
     var n = Number(it && it.rating);
     return isFinite(n) && n > 0 ? n : -1;   // 无评分沉底
   }
-  // 默认序：观影时间倒序 → 同日按上传时间正序 → id 字典序稳定收尾
-  function cmpTime(a, b) {
-    var d = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
-    if (d !== 0) return d;
+
+  /* ---------- 第 78 轮：手动「排序」值 ----------
+     order ∈ [0,5] 的整数，越小越靠前；缺字段 / 空串 / 非整数 / 越界 一律当 3。
+     默认值在「读取时」生效（不要求数据里一定有这个字段），所以老数据零迁移。 */
+  var ORDER_DEFAULT = 3;
+  function orderVal(it) {
+    var raw = it == null ? null : it.order;
+    if (raw == null || raw === '') return ORDER_DEFAULT;
+    var n = Number(raw);
+    if (!isFinite(n) || Math.floor(n) !== n || n < 0 || n > 5) return ORDER_DEFAULT;
+    return n;
+  }
+  // 排序值升序；相等返回 0（交给下一级 tie-break）
+  function cmpOrder(a, b) {
+    return orderVal(a) - orderVal(b);
+  }
+  // 末级兜底：上传时间正序 → id 字典序
+  function cmpAdded(a, b) {
     var s = stampKey(a.added_at) - stampKey(b.added_at);
     if (s !== 0) return s;
     return String(a.id || '').localeCompare(String(b.id || ''));
   }
-  // 评分序：高评分在前（无评分沉底），并列回落默认序
+  // 默认序：观影时间倒序 → 同日按「排序」升序 → 上传时间正序 → id 字典序稳定收尾
+  function cmpTime(a, b) {
+    var d = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
+    if (d !== 0) return d;
+    var o = cmpOrder(a, b);
+    if (o !== 0) return o;
+    return cmpAdded(a, b);
+  }
+  // 评分序：高评分在前（无评分沉底），并列按「排序」升序，再回落默认序
   function cmpRating(a, b) {
     var vb = ratingVal(b), va = ratingVal(a);
     if (vb !== va) return vb - va;
+    var o = cmpOrder(a, b);
+    if (o !== 0) return o;
     return cmpTime(a, b);
   }
   function ordered(list) {
@@ -556,6 +580,9 @@
     syncTokenState();
     var d = document.getElementById('add-watched');
     if (d && !d.value) d.value = localDateValue(new Date());
+    // 第 78 轮：新增时排序预填默认值 3（不是留空，让用户一眼看见可改）
+    var o = document.getElementById('add-order');
+    if (o) o.value = String(ORDER_DEFAULT);
     if (!dlgEl) return;
     if (typeof dlgEl.showModal === 'function') dlgEl.showModal();
     else dlgEl.setAttribute('open', '');
@@ -600,6 +627,28 @@
     return el ? String(el.value == null ? '' : el.value).trim() : '';
   }
 
+  /* 第 78 轮：读「排序」输入框
+     · 留空            → 默认 3（合法）
+     · 0~5 的整数字符串 → 取该值
+     · 其它（小数 / 越界 / 负数 / 非数字）→ 非法，调用方负责提示并阻断保存
+     · 浏览器原生 number 控件遇到 "abc" 这类会清空 value 并置 badInput，必须单独判，
+       否则会被当成「留空」静默存成 3 */
+  var ORDER_ERR = '排序只能填 0~5 的整数（留空按 3）';
+  function readOrderField() {
+    var el = document.getElementById('add-order');
+    if (el && el.validity && el.validity.badInput) return { ok: false };
+    var raw = el ? String(el.value == null ? '' : el.value).trim() : '';
+    if (raw === '') return { ok: true, v: ORDER_DEFAULT };
+    if (!/^[0-5]$/.test(raw)) return { ok: false };
+    return { ok: true, v: Number(raw) };
+  }
+  // 校验失败时统一动作：提示 + 聚焦回填该字段
+  function rejectOrder() {
+    setMsg(ORDER_ERR, 'err');
+    var el = document.getElementById('add-order');
+    if (el) { el.focus(); if (el.select) el.select(); }
+  }
+
   // 打开编辑：预填现有字段 + 展示当前海报（编辑时不换图，避免旧图变孤儿文件）
   function openEdit(it) {
     if (!dlgEl || !it) return;
@@ -617,6 +666,8 @@
     // date 控件只认 YYYY-MM-DD；「2026」「2026-10」这种粗粒度留空，保存时回退原值
     setField('add-watched', /^\d{4}-\d{2}-\d{2}$/.test(String(it.watched_at || '')) ? it.watched_at : '');
     setField('add-rating', it.rating == null ? '' : it.rating);
+    // 第 78 轮：排序值预填 —— 老数据没有 order 字段，这里直接显示默认值 3
+    setField('add-order', orderVal(it));
     setField('add-tags', Array.isArray(it.tags) ? it.tags.join(', ') : '');
     setField('add-note', it.note || '');
 
@@ -666,6 +717,9 @@
     var ratingRaw = fieldVal('add-rating');
     var tagsRaw = fieldVal('add-tags');
     var note = fieldVal('add-note');
+    // 第 78 轮：排序值校验（非法 → 提示并阻断保存，绝不静默改成默认值）
+    var orderRead = readOrderField();
+    if (!orderRead.ok) { rejectOrder(); return; }
 
     var next = { id: old.id, title: title, kind: kind, watched_at: watched, poster: posterPath };
     if (old.added_at) next.added_at = old.added_at;   // 第 72 轮：编辑只改字段，上传时间保持首次录入
@@ -680,6 +734,7 @@
     if (en) next.title_en = en;
     if (yearRaw) next.year = Number(yearRaw) || yearRaw;
     if (ratingRaw !== '' && !isNaN(Number(ratingRaw))) next.rating = Number(ratingRaw);
+    next.order = orderRead.v;   // 第 78 轮：显式落库（留空时写默认 3，便于日后直接从数据读）
     if (tagsRaw) next.tags = tagsRaw.split(',').map(function (x) { return x.trim(); }).filter(Boolean);
     if (note) next.note = note;
 
@@ -757,6 +812,10 @@
 
     // 第 69 轮：编辑模式走另外一条路径（保留原 id 与海报，只改表单字段）
     if (editingId) { submitEdit(); return; }
+
+    // 第 78 轮：新增路径的排序值校验（编辑路径在 submitEdit 里校验，避免重复提示）
+    var orderRead = readOrderField();
+    if (!orderRead.ok) { rejectOrder(); return; }
 
     // id 延迟到拿到仓库数据后解析：同 id 同片名 = 更新；同 id 不同片名 = 追 -2/-3 后缀
     var slug = makeSlug(en, title);
@@ -839,6 +898,7 @@
         if (en) item.title_en = en;
         if (yearRaw) item.year = Number(yearRaw) || yearRaw;
         if (ratingRaw !== '' && !isNaN(Number(ratingRaw))) item.rating = Number(ratingRaw);
+        item.order = orderRead.v;   // 第 78 轮：排序值（0~5，默认 3）
         if (tagsRaw) item.tags = tagsRaw.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
         if (note) item.note = note;
 

@@ -44,6 +44,8 @@ const HELP = `
   --year <年份>       如 2023
   --watched <日期>    观影时间，支持 2026-10-24 / 2026-10 / 2026，默认今天
   --rating <0-10>     评分，可小数
+  --order <0-5>       手动排序值（整数，越小越前）；观看时间或评分相同时用它定先后，
+                      默认 3（第 78 轮）
   --tags <a,b,c>      逗号分隔
   --note <感想>       一两句短评
   --id <自定义 id>    默认 <watched>-<slug>，指定它可精确覆盖某条
@@ -120,10 +122,22 @@ function stampKey(s) {
   return Number.isNaN(t) ? 0 : t;
 }
 
-// 第 72 轮：观影时间倒序 → 同日按上传时间正序（先上传居前）→ id 字典序稳定收尾
+// 第 78 轮：手动排序值（0~5 整数，越小越前；缺字段/非法一律当 3），与 watch.js 的 orderVal 一致
+const ORDER_DEFAULT = 3;
+function orderVal(it) {
+  const raw = it == null ? null : it.order;
+  if (raw == null || raw === '') return ORDER_DEFAULT;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || Math.floor(n) !== n || n < 0 || n > 5) return ORDER_DEFAULT;
+  return n;
+}
+
+// 第 78 轮：观影时间倒序 → 同日按「排序」升序 → 上传时间正序 → id 字典序稳定收尾
 function cmpTime(a, b) {
   const d = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
   if (d !== 0) return d;
+  const o = orderVal(a) - orderVal(b);
+  if (o !== 0) return o;
   const s = stampKey(a.added_at) - stampKey(b.added_at);
   if (s !== 0) return s;
   return String(a.id || '').localeCompare(String(b.id || ''));
@@ -193,6 +207,14 @@ async function main() {
     rating = r;
   }
 
+  // 第 78 轮：--order 只接受 0~5 的整数；不传则沿用旧值 / 默认 3
+  let order;
+  if (args.order !== undefined && args.order !== true) {
+    const o = Number(args.order);
+    if (!Number.isInteger(o) || o < 0 || o > 5) die(`--order 需要 0~5 的整数，收到：${args.order}`);
+    order = o;
+  }
+
   // ---- 图片处理 ----
   // 第 75 轮：resize 管道提成函数——主图与 320/480 变体共用同一套裁剪/压缩参数
   const VARIANT_WIDTHS = [320, 480];
@@ -235,6 +257,9 @@ async function main() {
     ...(args.year ? { year: Number(args.year) || String(args.year) } : (prev && prev.year ? { year: prev.year } : {})),
     watched_at: watchedAt,
     ...(rating !== undefined ? { rating } : (prev && prev.rating !== undefined ? { rating: prev.rating } : {})),
+    // 第 78 轮：排序值。只在显式给了 --order 或旧条目本来就有时才写字段，
+    // 缺字段按默认 3 处理（与网页端读取逻辑一致），避免给老条目添噪音字段
+    ...(order !== undefined ? { order } : (prev && prev.order !== undefined ? { order: prev.order } : {})),
     poster: relPoster,
     poster_w: outMeta.width,
     poster_h: outMeta.height,
@@ -266,6 +291,7 @@ async function main() {
   console.log(`  id       ${id}`);
   console.log(`  观影时间 ${watchedAt}   类型 ${kind}${args.year ? '   年份 ' + args.year : ''}`);
   if (rating !== undefined) console.log(`  评分     ${rating}`);
+  console.log(`  排序     ${item.order === undefined ? ORDER_DEFAULT + '（默认，未落库）' : item.order}`);
   console.log(`  海报     ${relPoster}  (${outMeta.width}×${outMeta.height})`);
   if (variants.length) {
     console.log(`  变体     ${variants.map((v) => `${v.rel} (${v.w}px, ${kb(v.bytes.length)})`).join(' / ')}`);
