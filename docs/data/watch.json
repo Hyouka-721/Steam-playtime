@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-29T18:41:22+08:00",
+  "updated_at": "2026-10-30T18:45:32+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1566,6 +1566,22 @@
       "year": 2011,
       "rating": 7.5,
       "note": "其实我一直在等那个有你的夏天"
+    },
+    {
+      "id": "2020-03-03-battle-of-the-midway",
+      "title": "决战中途岛",
+      "kind": "movie",
+      "watched_at": "2020-03-03",
+      "added_at": "2026-10-30T18:45:32+08:00",
+      "poster": "img/watch/battle-of-the-midway-cb54f507.webp",
+      "poster_w": 640,
+      "poster_h": 894,
+      "poster_320": "img/watch/battle-of-the-midway-cb54f507-320.webp",
+      "poster_480": "img/watch/battle-of-the-midway-cb54f507-480.webp",
+      "title_en": "Battle of the Midway",
+      "year": 2019,
+      "rating": 7.5,
+      "note": "战争的棋局"
     },
     {
       "id": "2020-02-16-1566",
