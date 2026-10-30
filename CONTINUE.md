@@ -34,7 +34,7 @@ docs/                 # = 发布根 = 源码（零构建；docs/ 就是 GitHub P
 scripts/              # 数据管线（fetch/diff/build/backfill/inline-boot/localize）+ watch-add.mjs + watch-variants.mjs + lib/
 data/                 # 管线原始数据（achievements/daily/manual/overrides/snapshots/cache），git 跟踪
 tests/                # 第 70 轮新收编：回归测试套件
-├── verify/           # 23 个本地回归脚本 verify6/47~78.mjs
+├── verify/           # 24 个本地回归脚本 verify6/47~79.mjs
 ├── online/           # 上线复验 online65/66/68/69/70/72/75/77.mjs
 ├── tools/            # rebase 数据冲突合并器 merge*.py
 └── README.md         # 怎么跑 + 约定
@@ -100,7 +100,8 @@ tests/                # 第 70 轮新收编：回归测试套件
     ④ **排序位置**：`cmpTime` = 观看时间倒序 → **order 升序** → 上传时间正序 → id；`cmpRating` = 评分倒序 → **order 升序** → 回落 `cmpTime`。所以三种并列情形分别落到：仅时间相同（时间轴看 order、评分序看评分）／仅评分相同（评分序看 order、时间轴看日期）／两者都相同（两种视图都看 order）
     ⑤ `watch.css?v=16→17` / `watch.js?v=11→12`（19 个回归脚本 59 处硬编码同步）；`scripts/watch-add.mjs` 加 `--order`（只在显式给出或旧条目本来有时才写字段）
     ⑥ 新增 `tests/verify/verify78.mjs` **38 条**：静态指纹 16 + 表单校验 9（含 PUT 体解 base64 核对落库值）+ 三种并列情形 10 + 老数据零影响 2（用「不含 order 的旧比较器」重算期望值逐条比对）
-- 回归基线：**23 个脚本 909 条断言**（`verify78.mjs` 38 条；`verify6` 的 3 条是内联快照超龄，非代码问题）。
+- 第 79 轮 = **交互契约守卫**（未改任何站点代码）：用户要求确认保持「网格卡片不可点击编辑、只有时间轴条目可点」。核查结论：事件委托仍只挂在 `#w-tl`（第 69 轮设计），网格 `.poster` 模板无 `data-id` / 无 `role="button"` / 无 `tabindex`，`.poster` 也无 `cursor:pointer`，`gridEl.addEventListener` 全文 0 次。新增 `tests/verify/verify79.mjs` **16/16**（静态 8 + 运行时 8：点海报图/点片名/连点 4 张/键盘 Enter·空格/布局往返后仍点不开；对照项确认时间轴条目点得开、`tabIndex=0`、Enter 可编辑）
+- 回归基线：**24 个脚本 925 条断言**（`verify78.mjs` 38 条 + `verify79.mjs` 16 条；`verify6` 的 3 条是内联快照超龄，非代码问题）。
   `verify67` 的高度判据已从代理观测值升级为**真不变量**：`条目高 ≡ max(缩略图高, 名称头高) + 固定 chrome`（8 档视口实测差值恒为 28），
   取代原来的「折行条目只高 1px」和「英文名最多 2 行」——后两者只是 (中文名2行/英文名2行) 一种组合下的快照，第 65 轮契约本就是「折行而不是顶宽、不截断」。
 - 归档：每轮成果在 `C:\Users\33329\Documents\Misc\对话成果\Steam游戏时长站\06_验证截图\<日期>_<主题>\`（含 `归档清单.md` + 截图 + 脚本），索引在 `Documents\Misc\对话成果\索引.md`。
