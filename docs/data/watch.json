@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-30T18:48:52+08:00",
+  "updated_at": "2026-10-30T18:51:03+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -531,6 +531,22 @@
       "rating": 5,
       "note": "莫名其妙",
       "added_at": "2026-10-25T09:26:55+08:00"
+    },
+    {
+      "id": "2023-05-31-prehistoric-planet",
+      "title": "史前星球",
+      "kind": "series",
+      "watched_at": "2023-05-31",
+      "added_at": "2026-10-30T18:51:03+08:00",
+      "poster": "img/watch/prehistoric-planet-bbfd4f72.webp",
+      "poster_w": 640,
+      "poster_h": 960,
+      "poster_320": "img/watch/prehistoric-planet-bbfd4f72-320.webp",
+      "poster_480": "img/watch/prehistoric-planet-bbfd4f72-480.webp",
+      "title_en": "Prehistoric Planet",
+      "year": 2022,
+      "rating": 8.5,
+      "note": "“The prehistoic plant is a green planet.”"
     },
     {
       "id": "2023-05-06-three-body",
