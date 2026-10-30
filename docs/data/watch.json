@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-30T20:01:32+08:00",
+  "updated_at": "2026-10-30T20:01:52+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -234,6 +234,7 @@
       "kind": "series",
       "watched_at": "2025-10-06",
       "poster": "img/watch/soldiers-sortie-820a09b0.webp",
+      "added_at": "2026-10-24T23:10:06+08:00",
       "poster_w": 640,
       "poster_h": 960,
       "poster_320": "img/watch/soldiers-sortie-820a09b0-320.webp",
@@ -241,8 +242,8 @@
       "title_en": "Soldiers Sortie",
       "year": 2006,
       "rating": 9,
-      "note": "好好活，就有意义",
-      "added_at": "2026-10-24T23:10:06+08:00"
+      "order": 1,
+      "note": "好好活，就有意义"
     },
     {
       "id": "2025-06-13-dunkirk",
