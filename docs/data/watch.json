@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-30T20:00:29+08:00",
+  "updated_at": "2026-10-30T20:00:45+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -585,8 +585,8 @@
       "title": "是大臣",
       "kind": "series",
       "watched_at": "2022-09-14",
-      "added_at": "2026-10-30T18:48:52+08:00",
       "poster": "img/watch/yes-minister-ed97481e.webp",
+      "added_at": "2026-10-30T18:48:52+08:00",
       "poster_w": 640,
       "poster_h": 906,
       "poster_320": "img/watch/yes-minister-ed97481e-320.webp",
@@ -594,6 +594,7 @@
       "title_en": "Yes Minister",
       "year": 1980,
       "rating": 9.9,
+      "order": 0,
       "note": "Yes Minister"
     },
     {
