@@ -221,8 +221,12 @@ console.log('\n== C Service Worker ==');
     return { n: urls.length, timing: es.length, zero: es.filter((e) => e.transferSize === 0).length };
   });
   ok('C1 线上 SW 已注册并控制页面（sw.js 生效）', ctrl, `controller=${ctrl}`);
-  ok('C2 SW 缓存 watch-posters-v1 已收录海报（缓存数 = 本次请求的海报数）',
-    cacheInfo.n > 0 && cacheInfo.n === cacheInfo.timing, `缓存 ${cacheInfo.n} / 请求 ${cacheInfo.timing}`);
+  /* 第 79 轮改判据：原判据要求「缓存数 === 本次请求数」，但缓存是**跨两次加载累积**的
+     （首次加载的首屏 eager 图 + reload 后的请求），两个计数天然不等；
+     真契约是「请求过的海报都进了缓存，且缓存不会比请求少」→ 用 ≥，
+     同时保留 n>0 防止 SW 完全没工作。实测 119 条时 缓存 9 / 请求 6 属正常。 */
+  ok('C2 SW 缓存 watch-posters-v1 已收录海报（缓存数 ≥ 本次请求的海报数）',
+    cacheInfo.n > 0 && cacheInfo.n >= cacheInfo.timing, `缓存 ${cacheInfo.n} / 请求 ${cacheInfo.timing}`);
 
   /* 再访问一次：海报全部由 SW 提供（fromServiceWorker）且零网络传输 */
   swResp.length = 0;
