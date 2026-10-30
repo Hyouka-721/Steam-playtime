@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-30T20:03:24+08:00",
+  "updated_at": "2026-10-30T20:03:43+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -557,8 +557,8 @@
       "title": "三体",
       "kind": "movie",
       "watched_at": "2023-05-06",
-      "added_at": "2026-10-26T20:47:59+08:00",
       "poster": "img/watch/three-body-0d024e88.webp",
+      "added_at": "2026-10-26T20:47:59+08:00",
       "poster_w": 640,
       "poster_h": 1138,
       "poster_320": "img/watch/three-body-0d024e88-320.webp",
@@ -566,6 +566,7 @@
       "title_en": "Three-Body",
       "year": 2023,
       "rating": 8,
+      "order": 1,
       "note": "时间的尽头~"
     },
     {
