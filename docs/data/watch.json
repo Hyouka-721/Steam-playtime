@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-30T18:47:35+08:00",
+  "updated_at": "2026-10-30T18:48:52+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -563,6 +563,22 @@
       "year": 2023,
       "rating": 8,
       "note": "起初，没有人在意这一场灾难"
+    },
+    {
+      "id": "2022-09-14-yes-minister",
+      "title": "是大臣",
+      "kind": "series",
+      "watched_at": "2022-09-14",
+      "added_at": "2026-10-30T18:48:52+08:00",
+      "poster": "img/watch/yes-minister-ed97481e.webp",
+      "poster_w": 640,
+      "poster_h": 906,
+      "poster_320": "img/watch/yes-minister-ed97481e-320.webp",
+      "poster_480": "img/watch/yes-minister-ed97481e-480.webp",
+      "title_en": "Yes Minister",
+      "year": 1980,
+      "rating": 9.9,
+      "note": "Yes Minister"
     },
     {
       "id": "2022-08-09-item",
