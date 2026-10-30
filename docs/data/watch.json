@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-30T20:02:31+08:00",
+  "updated_at": "2026-10-30T20:03:03+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -291,6 +291,7 @@
       "title_en": "Heidi",
       "year": 2015,
       "rating": 8.5,
+      "order": 2,
       "note": "生命的单纯和美好"
     },
     {
