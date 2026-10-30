@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-30T20:01:52+08:00",
+  "updated_at": "2026-10-30T20:02:31+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -1881,8 +1881,8 @@
       "title": "我想吃掉你的胰脏",
       "kind": "movie",
       "watched_at": "2019-07-11",
-      "added_at": "2026-10-25T16:14:10+08:00",
       "poster": "img/watch/item-dada35c9.webp",
+      "added_at": "2026-10-25T16:14:10+08:00",
       "poster_w": 640,
       "poster_h": 903,
       "poster_320": "img/watch/item-dada35c9-320.webp",
@@ -1890,6 +1890,7 @@
       "title_en": "君の膵臓をたべたい",
       "year": 2018,
       "rating": 9,
+      "order": 1,
       "note": "死不是生的对立面，而是作为生的一部分永恒"
     },
     {
