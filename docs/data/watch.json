@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-30T18:55:16+08:00",
+  "updated_at": "2026-10-30T20:00:17+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -816,6 +816,7 @@
       "title_en": "Love Letter",
       "year": 1995,
       "rating": 9.9,
+      "order": 1,
       "note": "因为我太害羞所以没有把这封信寄出去"
     },
     {
