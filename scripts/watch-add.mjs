@@ -301,18 +301,26 @@ async function main() {
   console.log(`  总数     ${data.items.length} 条`);
 
   if (prev && prev.poster && prev.poster !== relPoster) {
-    const oldAbs = path.join(DOCS, prev.poster);
-    if (fs.existsSync(oldAbs)) {
-      console.log(`\n  旧海报已不再被引用：${prev.poster}`);
-      if (args.dry) console.log('  （--dry：不删除）');
-      else { fs.unlinkSync(oldAbs); console.log('  已删除旧海报文件'); }
-    }
-    // 第 75 轮：旧变体一并清理（命名规则 <旧主图名>-<宽>.webp）
-    for (const vw of VARIANT_WIDTHS) {
-      const oldV = path.join(DOCS, prev.poster.replace(/\.webp$/, '') + `-${vw}.webp`);
-      if (fs.existsSync(oldV)) {
-        if (args.dry) console.log(`  （--dry：不删除旧变体 ${oldV}）`);
-        else { fs.unlinkSync(oldV); console.log(`  已删除旧变体 ${path.basename(oldV)}`); }
+    /* 第 79 轮：海报文件名带内容哈希 → 同内容必然同名，同一部作品重看两次会共用一张图。
+       共用时**绝对不能删**：删掉会把另一条直接变成死链（浏览器端编辑不会删文件，
+       只有本 CLI 会 unlink，所以这个守卫只在这里加）。 */
+    const sharedBy = data.items.filter((x) => x && x.poster === prev.poster);
+    if (sharedBy.length) {
+      console.log(`\n  旧海报仍被其它条目共用（${sharedBy.length} 条：${sharedBy.map((x) => x.id).join(', ')}），保留不删：${prev.poster}`);
+    } else {
+      const oldAbs = path.join(DOCS, prev.poster);
+      if (fs.existsSync(oldAbs)) {
+        console.log(`\n  旧海报已不再被引用：${prev.poster}`);
+        if (args.dry) console.log('  （--dry：不删除）');
+        else { fs.unlinkSync(oldAbs); console.log('  已删除旧海报文件'); }
+      }
+      // 第 75 轮：旧变体一并清理（命名规则 <旧主图名>-<宽>.webp）
+      for (const vw of VARIANT_WIDTHS) {
+        const oldV = path.join(DOCS, prev.poster.replace(/\.webp$/, '') + `-${vw}.webp`);
+        if (fs.existsSync(oldV)) {
+          if (args.dry) console.log(`  （--dry：不删除旧变体 ${oldV}）`);
+          else { fs.unlinkSync(oldV); console.log(`  已删除旧变体 ${path.basename(oldV)}`); }
+        }
       }
     }
   }

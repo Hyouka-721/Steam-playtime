@@ -95,15 +95,22 @@ ok('B2 《她和她的猫》海报换成 item-b73c9fed.webp：文件在、hash �
 ok('B3 旧海报 item-58c40d47.webp 已删除（无死链）',
   !fs.existsSync(ROOT + 'img/watch/item-58c40d47.webp') &&
   !data.items.some((x) => String(x.poster || '').includes('58c40d47')));
-ok('B4 海报库无孤儿（第 75 轮变体契约：base 恰好一条引用；变体只能是 <base>-320/-480.webp 且被对应条目 poster_<w> 字段引用）',
+ok('B4 海报库无孤儿（第 75 轮变体契约：base 无死链；同内容可同名共用但必须同作品；变体只能是 <base>-320/-480.webp 且被对应条目 poster_<w> 字段引用）',
   (() => {
     const dir = ROOT + 'img/watch/';
     const files = fs.readdirSync(dir).filter((f) => f.endsWith('.webp'));
     const base = (p) => String(p || '').replace('img/watch/', '');
     const used = data.items.map((x) => base(x.poster));
-    // ① base：无死链、无重复引用
-    if (used.length !== new Set(used).size) return false;
+    // ① base：无死链。第 79 轮放宽「恰好一条引用」——文件名带内容哈希，同内容必然同名，
+    //    同一部作品被录两次（重看）会合法共用一张图；但共用者必须是**同名作品**，
+    //    不同作品撞到同一张图仍然是错的（换海报时会误伤）。
     if (used.some((u) => !files.includes(u))) return false;
+    const byPoster = {};
+    for (const x of data.items) {
+      const b = base(x.poster);
+      (byPoster[b] = byPoster[b] || new Set()).add(String(x.title || '').trim());
+    }
+    if (Object.values(byPoster).some((titles) => titles.size > 1)) return false;
     // ② 变体：字段指向的文件必须存在，且文件名 = 该条目 base 的主干 + -<宽>
     const refs = [];
     for (const x of data.items) {
@@ -116,7 +123,8 @@ ok('B4 海报库无孤儿（第 75 轮变体契约：base 恰好一条引用；�
         refs.push(rel);
       }
     }
-    if (refs.length !== new Set(refs).size) return false;
+    // 变体允许被共用同一张图的多条记录重复引用（同上，文件名由 base 主干推出），
+    // 因此这里不再要求 refs 唯一；重复=同文件，磁盘上只会有一份。
     // ③ 磁盘上每个文件：要么是被引用的 base，要么是被字段引用的变体——不允许第三者
     const allowed = new Set(used.concat(refs));
     return files.every((f) => allowed.has(f));
@@ -125,7 +133,12 @@ ok('B4 海报库无孤儿（第 75 轮变体契约：base 恰好一条引用；�
     const dir = ROOT + 'img/watch/';
     const files = fs.readdirSync(dir).filter((f) => f.endsWith('.webp'));
     const nV = data.items.filter((x) => x.poster_320 || x.poster_480).length;
-    return `${files.length} 个文件（base ${data.items.length} + 变体 ${files.length - data.items.length}）/ ${data.items.length} 条记录，${nV} 条带变体`;
+    const base = (p) => String(p || '').replace('img/watch/', '');
+    const cnt = {};
+    data.items.forEach((x) => { const b = base(x.poster); cnt[b] = (cnt[b] || 0) + 1; });
+    const shared = Object.values(cnt).filter((n) => n > 1).length;
+    return `${files.length} 个文件 / ${data.items.length} 条记录，${nV} 条带变体` +
+      (shared ? `，${shared} 张图被同作品重看共用` : '');
   })());
 
 const anime = data.items.filter((x) => x.kind === 'anime').map((x) => x.title);
