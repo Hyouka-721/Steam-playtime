@@ -8,7 +8,7 @@
 <link rel="icon" type="image/webp" href="img/minion-0ef9a202.webp">
 <!-- 与游戏站同一套本地花体字，保持品牌一致；preload + font-display:block 消除 FOUT -->
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="watch.css?v=17">
+<link rel="stylesheet" href="watch.css?v=18">
 </head>
 <body>
 
@@ -49,6 +49,10 @@
     <button type="button" class="w-sort-btn is-on" data-sort="time" aria-pressed="true">观看时间</button>
     <button type="button" class="w-sort-btn" data-sort="rating" aria-pressed="false">评分</button>
   </div>
+  <!-- 第 80 轮 P2：标签 chip 行。内容由 watch.js 从数据里动态聚合（谁有标签就出谁），
+       所以新增一部带新标签的片子会自动多一枚 chip，不需要改代码。
+       点一枚=筛选，再点一次=取消；与上面的「类型」档位叠加生效。 -->
+  <div class="w-tags" id="w-tags" role="group" aria-label="按标签筛选" hidden></div>
 </div>
 
 <main class="w-main">
@@ -174,6 +178,9 @@
     <footer class="w-add-foot">
       <p class="w-add-msg" id="w-add-msg" role="status"></p>
       <div class="w-add-actions">
+        <!-- 第 80 轮 P6：只在「编辑模式」出现的删除按钮（两段式确认，见 watch.js removeArmed）。
+             删除只动 JSON 里这一条，海报文件保留 —— 不会牵连共用同一张图的重看条目。 -->
+        <button class="w-btn w-btn-danger" id="w-add-delete" type="button" hidden>删除这条</button>
         <button class="w-btn w-btn-ghost" id="w-add-cancel" type="button">取消</button>
         <button class="w-btn w-btn-primary" id="w-add-submit" type="submit">提交</button>
       </div>
@@ -182,7 +189,7 @@
 </dialog>
 
 <div class="w-toast" id="w-toast" role="status" hidden></div>
-<script src="watch.js?v=12"></script>
+<script src="watch.js?v=13"></script>
 <script>
 /* 第 75 轮：注册 Service Worker（docs/sw.js）。
    海报是内容哈希命名的不可变资源，Pages 只给 max-age=600，刷新超 10 分钟就要

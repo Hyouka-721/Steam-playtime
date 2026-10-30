@@ -23,16 +23,16 @@ tests/
   ```
   C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe tests/verify/verify70.mjs
   ```
-- 跑全部 24 个套件（在 bash 里循环）：
+- 跑全部 25 个套件（在 bash 里循环）：
   ```bash
   NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
   for s in verify6 verify47 verify48 verify49 verify54 verify55 verify56 verify57 verify58 \
-           verify60 verify62 verify63 verify64 verify65 verify66 verify67 verify68 verify69 verify70 verify72 verify73 verify75 verify78 verify79; do
+           verify60 verify62 verify63 verify64 verify65 verify66 verify67 verify68 verify69 verify70 verify72 verify73 verify75 verify78 verify79 verify80; do
     echo "== $s =="; "$NODE" tests/verify/$s.mjs 2>&1 | tail -2
   done
   ```
 
-## 套件清单与当前基线（第 79 轮，共 24 套件 925 条）
+## 套件清单与当前基线（第 80 轮，共 25 套件 955 条）
 
 | 脚本 | 覆盖轮次 / 契约 | 条数 |
 |---|---|---|
@@ -60,6 +60,7 @@ tests/
 | `verify75` | 图片加载性能（srcset 320/480 变体 + SW cache-first）+ 默认网格 + 默认评分序 | 17 |
 | `verify78` | 手动「排序」字段（order 0~5 默认 3）：表单预填/非法输入阻断/三种并列情形/老数据零影响 | 38 |
 | `verify79` | **守卫**：网格卡片不可点击编辑、只有时间轴条目可点（第 69 轮的绑定范围不许扩大） | 16 |
+| `verify80` | 第 80 轮七项：评分三档描边/胶片颗粒+放映机光晕/时间轴 hover 统一/次文字提亮/标签 chip 筛选/网页端删除（两段式）/SW 缓存 watch.json（网络优先） | 31 |
 
 `online75`（14 条）：Pages 生效 + 海报三档逐字节 + 线上默认态 + **SW 硬证据**（`response.fromServiceWorker()`）。
 `online77`（14 条）：《情书》海报替换全链路 —— 线上五字段 + **整份 watch.json md5 全等** + 新三档逐字节 + **旧三档必须 404** + 网格 `currentSrc` 命中变体 + 时间轴缩略图 + 该海报的 SW 命中。⚠️ 里面「故意探旧图 404」用 `probing404` 开关把浏览器的 404 控制台日志排除掉，否则会把自己的探针算成站点 JS 异常。
@@ -85,6 +86,9 @@ tests/
 - **⚠️ 带 `w` 描述符的 srcset，`naturalWidth` 是「密度校正 intrinsic 尺寸」**（≈ 卡片布局宽，不是被选中文件的原始像素宽）——断言图片真实尺寸要 `fetch(currentSrc)` + `createImageBitmap` 单独量（verify70 C3 / verify75 B6 的写法）；变体高度是 sharp 按比例算的（472.5 → 472），断言用 ±1 容差。
 - **本地服务 curl 加 `--noproxy '*'`**；本机 `hosts` 把 github 系列域名指向 127.0.0.1，线上探测一律用 Playwright（`--no-proxy-server`）+ 页内 `fetch(url,{cache:'reload'})`。
 - 脚本里的绝对路径（`ROOT` / `OUT` / `createRequire`）是本机专用；换机器要改这几处。
+- ⚠️ **`sw.js` 从第 80 轮起也拦 `/data/watch.json`**（网络优先）。凡是靠 `page.route('**/data/watch.json*')` 造假数据的套件，context 必须带 `serviceWorkers: 'block'`；否则刷新一次后请求改由 SW 发出，**`page.route` 根本拦不到**（Playwright 只拦页面发起的网络），造数静默失效。
+- ⚠️ 想验证「SW 到底有没有接管」时，别只看 `response.fromServiceWorker()`：**SW 里直接 `return fetch(req)` 透传网络响应时，Chromium 不置这个标志**（实测恒为 false，会误判成「SW 没拦」）。可靠信号是 `performance.getEntriesByType('resource')` 里该 URL 的 `workerStart > 0`，再配一条「缓存里确实有副本」`caches.open('watch-data-v1').match(...)`。`verify75` C3 就是这么改的（原判据「`page.route` 命中 ≥2」在 P7 之后必然恒 0 —— 代理失效不等于契约破坏）。
+- ⚠️ **别在 CSS 里另起一个 `@media (max-width: 860px)` 块**：`verify60` / `verify62` 是按「文件里**第一个** 860 块」取内容的，新块插在前面会把它们要看的那块挤到第二位，断言全落空（本轮就踩了一次，表现为「改了个表单页脚，网格断点却 FAIL」）。窄屏规则一律追加进那个既有的 860 块。
 
 ## 关于旧脚本
 

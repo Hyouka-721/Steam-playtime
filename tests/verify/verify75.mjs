@@ -54,8 +54,8 @@ function cmpRating(a, b) {
 
 /* ================= A 静态：代码与数据契约 ================= */
 console.log('== A 静态 ==');
-ok('A1 watch.html 引用 watch.js?v=12（静态资源版本已 bump）',
-  /<script src="watch\.js\?v=12"><\/script>/.test(html), (html.match(/watch\.js\?v=\d+/) || [''])[0]);
+ok('A1 watch.html 引用 watch.js?v=13（静态资源版本已 bump）',
+  /<script src="watch\.js\?v=13"><\/script>/.test(html), (html.match(/watch\.js\?v=\d+/) || [''])[0]);
 
 ok('A2 默认态常量：var layout = "grid" / var sort = "rating"',
   /var layout = 'grid';/.test(js) && /var sort = 'rating';/.test(js),
@@ -214,9 +214,6 @@ await p.screenshot({ path: OUT + 'B1_默认网格_评分序_1440.png' });
 
 /* ================= C 运行时：SW cache-first ================= */
 console.log('== C 运行时：Service Worker ==');
-let jsonHits = 0;
-await p.route('**/watch.json', (r) => { jsonHits++; r.continue(); });
-
 await p.evaluate(() => navigator.serviceWorker.ready);
 await p.reload({ waitUntil: 'load' });
 await p.waitForFunction(() => navigator.serviceWorker.controller !== null, null, { timeout: 20000 }).catch(() => {});
@@ -266,7 +263,37 @@ ok('C2 三次访问后所有海报 transferSize=0（SW cache-first，零网络�
   timing.n >= 20 && timing.bad.length === 0,
   `${timing.n} 个海报资源${timing.bad.length ? '，非零：' + timing.bad.slice(0, 3).join(' ') : '，全部 0'}`);
 
-ok('C3 watch.json 请求仍走网络（SW 不误伤数据协商）', jsonHits >= 2, `route 命中 ${jsonHits} 次`);
+/* 第 80 轮 P7：sw.js 也开始缓存 /data/watch.json。
+   原判据是「page.route 命中 ≥2」，但 SW 接管后 page.route 拦不到 SW 发出的请求，
+   计数恒为 0（代理失效，不是契约被破坏）→ 换成三条直接证据：
+   ① performance 里该请求 workerStart > 0：确实经过 SW 线程（不能靠
+      response.fromServiceWorker —— SW 直接透传 fetch() 的响应时 Chromium 不置该标志）；
+   ② watch-data-v1 缓存里已有这条副本：P7 的「顺带存一份」真的发生了；
+   ③ 内容与磁盘逐字段一致：网络优先，刷新即最新，没被旧缓存冻住。 */
+const disk = JSON.parse(fs.readFileSync(ROOT + 'data/watch.json', 'utf8'));
+const live = await p.evaluate(async () => {
+  const res = await fetch('./data/watch.json');
+  const j = await res.json();
+  await new Promise((r) => setTimeout(r, 250));   // 等 SW 里那次 cache.put 落盘
+  const keys = await caches.keys();
+  let cached = false;
+  if (keys.indexOf('watch-data-v1') >= 0) {
+    const c = await caches.open('watch-data-v1');
+    cached = !!(await c.match('/data/watch.json'));
+  }
+  const ent = performance.getEntriesByType('resource').filter((e) => /watch\.json/.test(e.name));
+  return {
+    viaWorker: ent.some((e) => e.workerStart > 0),
+    cached,
+    dataCache: keys.indexOf('watch-data-v1') >= 0,
+    updated: j.updated_at,
+    n: j.items.length,
+  };
+});
+ok('C3 watch.json 经 SW 且网络优先：内容=磁盘最新，并已写入 watch-data-v1',
+  live.viaWorker && live.dataCache && live.cached &&
+  live.updated === disk.updated_at && live.n === disk.items.length,
+  `SW线程=${live.viaWorker}｜watch-data-v1=${live.dataCache}｜命中=${live.cached}｜${live.n} 条/${live.updated}`);
 
 ok('C4 全程零 JS 异常', errs.length === 0, errs.slice(0, 3).join(' | '));
 

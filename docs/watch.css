@@ -10,8 +10,12 @@
 [data-theme="cinema"] {
   color-scheme: dark;
   --bg: #0b0b0e;
-  --bg-glow: radial-gradient(1100px 520px at 50% -14%, rgba(232, 176, 75, 0.10), transparent 62%),
-             radial-gradient(760px 420px at 92% 8%, rgba(120, 130, 200, 0.055), transparent 60%);
+  /* 第 80 轮 A2：顶部放映机光晕 —— 中间一束窄而暖的「灯」，外加一圈更宽的散射，
+     最外层仍是原来那抹冷色补光。全部由 radial-gradient 生成，0 素材。 */
+  --bg-glow: radial-gradient(560px 152px at 50% -34px, rgba(232, 176, 75, 0.34), transparent 74%),
+             radial-gradient(1100px 520px at 50% -10%, rgba(232, 176, 75, 0.11), transparent 62%),
+             radial-gradient(760px 420px at 92% 8%, rgba(120, 130, 200, 0.055), transparent 60%),
+             linear-gradient(180deg, rgba(232, 176, 75, 0.04), transparent 240px);
   --header-bg: rgba(10, 10, 13, 0.82);
   --panel: #14141a;
   --card-bg: linear-gradient(170deg, #17171e, #101015);
@@ -20,7 +24,8 @@
   --border-hi: #33333f;
   --text: #c9c9d2;
   --text-strong: #f5f5f8;
-  --text-dim: #82828f;
+  /* 第 80 轮 A4：11.5px 的日期/次要信息在深色下对比只有约 4.6:1，提亮一档到 5.9:1 */
+  --text-dim: #9696a6;
   --accent: #e8b04b;
   --accent-2: #c08a2e;
   --ring: rgba(232, 176, 75, 0.26);
@@ -55,6 +60,23 @@ body {
 
 a { color: var(--accent); }
 
+/* 第 80 轮 A2：胶片颗粒（纯 CSS，两层错位点阵叠加出噪点感，不用任何图片素材）。
+   固定在视口上、pointer-events:none —— 只负责质感，绝不参与点击与布局；
+   z-index 压在页眉（10）之下，页眉保持干净。 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1.4px),
+    radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1.5px);
+  background-size: 3px 3px, 5px 5px;
+  background-position: 0 0, 1px 2px;
+  opacity: .5;
+}
+
 code {
   font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
   font-size: .92em;
@@ -79,7 +101,11 @@ code {
   /* 2026-10-24 第 56 轮：18px → 20px，与首页 .site-header 的 20px 28px 对齐。
      这样复制过来的史蒂夫 top / right 偏移与首页**逐像素相同**，页眉总高同为 173px。 */
   padding: 20px 28px;
-  background: var(--header-bg);
+  /* 第 80 轮 A2：放映机光晕要在页眉这一条上也看得见 —— 页眉自身是 0.82 的黑底，
+     body 上那层金晕透过来只剩 18%，所以这里再叠一层同形状的暖光（不新增素材）。 */
+  background:
+    radial-gradient(560px 128px at 50% -30px, rgba(232, 176, 75, 0.30), transparent 72%),
+    var(--header-bg);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
   position: sticky; top: 0; z-index: 10;
@@ -187,6 +213,50 @@ code {
 .w-sort-btn.is-on { color: var(--accent); background: rgba(232, 176, 75, 0.13); font-weight: 600; }
 .w-sort-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+/* 第 80 轮 P2：标签 chip 行。独占一行（flex 100%），窄屏横向滑动 ——
+   不挤占「类型 / 排序」那一行，也不改变它们的位置与尺寸。 */
+.w-tags {
+  flex: 1 1 100%;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 0;
+  margin-top: 2px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.w-tags[hidden] { display: none; }
+.w-tags::-webkit-scrollbar { height: 0; }
+.w-tag {
+  appearance: none;
+  flex: 0 0 auto;
+  padding: 5px 12px;
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-dim);
+  font: inherit; font-size: 12.5px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: color .16s, border-color .16s, background .16s;
+}
+.w-tag:hover { color: var(--text); border-color: var(--border-hi); }
+.w-tag.is-on {
+  color: #1a1408;
+  background: linear-gradient(150deg, var(--accent), var(--accent-2));
+  border-color: transparent;
+  font-weight: 600;
+}
+.w-tag:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* 筛选后空结果（有数据、但当前「类型 + 标签」组合没有匹配） */
+.w-none {
+  margin: 44px 0;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--text-dim);
+}
+
 /* ================= 网格视图（豆瓣式海报墙）================= */
 .w-main { padding: 18px 28px 96px; }   /* 第 60 轮：底部 60 -> 96，滚到底时最后一行不会被右下角加号（底部占 82px）压住 */
 
@@ -231,6 +301,41 @@ code {
   box-shadow: var(--card-hover-shadow);
 }
 .poster:hover .poster-pic img { transform: scale(1.05); }
+
+/* 第 80 轮 A1：评分 → 海报描边发光。分档由 watch.js 的 scoreBand() 给出：
+   hi（≥9.5）金边外发光 ／ mid（8~9.5）半透明金边 ／ 无标记（7~8）维持原样 ／ low（<7）暗哑。
+   目的：一眼扫过时高分片「自己会亮」，不必去读右下角那枚 13px 的数字。 */
+.poster[data-score="hi"] .poster-pic {
+  border-color: rgba(232, 176, 75, 0.82);
+  box-shadow: 0 0 0 1px rgba(232, 176, 75, 0.50),
+              0 0 20px rgba(232, 176, 75, 0.26),
+              var(--card-shadow);
+}
+.poster[data-score="hi"]:hover .poster-pic {
+  box-shadow: 0 0 0 1px rgba(232, 176, 75, 0.78),
+              0 0 30px rgba(232, 176, 75, 0.44),
+              var(--card-hover-shadow);
+}
+.poster[data-score="mid"] .poster-pic {
+  border-color: rgba(232, 176, 75, 0.32);
+  box-shadow: 0 0 0 1px rgba(232, 176, 75, 0.15),
+              0 8px 22px rgba(232, 176, 75, 0.07),
+              var(--card-shadow);
+}
+.poster[data-score="mid"]:hover .poster-pic {
+  border-color: rgba(232, 176, 75, 0.55);
+}
+/* 低分：边框更暗、图略微去饱和压暗（hover 时恢复，确认「这不是坏图，是低分」） */
+.poster[data-score="low"] .poster-pic {
+  border-color: #191920;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 4px 14px rgba(0, 0, 0, 0.40);
+}
+.poster[data-score="low"] .poster-pic img {
+  filter: grayscale(0.42) brightness(0.76);
+}
+.poster[data-score="low"]:hover .poster-pic img {
+  filter: grayscale(0) brightness(1);
+}
 
 /* 第 66 轮：左上角「电影 / 剧集」角标已按需求删除（.poster-kind 规则整条移除） */
 /* 评分：金色，放右下角，压在图上 */
@@ -314,14 +419,31 @@ code {
 }
 
 .tl-item {
+  position: relative;   /* 第 80 轮 A3：金色竖线的定位基准 */
   display: flex; gap: 18px; align-items: center;   /* 文字块比缩略图矮时垂直居中，不贴着图顶 */
   padding: 14px 16px 14px 0;   /* 第 68 轮：缩略图落到内容左轨（与网格卡片同一 x） */
   border-radius: 12px;
-  transition: background .18s;
+  transition: background .18s, transform .18s ease;
 }
 /* 2026-10-24 第 60 轮：条目之间留缝 —— 原来靠 padding 首尾相接，视觉上挤成一整块 */
 .tl-item + .tl-item { margin-top: 6px; }
-.tl-item:hover { background: rgba(255, 255, 255, 0.028); }
+/* 第 80 轮 A3：hover 与网格卡片动效统一 —— 网格是「上浮 4px + 图放大 + 金边」，
+   时间轴对应「右移 3px + 缩略图放大 + 左侧金线亮起」，同一套节奏，切换视图不换手感。 */
+.tl-item:hover { background: rgba(255, 255, 255, 0.035); transform: translateX(3px); }
+.tl-item::after {
+  content: '';
+  position: absolute;
+  left: -2px; top: 10px; bottom: 10px; width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, transparent, var(--accent) 18%, var(--accent) 82%, transparent);
+  opacity: 0;
+  transform: scaleY(.35);
+  transform-origin: center;
+  transition: opacity .18s ease, transform .24s ease;
+  pointer-events: none;
+}
+.tl-item:hover::after { opacity: .85; transform: scaleY(1); }
+.tl-item:focus-visible::after { opacity: .85; transform: scaleY(1); }
 /* 第 69 轮：整条时间轴记录可点击 → 打开编辑弹窗 */
 .tl-item { cursor: pointer; }
 .tl-item:focus-visible {
@@ -338,8 +460,12 @@ code {
   overflow: hidden;
   background: #1a1a22;
   border: 1px solid var(--card-border);
+  transition: border-color .2s ease, box-shadow .2s ease;
 }
-.tl-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tl-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .28s ease; }
+/* 第 80 轮 A3：时间轴的缩略图也响应 hover（与网格卡片 img 的 1.05 同一手感，幅度小一档） */
+.tl-item:hover .tl-thumb { border-color: rgba(232, 176, 75, 0.4); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5); }
+.tl-item:hover .tl-thumb img { transform: scale(1.04); }
 
 /* 2026-10-24 第 62 轮：横向一行。名称与英文名同占一列（.tl-head，英文名在中文名正下方），
    其余五项与名称基线对齐排在同一行；装不下时按 flex-wrap 依次折行（窄屏兜底）。
@@ -629,6 +755,23 @@ select.w-input { cursor: pointer; }
 .w-btn-ghost { background: transparent; border-color: var(--card-border); color: var(--text); }
 .w-btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 
+/* 第 80 轮 P6：删除按钮 —— 只在「编辑模式」出现，靠左独立，与「取消 / 保存」拉开距离，
+   第一次点击只是「举起手」（变成「确认删除？」），5 秒内再点一次才真的发出请求。 */
+.w-btn-danger {
+  background: transparent;
+  border-color: rgba(214, 92, 92, 0.45);
+  color: #d98a8a;
+  margin-right: auto;
+}
+.w-btn-danger:hover { border-color: #d65c5c; color: #f0a0a0; background: rgba(214, 92, 92, 0.08); }
+.w-btn-danger.is-armed {
+  border-color: #d65c5c;
+  background: rgba(214, 92, 92, 0.16);
+  color: #ffb3b3;
+  font-weight: 600;
+}
+.w-btn-danger[disabled] { opacity: .55; cursor: progress; }
+
 /* 底部 */
 .w-add-foot {
   display: flex; align-items: center; justify-content: space-between;
@@ -674,6 +817,12 @@ select.w-input { cursor: pointer; }
   .w-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 28px 12px; }
   .poster-note { display: none; }       /* 窄屏优先保证海报与标题，短评移入详情不显示 */
   .w-foot { padding: 8px 18px 36px; }
+  /* 第 80 轮 P6：页脚一行要装「提示 + 删除 + 取消 + 保存」四件，窄屏下提示会被挤成
+     一字一行（竖排）并把弹窗顶得很高 —— 让提示独占一行，按钮另起一行。
+     ⚠️ 必须写在这个已有的 860 块里：verify60/62 是按「文件里第一个 860 块」取内容的，
+     另起一个 @media 会把它们要看的那块挤到第二位，断言全落空。 */
+  .w-add-foot { flex-wrap: wrap; }
+  .w-add-msg { flex: 1 1 100%; }
 }
 
 @media (max-width: 480px) {

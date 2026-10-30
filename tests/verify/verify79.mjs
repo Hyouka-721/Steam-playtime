@@ -5,7 +5,7 @@
    断言分组：
    A 静态（6 条）：模板与绑定范围 —— 网格卡片无可点击语义、委托只绑 tlEl
    B 运行时（8 条）：真实点击 / 键盘 / 布局切换后，网格点不开编辑、时间轴点得开
-   ⚠️ 版本号断言：watch.css?v=17 / watch.js?v=12（第 78 轮 bump，本轮未改码） */
+   ⚠️ 版本号断言：watch.css?v=18 / watch.js?v=13（第 78 轮 bump，本轮未改码） */
 import { createRequire } from 'module';
 import fs from 'fs';
 const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace/');
@@ -39,7 +39,7 @@ ok('A1 网格与时间轴是两个独立容器（w-grid / w-tl），互不复用
   const tSeg = jsNC.slice(tStart, jsNC.indexOf('function wireImages', tStart) > 0 ? jsNC.indexOf('function wireImages', tStart) : tStart + 2600);
 
   ok('A2 网格卡片模板：无 data-id / 无 role="button" / 无 tabindex（点不开、也聚焦不到）',
-    /'<article class="poster">'/.test(gSeg) &&
+    /'<article class="poster"'/.test(gSeg) &&
     !/data-id/.test(gSeg) && !/role="button"/.test(gSeg) && !/tabindex/.test(gSeg),
     `data-id=${/data-id/.test(gSeg)} role=${/role="button"/.test(gSeg)} tabindex=${/tabindex/.test(gSeg)}`);
 
@@ -71,8 +71,8 @@ ok('A6 查找目标写死 .tl-item（closestItem 认不出网格卡片）',
     posterBlock.replace(/\s+/g, ' ').slice(0, 80));
 }
 
-ok('A8 版本号未被本轮改动（watch.css?v=17 / watch.js?v=12）',
-  /watch\.css\?v=17"/.test(html) && /watch\.js\?v=12"/.test(html));
+ok('A8 版本号未被本轮改动（watch.css?v=18 / watch.js?v=13）',
+  /watch\.css\?v=18"/.test(html) && /watch\.js\?v=13"/.test(html));
 
 /* ================= B 运行时 ================= */
 const MOCK = {
