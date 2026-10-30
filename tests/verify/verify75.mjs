@@ -54,8 +54,8 @@ function cmpRating(a, b) {
 
 /* ================= A 静态：代码与数据契约 ================= */
 console.log('== A 静态 ==');
-ok('A1 watch.html 引用 watch.js?v=11（静态资源版本已 bump）',
-  /<script src="watch\.js\?v=11"><\/script>/.test(html), (html.match(/watch\.js\?v=\d+/) || [''])[0]);
+ok('A1 watch.html 引用 watch.js?v=12（静态资源版本已 bump）',
+  /<script src="watch\.js\?v=12"><\/script>/.test(html), (html.match(/watch\.js\?v=\d+/) || [''])[0]);
 
 ok('A2 默认态常量：var layout = "grid" / var sort = "rating"',
   /var layout = 'grid';/.test(js) && /var sort = 'rating';/.test(js),

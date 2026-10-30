@@ -1,5 +1,5 @@
 /* 第 72 轮线上复验（push 后跑）：
-   ① 页眉 My Watch List / <title> Watch List / watch.css?v=16 / watch.js?v=9 生效
+   ① 页眉 My Watch List / <title> Watch List / watch.css?v=17 / watch.js?v=9 生效
    ② 玉子市场恢复（2021-03-21-item-2）与玉子爱情故事同日并存，且两条短评已拆分
    ③ 另两条撞车受害者一并恢复：工作细胞（2020-07-16-item-2，新海报）、境界的彼方（2020-12-18-item-2）
    ④ 三个同日组（2021-03-21 / 2020-12-18 / 2020-07-16）都按上传时间正序
@@ -53,7 +53,7 @@ for (let i = 1; i <= 30; i++) {
   try { live = JSON.parse(snap.d); } catch (e) {}
   const titleOK = /<title>Watch List<\/title>/.test(snap.h);
   const h1OK = /<h1[^>]*class="w-title"[^>]*>\s*My Watch List\s*<\/h1>/.test(snap.h);
-  const verOK = /watch\.css\?v=16"/.test(snap.h) && /watch\.js\?v=9"/.test(snap.h);
+  const verOK = /watch\.css\?v=17"/.test(snap.h) && /watch\.js\?v=9"/.test(snap.h);
   const items = live && Array.isArray(live.items) ? live.items : [];
   const tamako = items.filter((x) => /玉子/.test(x.title));
   const cells = items.find((x) => x.id === '2020-07-16-item-2') || {};

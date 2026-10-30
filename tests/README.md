@@ -23,11 +23,11 @@ tests/
   ```
   C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe tests/verify/verify70.mjs
   ```
-- 跑全部 22 个套件（在 bash 里循环）：
+- 跑全部 23 个套件（在 bash 里循环）：
   ```bash
   NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
   for s in verify6 verify47 verify48 verify49 verify54 verify55 verify56 verify57 verify58 \
-           verify60 verify62 verify63 verify64 verify65 verify66 verify67 verify68 verify69 verify70 verify72 verify73 verify75; do
+           verify60 verify62 verify63 verify64 verify65 verify66 verify67 verify68 verify69 verify70 verify72 verify73 verify75 verify78; do
     echo "== $s =="; "$NODE" tests/verify/$s.mjs 2>&1 | tail -2
   done
   ```
@@ -58,6 +58,7 @@ tests/
 | `verify72` | 页眉 My Watch List / 排序切换 / 同日按上传时间 / 玉子修复 / 防撞车 | 21 |
 | `verify73` | 「番剧」类别全链路（筛选/表单/标签/脚本）+ 她和她的猫海报 + 29 部日本动画重分类 | 27 |
 | `verify75` | 图片加载性能（srcset 320/480 变体 + SW cache-first）+ 默认网格 + 默认评分序 | 17 |
+| `verify78` | 手动「排序」字段（order 0~5 默认 3）：表单预填/非法输入阻断/三种并列情形/老数据零影响 | 38 |
 
 `online75`（14 条）：Pages 生效 + 海报三档逐字节 + 线上默认态 + **SW 硬证据**（`response.fromServiceWorker()`）。
 `online77`（14 条）：《情书》海报替换全链路 —— 线上五字段 + **整份 watch.json md5 全等** + 新三档逐字节 + **旧三档必须 404** + 网格 `currentSrc` 命中变体 + 时间轴缩略图 + 该海报的 SW 命中。⚠️ 里面「故意探旧图 404」用 `probing404` 开关把浏览器的 404 控制台日志排除掉，否则会把自己的探针算成站点 JS 异常。
@@ -72,7 +73,7 @@ tests/
 
 ## 关键约定（改代码/改回归前必读）
 
-- **版本号 `?v=N` 是硬编码在多个脚本里的**，bump 必须同步。`watch.css?v=16` / `watch.js?v=11` 现在散落在 verify55/56/57/58/60/62/63/64/65/66/67/68/69/72/73/75 的断言里（有的脚本只有 css，有的两者都有）。**注意每个文件里有两处**：ok() 描述里的纯文本 + 正则断言里的转义形态（`watch\.js\?v=11`），只换一处会漏。
+- **版本号 `?v=N` 是硬编码在多个脚本里的**，bump 必须同步。`watch.css?v=17` / `watch.js?v=12` 现在散落在 verify55/56/57/58/60/62/63/64/65/66/67/68/69/72/73/75/78 的断言里（有的脚本只有 css，有的两者都有）。**注意每个文件里有两处**：ok() 描述里的纯文本 + 正则断言里的转义形态（`watch\.js\?v=12`），只换一处会漏。第 78 轮一次 bump 实测 19 个文件 / 59 处，用 Node 脚本按「替换前后计数相等」核对，`grep` 收尾查零残留（`fx.js?v=16`、`style.css?v=105` 是 index 页的，别误伤）。
 - **条数要从数据推导**（`N = data.items.length`），别写死 `22` / `26` / `39`。
 - **快照/用户数据算出来的值（百分比、条数）期望都从数据里读**，别写死（`verify6` 的成就卡就是教训）。
 - **判据分「契约」与「代理」**：`行数相同`、`页眉高相同` 是「两页文案相同」时的代理，文案一变就失效，要回到契约本身。
