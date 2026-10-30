@@ -1,0 +1,492 @@
+{
+  "schema": 1,
+  "date": "2026-10-30",
+  "data_date": "2026-10-30",
+  "captured_at": "2026-10-30T19:58:31.516Z",
+  "captured_at_local": "31/10/2026 03:58:31",
+  "source": "github-actions",
+  "run_id": "41119550590",
+  "steamid_hash": "a8474caf",
+  "game_count": 53,
+  "played_game_count": 38,
+  "shared_game_count": 0,
+  "games": {
+    "730": {
+      "appid": "730",
+      "name": "Counter-Strike 2",
+      "img_icon_url": "8dbc71957312bbd3baea65848b545be9eae2a355",
+      "playtime_forever": 786,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1658052808,
+      "origin": "owned"
+    },
+    "49520": {
+      "appid": "49520",
+      "name": "Borderlands 2",
+      "img_icon_url": "a3f4945226e69b6196074df4c776e342d3e5a3be",
+      "playtime_forever": 0,
+      "playtime_2weeks": null,
+      "rtime_last_played": 0,
+      "origin": "owned"
+    },
+    "105600": {
+      "appid": "105600",
+      "name": "Terraria",
+      "img_icon_url": "858961e95fbf869f136e1770d586e0caefd4cfac",
+      "playtime_forever": 10113,
+      "playtime_2weeks": 391,
+      "rtime_last_played": 1793193021,
+      "origin": "owned"
+    },
+    "227300": {
+      "appid": "227300",
+      "name": "Euro Truck Simulator 2",
+      "img_icon_url": "adc18a4fc9adc0330144b76d61cbda68bb2394a0",
+      "playtime_forever": 7984,
+      "playtime_2weeks": 150,
+      "rtime_last_played": 1793109308,
+      "origin": "owned"
+    },
+    "246420": {
+      "appid": "246420",
+      "name": "Kingdom Rush",
+      "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
+      "playtime_forever": 968,
+      "playtime_2weeks": 609,
+      "rtime_last_played": 1793356208,
+      "origin": "owned"
+    },
+    "250900": {
+      "appid": "250900",
+      "name": "The Binding of Isaac: Rebirth",
+      "img_icon_url": "16d46c8630499bfc54d20745ac90786a302cd643",
+      "playtime_forever": 0,
+      "playtime_2weeks": null,
+      "rtime_last_played": 0,
+      "origin": "owned"
+    },
+    "262060": {
+      "appid": "262060",
+      "name": "Darkest Dungeon®",
+      "img_icon_url": "af219e7f9ed0506cb0954aabb7f24a45e38d28e4",
+      "playtime_forever": 165,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1776998289,
+      "origin": "owned"
+    },
+    "270880": {
+      "appid": "270880",
+      "name": "American Truck Simulator",
+      "img_icon_url": "2aec8af4b4b23cb6054d9aea06194621cdd66945",
+      "playtime_forever": 10,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1754662003,
+      "origin": "owned"
+    },
+    "271590": {
+      "appid": "271590",
+      "name": "Grand Theft Auto V Legacy",
+      "img_icon_url": "1e72f87eb927fa1485e68aefaff23c7fd7178251",
+      "playtime_forever": 473,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1778326118,
+      "origin": "owned"
+    },
+    "286690": {
+      "appid": "286690",
+      "name": "Metro 2033 Redux",
+      "img_icon_url": "353ea01a045c084215bca95519808eaa7319ce0c",
+      "playtime_forever": 0,
+      "playtime_2weeks": null,
+      "rtime_last_played": 0,
+      "origin": "owned"
+    },
+    "292030": {
+      "appid": "292030",
+      "name": "The Witcher 3: Wild Hunt — Remastered",
+      "img_icon_url": "7b52d11edee478d652ef4e7103e00644bed2c74c",
+      "playtime_forever": 537,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1782817215,
+      "origin": "owned"
+    },
+    "311690": {
+      "appid": "311690",
+      "name": "Enter the Gungeon",
+      "img_icon_url": "b459d94ad4b6a5eabd71005874037b9577a4ca31",
+      "playtime_forever": 72,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1775628799,
+      "origin": "owned"
+    },
+    "322330": {
+      "appid": "322330",
+      "name": "Don't Starve Together",
+      "img_icon_url": "a80aa6cff8eebc1cbc18c367d9ab063e1553b0ee",
+      "playtime_forever": 348,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1781686683,
+      "origin": "owned"
+    },
+    "346110": {
+      "appid": "346110",
+      "name": "ARK: Survival Evolved",
+      "img_icon_url": "fef1799533131c10f538d2dd697bbbd89e663265",
+      "playtime_forever": 0,
+      "playtime_2weeks": null,
+      "rtime_last_played": 0,
+      "origin": "owned"
+    },
+    "367520": {
+      "appid": "367520",
+      "name": "Hollow Knight",
+      "img_icon_url": "f6ab055c2366237200b1a31cccbd6cf81e436d72",
+      "playtime_forever": 109,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1781934565,
+      "origin": "owned"
+    },
+    "379720": {
+      "appid": "379720",
+      "name": "DOOM",
+      "img_icon_url": "b6e72ff47d1990cb644700751eeeff14e0aba6dc",
+      "playtime_forever": 0,
+      "playtime_2weeks": null,
+      "rtime_last_played": 0,
+      "origin": "owned"
+    },
+    "391730": {
+      "appid": "391730",
+      "name": "Crashlands",
+      "img_icon_url": "8fb73009c5f9918aab9717d8f9db1a4604733297",
+      "playtime_forever": 212,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1771658771,
+      "origin": "owned"
+    },
+    "407530": {
+      "appid": "407530",
+      "name": "ARK: Survival Of The Fittest",
+      "img_icon_url": "807c673cddebbfee0700a947a75f4872ad136e9b",
+      "playtime_forever": 0,
+      "playtime_2weeks": null,
+      "rtime_last_played": 0,
+      "origin": "owned"
+    },
+    "418240": {
+      "appid": "418240",
+      "name": "Shadow Tactics: Blades of the Shogun",
+      "img_icon_url": "7f933b7e1bcb83caf3bbcc9a143aee85b8a677af",
+      "playtime_forever": 1961,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1767150171,
+      "origin": "owned"
+    },
+    "431960": {
+      "appid": "431960",
+      "name": "Wallpaper Engine",
+      "img_icon_url": "72edaed9d748c6cf7397ffb1c83f0b837b9ebd9d",
+      "playtime_forever": 3562,
+      "playtime_2weeks": 8,
+      "rtime_last_played": 1793182669,
+      "origin": "owned"
+    },
+    "489830": {
+      "appid": "489830",
+      "name": "The Elder Scrolls V: Skyrim Special Edition",
+      "img_icon_url": "0dfe3eed5658f9fbd8b62f8021038c0a4190f21d",
+      "playtime_forever": 0,
+      "playtime_2weeks": null,
+      "rtime_last_played": 0,
+      "origin": "owned"
+    },
+    "493340": {
+      "appid": "493340",
+      "name": "Planet Coaster",
+      "img_icon_url": "1b2f29e743dd3048f21fefd9642d86a5f5123968",
+      "playtime_forever": 0,
+      "playtime_2weeks": null,
+      "rtime_last_played": 0,
+      "origin": "owned"
+    },
+    "502500": {
+      "appid": "502500",
+      "name": "ACE COMBAT™7: SKIES UNKNOWN",
+      "img_icon_url": "f7e1587f3521cacbdebd07b25c05103a963160a8",
+      "playtime_forever": 208,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1766369765,
+      "origin": "owned"
+    },
+    "557600": {
+      "appid": "557600",
+      "name": "Gorogoa",
+      "img_icon_url": "ae001eaabbb76bf67661566249c978b73c4693e7",
+      "playtime_forever": 235,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1775454933,
+      "origin": "owned"
+    },
+    "588650": {
+      "appid": "588650",
+      "name": "Dead Cells",
+      "img_icon_url": "a431361e5dae5fd6ac2433064b62b2a37abc38f1",
+      "playtime_forever": 3620,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1774339015,
+      "origin": "owned"
+    },
+    "613100": {
+      "appid": "613100",
+      "name": "House Flipper",
+      "img_icon_url": "4ab6e7c49f3f0c063dfe08ab85038c979301f6dd",
+      "playtime_forever": 0,
+      "playtime_2weeks": null,
+      "rtime_last_played": 0,
+      "origin": "owned"
+    },
+    "638230": {
+      "appid": "638230",
+      "name": "Journey",
+      "img_icon_url": "8538c0cb998e844ce5c78683f322e9ca81075a34",
+      "playtime_forever": 134,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1766481561,
+      "origin": "owned"
+    },
+    "646570": {
+      "appid": "646570",
+      "name": "Slay the Spire",
+      "img_icon_url": "33ea124ea8c03a9ce7012d34c3b348a351612fca",
+      "playtime_forever": 30000,
+      "playtime_2weeks": 194,
+      "rtime_last_played": 1792927127,
+      "origin": "owned"
+    },
+    "683320": {
+      "appid": "683320",
+      "name": "GRIS",
+      "img_icon_url": "10a3afeac4adedb37acaec02885bdc3c102eca93",
+      "playtime_forever": 243,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1769869698,
+      "origin": "owned"
+    },
+    "733070": {
+      "appid": "733070",
+      "name": "Sudoku Universe",
+      "img_icon_url": "fc39447b788f1f914acc1042919eca9e71ca6fa1",
+      "playtime_forever": 2419,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1768451250,
+      "origin": "owned"
+    },
+    "769560": {
+      "appid": "769560",
+      "name": "Night of the Full Moon",
+      "img_icon_url": "8ccc812dd5e5c58cf9c1009c2a3eefe12820bea5",
+      "playtime_forever": 3860,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1732339722,
+      "origin": "owned"
+    },
+    "877280": {
+      "appid": "877280",
+      "name": "SAO Utils 2: Progressive",
+      "img_icon_url": "ab16d51fcd68f9b86c1313fe1d9beb0e563afce1",
+      "playtime_forever": 12,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1698561408,
+      "origin": "owned"
+    },
+    "960090": {
+      "appid": "960090",
+      "name": "Bloons TD 6",
+      "img_icon_url": "c5f0b67c8beeb6be99abe2ad8db2cada5d5ccff0",
+      "playtime_forever": 177,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1752223881,
+      "origin": "owned"
+    },
+    "990630": {
+      "appid": "990630",
+      "name": "The Last Campfire",
+      "img_icon_url": "a6601e3e8776e4c71d20869ae2ca1cad23d41cc0",
+      "playtime_forever": 373,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1775538011,
+      "origin": "owned"
+    },
+    "1174180": {
+      "appid": "1174180",
+      "name": "Red Dead Redemption 2",
+      "img_icon_url": "5106abd9c1187a97f23295a0ba9470c94804ec6c",
+      "playtime_forever": 0,
+      "playtime_2weeks": null,
+      "rtime_last_played": 0,
+      "origin": "owned"
+    },
+    "1222140": {
+      "appid": "1222140",
+      "name": "Detroit: Become Human",
+      "img_icon_url": "3d9f5bc971d44398aef740c0d8e79a358be2e800",
+      "playtime_forever": 0,
+      "playtime_2weeks": null,
+      "rtime_last_played": 0,
+      "origin": "owned"
+    },
+    "1237970": {
+      "appid": "1237970",
+      "name": "Titanfall® 2",
+      "img_icon_url": "d73c7e572859bd7490947d1aeab5c33eda18fd64",
+      "playtime_forever": 0,
+      "playtime_2weeks": null,
+      "rtime_last_played": 0,
+      "origin": "owned"
+    },
+    "1281930": {
+      "appid": "1281930",
+      "name": "tModLoader",
+      "img_icon_url": "e8a125078a31b8475994e8ce4d8d6fdd6becc131",
+      "playtime_forever": 9,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1787986376,
+      "origin": "owned"
+    },
+    "1329410": {
+      "appid": "1329410",
+      "name": "雀魂麻将(MahjongSoul)",
+      "img_icon_url": "9403eb9b90dc6f036dde903a669d70dab3b65e12",
+      "playtime_forever": 57,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1747661318,
+      "origin": "owned"
+    },
+    "1333910": {
+      "appid": "1333910",
+      "name": "Sizeable",
+      "img_icon_url": "d85e0010bc76856fc5f8f2c4df4c6a39ae1a006b",
+      "playtime_forever": 263,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1775621984,
+      "origin": "owned"
+    },
+    "1426210": {
+      "appid": "1426210",
+      "name": "It Takes Two",
+      "img_icon_url": "6b15f6d81c4fc52056f4928b363b7fac591a945b",
+      "playtime_forever": 885,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1784180188,
+      "origin": "owned"
+    },
+    "1504980": {
+      "appid": "1504980",
+      "name": "It Takes Two Friend's Pass",
+      "img_icon_url": "6b15f6d81c4fc52056f4928b363b7fac591a945b",
+      "playtime_forever": 813,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1662904743,
+      "origin": "owned"
+    },
+    "1579380": {
+      "appid": "1579380",
+      "name": "Shadow Tactics: Blades of the Shogun - Aiko's Choice",
+      "img_icon_url": "2696fc7ba08cab22ea50f0b8db787a63e6fa3004",
+      "playtime_forever": 612,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1776509537,
+      "origin": "owned"
+    },
+    "1623730": {
+      "appid": "1623730",
+      "name": "Palworld",
+      "img_icon_url": "f5523077a8f4c923c2e8d8c17794b3319035fa73",
+      "playtime_forever": 101,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1775279453,
+      "origin": "owned"
+    },
+    "1669980": {
+      "appid": "1669980",
+      "name": "Volcano Princess",
+      "img_icon_url": "632f02980c8e38bd482a9162ce0380b8aff9c882",
+      "playtime_forever": 106,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1779280452,
+      "origin": "owned"
+    },
+    "1687950": {
+      "appid": "1687950",
+      "name": "Persona 5 Royal",
+      "img_icon_url": "2f868d8c16fc357dc7122d440b9de3916e36e6fa",
+      "playtime_forever": 0,
+      "playtime_2weeks": null,
+      "rtime_last_played": 0,
+      "origin": "owned"
+    },
+    "1718570": {
+      "appid": "1718570",
+      "name": "ASTLIBRA ～生きた証～ Revision",
+      "img_icon_url": "e7c445fc57e408d34f6d831588026cace13d3150",
+      "playtime_forever": 0,
+      "playtime_2weeks": null,
+      "rtime_last_played": 0,
+      "origin": "owned"
+    },
+    "1794680": {
+      "appid": "1794680",
+      "name": "Vampire Survivors",
+      "img_icon_url": "3677cf1be3be1f4ea42261c62ce10519715ade58",
+      "playtime_forever": 62,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1771928158,
+      "origin": "owned"
+    },
+    "1942280": {
+      "appid": "1942280",
+      "name": "Brotato",
+      "img_icon_url": "d9dfcab8f300a9548439f70bef7b5f4e53d0fc28",
+      "playtime_forever": 5395,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1776685266,
+      "origin": "owned"
+    },
+    "2868840": {
+      "appid": "2868840",
+      "name": "Slay the Spire 2",
+      "img_icon_url": "f92b09dab91f1d1738f72fe0dd9be18dcc2901f9",
+      "playtime_forever": 978,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1774328516,
+      "origin": "owned"
+    },
+    "3009140": {
+      "appid": "3009140",
+      "name": "Salt Player for Windows",
+      "img_icon_url": "a2a0483be79a4082e0b50abccb3b67c979d3a457",
+      "playtime_forever": 865,
+      "playtime_2weeks": 7,
+      "rtime_last_played": 1793277064,
+      "origin": "owned"
+    },
+    "3167020": {
+      "appid": "3167020",
+      "name": "Escape From Duckov",
+      "img_icon_url": "5bb8d31708442a8f3ddbc100d7be7c3fde530d18",
+      "playtime_forever": 4548,
+      "playtime_2weeks": null,
+      "rtime_last_played": 1784268236,
+      "origin": "owned"
+    },
+    "3240220": {
+      "appid": "3240220",
+      "name": "Grand Theft Auto V Enhanced",
+      "img_icon_url": "8355a7bbdb704f727bfba80ec56bc7228991338e",
+      "playtime_forever": 0,
+      "playtime_2weeks": null,
+      "rtime_last_played": 0,
+      "origin": "owned"
+    }
+  }
+}

@@ -1,10 +1,10 @@
 {
   "schema": 1,
   "ready": true,
-  "generated_at": "2026-10-29T20:24:27.929Z",
-  "snapshot_date": "2026-10-29",
+  "generated_at": "2026-10-30T19:58:51.761Z",
+  "snapshot_date": "2026-10-30",
   "stats": {
-    "unlocked": 841,
+    "unlocked": 842,
     "total": 2504,
     "pct": 33.6,
     "games": 31
@@ -1301,8 +1301,16 @@
       "appid": "246420",
       "name": "王国保卫战",
       "total": 74,
-      "unlocked": 36,
+      "unlocked": 37,
       "achievements": [
+        {
+          "api": "ACH_ENTANGLED",
+          "name": "Entangled",
+          "desc": "Hold 500 or more enemies with Wrath of the Forest.",
+          "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/b991d77c006dacf30ce428935ae078a613e3314b.jpg",
+          "percent": 44.5,
+          "ts": 1793355173
+        },
         {
           "api": "ACH_ARACHNOPHOBIA",
           "name": "Arachnophobia",

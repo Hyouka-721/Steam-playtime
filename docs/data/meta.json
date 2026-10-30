@@ -2,16 +2,16 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-29T20:24:27.932Z",
-  "generated_at_local": "2026-10-30",
+  "generated_at": "2026-10-30T19:58:51.766Z",
+  "generated_at_local": "2026-10-31",
   "tracking_since": "2026-10-13",
-  "last_snapshot_date": "2026-10-29",
+  "last_snapshot_date": "2026-10-30",
   "steamid_hash": "a8474caf",
   "months": [
     "2026-10"
   ],
   "ach_stats": {
-    "unlocked": 841,
+    "unlocked": 842,
     "total": 2504,
     "pct": 33.6,
     "games": 31
@@ -26,17 +26,17 @@
     "990630"
   ],
   "stats": {
-    "lifetime_minutes": 83239,
-    "lifetime_hours": 1387.3,
+    "lifetime_minutes": 83275,
+    "lifetime_hours": 1387.9,
     "owned_games": 53,
     "lifetime_played_games": 38,
-    "total_minutes": 1515,
-    "total_hours": 25.3,
-    "tracked_days": 16,
-    "active_days": 15,
-    "current_streak": 8,
-    "longest_streak": 8,
-    "week_minutes": 208,
+    "total_minutes": 1551,
+    "total_hours": 25.9,
+    "tracked_days": 17,
+    "active_days": 16,
+    "current_streak": 9,
+    "longest_streak": 9,
+    "week_minutes": 244,
     "played_games": 6,
     "best_day": {
       "date": "2026-10-18",
@@ -64,9 +64,9 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "total_minutes": 712,
+      "total_minutes": 748,
       "first_day": "2026-10-13",
-      "last_day": "2026-10-29"
+      "last_day": "2026-10-30"
     },
     "431960": {
       "appid": "431960",
@@ -126,8 +126,8 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "lifetime_minutes": 932,
-      "last_played": "2026-10-29"
+      "lifetime_minutes": 968,
+      "last_played": "2026-10-30"
     },
     "250900": {
       "appid": "250900",
@@ -405,7 +405,7 @@
     "1669980": {
       "appid": "1669980",
       "name": "火山的女儿",
-      "img_icon_url": "af41b6930b60ea5a3d8e21ba04933284253f42cf",
+      "img_icon_url": "632f02980c8e38bd482a9162ce0380b8aff9c882",
       "lifetime_minutes": 106,
       "last_played": "2026-05-20"
     },
