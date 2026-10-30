@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-30T20:00:45+08:00",
+  "updated_at": "2026-10-30T20:01:32+08:00",
   "items": [
     {
       "id": "2026-10-24-dead-to-rights",
@@ -314,6 +314,7 @@
       "kind": "movie",
       "watched_at": "2024-12-12",
       "poster": "img/watch/manchester-by-the-sea-521b167c.webp",
+      "added_at": "2026-10-24T23:17:32+08:00",
       "poster_w": 640,
       "poster_h": 948,
       "poster_320": "img/watch/manchester-by-the-sea-521b167c-320.webp",
@@ -321,8 +322,8 @@
       "title_en": "Manchester by the Sea",
       "year": 2016,
       "rating": 9,
-      "note": "遗憾大约占了真实人生的一半长度",
-      "added_at": "2026-10-24T23:17:32+08:00"
+      "order": 2,
+      "note": "遗憾大约占了真实人生的一半长度"
     },
     {
       "id": "2024-12-05-item",
