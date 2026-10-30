@@ -38,9 +38,21 @@ function sortKey(d) {
   return m[1] + '-' + (m[2] || '00') + '-' + (m[3] || '00');
 }
 function stampKey(s) { const t = Date.parse(String(s || '')); return Number.isNaN(t) ? 0 : t; }
+/* 第 78 轮把「排序」order 插进了两级比较器，本套件的 node 侧重放必须同步，
+   否则用户一旦给某条设了 order（例如《史前星球》order=1），并列时的期望顺序
+   就与页面不一致 —— 这不是页面错了，是这套比较器过期了。 */
+function orderVal(it) {
+  const raw = it == null ? null : it.order;
+  if (raw == null || raw === '') return 3;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || Math.floor(n) !== n || n < 0 || n > 5) return 3;
+  return n;
+}
 function cmpTime(a, b) {
   const d = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
   if (d !== 0) return d;
+  const o = orderVal(a) - orderVal(b);   // 第 78 轮：并列时 order 升序
+  if (o !== 0) return o;
   const s = stampKey(a.added_at) - stampKey(b.added_at);
   if (s !== 0) return s;
   return String(a.id || '').localeCompare(String(b.id || ''));
@@ -49,6 +61,8 @@ function ratingVal(it) { const n = Number(it && it.rating); return Number.isFini
 function cmpRating(a, b) {
   const vb = ratingVal(b), va = ratingVal(a);
   if (vb !== va) return vb - va;
+  const o = orderVal(a) - orderVal(b);   // 第 78 轮：评分并列时 order 升序
+  if (o !== 0) return o;
   return cmpTime(a, b);
 }
 
