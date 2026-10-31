@@ -33,7 +33,7 @@
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=108">
+<link rel="stylesheet" href="style.css?v=109">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -125,18 +125,26 @@
       <div class="panel-head">
         <div class="panel-title">
           <button class="btn btn-back" id="btn-drill-back">← 返回</button>
-          <h2 id="drill-title">每日时长趋势</h2>
+          <h2 id="drill-title">每日游玩热力图</h2>
         </div>
         <div class="ctrl">
-          <div class="seg" id="drill-range">
-            <button data-r="30" class="active">30 天</button>
-            <button data-r="90">90 天</button>
-            <button data-r="365">365 天</button>
-            <button data-r="all">全部</button>
+          <div class="heat-nav">
+            <button class="cal-nav" id="heat-prev" type="button" aria-label="上个月">‹</button>
+            <span class="heat-month" id="heat-month">—</span>
+            <button class="cal-nav" id="heat-next" type="button" aria-label="下个月">›</button>
           </div>
         </div>
       </div>
-      <div id="chart-drill" class="chart chart-tall"></div>
+      <div class="heat-week" aria-hidden="true">
+        <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+      </div>
+      <div class="heat heat-cal" id="heat-drill"></div>
+      <div class="heat-foot">
+        <span class="heat-sum" id="heat-sum">—</span>
+        <span class="heat-legend" aria-hidden="true">
+          <span>少</span><i class="h0"></i><i class="h1"></i><i class="h2"></i><i class="h3"></i><i class="h4"></i><span>多</span>
+        </span>
+      </div>
       <div id="drill-more" class="drill-more"></div>
     </div>
   </div>
@@ -184,16 +192,6 @@
 
 <!-- ④ 数据 -->
 <section class="view" id="view-data">
-  <div class="panel" id="panel-heat">
-    <div class="panel-head">
-      <div class="panel-title"><h2>活动热力图</h2></div>
-      <div class="ctrl"><span class="hint" id="heat-hint">—</span></div>
-    </div>
-    <div class="heat" id="heatmap"></div>
-    <div class="heat-legend" aria-hidden="true">
-      <span>少</span><i class="h0"></i><i class="h1"></i><i class="h2"></i><i class="h3"></i><i class="h4"></i><span>多</span>
-    </div>
-  </div>
   <div class="panel" id="panel-report">
     <div class="panel-head">
       <div class="panel-title"><h2>阶段报告</h2></div>
@@ -318,6 +316,6 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <script src="fx.js?v=16"></script>
-<script src="app.js?v=103" onerror="__appFail()"></script>
+<script src="app.js?v=104" onerror="__appFail()"></script>
 </body>
 </html>

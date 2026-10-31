@@ -86,7 +86,7 @@ ok('1.5 面板只剩 #recent-list 一个子元素', dom.panelKidCount === 1 && d
 ok('1.6 面板内无空占位子元素', dom.emptyKids === 0, dom.emptyKids);
 ok('1.7 页面不再出现「近 14 天 / 款游戏」提示文案', !dom.hasPhrase && !dom.hasPhrase2, { p1: dom.hasPhrase, p2: dom.hasPhrase2 });
 ok('1.8 各视图的 hint 仍统一走 .hint 样式（第 83 轮新增热力图/榜单/勋章/报告四处）',
-  JSON.stringify(dom.otherHints) === JSON.stringify(['badge-hint', 'ach-hint', 'tl-hint', 'heat-hint', 'report-range']), dom.otherHints);
+  JSON.stringify(dom.otherHints) === JSON.stringify(['badge-hint', 'ach-hint', 'tl-hint', 'report-range']), dom.otherHints);
 
 // ---------- 2. 无 hack（纯文档流） ----------
 const flow = await page.evaluate(() => {

@@ -86,7 +86,7 @@ ok('A6 线上含新录入的片子（大宅门 / 新世纪福音战士 / 游戏�
   liveData.items.slice(0, 3).map((x) => x.title).join(','));
 const rIdx = await page.evaluate(async (base) => {
   const h = await (await fetch(base + 'index.html?cb=' + Date.now(), { cache: 'reload' })).text();
-  return ['style.css?v=108', 'app.js?v=103', 'fx.js?v=16'].filter((v) => !h.includes(v));
+  return ['style.css?v=109', 'app.js?v=104', 'fx.js?v=16'].filter((v) => !h.includes(v));
 }, SITE);
 ok('A7 首页三个版本号未受影响', rIdx.length === 0, rIdx.join(',') || '全部命中');
 await ctx.close();

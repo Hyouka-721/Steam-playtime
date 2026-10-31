@@ -64,9 +64,7 @@
     days: new Map(),  // 'YYYY-MM-DD' -> day（全量；日历二级界面按日期直接取用）
     allDates: [],     // 有记录的日期索引（升序）
     view: 'lifetime',
-    drill: { appid: null },   // 二级趋势界面：null = 每日总时长
-    drillRange: 30,
-    charts: {},
+    drill: { appid: null, month: null },   // 二级界面：null = 每日总时长；month = 'YYYY-MM'
     // ---- 游玩日历浮层（点击「最近游玩」首行日期上方的小日历图标打开）----
     cal: { open: false, ym: '2026-10', busy: false, lastFocus: null, day: null },
     heroAppid: null,  // 悬停中的游戏（背景底纹用），null = 恢复默认底
@@ -200,8 +198,6 @@
     { id: 'dawn', name: '晨曦紫', mode: 'light' },
     { id: 'night', name: '夜航', mode: 'dark' },
   ];
-  /** 读取当前主题的 CSS 变量（图表画在 canvas 上，必须显式取色） */
-  const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   const themeName = (id) => (THEMES.find((t) => t.id === id) ?? THEMES[0]).name;
 
   function currentTheme() {
@@ -216,9 +212,6 @@
     // <head> 内联脚本首屏前读同一 key，隐私模式下静默失败不影响当前会话
     try { localStorage.setItem('theme', id); } catch (e) { /* 隐私模式下忽略 */ }
     syncThemeUi(id);
-    // 图表画在 canvas 上，不会跟随 CSS 变量，需重新渲染
-    // （echarts 按需加载，尚未加载时 renderDrill 内部直接返回，不会报错）
-    if (state.charts.drill) renderDrill();
     if (announce) toast(`主题：${themeName(id)}`);
   }
 
@@ -560,202 +553,109 @@
     observeCapsules(box); // 与累计榜同一套按需加载
   }
 
-  // ---------- ①c 二级趋势界面（游戏累计下钻） ----------
-  /** 每天每款游戏的时长已在 daily 数据中；这里负责折线展示。游戏由列表点击进入，不做切换下拉 */
+  // ---------- ①c 二级界面（下钻）：按月热力图 ----------
+  /** 2026-10-31 第 86 轮：原来的「累计柱状 + 每日折线」（ECharts，按需还要联网拉 ~1MB）
+      整体换成**按月热力图**。用户要的是「哪几天玩得多」的强弱，不是精确曲线；
+      顺带把 ECharts 这个最大的外部依赖从站点里彻底摘掉。 */
 
-  /** ECharts 按需加载（2026-10-18 首屏优化）
-   *  原先在 <head> 里同步加载 ~1MB 的 echarts.min.js，会阻塞首屏渲染与
-   *  DOMContentLoaded，而首屏（概览卡 + 列表）根本用不到图表。
-   *  现在改为**第一次真正需要画图时**才注入 script，加载完成前 renderDrill
-   *  会排队等待；主 CDN 失败自动切备用 CDN，两者都失败则给出可见提示并
-   *  保持页面其余部分正常（图表区降级，不影响卡片/列表/日历）。 */
-  const ECHARTS_SRC = [
-    'https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js',
-    'https://cdn.bootcdn.net/ajax/libs/echarts/5.5.1/echarts.min.js',
-  ];
-  let echartsPromise = null;
-
-  function loadEcharts() {
-    if (window.echarts) return Promise.resolve(window.echarts);
-    if (echartsPromise) return echartsPromise;
-    echartsPromise = new Promise((resolve, reject) => {
-      const tryAt = (i) => {
-        if (i >= ECHARTS_SRC.length) {
-          echartsPromise = null; // 允许下次重试
-          reject(new Error('echarts 全部源加载失败'));
-          return;
-        }
-        const s = document.createElement('script');
-        s.src = ECHARTS_SRC[i];
-        s.async = true;
-        s.onload = () => (window.echarts ? resolve(window.echarts) : tryAt(i + 1));
-        s.onerror = () => tryAt(i + 1);
-        document.head.appendChild(s);
-      };
-      tryAt(0);
-    });
-    return echartsPromise;
+  /** 默认月份 = 最新数据所在月 */
+  function heatDefaultMonth() {
+    const last = state.allDates[state.allDates.length - 1];
+    return last ? last.slice(0, 7) : todayStr().slice(0, 7);
   }
 
-  async function openDrill(appid) {
+  /** 可翻阅的月份区间（首份数据月 → 最新数据月） */
+  function heatMonthBounds() {
+    const first = (state.allDates[0] ?? todayStr()).slice(0, 7);
+    const last = (state.allDates[state.allDates.length - 1] ?? todayStr()).slice(0, 7);
+    return { min: first, max: last };
+  }
+
+  function shiftMonth(ym, delta) {
+    const [y, m] = ym.split('-').map(Number);
+    const d = new Date(Date.UTC(y, m - 1 + delta, 1));
+    return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+  }
+
+  /** 某天某游戏的分钟数；appid 为空 = 当天总和。返回 null 表示「那天还没有数据」 */
+  function minutesOn(date, appid) {
+    const day = state.days.get(date);
+    if (!day) return null;
+    if (!appid) return day.total_minutes ?? 0;
+    return (day.games ?? []).find((g) => String(g.appid) === String(appid))?.minutes ?? 0;
+  }
+
+  function openDrill(appid) {
     state.drill.appid = appid;
+    state.drill.month = heatDefaultMonth();
     $('lt-main').hidden = true;
     $('lt-detail').hidden = false;
-    try {
-      await loadEcharts();
-    } catch (e) {
-      const box = $('chart-drill');
-      if (box) {
-        box.style.display = 'flex';
-        box.style.alignItems = 'center';
-        box.style.justifyContent = 'center';
-        box.style.color = 'var(--text-dim)';
-        box.style.fontSize = '13px';
-        box.textContent = '图表组件加载失败（可能是网络波动），请刷新后重试；其余数据不受影响。';
-      }
-    }
     renderDrill();
-    renderDrillMore(appid);
+    syncHash();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function closeDrill() {
+    // 必须清掉 appid：否则深链会一直挂着 g/<旧游戏>（切走再切回也回不来）
+    state.drill.appid = null;
     $('lt-detail').hidden = true;
     $('lt-main').hidden = false;
+    syncHash();
   }
 
+  /** 月历热力图：7 列（周一→周日），格子带日期与当日时长；全部游戏 / 单游戏共用 */
   function renderDrill() {
-    const el = $('chart-drill');
-    if (!window.echarts) return; // 按需加载未完成 / 失败：跳过，openDrill 已处理提示
-    if (!state.charts.drill) state.charts.drill = echarts.init(el);
-    if (!state.allDates.length) return;
-
     const appid = state.drill.appid;
     const gl = state.meta.games_lifetime ?? {};
     const title = appid ? (gl[appid]?.name ?? `App ${appid}`) : '全部游戏';
-    $('drill-title').textContent = `${title} · 每日与累计时长趋势`;
+    $('drill-title').textContent = `${title} · 每日游玩热力图`;
 
-    const today = ymd(new Date());
-    const lastDate = state.allDates[state.allDates.length - 1];
-    const end = today < lastDate ? today : lastDate;
-    let start;
-    if (state.drillRange === 'all') start = state.allDates[0];
-    else start = addDaysStr(end, -(state.drillRange - 1));
-    if (start < state.allDates[0]) start = state.allDates[0];
+    const ym = state.drill.month || heatDefaultMonth();
+    const bounds = heatMonthBounds();
+    const [y, m] = ym.split('-').map(Number);
+    const dim = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    const lead = (new Date(Date.UTC(y, m - 1, 1)).getUTCDay() + 6) % 7; // 周一 = 0
+    const today = todayStr();
 
-    const dates = eachDate(start, end);
-    const data = dates.map((d) => {
-      const day = state.days.get(d);
-      if (!day) return 0;
-      if (!appid) return day.total_minutes ?? 0;
-      return (day.games ?? []).find((g) => String(g.appid) === String(appid))?.minutes ?? 0;
-    });
-    const totalMin = data.reduce((a, b) => a + b, 0);
-    const activeDays = data.filter((v) => v > 0).length;
-    // 累计曲线：以 Steam 终身累计为基准，把「追踪前历史」锚定到起点，
-    // 保证曲线终点 = 卡片上的真实总时长（如 1364 h）
-    const lifetimeMin = appid
-      ? (gl[appid]?.lifetime_minutes ?? null)
-      : (state.meta.stats?.lifetime_minutes ?? null);
-    const base = lifetimeMin != null ? Math.max(0, lifetimeMin - totalMin) : 0;
-    const cum = [];
-    let acc = base;
-    for (const v of data) {
-      acc += v;
-      cum.push(acc);
+    const cells = [];
+    for (let i = 0; i < lead; i++) cells.push('<span class="hc is-blank"></span>');
+    let max = 0;
+    let active = 0;
+    let sum = 0;
+    for (let d = 1; d <= dim; d++) {
+      const ds = `${ym}-${String(d).padStart(2, '0')}`;
+      const min = minutesOn(ds, appid);
+      if (min === null) {
+        // 追踪开始之前 / 未来：留白格，只显示日期
+        cells.push(`<span class="hc is-na"><b>${d}</b></span>`);
+        continue;
+      }
+      if (min > 0) { active++; sum += min; }
+      if (min > max) max = min;
+      const r = max > 0 ? min / max : 0;
+      const lv = min <= 0 ? 0 : r <= 0.25 ? 1 : r <= 0.5 ? 2 : r <= 0.75 ? 3 : 4;
+      const cls = ['hc', `h${lv}`];
+      if (ds === today) cls.push('is-today');
+      cells.push(`<span class="${cls.join(' ')}"><b>${d}</b>${min > 0 ? `<i>${hoursShort(min)}</i>` : ''}</span>`);
     }
-    const finalMin = acc;
+    while (cells.length % 7 !== 0) cells.push('<span class="hc is-blank"></span>');
 
-    const CA = cssVar('--chart-axis');
-    const CS = cssVar('--chart-split');
-    const barColor = appid
-      ? { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: cssVar('--chart-cum-a2') }, { offset: 1, color: cssVar('--chart-cum-b2') }] }
-      : { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: cssVar('--chart-cum-a') }, { offset: 1, color: cssVar('--chart-cum-b') }] };
-    const lineColor = cssVar(appid ? '--chart-line2' : '--chart-line');
+    $('heat-drill').innerHTML = cells.join('');
+    $('heat-month').textContent = `${y} 年 ${m} 月`;
+    $('heat-prev').disabled = ym <= bounds.min;
+    $('heat-next').disabled = ym >= bounds.max;
+    $('heat-sum').textContent = `本月 ${active} 天有记录 · ${max > 0 ? '峰值 ' + hm(max) : '暂无记录'} · 合计 ${hm(sum)}`;
+    renderDrillMore(appid);
+  }
 
-    state.charts.drill.setOption(
-      {
-        backgroundColor: 'transparent',
-        // 入场动画：累计柱生长 + 每日曲线延伸
-        animation: true,
-        animationDuration: 1100,
-        animationEasing: 'cubicOut',
-        animationDurationUpdate: 600,
-        grid: { left: 58, right: 58, top: 40, bottom: 40 },
-        title: {
-          text: `${dates[0]} → ${end} · 最终累计 ${hm(finalMin)} · 期内游玩 ${hm(totalMin)} · 有记录 ${activeDays} 天`,
-          left: 8, top: 0,
-          textStyle: { color: cssVar('--chart-title'), fontSize: 12, fontWeight: 400 },
-        },
-        legend: {
-          top: 0, right: 8,
-          data: ['累计时长', '每日时长'],
-          textStyle: { color: CA, fontSize: 11 },
-          inactiveColor: cssVar('--chart-legend-off'),
-        },
-        tooltip: {
-          trigger: 'axis',
-          backgroundColor: cssVar('--chart-tip-bg'),
-          borderColor: cssVar('--chart-tip-border'),
-          textStyle: { color: cssVar('--chart-tip-text'), fontSize: 12 },
-          formatter: (ps) => {
-            const date = ps[0].axisValue;
-            const cumP = ps.find((p) => p.seriesName === '累计时长');
-            const dayP = ps.find((p) => p.seriesName === '每日时长');
-            const day = state.days.get(date);
-            let s = `${date}<br/>${cumP.marker}<b>累计：${hm(cumP.value ?? 0)}</b><br/>${dayP.marker}当日：${hm(dayP.value ?? 0)}`;
-            if (day && day.span_days > 1) s += `<br/><span style="color:#e8b13a">覆盖 ${day.span_days} 天</span>`;
-            return s;
-          },
-        },
-        xAxis: {
-          type: 'category',
-          data: dates,
-          axisLabel: { color: CA, fontSize: 11 },
-          axisLine: { lineStyle: { color: CS } },
-        },
-        yAxis: [
-          {
-            type: 'value',
-            name: '',
-            axisLabel: {
-              color: CA, fontSize: 11,
-              formatter: (v) => Math.round((v / 60) * 10) / 10,
-            },
-            splitLine: { lineStyle: { color: CS } },
-          },
-          {
-            type: 'value',
-            name: '',
-            axisLabel: { color: CA, fontSize: 11 },
-            splitLine: { show: false },
-          },
-        ],
-        series: [
-          {
-            name: '累计时长',
-            type: 'bar',
-            barWidth: '62%',
-            barMaxWidth: 28,
-            itemStyle: { color: barColor, borderRadius: [3, 3, 0, 0] },
-            data: cum,
-          },
-          {
-            name: '每日时长',
-            type: 'line',
-            yAxisIndex: 1,
-            smooth: true,
-            symbol: 'circle',
-            symbolSize: 4,
-            showSymbol: data.length <= 60,
-            itemStyle: { color: lineColor },
-            lineStyle: { width: 2.6, color: lineColor, shadowBlur: 8, shadowColor: lineColor, shadowOpacity: 0.35 },
-            data,
-          },
-        ],
-      },
-      true,
-    );
+  /** 上/下个月（越界直接忽略） */
+  function stepHeatMonth(delta) {
+    const ym = state.drill.month || heatDefaultMonth();
+    const bounds = heatMonthBounds();
+    const next = shiftMonth(ym, delta);
+    if (next < bounds.min || next > bounds.max) return;
+    state.drill.month = next;
+    renderDrill();
   }
 
   // ---------- ①d 成就详情 ----------
@@ -1479,50 +1379,6 @@
     el.style.opacity = '1';
   }
 
-  /* ---------- #7 活动热力图 ---------- */
-  /** 最近 18 周（周一开头）× 7 天。颜色深浅按「当日分钟 / 期内峰值」分四档，
-      不做插值 —— 五档色阶在小方块上比连续渐变更容易读。 */
-  function renderHeat() {
-    const box = $('heatmap');
-    if (!box) return;
-    const dates = state.allDates;
-    if (!dates.length) {
-      box.innerHTML = '<p class="empty">每日数据还在积累中，热力图会自动长出来。</p>';
-      if ($('heat-hint')) $('heat-hint').textContent = '—';
-      return;
-    }
-    const WEEKS = 18;
-    const lastDay = dates[dates.length - 1];
-    const firstCol = addDaysStr(weekStart(lastDay), -(WEEKS - 1) * 7);
-    const cells = [];
-    let max = 0;
-    let active = 0;
-    let sum = 0;
-    for (let w = 0; w < WEEKS; w++) {
-      const ws = addDaysStr(firstCol, w * 7);
-      for (let d = 0; d < 7; d++) {
-        const date = addDaysStr(ws, d);
-        const min = state.days.get(date)?.total_minutes ?? 0;
-        if (min > 0) { active++; sum += min; }
-        if (min > max) max = min;
-        cells.push({ date, min });
-      }
-    }
-    const lv = (m) => {
-      if (!m || max <= 0) return 0;
-      const r = m / max;
-      return r <= 0.25 ? 1 : r <= 0.5 ? 2 : r <= 0.75 ? 3 : 4;
-    };
-    box.style.setProperty('--heat-weeks', String(WEEKS));
-    box.innerHTML = cells
-      .map((c) => `<i class="hc h${lv(c.min)}"${c.min > 0 ? ` data-d="${c.date}"` : ''}></i>`)
-      .join('');
-    box.setAttribute('aria-label', `最近 ${WEEKS} 周共 ${active} 天有游玩记录，单日峰值 ${hm(max)}`);
-    if ($('heat-hint')) {
-      $('heat-hint').textContent = `${active}/${WEEKS * 7} 天有记录 · 峰值 ${hm(max)} · 合计 ${hm(sum)}`;
-    }
-  }
-
   /* ---------- #12 全成就勋章墙 ---------- */
   function renderBadges() {
     const panel = $('panel-badges');
@@ -1652,9 +1508,10 @@
     const g = appid ? gl[appid] : null;
     const totalLife = state.meta?.stats?.lifetime_minutes ?? 0;
     const share = g && totalLife > 0 ? (g.lifetime_minutes / totalLife) * 100 : null;
+    // 与月历热力图同口径：只数「当天真有时长」的日子（基线日的 0 分钟不算）
     const days = appid
       ? state.allDates.filter((d) => (state.days.get(d)?.games ?? []).some((x) => String(x.appid) === String(appid)))
-      : state.allDates;
+      : state.allDates.filter((d) => (state.days.get(d)?.total_minutes ?? 0) > 0);
     const inPeriod = appid
       ? days.reduce((a, d) => {
           const hit = (state.days.get(d)?.games ?? []).find((x) => String(x.appid) === String(appid));
@@ -1709,10 +1566,10 @@
     const seg = h.split('/').filter(Boolean);
     const view = ['lifetime', 'recent', 'ach', 'timeline', 'data'].includes(seg[0]) ? seg[0] : null;
     if (!view) return false;
-    switchView(view);
+    switchView(view, { instant: true });
     const gi = seg.indexOf('g');
     const appid = gi >= 0 ? seg[gi + 1] : null;
-    if (appid && view === 'lifetime') openDrill(appid).catch(() => {});
+    if (appid && view === 'lifetime') openDrill(appid);
     return true;
   }
 
@@ -1732,7 +1589,7 @@
     }
     const drillTo = (e) => {
       const b = e.target.closest('[data-appid]');
-      if (b) openDrill(b.dataset.appid).catch(() => {});
+      if (b) openDrill(b.dataset.appid);
     };
     if ($('badges')) $('badges').addEventListener('click', drillTo);
     if ($('suggest')) $('suggest').addEventListener('click', drillTo);
@@ -1749,7 +1606,9 @@
     window.addEventListener('hashchange', () => { applyHash(); });
   }
   // ---------- tabs / init ----------
-  function switchView(v) {
+  /** opts.instant：跳过 View Transition（深链直达时用 —— 过渡的回调是异步执行的，
+   *  会把紧接着 openDrill 打开的详情面板又关回去）。 */
+  function switchView(v, opts = {}) {
     const run = () => {
       state.view = v;
       document.querySelectorAll('.card-nav').forEach((c) => c.classList.toggle('active', c.dataset.view === v));
@@ -1769,12 +1628,12 @@
         }
       }
       if (v === 'timeline') renderTimeline();
-      if (v === 'data') { renderReport(); renderHeat(); }
+      if (v === 'data') renderReport();
       syncHash();
     };
     // #11 视图过渡：支持的浏览器用 View Transitions，不支持的（或用户要求减少动效）直接切
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!document.startViewTransition || reduce) { run(); return; }
+    if (opts.instant || !document.startViewTransition || reduce) { run(); return; }
     if (state.vt) { run(); return; }
     const t = document.startViewTransition(run);
     state.vt = t;
@@ -1847,7 +1706,7 @@
       } else if (!$('lt-detail').hidden) {
         closeDrill();
       } else {
-        openDrill(null).catch((e) => console.warn('趋势图打开失败', e));
+        openDrill(null);
       }
     });
     $('card-recent').addEventListener('click', () => switchView('recent'));
@@ -1866,7 +1725,7 @@
     $('lt-list').addEventListener('click', (e) => {
       const row = e.target.closest('.rank-item');
       if (!row) return;
-      openDrill(row.dataset.appid).catch((e) => console.warn('趋势图打开失败', e));
+      openDrill(row.dataset.appid);
     });
 
     // 最近游玩列表：全站唯一的日历入口（2026-10-20）。
@@ -1881,19 +1740,12 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    $('drill-range').addEventListener('click', (e) => {
-      const b = e.target.closest('button');
-      if (!b) return;
-      [...$('drill-range').children].forEach((x) => x.classList.toggle('active', x === b));
-      state.drillRange = b.dataset.r === 'all' ? 'all' : Number(b.dataset.r);
-      renderDrill();
-    });
+    // 第 86 轮：月份翻页（原 30/90/365 分段已随趋势图一起移除）
+    $('heat-prev').addEventListener('click', () => stepHeatMonth(-1));
+    $('heat-next').addEventListener('click', () => stepHeatMonth(1));
 
     $('btn-csv-daily').addEventListener('click', () => download('steam-daily.csv', csvDaily()));
     $('btn-csv-lifetime').addEventListener('click', () => download('steam-games-lifetime.csv', csvLifetime()));
-    window.addEventListener('resize', () => {
-      Object.values(state.charts).forEach((c) => c?.resize());
-    });
   }
 
   (async function init() {
@@ -1922,11 +1774,11 @@
       buildAchSelect();
       // 第 83 轮新增块：热力图 / 勋章墙 / 推荐 / 阶段报告，以及新交互的一次性绑定
       bindMore();
-      renderHeat();
       renderBadges();
       renderReport();
-      switchView('lifetime');
-      applyHash();      // 深链：#/ach、#/lifetime/week、#/lifetime/g/730
+      // 有深链就按深链走（applyHash 内部已切视图）；没有就用默认视图。
+      // 首屏不播 View Transition：过渡回调是异步的，会把深链打开的详情面板又关回去。
+      if (!applyHash()) switchView('lifetime', { instant: true });
     } catch (err) {
       clearTimeout(watchdog);
       console.error('初始化失败：', err);

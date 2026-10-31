@@ -1433,30 +1433,58 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   transition: opacity .45s ease;
 }
 
-/* #7 活动热力图：18 列 × 7 行的方格，四档亮度 */
-.heat {
-  display: grid; grid-auto-flow: column;
-  grid-template-rows: repeat(7, 11px); grid-auto-columns: 11px;
-  justify-content: start; gap: 3px; margin-bottom: 8px;
+/* #7 活动热力图（第 86 轮起**按月**）：7 列 = 周一 → 周日，格子里直接写日期与当天时长。
+   一格最小 54px 高、等比铺满容器 —— 月份只有 5~6 行，比原来 18 周的小方块更能看清每天。 */
+.heat-cal {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 10px;
 }
+.heat-week {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+  font-size: 11.5px; color: var(--text-dim); margin-bottom: 7px;
+}
+.heat-week span { padding-left: 7px; }
 .hc {
-  border-radius: 3px; background: var(--tint-1);
-  box-shadow: inset 0 0 0 .5px var(--border);
+  position: relative; min-height: 78px; border-radius: 10px; padding: 8px 10px;
+  display: flex; flex-direction: column; gap: 2px;
+  background: var(--sunken); border: .5px solid var(--border);
+  color: var(--text-dim); font-size: 12.5px; font-variant-numeric: tabular-nums;
 }
-.hc.h1 { background: var(--accent); opacity: .28; }
-.hc.h2 { background: var(--accent); opacity: .5; }
-.hc.h3 { background: var(--accent); opacity: .72; }
-.hc.h4 { background: var(--accent); opacity: 1; }
+.hc b { font-weight: 500; color: var(--text); }
+.hc i { font-style: normal; font-size: 11.5px; margin-top: auto; text-align: right; opacity: .95; }
+.hc.is-blank { background: transparent; border-color: transparent; }
+.hc.is-na { background: transparent; border-style: dashed; opacity: .55; }
+.hc.is-today { box-shadow: inset 0 0 0 1.5px var(--accent); }
+/* 四档：用 color-mix 调透明度，文字不跟着变淡（旧写法用 opacity 会把日期一起洗白） */
+.hc.h1 { background: color-mix(in srgb, var(--accent) 16%, var(--sunken)); }
+.hc.h2 { background: color-mix(in srgb, var(--accent) 34%, var(--sunken)); }
+.hc.h3 { background: color-mix(in srgb, var(--accent) 56%, var(--sunken)); }
+.hc.h4 { background: var(--accent); border-color: var(--accent); }
+.hc.h4 b, .hc.h4 i { color: #fff; }
+.heat-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.heat-sum { font-size: 12px; color: var(--text-dim); }
 .heat-legend {
-  display: flex; align-items: center; gap: 5px; justify-content: flex-end;
+  display: flex; align-items: center; gap: 5px;
   font-size: 11px; color: var(--text-faint);
 }
-.heat-legend i { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+.heat-legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
 .heat-legend .h0 { background: var(--tint-1); box-shadow: inset 0 0 0 .5px var(--border); }
-.heat-legend .h1 { background: var(--accent); opacity: .28; }
-.heat-legend .h2 { background: var(--accent); opacity: .5; }
-.heat-legend .h3 { background: var(--accent); opacity: .72; }
-.heat-legend .h4 { background: var(--accent); opacity: 1; }
+.heat-legend .h1 { background: color-mix(in srgb, var(--accent) 20%, transparent); }
+.heat-legend .h2 { background: color-mix(in srgb, var(--accent) 38%, transparent); }
+.heat-legend .h3 { background: color-mix(in srgb, var(--accent) 60%, transparent); }
+.heat-legend .h4 { background: var(--accent); }
+/* 月份翻页 */
+.heat-nav { display: flex; align-items: center; gap: 6px; }
+.heat-month { font-size: 13px; color: var(--text-strong); min-width: 92px; text-align: center; font-variant-numeric: tabular-nums; }
+.heat-nav .cal-nav:disabled { opacity: .35; cursor: default; }
+
+@media (max-width: 860px) {
+  .hc { min-height: 58px; padding: 6px 7px; font-size: 11px; }
+  .hc i { font-size: 10px; }
+  .heat-cal, .heat-week { gap: 4px; }
+  .heat-week span { padding-left: 5px; }
+}
 
 /* #14 接下来玩什么 */
 .suggest { display: flex; flex-direction: column; gap: 8px; }

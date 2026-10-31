@@ -49,8 +49,8 @@ check('内联：构建脚本串上 inline-boot', /inline-boot\.mjs/.test(build))
 check('样式：骨架屏样式与动画存在', /\.sk-block/.test(css) && /@keyframes sk-shimmer/.test(css));
 check('样式：尊重 reduced-motion（骨架不流动）', /prefers-reduced-motion: reduce[\s\S]{0,120}sk-block/.test(css));
 check('构建：build.mjs 输出 ach_stats 到 meta', /ach_stats:\s*achStats/.test(build));
-check('版本号：style\.css\?v=108 / app\.js\?v=103 / fx.js?v=16',
-  /style\.css\?v=108/.test(html) && /app\.js\?v=103/.test(html) && /fx\.js\?v=16/.test(html));
+check('版本号：style\.css\?v=109 / app\.js\?v=104 / fx.js?v=16',
+  /style\.css\?v=109/.test(html) && /app\.js\?v=104/.test(html) && /fx\.js\?v=16/.test(html));
 
 /* ---------- B/C/D. 浏览器实测 ---------- */
 const browser = await chromium.launch();
@@ -213,15 +213,21 @@ await page.waitForTimeout(300);
 const t2 = await page.evaluate(() => ({ now: document.documentElement.dataset.theme, stored: localStorage.getItem('theme') }));
 check('回归：主题切换并持久化', t2.stored === t2.now, JSON.stringify({ before: t1, ...t2 }));
 
-// 趋势图
+// 下钻：第 86 轮起是「月历热力图」，不再加载 ECharts
 await page.click('#lt-list .rank-item');
-await page.waitForTimeout(4000);
+await page.waitForTimeout(900);
 const drill = await page.evaluate(() => ({
   open: !document.getElementById('lt-detail').hidden,
-  canvas: !!document.querySelector('#chart-drill canvas'),
-  fallback: (document.getElementById('chart-drill').textContent || '').includes('加载失败'),
+  cells: document.querySelectorAll('#heat-drill .hc').length,
+  month: (document.getElementById('heat-month').textContent || '').trim(),
+  sum: (document.getElementById('heat-sum').textContent || '').trim(),
+  echarts: typeof window.echarts,
+  legacyChart: !!document.getElementById('chart-drill'),
 }));
-check('回归：趋势图可打开（ECharts 按需 + 降级）', drill.open && (drill.canvas || drill.fallback), JSON.stringify(drill));
+check('回归：下钻打开月历热力图（7 列网格 / 有月份 / 有汇总 / 无 ECharts）',
+  drill.open && drill.cells >= 28 && /\d{4} 年 \d{1,2} 月/.test(drill.month) &&
+  drill.sum.length > 0 && drill.echarts === 'undefined' && !drill.legacyChart,
+  JSON.stringify(drill));
 
 // 滚动胶囊图：只断言"水化动作发生了"（沙箱连不上 Steam CDN，图片字节到不了，
 // 不能拿 naturalWidth 判断——那是网络问题不是逻辑问题）

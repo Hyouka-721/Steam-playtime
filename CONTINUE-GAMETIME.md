@@ -60,11 +60,17 @@ README.md                    # 完整说明（管线/部署/密钥/Schema/自检
 
 ## 四、当前进展与版本
 
-- 版本号：`style.css?v=108` / `app.js?v=103` / `fx.js?v=16`（**硬编码在 `verify6.mjs` 第 52 行**；第 85 轮回退四项后再次 bump）。
+- 版本号：`style.css?v=109` / `app.js?v=104` / `fx.js?v=16`（**硬编码在 `verify6.mjs` 第 52 行**；第 86 轮热力图改月历后再次 bump）。
 - 最近一次针对游戏站的大改是**第 24 轮「首屏加载优化」**（在 verify6 注释里记着）：数据全内联、`cache:"default"`、月份文件 `Promise.allSettled` 并行、成就按需、骨架屏、`meta.ach_stats` 摘要。
 - 之后 25~80 轮几乎都在做观影页（watch），游戏站只在 CI 每晚改 `docs/index.html` 数据、以及「日历入口收敛到最近游玩」等零散订正。
 - **第 82 轮（index 侧，2026-10-31，本地改动，未提交/未上线）**三项：① 全站移除 `title` 悬停气泡（页眉三项 + 五张概览卡 + 返回按钮 + 日历日期格 + 排行榜行 + 氛围开关禁用态），语义一律改由 `aria-label` 承载；② `.site-title` 加 `user-select:none`（双击不再框选、拖拽不带走文字，点它仍回顶部）；③ 删掉排行榜首行三只吉祥物（加菲猫 / 猫和老鼠 / 企鹅）——模板、CSS 三条规则、三张 webp 全清，`.rank-list` 的 18px 上内边距**刻意保留**（首行位置与 `--cal-lift` 的换算依赖它）。新增 `tests/verify/verify82_index.mjs` **16/16**。
 - 回归：`verify6` **35/35**、`verify47` **72/72**（0.4b 判据改为「aria-label 承载 + title 必为 null」）、`verify54` **23/23**（B2/B3/B6 同步改成 aria-label）、`verify82_index` **16/16**；`verify55/56/58` 页眉几何未受影响（40/40、49/49、23/23）。
+- **第 86 轮（index 侧，2026-10-31）**热力图改「按月」并取代趋势图：
+  ① 热力图从「18 周 × 7 天的小方块」改成**月历网格**（7 列 = 周一 → 周日，格子内写日期 + 当日时长，四档 `color-mix` 深浅）；只在**下钻界面**出现，数据页那块已删除。
+  ② 下钻（点榜单行 = 单游戏；点「游戏时长」卡 = 全部游戏）原来是 **ECharts 柱状 + 折线**，现在整体换成同一套月历热力图 —— **ECharts 已从站点彻底移除**（`ECHARTS_SRC` / `loadEcharts` / 旧 `renderDrill` / `state.charts` / `drillRange` / `cssVar` 全删），首屏与下钻都不再联网取图表库。
+  ③ 月份翻页 `#heat-prev` / `#heat-next`，边界 = 「首份数据月 → 最新数据月」；汇总行「本月 N 天有记录 · 峰值 · 合计」。
+  ④ 三个真坑：`openDrill` 不再 async 后，调用点的 `.catch()` 会抛错；`closeDrill` 必须清 `state.drill.appid`，否则深链一直挂着 `g/<旧游戏>`；**深链直达要 `switchView(v,{instant:true})`** —— View Transition 的回调是异步的，会把紧随其后打开的详情面板又关回去。
+  回归：`verify6` 的「趋势图」判据改为「月历热力图 + 无 ECharts」；`verify83_index` 32 条同步；`verify49` 的 hint 清单去掉 heat-hint。
 - **第 85 轮（index 侧，2026-10-31，回退轮）**—— 用户点名撤掉第 83 轮的三项，并把热力图换页：
   ① **#8 封面主色进度条 → 撤回**：`barStyle()` 回到两参（只用十色 `topPalette`），`build.mjs` 不再合并 `game-colors.json`，`meta.games_lifetime[].bar` 字段消失；`scripts/rank-colors.mjs` 与 `data/overrides/game-colors.json` **已删除**（需要时从 `fca115e` 取回）。
   ② **#14「接下来玩什么」→ 整块删除**：HTML 容器、`renderSuggest()`、`bindMore` 里的点击委托、`meta.ach_almost` 与构建期计算全清；`.sg-*` / `.panel-strip` 样式一并删掉。

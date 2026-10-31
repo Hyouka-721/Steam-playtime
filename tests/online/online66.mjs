@@ -86,7 +86,7 @@ ok('A3 线上 watch.html 与本地去 CR 后 md5 全等', md5(norm(snap.h)) === 
 ok('A4 线上 watch.js 与本地去 CR 后 md5 全等', md5(norm(snap.j)) === md5(local('watch.js')), md5(norm(snap.j)));
 const rIdx = await page.evaluate(async (base) => {
   const h = await (await fetch(base + 'index.html?cb=' + Date.now(), { cache: 'reload' })).text();
-  return ['style.css?v=108', 'app.js?v=103', 'fx.js?v=16'].filter((v) => !h.includes(v));
+  return ['style.css?v=109', 'app.js?v=104', 'fx.js?v=16'].filter((v) => !h.includes(v));
 }, SITE);
 ok('A5 首页三个版本号未受影响', rIdx.length === 0, rIdx.join(',') || '全部命中');
 const liveData = JSON.parse(snap.d);
