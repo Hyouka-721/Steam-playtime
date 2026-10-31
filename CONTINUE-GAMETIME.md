@@ -60,12 +60,28 @@ README.md                    # 完整说明（管线/部署/密钥/Schema/自检
 
 ## 四、当前进展与版本
 
-- 版本号：`style.css?v=106` / `app.js?v=100` / `fx.js?v=16`（**硬编码在 `verify6.mjs` 第 52 行**；第 82 轮 index 侧改动后从 105/99 bump）。
+- 版本号：`style.css?v=107` / `app.js?v=101` / `fx.js?v=16`（**硬编码在 `verify6.mjs` 第 52 行**；第 83 轮 index 侧改动后从 106/100 bump）。
 - 最近一次针对游戏站的大改是**第 24 轮「首屏加载优化」**（在 verify6 注释里记着）：数据全内联、`cache:"default"`、月份文件 `Promise.allSettled` 并行、成就按需、骨架屏、`meta.ach_stats` 摘要。
 - 之后 25~80 轮几乎都在做观影页（watch），游戏站只在 CI 每晚改 `docs/index.html` 数据、以及「日历入口收敛到最近游玩」等零散订正。
 - **第 82 轮（index 侧，2026-10-31，本地改动，未提交/未上线）**三项：① 全站移除 `title` 悬停气泡（页眉三项 + 五张概览卡 + 返回按钮 + 日历日期格 + 排行榜行 + 氛围开关禁用态），语义一律改由 `aria-label` 承载；② `.site-title` 加 `user-select:none`（双击不再框选、拖拽不带走文字，点它仍回顶部）；③ 删掉排行榜首行三只吉祥物（加菲猫 / 猫和老鼠 / 企鹅）——模板、CSS 三条规则、三张 webp 全清，`.rank-list` 的 18px 上内边距**刻意保留**（首行位置与 `--cal-lift` 的换算依赖它）。新增 `tests/verify/verify82_index.mjs` **16/16**。
 - 回归：`verify6` **35/35**、`verify47` **72/72**（0.4b 判据改为「aria-label 承载 + title 必为 null」）、`verify54` **23/23**（B2/B3/B6 同步改成 aria-label）、`verify82_index` **16/16**；`verify55/56/58` 页眉几何未受影响（40/40、49/49、23/23）。
-- 数据现状：`docs/data/daily/` 按月一份；`meta.json` 有 `ach_stats`；`achievements.json` 约 285KB。
+- **第 83 轮（index 侧，2026-10-31，已提交）14 项体验改造**（用户点名「除 #2 #3 #9 #17 外全做」）：
+  ① **合并视图**：删掉独立的「游戏库/时间轴」视图，`#card-games` 卡一并移除 → 概览 4 张卡；榜单用 `#lt-mode`（排名/时间轴）切换两种画法，`switchView('timeline')` 仍保留为别名（老书签/深链不炸）。
+  ② **活动热力图**（`#heatmap`）：18 周 × 7 天 = **126 格**，四档亮度按「当日分钟/期内峰值」；格子固定 **11px**（用 `1fr` 会被撑到 60px，整块 623px 高——踩过）。
+  ③ **接下来玩什么**（`#panel-suggest`，`.panel-strip` 窄条）：两组 —— 「差 ≤3 个成就」(`meta.ach_almost`，构建期算) 与「买了没启动」。**不能做成大面板**：会把握手榜挤出首屏。
+  ④ **全成就勋章墙**：放在**成就视图**顶部（不是游戏时长页），数据来自 `meta.ach_perfect`。
+  ⑤ **封面主色进度条**：`scripts/rank-colors.mjs` 用 sharp 从 `header.jpg` 提主色写 `data/overrides/game-colors.json`，`build.mjs` 合并进 `meta.games_lifetime[].bar`；缺表自动回落十色板。
+  ⑥ **悬停底纹**：`#hero-bg`（JS 动态创建，`position:fixed; z-index:-1`），悬停榜单行换成该游戏封面模糊图。
+  ⑦ **数字滚动 + View Transitions**：`countUp()` 尊重 reduced-motion；`switchView` 用 `document.startViewTransition`，**必须加 `state.vt` 锁**，否则连续切换会抛 `Transition was skipped`（会变成 pageerror）。
+  ⑧ **深色主题 `night`**：第 4 套主题，变量与 cream 一一对齐；首屏脚本**首次访问跟随系统 `prefers-color-scheme`**，手动选过以 localStorage 为准。
+  ⑨ **阶段报告 + 周目标 + 换算**（数据页）：`#report`（追踪天数/期内总时长/最长连续/最佳单日/期内最常玩）、`#pace`（周目标环，目标存 `localStorage.weekGoalH`，默认 10h，本周 vs 上周）、`#convert`（电影/剧集/《战争与和平》/通勤 四条换算）。
+  ⑩ **单游戏详情扩展**（`#drill-more`）：占终身比重条 + 期内/首次/最近 + 最近 8 条成就（含稀有度金色）。
+  ⑪ **深链**：`#/视图`、`#/lifetime/week`、`#/lifetime/g/<appid>`，`history.replaceState` 同步。
+  ⑫ **PWA**：`manifest.webmanifest` + `icon-192/512.png`（`scripts/make-icons.mjs` 用史蒂夫合成）。**离线缓存刻意没做** —— index 侧再注册一个 SW 会与 watch 页的 `sw.js`（同 scope）互相替换。
+  ⑬ **窄屏两行榜单**：≤860px 改成 `34px 100px 1fr`，进度条落第二行；**别写成 4 列**（定宽吃光后片名只剩 30px）。
+  ⑭ **页脚去重**：删掉 `#footer-gen`（与「数据」卡重复）。
+  新增 `tests/verify/verify83_index.mjs` **28 条**；回归：verify6 35、47 72、48 78、49 47、54 23、55 40、56 49、58 23、82_index 16、83_index 28 —— **全绿**。
+- 数据现状：`docs/data/daily/` 按月一份；`meta.json` 有 `ach_stats` / `ach_perfect` / `ach_almost`；`achievements.json` 约 285KB。
 
 ## 五、硬约束（违反必炸）
 
@@ -78,6 +94,10 @@ README.md                    # 完整说明（管线/部署/密钥/Schema/自检
 7. **沙箱里 CDN/Steam 图片会挂起**：verify6 里 `ctx.route` 把 `cdn.jsdelivr.net / steamstatic.com / steampowered.com / akamaihd` 全 `abort`，否则计时被拖死。
 8. **`blackrose.woff`（TTF）是 `style.css` 的字体回退**，别当冗余删。
 9. **不要再给任何元素加 `title`**（第 82 轮用户要求「全站一个悬停气泡都不留」）：需要向读屏/键盘用户说明的语义写进 `aria-label`；`verify82_index.mjs` 把「整页带 title 属性的元素数 = 0」当硬断言，加了就 FAIL。
+10. **首屏预算**（第 83 轮）：游戏时长视图里榜单上方**最多两块**（热力图 + 推荐窄条）。1440×900 实测首行在 y≈777；再加一块就会把榜单挤出首屏，`verify6` 的「视口内胶囊图已水化」会直接挂。
+11. **新面板一律 `.panel` + `.panel-head`；只有一行内容用 `.panel-strip`**（无标题栏，padding 12/18）。热力图格子用固定 `11px`，**不要用 `1fr`** —— 容器宽 1180 时会被撑到 60px 一方，整块 623px 高。
+12. **`meta.ach_almost` 与 `games_lifetime[].bar` 都是构建期产物**：改 `build.mjs` 后必须重跑 `npm run build`；主色表缺失不报错（前端回落十色板），重建它要联网跑 `node scripts/rank-colors.mjs`（增量，`--force` 全量）。
+13. **View Transition 必须加锁**：`state.vt` 在跑就别再开第二个，否则 Chromium 抛 `Transition was skipped`，会以 pageerror 计入「零 JS 异常」断言。
 9. **条数/百分比写死会随快照漂移**：期望值从内联 `__BOOT` 里读（verify6 成就卡就是教训，第 70 轮改过）。
 
 ## 六、标准工作流

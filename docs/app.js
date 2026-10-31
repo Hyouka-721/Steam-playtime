@@ -66,6 +66,10 @@
     charts: {},
     // ---- 游玩日历浮层（点击「最近游玩」首行日期上方的小日历图标打开）----
     cal: { open: false, ym: '2026-10', busy: false, lastFocus: null, day: null },
+    // 第 83 轮：排名 / 时间轴 合并后的呈现方式（'rank' | 'week'），不持久化
+    ltMode: 'rank',
+    heroAppid: null,  // 悬停中的游戏（背景底纹用），null = 恢复默认底
+    vt: null,         // 正在跑的 ViewTransition（Chromium 不允许叠第二个）
   };
 
   // ---------- utils ----------
@@ -159,13 +163,13 @@
     if (lt && !lt.querySelector('.sk-row') && !lt.querySelector('.rank-item')) {
       lt.innerHTML = rankSkeleton(8);
     }
-    ['c-lifetime', 'c-recent', 'c-ach', 'c-games', 'c-data'].forEach((id) => {
+    ['c-lifetime', 'c-recent', 'c-ach', 'c-data'].forEach((id) => {
       const el = $(id);
       if (el && el.textContent.trim() === '—') el.classList.add('sk-value');
     });
   }
   function clearCardSkeleton() {
-    ['c-lifetime', 'c-recent', 'c-ach', 'c-games', 'c-data'].forEach((id) => {
+    ['c-lifetime', 'c-recent', 'c-ach', 'c-data'].forEach((id) => {
       $(id)?.classList.remove('sk-value');
     });
   }
@@ -186,11 +190,14 @@
   }
 
   // ---------- 主题 ----------
-  /** 3 套主题（全浅色）：切换只改 <html data-theme>，配色全部走 CSS 变量 */
+  /** 4 套主题（3 浅 + 1 深）：切换只改 <html data-theme>，配色全部走 CSS 变量。
+      2026-10-31 第 83 轮：加入 night —— 用户点名要的一条，破例首次引入深色。
+      单击史蒂夫会在四套里随机挑一套（原来只在浅色组里随机）。 */
   const THEMES = [
     { id: 'cream', name: '暖阳米', mode: 'light' },
     { id: 'mint', name: '薄荷晨', mode: 'light' },
     { id: 'dawn', name: '晨曦紫', mode: 'light' },
+    { id: 'night', name: '夜航', mode: 'dark' },
   ];
   /** 读取当前主题的 CSS 变量（图表画在 canvas 上，必须显式取色） */
   const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -220,15 +227,16 @@
       读屏仍能读到「当前：某主题」，鼠标悬停则不再弹任何提示。 */
   function syncThemeUi(id = currentTheme()) {
     const light = $('theme-light');
-    if (light) light.setAttribute('aria-label', `切换浅色主题（当前：${themeName(id)}）`);
+    if (light) light.setAttribute('aria-label', `切换主题（当前：${themeName(id)}）`);
   }
 
-  /** 在指定深/浅组内随机挑一个与当前不同的主题 */
+  /** 随机挑一个与当前不同的主题；mode='all' 时四套一起参与（第 83 轮起含深色） */
   function randomTheme(mode) {
     const cur = currentTheme();
-    const pool = THEMES.filter((t) => t.mode === mode && t.id !== cur);
+    const all = mode === 'all' ? THEMES : THEMES.filter((t) => t.mode === mode);
+    const pool = all.filter((t) => t.id !== cur);
     // 组内全被排除时（当前主题不在该组）直接全组随机
-    const list = pool.length ? pool : THEMES.filter((t) => t.mode === mode);
+    const list = pool.length ? pool : all;
     return list[Math.floor(Math.random() * list.length)].id;
   }
 
@@ -349,18 +357,13 @@
     const asOf = state.meta.last_snapshot_date;
     clearCardSkeleton(); // 有值了就把占位块撤掉（HTML 里预置的 sk-value 类）
 
-    $('c-lifetime').textContent = hm(s.lifetime_minutes ?? 0);
-
+    // 第 83 轮：四张卡（原「游戏库」并入游戏时长视图），数字从 0 滚上来
+    countUp($('c-lifetime'), s.lifetime_minutes ?? 0, (v) => hm(v));
     // 最近游玩卡：近两周总时长。口径固定，不随日历浮层里选了哪一天而变化
-    // （2026-10-21 前此处会跟随"回看态"显示当天总时长，整页回看已移除）
-    $('c-recent').textContent = hm(lastNDaysTotal(14).minutes);
+    countUp($('c-recent'), lastNDaysTotal(14).minutes, (v) => hm(v));
 
-    // 游戏库卡：玩过 / 拥有
-    $('c-games').textContent = `${s.lifetime_played_games ?? 0} / ${s.owned_games ?? 0}`;
-
-    // 成就卡：完成百分比（2026-10-17 起不再显示「已解锁/总数」小字）；无数据时只显示占位符
     if (state.ach?.stats) {
-      $('c-ach').textContent = `${state.ach.stats.pct}%`;
+      countUp($('c-ach'), state.ach.stats.pct, (v) => `${Number(v).toFixed(1)}%`);
     } else {
       $('c-ach').textContent = '—';
     }
@@ -374,8 +377,6 @@
         ? `数据截至 ${asOf}` + (state.meta.tracking_since ? ` · 每日记录自 ${state.meta.tracking_since}` : '')
         : '等待首次采集';
     }
-
-    $('footer-gen').textContent = `数据生成于 ${state.meta.generated_at_local ?? '—'}`;
   }
 
   // ---------- ① 游戏累计 ----------
@@ -399,7 +400,10 @@
   ];
   /* 三处榜单行共用的序号类名 / 进度条样式 */
   const noCls = (i) => (i < 3 ? ` r${i + 1}` : '');
-  const barStyle = (pct, i) => `width:${pct}%` + (topPalette[i] ? `;background:${topPalette[i]}` : '');
+  /* 第 83 轮：构建期用 sharp 从封面提主色写进 meta（games_lifetime[].bar），
+     有就用它，没有就回落到原十色 topPalette —— 缺字段也不会变色。 */
+  const barStyle = (pct, i, color) =>
+    `width:${pct}%` + (color ? `;background:${color}` : topPalette[i] ? `;background:${topPalette[i]}` : '');
 
   /* 「最近游玩」首行日期上方的「游玩日历」入口图标（2026-10-20 收敛为全站唯一入口）：
      透明小日历（无底色无边框），CSS 里绝对定位于日期文字上方，不占布局、不改行高；
@@ -461,7 +465,7 @@
           <span class="rank-no${noCls(i)}">${i + 1}</span>
           ${capsuleHtml(g.appid, { perfect: isPerfect, eager, icon })}
           <span class="rank-name">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
-          <span class="rank-bar"><span style="${barStyle(pct, i)}"></span></span>
+          <span class="rank-bar"><span style="${barStyle(pct, i, g.bar)}"></span></span>
           <span class="rank-min">${hm(g.lifetime_minutes)}</span>
           ${lastHtml}
         </div>`;
@@ -547,7 +551,7 @@
           <span class="rank-no${noCls(i)}">${i + 1}</span>
           ${capsuleHtml(g.appid, { perfect: isPerfect, icon })}
           <span class="rank-name">${escapeHtml(g.name)}</span>
-          <span class="rank-bar"><span style="${barStyle(pct, i)}"></span></span>
+          <span class="rank-bar"><span style="${barStyle(pct, i, g.bar)}"></span></span>
           <span class="rank-min">${hm(g.recent)}</span>
           ${lastHtml}
         </div>`;
@@ -611,6 +615,7 @@
       }
     }
     renderDrill();
+    renderDrillMore(appid);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -950,7 +955,7 @@
 
   function renderTimeline() {
     const box = $('timeline');
-    const hint = $('tl-hint');
+    const hint = $('lt-hint');
     if (!state.allDates.length) {
       hint.textContent = '—';
       box.innerHTML = '<p class="empty">每日数据还在积累中。首次快照采集完成后即可看到时间轴。</p>';
@@ -1430,26 +1435,412 @@
     }
   }
 
-  // ---------- tabs / init ----------
-  function switchView(v) {
-    state.view = v;
-    document.querySelectorAll('.card-nav').forEach((c) => c.classList.toggle('active', c.dataset.view === v));
-    document.querySelectorAll('.view').forEach((s) => s.classList.toggle('active', s.id === `view-${v}`));
-    if (v === 'lifetime') closeDrill();
-    if (v === 'recent') renderRecent();
-    if (v === 'ach') {
-      // 成就**明细**（285KB）按需加载：首屏只带 stats 摘要，这里才去取 games。
-      // 先同步渲染一次（显示摘要 + "加载中"），到位后再渲染一次（填充明细列表）。
-      renderAch();
-      if (!state.achReady) {
-        ensureAchDetail().then(() => {
-          if (state.view !== 'ach') return; // 用户已切走就不必重绘
-          renderAch();
-          buildAchSelect();
-        });
+  // ================= 第 83 轮新增模块 =================
+  /* 用户 2026-10-31 点名的一批体验改动：#7 热力图 / #8 封面主色进度条 / #10 悬停底纹
+     #11 数字滚动+视图过渡 / #12 勋章墙 / #14 临门一脚推荐 / #15 阶段报告
+     #18 单游戏详情升级 / #19 深链 / #21 周目标与节奏。
+     全部只用现有数据（meta / daily / achievements），不新增任何运行时接口。 */
+
+  /** 数字滚动：从 0 滚到 to。尊重 prefers-reduced-motion；0 值直接落地。
+      fmt 收到的是浮点数，由调用方决定怎么格式化（整数 / 一位小数 / 时间串）。 */
+  function countUp(el, to, fmt) {
+    if (!el) return;
+    const target = Number(to) || 0;
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || target === 0) { el.textContent = fmt(target); return; }
+    const t0 = performance.now();
+    const tick = (t) => {
+      const k = Math.min(1, (t - t0) / 900);
+      const e = 1 - Math.pow(1 - k, 3); // ease-out cubic
+      el.textContent = fmt(target * e);
+      if (k < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  /* ---------- #10 悬停底纹：把当前指向的游戏封面极淡地铺在页底 ---------- */
+  function ensureHeroLayer() {
+    if ($('hero-bg')) return;
+    const d = document.createElement('div');
+    d.id = 'hero-bg';
+    d.className = 'hero-bg';
+    d.setAttribute('aria-hidden', 'true');
+    document.body.insertBefore(d, document.body.firstChild);
+  }
+
+  function setHero(appid) {
+    if (state.heroAppid === appid) return;
+    state.heroAppid = appid;
+    const el = $('hero-bg');
+    if (!el) return;
+    if (!appid) { el.style.opacity = '0'; return; }
+    el.style.backgroundImage = `url("${CAPSULE(appid)}")`;
+    el.style.opacity = '1';
+  }
+
+  /* ---------- #7 活动热力图 ---------- */
+  /** 最近 18 周（周一开头）× 7 天。颜色深浅按「当日分钟 / 期内峰值」分四档，
+      不做插值 —— 五档色阶在小方块上比连续渐变更容易读。 */
+  function renderHeat() {
+    const box = $('heatmap');
+    if (!box) return;
+    const dates = state.allDates;
+    if (!dates.length) {
+      box.innerHTML = '<p class="empty">每日数据还在积累中，热力图会自动长出来。</p>';
+      if ($('heat-hint')) $('heat-hint').textContent = '—';
+      return;
+    }
+    const WEEKS = 18;
+    const lastDay = dates[dates.length - 1];
+    const firstCol = addDaysStr(weekStart(lastDay), -(WEEKS - 1) * 7);
+    const cells = [];
+    let max = 0;
+    let active = 0;
+    let sum = 0;
+    for (let w = 0; w < WEEKS; w++) {
+      const ws = addDaysStr(firstCol, w * 7);
+      for (let d = 0; d < 7; d++) {
+        const date = addDaysStr(ws, d);
+        const min = state.days.get(date)?.total_minutes ?? 0;
+        if (min > 0) { active++; sum += min; }
+        if (min > max) max = min;
+        cells.push({ date, min });
       }
     }
-    if (v === 'timeline') renderTimeline();
+    const lv = (m) => {
+      if (!m || max <= 0) return 0;
+      const r = m / max;
+      return r <= 0.25 ? 1 : r <= 0.5 ? 2 : r <= 0.75 ? 3 : 4;
+    };
+    box.style.setProperty('--heat-weeks', String(WEEKS));
+    box.innerHTML = cells
+      .map((c) => `<i class="hc h${lv(c.min)}"${c.min > 0 ? ` data-d="${c.date}"` : ''}></i>`)
+      .join('');
+    box.setAttribute('aria-label', `最近 ${WEEKS} 周共 ${active} 天有游玩记录，单日峰值 ${hm(max)}`);
+    if ($('heat-hint')) {
+      $('heat-hint').textContent = `${active}/${WEEKS * 7} 天有记录 · 峰值 ${hm(max)} · 合计 ${hm(sum)}`;
+    }
+  }
+
+  /* ---------- #12 全成就勋章墙 ---------- */
+  function renderBadges() {
+    const panel = $('panel-badges');
+    const box = $('badges');
+    if (!panel || !box) return;
+    const perfect = state.meta?.ach_perfect ?? [];
+    if (!perfect.length) { panel.hidden = true; return; }
+    const gl = state.meta.games_lifetime ?? {};
+    panel.hidden = false;
+    if ($('badge-hint')) $('badge-hint').textContent = `${perfect.length} 款全部解锁 · 点一枚看趋势`;
+    box.innerHTML = perfect
+      .map((appid) => {
+        const g = gl[appid] ?? {};
+        return `<button type="button" class="badge" data-appid="${appid}">
+          ${capsuleHtml(appid, { perfect: true, icon: ICON(appid, g.img_icon_url) })}
+          <span class="badge-name">${escapeHtml(g.name ?? 'App ' + appid)}</span>
+          <span class="badge-min">${hm(g.lifetime_minutes ?? 0)}</span>
+        </button>`;
+      })
+      .join('');
+    observeCapsules(box);
+  }
+
+  /* ---------- #14 「接下来玩什么」 ---------- */
+  /** 两组：差 ≤3 个成就就全解锁（ach_almost 由构建期算好塞进 meta） + 买了没启动的。
+      纯规则、无模型：它只是把你自己的数据里「马上能完成」和「完全没碰」挑出来。 */
+  function renderSuggest() {
+    const panel = $('panel-suggest');
+    const box = $('suggest');
+    if (!panel || !box) return;
+    const almost = state.meta?.ach_almost ?? [];
+    const gl = state.meta.games_lifetime ?? {};
+    const never = Object.values(gl).filter((g) => (g.lifetime_minutes ?? 0) === 0);
+    if (!almost.length && !never.length) { panel.hidden = true; return; }
+    panel.hidden = false;
+    const chip = (appid, name, note) =>
+      `<button type="button" class="sg-item" data-appid="${appid}">
+        <span class="sg-name">${escapeHtml(name)}</span>
+        <span class="sg-note">${escapeHtml(note)}</span>
+      </button>`;
+    const a = almost.slice(0, 4).map((g) => chip(g.appid, g.name, `差 ${g.left} 个成就 · ${g.unlocked}/${g.total}`));
+    const b = never.slice(0, 4).map((g) => chip(g.appid, g.name, '还没启动过'));
+    box.innerHTML =
+      (a.length ? `<div class="sg-row"><span class="sg-label">就差一点</span>${a.join('')}</div>` : '') +
+      (b.length ? `<div class="sg-row"><span class="sg-label">买了还没玩</span>${b.join('')}</div>` : '');
+  }
+
+  /* ---------- #21 周目标与节奏 ---------- */
+  function weekMinutes(offset) {
+    const start = addDaysStr(weekStart(todayStr()), offset * 7);
+    let sum = 0;
+    for (let i = 0; i < 7; i++) sum += state.days.get(addDaysStr(start, i))?.total_minutes ?? 0;
+    return sum;
+  }
+
+  function goalHours() {
+    try {
+      const v = Number(localStorage.getItem('weekGoalH'));
+      return v > 0 && v <= 168 ? v : 10;
+    } catch (e) { return 10; }
+  }
+
+  function renderPace() {
+    const box = $('pace');
+    if (!box) return;
+    const goal = goalHours();
+    const cur = weekMinutes(0);
+    const prev = weekMinutes(-1);
+    const pct = Math.max(0, Math.min(1, cur / (goal * 60)));
+    const R = 26;
+    const C = 2 * Math.PI * R;
+    const delta = prev > 0 ? Math.round(((cur - prev) / prev) * 100) : null;
+    const deltaTxt = delta === null ? '上周没有记录，这是起点' : delta >= 0 ? `比上周多 ${delta}%` : `比上周少 ${-delta}%`;
+    box.innerHTML = `
+      <div class="pace-ring">
+        <svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true">
+          <circle cx="32" cy="32" r="${R}" class="pr-track"></circle>
+          <circle cx="32" cy="32" r="${R}" class="pr-fill"
+                  stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C * (1 - pct)).toFixed(1)}"></circle>
+        </svg>
+        <div class="pace-num">${Math.round(pct * 100)}%</div>
+      </div>
+      <div class="pace-txt">
+        <div class="pace-main">本周 ${hm(cur)} <span class="pace-dim">/ 目标 ${goal} h</span></div>
+        <div class="pace-sub">${deltaTxt}</div>
+      </div>
+      <label class="pace-set">周目标
+        <input type="number" id="week-goal" min="1" max="168" step="1" value="${goal}" aria-label="周目标小时数">
+        <span>h</span>
+      </label>`;
+  }
+
+  /* ---------- #16 时间换算 ---------- */
+  function renderConvert() {
+    const box = $('convert');
+    if (!box) return;
+    const m = state.meta?.stats?.lifetime_minutes ?? 0;
+    if (!m) { box.innerHTML = ''; return; }
+    const items = [
+      ['场电影（2 小时一部）', m / 120, '场'],
+      ['集 30 分钟的剧', m / 30, '集'],
+      ['遍《战争与和平》（约 35 小时）', m / (60 * 35), '遍'],
+      ['年的通勤（每天 1 小时）', m / (60 * 365), '年'],
+    ];
+    const fmt = (v) => (v >= 10 ? Math.round(v).toLocaleString('zh-CN') : v.toFixed(1));
+    box.innerHTML =
+      '<div class="cv-title">这些时间还能换算成</div><div class="cv-list">' +
+      items.map(([label, v, unit]) => `<span class="cv-item"><b>${fmt(v)}</b>${unit} ${label}</span>`).join('') +
+      '</div>';
+  }
+
+  /* ---------- #15 阶段报告 ---------- */
+  function renderReport() {
+    const box = $('report');
+    if (!box) return;
+    const s = state.meta?.stats ?? {};
+    const dates = state.allDates;
+    const gl = state.meta?.games_lifetime ?? {};
+    const top = Object.values(state.meta?.games_index ?? {})
+      .filter((g) => (g.total_minutes ?? 0) > 0)
+      .sort((a, b) => b.total_minutes - a.total_minutes)
+      .slice(0, 3);
+    const best = s.best_day;
+    const cell = (label, value, sub) =>
+      `<div class="rp-cell"><div class="rp-label">${label}</div><div class="rp-value">${value}</div>` +
+      (sub ? `<div class="rp-sub">${sub}</div>` : '') + '</div>';
+    const trackedDays = s.tracked_days ?? dates.length;
+    box.innerHTML =
+      cell('追踪天数', `${trackedDays} 天`, `${s.active_days ?? 0} 天有记录`) +
+      cell('期内总时长', hm(s.total_minutes ?? 0), `日均 ${hm(Math.round((s.total_minutes ?? 0) / Math.max(1, trackedDays)))}`) +
+      cell('最长连续', `${s.longest_streak ?? 0} 天`, `当前 ${s.current_streak ?? 0} 天`) +
+      cell('最佳单日', best ? hm(best.minutes) : '—', best ? best.date : '') +
+      (top.length
+        ? `<div class="rp-cell rp-wide"><div class="rp-label">期内最常玩</div><div class="rp-top">${top
+            .map((g, i) => `<span><b>${i + 1}</b>${escapeHtml(g.name)}<i>${hm(g.total_minutes)}</i></span>`)
+            .join('')}</div></div>`
+        : '');
+    if ($('report-range')) {
+      $('report-range').textContent = dates.length ? `${dates[0]} → ${dates[dates.length - 1]}` : '—';
+    }
+    renderPace();
+    renderConvert();
+    void gl;
+  }
+
+  /* ---------- #18 单游戏详情：占比 / 期段 / 成就解锁 ---------- */
+  function renderDrillMore(appid) {
+    const box = $('drill-more');
+    if (!box) return;
+    const gl = state.meta?.games_lifetime ?? {};
+    const g = appid ? gl[appid] : null;
+    const totalLife = state.meta?.stats?.lifetime_minutes ?? 0;
+    const share = g && totalLife > 0 ? (g.lifetime_minutes / totalLife) * 100 : null;
+    const days = appid
+      ? state.allDates.filter((d) => (state.days.get(d)?.games ?? []).some((x) => String(x.appid) === String(appid)))
+      : state.allDates;
+    const inPeriod = appid
+      ? days.reduce((a, d) => {
+          const hit = (state.days.get(d)?.games ?? []).find((x) => String(x.appid) === String(appid));
+          return a + (hit?.minutes ?? 0);
+        }, 0)
+      : (state.meta?.stats?.total_minutes ?? 0);
+    const head = g
+      ? `<div class="dm-head">
+          <div class="dm-share"><span>占终身时长</span><b>${share.toFixed(1)}%</b><i style="width:${Math.min(100, share).toFixed(1)}%"></i></div>
+          <div class="dm-kv"><span>期内游玩</span><b>${hm(inPeriod)}</b></div>
+          <div class="dm-kv"><span>首次记录</span><b>${days[0] ?? '—'}</b></div>
+          <div class="dm-kv"><span>最近游玩</span><b>${g.last_played ?? '—'}</b></div>
+        </div>`
+      : `<div class="dm-head"><div class="dm-kv"><span>期内合计</span><b>${hm(inPeriod)}</b></div>
+         <div class="dm-kv"><span>有记录</span><b>${days.length} 天</b></div></div>`;
+    box.innerHTML = head + (appid ? '<div class="dm-ach" id="dm-ach"><p class="dm-empty">成就明细按需加载…</p></div>' : '');
+    if (!appid) return;
+    ensureAchDetail().then(() => {
+      const mine = state.ach?.games?.[appid];
+      const box2 = $('dm-ach');
+      if (!box2) return;
+      if (!mine || !(mine.achievements ?? []).length) {
+        box2.innerHTML = '<p class="dm-empty">这款游戏没有成就记录（无成就系统，或尚未采集）。</p>';
+        return;
+      }
+      const un = (mine.achievements ?? []).slice().sort((a, b) => (b.ts ?? 0) - (a.ts ?? 0)).slice(0, 8);
+      box2.innerHTML =
+        `<div class="dm-ach-head">已解锁 ${mine.unlocked}/${mine.total} · 最近 8 条</div>` +
+        un
+          .map(
+            (a) => `<div class="dm-row">
+            <span class="dm-name${a.percent != null && a.percent < ACH_RARE_PCT ? ' is-gold' : ''}">${escapeHtml(a.name)}</span>
+            <span class="dm-pct">${a.percent != null ? a.percent + '%' : ''}</span>
+            <span class="dm-date">${a.ts ? achDate(a.ts) : ''}</span>
+          </div>`,
+          )
+          .join('');
+    });
+  }
+
+  /* ---------- #19 深链 ---------- */
+  function syncHash() {
+    const parts = ['#/' + state.view];
+    if (state.view === 'lifetime') {
+      if (state.ltMode === 'week') parts.push('week');
+      if (state.drill.appid) parts.push('g/' + state.drill.appid);
+    }
+    const next = parts.join('/');
+    if (location.hash !== next) history.replaceState(null, '', next);
+  }
+
+  function applyHash() {
+    const h = (location.hash || '').replace(/^#\/?/, '');
+    if (!h) return false;
+    const seg = h.split('/').filter(Boolean);
+    const view = ['lifetime', 'recent', 'ach', 'data'].includes(seg[0]) ? seg[0] : null;
+    if (!view) return false;
+    if (seg.includes('week')) state.ltMode = 'week';
+    switchView(view);
+    const gi = seg.indexOf('g');
+    const appid = gi >= 0 ? seg[gi + 1] : null;
+    if (appid && view === 'lifetime') openDrill(appid).catch(() => {});
+    return true;
+  }
+
+  /* ---------- 排名 / 时间轴（#1 合并后的呈现方式切换） ---------- */
+  function setLtMode(m) {
+    state.ltMode = m === 'week' ? 'week' : 'rank';
+    const list = $('lt-list');
+    const tl = $('timeline');
+    const title = $('lt-title');
+    if (list) list.hidden = state.ltMode !== 'rank';
+    if (tl) tl.hidden = state.ltMode !== 'week';
+    if (title) title.textContent = state.ltMode === 'week' ? '每周时间轴' : '游戏排行';
+    const seg = $('lt-mode');
+    if (seg) {
+      [...seg.children].forEach((b) => {
+        const on = b.dataset.m === state.ltMode;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+    }
+    const hint = $('lt-hint');
+    if (hint && state.ltMode === 'rank') {
+      const s = state.meta?.stats ?? {};
+      hint.textContent = `${s.lifetime_played_games ?? 0} / ${s.owned_games ?? 0} 款有游玩记录`;
+    }
+    if (state.ltMode === 'week') renderTimeline();
+    else renderLifetime();
+    syncHash();
+  }
+
+  /* ---------- 新增交互的一次性绑定（放在 bind() 之后调用，避免改动原函数体） ---------- */
+  function bindMore() {
+    ensureHeroLayer();
+    const mode = $('lt-mode');
+    if (mode) {
+      mode.addEventListener('click', (e) => {
+        const b = e.target.closest('button');
+        if (b) setLtMode(b.dataset.m);
+      });
+    }
+    const list = $('lt-list');
+    if (list) {
+      list.addEventListener('mouseover', (e) => {
+        const row = e.target.closest('.rank-item');
+        setHero(row ? row.dataset.appid : null);
+      });
+      list.addEventListener('mouseleave', () => setHero(null));
+    }
+    const drillTo = (e) => {
+      const b = e.target.closest('[data-appid]');
+      if (b) openDrill(b.dataset.appid).catch(() => {});
+    };
+    if ($('badges')) $('badges').addEventListener('click', drillTo);
+    if ($('suggest')) $('suggest').addEventListener('click', drillTo);
+    const pace = $('pace');
+    if (pace) {
+      pace.addEventListener('change', (e) => {
+        if (!e.target || e.target.id !== 'week-goal') return;
+        const v = Number(e.target.value);
+        if (!(v >= 1 && v <= 168)) return;
+        try { localStorage.setItem('weekGoalH', String(Math.round(v))); } catch (err) { /* 隐私模式忽略 */ }
+        renderPace();
+      });
+    }
+    window.addEventListener('hashchange', () => { applyHash(); });
+  }
+  // ---------- tabs / init ----------
+  function switchView(v) {
+    // 第 83 轮：'timeline' 不再是一个独立视图 —— 它变成「游戏时长」视图里的第二种画法。
+    // 保留 'timeline' 这个入口名，是因为卡片/深链/老书签都还在用它。
+    if (v === 'timeline') { state.ltMode = 'week'; v = 'lifetime'; }
+    const run = () => {
+      state.view = v;
+      document.querySelectorAll('.card-nav').forEach((c) => c.classList.toggle('active', c.dataset.view === v));
+      document.querySelectorAll('.view').forEach((sec) => sec.classList.toggle('active', sec.id === `view-${v}`));
+      if (v === 'lifetime') { closeDrill(); setLtMode(state.ltMode); }
+      if (v === 'recent') renderRecent();
+      if (v === 'ach') {
+        // 成就**明细**（285KB）按需加载：首屏只带 stats 摘要，这里才去取 games。
+        // 先同步渲染一次（显示摘要 + "加载中"），到位后再渲染一次（填充明细列表）。
+        renderAch();
+        if (!state.achReady) {
+          ensureAchDetail().then(() => {
+            if (state.view !== 'ach') return; // 用户已切走就不必重绘
+            renderAch();
+            buildAchSelect();
+          });
+        }
+      }
+      if (v === 'data') renderReport();
+      syncHash();
+    };
+    // #11 视图过渡：支持的浏览器用 View Transitions，不支持的（或用户要求减少动效）直接切
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!document.startViewTransition || reduce) { run(); return; }
+    // 过渡进行中再来一次会抛「Transition was skipped」—— 直接更新 DOM，不叠加过渡
+    if (state.vt) { run(); return; }
+    const t = document.startViewTransition(run);
+    state.vt = t;
+    // finished 在过渡被跳过时会 reject，必须兜住，否则变成 pageerror
+    Promise.resolve(t.finished).catch(() => {}).then(() => { state.vt = null; });
   }
 
   function bind() {
@@ -1470,7 +1861,7 @@
     // 左侧小黄人是观影记录入口（<a href="watch.html">，纯导航、无 JS）；
     // 氛围特效开关在页脚（fx.js 自己绑定 #fx-seg）；
     // 游玩日历入口是「最近游玩」首行日期上方的小日历图标（全站唯一）。
-    bindFlip($('theme-light'), 'light');
+    bindFlip($('theme-light'), 'all');
 
     // 日历浮层：上下月、关闭、点空白关闭、二级界面返回/关闭、点有记录的日期看当天明细
     $('cal-prev').addEventListener('click', () => stepMonth(-1));
@@ -1523,7 +1914,6 @@
     });
     $('card-recent').addEventListener('click', () => switchView('recent'));
     $('card-ach').addEventListener('click', () => switchView('ach'));
-    $('card-games').addEventListener('click', () => switchView('timeline'));
     $('card-data').addEventListener('click', () => switchView('data'));
 
     // 成就页：游戏筛选
@@ -1592,8 +1982,14 @@
       renderAch();      // 此处只有 stats 摘要，成就页显示骨架
       renderHealth();
       buildAchSelect();
-      renderTimeline();
+      // 第 83 轮新增块：热力图 / 勋章墙 / 推荐 / 阶段报告，以及新交互的一次性绑定
+      bindMore();
+      renderHeat();
+      renderBadges();
+      renderSuggest();
+      renderReport();
       switchView('lifetime');
+      applyHash();      // 深链：#/ach、#/lifetime/week、#/lifetime/g/730
     } catch (err) {
       clearTimeout(watchdog);
       console.error('初始化失败：', err);

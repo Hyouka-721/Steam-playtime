@@ -85,7 +85,7 @@ ok('A6 抽查 6 张海报全部 200', sample.every((s) => s.endsWith(':200')), s
 
 const rIdx = await page.evaluate(async (base) => {
   const h = await (await fetch(base + 'index.html?cb=' + Date.now(), { cache: 'reload' })).text();
-  return ['style.css?v=106', 'app.js?v=100', 'fx.js?v=16'].filter((v) => !h.includes(v));
+  return ['style.css?v=107', 'app.js?v=101', 'fx.js?v=16'].filter((v) => !h.includes(v));
 }, SITE);
 ok('A7 首页三个版本号未受影响', rIdx.length === 0, rIdx.join(',') || '全部命中');
 await ctx.close();

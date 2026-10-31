@@ -85,8 +85,8 @@ ok('1.4 内层 .ctrl 容器一并删除', !dom.ctrlExists, dom.ctrlExists);
 ok('1.5 面板只剩 #recent-list 一个子元素', dom.panelKidCount === 1 && dom.panelKids[0] === 'recent-list', dom.panelKids);
 ok('1.6 面板内无空占位子元素', dom.emptyKids === 0, dom.emptyKids);
 ok('1.7 页面不再出现「近 14 天 / 款游戏」提示文案', !dom.hasPhrase && !dom.hasPhrase2, { p1: dom.hasPhrase, p2: dom.hasPhrase2 });
-ok('1.8 成就页 / 时间轴的 hint 未受影响（.hint 样式保留）',
-  JSON.stringify(dom.otherHints) === JSON.stringify(['ach-hint', 'tl-hint']), dom.otherHints);
+ok('1.8 各视图的 hint 仍统一走 .hint 样式（第 83 轮新增热力图/榜单/勋章/报告四处）',
+  JSON.stringify(dom.otherHints) === JSON.stringify(['heat-hint', 'lt-hint', 'badge-hint', 'ach-hint', 'report-range']), dom.otherHints);
 
 // ---------- 2. 无 hack（纯文档流） ----------
 const flow = await page.evaluate(() => {
@@ -154,16 +154,19 @@ await page.evaluate(() => document.getElementById('card-lifetime').click());
 await page.waitForTimeout(900);
 const lt = await page.evaluate(() => {
   const b = (el) => { const r = el.getBoundingClientRect(); return { t: +r.top.toFixed(2), h: +r.height.toFixed(2) }; };
-  const panel = document.querySelector('#view-lifetime .panel');
-  const row0 = document.querySelector('#lt-list .rank-item');
-  const cs = getComputedStyle(document.querySelector('#view-lifetime .panel'));
-  return { panel: b(panel), row0: b(row0), padTop: parseFloat(cs.paddingTop), border: parseFloat(cs.borderTopWidth) };
+  const listEl = document.querySelector('#lt-list');
+  const panel = listEl.closest('.panel');
+  const row0 = listEl.querySelector('.rank-item');
+  const cs = getComputedStyle(panel);
+  return { panel: b(panel), list: b(listEl), row0: b(row0), padTop: parseFloat(cs.paddingTop), border: parseFloat(cs.borderTopWidth) };
 });
-const ltOffset = +(lt.row0.t - lt.panel.t).toFixed(2);
-ok('4.1 「游戏时长」面板首行基线 = 1 + 18 + 18 = 37px', ltOffset === 37, ltOffset);
-ok('4.2 「最近游玩」首行基线与之完全相同（节奏一致）',
-  Math.abs((geo.row0.t - geo.panel.t) - ltOffset) <= 0.02,
-  { recent: +(geo.row0.t - geo.panel.t).toFixed(2), lifetime: ltOffset });
+// 第 83 轮：榜单头上多了「排名 / 时间轴」分段控件，「距面板顶」不再是固定 37px；
+// 仍然成立的真不变量是「首行距**列表顶** = 列表自身的 18px 上内边距」，与最近游玩完全一致。
+const ltOffset = +(lt.row0.t - lt.list.t).toFixed(2);
+ok('4.1 榜单首行距列表顶 = 列表上内边距 18px', ltOffset === 18, ltOffset);
+ok('4.2 「最近游玩」节奏完全一致（首行距列表顶也是 18px）',
+  Math.abs((geo.row0.t - geo.list.t) - ltOffset) <= 0.02,
+  { recent: +(geo.row0.t - geo.list.t).toFixed(2), lifetime: ltOffset });
 ok('4.3 两侧面板内边距一致（18px）', lt.padTop === 18 && flow.panelPadTop === 18, { lt: lt.padTop });
 
 // ---------- 5. 不在删除处叠加间距 ----------
@@ -230,13 +233,14 @@ await page.screenshot({ path: OUT + 'r49_recent_1440.png' });
 const func = await page.evaluate(() => ({
   recentRows: document.querySelectorAll('#recent-list .rank-item').length,
   ltRows: document.querySelectorAll('#lt-list .rank-item').length,
-  cards: ['c-lifetime', 'c-recent', 'c-ach', 'c-games', 'c-data'].map((id) => document.getElementById(id).textContent),
+  // 第 83 轮：游戏库卡并入游戏时长视图，概览只剩四张
+  cards: ['c-lifetime', 'c-recent', 'c-ach', 'c-data'].map((id) => document.getElementById(id).textContent),
   icon: !!document.querySelector('#recent-list [data-cal-toggle]'),
   theme: document.documentElement.dataset.theme,
 }));
 ok('8.1 最近游玩列表仍正常渲染', func.recentRows > 0, func.recentRows);
 ok('8.2 累计榜仍正常渲染', func.ltRows > 40, func.ltRows);
-ok('8.3 五张概览卡仍有值', func.cards.every((v) => v && v !== '—'), func.cards);
+ok('8.3 四张概览卡仍有值', func.cards.length === 4 && func.cards.every((v) => v && v !== '—'), func.cards);
 ok('8.4 日历图标仍在（入口未丢）', func.icon);
 await page.click('#card-recent');
 await page.waitForTimeout(400);

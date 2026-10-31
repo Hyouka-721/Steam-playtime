@@ -1,0 +1,25 @@
+{
+  "name": "My Game Time · Steam 游戏时长",
+  "short_name": "Game Time",
+  "description": "把 Steam 的累计时长拆成每一天：热力图、排行榜、成就与阶段报告。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fbf7f1",
+  "theme_color": "#fbf7f1",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

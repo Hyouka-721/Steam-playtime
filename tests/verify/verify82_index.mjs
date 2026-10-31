@@ -59,8 +59,8 @@ const titleRule = (cssNC.match(/\.site-title\s*\{[^}]*\}/) || [''])[0];
 ok('A7 .site-title 声明了 user-select:none（含 -webkit- 前缀）',
   /user-select:\s*none/.test(titleRule) && /-webkit-user-select:\s*none/.test(titleRule), titleRule.slice(0, 90));
 
-ok('A8 版本号已 bump：style.css?v=106 / app.js?v=100',
-  html.includes('style.css?v=106') && html.includes('app.js?v=100'),
+ok('A8 版本号已 bump：style.css?v=107 / app.js?v=101',
+  html.includes('style.css?v=107') && html.includes('app.js?v=101'),
   (html.match(/(style\.css|app\.js)\?v=\d+/g) || []).join(' '));
 
 /* ================= B 运行时 ================= */
@@ -127,7 +127,7 @@ ok('B6 史蒂夫主题键点击仍切换主题', theme2 !== theme, `${theme} →
 
 // B7：五张概览卡仍能切视图
 const viewOk = [];
-for (const [card, view] of [['#card-ach', 'view-ach'], ['#card-games', 'view-timeline'], ['#card-lifetime', 'view-lifetime']]) {
+for (const [card, view] of [['#card-ach', 'view-ach'], ['#card-data', 'view-data'], ['#card-lifetime', 'view-lifetime']]) {
   await page.click(card);
   await page.waitForTimeout(320);
   viewOk.push(await page.evaluate((v) => {
@@ -135,7 +135,7 @@ for (const [card, view] of [['#card-ach', 'view-ach'], ['#card-games', 'view-tim
     return !!el && el.classList.contains('active');
   }, view));
 }
-ok('B7 五张概览卡点击仍正确切换视图（成就 / 游戏库 / 游戏时长往返）',
+ok('B7 概览卡点击仍正确切换视图（成就 / 数据 / 游戏时长往返）',
   viewOk.every(Boolean), JSON.stringify(viewOk));
 
 // B8：全过程零 JS 异常（沙箱里被 abort 的 Steam/CDN 图会记 console error，按 verify6 同一口径滤掉）

@@ -34,7 +34,7 @@ page.on('pageerror', (e) => errs.push(String(e)));
 page.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
 
 /* ---------- A 等 Pages 生效 ---------- */
-console.log('== A 等待 Pages 生效（判内容指纹 style.css?v=106）==');
+console.log('== A 等待 Pages 生效（判内容指纹 style.css?v=107）==');
 let html = '';
 for (let i = 1; i <= 20; i++) {
   try {
@@ -45,13 +45,13 @@ for (let i = 1; i <= 20; i++) {
     await page.waitForTimeout(8000);
     continue;
   }
-  const fresh = html.includes('style.css?v=106') && html.includes('app.js?v=100');
+  const fresh = html.includes('style.css?v=107') && html.includes('app.js?v=101');
   console.log(`  第 ${i} 次：${fresh ? '已生效' : '仍是旧版'}`);
   if (fresh) break;
   await page.waitForTimeout(10000);
 }
-ok('A1 线上 index.html 已是 v=106 / v=100',
-  html.includes('style.css?v=106') && html.includes('app.js?v=100'),
+ok('A1 线上 index.html 已是 v=107 / v=101',
+  html.includes('style.css?v=107') && html.includes('app.js?v=101'),
   (html.match(/(style\.css|app\.js|fx\.js)\?v=\d+/g) || []).join(' '));
 
 /* ---------- B 字节指纹 ---------- */
@@ -119,7 +119,7 @@ const th1 = await page.evaluate(() => document.documentElement.dataset.theme);
 ok('D6 史蒂夫主题键仍能切主题', th1 !== th0, `${th0} → ${th1}`);
 
 const views = [];
-for (const [card, view] of [['#card-ach', 'view-ach'], ['#card-games', 'view-timeline'], ['#card-lifetime', 'view-lifetime']]) {
+for (const [card, view] of [['#card-ach', 'view-ach'], ['#card-data', 'view-data'], ['#card-lifetime', 'view-lifetime']]) {
   await page.click(card);
   await page.waitForTimeout(350);
   views.push(await page.evaluate((v) => document.getElementById(v).classList.contains('active'), view));
