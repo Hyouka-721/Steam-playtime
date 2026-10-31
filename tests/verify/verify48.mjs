@@ -6,7 +6,7 @@
  *   d 浮层能正常打开与关闭、月历正常渲染、日期点击后进入对应二级明细
  *   e 清理无效代码：review-bar / cal-mark / reviewing / state.review / *Full 等
  * 覆盖：
- *   0  静态指纹：三个文件均无 review 残留；版本 ?v=102
+ *   0  静态指纹：三个文件均无 review 残留；版本 ?v=103
  *   1  浮层打开：一级月历渲染（标题 / 有记录格数 / 无选中）
  *   2  点击日期 → 二级明细（标题 / 摘要 / 行数 / 图标）
  *   3  ★ 浮层外零变化：c-recent 仍是 14 天窗口（不是当天总时长）
@@ -137,7 +137,7 @@ for (const [name, txt] of [['app.js', srcApp], ['index.html', srcHtml], ['style.
   const hits = BANNED.filter((k) => txt.toLowerCase().includes(k.toLowerCase()));
   ok(`0.1 ${name} 无回看态残留关键词`, hits.length === 0, hits);
 }
-ok('0.2 index.html 引用 app\.js\?v=102', srcHtml.includes('app\.js\?v=102'), (srcHtml.match(/app\.js\?v=\d+/) || [])[0]);
+ok('0.2 index.html 引用 app\.js\?v=103', srcHtml.includes('app\.js\?v=103'), (srcHtml.match(/app\.js\?v=\d+/) || [])[0]);
 ok('0.3 app.js 仍保留两级浮层核心函数',
   ['openCal(', 'closeCal(', 'openCalDay(', 'backToCalMonth(', 'renderCalGrid(', 'renderCalDay('].every((k) => srcApp.includes(k)));
 ok('0.4 app.js 已无 buildSnapshot / applyReview / exitReview / renderAll 定义',

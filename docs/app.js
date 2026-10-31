@@ -69,8 +69,6 @@
     charts: {},
     // ---- 游玩日历浮层（点击「最近游玩」首行日期上方的小日历图标打开）----
     cal: { open: false, ym: '2026-10', busy: false, lastFocus: null, day: null },
-    // 第 83 轮：排名 / 时间轴 合并后的呈现方式（'rank' | 'week'），不持久化
-    ltMode: 'rank',
     heroAppid: null,  // 悬停中的游戏（背景底纹用），null = 恢复默认底
     vt: null,         // 正在跑的 ViewTransition（Chromium 不允许叠第二个）
   };
@@ -166,13 +164,13 @@
     if (lt && !lt.querySelector('.sk-row') && !lt.querySelector('.rank-item')) {
       lt.innerHTML = rankSkeleton(8);
     }
-    ['c-lifetime', 'c-recent', 'c-ach', 'c-data'].forEach((id) => {
+    ['c-lifetime', 'c-recent', 'c-ach', 'c-games', 'c-data'].forEach((id) => {
       const el = $(id);
       if (el && el.textContent.trim() === '—') el.classList.add('sk-value');
     });
   }
   function clearCardSkeleton() {
-    ['c-lifetime', 'c-recent', 'c-ach', 'c-data'].forEach((id) => {
+    ['c-lifetime', 'c-recent', 'c-ach', 'c-games', 'c-data'].forEach((id) => {
       $(id)?.classList.remove('sk-value');
     });
   }
@@ -364,6 +362,8 @@
     countUp($('c-lifetime'), s.lifetime_minutes ?? 0, (v) => hm(v));
     // 最近游玩卡：近两周总时长。口径固定，不随日历浮层里选了哪一天而变化
     countUp($('c-recent'), lastNDaysTotal(14).minutes, (v) => hm(v));
+    // 游戏库卡：玩过 / 拥有（第 85 轮随五张卡一起恢复）
+    $('c-games').textContent = `${s.lifetime_played_games ?? 0} / ${s.owned_games ?? 0}`;
 
     if (state.ach?.stats) {
       countUp($('c-ach'), state.ach.stats.pct, (v) => `${Number(v).toFixed(1)}%`);
@@ -403,10 +403,7 @@
   ];
   /* 三处榜单行共用的序号类名 / 进度条样式 */
   const noCls = (i) => (i < 3 ? ` r${i + 1}` : '');
-  /* 第 83 轮：构建期用 sharp 从封面提主色写进 meta（games_lifetime[].bar），
-     有就用它，没有就回落到原十色 topPalette —— 缺字段也不会变色。 */
-  const barStyle = (pct, i, color) =>
-    `width:${pct}%` + (color ? `;background:${color}` : topPalette[i] ? `;background:${topPalette[i]}` : '');
+  const barStyle = (pct, i) => `width:${pct}%` + (topPalette[i] ? `;background:${topPalette[i]}` : '');
 
   /* 「最近游玩」首行日期上方的「游玩日历」入口图标（2026-10-20 收敛为全站唯一入口）：
      透明小日历（无底色无边框），CSS 里绝对定位于日期文字上方，不占布局、不改行高；
@@ -468,7 +465,7 @@
           <span class="rank-no${noCls(i)}">${i + 1}</span>
           ${capsuleHtml(g.appid, { perfect: isPerfect, eager, icon })}
           <span class="rank-name">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
-          <span class="rank-bar"><span style="${barStyle(pct, i, g.bar)}"></span></span>
+          <span class="rank-bar"><span style="${barStyle(pct, i)}"></span></span>
           <span class="rank-min">${hm(g.lifetime_minutes)}</span>
           ${lastHtml}
         </div>`;
@@ -554,7 +551,7 @@
           <span class="rank-no${noCls(i)}">${i + 1}</span>
           ${capsuleHtml(g.appid, { perfect: isPerfect, icon })}
           <span class="rank-name">${escapeHtml(g.name)}</span>
-          <span class="rank-bar"><span style="${barStyle(pct, i, g.bar)}"></span></span>
+          <span class="rank-bar"><span style="${barStyle(pct, i)}"></span></span>
           <span class="rank-min">${hm(g.recent)}</span>
           ${lastHtml}
         </div>`;
@@ -958,7 +955,7 @@
 
   function renderTimeline() {
     const box = $('timeline');
-    const hint = $('lt-hint');
+    const hint = $('tl-hint');
     if (!state.allDates.length) {
       hint.textContent = '—';
       box.innerHTML = '<p class="empty">每日数据还在积累中。首次快照采集完成后即可看到时间轴。</p>';
@@ -1549,30 +1546,6 @@
     observeCapsules(box);
   }
 
-  /* ---------- #14 「接下来玩什么」 ---------- */
-  /** 两组：差 ≤3 个成就就全解锁（ach_almost 由构建期算好塞进 meta） + 买了没启动的。
-      纯规则、无模型：它只是把你自己的数据里「马上能完成」和「完全没碰」挑出来。 */
-  function renderSuggest() {
-    const panel = $('panel-suggest');
-    const box = $('suggest');
-    if (!panel || !box) return;
-    const almost = state.meta?.ach_almost ?? [];
-    const gl = state.meta.games_lifetime ?? {};
-    const never = Object.values(gl).filter((g) => (g.lifetime_minutes ?? 0) === 0);
-    if (!almost.length && !never.length) { panel.hidden = true; return; }
-    panel.hidden = false;
-    const chip = (appid, name, note) =>
-      `<button type="button" class="sg-item" data-appid="${appid}">
-        <span class="sg-name">${escapeHtml(name)}</span>
-        <span class="sg-note">${escapeHtml(note)}</span>
-      </button>`;
-    const a = almost.slice(0, 4).map((g) => chip(g.appid, g.name, `差 ${g.left} 个成就 · ${g.unlocked}/${g.total}`));
-    const b = never.slice(0, 4).map((g) => chip(g.appid, g.name, '还没启动过'));
-    box.innerHTML =
-      (a.length ? `<div class="sg-row"><span class="sg-label">就差一点</span>${a.join('')}</div>` : '') +
-      (b.length ? `<div class="sg-row"><span class="sg-label">买了还没玩</span>${b.join('')}</div>` : '');
-  }
-
   /* ---------- #21 周目标与节奏 ---------- */
   function weekMinutes(offset) {
     const start = addDaysStr(weekStart(todayStr()), offset * 7);
@@ -1725,10 +1698,7 @@
   /* ---------- #19 深链 ---------- */
   function syncHash() {
     const parts = ['#/' + state.view];
-    if (state.view === 'lifetime') {
-      if (state.ltMode === 'week') parts.push('week');
-      if (state.drill.appid) parts.push('g/' + state.drill.appid);
-    }
+    if (state.view === 'lifetime' && state.drill.appid) parts.push('g/' + state.drill.appid);
     const next = parts.join('/');
     if (location.hash !== next) history.replaceState(null, '', next);
   }
@@ -1737,9 +1707,8 @@
     const h = (location.hash || '').replace(/^#\/?/, '');
     if (!h) return false;
     const seg = h.split('/').filter(Boolean);
-    const view = ['lifetime', 'recent', 'ach', 'data'].includes(seg[0]) ? seg[0] : null;
+    const view = ['lifetime', 'recent', 'ach', 'timeline', 'data'].includes(seg[0]) ? seg[0] : null;
     if (!view) return false;
-    if (seg.includes('week')) state.ltMode = 'week';
     switchView(view);
     const gi = seg.indexOf('g');
     const appid = gi >= 0 ? seg[gi + 1] : null;
@@ -1747,43 +1716,12 @@
     return true;
   }
 
-  /* ---------- 排名 / 时间轴（#1 合并后的呈现方式切换） ---------- */
-  function setLtMode(m) {
-    state.ltMode = m === 'week' ? 'week' : 'rank';
-    const list = $('lt-list');
-    const tl = $('timeline');
-    const title = $('lt-title');
-    if (list) list.hidden = state.ltMode !== 'rank';
-    if (tl) tl.hidden = state.ltMode !== 'week';
-    if (title) title.textContent = state.ltMode === 'week' ? '每周时间轴' : '游戏排行';
-    const seg = $('lt-mode');
-    if (seg) {
-      [...seg.children].forEach((b) => {
-        const on = b.dataset.m === state.ltMode;
-        b.classList.toggle('active', on);
-        b.setAttribute('aria-pressed', String(on));
-      });
-    }
-    const hint = $('lt-hint');
-    if (hint && state.ltMode === 'rank') {
-      const s = state.meta?.stats ?? {};
-      hint.textContent = `${s.lifetime_played_games ?? 0} / ${s.owned_games ?? 0} 款有游玩记录`;
-    }
-    if (state.ltMode === 'week') renderTimeline();
-    else renderLifetime();
-    syncHash();
-  }
-
   /* ---------- 新增交互的一次性绑定（放在 bind() 之后调用，避免改动原函数体） ---------- */
   function bindMore() {
     ensureHeroLayer();
-    const mode = $('lt-mode');
-    if (mode) {
-      mode.addEventListener('click', (e) => {
-        const b = e.target.closest('button');
-        if (b) setLtMode(b.dataset.m);
-      });
-    }
+    // 第 85 轮：游戏库卡恢复独立视图后，点击绑定也要回来（第 83 轮删卡时被一并移除）
+    const gamesCard = $('card-games');
+    if (gamesCard) gamesCard.addEventListener('click', () => switchView('timeline'));
     const list = $('lt-list');
     if (list) {
       list.addEventListener('mouseover', (e) => {
@@ -1812,14 +1750,11 @@
   }
   // ---------- tabs / init ----------
   function switchView(v) {
-    // 第 83 轮：'timeline' 不再是一个独立视图 —— 它变成「游戏时长」视图里的第二种画法。
-    // 保留 'timeline' 这个入口名，是因为卡片/深链/老书签都还在用它。
-    if (v === 'timeline') { state.ltMode = 'week'; v = 'lifetime'; }
     const run = () => {
       state.view = v;
       document.querySelectorAll('.card-nav').forEach((c) => c.classList.toggle('active', c.dataset.view === v));
       document.querySelectorAll('.view').forEach((sec) => sec.classList.toggle('active', sec.id === `view-${v}`));
-      if (v === 'lifetime') { closeDrill(); setLtMode(state.ltMode); }
+      if (v === 'lifetime') closeDrill();
       if (v === 'recent') renderRecent();
       if (v === 'ach') {
         // 成就**明细**（285KB）按需加载：首屏只带 stats 摘要，这里才去取 games。
@@ -1833,17 +1768,16 @@
           });
         }
       }
-      if (v === 'data') renderReport();
+      if (v === 'timeline') renderTimeline();
+      if (v === 'data') { renderReport(); renderHeat(); }
       syncHash();
     };
     // #11 视图过渡：支持的浏览器用 View Transitions，不支持的（或用户要求减少动效）直接切
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!document.startViewTransition || reduce) { run(); return; }
-    // 过渡进行中再来一次会抛「Transition was skipped」—— 直接更新 DOM，不叠加过渡
     if (state.vt) { run(); return; }
     const t = document.startViewTransition(run);
     state.vt = t;
-    // finished 在过渡被跳过时会 reject，必须兜住，否则变成 pageerror
     Promise.resolve(t.finished).catch(() => {}).then(() => { state.vt = null; });
   }
 
@@ -1990,7 +1924,6 @@
       bindMore();
       renderHeat();
       renderBadges();
-      renderSuggest();
       renderReport();
       switchView('lifetime');
       applyHash();      // 深链：#/ach、#/lifetime/week、#/lifetime/g/730

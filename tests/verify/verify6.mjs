@@ -49,8 +49,8 @@ check('内联：构建脚本串上 inline-boot', /inline-boot\.mjs/.test(build))
 check('样式：骨架屏样式与动画存在', /\.sk-block/.test(css) && /@keyframes sk-shimmer/.test(css));
 check('样式：尊重 reduced-motion（骨架不流动）', /prefers-reduced-motion: reduce[\s\S]{0,120}sk-block/.test(css));
 check('构建：build.mjs 输出 ach_stats 到 meta', /ach_stats:\s*achStats/.test(build));
-check('版本号：style\.css\?v=107 / app\.js\?v=102 / fx.js?v=16',
-  /style\.css\?v=107/.test(html) && /app\.js\?v=102/.test(html) && /fx\.js\?v=16/.test(html));
+check('版本号：style\.css\?v=108 / app\.js\?v=103 / fx.js?v=16',
+  /style\.css\?v=108/.test(html) && /app\.js\?v=103/.test(html) && /fx\.js\?v=16/.test(html));
 
 /* ---------- B/C/D. 浏览器实测 ---------- */
 const browser = await chromium.launch();
@@ -100,7 +100,7 @@ const skState = await skPage.evaluate(() => ({
 }));
 await skCtx.close();
 check('骨架屏：脚本未到位时用骨架占位（而非空白「—」）',
-  skState.skRows > 0 && skState.skCards === 4 && skState.lifetime === '—',
+  skState.skRows > 0 && skState.skCards === 5 && skState.lifetime === '—',
   JSON.stringify(skState));
 
 // 首屏可读时刻：优先取 DCL 时刻（内联数据后 DCL 即完成渲染），
@@ -190,8 +190,7 @@ await page.evaluate(() => document.querySelector('[data-view="lifetime"]').click
 await page.waitForTimeout(300);
 const cards = await page.evaluate(() =>
   [...document.querySelectorAll('.cards .card-value')].map((e) => e.textContent.trim()));
-// 第 83 轮：概览从五张降到四张（「游戏库」卡并入「游戏时长」视图）
-check('回归：四张概览卡有值', cards.length === 4 && cards.every((v) => v && v !== '—'), JSON.stringify(cards));
+check('回归：五张概览卡有值', cards.length === 5 && cards.every((v) => v && v !== '—'), JSON.stringify(cards));
 
 // 日历回看（成就明细已加载，应精确回溯）
 // 2026-10-20：日历入口已从累计榜收敛到「最近游玩」（全站唯一），

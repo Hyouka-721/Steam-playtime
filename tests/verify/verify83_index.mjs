@@ -1,13 +1,11 @@
-/* verify83_index.mjs — 第 83 轮（index 侧）批量体验改造回归
-   用户 2026-10-31 点名除 #2 #3 #9 #17 外的全部建议，本轮落地 14 项：
-     #1 合并「游戏时长 / 游戏库」两个视图   #4 页脚去重   #5 窄屏两行榜单
-     #6 flags 内联   #7 活动热力图   #8 封面主色进度条   #10 悬停底纹
-     #11 数字滚动 + 视图过渡   #12 全成就勋章墙   #13 深色主题
-     #14 临门一脚推荐   #15 阶段报告   #16 时间换算   #18 详情扩展
-     #19 深链   #20 manifest   #21 周目标与节奏   （#6 由日历二级承载，见 D8）
+/* verify83_index.mjs — 游戏站体验改造回归（第 83→85 轮的净结果）
+   第 83 轮铺开 14 项；第 84 轮加封面本地化 + 离线；第 85 轮按用户要求**回退三项**：
+     · #8 封面主色进度条  → 回到固定十色板
+     · #14「接下来玩什么」 → 整块移除（含 meta.ach_almost）
+     · 「游戏时长 / 时间轴」视图合并 → 恢复成两个独立视图（五张卡）
+   并新增：活动热力图从「游戏时长」移到「数据」选项卡下。
 
-   第 84 轮追加：离线可用（Service Worker 与观影页共用一个，见 docs/sw.js）+ 本地封面。
-   断言分组：A 静态（12） / B 运行时（16） / C 离线（5） */
+   断言分组：A 静态（12） / B 运行时（15） / C 离线（5） */
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
 
@@ -30,45 +28,47 @@ const meta = JSON.parse(rd('data/meta.json'));
 
 /* ================= A 静态 ================= */
 console.log('== A 静态 ==');
-ok('A1 概览只剩四张卡，且「游戏库」卡已移除',
-  (html.match(/class="card card-nav/g) || []).length === 4 && !html.includes('card-games'));
+ok('A1 概览恢复五张卡，且「游戏库」卡（#card-games）回来了',
+  (html.match(/class="card card-nav/g) || []).length === 5 &&
+  html.includes('id="card-games"') && html.includes('id="c-games"'));
 
-ok('A2 独立的「时间轴」视图已删除（合并进游戏时长视图）',
-  !html.includes('id="view-timeline"') && html.includes('id="lt-mode"'));
+ok('A2 独立的「时间轴」视图恢复（#view-timeline 存在，且不在游戏时长视图里）',
+  /<section class="view" id="view-timeline">[\s\S]{0,400}id="timeline"/.test(html) &&
+  !/id="view-lifetime"[\s\S]{0,3000}id="timeline"/.test(html));
 
-ok('A3 热力图 / 推荐条 / 报告容器都在位',
-  html.includes('id="heatmap"') && html.includes('id="panel-suggest"') &&
-  html.includes('id="report"') && html.includes('id="pace"') && html.includes('id="convert"'));
+ok('A3 活动热力图挪到「数据」视图下，游戏时长视图里没有',
+  /id="view-data"[\s\S]{0,1500}id="heatmap"/.test(html) &&
+  !/id="view-lifetime"[\s\S]{0,2500}id="heatmap"/.test(html));
 
-ok('A4 勋章墙挪进「成就」视图（不在游戏时长视图里抢首屏）',
-  /id="view-ach"[\s\S]{0,400}id="panel-badges"/.test(html));
+ok('A4 「接下来玩什么」已整体移除（无容器 / 无函数 / 无条目）',
+  !html.includes('panel-suggest') && !js.includes('renderSuggest') && !js.includes('sg-item'));
 
-ok('A5 页脚不再重复「数据生成于 …」（卡片已表达同一信息）',
-  !html.includes('footer-gen'));
+ok('A5 排名/时间轴 的分段控件与 setLtMode 已移除',
+  !html.includes('id="lt-mode"') && !js.includes('setLtMode') && !js.includes('ltMode'));
 
-ok('A6 四套主题：cream / mint / dawn / night',
-  ["'cream'", "'mint'", "'dawn'", "'night'"].every((t) => js.includes(t)),
-  (js.match(/id: '\w+'/g) || []).join(','));
+ok('A6 全成就勋章墙仍在成就视图顶部', /id="view-ach"[\s\S]{0,400}id="panel-badges"/.test(html));
 
-ok('A7 深色主题在 CSS 里有完整变量块', /\[data-theme="night"\]\s*\{[\s\S]{200,}?\}/.test(css));
+ok('A7 页脚仍不重复「数据生成于 …」', !html.includes('footer-gen'));
 
-ok('A8 构建期产出封面主色：meta.games_lifetime 带 bar 字段',
-  Object.values(meta.games_lifetime).filter((g) => g.bar).length > 40,
-  `${Object.values(meta.games_lifetime).filter((g) => g.bar).length} 款`);
+ok('A8 四套主题齐备，night 变量块在 CSS 里',
+  ["'cream'", "'mint'", "'dawn'", "'night'"].every((t) => js.includes(t)) &&
+  /\[data-theme="night"\]\s*\{[\s\S]{200,}?\}/.test(css));
 
-ok('A9 构建期产出「临门一脚」列表 meta.ach_almost', Array.isArray(meta.ach_almost),
-  JSON.stringify(meta.ach_almost?.slice(0, 2) ?? null));
+ok('A9 meta 回到「无封面主色、无临门一脚」的干净状态',
+  Object.values(meta.games_lifetime).filter((g) => g.bar).length === 0 &&
+  meta.ach_almost === undefined,
+  `bar=${Object.values(meta.games_lifetime).filter((g) => g.bar).length} almost=${String(meta.ach_almost)}`);
 
-ok('A10 manifest 与 192/512 图标齐备',
+ok('A10 manifest 与 192/512 图标仍在',
   fs.existsSync(`${DOCS}/manifest.webmanifest`) &&
   fs.existsSync(`${DOCS}/img/icon-192.png`) && fs.existsSync(`${DOCS}/img/icon-512.png`));
 
-ok('A11 窄屏规则：进度条不再被 display:none 掉',
+ok('A11 窄屏两行榜单规则仍在（进度条没有被 display:none）',
   !/\.rank-bar,\s*\.rank-last\s*\{\s*display:\s*none/.test(css) &&
   /\.rank-bar\s*\{[^}]*grid-row:\s*2/.test(css));
 
-ok('A12 新模块在 app.js 里都有实现（8 个关键函数）',
-  ['renderHeat', 'renderBadges', 'renderSuggest', 'renderReport', 'renderPace', 'renderConvert', 'renderDrillMore', 'syncHash']
+ok('A12 保留的新模块函数齐全（热力图/勋章/报告/目标/换算/详情/深链）',
+  ['renderHeat', 'renderBadges', 'renderReport', 'renderPace', 'renderConvert', 'renderDrillMore', 'syncHash', 'countUp']
     .every((f) => new RegExp(`function ${f}\\(`).test(js)));
 
 /* ================= B 运行时 ================= */
@@ -89,89 +89,93 @@ const heat = await page.evaluate(() => {
   const cells = [...document.querySelectorAll('#heatmap .hc')];
   return { total: cells.length, lit: cells.filter((c) => !/h0/.test(c.className)).length };
 });
-ok('B1 热力图 18 周 × 7 天 = 126 格，且有已点亮的日子',
+ok('B1 热力图仍是 18 周 × 7 天 = 126 格，且有已点亮的日子',
   heat.total === 126 && heat.lit > 0, JSON.stringify(heat));
 
 const card = await page.evaluate(() => document.getElementById('c-lifetime').textContent.trim());
 ok('B2 概览卡数字滚动后落在真实值上',
-  card === `${Math.floor(meta.stats.lifetime_minutes / 60)} h` ||
   card.startsWith(`${Math.floor(meta.stats.lifetime_minutes / 60)} h`), card);
 
-const barColor = await page.evaluate(() => {
+const bar = await page.evaluate(() => {
   const el = document.querySelector('#lt-list .rank-item .rank-bar > span');
   return el ? el.getAttribute('style') : '';
 });
-ok('B3 排行榜进度条用的是封面主色（inline 里是 hsl 而非固定色板）',
-  /hsl\(/.test(barColor), barColor.slice(0, 70));
+ok('B3 进度条回到固定色板（首行 = topPalette 第一色 #f0a35c，不再有 hsl）',
+  /#f0a35c/i.test(bar) && !/hsl\(/.test(bar), bar.slice(0, 70));
 
-const sug = await page.evaluate(() => ({
-  rows: document.querySelectorAll('#panel-suggest .sg-row').length,
-  items: document.querySelectorAll('#panel-suggest [data-appid]').length,
+await page.click('#card-games');
+await page.waitForTimeout(700);
+const tlView = await page.evaluate(() => ({
+  active: document.getElementById('view-timeline').classList.contains('active'),
+  items: document.querySelectorAll('#timeline .tl-item').length,
+  hint: (document.getElementById('tl-hint').textContent || '').trim(),
+  ltOff: !document.getElementById('view-lifetime').classList.contains('active'),
 }));
-ok('B4 「接下来玩什么」有内容且是可点的条目', sug.rows >= 1 && sug.items >= 1, JSON.stringify(sug));
+ok('B4 点「游戏库」进入独立时间轴视图（有周条目、hint 有文案、游戏时长视图已退出）',
+  tlView.active && tlView.items > 0 && tlView.hint !== '—' && tlView.ltOff, JSON.stringify(tlView));
 
-// #1 呈现方式切换
-await page.click('#lt-mode button[data-m="week"]');
-await page.waitForTimeout(500);
-const week = await page.evaluate(() => ({
-  listHidden: document.getElementById('lt-list').hidden,
-  tlHidden: document.getElementById('timeline').hidden,
-  title: document.getElementById('lt-title').textContent.trim(),
-  hash: location.hash,
+await page.click('#card-lifetime');
+await page.waitForTimeout(600);
+ok('B5 点回「游戏时长」：视图复位且深链同步为 #/lifetime',
+  await page.evaluate(() =>
+    document.getElementById('view-lifetime').classList.contains('active') &&
+    !document.getElementById('view-timeline').classList.contains('active') &&
+    location.hash === '#/lifetime'));
+
+await page.goto(`${BASE}#/timeline`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(900);
+ok('B6 深链 #/timeline 直接落在时间轴视图',
+  await page.evaluate(() => document.getElementById('view-timeline').classList.contains('active')));
+
+await page.goto(`${BASE}#/data`, { waitUntil: 'networkidle' });
+await page.waitForTimeout(900);
+const dataView = await page.evaluate(() => ({
+  active: document.getElementById('view-data').classList.contains('active'),
+  heatVisible: (() => {
+    const el = document.getElementById('heatmap');
+    return !!el && el.getBoundingClientRect().height > 40;
+  })(),
 }));
-ok('B5 切到「时间轴」：榜单隐藏、时间轴出现、标题与深链同步',
-  week.listHidden === true && week.tlHidden === false && week.title === '每周时间轴' && week.hash.includes('week'),
-  JSON.stringify(week));
-await page.click('#lt-mode button[data-m="rank"]');
-await page.waitForTimeout(400);
-ok('B6 切回「排名」：状态复位', await page.evaluate(() =>
-  !document.getElementById('lt-list').hidden && document.getElementById('timeline').hidden));
+ok('B7 深链 #/data 生效，且热力图在数据页里可见', dataView.active && dataView.heatVisible, JSON.stringify(dataView));
 
-// #10 悬停底纹
+await page.goto(BASE, { waitUntil: 'networkidle' });
+await page.waitForTimeout(800);
 await page.hover('#lt-list .rank-item');
 await page.waitForTimeout(450);
 const hero = await page.evaluate(() => {
   const el = document.getElementById('hero-bg');
-  return el ? { exists: true, opacity: getComputedStyle(el).opacity, bg: el.style.backgroundImage.slice(0, 40) } : { exists: false };
+  return el ? { exists: true, opacity: getComputedStyle(el).opacity, bg: el.style.backgroundImage.slice(0, 60) } : { exists: false };
 });
-ok('B7 悬停榜单行时页底浮出该游戏封面底纹（第 84 轮起优先用本地封面）',
+ok('B8 悬停榜单行时页底浮出该游戏底纹（本地封面优先）',
   hero.exists && hero.opacity !== '0' && /img\/covers\//.test(hero.bg), JSON.stringify(hero));
 
-// #12 勋章墙（在成就视图）
 await page.click('#card-ach');
-await page.waitForTimeout(700);
+await page.waitForTimeout(800);
 const badges = await page.evaluate(() => ({
   count: document.querySelectorAll('#badges .badge').length,
   visible: !document.getElementById('panel-badges').hidden,
-  view: document.getElementById('view-ach').classList.contains('active'),
 }));
-ok('B8 成就页顶部出现全成就勋章墙，数量与 meta.ach_perfect 一致',
+ok('B9 成就页全成就勋章墙数量与 meta.ach_perfect 一致',
   badges.visible && badges.count === meta.ach_perfect.length, JSON.stringify(badges));
 
-// #15 #16 #21 报告
 await page.click('#card-data');
-await page.waitForTimeout(600);
+await page.waitForTimeout(700);
 const report = await page.evaluate(() => ({
   cells: document.querySelectorAll('#report .rp-cell').length,
   ring: !!document.querySelector('#pace .pace-ring'),
   cv: document.querySelectorAll('#convert .cv-item').length,
   range: (document.getElementById('report-range') || {}).textContent || '',
 }));
-ok('B9 阶段报告：四块统计 + 最常玩 + 周目标环 + 四条换算',
+ok('B10 阶段报告：四块统计 + 最常玩 + 周目标环 + 四条换算',
   report.cells >= 4 && report.ring && report.cv === 4 && /→/.test(report.range), JSON.stringify(report));
 
-const beforeGoal = await page.evaluate(() => localStorage.getItem('weekGoalH'));
-await page.fill('#week-goal', '8');
+await page.fill('#week-goal', '9');
 await page.dispatchEvent('#week-goal', 'change');
 await page.waitForTimeout(300);
-const afterGoal = await page.evaluate(() => ({
-  stored: localStorage.getItem('weekGoalH'),
-  txt: document.querySelector('#pace .pace-main').textContent,
-}));
-ok('B10 周目标可改并持久化（8h 立刻写进 localStorage 与文案）',
-  afterGoal.stored === '8' && /目标 8 h/.test(afterGoal.txt), `${beforeGoal} → ${JSON.stringify(afterGoal)}`);
+ok('B11 周目标可改并持久化（9h 立刻写进 localStorage 与文案）',
+  await page.evaluate(() => localStorage.getItem('weekGoalH') === '9' &&
+    /目标 9 h/.test(document.querySelector('#pace .pace-main').textContent)));
 
-// #18 详情扩展
 await page.click('#card-lifetime');
 await page.waitForTimeout(500);
 await page.click('#lt-list .rank-item');
@@ -180,20 +184,8 @@ const dm = await page.evaluate(() => ({
   share: !!document.querySelector('#drill-more .dm-share'),
   kv: document.querySelectorAll('#drill-more .dm-kv').length,
 }));
-ok('B11 单游戏详情多了「占终身比重 + 期段信息」', dm.share && dm.kv >= 3, JSON.stringify(dm));
+ok('B12 单游戏详情仍有「占终身比重 + 期段信息」', dm.share && dm.kv >= 3, JSON.stringify(dm));
 
-// #19 深链：直接带 hash 打开
-await page.goto(`${BASE}#/data`, { waitUntil: 'networkidle' });
-await page.waitForTimeout(900);
-ok('B12 深链 #/data 能直接落到数据视图',
-  await page.evaluate(() => document.getElementById('view-data').classList.contains('active')));
-
-await page.goto(`${BASE}#/lifetime/week`, { waitUntil: 'networkidle' });
-await page.waitForTimeout(900);
-ok('B13 深链 #/lifetime/week 直接落在时间轴画法',
-  await page.evaluate(() => !document.getElementById('timeline').hidden));
-
-// #13 深色主题
 await page.evaluate(() => localStorage.setItem('theme', 'night'));
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(900);
@@ -202,14 +194,13 @@ const night = await page.evaluate(() => {
   const m = bg.match(/\d+/g).map(Number);
   return { theme: document.documentElement.dataset.theme, bg, lum: (m[0] * 0.299 + m[1] * 0.587 + m[2] * 0.114) / 255 };
 });
-ok('B14 深色主题生效且底色确实变暗（亮度 < 0.25）',
+ok('B13 深色主题生效且底色确实变暗（亮度 < 0.25）',
   night.theme === 'night' && night.lum < 0.25, JSON.stringify(night));
 
-// #5 窄屏两行（先切回「排名」，否则榜单是隐藏的）
 await page.goto(BASE, { waitUntil: 'networkidle' });
-await page.waitForTimeout(500);
+await page.waitForTimeout(600);
 await page.setViewportSize({ width: 390, height: 844 });
-await page.waitForTimeout(700);
+await page.waitForTimeout(600);
 const mobile = await page.evaluate(() => {
   const bar = document.querySelector('#lt-list .rank-item .rank-bar');
   const row = document.querySelector('#lt-list .rank-item');
@@ -221,13 +212,15 @@ const mobile = await page.evaluate(() => {
     overflow: document.documentElement.scrollWidth - window.innerWidth,
   };
 });
-ok('B15 390px 下进度条仍在，并落到第二行、无横向溢出',
+ok('B14 390px 下进度条仍在、落到第二行、无横向溢出',
   mobile.barVisible && mobile.secondLine && mobile.overflow <= 0, JSON.stringify(mobile));
 
-/* ================= C 离线（第 84 轮） ================= */
+const realErrs = errs.filter((e) => !/Failed to load resource|net::ERR|ERR_BLOCKED|ERR_FAILED/i.test(e));
+ok('B15 全程零 JS 异常', realErrs.length === 0, realErrs.slice(0, 3).join(' | '));
+
+/* ================= C 离线 ================= */
 console.log('== C 离线 ==');
 {
-  // 干净上下文：不 abort、不用旧缓存；先在线跑一次让 SW 接管并写缓存，再断网刷新
   const offCtx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   await offCtx.route(/^https?:\/\/(cdn\.cloudflare\.steamstatic\.com|media\.steampowered\.com|cdn\.jsdelivr\.net)\//, (r) => r.abort());
   const off = await offCtx.newPage();
@@ -235,6 +228,10 @@ console.log('== C 离线 ==');
   off.on('pageerror', (e) => offErrs.push(String(e)));
   await off.goto(BASE, { waitUntil: 'load', timeout: 60000 });
   await off.waitForFunction(() => navigator.serviceWorker && navigator.serviceWorker.controller !== null, null, { timeout: 20000 }).catch(() => {});
+  await off.waitForTimeout(1200);
+  // 再在线刷一次：首次访问时 SW 尚未接管，图片请求没经过它；
+  // 第二次才是真实用户场景（访问过 → 之后断网）
+  await off.reload({ waitUntil: 'networkidle', timeout: 45000 }).catch(() => {});
   await off.waitForTimeout(1200);
 
   const swState = await off.evaluate(async () => {
@@ -250,10 +247,9 @@ console.log('== C 离线 ==');
   ok('C1 SW 已注册并接管首页，外壳缓存里有 index.html',
     swState.controlled && swState.shellHasIndex, JSON.stringify(swState.keys));
 
-  // 断网后刷新：导航回落缓存 → 页面仍能渲染
   await offCtx.setOffline(true);
   let offlineOk = false;
-  let offlineRows = 0;
+  let rows = 0;
   try {
     await off.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
     await off.waitForTimeout(900);
@@ -261,35 +257,26 @@ console.log('== C 离线 ==');
       const v = document.getElementById('c-lifetime');
       return !!v && v.textContent.trim() !== '' && v.textContent.trim() !== '—';
     });
-    offlineRows = await off.evaluate(() => document.querySelectorAll('#lt-list .rank-item').length);
+    rows = await off.evaluate(() => document.querySelectorAll('#lt-list .rank-item').length);
   } catch (e) {
     offlineOk = false;
   }
-  ok('C2 断网刷新后页面仍能打开并渲染出数据（不是空白/报错页）',
-    offlineOk && offlineRows > 20, `ok=${offlineOk} rows=${offlineRows}`);
+  ok('C2 断网刷新后页面仍能渲染出数据（不是空白页）', offlineOk && rows > 20, `ok=${offlineOk} rows=${rows}`);
 
-  // 本地封面在离线时仍然完整（说明命中了 SW 缓存，而不是 404）
   const coverOk = await off.evaluate(() => {
     const imgs = [...document.querySelectorAll('#lt-list img.rank-capsule')].slice(0, 3);
     return imgs.length > 0 && imgs.every((i) => i.complete && i.naturalWidth > 0);
-  });
-  ok('C3 离线状态下前几张封面仍加载成功（来自缓存，非 404）', coverOk);
+  }).catch(() => false);
+  ok('C3 离线状态下前几张本地封面仍能显示（命中 SW 缓存）', coverOk);
 
   const offReal = offErrs.filter((e) => !/Failed to load resource|net::ERR|ERR_BLOCKED|ERR_FAILED/i.test(e));
   ok('C4 离线过程零 JS 异常', offReal.length === 0, offReal.slice(0, 2).join(' | '));
 
-  // 恢复网络后回到最新（网络优先，不是永久吃缓存）
   await offCtx.setOffline(false);
-  const fresh = await off.evaluate(async () => {
-    const r = await fetch('data/meta.json', { cache: 'no-store' });
-    return r.ok;
-  });
+  const fresh = await off.evaluate(async () => (await fetch('data/meta.json', { cache: 'no-store' })).ok);
   ok('C5 恢复网络后数据仍走网络（网络优先语义未被破坏）', fresh);
   await offCtx.close();
 }
-
-const realErrs = errs.filter((e) => !/Failed to load resource|net::ERR|ERR_BLOCKED|ERR_FAILED/i.test(e));
-ok('B16 全程零 JS 异常（含视图过渡）', realErrs.length === 0, realErrs.slice(0, 3).join(' | '));
 
 await browser.close();
 console.log(`\n================ ${pass} / ${pass + fail} ================`);

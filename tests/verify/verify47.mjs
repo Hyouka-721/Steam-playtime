@@ -104,7 +104,7 @@ await page.waitForTimeout(1200);
 // ---------- 0. 版本与结构 ----------
 const v = await page.evaluate(() =>
   [...document.querySelectorAll('script[src]')].map((s) => s.getAttribute('src')).find((s) => s.includes('app.js')));
-ok('0.1 app.js 版本号已 bump 到 ?v=102', v === 'app\.js\?v=102', v);
+ok('0.1 app.js 版本号已 bump 到 ?v=103', v === 'app\.js\?v=103', v);
 
 const head = await page.evaluate(() => {
   const hd = document.querySelector('.cal-head-day');

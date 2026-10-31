@@ -60,12 +60,18 @@ README.md                    # 完整说明（管线/部署/密钥/Schema/自检
 
 ## 四、当前进展与版本
 
-- 版本号：`style.css?v=107` / `app.js?v=102` / `fx.js?v=16`（**硬编码在 `verify6.mjs` 第 52 行**；第 84 轮封面本地化后 app.js 再 bump 一次）。
+- 版本号：`style.css?v=108` / `app.js?v=103` / `fx.js?v=16`（**硬编码在 `verify6.mjs` 第 52 行**；第 85 轮回退四项后再次 bump）。
 - 最近一次针对游戏站的大改是**第 24 轮「首屏加载优化」**（在 verify6 注释里记着）：数据全内联、`cache:"default"`、月份文件 `Promise.allSettled` 并行、成就按需、骨架屏、`meta.ach_stats` 摘要。
 - 之后 25~80 轮几乎都在做观影页（watch），游戏站只在 CI 每晚改 `docs/index.html` 数据、以及「日历入口收敛到最近游玩」等零散订正。
 - **第 82 轮（index 侧，2026-10-31，本地改动，未提交/未上线）**三项：① 全站移除 `title` 悬停气泡（页眉三项 + 五张概览卡 + 返回按钮 + 日历日期格 + 排行榜行 + 氛围开关禁用态），语义一律改由 `aria-label` 承载；② `.site-title` 加 `user-select:none`（双击不再框选、拖拽不带走文字，点它仍回顶部）；③ 删掉排行榜首行三只吉祥物（加菲猫 / 猫和老鼠 / 企鹅）——模板、CSS 三条规则、三张 webp 全清，`.rank-list` 的 18px 上内边距**刻意保留**（首行位置与 `--cal-lift` 的换算依赖它）。新增 `tests/verify/verify82_index.mjs` **16/16**。
 - 回归：`verify6` **35/35**、`verify47` **72/72**（0.4b 判据改为「aria-label 承载 + title 必为 null」）、`verify54` **23/23**（B2/B3/B6 同步改成 aria-label）、`verify82_index` **16/16**；`verify55/56/58` 页眉几何未受影响（40/40、49/49、23/23）。
-- **第 83 轮（index 侧，2026-10-31，已提交）14 项体验改造**（用户点名「除 #2 #3 #9 #17 外全做」）：
+- **第 85 轮（index 侧，2026-10-31，回退轮）**—— 用户点名撤掉第 83 轮的三项，并把热力图换页：
+  ① **#8 封面主色进度条 → 撤回**：`barStyle()` 回到两参（只用十色 `topPalette`），`build.mjs` 不再合并 `game-colors.json`，`meta.games_lifetime[].bar` 字段消失；`scripts/rank-colors.mjs` 与 `data/overrides/game-colors.json` **已删除**（需要时从 `fca115e` 取回）。
+  ② **#14「接下来玩什么」→ 整块删除**：HTML 容器、`renderSuggest()`、`bindMore` 里的点击委托、`meta.ach_almost` 与构建期计算全清；`.sg-*` / `.panel-strip` 样式一并删掉。
+  ③ **「游戏时长 / 时间轴」视图合并 → 撤回**：恢复五张卡（`#card-games` + `#c-games` 回来）、恢复独立的 `#view-timeline` 视图与 `#tl-hint`，`switchView('timeline')` 重新是真视图；`#lt-mode` 分段控件、`setLtMode()`、`state.ltMode`、深链里的 `/week` 全部移除。⚠️ **删卡时别忘绑定**：`#card-games` 的 click 必须在 `bindMore()` 里重新挂上，否则卡点了没反应（本轮踩过）。
+  ④ **活动热力图从「游戏时长」移到「数据」**：`#panel-heat` 整体搬进 `#view-data` 的第一块面板；`renderHeat()` 改为 `switchView('data')` 时重算（初始化仍会算一次，隐藏时也能算）。
+  回归：`verify83_index` 重写为 **32 条**（12 静态 + 15 运行时 + 5 离线）；`verify6/47/48/49/54/55/56/58/75/80/82_index` 全绿。
+- **第 83 轮（index 侧，2026-10-31，已提交）14 项体验改造**（用户点名「除 #2 #3 #9 #17 外全做」；其中 **#1 / #8 / #14 已于第 85 轮回退**，下面保留原始记录）：
   ① **合并视图**：删掉独立的「游戏库/时间轴」视图，`#card-games` 卡一并移除 → 概览 4 张卡；榜单用 `#lt-mode`（排名/时间轴）切换两种画法，`switchView('timeline')` 仍保留为别名（老书签/深链不炸）。
   ② **活动热力图**（`#heatmap`）：18 周 × 7 天 = **126 格**，四档亮度按「当日分钟/期内峰值」；格子固定 **11px**（用 `1fr` 会被撑到 60px，整块 623px 高——踩过）。
   ③ **接下来玩什么**（`#panel-suggest`，`.panel-strip` 窄条）：两组 —— 「差 ≤3 个成就」(`meta.ach_almost`，构建期算) 与「买了没启动」。**不能做成大面板**：会把握手榜挤出首屏。
@@ -99,9 +105,9 @@ README.md                    # 完整说明（管线/部署/密钥/Schema/自检
 7. **沙箱里 CDN/Steam 图片会挂起**：verify6 里 `ctx.route` 把 `cdn.jsdelivr.net / steamstatic.com / steampowered.com / akamaihd` 全 `abort`，否则计时被拖死。
 8. **`blackrose.woff`（TTF）是 `style.css` 的字体回退**，别当冗余删。
 9. **不要再给任何元素加 `title`**（第 82 轮用户要求「全站一个悬停气泡都不留」）：需要向读屏/键盘用户说明的语义写进 `aria-label`；`verify82_index.mjs` 把「整页带 title 属性的元素数 = 0」当硬断言，加了就 FAIL。
-10. **首屏预算**（第 83 轮）：游戏时长视图里榜单上方**最多两块**（热力图 + 推荐窄条）。1440×900 实测首行在 y≈777；再加一块就会把榜单挤出首屏，`verify6` 的「视口内胶囊图已水化」会直接挂。
-11. **新面板一律 `.panel` + `.panel-head`；只有一行内容用 `.panel-strip`**（无标题栏，padding 12/18）。热力图格子用固定 `11px`，**不要用 `1fr`** —— 容器宽 1180 时会被撑到 60px 一方，整块 623px 高。
-12. **`meta.ach_almost` 与 `games_lifetime[].bar` 都是构建期产物**：改 `build.mjs` 后必须重跑 `npm run build`；主色表缺失不报错（前端回落十色板），重建它要联网跑 `node scripts/rank-colors.mjs`（增量，`--force` 全量）。
+10. **首屏预算**（第 85 轮现状）：游戏时长视图里**只有榜单一块面板**（热力图已挪到「数据」页）。别再往榜单上面加面板 —— 一旦把首行挤出首屏，`verify6` 的「视口内胶囊图已水化」会直接挂。
+11. **新面板一律 `.panel` + `.panel-head`**（`.panel-strip` 已随「接下来玩什么」一起删除）。热力图格子用固定 **11px**，**不要用 `1fr`** —— 容器宽 1180 时会被撑到 60px 一方，整块 623px 高（踩过）。
+12. **构建期产物只剩 `meta.ach_stats` 与 `meta.ach_perfect`**（`ach_almost` / `games_lifetime[].bar` 已随第 85 轮回退删除）：改 `build.mjs` 后必须重跑 `npm run build` 让 `meta.json` 与内联 `__BOOT` 同步。
 13. **View Transition 必须加锁**：`state.vt` 在跑就别再开第二个，否则 Chromium 抛 `Transition was skipped`，会以 pageerror 计入「零 JS 异常」断言。
 14. **两个页面共用一个 Service Worker**（同域同 scope 只能有一个）：改 `sw.js` 时观影页那两条规则（海报 cache-first、`watch.json` 网络优先）**不许动**，`verify75 A5` / `verify80 A8-A9` 盯着；新增缓存要在 `activate` 里一起保留，否则每次发布都把缓存清掉。
 15. **首页的 css/js 必须写进 SW 预热**，且版本号要**从 index.html 现场解析**（不能写死 `?v=107`，否则下次 bump 就失效）。

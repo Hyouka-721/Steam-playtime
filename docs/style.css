@@ -1459,21 +1459,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .heat-legend .h4 { background: var(--accent); opacity: 1; }
 
 /* #14 接下来玩什么 */
-/* 窄条面板：只有一行内容时不再留标题栏的高度 */
-.panel-strip { padding: 12px 18px; }
 .suggest { display: flex; flex-direction: column; gap: 8px; }
-.sg-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; min-width: 0; }
-.sg-label { font-size: 12px; color: var(--text-dim); letter-spacing: .04em; flex: 0 0 auto; margin-right: 2px; }
-.sg-list { display: flex; flex-direction: row; flex-wrap: wrap; gap: 6px; }
-.sg-item {
-  display: inline-flex; flex: 0 0 auto; align-items: baseline; justify-content: space-between; gap: 8px;
-  padding: 9px 12px; border-radius: 9px; text-align: left; cursor: pointer;
-  border: 1px solid var(--border); background: var(--sunken); color: var(--text);
-  font: inherit; transition: border-color .2s ease, background .2s ease;
-}
-.sg-item:hover { border-color: var(--tint-border); background: var(--tint-1); }
-.sg-name { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sg-note { font-size: 11.5px; color: var(--text-dim); white-space: nowrap; }
 
 /* #12 全成就勋章墙 */
 .badges { display: flex; flex-wrap: wrap; gap: 12px; }
@@ -1558,8 +1544,6 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .dm-pct, .dm-date { color: var(--text-faint); text-align: right; font-variant-numeric: tabular-nums; }
 .dm-empty { font-size: 12.5px; color: var(--text-dim); margin: 6px 0 0; }
 
-/* 合并视图后的控件行 */
-.lt-ctrl { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
 
 /* #11 视图切换过渡（View Transitions API，不支持的浏览器自动忽略） */
 @media (prefers-reduced-motion: no-preference) {

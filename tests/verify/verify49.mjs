@@ -86,7 +86,7 @@ ok('1.5 面板只剩 #recent-list 一个子元素', dom.panelKidCount === 1 && d
 ok('1.6 面板内无空占位子元素', dom.emptyKids === 0, dom.emptyKids);
 ok('1.7 页面不再出现「近 14 天 / 款游戏」提示文案', !dom.hasPhrase && !dom.hasPhrase2, { p1: dom.hasPhrase, p2: dom.hasPhrase2 });
 ok('1.8 各视图的 hint 仍统一走 .hint 样式（第 83 轮新增热力图/榜单/勋章/报告四处）',
-  JSON.stringify(dom.otherHints) === JSON.stringify(['heat-hint', 'lt-hint', 'badge-hint', 'ach-hint', 'report-range']), dom.otherHints);
+  JSON.stringify(dom.otherHints) === JSON.stringify(['badge-hint', 'ach-hint', 'tl-hint', 'heat-hint', 'report-range']), dom.otherHints);
 
 // ---------- 2. 无 hack（纯文档流） ----------
 const flow = await page.evaluate(() => {
@@ -233,14 +233,13 @@ await page.screenshot({ path: OUT + 'r49_recent_1440.png' });
 const func = await page.evaluate(() => ({
   recentRows: document.querySelectorAll('#recent-list .rank-item').length,
   ltRows: document.querySelectorAll('#lt-list .rank-item').length,
-  // 第 83 轮：游戏库卡并入游戏时长视图，概览只剩四张
-  cards: ['c-lifetime', 'c-recent', 'c-ach', 'c-data'].map((id) => document.getElementById(id).textContent),
+  cards: ['c-lifetime', 'c-recent', 'c-ach', 'c-games', 'c-data'].map((id) => document.getElementById(id).textContent),
   icon: !!document.querySelector('#recent-list [data-cal-toggle]'),
   theme: document.documentElement.dataset.theme,
 }));
 ok('8.1 最近游玩列表仍正常渲染', func.recentRows > 0, func.recentRows);
 ok('8.2 累计榜仍正常渲染', func.ltRows > 40, func.ltRows);
-ok('8.3 四张概览卡仍有值', func.cards.length === 4 && func.cards.every((v) => v && v !== '—'), func.cards);
+ok('8.3 五张概览卡仍有值', func.cards.length === 5 && func.cards.every((v) => v && v !== '—'), func.cards);
 ok('8.4 日历图标仍在（入口未丢）', func.icon);
 await page.click('#card-recent');
 await page.waitForTimeout(400);

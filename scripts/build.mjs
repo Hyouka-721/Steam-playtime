@@ -23,19 +23,6 @@ const log = (...a) => console.log('[build]', ...a);
 
 const readJson = (f) => JSON.parse(fs.readFileSync(f, 'utf8'));
 
-/** 第 83 轮：封面主色表（由 scripts/rank-colors.mjs 生成，可缺省）。
- *  缺省时前端回落到十色 topPalette —— 没跑过这个脚本也绝不缺色。 */
-function loadGameColors() {
-  const file = path.join(OVERRIDE_DIR, 'game-colors.json');
-  if (!fs.existsSync(file)) return {};
-  try {
-    return readJson(file);
-  } catch (e) {
-    console.warn('[build] WARN: overrides/game-colors.json 解析失败:', e.message);
-    return {};
-  }
-}
-
 function loadNameOverrides() {
   const file = path.join(OVERRIDE_DIR, 'game-names.json');
   if (!fs.existsSync(file)) return {};
@@ -99,7 +86,6 @@ function buildAchievementsDoc(nameOverrides) {
 
   const games = {};
   const perfect = [];
-  const almost = [];
   let unlockedTotal = 0;
   let totalTotal = 0;
   for (const [appid, g] of Object.entries(ach.games ?? {})) {
@@ -116,15 +102,8 @@ function buildAchievementsDoc(nameOverrides) {
     unlockedTotal += g.unlocked ?? 0;
     totalTotal += g.total ?? 0;
     if (isAchComplete(games[appid])) perfect.push(String(appid));
-    // 第 83 轮「临门一脚」：差 1~3 个成就就全解锁的游戏，构建期算好塞进 meta，
-    // 前端不必为这块推荐下载 285KB 的明细文件。
-    const left = Number(g.total) - Number(g.unlocked);
-    if (Number(g.total) > 0 && left > 0 && left <= 3) {
-      almost.push({ appid: String(appid), name: games[appid].name, left, total: Number(g.total), unlocked: Number(g.unlocked) });
-    }
   }
   perfect.sort(); // 顺序稳定，便于比对差异
-  almost.sort((x, y) => x.left - y.left || y.total - x.total);
 
   const doc = {
     schema: 1,
@@ -141,7 +120,7 @@ function buildAchievementsDoc(nameOverrides) {
   };
   fs.writeFileSync(OUT_ACH, JSON.stringify(doc, null, 2) + '\n', 'utf8');
   log(`已生成 docs/data/achievements.json（${unlockedTotal}/${totalTotal}，${doc.stats.pct}%，${doc.stats.games} 款游戏，其中 ${perfect.length} 款已全解锁）`);
-  return { stats: doc.stats, perfect, almost }; // 摘要 / 全解锁 / 临门一脚 写进 meta，供首屏直接使用
+  return { stats: doc.stats, perfect }; // 摘要与全解锁列表写进 meta，供首屏直接使用
 }
 
 function computeStreaks(allDays) {
@@ -180,7 +159,6 @@ function main() {
   }
 
   const nameOverrides = loadNameOverrides();
-  const gameColors = loadGameColors();
   const snapMeta = loadGameMetaFromLatestSnapshot();
 
   const monthFiles = fs.readdirSync(DAILY_DIR).filter((f) => /^\d{4}-\d{2}\.json$/.test(f)).sort();
@@ -270,8 +248,6 @@ function main() {
       img_icon_url: g.img_icon_url ?? null,
       lifetime_minutes: minutes,
       last_played: rtime ? shanghaiDate(new Date(rtime * 1000)) : null,
-      // 第 83 轮：进度条用封面主色（缺省不写该字段，前端回落到固定色板）
-      ...(gameColors[appid] ? { bar: gameColors[appid] } : {}),
     };
   }
 
@@ -298,11 +274,7 @@ function main() {
   // 先算成就摘要与全解锁列表：要写进 meta.ach_stats / meta.ach_perfect（首屏用），
   // 所以得早于 meta 落盘
   fs.mkdirSync(OUT_DIR, { recursive: true });
-  const {
-    stats: achStats,
-    perfect: achPerfect,
-    almost: achAlmost,
-  } = buildAchievementsDoc(nameOverrides) ?? { stats: null, perfect: [], almost: [] };
+  const { stats: achStats, perfect: achPerfect } = buildAchievementsDoc(nameOverrides) ?? { stats: null, perfect: [] };
 
   const meta = {
     schema: 2,
@@ -320,8 +292,6 @@ function main() {
     // 「全部成就已解锁」的游戏 appid（2026-10-19 起）：主界面胶囊图要描一圈金光，
     // 但首屏不能为此下载明细，故构建期算好随 meta 下发
     ach_perfect: achPerfect,
-    // 「差 1~3 个成就」的游戏（第 83 轮）：首屏推荐块直接用，不需要下载成就明细
-    ach_almost: achAlmost,
     stats: {
       // 终身累计（截至最新快照日，Steam 服务器统计）
       lifetime_minutes: lifetimeMinutes,
@@ -354,7 +324,6 @@ function main() {
   fs.mkdirSync(OUT_DIR, { recursive: true });
   fs.writeFileSync(path.join(OUT_DIR, 'meta.json'), JSON.stringify(meta, null, 2) + '\n', 'utf8');
 
-  log(`封面主色覆盖 ${Object.keys(gameColors).length} 款`);
   log(`已生成 docs/data/meta.json（${dates.length} 天，${playedGames} 款追踪期游戏 / ${lifetimePlayed} 款终身有游玩）`);
   log(`终身累计 ${lifetimeMinutes} min（${meta.stats.lifetime_hours} h），追踪期累计 ${totalMinutes} min`);
   log('⚠ 校验：meta.json 中不含完整 steamid =', !JSON.stringify(meta).includes('7656119'));
