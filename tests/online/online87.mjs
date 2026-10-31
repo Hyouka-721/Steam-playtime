@@ -67,7 +67,9 @@ await page.click('#card-lifetime');
 await page.waitForSelector('#lt-detail:not([hidden])', { timeout: 15000 });
 await page.waitForTimeout(500);
 const font = await page.evaluate(() => {
-  const i = [...document.querySelectorAll('#heat-drill .hc i')][0];
+  // ⚠️ 要挑浅色格里的时长文字：h4（最深的实心格）里是白字，拿它比亮度会得出反结论（本轮踩过）
+  const i = [...document.querySelectorAll('#heat-drill .hc i')]
+    .find((el) => !el.parentElement.classList.contains('h4'));
   const cell = i.parentElement;
   const ci = getComputedStyle(i);
   const ccell = getComputedStyle(cell);
