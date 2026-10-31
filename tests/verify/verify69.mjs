@@ -41,8 +41,8 @@ ok('A6 条目可点光标 + hover 高亮片名 + 键盘焦点环',
   /\.tl-item:focus-visible \{[\s\S]*?outline: 2px solid var\(--accent\)/.test(cssNC));
 ok('A7 弹窗标题单行省略（长片名不挤走关闭按钮）',
   /\.w-add-title \{[\s\S]*?text-overflow: ellipsis/.test(cssNC));
-ok('A8 版本号 bump：watch.css?v=20 / watch.js?v=15',
-  /watch\.css\?v=20"/.test(html) && /watch\.js\?v=15"/.test(html));
+ok('A8 版本号 bump：watch.css?v=21 / watch.js?v=16',
+  /watch\.css\?v=21"/.test(html) && /watch\.js\?v=16"/.test(html));
 
 /* ================= B 运行时 ================= */
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });

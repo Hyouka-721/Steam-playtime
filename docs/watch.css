@@ -472,7 +472,9 @@ code {
 .tl-meta > span { display: block; white-space: nowrap; }
 .tl-meta .tl-score { color: var(--accent); font-weight: 600; }
 .tl-meta .tl-score i { font-style: normal; font-size: 16px; opacity: .85; }
-/* 评语吃剩余宽度，单行超长则省略（hover 看全文，title 由 JS 写入） */
+/* 评语吃剩余宽度，单行超长则省略。
+   第 83 轮：全页不再有 title 悬停气泡（这条评语原来靠 title 看全文），
+   要读全文请点开该条目在编辑弹窗里看。 */
 .tl-note {
   margin: 0;
   flex: 1 1 160px; min-width: 0;

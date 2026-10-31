@@ -90,8 +90,8 @@ for (let i = 1; i <= 30; i++) {
   await page.waitForTimeout(5000);
 }
 
-ok('A1 线上 watch.html 引用 watch.css?v=20 / watch.js?v=15',
-  /watch\.css\?v=20"/.test(htmlTxt) && /watch\.js\?v=15"/.test(htmlTxt));
+ok('A1 线上 watch.html 引用 watch.css?v=21 / watch.js?v=16',
+  /watch\.css\?v=21"/.test(htmlTxt) && /watch\.js\?v=16"/.test(htmlTxt));
 ok('A2 线上 watch.js 与本地整份 md5 全等（最硬的指纹）', jsHit, md5txt(localJs));
 ok('A3 线上 watch.css 与本地整份 md5 全等', cssHit, md5txt(localCss));
 {

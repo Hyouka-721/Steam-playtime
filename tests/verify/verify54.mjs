@@ -58,8 +58,9 @@ ok('A5 主题仍由 app.js 的 bindFlip 绑在 #theme-light 上，没有绑到 .
   && (app.match(/bindFlip\(\$/g) || []).length === 1,
   { calls: (app.match(/bindFlip\(\$/g) || []).length });
 
-ok('A6 观影页的返回入口文案已改为「退出观影记录」',
-  /class="w-home"[^>]*title="退出观影记录/.test(watchHtml), (watchHtml.match(/class="w-home"[^>]*/) || [])[0]);
+ok('A6 观影页的返回入口文案已改为「退出观影记录」，且由 aria-label 承载（第 83 轮起无 title 气泡）',
+  /class="w-home"[^>]*aria-label="退出观影记录/.test(watchHtml) &&
+  !/class="w-home"[^>]*\btitle=/.test(watchHtml), (watchHtml.match(/class="w-home"[^>]*/) || [])[0]);
 await ctxA.close();
 
 /* ================= B. 浏览器实测 ================= */
@@ -171,11 +172,14 @@ const w1 = page.url();
 const watchInfo = await page.evaluate(() => ({
   theme: document.documentElement.dataset.theme,
   home: !!document.querySelector('.w-home'),
+  // 第 83 轮：删掉 title 悬停气泡，「说明退出」的语义改由 aria-label 承载
+  homeLabel: (document.querySelector('.w-home') || { getAttribute: () => null }).getAttribute('aria-label') || '',
   homeTitle: (document.querySelector('.w-home') || {}).title || '',
 }));
 ok('B12 点小黄人 → 进入 watch.html', /watch\.html/.test(w1), w1.split('/').pop());
-ok('B13 观影页同一形象是「退出」入口（.w-home 指向首页，文案说明退出）',
-  watchInfo.home && /退出/.test(watchInfo.homeTitle) && watchInfo.theme === 'cinema', watchInfo);
+ok('B13 观影页同一形象是「退出」入口（.w-home 指向首页，说明文字在 aria-label、无 title 气泡）',
+  watchInfo.home && /退出/.test(watchInfo.homeLabel) && watchInfo.homeTitle === '' &&
+  watchInfo.theme === 'cinema', watchInfo);
 
 // —— 退出
 await page.click('.w-home');

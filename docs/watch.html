@@ -8,14 +8,14 @@
 <link rel="icon" type="image/webp" href="img/minion-0ef9a202.webp">
 <!-- 与游戏站同一套本地花体字，保持品牌一致；preload + font-display:block 消除 FOUT -->
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="watch.css?v=20">
+<link rel="stylesheet" href="watch.css?v=21">
 </head>
 <body>
 
 <header class="w-header">
   <!-- 小黄人：与首页同一个形象，负责「退出观影记录」回到游戏时长页
        （首页上它负责进入，于是这个图标在全站就是两页之间的切换器） -->
-  <a class="w-home" href="./" title="退出观影记录（回到游戏时长）" aria-label="退出观影记录，回到游戏时长">
+  <a class="w-home" href="./" aria-label="退出观影记录，回到游戏时长">
     <img src="img/minion-0ef9a202.webp" alt="小黄人" width="460" height="420" decoding="async">
   </a>
   <!-- 2026-10-24 第 64 轮：标题兼作「回到顶部」按钮（页面滚很长时才用得上）。
@@ -29,9 +29,10 @@
        （第三个 grid 单元、justify-self:end、132×132、≤480px 88×88、同一张素材、同一套 hover/active/focus 反馈）。
        首页上它切换浅色主题，这里它切换**网格视图 ⇄ 时间轴视图**；
        原来的「网格 / 时间轴」两个文字按钮已按用户确认由它取代（grid 视图 = 豆瓣式海报墙，
-       timeline 视图 = 按观影时间倒序）。aria-pressed 表示「时间轴是否开启」。 -->
+       timeline 视图 = 按观影时间倒序）。aria-pressed 表示「时间轴是否开启」。
+       第 83 轮：全页不再有 title 悬停气泡，语义统一由 aria-label 承载（与首页一致）。 -->
   <div class="w-avatar" id="w-avatar" role="button" tabindex="0"
-       aria-pressed="false" title="切换到时间轴视图" aria-label="切换到时间轴视图"></div>
+       aria-pressed="false" aria-label="切换到时间轴视图"></div>
 </header>
 
 <div class="w-bar">
@@ -86,7 +87,7 @@
      纯静态站没有后端，所以提交走 GitHub Contents API（Token 由用户在本机填一次）。
      表单字段与 scripts/watch-add.mjs 的参数一一对应，压图 / 哈希命名 / 去重合并规则也完全一致；
      第 75 轮起海报除 640 主图外还会一起生成并上传 320 / 480 两张响应式变体。 -->
-<button class="w-fab" id="w-fab" type="button" title="添加观影记录" aria-label="添加观影记录">
+<button class="w-fab" id="w-fab" type="button" aria-label="添加观影记录">
   <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
 </button>
 
@@ -188,7 +189,7 @@
 </dialog>
 
 <div class="w-toast" id="w-toast" role="status" hidden></div>
-<script src="watch.js?v=15"></script>
+<script src="watch.js?v=16"></script>
 <script>
 /* 第 75 轮：注册 Service Worker（docs/sw.js）。
    海报是内容哈希命名的不可变资源，Pages 只给 max-age=600，刷新超 10 分钟就要

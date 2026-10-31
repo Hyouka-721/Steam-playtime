@@ -189,7 +189,7 @@
             '<h3 class="poster-name">' + esc(it.title) + '</h3>' +
             (it.watched_at ? '<span class="poster-date">' + esc(it.watched_at) + '</span>' : '') +
           '</div>' +
-          (it.note ? '<p class="poster-note" title="' + esc(it.note) + '">' + esc(it.note) + '</p>' : '') +
+          (it.note ? '<p class="poster-note">' + esc(it.note) + '</p>' : '') +
         '</article>';
     }).join('');
     wireImages(gridEl);
@@ -228,7 +228,7 @@
                 (releaseText(it) ? '<span class="tl-year">' + esc(releaseText(it)) + '</span>' : '') +
                 scoreHtml(it.rating, 'tl-score') +
               '</div>' +
-              (it.note ? '<p class="tl-note" title="' + esc(it.note) + '">' + esc(it.note) + '</p>' : '') +
+              (it.note ? '<p class="tl-note">' + esc(it.note) + '</p>' : '') +
             '</div>' +
           '</article>';
       }).join('');
@@ -272,14 +272,13 @@
 
   /* ---------- 视图 / 筛选切换（状态持久化） ---------- */
   // 头像的可见状态：aria-pressed = 「时间轴是否开启」；
-  // title / aria-label 描述「点下去会发生什么」，与首页 syncThemeUi() 的写法一致。
+  // 第 83 轮：全页不再有 title 悬停气泡，「点下去会发生什么」只由 aria-label 承载
+  // （与首页 syncThemeUi() 的写法保持一致）。
   function syncAvatar() {
     if (!avatarEl) return;
     var timeline = layout === 'timeline';
     avatarEl.setAttribute('aria-pressed', timeline ? 'true' : 'false');
-    var label = timeline ? '切换到网格视图' : '切换到时间轴视图';
-    avatarEl.title = label;
-    avatarEl.setAttribute('aria-label', label);
+    avatarEl.setAttribute('aria-label', timeline ? '切换到网格视图' : '切换到时间轴视图');
   }
 
   function setLayout(next, silent) {

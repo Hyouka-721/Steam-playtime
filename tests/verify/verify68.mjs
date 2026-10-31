@@ -37,7 +37,7 @@ ok('A4 轴线与圆点改为负偏移，画进页面留白',
 ok('A5 ≤860px 轴线离轨收窄到 8px（页面留白只有 18px）',
   /\.w-tl \{ --tl-axis: 8px; \}/.test(cssNC));
 ok('A6 ≤480px 的 .tl-item 也不再左缩进', /\.tl-item \{ padding: 12px 8px 12px 0/.test(cssNC));
-ok('A7 版本号 bump：watch.css?v=20', /watch\.css\?v=20"/.test(html));
+ok('A7 版本号 bump：watch.css?v=21', /watch\.css\?v=21"/.test(html));
 
 /* ================= B 运行时 ================= */
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });

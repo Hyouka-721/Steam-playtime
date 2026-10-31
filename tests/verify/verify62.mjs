@@ -38,8 +38,8 @@ const note = (cssNC.match(/\.tl-note \{([^}]*)\}/) || [, ''])[1];
 ok('A6 .tl-note 单行省略（超长 hover 看 title）', /white-space: nowrap/.test(note) && /text-overflow: ellipsis/.test(note));
 ok('A7 缩略图已撤掉第 61 轮的 align-self:flex-start（回到居中）',
   !/align-self: flex-start/.test(cssNC));
-ok('A8 版本号 bump：watch.css?v=20 / watch.js?v=15',
-  /watch\.css\?v=20"/.test(html) && /watch\.js\?v=15"/.test(html));
+ok('A8 版本号 bump：watch.css?v=21 / watch.js?v=16',
+  /watch\.css\?v=21"/.test(html) && /watch\.js\?v=16"/.test(html));
 
 /* ================= B 浏览器 ================= */
 const DATA = JSON.parse(rd('data/watch.json'));
@@ -123,10 +123,13 @@ for (const W of [1440, 1100, 900, 860]) {
   /* 第 66 轮：真实数据里上映写了完整日期（2026-02-14），861~1000px 一行装不下时
      由评语承担收缩（设计如此）→ 判据从「必须全文」放宽为「完整在一行内、省略号生效、title 有全文」 */
   /* 第 66 轮：评语要么与四项同一行（够宽全文 / 不够宽省略号），要么在 ≤860 整段折到下一行 */
-  ok(`B[${W}] 短评不丢字：title 有全文，且要么同行、要么整段折行`,
-    r.noteTitle === it0.note &&
+  /* 第 83 轮：全页删掉 title 悬停气泡 → 「不丢字」的判据回到版式本身：
+     评语要么与四项同一行、要么整段折到下一行，且**必须没有 title**（反向守卫，
+     免得以后又被谁加回来）。原先「title 里有全文」这条代理判据已废。 */
+  ok(`B[${W}] 短评不丢字（第 83 轮起无 title 气泡）：要么同行、要么整段折行`,
+    r.noteTitle === null &&
     ((r.note.top >= r.head.top - 0.6 && r.note.bottom <= r.head.bottom + 0.6) || r.note.top > r.meta.bottom - 0.6),
-    `ellipsis=${r.noteEllipsis} title=${r.noteTitle === it0.note} note.top=${r.note.top}`);
+    `ellipsis=${r.noteEllipsis} title=${r.noteTitle} note.top=${r.note.top}`);
 }
 
 console.log('\n== C 窄屏兜底（折行但英文名仍在名称正下方）==');

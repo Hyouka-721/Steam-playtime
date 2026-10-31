@@ -18,10 +18,11 @@ const cssNC = stripCmt(css);
 console.log('== A 静态指纹 ==');
 ok('A1 watch.html 用史蒂夫取代文字按钮（#w-avatar 存在、无 .w-layout 按钮）',
   /id="w-avatar"/.test(html) && !/w-layout-btn/.test(html) && !/class="w-layout"/.test(html));
-ok('A2 头像具备与原图标一致的交互属性（role/tabindex/aria-pressed/title/aria-label）',
-  /class="w-avatar" id="w-avatar" role="button" tabindex="0"\s*\n?\s*aria-pressed="false" title="切换到时间轴视图" aria-label="切换到时间轴视图"/.test(html));
-ok('A3 版本号 bump：watch.css?v=20 / watch.js?v=15',
-  /watch\.css\?v=20"/.test(html) && /watch\.js\?v=15"/.test(html));
+ok('A2 头像具备与原图标一致的交互属性（role/tabindex/aria-pressed/aria-label；第 83 轮起无 title 气泡）',
+  /class="w-avatar" id="w-avatar" role="button" tabindex="0"\s*\n?\s*aria-pressed="false" aria-label="切换到时间轴视图"/.test(html) &&
+  !/id="w-avatar"[^>]*\btitle=/.test(html));
+ok('A3 版本号 bump：watch.css?v=21 / watch.js?v=16',
+  /watch\.css\?v=21"/.test(html) && /watch\.js\?v=16"/.test(html));
 
 const wav = (cssNC.match(/\.w-avatar \{[^}]*\}/) || [''])[0];
 ok('A4 .w-avatar 132×132 + 同一素材 + 同一投影',
@@ -124,7 +125,8 @@ const state = () => page.evaluate(() => {
   const g = document.getElementById('w-grid'), t = document.getElementById('w-tl');
   return {
     pressed: av.getAttribute('aria-pressed'),
-    title: av.title, label: av.getAttribute('aria-label'),
+    // 第 83 轮：title 气泡已删，语义全靠 aria-label（hasTitle 用来做反向守卫）
+    title: av.title, hasTitle: av.hasAttribute('title'), label: av.getAttribute('aria-label'),
     gridHidden: g.hidden, tlHidden: t.hidden,
     posters: g.querySelectorAll('.poster').length, tlItems: t.querySelectorAll('.tl-item').length,
     stored: localStorage.getItem('watch-layout'),
@@ -132,15 +134,15 @@ const state = () => page.evaluate(() => {
 });
 
 let s = await state();
-ok('C1 默认网格视图：grid 可见 / tl 隐藏 / aria-pressed=false / title=切换到时间轴视图',
-  s.gridHidden === false && s.tlHidden === true && s.pressed === 'false' && s.title === '切换到时间轴视图',
+ok('C1 默认网格视图：grid 可见 / tl 隐藏 / aria-pressed=false / aria-label=切换到时间轴视图（第 83 轮起无 title 气泡）',
+  s.gridHidden === false && s.tlHidden === true && s.pressed === 'false' && s.label === '切换到时间轴视图' && s.hasTitle === false,
   JSON.stringify(s));
 
 await page.click('#w-avatar');
 await page.waitForTimeout(250);
 s = await state();
-ok('C2 点史蒂夫 → 时间轴视图（tl 可见、grid 隐藏、aria-pressed=true、title 变为「切换到网格视图」）',
-  s.gridHidden === true && s.tlHidden === false && s.pressed === 'true' && s.title === '切换到网格视图' && s.tlItems === 3,
+ok('C2 点史蒂夫 → 时间轴视图（tl 可见、grid 隐藏、aria-pressed=true、aria-label 变「切换到网格视图」，始终无 title）',
+  s.gridHidden === true && s.tlHidden === false && s.pressed === 'true' && s.label === '切换到网格视图' && s.hasTitle === false && s.tlItems === 3,
   JSON.stringify(s));
 // 第 75 轮契约变更：视图选择不再持久化（用户要求「默认展示网格」），localStorage 不再写
 ok('C3 视图选择不再持久化（watch-layout 不再写入，第 75 轮起）', s.stored === null, String(s.stored));
