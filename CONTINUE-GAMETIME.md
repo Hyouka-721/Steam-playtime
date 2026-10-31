@@ -60,11 +60,21 @@ README.md                    # 完整说明（管线/部署/密钥/Schema/自检
 
 ## 四、当前进展与版本
 
-- 版本号：`style.css?v=109` / `app.js?v=104` / `fx.js?v=16`（**硬编码在 `verify6.mjs` 第 52 行**；第 86 轮热力图改月历后再次 bump）。
+- 版本号：`style.css?v=110` / `app.js?v=105` / `fx.js?v=16`（**硬编码在 `verify6.mjs` 第 52 行**；第 87 轮把日明细入口并入热力图后再次 bump）。
 - 最近一次针对游戏站的大改是**第 24 轮「首屏加载优化」**（在 verify6 注释里记着）：数据全内联、`cache:"default"`、月份文件 `Promise.allSettled` 并行、成就按需、骨架屏、`meta.ach_stats` 摘要。
 - 之后 25~80 轮几乎都在做观影页（watch），游戏站只在 CI 每晚改 `docs/index.html` 数据、以及「日历入口收敛到最近游玩」等零散订正。
 - **第 82 轮（index 侧，2026-10-31，本地改动，未提交/未上线）**三项：① 全站移除 `title` 悬停气泡（页眉三项 + 五张概览卡 + 返回按钮 + 日历日期格 + 排行榜行 + 氛围开关禁用态），语义一律改由 `aria-label` 承载；② `.site-title` 加 `user-select:none`（双击不再框选、拖拽不带走文字，点它仍回顶部）；③ 删掉排行榜首行三只吉祥物（加菲猫 / 猫和老鼠 / 企鹅）——模板、CSS 三条规则、三张 webp 全清，`.rank-list` 的 18px 上内边距**刻意保留**（首行位置与 `--cal-lift` 的换算依赖它）。新增 `tests/verify/verify82_index.mjs` **16/16**。
 - 回归：`verify6` **35/35**、`verify47` **72/72**（0.4b 判据改为「aria-label 承载 + title 必为 null」）、`verify54` **23/23**（B2/B3/B6 同步改成 aria-label）、`verify82_index` **16/16**；`verify55/56/58` 页眉几何未受影响（40/40、49/49、23/23）。
+- **第 87 轮（index 侧，2026-10-31）**热力图时长字样放大 + 日明细入口并入热力图：
+  ① 用户「热力图中时间字样放大，颜色加深」→ `.hc i` 从 11.5px / 继承色 / opacity .95 改为 **13px / 600 重 / --text-strong / opacity 1**（`h4` 实心格里仍是白字，靠 `.hc.h4 i` 更高的特异性守住，没被这条盖掉）；窄屏 ≤860 用 12px、≤360 用 11px。
+  ② 用户「删除最近游玩选项卡下的日历图标，其负责的功能（点击日期查看当天游玩的游戏及其时长）并入总时长的热力图」→ 删 `CAL_ICON_BTN` 常量、`renderRecent` 的首行分支、`#recent-list` 的点击委托、`.cal-icon-btn` 整套 CSS（含 `--cal-lift` 那 45 行对位算法）。**浮层的「一级月历」整层也随之删除** —— 热力图本身就是月历，不必再看第二份：`#cal-page-month` / `#cal-grid` / `#cal-title` / `#cal-prev` / `#cal-next` / `#cal-back` / `#cal-status` 的元素与 JS（`renderCalGrid` / `stepMonth` / `backToCalMonth` / `resetCalLevel` / `focusCalDay` / `calRange` / `calDefaultMonth` / `hasPlay`）全清。
+  ③ 新入口：`renderDrill` 给有数据的日子加 `is-live` + `data-date` + `role="button"` + `tabindex="0"` + `aria-label`（日期 / 时长 /「查看当天明细」），在 `#heat-drill` 上委托 click 与 keydown(Enter/Space) → `openDayDetail(date)`；未追踪的日子（`is-na`）与月首月尾补位格不可点。
+  ④ 细节：`.hc.is-sel` 标出「刚看过的那天」，关掉浮层后仍保留（便于接着看相邻日）；步进跨月时背后的热力图自动跟到同月（同步 `state.drill.month` 重绘，并把「关闭后焦点还回谁」改指新格子）；单游戏下钻里点格子，明细仍列**当天全部游戏**，当前那款加 `.cal-game.is-focus` 左侧金线。
+  ⑤ **两个真坑**：`openDayDetail()` 要把 `state.cal.day` 置 null 才被认作「首次打开」，也才会把焦点送进浮层（`closeCal()` 同样要清）；窄屏 `padding: 6px 4px` **必须写在 ≤860 块之后** —— 同特异度靠源码顺序决胜，写在前面的 480 块里会被 860 块的 `padding: 6px 7px` 覆盖（实测内边距一直是 7px，「49min」顶出格子）。
+  ⑥ 顺手修掉第 86 轮的遗留缺陷：**360px 下钻整块横向溢出 13px** —— 网格项默认 `min-width:auto`，格内时长文字的最小宽度把 `1fr` 轨道顶宽；给 `.hc` 加 `min-width: 0` 后归零（360 / 390 / 430 实测 docOverflow 均为 0）。
+  ⑦ 测试：`verify47` **整体重写** 72 → **80 条**（结构 / 入口 / 几何 / 步进 / 空态 / 边界 / 关闭 / 焦点 / 键盘 / 响应式 / 单游戏高亮）；`verify48` 改判 78 → **76 条**（「浮层外零变化」的基线改成「进下钻后、开浮层前」，锚点从最近榜首行换成下钻面板）；`verify49` 第 6 段从「图标几何」改成「图标已删且没留空壳」（47 → **45 条**）；`verify6` 的日历断言改为点格子开明细。新增 `online87`（14 条：字号/颜色、格子可点、明细与线上 daily 对账、无一级月历、图标已删、360px 不溢出）。
+  回归：index 侧 7 套件 **307 条 0 FAIL**（verify6 35 / verify47 80 / verify48 76 / verify49 45 / verify54 23 / verify82_index 16 / verify83_index 32）。
+
 - **第 86 轮（index 侧，2026-10-31）**热力图改「按月」并取代趋势图：
   ① 热力图从「18 周 × 7 天的小方块」改成**月历网格**（7 列 = 周一 → 周日，格子内写日期 + 当日时长，四档 `color-mix` 深浅）；只在**下钻界面**出现，数据页那块已删除。
   ② 下钻（点榜单行 = 单游戏；点「游戏时长」卡 = 全部游戏）原来是 **ECharts 柱状 + 折线**，现在整体换成同一套月历热力图 —— **ECharts 已从站点彻底移除**（`ECHARTS_SRC` / `loadEcharts` / 旧 `renderDrill` / `state.charts` / `drillRange` / `cssVar` 全删），首屏与下钻都不再联网取图表库。

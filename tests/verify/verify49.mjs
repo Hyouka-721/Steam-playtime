@@ -43,7 +43,10 @@ const freshPage = async (vw = 1440, vh = 950, dsf = 1) => {
 };
 const waitDay = async () => {
   await page.waitForFunction(
-    () => { const m = document.getElementById('cal-mask'); return !!m && m.hidden && !document.getElementById('cal-page-day').hidden; },
+    () => {
+      const m = document.getElementById('cal-mask');
+      return !!m && m.hidden && !document.getElementById('cal-overlay').hidden;
+    },
     null, { timeout: 8000 },
   ).catch(() => {});
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
@@ -136,8 +139,8 @@ const geo = await page.evaluate(() => {
   const panel = document.querySelector('#view-recent .panel');
   const list = document.getElementById('recent-list');
   const row0 = list.querySelector('.rank-item');
-  const icon = list.querySelector('[data-cal-toggle]');
-  return { panel: b(panel), list: b(list), row0: b(row0), icon: icon ? b(icon) : null };
+  // 第 87 轮：图标已删，这里不再量它的盒子（曾是绝对定位，本就没参与过布局计算）
+  return { panel: b(panel), list: b(list), row0: b(row0) };
 });
 // 旧版首行基线（第 48 轮线上实测）：panel.top + 1(border) + 18(pad) + 33.19(head) + 18(list pad) = +70.19
 const oldRow0Offset = 1 + 18 + EXPECT_SHIFT + 18;   // 70.19
@@ -193,38 +196,38 @@ ok('5.1 面板边框到首行 = border 1 + panel 18 + list 18 = 37px（无第三
 ok('5.2 列表 margin-top = 0（没有额外上外边距叠加）', stack.listMarginTop === 0, stack.listMarginTop);
 ok('5.3 首行 margin-top = 0（.rank-list 用 gap，不用行外边距）', stack.row0MarginTop === 0, stack.row0MarginTop);
 
-// ---------- 6. 日历图标完全在面板内、且在首行之上 ----------
+// ---------- 6. 第 87 轮：日历图标已整体删除 ----------
 await page.evaluate(() => document.getElementById('card-recent').click());
 await page.waitForTimeout(700);
-const iconGeos = [];
-for (const w of [1440, 1200, 1024, 861]) {
+for (const w of [1440, 1024, 861]) {
   await page.setViewportSize({ width: w, height: 900 });
-  await page.waitForTimeout(320);
+  await page.waitForTimeout(300);
   const g = await page.evaluate(() => {
-    const r = (el) => el.getBoundingClientRect();
-    const panel = r(document.querySelector('#view-recent .panel'));
-    const row0 = r(document.querySelector('#recent-list .rank-item'));
-    const icon = r(document.querySelector('#recent-list [data-cal-toggle]'));
-    const last = r(document.querySelector('#recent-list .rank-item .rank-last'));
+    const rows = [...document.querySelectorAll('#recent-list .rank-item')];
+    const lasts = rows.map((r) => r.querySelector('.rank-last'));
     return {
-      inside: icon.top >= panel.top && icon.bottom <= panel.bottom && icon.left >= panel.left && icon.right <= panel.right,
-      gapAbovePanelTop: +(icon.top - panel.top).toFixed(2),
-      gapAboveRowTop: +(row0.top - icon.bottom).toFixed(2),
-      gapToDate: +(last.top - icon.bottom).toFixed(2),
-      noRowOverlap: icon.bottom <= row0.top,
-      iconSize: [+icon.width.toFixed(1), +icon.height.toFixed(1)],
+      btn: document.querySelectorAll('.cal-icon-btn').length,
+      toggles: document.querySelectorAll('[data-cal-toggle]').length,
+      // 删元素容易，难的是别留下空壳：每个 .rank-last 里都应当只有文本节点
+      lastChildElems: lasts.reduce((a, el) => a + (el ? el.children.length : 0), 0),
+      lastHasSvg: document.querySelectorAll('#recent-list .rank-last svg').length,
+      // 行高必须与删除前一致（图标是绝对定位，本就不占位）
+      rowH: +rows[0].getBoundingClientRect().height.toFixed(2),
+      docOverflow: document.documentElement.scrollWidth - window.innerWidth,
     };
   });
-  iconGeos.push([w, g]);
-  ok(`6.${w} 图标完全落在面板内、位于首行上方、不与行重叠`,
-    g.inside && g.noRowOverlap && g.gapAbovePanelTop >= 0, g);
+  ok(`6.${w} 最近游玩里已无日历图标，且没留下空壳节点`,
+    g.btn === 0 && g.toggles === 0 && g.lastChildElems === 0 && g.lastHasSvg === 0 && g.docOverflow <= 0, g);
 }
-const g1440 = iconGeos[0][1];
-ok('6.5 图标上下留白均衡（距面板顶 6~7px、距首行顶 6~7px）',
-  g1440.gapAbovePanelTop >= 5 && g1440.gapAbovePanelTop <= 8
-  && g1440.gapAboveRowTop >= 5 && g1440.gapAboveRowTop <= 8, g1440);
-ok('6.6 图标尺寸仍为 24×24（未因上移被压扁）',
-  g1440.iconSize[0] === 24 && g1440.iconSize[1] === 24, g1440.iconSize);
+// 行高不写死：两榜共用同一套 .rank-item 网格，删图标（绝对定位）不该让它们分叉
+const recentRowH = await page.evaluate(() => document.querySelector('#recent-list .rank-item').getBoundingClientRect().height);
+await page.click('#card-lifetime');           // recent → lifetime 列表（一下即可，图标那时代也是这样切）
+await page.waitForTimeout(600);
+const ltRowH = await page.evaluate(() => document.querySelector('#lt-list .rank-item').getBoundingClientRect().height);
+ok('6.4 「最近游玩」行高与「游戏时长」榜完全一致（图标从未参与布局）',
+  Math.abs(recentRowH - ltRowH) <= 0.5, { recent: +recentRowH.toFixed(2), lifetime: +ltRowH.toFixed(2) });
+await page.click('#card-recent');             // 回到「最近游玩」继续截图
+await page.waitForTimeout(500);
 await page.setViewportSize({ width: 1440, height: 950 });
 await page.waitForTimeout(400);
 await page.screenshot({ path: OUT + 'r49_recent_1440.png' });
@@ -240,25 +243,25 @@ const func = await page.evaluate(() => ({
 ok('8.1 最近游玩列表仍正常渲染', func.recentRows > 0, func.recentRows);
 ok('8.2 累计榜仍正常渲染', func.ltRows > 40, func.ltRows);
 ok('8.3 五张概览卡仍有值', func.cards.length === 5 && func.cards.every((v) => v && v !== '—'), func.cards);
-ok('8.4 日历图标仍在（入口未丢）', func.icon);
-await page.click('#card-recent');
-await page.waitForTimeout(400);
-await page.click('#recent-list [data-cal-toggle]');
-await page.waitForSelector('#cal-grid .cal-day.on', { state: 'visible', timeout: 10000 });
+ok('8.4 日历图标已全站删除（入口并入下钻热力图）', !func.icon);
+// 第 87 轮：入口改为「游戏时长」下钻里的热力图格子（进下钻要点两下：先回列表、再进下钻）
+await page.click('#card-lifetime');
+await page.waitForTimeout(500);
+await page.click('#card-lifetime');
+await page.waitForSelector('#lt-detail:not([hidden])', { timeout: 10000 });
 const cal = await page.evaluate(() => ({
-  open: !document.getElementById('cal-overlay').hidden,
-  monthVisible: !document.getElementById('cal-page-month').hidden,
-  on: document.querySelectorAll('#cal-grid .cal-day.on').length,
+  cells: document.querySelectorAll('#heat-drill .hc.is-live').length,
+  alive: [...document.querySelectorAll('#heat-drill .hc.is-live')].reverse().find((c) => c.querySelector('i'))?.dataset.date ?? null,
 }));
-ok('8.5 点击图标仍能打开月历浮层', cal.open && cal.monthVisible && cal.on > 0, cal);
-await page.click('#cal-grid .cal-day.on');
+ok('8.5 热力图里每个有数据的日子都可点（.is-live）', cal.cells > 0 && !!cal.alive, cal);
+await page.click(`#heat-drill .hc[data-date="${cal.alive}"]`);
 await waitDay();
 const day = await page.evaluate(() => ({
-  dayVisible: !document.getElementById('cal-page-day').hidden,
+  dayVisible: !document.getElementById('cal-overlay').hidden,
   title: document.getElementById('cal-day-title').textContent,
   rows: document.querySelectorAll('#cal-day-games .cal-game').length,
 }));
-ok('8.6 点击某一天仍能进入二级明细', day.dayVisible && /\d+ 月 \d+ 日 周./.test(day.title) && day.rows > 0, day);
+ok('8.6 点格子仍能打开当天明细', day.dayVisible && /\d+ 月 \d+ 日 周./.test(day.title) && day.rows > 0, day);
 await page.click('#cal-day-close');
 await page.waitForTimeout(300);
 await page.screenshot({ path: OUT + 'r49_after_cal.png' });
@@ -274,11 +277,11 @@ for (const w of [860, 768, 430, 390, 360]) {
     const r = (el) => el.getBoundingClientRect();
     const panel = r(document.querySelector('#view-recent .panel'));
     const row0 = r(document.querySelector('#recent-list .rank-item'));
-    const icon = document.querySelector('#recent-list [data-cal-toggle]');
-    const iconBox = icon ? r(icon) : null;
+    // 第 87 轮：图标已删除 → 这里要验的是「没有图标」这件事在窄屏也成立
+    const iconCount = document.querySelectorAll('#recent-list [data-cal-toggle]').length;
     const last = document.querySelector('#recent-list .rank-item .rank-last');
     return {
-      iconHidden: !iconBox || (iconBox.width === 0 && iconBox.height === 0),
+      iconGone: iconCount === 0,
       offset: +(row0.top - panel.top).toFixed(2),
       panelH: +panel.height.toFixed(2),
       docOverflow: document.documentElement.scrollWidth - window.innerWidth,
@@ -292,7 +295,7 @@ for (const w of [860, 768, 430, 390, 360]) {
   });
   const expectOffset = 1 + m.panelPadTop + m.listPadTop; // 1 + 18 + 18 = 37
   ok(`7.${w} 移动端无残留提示行/容器、行上移到位（首行基线 37px）`,
-    m.iconHidden && m.hintCount === 0 && m.headCount === 0 && Math.abs(m.offset - expectOffset) <= 0.02, m);
+    m.iconGone && m.hintCount === 0 && m.headCount === 0 && Math.abs(m.offset - expectOffset) <= 0.02, m);
   ok(`7.${w} 移动端无横向溢出、首行在面板内`, m.docOverflow <= 0 && m.firstRowInside, m);
   if (w === 390) await page.screenshot({ path: OUT + 'r49_recent_390.png' });
   await ctx.close();

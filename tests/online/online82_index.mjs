@@ -34,7 +34,7 @@ page.on('pageerror', (e) => errs.push(String(e)));
 page.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
 
 /* ---------- A 等 Pages 生效 ---------- */
-console.log('== A 等待 Pages 生效（判内容指纹 style.css?v=109）==');
+console.log('== A 等待 Pages 生效（判内容指纹 style.css?v=110）==');
 let html = '';
 for (let i = 1; i <= 20; i++) {
   try {
@@ -45,13 +45,13 @@ for (let i = 1; i <= 20; i++) {
     await page.waitForTimeout(8000);
     continue;
   }
-  const fresh = html.includes('style.css?v=109') && html.includes('app.js?v=104');
+  const fresh = html.includes('style.css?v=110') && html.includes('app.js?v=105');
   console.log(`  第 ${i} 次：${fresh ? '已生效' : '仍是旧版'}`);
   if (fresh) break;
   await page.waitForTimeout(10000);
 }
 ok('A1 线上 index.html 已是 v=109 / v=104',
-  html.includes('style.css?v=109') && html.includes('app.js?v=104'),
+  html.includes('style.css?v=110') && html.includes('app.js?v=105'),
   (html.match(/(style\.css|app\.js|fx\.js)\?v=\d+/g) || []).join(' '));
 
 /* ---------- B 字节指纹 ---------- */

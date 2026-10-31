@@ -49,8 +49,8 @@ check('内联：构建脚本串上 inline-boot', /inline-boot\.mjs/.test(build))
 check('样式：骨架屏样式与动画存在', /\.sk-block/.test(css) && /@keyframes sk-shimmer/.test(css));
 check('样式：尊重 reduced-motion（骨架不流动）', /prefers-reduced-motion: reduce[\s\S]{0,120}sk-block/.test(css));
 check('构建：build.mjs 输出 ach_stats 到 meta', /ach_stats:\s*achStats/.test(build));
-check('版本号：style\.css\?v=109 / app\.js\?v=104 / fx.js?v=16',
-  /style\.css\?v=109/.test(html) && /app\.js\?v=104/.test(html) && /fx\.js\?v=16/.test(html));
+check('版本号：style\.css\?v=110 / app\.js\?v=105 / fx.js?v=16',
+  /style\.css\?v=110/.test(html) && /app\.js\?v=105/.test(html) && /fx\.js\?v=16/.test(html));
 
 /* ---------- B/C/D. 浏览器实测 ---------- */
 const browser = await chromium.launch();
@@ -192,19 +192,29 @@ const cards = await page.evaluate(() =>
   [...document.querySelectorAll('.cards .card-value')].map((e) => e.textContent.trim()));
 check('回归：五张概览卡有值', cards.length === 5 && cards.every((v) => v && v !== '—'), JSON.stringify(cards));
 
-// 日历回看（成就明细已加载，应精确回溯）
-// 2026-10-20：日历入口已从累计榜收敛到「最近游玩」（全站唯一），
-// 断言同步改为：切到「最近游玩」→ 点那唯一的 .cal-icon-btn。
-await page.click('#card-recent');
+// 当日明细浮层（成就明细已加载，应精确回溯）
+// 第 87 轮：入口从「最近游玩」首行的小日历图标改为「游戏时长」下钻里的月历热力图格子，
+// 断言同步改为：进下钻 → 点一个带时长的格子 → 浮层列出当天明细。
+await page.click('#card-lifetime');
+await page.waitForSelector('#lt-detail:not([hidden])', { timeout: 10000 });
+await page.waitForTimeout(300);
+const firstCell = await page.evaluate(() => {
+  const c = [...document.querySelectorAll('#heat-drill .hc.is-live')].reverse().find((x) => x.querySelector('i'));
+  return c ? c.dataset.date : null;
+});
+await page.click(`#heat-drill .hc[data-date="${firstCell}"]`);
 await page.waitForTimeout(600);
-await page.click('#recent-list [data-cal-toggle]');
-await page.waitForTimeout(400);
-const calOpen = await page.evaluate(() => document.querySelectorAll('.cal-day').length > 0);
-check('回归：日历浮层可打开（唯一入口在「最近游玩」）', calOpen);
+const calOpen = await page.evaluate(() => ({
+  open: !document.getElementById('cal-overlay').hidden,
+  rows: document.querySelectorAll('#cal-day-games .cal-game').length,
+  title: document.getElementById('cal-day-title').textContent,
+}));
+check('回归：热力图格子能打开当日明细（入口已并入热力图）',
+  calOpen.open && calOpen.rows > 0, JSON.stringify(calOpen));
 await page.keyboard.press('Escape');
 await page.waitForTimeout(300);
-await page.click('#card-lifetime');
-await page.waitForTimeout(600);
+await page.click('#btn-drill-back'); // 回到榜单列表，后续断言在列表视图上做
+await page.waitForTimeout(400);
 
 // 主题持久化
 const t1 = await page.evaluate(() => document.documentElement.dataset.theme);

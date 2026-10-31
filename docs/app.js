@@ -64,9 +64,9 @@
     days: new Map(),  // 'YYYY-MM-DD' -> day（全量；日历二级界面按日期直接取用）
     allDates: [],     // 有记录的日期索引（升序）
     view: 'lifetime',
-    drill: { appid: null, month: null },   // 二级界面：null = 每日总时长；month = 'YYYY-MM'
-    // ---- 游玩日历浮层（点击「最近游玩」首行日期上方的小日历图标打开）----
-    cal: { open: false, ym: '2026-10', busy: false, lastFocus: null, day: null },
+    drill: { appid: null, month: null, sel: null }, // 二级界面：null = 全部游戏；month = 'YYYY-MM'；sel = 最近看过的那天
+    // ---- 当日明细浮层（第 87 轮：入口改为下钻月历热力图的格子）----
+    cal: { open: false, busy: false, lastFocus: null, day: null },
     heroAppid: null,  // 悬停中的游戏（背景底纹用），null = 恢复默认底
     vt: null,         // 正在跑的 ViewTransition（Chromium 不允许叠第二个）
   };
@@ -398,24 +398,11 @@
   const noCls = (i) => (i < 3 ? ` r${i + 1}` : '');
   const barStyle = (pct, i) => `width:${pct}%` + (topPalette[i] ? `;background:${topPalette[i]}` : '');
 
-  /* 「最近游玩」首行日期上方的「游玩日历」入口图标（2026-10-20 收敛为全站唯一入口）：
-     透明小日历（无底色无边框），CSS 里绝对定位于日期文字上方，不占布局、不改行高；
-     点击只做一件事：弹出日历浮层（一级月历 → 二级当天明细），不改变浮层以外的
-     任何页面状态（2026-10-21 前点它会把整页切到"回看态"，该逻辑已整体移除）。
-     史蒂夫头像已改为氛围特效开关（单击 开 / 关，仅流星）。
-
-     2026-10-20 收敛：累计榜（#lt-list）里的同一枚图标已整体摘除，相关渲染分支、
-     事件拦截、状态同步全部删干净，日历入口只保留在「最近游玩」首行。
-     累计榜首行现在与其它行结构完全一致（.rank-last 里只有日期文字），
-     不会留下空节点、多余占位或高度变化。#recent-list 的委托负责点击；
-     该列表的行本身没有下钻行为，因此这里只处理日历按钮。 */
-  const CAL_ICON_BTN =
-    '<button class="cal-icon-btn" type="button" data-cal-toggle ' +
-    'aria-label="打开游玩日历，查看有游玩记录的那一天的游戏明细">' +
-    '<svg viewBox="0 0 20 20" width="22" height="22" aria-hidden="true" focusable="false">' +
-    '<rect x="2.6" y="4.2" width="14.8" height="13.6" rx="2.2"></rect>' +
-    '<path d="M2.6 8.6h14.8M7 2.6v3M13 2.6v3"></path>' +
-    '</svg></button>';
+  /* 「最近游玩」首行日期上方的「游玩日历」入口图标 —— **第 87 轮已删除**：
+     它负责的「点日期看当天玩了哪些游戏、各多久」已并入「游戏时长」下钻里的
+     月历热力图（点格子打开当日明细浮层），所以这个绝对定位的小按钮、它的
+     CSS（.cal-icon-btn / --cal-lift 那一套对位算法）与 #recent-list 的点击委托
+     一并删干净了。累计榜与最近榜现在都不再有任何「行内图标」。 */
 
   function renderLifetime() {
     const box = $('lt-list');
@@ -533,20 +520,15 @@
         const icon = ICON(g.appid, g.img_icon_url);
         const pct = Math.max(1.5, (g.recent / max) * 100);
         const isPerfect = perfect.has(String(g.appid));
-        // 「最近游玩」首行日期上方的「游玩日历」入口（2026-10-20 起全站唯一）：
-        // 与原先累计榜那个按钮**同一个常量、同一套 CSS**，因此尺寸/样式/居中方式一致。
-        // 图标绝对定位在日期文字上方，不占布局，日期文字位置与行高不受影响；
-        // 点击由 #recent-list 委托处理（共用的 data-cal-toggle + openCal()）。
-        const lastHtml = i === 0
-          ? `<span class="rank-last">${CAL_ICON_BTN}${g.last_played ?? '—'}</span>`
-          : `<span class="rank-last">${g.last_played ?? '—'}</span>`;
+        // 第 87 轮：原先首行日期上方那枚「游玩日历」图标已删除（功能并入下钻热力图），
+        // 所有行结构完全一致 —— .rank-last 里只有日期文字，没有空节点、没有额外占位。
         return `<div class="rank-item">
           <span class="rank-no${noCls(i)}">${i + 1}</span>
           ${capsuleHtml(g.appid, { perfect: isPerfect, icon })}
           <span class="rank-name">${escapeHtml(g.name)}</span>
           <span class="rank-bar"><span style="${barStyle(pct, i)}"></span></span>
           <span class="rank-min">${hm(g.recent)}</span>
-          ${lastHtml}
+          <span class="rank-last">${g.last_played ?? '—'}</span>
         </div>`;
       })
       .join('');
@@ -588,6 +570,7 @@
   function openDrill(appid) {
     state.drill.appid = appid;
     state.drill.month = heatDefaultMonth();
+    state.drill.sel = null; // 进入一个新的下钻，不保留上一个游戏看过的那天
     $('lt-main').hidden = true;
     $('lt-detail').hidden = false;
     renderDrill();
@@ -598,6 +581,7 @@
   function closeDrill() {
     // 必须清掉 appid：否则深链会一直挂着 g/<旧游戏>（切走再切回也回不来）
     state.drill.appid = null;
+    state.drill.sel = null;
     $('lt-detail').hidden = true;
     $('lt-main').hidden = false;
     syncHash();
@@ -627,16 +611,26 @@
       const min = minutesOn(ds, appid);
       if (min === null) {
         // 追踪开始之前 / 未来：留白格，只显示日期
-        cells.push(`<span class="hc is-na"><b>${d}</b></span>`);
+        cells.push(`<span class="hc is-na" data-date="${ds}"><b>${d}</b></span>`);
         continue;
       }
       if (min > 0) { active++; sum += min; }
       if (min > max) max = min;
       const r = max > 0 ? min / max : 0;
       const lv = min <= 0 ? 0 : r <= 0.25 ? 1 : r <= 0.5 ? 2 : r <= 0.75 ? 3 : 4;
-      const cls = ['hc', `h${lv}`];
+      const cls = ['hc', `h${lv}`, 'is-live'];
       if (ds === today) cls.push('is-today');
-      cells.push(`<span class="${cls.join(' ')}"><b>${d}</b>${min > 0 ? `<i>${hoursShort(min)}</i>` : ''}</span>`);
+      if (ds === state.drill.sel) cls.push('is-sel');
+      /* 第 87 轮：格子成为「当日明细」的入口（原来挂在「最近游玩」首行的小日历图标上）。
+         有数据的日子都可点 —— 包括「当天这款没玩」的 0 分钟格，因为那天的明细里
+         还有别的游戏。可访问名给出日期 + 时长 + 动作，读屏能听懂点进去是什么。 */
+      const label = min > 0
+        ? `${m} 月 ${d} 日 · ${appid ? '这款玩了 ' : '当天 '}${hoursShort(min)}，查看当天明细`
+        : `${m} 月 ${d} 日 · ${appid ? '这款当天没玩' : '当天没有游玩'}，仍可查看明细`;
+      cells.push(
+        `<span class="${cls.join(' ')}" data-date="${ds}" role="button" tabindex="0"` +
+          ` aria-label="${escapeHtml(label)}"><b>${d}</b>${min > 0 ? `<i>${hoursShort(min)}</i>` : ''}</span>`,
+      );
     }
     while (cells.length % 7 !== 0) cells.push('<span class="hc is-blank"></span>');
 
@@ -998,33 +992,12 @@
     return rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
   }
 
-  // ---------- 游玩日历浮层（月历 → 当天明细） ----------
+  // ---------- 当日明细浮层（第 87 轮：入口改为下钻月历热力图的格子） ----------
   /** 一周从周一起算，与 renderTimeline 的 weekStart 保持一致 */
   const todayStr = () => ymd(new Date());
-  /** 有游玩记录 = 当日分钟数 > 0（CI 可能写入 0 分钟的占位日，那也按无记录处理） */
-  const hasPlay = (d) => (state.days.get(d)?.total_minutes ?? 0) > 0;
 
-  /** 可翻阅的月份范围受限于已落盘的 data/daily/*.json（meta.months），避免翻到空月份 */
-  function calRange() {
-    const ms = (state.meta?.months ?? []).slice().sort();
-    return ms.length ? { min: ms[0], max: ms[ms.length - 1] } : null;
-  }
-
-  /** 打开日历时的默认月：最新快照所在月（当前数据即 2026-10），退化到有数据的最后一个月 */
-  function calDefaultMonth() {
-    const snap = state.meta?.last_snapshot_date;
-    if (snap) {
-      const r = calRange();
-      const m = snap.slice(0, 7);
-      if (!r || (m >= r.min && m <= r.max)) return m;
-      return r.max;
-    }
-    const r = calRange();
-    return r ? r.max : todayStr().slice(0, 7);
-  }
-
-  function setCalStatus(msg, isErr = false) {
-    const el = $('cal-status');
+  function setDayStatus(msg, isErr = false) {
+    const el = $('cal-day-status');
     if (!el) return;
     el.textContent = msg ?? '';
     el.classList.toggle('err', !!isErr);
@@ -1038,71 +1011,6 @@
       const t = mask.querySelector('.cal-mask-text');
       if (t) t.textContent = text ?? '加载中…';
     }
-  }
-
-  function renderCalGrid(selDate) {
-    const grid = $('cal-grid');
-    if (!grid) return;
-    const ym = state.cal.ym;
-    const [y, m] = ym.split('-').map(Number);
-    $('cal-title').textContent = `${y} 年 ${m} 月`;
-
-    const range = calRange();
-    const prev = $('cal-prev');
-    const next = $('cal-next');
-    if (prev) prev.disabled = !!range && ym <= range.min;
-    if (next) next.disabled = !!range && ym >= range.max;
-
-    if (!state.meta) {
-      grid.innerHTML = '<div class="cal-empty">数据尚未加载完成，请稍候再试</div>';
-      setCalStatus('数据未就绪', true);
-      return;
-    }
-
-    // 周一为一周首日 → 1 号之前要补几个空格
-    const lead = (new Date(`${ym}-01T12:00:00Z`).getUTCDay() + 6) % 7;
-    const dim = new Date(Date.UTC(y, m, 0)).getUTCDate();
-    const today = todayStr();
-
-    const cells = [];
-    for (let i = 0; i < lead; i++) cells.push('<span class="cal-day pad" aria-hidden="true"></span>');
-    let activeCount = 0;
-    for (let n = 1; n <= dim; n++) {
-      const ds = `${ym}-${String(n).padStart(2, '0')}`;
-      const day = state.days.get(ds);
-      const play = hasPlay(ds);
-      if (play) activeCount++;
-      const cls = ['cal-day', play ? 'on' : 'off'];
-      if (ds === today) cls.push('today');
-      // 选中态 = 二级界面当前（或刚才）看的那一天，从二级返回一级时便于定位。
-      // 2026-10-21 前这里跟随"回看日期"，整页回看移除后改跟 state.cal.day。
-      // 注意 backToCalMonth 会先 resetCalLevel()（把 day 置空）再重绘，
-      // 所以选中日必须由调用方用参数显式传进来，不能只读 state.cal.day。
-      if (ds === (selDate ?? state.cal.day)) cls.push('sel');
-      const label = play
-        ? `${ds} · 游玩 ${hm(day.total_minutes)}`
-        : `${ds} · 无游玩记录`;
-      cells.push(
-        `<span class="${cls.join(' ')}" data-date="${ds}"` +
-          ` role="${play ? 'button' : 'presentation'}" tabindex="${play ? 0 : -1}"` +
-          ` aria-disabled="${play ? 'false' : 'true'}" aria-label="${escapeHtml(label)}">` +
-          `<span class="cal-num">${n}</span>` +
-          (play ? `<span class="cal-min">${hoursShort(day.total_minutes)}</span>` : '') +
-          `</span>`,
-      );
-    }
-    grid.innerHTML = cells.join('');
-    setCalStatus(`本月 ${activeCount} 天有记录`);
-  }
-
-  function stepMonth(delta) {
-    const [y, m] = state.cal.ym.split('-').map(Number);
-    const d = new Date(Date.UTC(y, m - 1 + delta, 1));
-    const next = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
-    const r = calRange();
-    if (r && (next < r.min || next > r.max)) return;
-    state.cal.ym = next;
-    renderCalGrid();
   }
 
   // ---------- 日历二级界面：某一天的游戏游玩明细 ----------
@@ -1137,16 +1045,8 @@
     );
   }
 
-  /** 只切两级页面的显隐，不重绘（openCal / closeCal / backToCalMonth 共用） */
-  function resetCalLevel() {
-    state.cal.day = null;
-    $('cal-page-month').hidden = false;
-    $('cal-page-day').hidden = true;
-  }
-
-  /** 二级界面可步进的日期范围：首条每日记录 ~ 最新快照日。
-      刻意不拿「今天」当上界：数据滞后一天，翻到没有数据的月份会渲染出整月灰格，
-      而月历的可翻页范围（meta.months）本来就只覆盖有数据的月份。
+  /** 可步进的日期范围：首条每日记录 ~ 最新快照日。
+      刻意不拿「今天」当上界：数据滞后一天，翻到没有数据的日期只会看到空态。
       范围内**允许**落到没有记录的日子（如采集缺口），此时展示空状态。 */
   function calDayRange() {
     const min = state.allDates[0];
@@ -1222,8 +1122,11 @@
         // 查不到图标时给透明占位：否则 onerror 会把 src 设成空串（解析成当前页 URL）
         const icon = hash ? ICON(g.appid, hash) : BLANK_GIF;
         const pct = Math.max(2, (g.minutes / max) * 100);
+        // 第 87 轮：从「单游戏下钻」点进来时，把那一款标出来 —— 明细里永远列当天的**全部**
+        // 游戏（这才是"当天玩了哪些"），高亮用来回答"我现在看的是哪一款"。
+        const focus = state.drill.appid && String(state.drill.appid) === String(g.appid);
         return (
-          `<div class="cal-game">` +
+          `<div class="cal-game${focus ? ' is-focus' : ''}">` +
           `<span class="cal-game-no${noCls(i)}">${i + 1}</span>` +
           capsuleHtml(g.appid, { icon }) +
           `<span class="cal-game-name">${escapeHtml(g.name)}</span>` +
@@ -1237,17 +1140,25 @@
     observeCapsules(box); // 与其它列表同一套按需加载
   }
 
-  /** 点击某一天 / 前一天 / 后一天 → 进入（或在）二级界面看当天明细。
-      只影响浮层内部状态：浮层外的页面布局与数据一律不动
-      （2026-10-21 前此处会把整页切到"回看态"，该逻辑已移除）。 */
+  /** 把热力图里「当前正在看的那天」标成选中态（不整块重绘，保住焦点与滚动位置） */
+  function markHeatSel(date) {
+    const box = $('heat-drill');
+    if (!box) return;
+    box.querySelectorAll('.hc.is-sel').forEach((c) => c.classList.remove('is-sel'));
+    const cell = box.querySelector(`.hc[data-date="${date}"]`);
+    if (cell) cell.classList.add('is-sel');
+  }
+
+  /** 打开/切换「某一天」的明细。入口只有一个：下钻月历热力图的格子。
+      只影响浮层内部状态：浮层外的页面布局与数据一律不动。 */
   function openCalDay(date) {
     if (state.cal.busy) return;
     if (!state.meta) {
-      setCalStatus('数据尚未加载完成，请稍候再试', true);
+      setDayStatus('数据尚未加载完成，请稍候再试', true);
       return;
     }
-    setCalStatus('');
-    // 已经在二级界面里 → 这是步进，不要抢焦点（用户正盯着某个按钮）
+    setDayStatus('');
+    // 浮层已经开着 → 这是步进（← / →），不要抢焦点（用户正盯着某个按钮）
     const stepping = state.cal.day !== null;
     setCalBusy(true, stepping ? '正在切换日期…' : '正在载入当天明细…');
     // 渲染是同步 CPU 操作，先让浏览器把遮罩画出来再算
@@ -1255,62 +1166,48 @@
       try {
         renderCalDay(date);
         state.cal.day = date;
-        // 跨月步进时同步月历视图：返回一级后看到的还是这个月
+        state.drill.sel = date;
+        /* 步进可能跨月：把背后的热力图跟到同一个月，关掉浮层看到的还是这一天所在的月份
+           （热力图整块重绘会换掉格子节点，所以这里顺手把「关闭后焦点还回谁」指到新格子）。 */
         const ym = date.slice(0, 7);
-        if (ym !== state.cal.ym) state.cal.ym = ym;
-        $('cal-page-month').hidden = true;
-        $('cal-page-day').hidden = false;
+        const b = heatMonthBounds();
+        const drilled = $('lt-detail') && !$('lt-detail').hidden;
+        if (drilled && state.drill.month !== ym && ym >= b.min && ym <= b.max) {
+          state.drill.month = ym;
+          renderDrill();
+          const back = $('heat-drill').querySelector(`.hc[data-date="${date}"]`);
+          if (back) state.cal.lastFocus = back;
+        } else {
+          markHeatSel(date);
+        }
         setCalBusy(false);
-        if (!stepping) $('cal-back').focus();
+        if (!stepping) $('cal-day-close').focus(); // 首次打开把焦点送进浮层
       } catch (err) {
-        // 失败只提示，浮层外的页面与浮层内已渲染的内容都不受影响
+        // 失败只提示：已渲染的内容与浮层外的页面都不受影响
         console.error('载入当天明细失败', err);
         setCalBusy(false);
-        backToCalMonth();
-        setCalStatus(`载入失败：${err.message}`, true);
+        setDayStatus(`载入失败：${err.message}`, true);
       }
     });
   }
 
-  /** 二级界面 → 返回一级月历（selection = 刚才看的那一天，便于继续选别的日期） */
-  function backToCalMonth() {
-    const sel = state.cal.day;
-    resetCalLevel();
-    renderCalGrid(sel);
-    focusCalDay();
-  }
 
-  /** 一级月历的初始焦点：优先选中日 → 最后一个有记录的日期 → 关闭按钮 */
-  function focusCalDay() {
-    const grid = $('cal-grid');
-    const target =
-      grid?.querySelector('.cal-day.sel') ??
-      grid?.querySelector('.cal-day.on:last-of-type') ??
-      $('cal-close');
-    if (target) target.focus();
-  }
-
-  function openCal(ym) {
+  /** 打开浮层看某一天的明细（唯一入口：下钻月历热力图的格子，见 #heat-drill 的委托） */
+  function openDayDetail(date) {
     if (state.cal.open) return;
     state.cal.open = true;
-    state.cal.lastFocus = document.activeElement;
-    state.cal.ym = (ym || calDefaultMonth()).slice(0, 7);
-    const ov = $('cal-overlay');
-    ov.hidden = false;
-    setCalBusy(false);
-    setCalStatus('');
-    // 每次打开都停在一级月历；二级界面只能由「点击某一天」进入
-    resetCalLevel();
-    renderCalGrid();
+    state.cal.lastFocus = document.activeElement; // 关闭时把焦点还回那个格子
+    state.cal.day = null; // 置空 → openCalDay 认为这是「首次打开」，会把焦点送进浮层
+    $('cal-overlay').hidden = false;
     document.addEventListener('keydown', onCalKey, true);
-    focusCalDay();
+    openCalDay(date);
   }
 
   function closeCal() {
     if (!state.cal.open) return;
     state.cal.open = false;
     setCalBusy(false);
-    resetCalLevel(); // 下次打开一律从一级月历开始
+    state.cal.day = null;
     $('cal-overlay').hidden = true;
     document.removeEventListener('keydown', onCalKey, true);
     const f = state.cal.lastFocus;
@@ -1322,16 +1219,11 @@
       if (state.cal.busy) return;
       e.preventDefault();
       e.stopPropagation();
-      // 二级界面里 Esc 先退回一级月历，再按才关闭浮层
-      if (state.cal.day) backToCalMonth();
-      else closeCal();
+      closeCal();
     } else if (e.key === 'ArrowLeft' && !state.cal.busy) {
-      // 二级界面里方向键步进「前一天 / 后一天」，一级月历里才是上下月
-      if (state.cal.day) stepCalDay(-1);
-      else stepMonth(-1);
+      stepCalDay(-1); // 只有一层了：← / → 一律步进「前一天 / 后一天」
     } else if (e.key === 'ArrowRight' && !state.cal.busy) {
-      if (state.cal.day) stepCalDay(1);
-      else stepMonth(1);
+      stepCalDay(1);
     }
   }
 
@@ -1656,33 +1548,29 @@
     // 只有史蒂夫头像绑定主题切换（2026-10-24 起从左侧小黄人搬过来，id 仍是 #theme-light，
     // 所以 bindFlip / syncThemeUi 一行都不用改）；
     // 左侧小黄人是观影记录入口（<a href="watch.html">，纯导航、无 JS）；
-    // 氛围特效开关在页脚（fx.js 自己绑定 #fx-seg）；
-    // 游玩日历入口是「最近游玩」首行日期上方的小日历图标（全站唯一）。
+    // 氛围特效开关在页脚（fx.js 自己绑定 #fx-seg）。
     bindFlip($('theme-light'), 'all');
 
-    // 日历浮层：上下月、关闭、点空白关闭、二级界面返回/关闭、点有记录的日期看当天明细
-    $('cal-prev').addEventListener('click', () => stepMonth(-1));
-    $('cal-next').addEventListener('click', () => stepMonth(1));
-    $('cal-close').addEventListener('click', () => closeCal());
-    $('cal-back').addEventListener('click', () => backToCalMonth());
+    // 当日明细浮层（第 87 轮：入口已从「最近游玩」的小日历图标改为下钻热力图的格子）
     $('cal-day-close').addEventListener('click', () => closeCal());
-    // 二级界面：日期文本两侧的「前一天 / 后一天」
     $('cal-day-prev').addEventListener('click', () => stepCalDay(-1));
     $('cal-day-next').addEventListener('click', () => stepCalDay(1));
     $('cal-overlay').addEventListener('click', (e) => {
       if (e.target.closest('.cal-panel')) return; // 面板内的点击不关闭
       if (!state.cal.busy) closeCal();
     });
-    $('cal-grid').addEventListener('click', (e) => {
-      const cell = e.target.closest('.cal-day.on');
-      if (cell && !state.cal.busy) openCalDay(cell.dataset.date);
+
+    // 热力图格子 → 当日明细（点击 + 键盘 Enter/Space，事件委托挂在容器上）
+    $('heat-drill').addEventListener('click', (e) => {
+      const cell = e.target.closest('.hc.is-live');
+      if (cell && !state.cal.busy) openDayDetail(cell.dataset.date);
     });
-    $('cal-grid').addEventListener('keydown', (e) => {
+    $('heat-drill').addEventListener('keydown', (e) => {
       if (e.key !== 'Enter' && e.key !== ' ') return;
-      const cell = e.target.closest('.cal-day.on');
+      const cell = e.target.closest('.hc.is-live');
       if (!cell || state.cal.busy) return;
       e.preventDefault();
-      openCalDay(cell.dataset.date);
+      openDayDetail(cell.dataset.date);
     });
 
     // 网站名：点击返回顶部（键盘 Enter / 空格同样支持）
@@ -1719,21 +1607,16 @@
       renderAch();
     });
 
-    // 游戏累计列表：点击整行 → 该游戏每日时长趋势
-    // （2026-10-20：原先挂在这里的日历图标入口已随「日历收敛到最近游玩」一并移除，
-    //  所以不再需要 [data-cal-toggle] 的提前拦截；整行点击行为回到纯粹的下一级趋势图）
+    // 游戏累计列表：点击整行 → 该游戏每日时长热力图（下钻）
     $('lt-list').addEventListener('click', (e) => {
       const row = e.target.closest('.rank-item');
       if (!row) return;
       openDrill(row.dataset.appid);
     });
 
-    // 最近游玩列表：全站唯一的日历入口（2026-10-20）。
-    // 该列表原本没有任何点击行为（行不下钻），所以这里**只**处理日历按钮，
-    // 不新增行点击逻辑，避免改变既有交互。
-    $('recent-list').addEventListener('click', (e) => {
-      if (e.target.closest('[data-cal-toggle]')) openCal();
-    });
+    /* 第 87 轮：「最近游玩」列表原本唯一的交互（首行那枚日历入口）已删除，
+       该列表现在**没有任何点击行为**，所以这里不再挂监听器（原来那条
+       `#recent-list` 委托已整体移除），避免留下一个空委托误导下一轮。 */
 
     $('btn-drill-back').addEventListener('click', () => {
       closeDrill();

@@ -67,7 +67,7 @@ ok('A6 太平年数据仍是「观看 2026-02-14 / 上映 2026」',
   (() => { const tp = liveData.items.find((x) => x.title === '太平年'); return tp && tp.watched_at === '2026-02-14' && tp.year === 2026 && !tp.release_date; })());
 const rIdx = await page.evaluate(async (base) => {
   const h = await (await fetch(base + 'index.html?cb=' + Date.now(), { cache: 'reload' })).text();
-  return ['style.css?v=109', 'app.js?v=104', 'fx.js?v=16'].filter((v) => !h.includes(v));
+  return ['style.css?v=110', 'app.js?v=105', 'fx.js?v=16'].filter((v) => !h.includes(v));
 }, SITE);
 ok('A7 首页三个版本号未受影响', rIdx.length === 0, rIdx.join(',') || '全部命中');
 await ctx.close();

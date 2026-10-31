@@ -33,7 +33,7 @@
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=109">
+<link rel="stylesheet" href="style.css?v=110">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -246,58 +246,39 @@
   </span>
 </footer>
 
-<!-- 游玩日历浮层（点击「最近游玩」首行日期上方的小日历图标打开；Esc / 点击空白处关闭）
-     两级结构：一级 = 月历（原有结构原样保留），二级 = 某一天的游戏游玩明细 -->
+<!-- 当日明细浮层（Esc / 点击空白处 / × 关闭）
+     第 87 轮：原「最近游玩」首行日期上方的日历图标已删除 —— 它的功能（点日期看当天玩了
+     哪些游戏、各多久）并入「游戏时长」下钻里的**月历热力图**：点热力图的格子即打开本浮层。
+     因此浮层原来的「一级月历」整层也一并撤掉 —— 热力图本身就是月历，不必再看第二份。
+     现在只有一层：某一天的游戏游玩明细（← / → 步进前一天/后一天）。 -->
 <div class="cal-overlay" id="cal-overlay" hidden>
   <div class="cal-backdrop"></div>
-  <div class="cal-panel" id="cal-panel" role="dialog" aria-modal="true" aria-labelledby="cal-title">
-    <!-- ── 一级界面：月历（head / weekdays / grid / foot 均保持原有结构与 id） ── -->
-    <div class="cal-page" id="cal-page-month">
-      <div class="cal-head">
-        <button class="cal-nav" id="cal-prev" type="button" aria-label="上一月">‹</button>
-        <div class="cal-title" id="cal-title">—</div>
-        <button class="cal-nav" id="cal-next" type="button" aria-label="下一月">›</button>
-        <button class="cal-close" id="cal-close" type="button" aria-label="关闭日历">×</button>
+  <div class="cal-panel" id="cal-panel" role="dialog" aria-modal="true" aria-labelledby="cal-day-title">
+    <div class="cal-head cal-head-day">
+      <!-- 日期文本两侧的「前一天 / 后一天」：只留箭头，语义由 aria-label 承载
+           （第 82 轮起全站不留 title 悬停气泡）。 -->
+      <div class="cal-day-nav">
+        <button class="cal-step" id="cal-day-prev" type="button" aria-label="前一天">
+          <span class="cal-step-ico" aria-hidden="true">←</span>
+        </button>
+        <div class="cal-title" id="cal-day-title">—</div>
+        <button class="cal-step" id="cal-day-next" type="button" aria-label="后一天">
+          <span class="cal-step-ico" aria-hidden="true">→</span>
+        </button>
       </div>
-      <div class="cal-weekdays" aria-hidden="true">
-        <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
-      </div>
-      <div class="cal-grid" id="cal-grid"></div>
-      <div class="cal-foot">
-        <span class="cal-legend"><i class="cal-dot"></i>有游玩记录 · 可点击</span>
-        <span class="cal-legend"><i class="cal-dot off"></i>无记录 · 不可点击</span>
-        <span class="cal-status" id="cal-status"></span>
-      </div>
+      <button class="cal-close" id="cal-day-close" type="button" aria-label="关闭当日明细">×</button>
     </div>
-    <!-- ── 二级界面：某一天的游戏游玩明细（‹ 返回一级月历，× 关闭整个浮层） ── -->
-    <div class="cal-page" id="cal-page-day" hidden>
-      <div class="cal-head cal-head-day">
-        <button class="cal-nav" id="cal-back" type="button" aria-label="返回月历">‹</button>
-        <!-- 日期文本两侧的「前一天 / 后一天」：只留箭头，文字说明走 title / aria-label。
-             用 ←/→ 而非 ‹/›，是为了不与左侧「返回月历」的 ‹ 撞脸（两者仅隔 6px）。 -->
-        <div class="cal-day-nav">
-          <button class="cal-step" id="cal-day-prev" type="button" aria-label="前一天">
-            <span class="cal-step-ico" aria-hidden="true">←</span>
-          </button>
-          <div class="cal-title" id="cal-day-title">—</div>
-          <button class="cal-step" id="cal-day-next" type="button" aria-label="后一天">
-            <span class="cal-step-ico" aria-hidden="true">→</span>
-          </button>
-        </div>
-        <button class="cal-close" id="cal-day-close" type="button" aria-label="关闭日历">×</button>
-      </div>
-      <div class="cal-day-summary">
-        <div class="cal-day-sum-label">当天游玩时长</div>
-        <div class="cal-day-sum-value" id="cal-day-total">—</div>
-        <div class="cal-day-sum-note" id="cal-day-note"></div>
-      </div>
-      <div class="cal-games" id="cal-day-games"></div>
-      <div class="cal-foot">
-        <span class="cal-legend"><i class="cal-dot"></i>仅当天有游玩的游戏</span>
-        <span class="cal-status" id="cal-day-status"></span>
-      </div>
+    <div class="cal-day-summary">
+      <div class="cal-day-sum-label">当天游玩时长</div>
+      <div class="cal-day-sum-value" id="cal-day-total">—</div>
+      <div class="cal-day-sum-note" id="cal-day-note"></div>
     </div>
-    <!-- 载入当天明细进行中的遮罩（失败时不改变页面状态，仅在此提示） -->
+    <div class="cal-games" id="cal-day-games"></div>
+    <div class="cal-foot">
+      <span class="cal-legend"><i class="cal-dot"></i>仅当天有游玩的游戏</span>
+      <span class="cal-status" id="cal-day-status"></span>
+    </div>
+    <!-- 载入当天明细进行中的遮罩（失败时也不改页面其它状态，仅在此提示） -->
     <div class="cal-mask" id="cal-mask" hidden>
       <span class="cal-spin"></span><span class="cal-mask-text">加载中…</span>
     </div>
@@ -316,6 +297,6 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <script src="fx.js?v=16"></script>
-<script src="app.js?v=104" onerror="__appFail()"></script>
+<script src="app.js?v=105" onerror="__appFail()"></script>
 </body>
 </html>

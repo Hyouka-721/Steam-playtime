@@ -1,6 +1,7 @@
-/* verify48.mjs — 第 48 轮验证：日历图标只弹浮层，不再把整页切到「回看态」
+/* verify48.mjs — 第 48 轮验证：浮层不改页面 · 第 87 轮改判：入口改为下钻热力图格子
  * 需求：
- *   a 点击日历图标 → 弹出日历浮层（一级月历 → 二级当天明细）
+ *   a 点击下钻热力图的格子 → 弹出「当日明细」浮层（第 87 轮：原来的日历图标已删，
+ *     浮层的一级月历也随之下线 —— 热力图本身就是月历）
  *   b 移除整页回看态：路由跳转 / 全局状态切换 / 页面级视图替换全部删除
  *   c 浮层以外的页面布局与状态完全不变（卡片数值、列表行数、滚动、主题、焦点）
  *   d 浮层能正常打开与关闭、月历正常渲染、日期点击后进入对应二级明细
@@ -50,15 +51,35 @@ const waitDay = async () => {
   await page.waitForFunction(
     () => {
       const m = document.getElementById('cal-mask');
-      return !!m && m.hidden && !document.getElementById('cal-page-day').hidden;
+      return !!m && m.hidden && !document.getElementById('cal-overlay').hidden;
     },
     null, { timeout: 8000 },
   ).catch(() => {});
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
 };
-const openCal = async () => {
-  await page.click('#recent-list [data-cal-toggle]');
-  await page.waitForSelector('#cal-grid .cal-day.on', { state: 'visible', timeout: 10000 });
+/** 第 87 轮：入口 = 「游戏时长」下钻里的月历热力图格子。
+    openDrill() 负责把「当前视图 / 下钻是否已打开」这两种情况都处理掉。 */
+const openDrill = async () => {
+  const drilled = await page.evaluate(() => !document.getElementById('lt-detail').hidden);
+  if (drilled) return;
+  const view = await page.evaluate(() => document.querySelector('.view.active')?.id);
+  if (view !== 'view-lifetime') {
+    await page.click('#card-lifetime');
+    await page.waitForTimeout(450);
+  }
+  await page.click('#card-lifetime');
+  await page.waitForSelector('#lt-detail:not([hidden])', { timeout: 10000 });
+  await page.waitForTimeout(300);
+};
+const openCal = async (date) => {
+  await openDrill();
+  const d = date || await page.evaluate(() => {
+    const c = [...document.querySelectorAll('#heat-drill .hc.is-live')].reverse().find((x) => x.querySelector('i'));
+    return c.dataset.date;
+  });
+  await page.click(`#heat-drill .hc[data-date="${d}"]`);
+  await page.waitForTimeout(350);
+  return d;
 };
 const hmText = (m) => {
   const n = Math.round(Number(m) || 0);
@@ -95,15 +116,22 @@ const pageSnapshot = () => page.evaluate(() => {
     theme: document.documentElement.dataset.theme ?? null,
     bodyClass: document.body.className,
     toast: !!document.querySelector('.toast'),
-    iconCls: document.querySelector('#recent-list [data-cal-toggle]')?.className ?? null,
-    iconColor: (() => { const b = document.querySelector('#recent-list [data-cal-toggle]'); return b ? getComputedStyle(b).color : null; })(),
+    iconCls: document.querySelector('.cal-icon-btn')?.className ?? null,
+    iconCount: document.querySelectorAll('.cal-icon-btn, [data-cal-toggle]').length,
+    lastChildElems: [...document.querySelectorAll('#recent-list .rank-last, #lt-list .rank-last')]
+      .reduce((a, el) => a + el.children.length, 0),
+    lastHasSvg: document.querySelectorAll('#recent-list .rank-last svg, #lt-list .rank-last svg').length,
     reviewBarExists: !!document.getElementById('review-bar'),
     calMarkCount: document.querySelectorAll('.cal-mark').length,
     reviewingCount: document.querySelectorAll('.cal-icon-btn.reviewing').length,
-    firstRowRect: (() => {
-      const r = document.querySelector('#recent-list .rank-item');
-      if (!r) return null;
-      const b = r.getBoundingClientRect();
+    // 浮层「挤没挤动布局」的锚点：优先量下钻面板（第 87 轮入口在那里），
+    // 退化到最近 / 累计榜的首行
+    anchorRect: (() => {
+      const el = document.querySelector('#lt-detail:not([hidden]) .panel')
+        || document.querySelector('#recent-list .rank-item')
+        || document.querySelector('#lt-list .rank-item');
+      if (!el) return null;
+      const b = el.getBoundingClientRect();
       return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) };
     })(),
   };
@@ -137,9 +165,12 @@ for (const [name, txt] of [['app.js', srcApp], ['index.html', srcHtml], ['style.
   const hits = BANNED.filter((k) => txt.toLowerCase().includes(k.toLowerCase()));
   ok(`0.1 ${name} 无回看态残留关键词`, hits.length === 0, hits);
 }
-ok('0.2 index.html 引用 app\.js\?v=104', srcHtml.includes('app\.js\?v=104'), (srcHtml.match(/app\.js\?v=\d+/) || [])[0]);
-ok('0.3 app.js 仍保留两级浮层核心函数',
-  ['openCal(', 'closeCal(', 'openCalDay(', 'backToCalMonth(', 'renderCalGrid(', 'renderCalDay('].every((k) => srcApp.includes(k)));
+ok('0.2 index.html 引用 app\.js\?v=105', srcHtml.includes('app\.js\?v=105'), (srcHtml.match(/app\.js\?v=\d+/) || [])[0]);
+// 第 87 轮：一级月历层已删 → backToCalMonth / renderCalGrid / stepMonth 都不该再存在，
+// 而「开/关/渲染/步进当日明细」这一组必须还在。
+ok('0.3 app.js 保留当日明细浮层核心函数，且已无一级月历函数',
+  ['openDayDetail(', 'openCalDay(', 'closeCal(', 'renderCalDay(', 'stepCalDay(', 'markHeatSel('].every((k) => srcApp.includes(k))
+  && !/function\s+(backToCalMonth|renderCalGrid|stepMonth|resetCalLevel|focusCalDay)\s*\(/.test(srcApp));
 ok('0.4 app.js 已无 buildSnapshot / applyReview / exitReview / renderAll 定义',
   !/function\s+(buildSnapshot|applyReview|exitReview|renderAll|renderReviewBar|buildAchSnapshot)\s*\(/.test(srcApp));
 
@@ -150,11 +181,14 @@ await page.click('#card-recent'); // 默认视图是累计榜，日历入口在�
 await page.waitForSelector('#recent-list .rank-item', { state: 'visible', timeout: 30000 });
 await page.waitForTimeout(1200);
 
-const before = await pageSnapshot();
+let before = await pageSnapshot();
 ok('1.1 页面初始没有 #review-bar 元素（整页回看入口已删）', !before.reviewBarExists, before.reviewBarExists);
 ok('1.2 页面初始没有 .cal-mark / .reviewing（回看标识已删）', before.calMarkCount === 0 && before.reviewingCount === 0);
-ok('1.3 日历图标是纯按钮，无 reviewing 类', before.iconCls === 'cal-icon-btn', before.iconCls);
-ok('1.4 图标颜色仍是 --text-faint（未因回看着色）', typeof before.iconColor === 'string', before.iconColor);
+// 第 87 轮（用户要求）：日历图标整体删除，功能并入下钻热力图
+ok('1.3 日历图标已彻底删除（.cal-icon-btn / [data-cal-toggle] 计数均为 0）',
+  before.iconCls === null && before.iconCount === 0, { cls: before.iconCls, n: before.iconCount });
+ok('1.4 「最近游玩」首行 .rank-last 里不再挂着任何元素（没留空壳）',
+  before.lastChildElems === 0 && before.lastHasSvg === 0, { kids: before.lastChildElems, svg: before.lastHasSvg });
 
 // 数据源：当月记录日 + last_snapshot_date + 14 天窗口（独立预言）
 const ds = await page.evaluate(async () => {
@@ -195,37 +229,42 @@ ok('1.5 数据源可用：当月记录日 + 14 天窗口',
 ok('1.6 基线：「最近游玩」卡当前就是 14 天窗口值（未经任何回看污染）',
   before.cards.recent === hm(data.winTotal), { got: before.cards.recent, want: hm(data.winTotal) });
 
-// ---------- 2. 打开浮层：一级月历 ----------
-await openCal();
-await page.waitForTimeout(400);
+// ---------- 2. 打开浮层：直接是「某一天」的明细（一级月历已随图标一起下线） ----------
+const TARGET0 = PLAY_DATES[PLAY_DATES.length - 1]; // 先看最新一个「有游玩」的日子
+// 第 87 轮：入口在下钻里 → 「浮层外零变化」的基线改成「进下钻之后、开浮层之前」的整页快照
+// （原来基线拍在「最近游玩」页，入口搬走后那页本来就不在了，比它没有意义）
+await openDrill();
+before = await pageSnapshot();
+await openCal(TARGET0);
 const lvl1 = await page.evaluate(() => ({
   overlayHidden: document.getElementById('cal-overlay').hidden,
-  monthVisible: !document.getElementById('cal-page-month').hidden,
-  dayHidden: document.getElementById('cal-page-day').hidden,
-  title: document.getElementById('cal-title').textContent,
-  on: document.querySelectorAll('#cal-grid .cal-day.on').length,
-  off: document.querySelectorAll('#cal-grid .cal-day.off').length,
-  sel: document.querySelectorAll('#cal-grid .cal-day.sel').length,
-  status: document.getElementById('cal-status').textContent,
+  monthNodeGone: !document.getElementById('cal-page-month') && !document.getElementById('cal-grid') && !document.getElementById('cal-back'),
+  title: document.getElementById('cal-day-title').textContent,
+  rows: document.querySelectorAll('#cal-day-games .cal-game').length,
   panelRole: document.getElementById('cal-panel').getAttribute('role'),
-  dayTitleReset: document.getElementById('cal-day-title').textContent,
+  labelledBy: document.getElementById('cal-panel').getAttribute('aria-labelledby'),
+  focus: document.activeElement?.id ?? null,
+  heatSel: document.querySelector('#heat-drill .hc.is-sel')?.dataset.date ?? null,
 }));
-ok('2.1 点击图标后浮层打开（overlay 可见）', !lvl1.overlayHidden);
-ok('2.2 浮层一级 = 月历，二级仍隐藏', lvl1.monthVisible && lvl1.dayHidden, lvl1);
-ok('2.3 月历标题为当前默认月（2026 年 10 月）', lvl1.title === '2026 年 10 月', lvl1.title);
-ok('2.4 月历渲染：有记录格数 = 数据源有游玩日数（hasPlay 口径）', lvl1.on === PLAY_DATES.length, { got: lvl1.on, want: PLAY_DATES.length });
-ok('2.5 月历无记录格也存在（整月 31 天铺满）', lvl1.on + lvl1.off === 31, { on: lvl1.on, off: lvl1.off });
-ok('2.6 刚打开时没有任何日期处于选中态', lvl1.sel === 0, lvl1.sel);
-ok('2.7 一级状态行提示本月记录天数', lvl1.status === `本月 ${PLAY_DATES.length} 天有记录`, lvl1.status);
-ok('2.8 面板是 aria-modal 对话框', lvl1.panelRole === 'dialog', lvl1.panelRole);
+ok('2.1 点热力图格子后浮层打开（overlay 可见）', !lvl1.overlayHidden);
+ok('2.2 浮层只剩一层：一级月历的 DOM 全部不存在（cal-page-month / cal-grid / cal-back）',
+  lvl1.monthNodeGone, lvl1.monthNodeGone);
+ok('2.3 打开即显示被点那一天的标题', lvl1.title === `${Number(TARGET0.slice(5, 7))} 月 ${Number(TARGET0.slice(8, 10))} 日 ${wdName(TARGET0)}`,
+  { got: lvl1.title, target: TARGET0 });
+ok('2.4 明细列表行数与当天游戏款数一致', lvl1.rows === data.counts[TARGET0], { got: lvl1.rows, want: data.counts[TARGET0] });
+ok('2.5 打开后焦点落在关闭按钮上（键盘可直接 Esc / Tab）', lvl1.focus === 'cal-day-close', lvl1.focus);
+ok('2.6 被点的格子在热力图里标成选中态（关掉后还能认出刚才看的哪天）', lvl1.heatSel === TARGET0, lvl1.heatSel);
+ok('2.7 面板是 aria-modal 对话框，且由日期标题命名',
+  lvl1.panelRole === 'dialog' && lvl1.labelledBy === 'cal-day-title', lvl1);
 
 // ---------- 3. 点击某一天 → 二级明细 ----------
 const target = PLAY_DATES.includes('2026-10-16') ? '2026-10-16' : PLAY_DATES[Math.floor(PLAY_DATES.length / 2)];
-await page.click(`#cal-grid .cal-day.on[data-date="${target}"]`);
+await page.click('#cal-day-close'); // 关掉 §2 那一次，再从格子里重新点进来
+await page.waitForTimeout(300);
+await openCal(target);
 await waitDay();
 const lvl2 = await page.evaluate(() => ({
-  monthHidden: document.getElementById('cal-page-month').hidden,
-  dayVisible: !document.getElementById('cal-page-day').hidden,
+  dayVisible: !document.getElementById('cal-overlay').hidden,
   title: document.getElementById('cal-day-title').textContent,
   total: document.getElementById('cal-day-total').textContent,
   note: document.getElementById('cal-day-note').textContent,
@@ -238,7 +277,7 @@ const lvl2 = await page.evaluate(() => ({
     return i ? (i.getAttribute('src') || '').slice(0, 60) : null;
   })(),
 }));
-ok('3.1 点击日期后进入二级明细页', lvl2.monthHidden && lvl2.dayVisible, lvl2);
+ok('3.1 点格子后显示该日明细', lvl2.dayVisible, lvl2);
 ok('3.2 二级标题 = 该日 + 星期几（独立星期预言）',
   lvl2.title === `${Number(target.slice(5, 7))} 月 ${Number(target.slice(8, 10))} 日 ${wdName(target)}`,
   { got: lvl2.title, want: wdName(target) });
@@ -275,8 +314,8 @@ ok('4.6 ★ 当前激活视图不变', during.view === before.view, during.view)
 ok('4.7 ★ 页面滚动位置不变', during.scrollY === before.scrollY, during.scrollY);
 ok('4.8 ★ 主题 / body class 不变', during.theme === before.theme && during.bodyClass === before.bodyClass, during);
 ok('4.9 ★ 没有弹出 toast（没有"已按该日重建"之类提示）', !during.toast);
-ok('4.10 ★ 首行 DOM 几何不变（浮层没挤动布局）',
-  same(during.firstRowRect, before.firstRowRect), { before: before.firstRowRect, during: during.firstRowRect });
+ok('4.10 ★ 下钻面板的 DOM 几何不变（浮层没挤动布局）',
+  same(during.anchorRect, before.anchorRect), { before: before.anchorRect, during: during.anchorRect });
 ok('4.11 ★ 图标仍未获得 reviewing 类 / cal-mark', during.reviewingCount === 0 && during.calMarkCount === 0);
 
 // ---------- 5. 步进日期时浮层外仍零变化 ----------
@@ -305,18 +344,20 @@ await page.waitForTimeout(400);
 const afterClose = await pageSnapshot();
 const closeState = await page.evaluate(() => ({
   overlayHidden: document.getElementById('cal-overlay').hidden,
-  dayHidden: document.getElementById('cal-page-day').hidden,
-  focus: document.activeElement?.closest('[data-cal-toggle]') ? 'cal-icon' : (document.activeElement?.id ?? null),
+  busy: (() => { const m = document.getElementById('cal-mask'); return !m || m.hidden; })(),
+  focus: document.activeElement?.dataset?.date ?? document.activeElement?.id ?? null,
+  heatSel: document.querySelector('#heat-drill .hc.is-sel')?.dataset.date ?? null,
 }));
-ok('6.1 二级界面的 × 关闭整个浮层', closeState.overlayHidden, closeState);
-ok('6.2 关闭后二级页复位（下次打开从一级开始）', closeState.dayHidden, closeState);
-ok('6.3 关闭后焦点还给日历图标', closeState.focus === 'cal-icon', { focusBeforeClose, focus: closeState.focus });
+ok('6.1 × 关闭浮层（且遮罩复位）', closeState.overlayHidden && closeState.busy, closeState);
+ok('6.2 关闭后热力图仍标着刚才看的那天（.is-sel 保留，便于接着看相邻日）',
+  !!closeState.heatSel, closeState);
+ok('6.3 关闭后焦点还给刚才点的那个格子（键盘用户回到原位）',
+  /^\d{4}-\d{2}-\d{2}$/.test(String(closeState.focus)), { focusBeforeClose, focus: closeState.focus });
 ok('6.4 ★ 关闭后整页状态与打开前完全一致', same(afterClose, before), afterClose);
 await page.screenshot({ path: OUT + 'cal48_after_close.png' });
 
 // ---------- 7. 重新打开 → 键盘 / Esc / 点空白 ----------
-await openCal();
-await page.click(`#cal-grid .cal-day.on[data-date="${target}"]`);
+await openCal(target);
 await waitDay();
 const kbTitle0 = (await readDay()).title;
 await page.keyboard.press('ArrowRight'); await waitDay();
@@ -324,30 +365,25 @@ const kbRight = (await readDay()).title;
 await page.keyboard.press('ArrowLeft'); await waitDay();
 const kbLeft = (await readDay()).title;
 const nxt = new Date(new Date(target + 'T12:00:00Z').getTime() + 86400000).toISOString().slice(0, 10);
-ok('7.1 二级界面 → 步进后一天（键盘）',
+ok('7.1 浮层内 → 步进后一天（键盘）',
   kbRight === `${Number(nxt.slice(5, 7))} 月 ${Number(nxt.slice(8, 10))} 日 ${wdName(nxt)}`, { got: kbRight, want: wdName(nxt) });
-ok('7.2 二级界面 ← 回到原日期', kbLeft === kbTitle0, { got: kbLeft, want: kbTitle0 });
+ok('7.2 浮层内 ← 回到原日期', kbLeft === kbTitle0, { got: kbLeft, want: kbTitle0 });
 
+// 第 87 轮：只有一层了 → Esc 直接关闭（原来要先退回一级月历）
 await page.keyboard.press('Escape'); await page.waitForTimeout(350);
-const esc1 = await page.evaluate(() => ({
-  monthVisible: !document.getElementById('cal-page-month').hidden,
-  overlayHidden: document.getElementById('cal-overlay').hidden,
-}));
-ok('7.3 二级界面 Esc 先退回一级月历（浮层仍开着）', esc1.monthVisible && !esc1.overlayHidden, esc1);
-const esc1Sel = await page.evaluate(() => document.querySelector('#cal-grid .cal-day.sel')?.dataset.date ?? null);
-ok('7.4 返回一级后仍选中刚才看的那一天', esc1Sel === target, { got: esc1Sel, want: target });
-await page.keyboard.press('Escape'); await page.waitForTimeout(350);
-const esc2 = await page.evaluate(() => document.getElementById('cal-overlay').hidden);
-ok('7.5 一级界面再按 Esc 关闭浮层', esc2, esc2);
+const esc1 = await page.evaluate(() => document.getElementById('cal-overlay').hidden);
+ok('7.3 浮层里按 Esc 直接关闭（不再有"先退回月历"这一步）', esc1, esc1);
+const selAfter = await page.evaluate(() => document.querySelector('#heat-drill .hc.is-sel')?.dataset.date ?? null);
+ok('7.4 关闭后热力图选中态跟着键盘步进走（停在哪天就标哪天）', !!selAfter, { selAfter });
 
 // 点空白处关闭
-await openCal();
+await openCal(target);
 await page.mouse.click(12, 12);
 await page.waitForTimeout(350);
 const backdropClosed = await page.evaluate(() => document.getElementById('cal-overlay').hidden);
-ok('7.6 点击浮层空白处关闭', backdropClosed, backdropClosed);
+ok('7.5 点击浮层空白处关闭', backdropClosed, backdropClosed);
 const afterBackdrop = await pageSnapshot();
-ok('7.7 ★ 点空白关闭后整页状态仍与初始一致', same(afterBackdrop, before), afterBackdrop);
+ok('7.6 ★ 点空白关闭后整页状态仍与初始一致', same(afterBackdrop, before), afterBackdrop);
 
 // ---------- 8. 空态与边界（47 轮口径复用） ----------
 let gap = null;
@@ -356,9 +392,8 @@ for (let i = 1; i < DATES.length; i++) {
   if ((b - a) / 86400000 === 2) { gap = new Date(a.getTime() + 86400000).toISOString().slice(0, 10); break; }
 }
 if (gap) {
-  await openCal();
   const after = PLAY_DATES.find((d) => d > gap);
-  await page.click(`#cal-grid .cal-day.on[data-date="${after}"]`); await waitDay();
+  await openCal(after); await waitDay();
   await settle(); await page.click('#cal-day-prev'); await waitDay();
   const g = await readDay();
   const gPage = await pageSnapshot();
@@ -370,13 +405,13 @@ if (gap) {
   skip('8.1~8.4 空态', '当月没有采集缺口');
 }
 // 边界禁用
-await page.click('#cal-back'); await page.waitForTimeout(300);
-await page.click(`#cal-grid .cal-day.on[data-date="${MIN}"]`); await waitDay();
+await page.click('#cal-day-close'); await page.waitForTimeout(300);
+await openCal(MIN); await waitDay();
 const atMin = await readDay();
 ok('8.5 最早一天：前一天禁用 + 状态行说明', atMin.prevDisabled && atMin.status === '已是最早一天的记录', atMin);
-// 最新一端：网格只点有游玩的最后一天，若早于 last_snapshot_date 再步进到真正的最新一天
-await page.click('#cal-back'); await page.waitForTimeout(300);
-await page.click(`#cal-grid .cal-day.on[data-date="${PLAY_DATES[PLAY_DATES.length - 1]}"]`); await waitDay();
+// 最新一端：热力图只点有游玩的最后一天，若早于 last_snapshot_date 再步进到真正的最新一天
+await page.click('#cal-day-close'); await page.waitForTimeout(300);
+await openCal(PLAY_DATES[PLAY_DATES.length - 1]); await waitDay();
 if (PLAY_DATES[PLAY_DATES.length - 1] !== MAX) { await settle(); await page.click('#cal-day-next'); await waitDay(); }
 const atMax = await readDay();
 const maxHasPlay = (data.totals[MAX] ?? 0) > 0;
@@ -391,10 +426,8 @@ await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
 await page.click('#card-recent');
 await page.waitForSelector('#recent-list .rank-item', { state: 'visible', timeout: 30000 });
 await page.waitForTimeout(900);
-await page.click('#recent-list [data-cal-toggle]');
-await page.waitForSelector('#cal-grid .cal-day.on', { state: 'visible', timeout: 10000 });
-await page.waitForTimeout(250);
-await page.click('#cal-grid .cal-day.on');
+await openDrill();
+await openCal();
 await waitDay();
 for (const w of [1440, 1024, 768, 430, 390, 360]) {
   await page.setViewportSize({ width: w, height: 900 });
