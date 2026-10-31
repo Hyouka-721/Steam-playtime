@@ -27,7 +27,7 @@ page.on('pageerror', (e) => errs.push(String(e)));
 /* ---------- A 等 Pages 生效 ---------- */
 console.log('== A 等待 Pages 生效 ==');
 let html = '';
-for (let i = 1; i <= 20; i++) {
+for (let i = 1; i <= 40; i++) {
   try {
     const r = await page.goto(SITE + 'index.html', { waitUntil: 'domcontentloaded', timeout: 45000 });
     html = await r.text();
@@ -99,7 +99,7 @@ ok('C2 断网刷新后页面仍能渲染（数据来自内联 __BOOT）', offOk 
 const coverOffline = await page.evaluate(() => {
   const imgs = [...document.querySelectorAll('#lt-list img.rank-capsule')].slice(0, 3);
   return imgs.length > 0 && imgs.every((i) => i.complete && i.naturalWidth > 0);
-});
+}).catch(() => false);
 ok('C3 离线时前几张本地封面仍能显示（命中 SW 缓存）', coverOffline);
 
 await ctx.setOffline(false);
