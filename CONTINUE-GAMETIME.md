@@ -71,6 +71,8 @@ README.md                    # 完整说明（管线/部署/密钥/Schema/自检
   ③ 月份翻页 `#heat-prev` / `#heat-next`，边界 = 「首份数据月 → 最新数据月」；汇总行「本月 N 天有记录 · 峰值 · 合计」。
   ④ 三个真坑：`openDrill` 不再 async 后，调用点的 `.catch()` 会抛错；`closeDrill` 必须清 `state.drill.appid`，否则深链一直挂着 `g/<旧游戏>`；**深链直达要 `switchView(v,{instant:true})`** —— View Transition 的回调是异步的，会把紧随其后打开的详情面板又关回去。
   回归：`verify6` 的「趋势图」判据改为「月历热力图 + 无 ECharts」；`verify83_index` 32 条同步；`verify49` 的 hint 清单去掉 heat-hint。
+  **已上线**：提交 `41eb769`（19 文件）+ `17d9b75`（新增 `tests/online/online86.mjs`），推送 `22eb8dc..17d9b75`；Pages 第 4 次轮询切到 `style.css?v=109`。线上复验 `online86` **16/16**、`online84` **7/7**。
+  `online86` 的期望一律从线上 `data/meta.json` 推导（`months` 决定可翻阅范围），**别写死月份**；「‹」的禁用断言按「线上只有 1 个月时两个按钮都灰」判，否则刚上线月份少时必红。
 - **第 85 轮（index 侧，2026-10-31，回退轮）**—— 用户点名撤掉第 83 轮的三项，并把热力图换页：
   ① **#8 封面主色进度条 → 撤回**：`barStyle()` 回到两参（只用十色 `topPalette`），`build.mjs` 不再合并 `game-colors.json`，`meta.games_lifetime[].bar` 字段消失；`scripts/rank-colors.mjs` 与 `data/overrides/game-colors.json` **已删除**（需要时从 `fca115e` 取回）。
   ② **#14「接下来玩什么」→ 整块删除**：HTML 容器、`renderSuggest()`、`bindMore` 里的点击委托、`meta.ach_almost` 与构建期计算全清；`.sg-*` / `.panel-strip` 样式一并删掉。
