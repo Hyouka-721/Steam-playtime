@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-31T17:16:00+08:00",
+  "updated_at": "2026-10-31T17:18:43+08:00",
   "items": [
     {
       "id": "2026-10-31-dear-you",
@@ -721,6 +721,23 @@
         "冒险"
       ],
       "note": "起初，没有人在意这一场灾难"
+    },
+    {
+      "id": "2022-11-09-the-thunder",
+      "title": "破冰行动",
+      "kind": "series",
+      "watched_at": "2022-11-09",
+      "added_at": "2026-10-31T17:18:43+08:00",
+      "poster": "img/watch/the-thunder-90040ddf.webp",
+      "poster_w": 640,
+      "poster_h": 1138,
+      "poster_320": "img/watch/the-thunder-90040ddf-320.webp",
+      "poster_480": "img/watch/the-thunder-90040ddf-480.webp",
+      "title_en": "The Thunder",
+      "year": 2019,
+      "rating": 5.5,
+      "order": 3,
+      "note": "The Thunder"
     },
     {
       "id": "2022-09-14-yes-minister",
