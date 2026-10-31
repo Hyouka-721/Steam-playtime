@@ -67,8 +67,8 @@ ok('A1 页眉是 My Watch List、<title> 站名仍是 Watch List（两处分工�
 ok('A2 「共 N 部」计数条已删，换成 #w-sort 两按钮（默认观看时间）',
   !/w-count/.test(html) && /id="w-sort"/.test(html) &&
   /data-sort="time"[^>]*aria-pressed="true"/.test(html) && /data-sort="rating"[^>]*aria-pressed="false"/.test(html));
-ok('A3 版本号 bump：watch.css?v=18 / watch.js?v=13',
-  /watch\.css\?v=18"/.test(html) && /watch\.js\?v=13"/.test(html));
+ok('A3 版本号 bump：watch.css?v=19 / watch.js?v=14',
+  /watch\.css\?v=19"/.test(html) && /watch\.js\?v=14"/.test(html));
 ok('A4 玉子两部并存：id 不同、同日、按上传时间正序',
   (() => {
     const a = data.items.find((x) => x.title === '玉子爱情故事');

@@ -213,43 +213,7 @@ code {
 .w-sort-btn.is-on { color: var(--accent); background: rgba(232, 176, 75, 0.13); font-weight: 600; }
 .w-sort-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* 第 80 轮 P2：标签 chip 行。独占一行（flex 100%），窄屏横向滑动 ——
-   不挤占「类型 / 排序」那一行，也不改变它们的位置与尺寸。 */
-.w-tags {
-  flex: 1 1 100%;
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding: 2px 0;
-  margin-top: 2px;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-.w-tags[hidden] { display: none; }
-.w-tags::-webkit-scrollbar { height: 0; }
-.w-tag {
-  appearance: none;
-  flex: 0 0 auto;
-  padding: 5px 12px;
-  border: 1px solid var(--card-border);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.02);
-  color: var(--text-dim);
-  font: inherit; font-size: 12.5px;
-  line-height: 1.4;
-  cursor: pointer;
-  transition: color .16s, border-color .16s, background .16s;
-}
-.w-tag:hover { color: var(--text); border-color: var(--border-hi); }
-.w-tag.is-on {
-  color: #1a1408;
-  background: linear-gradient(150deg, var(--accent), var(--accent-2));
-  border-color: transparent;
-  font-weight: 600;
-}
-.w-tag:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-/* 筛选后空结果（有数据、但当前「类型 + 标签」组合没有匹配） */
+/* 筛选后空结果（有数据、但当前「类型」档位没有匹配） */
 .w-none {
   margin: 44px 0;
   text-align: center;

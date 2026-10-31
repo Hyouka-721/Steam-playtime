@@ -1,12 +1,15 @@
-/* 第 80 轮线上复验（push 后跑）：六项体验优化上线 + A1 确认已回退
-   对应提交：d120985(feat 七项) / 34b5161(revert A1) / e74ad2a(合并远端 tags)
+/* 线上复验（push 后跑）：第 80 轮六项体验优化 + 第 81 轮撤销标签 chip
+   第 80 轮对应提交：d120985(feat 七项) / 34b5161(revert A1) / e74ad2a(合并远端 tags)
+   第 81 轮：用户指令「在所有界面删除 P2 标签 chip 筛选」→ chip 行连同筛选逻辑整体下线
 
-   ① 内容指纹：线上 watch.html 引用 v18/v13；watch.css / watch.js / sw.js 与本地 md5 全等
+   ① 内容指纹：线上 watch.html 引用 v19/v14；watch.css / watch.js / sw.js 与本地 md5 全等
    ② A1 已回退：CSS 里没有 .poster[data-score]，线上网格 0 张卡片带该属性
-   ③ 六项生效：颗粒+光晕（含页眉那层）、时间轴 hover、--text-dim、标签 chip（含点选/取消）、
+   ③ 六项生效：颗粒+光晕（含页眉那层）、时间轴 hover、--text-dim、
       编辑模式才出现的删除按钮（第一下只举手、零请求）
-   ④ 数据：线上 119 条与本地逐条同 tags，词表 14 个（含用户在网页端加的「灾难」）
-   ⑤ SW：watch.json 经 SW 处理且已写入 watch-data-v1（网络优先生效的证据）
+   ④ 第 81 轮：线上 HTML 无 #w-tags、页面 DOM 无 chip、排序条与网格之间没有残留空档
+   ⑤ 数据：线上 119 条与本地逐条同 tags，词表 14 个（含用户在网页端加的「灾难」）
+      —— tags 字段**保留**，只是不再有筛选 UI
+   ⑥ SW：watch.json 经 SW 处理且已写入 watch-data-v1（网络优先生效的证据）
    写操作安全边界：全程 api.github.com 的 PUT 必须为 0（线上绝不真删/真写）。 */
 import { createRequire } from 'module';
 import fs from 'fs';
@@ -59,14 +62,14 @@ const fetched = await (async () => {
   return p.evaluate(async (site) => {
     const get = async (u) => (await fetch(site + u, { cache: 'reload' })).text();
     const [html, css, js, sw, data] = await Promise.all([
-      get('watch.html'), get('watch.css?v=18'), get('watch.js?v=13'), get('sw.js'), get('data/watch.json'),
+      get('watch.html'), get('watch.css?v=19'), get('watch.js?v=14'), get('sw.js'), get('data/watch.json'),
     ]);
     return { html, css, js, sw, data };
   }, SITE);
 })();
 
-ok('A1 线上 watch.html 引用 watch.css?v=18 / watch.js?v=13',
-  /watch\.css\?v=18/.test(fetched.html) && /watch\.js\?v=13/.test(fetched.html),
+ok('A1 线上 watch.html 引用 watch.css?v=19 / watch.js?v=14',
+  /watch\.css\?v=19/.test(fetched.html) && /watch\.js\?v=14/.test(fetched.html),
   (fetched.html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 线上 watch.css 与本地逐字节相同（CRLF 归一后 md5 全等）',
@@ -112,8 +115,9 @@ ok('B4 A3 时间轴 hover：右移 + 金线 + 缩略图放大',
 ok('B5 A4 --text-dim = #9696a6，旧值 #82828f 已不存在',
   /--text-dim: #9696a6;/.test(cssNC) && !/#82828f/.test(cssNC));
 
-ok('B6 P2 chip 容器 + P6 删除按钮都在线上 HTML 里，且删除默认 hidden',
-  /id="w-tags"/.test(fetched.html) && /id="w-add-delete"[^>]*hidden/.test(fetched.html));
+ok('B6 第 81 轮：线上 HTML 已无 chip 容器 #w-tags；P6 删除按钮仍在且默认 hidden',
+  !/id="w-tags"/.test(fetched.html) && !/class="w-tags"/.test(fetched.html) &&
+  /id="w-add-delete"[^>]*hidden/.test(fetched.html));
 
 ok('B7 P7 sw.js 有独立数据缓存且网络优先（fetch 在前，catch 才读缓存）',
   /watch-data-v1/.test(fetched.sw) &&
@@ -127,35 +131,21 @@ await p.waitForTimeout(800);
 ok('C1 线上网格 0 张卡片带 data-score（A1 确实回退了）',
   (await p.$$eval('#w-grid .poster[data-score]', (e) => e.length)) === 0);
 
-const chipInfo = await p.evaluate(() => {
-  const box = document.getElementById('w-tags');
-  const chips = [...document.querySelectorAll('#w-tags .w-tag')];
-  return { hidden: box.hidden, n: chips.length, names: chips.slice(0, 4).map((b) => b.textContent.trim()) };
+/* 第 81 轮：chip 行下线 —— DOM 里查不到，排序条到网格之间也没有它留下的空档 */
+const gone = await p.evaluate(() => {
+  const r = (sel) => {
+    const el = document.querySelector(sel);
+    return el ? el.getBoundingClientRect() : { top: 0, bottom: 0 };
+  };
+  return {
+    box: document.querySelectorAll('#w-tags').length,
+    chips: document.querySelectorAll('.w-tag, .w-tags').length,
+    d: Math.round(r('#w-grid').top - r('#w-sort').bottom),
+  };
 });
-const total = await p.$$eval('#w-grid .poster', (e) => e.length);
-await p.evaluate(() => {
-  const b = [...document.querySelectorAll('#w-tags .w-tag')].find((x) => x.getAttribute('data-tag') === '动画');
-  b.click();
-});
-await p.waitForTimeout(600);
-const afterOn = await p.evaluate(() => ({
-  n: document.querySelectorAll('#w-grid .poster').length,
-  on: (document.querySelector('#w-tags .w-tag.is-on') || {}).getAttribute
-    ? document.querySelector('#w-tags .w-tag.is-on').getAttribute('data-tag') : null,
-  pressed: (() => { const e = document.querySelector('#w-tags .w-tag[aria-pressed="true"]'); return e ? e.getAttribute('data-tag') : null; })(),
-}));
-ok(`C2 chip 行渲染出 ${chipInfo.n} 枚标签且可筛选：「动画」→ ${afterOn.n} 部（全量 ${total}）`,
-  !chipInfo.hidden && chipInfo.n >= 10 && afterOn.n > 0 && afterOn.n < total && afterOn.on === '动画' && afterOn.pressed === '动画',
-  `${chipInfo.names.join('/')}…`);
-
-await p.evaluate(() => {
-  const b = [...document.querySelectorAll('#w-tags .w-tag')].find((x) => x.getAttribute('data-tag') === '动画');
-  b.click();
-});
-await p.waitForTimeout(500);
-const afterOff = await p.$$eval('#w-grid .poster', (e) => e.length);
-ok('C3 再点同一枚：筛选取消，卡片数回到全量',
-  afterOff === total, `${afterOff} / ${total}`);
+ok('C2 第 81 轮：线上无 chip 行（DOM 计数 0），排序条→网格间距 ≤ 60px（无残留空档）',
+  gone.box === 0 && gone.chips === 0 && gone.d >= 0 && gone.d <= 60,
+  `#w-tags=${gone.box}｜chip=${gone.chips}｜间距=${gone.d}px`);
 
 /* P6：编辑模式才有删除；第一下只举手，且绝不发请求 */
 await p.click('#w-avatar');
@@ -179,12 +169,12 @@ const armed = await p.evaluate(() => {
     open: document.getElementById('w-add').hasAttribute('open'),
   };
 });
-ok('C4 P6 删除按钮：新增模式隐藏、编辑模式出现，第一下只变「确认删除？」',
+ok('C3 P6 删除按钮：新增模式隐藏、编辑模式出现，第一下只变「确认删除？」',
   addModeHidden === true && editInfo.hidden === false && editInfo.label === '删除这条' &&
   armed.label === '确认删除？' && armed.armed && /再点一次确认删除/.test(armed.msg) && armed.open === true,
   `隐藏=${addModeHidden}/${editInfo.hidden}｜${editInfo.label} → ${armed.label}`);
 
-ok('C5 写操作安全边界：点第一下全程 0 次 PUT（线上绝不会误删）',
+ok('C4 写操作安全边界：点第一下全程 0 次 PUT（线上绝不会误删）',
   puts.length === 0, `PUT ${puts.length} 次`);
 
 /* SW：数据请求经 SW 且已入 watch-data-v1（网络优先顺带写缓存）
@@ -210,11 +200,11 @@ const swInfo = await p.evaluate(async () => {
     keys, hit, n: ent.length,
   };
 });
-ok('C6 SW：watch.json 请求经 SW 处理，且 watch-data-v1 里已有副本',
+ok('C5 SW：watch.json 请求经 SW 处理，且 watch-data-v1 里已有副本',
   swInfo.controlled === true && swInfo.via === true && swInfo.hit === true,
   `受控=${swInfo.controlled}｜SW线程=${swInfo.via}｜缓存命中=${swInfo.hit}｜${swInfo.n} 条请求`);
 
-ok('C7 全程零 JS 异常', errs.length === 0, errs.slice(0, 2).join(' | '));
+ok('C6 全程零 JS 异常', errs.length === 0, errs.slice(0, 2).join(' | '));
 
 await p.keyboard.press('Escape').catch(() => {});
 await p.screenshot({ path: OUT + 'online80_首屏.png' });

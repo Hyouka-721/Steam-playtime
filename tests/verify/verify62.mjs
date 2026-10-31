@@ -38,8 +38,8 @@ const note = (cssNC.match(/\.tl-note \{([^}]*)\}/) || [, ''])[1];
 ok('A6 .tl-note 单行省略（超长 hover 看 title）', /white-space: nowrap/.test(note) && /text-overflow: ellipsis/.test(note));
 ok('A7 缩略图已撤掉第 61 轮的 align-self:flex-start（回到居中）',
   !/align-self: flex-start/.test(cssNC));
-ok('A8 版本号 bump：watch.css?v=18 / watch.js?v=13',
-  /watch\.css\?v=18"/.test(html) && /watch\.js\?v=13"/.test(html));
+ok('A8 版本号 bump：watch.css?v=19 / watch.js?v=14',
+  /watch\.css\?v=19"/.test(html) && /watch\.js\?v=14"/.test(html));
 
 /* ================= B 浏览器 ================= */
 const DATA = JSON.parse(rd('data/watch.json'));

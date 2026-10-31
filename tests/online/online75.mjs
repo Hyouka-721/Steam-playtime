@@ -1,5 +1,5 @@
 /* 第 75 轮线上复验（push 后跑）：
-   ① Pages 生效：watch.js?v=13 + sw.js 可访问 + watch.json 106 条（含 4 条新录）+ 变体字段齐全
+   ① Pages 生效：watch.js?v=14 + sw.js 可访问 + watch.json 106 条（含 4 条新录）+ 变体字段齐全
    ② 变体海报线上可下载（抽查 base / 320 / 480 三档）与本地逐字节相同
    ③ 运行时默认态：网格视图 + 评分序（不持久化），srcset 三候选 + sizes
    ④ Service Worker：线上确实控制页面 + 海报走 cache-first（二次访问 transferSize=0）
@@ -72,7 +72,7 @@ for (let i = 1; i <= 30; i++) {
   } catch (e) { console.log('  第 ' + i + ' 次拉取失败'); await page.waitForTimeout(4000); waited += 4; continue; }
   let live = null;
   try { live = JSON.parse(snap.d); } catch (e) {}
-  const verOK = /watch\.js\?v=13"/.test(snap.h);
+  const verOK = /watch\.js\?v=14"/.test(snap.h);
   const swOK = /var CACHE = 'watch-posters-v\d+';/.test(snap.s) &&
     snap.s.includes('var IMMUTABLE_RE = /\\/img\\/watch\\/[^?#]+\\.webp$/;');
   const items = live && Array.isArray(live.items) ? live.items : [];
@@ -86,7 +86,7 @@ for (let i = 1; i <= 30; i++) {
   if (verOK && swOK && dataOK) { hit = true; break; }
   waited += 5; await page.waitForTimeout(5000);
 }
-ok('A1 Pages 已生效（watch.js?v=13 + sw.js 就位 + 数据含新录 4 部 + 变体字段齐全）', hit, `约 ${waited}s`);
+ok('A1 Pages 已生效（watch.js?v=14 + sw.js 就位 + 数据含新录 4 部 + 变体字段齐全）', hit, `约 ${waited}s`);
 ok('A2 线上 watch.html 与本地 md5 全等', md5(norm(snap.h)) === md5(local('watch.html')), md5(norm(snap.h)));
 
 const liveData = JSON.parse(snap.d);

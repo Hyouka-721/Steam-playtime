@@ -1,14 +1,17 @@
 /* 第 80 轮回归：A2 胶片颗粒+放映机光晕 / A3 时间轴 hover 统一 / A4 次要文字提亮 /
-   P2 标签 chip 筛选 / P6 网页端删除 / P7 SW 缓存 watch.json
+   P6 网页端删除 / P7 SW 缓存 watch.json
    ⚠️ A1「评分 → 海报描边三档」已被用户回退，本套件不再覆盖它。
+   ⚠️ P2「标签 chip 筛选」已被第 81 轮整体撤销（用户指令），本套件的 A6 改为
+      「确认它真的没了」，C 段只留默认排序 / 无 chip 行 / 零异常三条。
+      标签数据本身（tags 字段）**保留**，E 段继续守着它。
 
    断言分组：
-   A 静态指纹（9）：CSS 规则、HTML 结构、JS 函数、sw.js 策略顺序
-   C 标签筛选（9）：chip 生成 / 点选 / 取消 / 叠加 / 空态 / 时间轴 / 脏数据归一
+   A 静态指纹（9）：CSS 规则、HTML 结构、JS 函数、sw.js 策略顺序、chip 已移除
+   C 运行时（3）：默认评分序、页面上找不到 chip 行、零 JS 异常
    D 删除（7）：只在编辑模式出现、两段确认、无 Token 零请求、有 Token 一次 PUT 且数据真的少了、
       390px 页脚不把提示压成一字一行
-   E 实体数据（2）：全部条目有标签、词表符合约定
-   ⚠️ 版本号：watch.css?v=18 / watch.js?v=13（第 80 轮 bump）
+   E 实体数据（2）：tags 字段全部保留、词表符合约定
+   ⚠️ 版本号：watch.css?v=19 / watch.js?v=14（第 81 轮 bump）
    ⚠️ 所有 mock 上下文都带 serviceWorkers:'block' —— 第 80 轮起 SW 也拦 watch.json
       （网络优先），屏蔽 SW 才能保证 page.route 造数绝对生效。 */
 import { createRequire } from 'module';
@@ -33,8 +36,8 @@ const P = 'img/minion-0ef9a202.webp';
 
 /* ================= A 静态指纹 ================= */
 console.log('== A 静态指纹 ==');
-ok('A1 版本号 bump：watch.css?v=18 / watch.js?v=13',
-  /watch\.css\?v=18"/.test(html) && /watch\.js\?v=13"/.test(html));
+ok('A1 版本号 bump：watch.css?v=19 / watch.js?v=14',
+  /watch\.css\?v=19"/.test(html) && /watch\.js\?v=14"/.test(html));
 
 ok('A2 胶片颗粒：body::before 两层点阵 + pointer-events:none（不挡点击）',
   /body::before \{[\s\S]{0,420}pointer-events: none/.test(cssNC) &&
@@ -51,11 +54,15 @@ ok('A4 时间轴 hover 与网格统一：位移 + 金线 + 缩略图放大',
 ok('A5 次要文字提亮：--text-dim 已是 #9696a6，旧值 #82828f 不再出现',
   /--text-dim: #9696a6;/.test(cssNC) && !/#82828f/.test(cssNC));
 
-ok('A6 P2 标签 chip：HTML 有容器、JS 有聚合与筛选四件套',
-  /<div class="w-tags" id="w-tags"/.test(html) &&
-  /function tagList\(it\)/.test(jsNC) && /function allTags\(\)/.test(jsNC) &&
-  /function renderTags\(\)/.test(jsNC) && /function setTag\(next\)/.test(jsNC) &&
-  /tagList\(it\)\.indexOf\(tagFilter\) >= 0/.test(jsNC));
+ok('A6 P2 已被第 81 轮撤销：chip 的容器 / CSS / JS 四件套全都不在了',
+  !/<div class="w-tags" id="w-tags"/.test(html) &&
+  !/id="w-tags"/.test(html) &&
+  !/\.w-tags/.test(cssNC) && !/\.w-tag[\s{.:[]/.test(cssNC) &&
+  !/function tagList\(it\)/.test(jsNC) && !/function allTags\(\)/.test(jsNC) &&
+  !/function renderTags\(\)/.test(jsNC) && !/function setTag\(next\)/.test(jsNC) &&
+  !/tagFilter/.test(jsNC) &&
+  // 表单里的「标签」输入框是录入功能，不是筛选，必须还在
+  /id="add-tags"/.test(html));
 
 ok('A7 P6 删除：按钮在表单页脚、两段式确认、走 PUT 覆盖 JSON（不删图片）',
   /id="w-add-delete"/.test(html) &&
@@ -140,87 +147,38 @@ async function toGrid(page) {
   await page.waitForFunction(() => document.querySelectorAll('#w-grid .poster').length > 0, null, { timeout: 20000 });
   await page.waitForTimeout(350);
 }
-async function clickChip(page, tag) {
-  await page.evaluate((t) => {
-    const el = [...document.querySelectorAll('#w-tags .w-tag')].find((b) => b.getAttribute('data-tag') === t);
-    if (el) el.click();
-  }, tag);
-  await page.waitForTimeout(350);
-}
-
-/* ================= C 标签 chip ================= */
-console.log('\n== C 标签 chip 筛选（P2）==');
+/* ================= C 运行时 ================= */
+console.log('\n== C 运行时（P2 撤销后）==');
 {
   const { ctx, page, errs } = await newPage();
 
-  const chips = await page.$$eval('#w-tags .w-tag', (els) =>
-    els.map((e) => ({ t: e.getAttribute('data-tag'), on: e.getAttribute('aria-pressed') })));
-  const names = chips.map((c) => c.t);
-  const expectSet = ['科幻', '剧情', '动画', '喜剧', '历史', '战争'];
-  ok('C1 chip 行 = 数据里出现过的 6 个标签，且「出现 2 次」的排在前面',
-    names.length === 6 && expectSet.every((t) => names.indexOf(t) >= 0) &&
-    ['科幻', '剧情'].indexOf(names[0]) >= 0 && ['科幻', '剧情'].indexOf(names[1]) >= 0,
-    names.join(' / '));
-
   const before = await gridNames(page);
-  ok('C2 默认（无标签筛选）顺序 = 评分倒序（9.9 / 8.5 / 8.0 / 7.5 / 5.0）',
+  ok('C1 默认仍是评分倒序（9.9 / 8.5 / 8.0 / 7.5 / 5.0）',
     JSON.stringify(before) === JSON.stringify(['九点九', '八点五', '无标签', '七点五', '五点零']),
     before.join(' > '));
 
-  await clickChip(page, '科幻');
-  const afterClick = await gridNames(page);
-  const onState = await page.evaluate(() => {
-    const b = [...document.querySelectorAll('#w-tags .w-tag')].find((x) => x.getAttribute('data-tag') === '科幻');
-    return { on: b.getAttribute('aria-pressed'), cls: b.className };
+  /* 第 81 轮：chip 行彻底消失 —— DOM 里没有 #w-tags，也没有遗留的空白占位 */
+  const gap = await page.evaluate(() => {
+    const r = (sel) => document.querySelector(sel).getBoundingClientRect();
+    return {
+      tags: document.querySelectorAll('#w-tags').length,
+      chips: document.querySelectorAll('.w-tag, .w-tags').length,
+      d: Math.round(r('#w-grid').top - r('#w-sort').bottom),
+    };
   });
-  ok('C3 点「科幻」：只剩 2 部，chip 变选中态（is-on + aria-pressed=true）',
-    JSON.stringify(afterClick) === JSON.stringify(['九点九', '八点五']) &&
-    onState.on === 'true' && /is-on/.test(onState.cls),
-    `${afterClick.join('、')}｜${onState.on}`);
+  ok('C2 页面上既没有 chip 行、也没有它留下的空档（排序条下沿 → 网格上沿 ≤ 60px）',
+    gap.tags === 0 && gap.chips === 0 && gap.d >= 0 && gap.d <= 60,
+    `tags=${gap.tags} chips=${gap.chips} 间距=${gap.d}px`);
 
-  await clickChip(page, '科幻');
-  const afterOff = await gridNames(page);
-  const offState = await page.evaluate(() => {
-    const b = [...document.querySelectorAll('#w-tags .w-tag')].find((x) => x.getAttribute('data-tag') === '科幻');
-    return b.getAttribute('aria-pressed');
-  });
-  ok('C4 再点同一枚 = 取消筛选，回到 5 部且 aria-pressed=false',
-    afterOff.length === 5 && offState === 'false', `${afterOff.length} 部`);
+  /* 撤掉 chip 不能顺手把排序按钮带坏 */
+  await page.click('.w-sort-btn[data-sort="time"]');
+  await page.waitForTimeout(350);
+  const byTime = await gridNames(page);
+  ok('C3 排序切换仍工作：点「观看时间」→ 按观影日期倒序（同日按上传时间正序）',
+    JSON.stringify(byTime) === JSON.stringify(['九点九', '八点五', '七点五', '五点零', '无标签']),
+    byTime.join(' > '));
 
-  await page.click('.w-seg-btn[data-kind="anime"]');
-  await page.waitForTimeout(300);
-  await clickChip(page, '动画');
-  const combo = await gridNames(page);
-  ok('C5 与类型筛选叠加：番剧 + 标签「动画」→ 只剩 1 部（七点五）',
-    JSON.stringify(combo) === JSON.stringify(['七点五']), combo.join('、'));
-
-  await clickChip(page, '科幻');
-  const none = await page.evaluate(() => ({
-    posters: document.querySelectorAll('#w-grid .poster').length,
-    note: ((document.querySelector('#w-grid .w-none') || {}).textContent || '').trim(),
-  }));
-  ok('C6 组合筛不出结果时给一句话，不留白屏（.w-none + 0 张卡片）',
-    none.posters === 0 && /没有符合条件的作品/.test(none.note), `${none.posters} 张｜${none.note.slice(0, 20)}`);
-
-  /* 脏数据归一：'五点零' 的标签是一个合串 "剧情，历史，战争" → 应能被单独筛出来 */
-  await page.click('.w-seg-btn[data-kind="all"]');
-  await page.waitForTimeout(250);
-  await clickChip(page, '科幻');   // 先取消（当前是选中态）
-  await clickChip(page, '历史');
-  const dirty = await gridNames(page);
-  ok('C7 脏写法归一：「剧情，历史，战争」被拆成 3 个标签，点「历史」能筛出它',
-    JSON.stringify(dirty) === JSON.stringify(['五点零']), dirty.join('、'));
-
-  await toTimeline(page);
-  await clickChip(page, '战争');
-  const tlN = await page.evaluate(() => ({
-    n: document.querySelectorAll('#w-tl .tl-item').length,
-    names: [...document.querySelectorAll('#w-tl .tl-item .tl-name')].map((e) => e.textContent.trim()),
-  }));
-  ok('C8 时间轴视图下标签筛选同样生效（只剩 1 条）',
-    tlN.n === 1 && tlN.names[0] === '五点零', `${tlN.n} 条｜${tlN.names.join('、')}`);
-
-  ok('C9 全程零 JS 异常', errs.length === 0, errs.slice(0, 2).join(' | '));
+  ok('C4 全程零 JS 异常', errs.length === 0, errs.slice(0, 2).join(' | '));
   await ctx.close();
 }
 
@@ -375,12 +333,12 @@ console.log('\n== 网页端删除（P6）==');
 }
 
 /* ================= E 实体数据 ================= */
-console.log('\n== 实体数据（P2 前提）==');
+console.log('\n== 实体数据（tags 保留，只是不再有筛选 UI）==');
 {
   const data = JSON.parse(rd('data/watch.json'));
   const N = data.items.length;
   const noTag = data.items.filter((x) => !Array.isArray(x.tags) || !x.tags.length);
-  ok(`E1 本地 ${N} 条全部有非空 tags 数组（一条不落，chip 才有意义）`,
+  ok(`E1 本地 ${N} 条仍全部带非空 tags 数组（删筛选≠删数据，一条都不许被清掉）`,
     N > 0 && noTag.length === 0, noTag.map((x) => x.title).slice(0, 5).join('、'));
 
   /* 13 个预设词 + 「灾难」（用户在网页端自己加的，2026-10-30 合并远端时保留，不要静默丢掉用户的输入） */
@@ -399,5 +357,5 @@ console.log('\n== 实体数据（P2 前提）==');
 }
 
 await browser.close();
-console.log(`\n第 80 轮：PASS ${pass} / FAIL ${fail}`);
+console.log(`\n第 80/81 轮：PASS ${pass} / FAIL ${fail}`);
 process.exit(fail ? 1 : 0);

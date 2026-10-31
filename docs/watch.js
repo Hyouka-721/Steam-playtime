@@ -32,14 +32,11 @@
   // 第 72 轮：排序切换取代原「共 N 部」计数条（.w-count 已删），只作用于网格视图
   var sortEl = document.getElementById('w-sort');
   var sortBtns = Array.prototype.slice.call(document.querySelectorAll('.w-sort-btn'));
-  // 第 80 轮 P2：标签 chip 行（内容动态生成，见 renderTags）
-  var tagsEl = document.getElementById('w-tags');
 
   var ALL = [];             // 全量数据（已按观影时间倒序，同日按上传时间正序）
   var layout = 'grid';      // 第 75 轮：默认网格视图，不持久化
   var kind = 'all';
   var sort = 'rating';      // 第 75 轮：默认评分序（time|rating），不持久化
-  var tagFilter = '';       // 第 80 轮：当前选中的标签（空串=不筛选），不持久化
 
   /* ---------- 工具 ---------- */
   function esc(s) {
@@ -67,36 +64,6 @@
     var n = Number(it && it.rating);
     return isFinite(n) && n > 0 ? n : -1;   // 无评分沉底
   }
-  /* 第 80 轮 P2：标签读取。历史数据里有两种脏写法（单个字符串含全角逗号、
-     数组里塞了「剧情，历史，战争」这种合串），统一在这里拆开、去空、去重，
-     这样 chip 与筛选都不会被脏数据带偏。 */
-  function tagList(it) {
-    var raw = it && it.tags;
-    if (!raw) return [];
-    var arr = Array.isArray(raw) ? raw : [raw];
-    var out = [], seen = {};
-    for (var i = 0; i < arr.length; i++) {
-      var parts = String(arr[i] == null ? '' : arr[i]).split(/[,，、;；\/]+/);
-      for (var j = 0; j < parts.length; j++) {
-        var s = parts[j].trim();
-        if (s && !seen[s]) { seen[s] = 1; out.push(s); }
-      }
-    }
-    return out;
-  }
-  // 全库标签，按出现次数降序（同次数按中文序），供 chip 行渲染
-  function allTags() {
-    var cnt = {}, list = [];
-    ALL.forEach(function (it) {
-      tagList(it).forEach(function (t) {
-        if (!cnt[t]) { cnt[t] = 0; list.push(t); }
-        cnt[t]++;
-      });
-    });
-    list.sort(function (a, b) { return (cnt[b] - cnt[a]) || a.localeCompare(b, 'zh'); });
-    return list;
-  }
-
   /* ---------- 第 78 轮：手动「排序」值 ----------
      order ∈ [0,5] 的整数，越小越靠前；缺字段 / 空串 / 非整数 / 越界 一律当 3。
      默认值在「读取时」生效（不要求数据里一定有这个字段），所以老数据零迁移。 */
@@ -171,11 +138,7 @@
 
   /* ---------- 筛选后的数据 ---------- */
   function visible() {
-    var out = (kind === 'all') ? ALL : ALL.filter(function (it) { return (it.kind || 'movie') === kind; });
-    if (tagFilter) {
-      out = out.filter(function (it) { return tagList(it).indexOf(tagFilter) >= 0; });
-    }
-    return out;
+    return (kind === 'all') ? ALL : ALL.filter(function (it) { return (it.kind || 'movie') === kind; });
   }
 
   /* ---------- 图片加载态（淡入 / 失败降透明度） ---------- */
@@ -276,11 +239,6 @@
 
   /* ---------- 总渲染 ---------- */
   function paint() {
-    // 第 80 轮 P2：数据一改（删除 / 编辑 / 换标签），原来选中的标签可能已经不存在 → 自愈，
-    // 免得停在一个「筛不出任何东西」的空白页上。
-    if (tagFilter && allTags().indexOf(tagFilter) < 0) tagFilter = '';
-    renderTags();
-
     var list = visible();
 
     // 第 72 轮：排序切换只作用于网格视图；时间轴恒按观影时间倒序（月份分组的前提）
@@ -292,43 +250,15 @@
     tlEl.hidden = !(layout === 'timeline' && total > 0);
 
     if (total === 0) return;
-    // 有数据、但当前「类型 + 标签」组合筛不出东西 —— 给一句话，别留白屏
+    // 有数据、但当前类型筛不出东西 —— 给一句话，别留白屏
     if (!list.length) {
-      var none = '<p class="w-none">没有符合条件的作品 —— 再点一次标签，或换个类型</p>';
+      var none = '<p class="w-none">这个分类下还没有作品</p>';
       if (layout === 'grid') gridEl.innerHTML = none;
       else tlEl.innerHTML = none;
       return;
     }
     if (layout === 'grid') renderGrid(ordered(list));
     else renderTimeline(list.slice().sort(cmpTime));
-  }
-
-  /* ---------- 第 80 轮 P2：标签 chip ---------- */
-  function renderTags() {
-    if (!tagsEl) return;
-    var list = allTags();
-    if (!list.length) { tagsEl.hidden = true; tagsEl.innerHTML = ''; return; }
-    tagsEl.hidden = false;
-    tagsEl.innerHTML = list.map(function (t) {
-      var on = t === tagFilter;
-      return '<button type="button" class="w-tag' + (on ? ' is-on' : '') + '"' +
-        ' data-tag="' + esc(t) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' +
-        esc(t) + '</button>';
-    }).join('');
-  }
-  function setTag(next) {
-    var v = next == null ? '' : String(next);
-    tagFilter = (v && v !== tagFilter) ? v : '';   // 点同一枚 = 取消筛选
-    paint();
-  }
-  if (tagsEl) {
-    tagsEl.addEventListener('click', function (e) {
-      var el = e.target;
-      while (el && el !== tagsEl) {
-        if (el.classList && el.classList.contains('w-tag')) { setTag(el.getAttribute('data-tag')); return; }
-        el = el.parentNode;
-      }
-    });
   }
 
   /* ---------- 视图 / 筛选切换（状态持久化） ---------- */
