@@ -33,7 +33,7 @@
   --sunken: #f3e6d3;
   --border: #eee5d9;
   --border-hi: #dccdbb;
-  --text: #241c15; --text-dim: #6d6055; --text-faint: #9c8d7e; --text-strong: #1a120c;
+  --text: #241c15; --text-dim: #564a3f; --text-faint: #7d6e5f; --text-strong: #1a120c;
   --accent: #d9762f; --accent-2: #b85c1c;
   --warn: #b45309; --ok: #15803d;
   --tint-1: rgba(217, 118, 47, 0.06);
@@ -134,7 +134,7 @@
   --sunken: #1a1922;
   --border: #2b2938;
   --border-hi: #3c394d;
-  --text: #e8e6f0; --text-dim: #a9a5bd; --text-faint: #7e7a94; --text-strong: #f7f5ff;
+  --text: #e8e6f0; --text-dim: #c2bed4; --text-faint: #9d99b2; --text-strong: #f7f5ff;
   --accent: #8b7bff; --accent-2: #6f5df0;
   --warn: #f0a35c; --ok: #5ad6a0;
   --tint-1: rgba(139, 123, 255, 0.08);
@@ -176,7 +176,7 @@
   --sunken: #dcf0e9;
   --border: #e0f0ea;
   --border-hi: #c2e2d6;
-  --text: #122620; --text-dim: #4f6d64; --text-faint: #7f9a91; --text-strong: #0a1a15;
+  --text: #122620; --text-dim: #3a564d; --text-faint: #5f7c73; --text-strong: #0a1a15;
   --accent: #0f9e8e; --accent-2: #0a7d70;
   --warn: #b45309; --ok: #15803d;
   --tint-1: rgba(15, 158, 142, 0.06);
@@ -217,7 +217,7 @@
   --sunken: #e9e4fb;
   --border: #e9e5f6;
   --border-hi: #d2caf0;
-  --text: #1b1730; --text-dim: #5f5878; --text-faint: #8d86a6; --text-strong: #120e24;
+  --text: #1b1730; --text-dim: #4a4462; --text-faint: #6e6889; --text-strong: #120e24;
   --accent: #7c5cf0; --accent-2: #6143d6;
   --warn: #b45309; --ok: #15803d;
   --tint-1: rgba(124, 92, 240, 0.06);
@@ -256,7 +256,7 @@ html, body {
   background-attachment: fixed;
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Roboto, sans-serif;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.6;
   transition: background-color .25s ease, color .25s ease;
 }
@@ -342,7 +342,7 @@ a { color: var(--accent); }
   z-index: 50; padding: 9px 20px; border-radius: 999px;
   background: var(--panel); border: 1px solid var(--border-hi);
   box-shadow: var(--card-shadow); color: var(--text);
-  font-size: 13px; letter-spacing: .5px; pointer-events: none;
+  font-size: 14px; letter-spacing: .5px; pointer-events: none;
   animation: toast-in .22s ease both;
 }
 @keyframes toast-in {
@@ -384,7 +384,7 @@ a { color: var(--accent); }
     var(--card-bg);
   border-color: var(--border-hi);
 }
-.card-label { font-size: 12px; color: var(--text-dim); letter-spacing: .8px; }
+.card-label { font-size: 13px; color: var(--text-dim); letter-spacing: .8px; }
 .card-value { font-size: 27px; font-weight: 700; color: var(--text-strong); margin-top: 5px; line-height: 1.25; font-variant-numeric: tabular-nums; }
 .card-hero .card-value {
   font-size: 30px;
@@ -405,20 +405,20 @@ a { color: var(--accent); }
   display: flex; align-items: center; justify-content: space-between;
   gap: 12px; flex-wrap: wrap; margin-bottom: 14px;
 }
-.panel-head h2 { margin: 0; font-size: 15px; font-weight: 600; color: var(--text-strong); }
+.panel-head h2 { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-strong); }
 .panel-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .btn-back {
-  padding: 5px 12px; font-size: 12.5px; color: var(--text-dim);
+  padding: 5px 12px; font-size: 13.5px; color: var(--text-dim);
   background: transparent; white-space: nowrap;
 }
 .btn-back:hover { color: var(--accent); border-color: var(--tint-border); background: var(--tint-1); }
 .ctrl { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.hint { font-size: 12px; color: var(--text-dim); }
+.hint { font-size: 13px; color: var(--text-dim); }
 
 select, .seg button {
   background: var(--sunken); color: var(--text);
   border: 1px solid var(--border); border-radius: 8px;
-  padding: 6px 12px; font-size: 13px; cursor: pointer; font-family: inherit;
+  padding: 6px 12px; font-size: 14px; cursor: pointer; font-family: inherit;
   outline: none; transition: border-color .15s;
 }
 select:hover, .seg button:hover { border-color: var(--border-hi); }
@@ -490,7 +490,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 /* 排名序号：靠左对齐、放大；前三名金 / 银 / 铜 */
 .rank-no {
   color: var(--text-faint); font-variant-numeric: tabular-nums;
-  text-align: left; font-size: 16px; font-weight: 600; letter-spacing: .5px;
+  text-align: left; font-size: 17px; font-weight: 600; letter-spacing: .5px;
 }
 .rank-no.r1, .rank-no.r2, .rank-no.r3 { font-size: 22px; font-weight: 800; }
 .rank-no.r1 { color: var(--medal-1); text-shadow: var(--medal-shadow-1); }
@@ -888,12 +888,12 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   background: var(--bar-grad);
   transition: width .5s ease;
 }
-.rank-min { font-variant-numeric: tabular-nums; color: var(--text-strong); text-align: center; font-weight: 600; font-size: 13.5px; }
-.rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: center; font-size: 12px; position: relative; }
+.rank-min { font-variant-numeric: tabular-nums; color: var(--text-strong); text-align: center; font-weight: 600; font-size: 14.5px; }
+.rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: center; font-size: 13px; position: relative; }
 /* 第 87 轮：首行日期上方那枚「游玩日历」小图标（.cal-icon-btn 的 24×24 按钮、
    --cal-lift 那套 32px 上抬与 focus-visible 规则）已随「入口并入下钻热力图」整体删除。
    .rank-last 上的 position:relative 是历史残留（已无绝对定位子元素），留着无害。 */
-.list-foot { text-align: right; color: var(--text-faint); font-size: 12px; margin: 10px 4px 2px; }
+.list-foot { text-align: right; color: var(--text-faint); font-size: 13px; margin: 10px 4px 2px; }
 .list-foot-dim { opacity: .75; }
 
 /* ---- 未游玩游戏的折叠区 ---- */
@@ -901,7 +901,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   display: flex; align-items: center; gap: 8px; cursor: pointer;
   margin: 10px 0 2px; padding: 8px 12px; border-radius: 9px;
   border: 1px dashed var(--border); background: var(--sunken);
-  color: var(--text-dim); font-size: 12.5px; user-select: none;
+  color: var(--text-dim); font-size: 13.5px; user-select: none;
   transition: border-color .15s, color .15s, background .15s;
 }
 .idle-toggle:hover, .idle-toggle:focus-visible {
@@ -929,14 +929,14 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .ach-icon-ph { width: 44px; height: 44px; }
 .ach-main { min-width: 0; }
 .ach-name {
-  color: var(--text-strong); font-weight: 600; font-size: 13.5px;
+  color: var(--text-strong); font-weight: 600; font-size: 14.5px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 /* 稀有成就（全球完成率 < 10%）名标金：双类选择器提权，稳胜上面的 .ach-name。
    只换 color，字号/字重/行高全不变，列表布局与行高不受影响。 */
 .ach-name.is-gold { color: var(--gold); }
 .ach-sub {
-  color: var(--text-dim); font-size: 12px;
+  color: var(--text-dim); font-size: 13px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .ach-sub .ach-game { color: var(--accent); }
@@ -947,12 +947,12 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .ach-pct {
   min-width: 46px; text-align: right;
   font-variant-numeric: tabular-nums;
-  color: var(--text-dim); font-size: 13px;
+  color: var(--text-dim); font-size: 14px;
   font-weight: 600;
 }
 .ach-date {
   text-align: right; font-variant-numeric: tabular-nums;
-  color: var(--text-faint); font-size: 12px;
+  color: var(--text-faint); font-size: 13px;
 }
 
 /* ---- 游戏时间轴（按周聚合，经游戏库卡进入） ---- */
@@ -969,7 +969,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   letter-spacing: 1px;
 }
 .tl-month-ph { min-height: 29px; }
-.tl-week { font-size: 12px; color: var(--text-faint); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.tl-week { font-size: 13px; color: var(--text-faint); margin-top: 2px; font-variant-numeric: tabular-nums; }
 /* 中列：时间轴主线 + 周节点圆点 */
 .tl-node { position: relative; height: 100%; min-height: 70px; }
 .tl-node::before {
@@ -1004,7 +1004,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .tl-badge {
   position: absolute; right: 4px; bottom: 4px;
   background: var(--badge-bg); color: var(--badge-text);
-  font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums;
+  font-size: 12.5px; font-weight: 600; font-variant-numeric: tabular-nums;
   padding: 0 7px; border-radius: 5px; line-height: 1.7;
   pointer-events: none;
 }
@@ -1013,38 +1013,38 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   margin-top: 10px; display: inline-block;
   background: var(--tint-2); border: 1px solid var(--tint-border);
   color: var(--accent); border-radius: 8px; padding: 4px 14px;
-  font-size: 13px;
+  font-size: 14px;
 }
-.tl-milestone b { font-size: 16px; margin-left: 4px; }
+.tl-milestone b { font-size: 17px; margin-left: 4px; }
 
 /* ---- 每日记录 ---- */
-.day-summary { font-size: 13.5px; color: var(--text-dim); margin: 2px 0 12px; }
+.day-summary { font-size: 14.5px; color: var(--text-dim); margin: 2px 0 12px; }
 .day-summary b { color: var(--text-strong); }
 .icon-ph { display: inline-block; }
 .icon-ph { width: 30px; height: 30px; border-radius: 6px; background: var(--sunken); object-fit: contain; }
 .tag {
-  font-size: 11px; padding: 1px 7px; border-radius: 5px; margin-left: 8px; vertical-align: 1px;
+  font-size: 12px; padding: 1px 7px; border-radius: 5px; margin-left: 8px; vertical-align: 1px;
   border: 1px solid var(--border); color: var(--text-dim); font-weight: 400;
 }
 .tag.new { color: var(--ok); border-color: var(--border-hi); }
 .tag.playing { color: var(--accent); border-color: var(--tint-border); background: var(--tint-1); }
 
-.empty { color: var(--text-dim); font-size: 13px; margin: 8px 0; }
+.empty { color: var(--text-dim); font-size: 14px; margin: 8px 0; }
 
 /* ---- 加载失败兜底 ---- */
 .load-error {
   margin: 24px 28px; padding: 28px 24px; text-align: center;
   background: var(--panel); border: 1px solid var(--warn); border-radius: var(--radius);
-  color: var(--warn); font-size: 15px;
+  color: var(--warn); font-size: 16px;
 }
-.load-error-sub { color: var(--text-dim); font-size: 13px; margin: 8px 0 16px; }
+.load-error-sub { color: var(--text-dim); font-size: 14px; margin: 8px 0 16px; }
 .load-error .btn { padding: 8px 26px; }
 
 /* ---- 数据页 ---- */
 .row-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .btn {
   background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
-  border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 13px;
+  border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 14px;
   font-family: inherit; text-decoration: none; display: inline-block;
   transition: border-color .15s, color .15s;
 }
@@ -1053,18 +1053,18 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 
 .health { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
 .h-item { background: var(--sunken); border: 1px solid var(--border); border-radius: 9px; padding: 12px 14px; }
-.h-label { font-size: 12px; color: var(--text-dim); }
+.h-label { font-size: 13px; color: var(--text-dim); }
 .h-value { font-size: 20px; font-weight: 600; color: var(--text-strong); margin-top: 3px; }
 .h-value.warn { color: var(--warn); }
 .h-value.ok { color: var(--ok); }
 
-.about { font-size: 13.5px; color: var(--text-dim); max-width: 780px; }
+.about { font-size: 14.5px; color: var(--text-dim); max-width: 780px; }
 .about strong { color: var(--text); }
 .about ul { padding-left: 18px; }
 .about li { margin: 5px 0; }
 
 .site-footer {
-  padding: 16px 28px 30px; color: var(--text-faint); font-size: 12px;
+  padding: 16px 28px 30px; color: var(--text-faint); font-size: 13px;
   display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
 }
 .dot { opacity: .5; }
@@ -1078,8 +1078,8 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   display: inline-flex; align-items: center; gap: 8px;
   margin-left: auto;
 }
-.fx-label { font-size: 12px; color: var(--text-faint); letter-spacing: .5px; }
-.fx-switch .seg button { padding: 3px 11px; font-size: 12px; line-height: 1.5; }
+.fx-label { font-size: 13px; color: var(--text-faint); letter-spacing: .5px; }
+.fx-switch .seg button { padding: 3px 11px; font-size: 13px; line-height: 1.5; }
 .fx-switch .seg button[disabled] { opacity: .45; cursor: not-allowed; }
 .fx-switch .seg button[disabled]:hover { border-color: var(--border); }
 
@@ -1113,8 +1113,8 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .ach-item { grid-template-columns: 40px 1fr auto; gap: 10px; }
   .ach-icon, .ach-icon-ph { width: 40px; height: 40px; }
   .ach-meta { gap: 8px; }
-  .ach-pct { font-size: 12px; min-width: 42px; }
-  .ach-date { font-size: 11px; }
+  .ach-pct { font-size: 13px; min-width: 42px; }
+  .ach-date { font-size: 12px; }
   .tl-item { grid-template-columns: 78px 30px 1fr; }
   .tl-month { font-size: 19px; }
   .tl-month-ph { min-height: 23px; }
@@ -1182,13 +1182,13 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   margin-bottom: 12px;
 }
 .cal-title {
-  text-align: center; font-size: 16px; font-weight: 700; color: var(--text-strong);
+  text-align: center; font-size: 17px; font-weight: 700; color: var(--text-strong);
   font-variant-numeric: tabular-nums;
 }
 .cal-nav, .cal-close {
   width: 32px; height: 32px; padding: 0; border-radius: 8px;
   background: var(--sunken); border: 1px solid var(--border); color: var(--text);
-  cursor: pointer; font-size: 17px; line-height: 1; font-family: inherit;
+  cursor: pointer; font-size: 18px; line-height: 1; font-family: inherit;
   display: grid; place-items: center;
   transition: border-color .15s, color .15s;
 }
@@ -1196,12 +1196,12 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .cal-nav:disabled { opacity: .35; cursor: not-allowed; }
 .cal-empty {
   grid-column: 1 / -1; text-align: center; color: var(--text-dim);
-  font-size: 12.5px; padding: 22px 0;
+  font-size: 13.5px; padding: 22px 0;
 }
 .cal-foot {
   display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
   margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);
-  font-size: 11.5px; color: var(--text-dim);
+  font-size: 12.5px; color: var(--text-dim);
 }
 .cal-legend { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
 .cal-dot {
@@ -1216,7 +1216,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   position: absolute; inset: 0; border-radius: 14px;
   display: flex; align-items: center; justify-content: center; gap: 8px;
   background: rgba(255, 255, 255, .78);
-  font-size: 13px; color: var(--text-dim);
+  font-size: 14px; color: var(--text-dim);
 }
 .cal-mask[hidden] { display: none; }
 .cal-spin {
@@ -1235,7 +1235,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   align-items: center; gap: 6px; min-width: 0;
 }
 .cal-day-nav .cal-title {
-  min-width: 0; font-size: 15px;
+  min-width: 0; font-size: 16px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .cal-step {
@@ -1250,7 +1250,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 }
 .cal-step:disabled { opacity: .35; cursor: not-allowed; }
 .cal-step:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.cal-step-ico { font-size: 14px; line-height: 1; }
+.cal-step-ico { font-size: 15px; line-height: 1; }
 
 /* 二级界面顶部摘要卡：刻意复用概览卡的背景/圆角/字号，视觉上与站内一致 */
 .cal-day-summary {
@@ -1260,12 +1260,12 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   padding: 14px 16px 13px;
   margin-bottom: 12px;
 }
-.cal-day-sum-label { font-size: 12px; color: var(--text-dim); letter-spacing: .8px; }
+.cal-day-sum-label { font-size: 13px; color: var(--text-dim); letter-spacing: .8px; }
 .cal-day-sum-value {
   font-size: 26px; font-weight: 700; color: var(--text-strong);
   margin-top: 4px; line-height: 1.25; font-variant-numeric: tabular-nums;
 }
-.cal-day-sum-note { font-size: 11.5px; color: var(--text-faint); margin-top: 5px; }
+.cal-day-sum-note { font-size: 12.5px; color: var(--text-faint); margin-top: 5px; }
 
 /* 当天游玩明细列表：面板只有 372px，用紧凑四列（序号/胶囊/名称/时长）+ 第二行占比条 */
 .cal-games { max-height: min(46vh, 380px); overflow-y: auto; overscroll-behavior: contain; }
@@ -1282,18 +1282,18 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .cal-game.is-focus { background: var(--tint-1); box-shadow: inset 2px 0 0 var(--accent); border-radius: 6px; }
 .cal-game-no {
   color: var(--text-faint); font-variant-numeric: tabular-nums;
-  text-align: center; font-size: 14px; font-weight: 600;
+  text-align: center; font-size: 15px; font-weight: 600;
 }
-.cal-game-no.r1, .cal-game-no.r2, .cal-game-no.r3 { font-size: 17px; font-weight: 800; }
+.cal-game-no.r1, .cal-game-no.r2, .cal-game-no.r3 { font-size: 18px; font-weight: 800; }
 .cal-game-no.r1 { color: var(--medal-1); text-shadow: var(--medal-shadow-1); }
 .cal-game-no.r2 { color: var(--medal-2); text-shadow: var(--medal-shadow-2); }
 .cal-game-no.r3 { color: var(--medal-3); text-shadow: var(--medal-shadow-3); }
 .cal-game-name {
-  min-width: 0; font-size: 13.5px; color: var(--text);
+  min-width: 0; font-size: 14.5px; color: var(--text);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .cal-game-min {
-  font-variant-numeric: tabular-nums; font-size: 12.5px; font-weight: 600;
+  font-variant-numeric: tabular-nums; font-size: 13.5px; font-weight: 600;
   color: var(--text-strong); white-space: nowrap;
 }
 .cal-game-bar {
@@ -1322,9 +1322,9 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .cal-game { grid-template-columns: 18px 56px minmax(0, 1fr) auto; gap: 3px 8px; }
   .cal-games .rank-capsule-wrap { --cap-box-w: 56px; --cap-box-h: 27px; }
   .cal-day-nav { gap: 4px; }
-  .cal-day-nav .cal-title { font-size: 14px; }
+  .cal-day-nav .cal-title { font-size: 15px; }
   .cal-step { width: 26px; height: 26px; }
-  .cal-step-ico { font-size: 13px; }
+  .cal-step-ico { font-size: 14px; }
 }
 
 
@@ -1338,42 +1338,68 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   transition: opacity .45s ease;
 }
 
-/* #7 活动热力图（第 86 轮起**按月**）：7 列 = 周一 → 周日，格子里直接写日期与当天时长。
-   一格最小 54px 高、等比铺满容器 —— 月份只有 5~6 行，比原来 18 周的小方块更能看清每天。 */
-.heat-cal {
-  display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 10px;
+/* #7 每日游玩热力图（第 86 轮按月 / 第 88 轮**两月并排**）
+   一格 = 一天，一页 = 最多两个月。单月铺满整幅面板时格子是 181×78 的长条（右边一片空），
+   两月并排后约 86×78，接近正方，日期与时长才填得满一格。
+   ‹ › 一次翻一页（2 个月）；最后一页永远是满的，当前月总落在右列。 */
+.heat-pair {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px; margin-bottom: 12px;
 }
+.heat-mb { min-width: 0; display: flex; flex-direction: column; }
+/* 占位卡（整月无数据）撑满与相邻月份等高，视觉上才是一块完整的"月份"，
+   否则左列会只剩一条细卡、右下大片空白（第 88 轮实测截图里很明显）。 */
+.heat-mb.is-empty .hm-none { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+/* 月份标题与月内统计**上下两行**：并排时两列的「标题 + 统计」会连成一条长行
+   （右列标题紧贴左列统计），分两行才看得出是两块。 */
+.hm-head {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 1px;
+  margin-bottom: 8px;
+}
+.hm-title { font-size: 14.5px; font-weight: 700; color: var(--text-strong); letter-spacing: .3px; }
+.hm-stat {
+  font-size: 12.5px; color: var(--text-dim);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+/* 整月无数据（追踪开始之前）：给一张占位卡，而不是 42 个虚线空格 */
+.hm-none {
+  margin: 0; padding: 34px 12px; border: 1px dashed var(--border); border-radius: 10px;
+  text-align: center; color: var(--text-dim); font-size: 13.5px; line-height: 1.7;
+  background: var(--sunken);
+}
+.hm-none span { display: block; font-size: 12.5px; color: var(--text-faint); }
+.heat-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
 .heat-week {
   display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
-  font-size: 11.5px; color: var(--text-dim); margin-bottom: 7px;
+  font-size: 12.5px; color: var(--text-dim); margin-bottom: 6px;
 }
-.heat-week span { padding-left: 7px; }
+.heat-week span { padding-left: 6px; }
 .hc {
-  position: relative; min-height: 78px; border-radius: 10px; padding: 8px 10px;
+  position: relative; min-height: 74px; border-radius: 10px; padding: 7px 9px;
   display: flex; flex-direction: column; gap: 2px;
   background: var(--sunken); border: .5px solid var(--border);
-  color: var(--text-dim); font-size: 12.5px; font-variant-numeric: tabular-nums;
+  color: var(--text-dim); font-size: 13px; font-variant-numeric: tabular-nums;
   /* 网格项默认 min-width:auto —— 里面那行时长文字的最小宽度会把 1fr 轨道顶宽，
-     窄屏（360px）下整块因此横向溢出 13px。显式归零让轨道可以缩到 1fr。
-     窄屏的左右内边距再收到 4px（见 ≤480 块），保证「49min」仍装得下。 */
+     窄屏（360px）下整块因此横向溢出。显式归零让轨道可以缩到 1fr。 */
   min-width: 0;
 }
-.hc b { font-weight: 500; color: var(--text); }
-/* 第 87 轮（用户）：格子里的「时长」字样要更大、更重 —— 它是这一格真正要读的信息，
-   原来 11.5px + 继承色 + .95 透明，放在米色底上偏弱。现在 13px / 600 重 / --text-strong，
-   h4（最深的实心格）里仍是白字（见下面的 .hc.h4 规则，特异性更高，不会被盖掉）。 */
+/* 第 88 轮（用户）：日期与时长数字都要更清楚 —— 日期升为主角（15px/600/--text-strong），
+   时长紧随（14px/600），两者都吃满格宽的两端：日期贴左上、时长贴右下。 */
+.hc b {
+  font-size: 15px; font-weight: 600; line-height: 1.15;
+  color: var(--text-strong);
+}
 .hc i {
-  font-style: normal; font-size: 13px; font-weight: 600;
+  font-style: normal; font-size: 14px; font-weight: 600;
   margin-top: auto; text-align: right;
   color: var(--text-strong); opacity: 1;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums; line-height: 1.2;
 }
 .hc.is-blank { background: transparent; border-color: transparent; }
 .hc.is-na { background: transparent; border-style: dashed; opacity: .55; }
 .hc.is-today { box-shadow: inset 0 0 0 1.5px var(--accent); }
-/* 第 87 轮：格子成为「当日明细」的入口（原来挂在「最近游玩」首行的小日历图标上）。
-   可点的格子给指针 + 悬停描边 + 键盘焦点环；.is-sel = 刚刚在浮层里看过的那一天，
-   关掉浮层后仍标出来，便于接着看相邻日期。 */
+/* 第 87 轮：格子是「当日明细」的入口 —— 指针 + 悬停描边 + 键盘焦点环；
+   .is-sel = 刚在浮层里看过的那天，关掉浮层后仍标出来，便于接着看相邻日期。 */
 .hc.is-live { cursor: pointer; transition: border-color .14s, transform .14s; }
 .hc.is-live:hover { border-color: var(--accent); transform: translateY(-1px); }
 .hc.is-live:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -1387,10 +1413,10 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .heat-foot {
   display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
 }
-.heat-sum { font-size: 12px; color: var(--text-dim); }
+.heat-sum { font-size: 13px; color: var(--text-dim); }
 .heat-legend {
   display: flex; align-items: center; gap: 5px;
-  font-size: 11px; color: var(--text-faint);
+  font-size: 12px; color: var(--text-faint);
 }
 .heat-legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
 .heat-legend .h0 { background: var(--tint-1); box-shadow: inset 0 0 0 .5px var(--border); }
@@ -1400,30 +1426,45 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .heat-legend .h4 { background: var(--accent); }
 /* 月份翻页 */
 .heat-nav { display: flex; align-items: center; gap: 6px; }
-.heat-month { font-size: 13px; color: var(--text-strong); min-width: 92px; text-align: center; font-variant-numeric: tabular-nums; }
+.heat-month {
+  font-size: 14px; color: var(--text-strong); min-width: 124px; text-align: center;
+  font-variant-numeric: tabular-nums;
+}
 .heat-nav .cal-nav:disabled { opacity: .35; cursor: default; }
 
-@media (max-width: 860px) {
-  .hc { min-height: 58px; padding: 6px 7px; font-size: 11px; }
-  /* 第 87 轮：桌面端把时长字样放大到 13px 后，窄屏这里原写 10px 会把它又压回去
-     （格子本来就窄，10px 在 390px 下几乎读不清）→ 提到 12px，仍比日期小一档。 */
-  .hc i { font-size: 12px; }
-  .heat-cal, .heat-week { gap: 4px; }
-  .heat-week span { padding-left: 5px; }
-
-/* 第 87 轮：时长字样放大后，窄屏要多给文字一点宽度 —— 格子左右内边距 7px → 4px。
-   ⚠️ 这两块必须写在上面的 ≤860 块**之后**：同特异度靠源码顺序决胜，
-   写在前面的 .cal-overlay/.cal-panel 那个 480 块里会被 860 块的 padding:6px 7px 覆盖
-   （本轮实测踩过：内边距一直是 7px，「49min」顶出格子 2px）。 */
-@media (max-width: 480px) {
-  .hc { padding: 6px 4px; }
+/* 窄屏：两列塞不下（1024 下每格只剩 58px、768 只剩 43px）→ 竖排，一页上下两个月，
+   月份块各占满宽，格子反而比两列时更宽，日期/时长仍用大字号。 */
+/* 900~1000 两列时格宽只有 50~55px：左右内边距从 9px 收到 6px，才装得下「49min」 */
+@media (max-width: 1000px) {
+  .hc { padding: 6px 6px; }
 }
-/* 360px 档再窄一档：格子内容宽只剩 ~30px，「49min」在 12px 下仍差 0.7px 顶边 →
-   降到 11px（仍比第 86 轮的 10px 大，用户要的「更清楚」保住）。 */
+@media (max-width: 899px) {
+  .heat-pair { grid-template-columns: 1fr; gap: 16px; }
+  /* 竖排时空月会挡在真月份前面占掉一屏 → 窄屏直接不渲染占位卡（桌面端仍保留，用来平衡两列高度） */
+  .heat-mb.is-empty { display: none; }
+}
+@media (max-width: 860px) {
+  .hc { min-height: 58px; padding: 6px 6px; }
+  .hc b { font-size: 13px; }
+  .hc i { font-size: 12.5px; }
+  .heat-cal, .heat-week { gap: 4px; }
+  .heat-week { font-size: 12px; }
+  .heat-week span { padding-left: 5px; }
+  .hm-title { font-size: 13.5px; }
+  .hm-stat { font-size: 12px; }
+  .hm-none { padding: 26px 10px; font-size: 13px; }
+}
+@media (max-width: 480px) {
+  /* 格宽只有 42~48px，左右内边距必须收到 4px 才装得下「49min」 */
+  .hc { padding: 6px 4px; }
+  .hm-head { flex-wrap: wrap; gap: 2px 8px; }
+}
+@media (max-width: 400px) {
+  .hc b { font-size: 12.5px; }
+  .hc i { font-size: 12px; }
+}
 @media (max-width: 360px) {
   .hc i { font-size: 11px; }
-}
-
 }
 
 /* #14 接下来玩什么 */
@@ -1438,20 +1479,20 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   transition: transform .18s ease, border-color .2s ease;
 }
 .badge:hover { transform: translateY(-2px); border-color: var(--tint-border); }
-.badge-name { font-size: 12px; max-width: 134px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.badge-min { font-size: 11px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.badge-name { font-size: 13px; max-width: 134px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.badge-min { font-size: 12px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
 
 /* #15 阶段报告 */
 .report { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 10px; }
 .rp-cell { padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--sunken); }
 .rp-cell.rp-wide { grid-column: 1 / -1; }
-.rp-label { font-size: 11.5px; color: var(--text-dim); }
+.rp-label { font-size: 12.5px; color: var(--text-dim); }
 .rp-value { font-size: 20px; color: var(--text-strong); margin-top: 3px; font-variant-numeric: tabular-nums; }
-.rp-sub { font-size: 11.5px; color: var(--text-faint); margin-top: 3px; }
+.rp-sub { font-size: 12.5px; color: var(--text-faint); margin-top: 3px; }
 .rp-top { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 7px; }
-.rp-top span { display: inline-flex; align-items: baseline; gap: 6px; font-size: 13px; }
+.rp-top span { display: inline-flex; align-items: baseline; gap: 6px; font-size: 14px; }
 .rp-top b { color: var(--accent); font-weight: 600; }
-.rp-top i { font-style: normal; color: var(--text-dim); font-size: 12px; font-variant-numeric: tabular-nums; }
+.rp-top i { font-style: normal; color: var(--text-dim); font-size: 13px; font-variant-numeric: tabular-nums; }
 
 /* #21 周目标与节奏 */
 .pace {
@@ -1464,13 +1505,13 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .pr-fill { fill: none; stroke: var(--accent); stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
 .pace-num {
   position: absolute; inset: 0; display: grid; place-items: center;
-  font-size: 12.5px; color: var(--text-strong); font-variant-numeric: tabular-nums;
+  font-size: 13.5px; color: var(--text-strong); font-variant-numeric: tabular-nums;
 }
 .pace-txt { flex: 1 1 180px; min-width: 0; }
-.pace-main { font-size: 14px; color: var(--text-strong); }
-.pace-dim { font-size: 12px; color: var(--text-dim); }
-.pace-sub { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
-.pace-set { font-size: 12px; color: var(--text-dim); display: inline-flex; align-items: center; gap: 6px; }
+.pace-main { font-size: 15px; color: var(--text-strong); }
+.pace-dim { font-size: 13px; color: var(--text-dim); }
+.pace-sub { font-size: 13px; color: var(--text-dim); margin-top: 3px; }
+.pace-set { font-size: 13px; color: var(--text-dim); display: inline-flex; align-items: center; gap: 6px; }
 .pace-set input {
   width: 62px; padding: 4px 8px; border-radius: 7px; font: inherit;
   border: 1px solid var(--border-hi); background: var(--panel); color: var(--text);
@@ -1478,13 +1519,13 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 
 /* #16 时间换算 */
 .convert { margin-top: 12px; }
-.cv-title { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; }
+.cv-title { font-size: 13px; color: var(--text-dim); margin-bottom: 8px; }
 .cv-list { display: flex; flex-wrap: wrap; gap: 8px; }
 .cv-item {
-  font-size: 12.5px; color: var(--text-dim); padding: 6px 11px; border-radius: 999px;
+  font-size: 13.5px; color: var(--text-dim); padding: 6px 11px; border-radius: 999px;
   background: var(--tint-1); border: 1px solid var(--border);
 }
-.cv-item b { color: var(--accent); font-size: 14px; margin-right: 2px; font-variant-numeric: tabular-nums; }
+.cv-item b { color: var(--accent); font-size: 15px; margin-right: 2px; font-variant-numeric: tabular-nums; }
 
 /* #18 单游戏详情扩展 */
 .drill-more { margin-top: 10px; }
@@ -1492,25 +1533,25 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .dm-share {
   flex: 1 1 220px; padding: 10px 12px; border-radius: 10px;
   border: 1px solid var(--border); background: var(--sunken);
-  font-size: 12px; color: var(--text-dim);
+  font-size: 13px; color: var(--text-dim);
 }
-.dm-share b { font-size: 17px; color: var(--accent); margin-left: 6px; font-variant-numeric: tabular-nums; }
+.dm-share b { font-size: 18px; color: var(--accent); margin-left: 6px; font-variant-numeric: tabular-nums; }
 .dm-share i { display: block; height: 6px; border-radius: 3px; background: var(--accent); margin-top: 8px; opacity: .85; }
 .dm-kv {
   flex: 1 1 118px; padding: 10px 12px; border-radius: 10px; display: flex; flex-direction: column; gap: 2px;
   border: 1px solid var(--border); background: var(--sunken);
 }
-.dm-kv span { font-size: 11.5px; color: var(--text-dim); }
-.dm-kv b { font-size: 14px; color: var(--text-strong); font-variant-numeric: tabular-nums; }
+.dm-kv span { font-size: 12.5px; color: var(--text-dim); }
+.dm-kv b { font-size: 15px; color: var(--text-strong); font-variant-numeric: tabular-nums; }
 .dm-ach { margin-top: 12px; }
-.dm-ach-head { font-size: 12px; color: var(--text-dim); margin-bottom: 6px; }
+.dm-ach-head { font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
 .dm-row {
   display: grid; grid-template-columns: minmax(0, 1fr) 62px 92px; gap: 10px; align-items: baseline;
-  padding: 6px 0; font-size: 12.5px; border-bottom: 1px dashed var(--border);
+  padding: 6px 0; font-size: 13.5px; border-bottom: 1px dashed var(--border);
 }
 .dm-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
 .dm-pct, .dm-date { color: var(--text-faint); text-align: right; font-variant-numeric: tabular-nums; }
-.dm-empty { font-size: 12.5px; color: var(--text-dim); margin: 6px 0 0; }
+.dm-empty { font-size: 13.5px; color: var(--text-dim); margin: 6px 0 0; }
 
 
 /* #11 视图切换过渡（View Transitions API，不支持的浏览器自动忽略） */
@@ -1523,7 +1564,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .heat { gap: 3px; }
   .heat-legend { justify-content: flex-start; }
   .report { grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); }
-  .rp-value { font-size: 17px; }
+  .rp-value { font-size: 18px; }
   .dm-row { grid-template-columns: minmax(0, 1fr) 54px; }
   .dm-date { display: none; }
   .pace { gap: 12px; }

@@ -11,8 +11,8 @@ const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace
 const { chromium } = require('playwright');
 
 const SITE = 'https://hyouka-721.github.io/Steam-playtime/';
-const CSS_V = '110';
-const APP_V = '105';
+const CSS_V = '111';
+const APP_V = '106';
 
 let pass = 0;
 let fail = 0;
@@ -214,7 +214,7 @@ const narrow = await page.evaluate(() => {
   const ir = i?.getBoundingClientRect();
   return {
     docOverflow: document.documentElement.scrollWidth - window.innerWidth,
-    cols: getComputedStyle(document.getElementById('heat-drill')).gridTemplateColumns.split(' ').length,
+    cols: getComputedStyle(document.querySelector('#heat-drill .heat-cal')).gridTemplateColumns.split(' ').length,
     fontSize: i ? parseFloat(getComputedStyle(i).fontSize) : null,
     // 文字实际右边界不得越过格子右边界（scrollWidth 会因 text-align:right 误报）
     textInside: !!(cr && ir) && ir.right + 1 >= cr.right - 6,

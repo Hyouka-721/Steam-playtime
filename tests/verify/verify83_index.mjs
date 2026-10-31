@@ -69,7 +69,7 @@ ok('A11 窄屏两行榜单规则仍在（进度条没有被 display:none）',
   /\.rank-bar\s*\{[^}]*grid-row:\s*2/.test(css));
 
 ok('A12 保留的新模块函数齐全（热力图/勋章/报告/目标/换算/详情/深链）',
-  ['renderDrill', 'stepHeatMonth', 'renderBadges', 'renderReport', 'renderPace', 'renderConvert', 'renderDrillMore', 'syncHash', 'countUp']
+  ['renderDrill', 'stepHeatPage', 'renderBadges', 'renderReport', 'renderPace', 'renderConvert', 'renderDrillMore', 'syncHash', 'countUp']
     .every((f) => new RegExp(`function ${f}\\(`).test(js)));
 
 /* ================= B 运行时 ================= */
@@ -99,8 +99,8 @@ const heat = await page.evaluate(() => {
   };
 });
 ok('B1 下钻是月历热力图：格数是 7 的倍数、覆盖整月、有已点亮的日期',
-  heat.total % 7 === 0 && heat.real >= 28 && heat.real <= 31 && heat.lit > 0 &&
-  /\d{4} 年 \d{1,2} 月/.test(heat.month), JSON.stringify(heat));
+  heat.total % 7 === 0 && heat.real >= 28 && heat.real <= 62 && heat.lit > 0 &&
+  /\d{4} 年 \d{1,2}(–\d{1,2})? 月/.test(heat.month), JSON.stringify(heat));
 await page.click('#btn-drill-back');
 await page.waitForTimeout(500);
 

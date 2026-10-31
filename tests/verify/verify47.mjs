@@ -76,9 +76,23 @@ const openDay = async (date) => {
     const c = [...document.querySelectorAll('#heat-drill .hc.is-live')].reverse().find((x) => x.querySelector('i'));
     return c.dataset.date;
   });
+  /* 第 88 轮：一页只有两个月，目标日期可能不在当前页 → 先翻到能看见它的那一页再点 */
+  await ensurePageWith(d);
   await page.click(`#heat-drill .hc[data-date="${d}"]`);
   await waitDay();
   return d;
+};
+/** 反复点「‹」把目标日期所在的那一页翻出来（找不到就停在最早一页） */
+const ensurePageWith = async (date) => {
+  for (let i = 0; i < 24; i++) {
+    const has = await page.evaluate((d) => !!document.querySelector(`#heat-drill .hc[data-date="${d}"]`), date);
+    if (has) return true;
+    const prevDisabled = await page.evaluate(() => document.getElementById('heat-prev').disabled);
+    if (prevDisabled) return false;
+    await page.click('#heat-prev');
+    await page.waitForTimeout(250);
+  }
+  return false;
 };
 const closeDay = async () => { await page.click('#cal-day-close'); await page.waitForTimeout(300); };
 const hmText = (m) => {
@@ -118,7 +132,7 @@ await page.waitForTimeout(800);
 // ---------- 0. 版本与结构 ----------
 const v = await page.evaluate(() =>
   [...document.querySelectorAll('script[src]')].map((s) => s.getAttribute('src')).find((s) => s.includes('app.js')));
-ok('0.1 app.js 版本号已 bump 到 ?v=105', v === 'app\.js\?v=105', v);
+ok('0.1 app.js 版本号已 bump 到 ?v=105', v === 'app\.js\?v=106', v);
 
 await openDrill();
 const head = await page.evaluate(() => {
@@ -216,11 +230,11 @@ ok('1.5 键盘 Enter 也能打开当天明细（焦点随即进入浮层）',
 await page.keyboard.press('Escape');
 await page.waitForTimeout(300);
 
-// 取当月数据（期望全部从数据源推导，不写死日期）
+// 取「有数据的那一页里、最右边那个月」的数据（期望全部从数据源推导，不写死日期）
+// 第 88 轮起一页两个月，标题是「2026 年 9–10 月」这样的范围 → 月份从月份块的 data-ym 读
 const ds = await page.evaluate(async () => {
-  const m = document.getElementById('heat-month').textContent;
-  const [, y, mm] = m.match(/(\d+) 年 (\d+) 月/);
-  const ym = `${y}-${String(mm).padStart(2, '0')}`;
+  const blocks = [...document.querySelectorAll('#heat-drill .heat-mb:not(.is-empty)')];
+  const ym = blocks[blocks.length - 1].dataset.ym;
   const [daily, meta] = await Promise.all([
     fetch(`data/daily/${ym}.json`, { cache: 'reload' }).then((r) => r.json()),
     fetch('data/meta.json', { cache: 'reload' }).then((r) => r.json()),
@@ -228,7 +242,7 @@ const ds = await page.evaluate(async () => {
   const days = daily.days || {};
   const dates = Object.keys(days).sort();
   return {
-    month: ym, dates,
+    month: ym, dates, label: document.getElementById('heat-month').textContent,
     totals: Object.fromEntries(dates.map((d) => [d, days[d].total_minutes ?? 0])),
     counts: Object.fromEntries(dates.map((d) => [d, (days[d].games ?? []).length])),
     min: dates[0],

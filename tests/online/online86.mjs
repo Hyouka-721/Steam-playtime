@@ -10,8 +10,8 @@ const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace
 const { chromium } = require('playwright');
 
 const SITE = 'https://hyouka-721.github.io/Steam-playtime/';
-const CSS_V = '110';
-const APP_V = '105';
+const CSS_V = '111';
+const APP_V = '106';
 
 let pass = 0;
 let fail = 0;
@@ -97,13 +97,17 @@ const cal = await page.evaluate(() => {
     blanks: cells.filter((c) => c.classList.contains('is-blank')).length,
     na: cells.filter((c) => c.classList.contains('is-na')).length,
     withMin: cells.filter((c) => c.querySelector('i')).length,
-    colW: getComputedStyle(document.getElementById('heat-drill')).gridTemplateColumns,
+    colW: getComputedStyle(document.querySelector('#heat-drill .heat-cal')).gridTemplateColumns,
     month: (document.getElementById('heat-month').textContent || '').trim(),
+    // 第 88 轮起一页两个月、标题是「2026 年 9–10 月」范围式 → 最新月用「最后一个有数据的月份块」判
+    lastYm: [...document.querySelectorAll('#heat-drill .heat-mb:not(.is-empty)')].pop()?.dataset.ym ?? null,
+    blocks: document.querySelectorAll('#heat-drill .heat-mb').length,
     sum: (document.getElementById('heat-sum').textContent || '').trim(),
     week: [...document.querySelectorAll('.heat-week span')].map((s) => s.textContent),
   };
 });
-ok('C1 默认落在最新数据月', cal.month === ymLabel(lastMonth), `显示「${cal.month}」期望「${ymLabel(lastMonth)}」`);
+ok('C1 默认落在最新数据月（页面右列就是最新月）',
+  cal.lastYm === lastMonth, `「${cal.month}」· 右列 ${cal.lastYm}，期望 ${lastMonth}`);
 ok('C2 网格是 7 列（周一→周日，列头 7 个）',
   cal.colW.split(' ').length === 7 && cal.week.join('') === '一二三四五六日',
   `${cal.week.join('')} / ${cal.colW.split(' ').length} 列`);
@@ -143,7 +147,7 @@ const bounds = await page.evaluate(() => ({
 }));
 const onlyOne = firstMonth === lastMonth;
 ok('D2 边界处按钮正确禁用（最新月「›」灰；仅 1 个月时「‹」也灰）',
-  bounds.next === true && bounds.prev === onlyOne && bounds.month === ymLabel(lastMonth),
+  bounds.next === true && bounds.prev === onlyOne && /\d{4} 年 \d{1,2}(–\d{1,2})? 月/.test(bounds.month),
   `${JSON.stringify(bounds)} 月份数=${months.length}`);
 
 /* ---------- E 旧 18 周热力图已彻底消失 ---------- */

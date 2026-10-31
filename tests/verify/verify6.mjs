@@ -49,8 +49,8 @@ check('内联：构建脚本串上 inline-boot', /inline-boot\.mjs/.test(build))
 check('样式：骨架屏样式与动画存在', /\.sk-block/.test(css) && /@keyframes sk-shimmer/.test(css));
 check('样式：尊重 reduced-motion（骨架不流动）', /prefers-reduced-motion: reduce[\s\S]{0,120}sk-block/.test(css));
 check('构建：build.mjs 输出 ach_stats 到 meta', /ach_stats:\s*achStats/.test(build));
-check('版本号：style\.css\?v=110 / app\.js\?v=105 / fx.js?v=16',
-  /style\.css\?v=110/.test(html) && /app\.js\?v=105/.test(html) && /fx\.js\?v=16/.test(html));
+check('版本号：style\.css\?v=111 / app\.js\?v=106 / fx.js?v=16',
+  /style\.css\?v=111/.test(html) && /app\.js\?v=106/.test(html) && /fx\.js\?v=16/.test(html));
 
 /* ---------- B/C/D. 浏览器实测 ---------- */
 const browser = await chromium.launch();
@@ -235,7 +235,7 @@ const drill = await page.evaluate(() => ({
   legacyChart: !!document.getElementById('chart-drill'),
 }));
 check('回归：下钻打开月历热力图（7 列网格 / 有月份 / 有汇总 / 无 ECharts）',
-  drill.open && drill.cells >= 28 && /\d{4} 年 \d{1,2} 月/.test(drill.month) &&
+  drill.open && drill.cells >= 28 && /\d{4} 年 \d{1,2}(–\d{1,2})? 月/.test(drill.month) &&
   drill.sum.length > 0 && drill.echarts === 'undefined' && !drill.legacyChart,
   JSON.stringify(drill));
 

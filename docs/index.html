@@ -33,7 +33,7 @@
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=110">
+<link rel="stylesheet" href="style.css?v=111">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -128,17 +128,17 @@
           <h2 id="drill-title">每日游玩热力图</h2>
         </div>
         <div class="ctrl">
+          <!-- 第 88 轮：一格 = 一天，单月铺满 1300px 会让格子变成 180×78 的长条 →
+               改成**一页两个月并排**（每格约 86×78，接近正方），‹ › 一次翻一页（2 个月） -->
           <div class="heat-nav">
-            <button class="cal-nav" id="heat-prev" type="button" aria-label="上个月">‹</button>
+            <button class="cal-nav" id="heat-prev" type="button" aria-label="上两个月">‹</button>
             <span class="heat-month" id="heat-month">—</span>
-            <button class="cal-nav" id="heat-next" type="button" aria-label="下个月">›</button>
+            <button class="cal-nav" id="heat-next" type="button" aria-label="下两个月">›</button>
           </div>
         </div>
       </div>
-      <div class="heat-week" aria-hidden="true">
-        <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
-      </div>
-      <div class="heat heat-cal" id="heat-drill"></div>
+      <!-- 月份块（每个含自己的月份标题 / 星期表头 / 7 列网格）由 renderDrill 渲染 -->
+      <div class="heat-pair" id="heat-drill"></div>
       <div class="heat-foot">
         <span class="heat-sum" id="heat-sum">—</span>
         <span class="heat-legend" aria-hidden="true">
@@ -297,6 +297,6 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <script src="fx.js?v=16"></script>
-<script src="app.js?v=105" onerror="__appFail()"></script>
+<script src="app.js?v=106" onerror="__appFail()"></script>
 </body>
 </html>
