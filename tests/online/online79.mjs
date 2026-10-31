@@ -2,7 +2,9 @@
    对应提交：929e2e3(feat order) / f8b0aa2(verify78) / 8786c50(verify79) / 5bfb903(共用海报守卫)
 
    ① 内容指纹：线上 watch.html 引用 v17/v12；watch.js、watch.css、watch.json 与本地 md5 全等
-   ② 排序字段：新增面板预填 3；编辑老条目也预填 3（默认值读取时生效）；非法值阻断且零 PUT
+   ② 排序字段：新增面板预填 3；编辑已有条目预填 = 该条目数据里的 order（无字段归 3，
+      第 83 轮起从线上数据推导 —— 原先写死「全部无 order → 预填 3」，用户真填了就误红）；
+      非法值阻断且零 PUT
    ③ 顺序一致：线上 119 条顺序 = 数据推算的期望（当前含 order 级；第 80 轮用户真设了 order 后，
       原先「不含 order 的旧比较器」已不能当期望，否则会要求功能失效）
    ④ 契约：网格卡片点不开编辑（无 data-id/role/tabindex），时间轴条目点得开
@@ -136,10 +138,25 @@ console.log('\n== B 排序字段与校验（只测拦截，不写线上数据）
   await page.click('#w-avatar');
   await page.waitForFunction(() => document.querySelectorAll('#w-tl .tl-item').length > 0, null, { timeout: 60000 });
   await page.waitForTimeout(600);
-  const firstName = await page.evaluate(() => {
+  /* 编辑线上真实条目：排序预填值必须等于该条目数据里的归一化 order（无字段 → 3）。
+     第 83 轮修正：原判据写死「线上全部条目都没有 order 字段 → 必须预填 3」，
+     用户给《给阿嬷的情书》填了 order=2 之后这条就红了 —— 「用户用了功能」不该是失败原因。
+     现在期望值从线上数据推导，零迁移语义（无字段/非法值→3）仍由 orderOf() 保证。 */
+  const firstMeta = await page.evaluate(() => {
     const el = document.querySelector('#w-tl .tl-item');
-    return el ? ((el.querySelector('.tl-name') || {}).textContent || '').trim() : '';
+    return el ? {
+      name: ((el.querySelector('.tl-name') || {}).textContent || '').trim(),
+      id: el.getAttribute('data-id'),
+    } : null;
   });
+  const orderOf = (it) => {
+    const v = it && it.order;
+    if (v === undefined || v === null || v === '') return 3;
+    const s = String(v);
+    return /^[0-5]$/.test(s) ? Number(s) : 3;
+  };
+  const liveItem = firstMeta && live && (live.items || []).find((x) => x.id === firstMeta.id);
+  const wantOrder = orderOf(liveItem);
   await page.evaluate(() => { document.querySelector('#w-tl .tl-item').click(); });
   await page.waitForTimeout(600);
   const eForm = await page.evaluate(() => ({
@@ -147,9 +164,9 @@ console.log('\n== B 排序字段与校验（只测拦截，不写线上数据）
     order: (document.getElementById('add-order') || {}).value,
     title: ((document.getElementById('w-add-title') || {}).textContent || '').trim(),
   }));
-  ok('B2 编辑线上真实条目（全部无 order 字段）：排序预填 3，且标题预填该条目',
-    eForm.open && eForm.order === '3' && eForm.title.indexOf(firstName) >= 0,
-    `${eForm.title} order=${eForm.order}`);
+  ok(`B2 编辑线上真实条目：排序预填 = 该条目 order（无字段归 3；此条期望 ${wantOrder}），且标题预填该条目`,
+    eForm.open && eForm.order === String(wantOrder) && eForm.title.indexOf(firstMeta.name) >= 0,
+    `${eForm.title} order=${eForm.order} 期望=${wantOrder}（数据里 order=${liveItem ? JSON.stringify(liveItem.order) : '未找到'}）`);
 
   const tryBad = async (val) => {
     const before = puts;
