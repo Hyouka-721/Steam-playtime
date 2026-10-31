@@ -746,7 +746,17 @@ select.w-input { cursor: pointer; }
   .w-main { padding: 14px 18px 84px; }   /* 同上，窄屏加号占底部 66px */
   .w-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 28px 12px; }
   .poster-note { display: none; }       /* 窄屏优先保证海报与标题，短评移入详情不显示 */
-  .w-foot { padding: 8px 18px 36px; }
+  .w-foot {
+    /* 第 82 轮：加了「共 N 部影视剧」后三段一行装不下 —— 窄屏改竖排，
+       否则「← 回到 My Game Time」会被折成两行、右端还会被右下角加号压住。
+       底 padding 64px 是为了让最后一行躲开加号（加号占底部约 66px）。 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px 64px;
+  }
+  .w-foot-sep { display: none; }   /* 竖排时不保留「·」，否则每行一个点 */
   /* 第 80 轮 P6：页脚一行要装「提示 + 删除 + 取消 + 保存」四件，窄屏下提示会被挤成
      一字一行（竖排）并把弹窗顶得很高 —— 让提示独占一行，按钮另起一行。
      ⚠️ 必须写在这个已有的 860 块里：verify60/62 是按「文件里第一个 860 块」取内容的，

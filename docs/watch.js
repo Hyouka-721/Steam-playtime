@@ -25,6 +25,7 @@
   var tlEl = document.getElementById('w-tl');
   var emptyEl = document.getElementById('w-empty');
   var updatedEl = document.getElementById('w-updated');
+  var countEl = document.getElementById('w-total');   // 第 82 轮：页脚「共 N 部影视剧」
   // 2026-10-24 第 56 轮：网格 / 时间轴改由史蒂夫头像单选切换（原 .w-layout-btn 组已删除），
   // 头像同时负责 aria-pressed 与 title / aria-label 的动态同步。
   var avatarEl = document.getElementById('w-avatar');
@@ -238,7 +239,15 @@
   }
 
   /* ---------- 总渲染 ---------- */
+  /* 第 82 轮：页脚影视剧总数。取 ALL.length（全量），与当前「类型」筛选**无关** ——
+     筛到只剩 3 部时也照样报总数，否则这个数字会跟筛选结果混淆。
+     放在 paint() 里同步：加载 / 新增 / 编辑 / 删除之后都会重绘，数字自动跟上。 */
+  function syncCount() {
+    if (countEl) countEl.textContent = '共 ' + ALL.length + ' 部影视剧';
+  }
+
   function paint() {
+    syncCount();
     var list = visible();
 
     // 第 72 轮：排序切换只作用于网格视图；时间轴恒按观影时间倒序（月份分组的前提）

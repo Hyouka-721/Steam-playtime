@@ -39,7 +39,7 @@ ok('A4 .tl-item 的缩略图宽度固定（列对齐的基准，所有条目同�
 const enRule = (cssNC.match(/\.tl-en \{([^}]*)\}/) || [, ''])[1];
 ok('A5 英文名不截断：没有 ellipsis / line-clamp，且允许 break-word 折行',
   !/text-overflow/.test(enRule) && !/line-clamp/.test(enRule) && /word-break: break-word/.test(enRule), enRule.replace(/\s+/g, ' '));
-ok('A6 版本号 bump：watch.css?v=19', /watch\.css\?v=19"/.test(html));
+ok('A6 版本号 bump：watch.css?v=20', /watch\.css\?v=20"/.test(html));
 
 /* ================= B 桌面：列对齐 ================= */
 console.log('\n== B 桌面：六列跨条目对齐（1440 / 1280 / 1180 / 1179 / 1100 / 1000 / 900 / 861） ==');

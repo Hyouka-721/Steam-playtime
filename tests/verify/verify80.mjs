@@ -11,7 +11,7 @@
    D 删除（7）：只在编辑模式出现、两段确认、无 Token 零请求、有 Token 一次 PUT 且数据真的少了、
       390px 页脚不把提示压成一字一行
    E 实体数据（2）：tags 字段全部保留、词表符合约定
-   ⚠️ 版本号：watch.css?v=19 / watch.js?v=14（第 81 轮 bump）
+   ⚠️ 版本号：watch.css?v=20 / watch.js?v=15（第 81 轮 bump）
    ⚠️ 所有 mock 上下文都带 serviceWorkers:'block' —— 第 80 轮起 SW 也拦 watch.json
       （网络优先），屏蔽 SW 才能保证 page.route 造数绝对生效。 */
 import { createRequire } from 'module';
@@ -36,8 +36,8 @@ const P = 'img/minion-0ef9a202.webp';
 
 /* ================= A 静态指纹 ================= */
 console.log('== A 静态指纹 ==');
-ok('A1 版本号 bump：watch.css?v=19 / watch.js?v=14',
-  /watch\.css\?v=19"/.test(html) && /watch\.js\?v=14"/.test(html));
+ok('A1 版本号 bump：watch.css?v=20 / watch.js?v=15',
+  /watch\.css\?v=20"/.test(html) && /watch\.js\?v=15"/.test(html));
 
 ok('A2 胶片颗粒：body::before 两层点阵 + pointer-events:none（不挡点击）',
   /body::before \{[\s\S]{0,420}pointer-events: none/.test(cssNC) &&

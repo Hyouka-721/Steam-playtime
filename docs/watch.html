@@ -8,7 +8,7 @@
 <link rel="icon" type="image/webp" href="img/minion-0ef9a202.webp">
 <!-- 与游戏站同一套本地花体字，保持品牌一致；preload + font-display:block 消除 FOUT -->
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="watch.css?v=19">
+<link rel="stylesheet" href="watch.css?v=20">
 </head>
 <body>
 
@@ -75,6 +75,9 @@
 
 <footer class="w-foot">
   <span id="w-updated">—</span>
+  <span class="w-foot-sep">·</span>
+  <!-- 第 82 轮：影视剧总数（全量，不随「类型」筛选变化），由 watch.js 在每次渲染时同步 -->
+  <span id="w-total">共 — 部影视剧</span>
   <span class="w-foot-sep">·</span>
   <a href="./">← 回到 My Game Time</a>
 </footer>
@@ -185,7 +188,7 @@
 </dialog>
 
 <div class="w-toast" id="w-toast" role="status" hidden></div>
-<script src="watch.js?v=14"></script>
+<script src="watch.js?v=15"></script>
 <script>
 /* 第 75 轮：注册 Service Worker（docs/sw.js）。
    海报是内容哈希命名的不可变资源，Pages 只给 max-age=600，刷新超 10 分钟就要
