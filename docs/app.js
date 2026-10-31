@@ -5,8 +5,11 @@
   const $ = (id) => document.getElementById(id);
   const ICON = (appid, hash) =>
     hash ? `https://media.steampowered.com/steamcommunity/public/images/apps/${appid}/${hash}.jpg` : null;
-  // 游戏横幅大图（Steam 官方 CDN，460x215）
-  const CAPSULE = (appid) => `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/header.jpg`;
+  // 游戏横幅大图：第 84 轮起本地化到 docs/img/covers/<appid>.webp
+  // （scripts/fetch-covers.mjs 生成，460 宽 q78，53 张合计约 1MB）。
+  // 保留 CDN 地址做兜底：新入库、还没跑过脚本的游戏仍能显示封面。
+  const CAPSULE_CDN = (appid) => `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/header.jpg`;
+  const CAPSULE = (appid) => `img/covers/${appid}.webp`;
 
   /* 1x1 透明 GIF 占位（35 字节）：
      胶囊图在真正需要时才赋 src（见 observeCapsules）。用 data URI 而不是
@@ -855,7 +858,7 @@
     return `<span class="rank-capsule-wrap${isPerfect ? ' is-perfect' : ''}">` +
       `<img class="rank-capsule" data-src="${CAPSULE(appid)}" src="${BLANK_GIF}" alt=""` +
       `${eager ? ' loading="eager" fetchpriority="high"' : ''} decoding="async" width="130" height="60"` +
-      ` onerror="this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'">` +
+      ` onerror="if(!this.dataset.fb){this.dataset.fb=1;this.src='${CAPSULE_CDN(appid)}'}else{this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'}">` +
       `${rings}</span>`;
   }
 
@@ -1474,7 +1477,8 @@
     const el = $('hero-bg');
     if (!el) return;
     if (!appid) { el.style.opacity = '0'; return; }
-    el.style.backgroundImage = `url("${CAPSULE(appid)}")`;
+    // 两层背景：本地封面命中第一层；没下载过这张图时浏览器会自然落到 CDN 那层
+    el.style.backgroundImage = `url("${CAPSULE(appid)}"), url("${CAPSULE_CDN(appid)}")`;
     el.style.opacity = '1';
   }
 

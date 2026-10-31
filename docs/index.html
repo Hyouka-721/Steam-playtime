@@ -313,7 +313,16 @@
 
 <!-- fx.js 自己绑定页脚的氛围开关（#fx-seg），app.js 不再参与特效状态；
      仍保持它先加载，任何外部脚本都能安全读取 window.__fx -->
+<script>
+/* 第 84 轮：首页也注册同一个 Service Worker（与 watch.html 共享 scope，重复注册是幂等的）。
+   只做「离线可打开 + 静态资源缓存」，数据仍网络优先，刷新即最新。 */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function () { /* 忽略：不影响页面 */ });
+  });
+}
+</script>
 <script src="fx.js?v=16"></script>
-<script src="app.js?v=101" onerror="__appFail()"></script>
+<script src="app.js?v=102" onerror="__appFail()"></script>
 </body>
 </html>

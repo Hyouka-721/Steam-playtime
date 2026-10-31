@@ -45,13 +45,13 @@ for (let i = 1; i <= 20; i++) {
     await page.waitForTimeout(8000);
     continue;
   }
-  const fresh = html.includes('style.css?v=107') && html.includes('app.js?v=101');
+  const fresh = html.includes('style.css?v=107') && html.includes('app.js?v=102');
   console.log(`  第 ${i} 次：${fresh ? '已生效' : '仍是旧版'}`);
   if (fresh) break;
   await page.waitForTimeout(10000);
 }
-ok('A1 线上 index.html 已是 v=107 / v=101',
-  html.includes('style.css?v=107') && html.includes('app.js?v=101'),
+ok('A1 线上 index.html 已是 v=107 / v=102',
+  html.includes('style.css?v=107') && html.includes('app.js?v=102'),
   (html.match(/(style\.css|app\.js|fx\.js)\?v=\d+/g) || []).join(' '));
 
 /* ---------- B 字节指纹 ---------- */

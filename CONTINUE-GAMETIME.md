@@ -60,7 +60,7 @@ README.md                    # 完整说明（管线/部署/密钥/Schema/自检
 
 ## 四、当前进展与版本
 
-- 版本号：`style.css?v=107` / `app.js?v=101` / `fx.js?v=16`（**硬编码在 `verify6.mjs` 第 52 行**；第 83 轮 index 侧改动后从 106/100 bump）。
+- 版本号：`style.css?v=107` / `app.js?v=102` / `fx.js?v=16`（**硬编码在 `verify6.mjs` 第 52 行**；第 84 轮封面本地化后 app.js 再 bump 一次）。
 - 最近一次针对游戏站的大改是**第 24 轮「首屏加载优化」**（在 verify6 注释里记着）：数据全内联、`cache:"default"`、月份文件 `Promise.allSettled` 并行、成就按需、骨架屏、`meta.ach_stats` 摘要。
 - 之后 25~80 轮几乎都在做观影页（watch），游戏站只在 CI 每晚改 `docs/index.html` 数据、以及「日历入口收敛到最近游玩」等零散订正。
 - **第 82 轮（index 侧，2026-10-31，本地改动，未提交/未上线）**三项：① 全站移除 `title` 悬停气泡（页眉三项 + 五张概览卡 + 返回按钮 + 日历日期格 + 排行榜行 + 氛围开关禁用态），语义一律改由 `aria-label` 承载；② `.site-title` 加 `user-select:none`（双击不再框选、拖拽不带走文字，点它仍回顶部）；③ 删掉排行榜首行三只吉祥物（加菲猫 / 猫和老鼠 / 企鹅）——模板、CSS 三条规则、三张 webp 全清，`.rank-list` 的 18px 上内边距**刻意保留**（首行位置与 `--cal-lift` 的换算依赖它）。新增 `tests/verify/verify82_index.mjs` **16/16**。
@@ -81,6 +81,11 @@ README.md                    # 完整说明（管线/部署/密钥/Schema/自检
   ⑬ **窄屏两行榜单**：≤860px 改成 `34px 100px 1fr`，进度条落第二行；**别写成 4 列**（定宽吃光后片名只剩 30px）。
   ⑭ **页脚去重**：删掉 `#footer-gen`（与「数据」卡重复）。
   新增 `tests/verify/verify83_index.mjs` **28 条**；回归：verify6 35、47 72、48 78、49 47、54 23、55 40、56 49、58 23、82_index 16、83_index 28 —— **全绿**。
+- **第 84 轮（index 侧，2026-10-31，发布轮）两项**：
+  ① **封面本地化**：`scripts/fetch-covers.mjs` 把 53 张 `header.jpg` 下成 `docs/img/covers/<appid>.webp`（460 宽 q78，合计约 1MB）；`CAPSULE()` 改指本地，另留 `CAPSULE_CDN()` 兜底，胶囊图 `onerror` 走「本地 → CDN → 小图标」三级，悬停底纹用双层 `background-image`。**新游戏入库后要重跑这个脚本**（增量，已存在的跳过）。
+  ② **离线可用**：`docs/sw.js` 从「只管观影页」扩成两页共用 —— 导航网络优先回落缓存、`/data/*` 网络优先、`?v=` 资源与 `/img/covers/*` 缓存优先；首页也注册同一个 SW。**预热必须从 index.html 现场解析出 `style.css?v=` / `app.js?v=` 再收进缓存**（首次访问时 SW 还没接管，那几个请求没经过 fetch 事件，不预热就会「断网刷新一片空白」）。
+  新增 `tests/verify/verify83_index.mjs` 的 C 段 **5 条离线断言**（SW 接管 / 断网刷新仍渲染 53 行 / 离线封面仍显示 / 零异常 / 恢复网络仍走网络）+ `tests/online/online84.mjs` 上线复验。
+- **⚠️ 本次发布明确排除**：「按类型推荐」（依赖 `appid → 类型` 映射，素材未提供，从未实现，无需回滚）。
 - 数据现状：`docs/data/daily/` 按月一份；`meta.json` 有 `ach_stats` / `ach_perfect` / `ach_almost`；`achievements.json` 约 285KB。
 
 ## 五、硬约束（违反必炸）
@@ -98,6 +103,9 @@ README.md                    # 完整说明（管线/部署/密钥/Schema/自检
 11. **新面板一律 `.panel` + `.panel-head`；只有一行内容用 `.panel-strip`**（无标题栏，padding 12/18）。热力图格子用固定 `11px`，**不要用 `1fr`** —— 容器宽 1180 时会被撑到 60px 一方，整块 623px 高。
 12. **`meta.ach_almost` 与 `games_lifetime[].bar` 都是构建期产物**：改 `build.mjs` 后必须重跑 `npm run build`；主色表缺失不报错（前端回落十色板），重建它要联网跑 `node scripts/rank-colors.mjs`（增量，`--force` 全量）。
 13. **View Transition 必须加锁**：`state.vt` 在跑就别再开第二个，否则 Chromium 抛 `Transition was skipped`，会以 pageerror 计入「零 JS 异常」断言。
+14. **两个页面共用一个 Service Worker**（同域同 scope 只能有一个）：改 `sw.js` 时观影页那两条规则（海报 cache-first、`watch.json` 网络优先）**不许动**，`verify75 A5` / `verify80 A8-A9` 盯着；新增缓存要在 `activate` 里一起保留，否则每次发布都把缓存清掉。
+15. **首页的 css/js 必须写进 SW 预热**，且版本号要**从 index.html 现场解析**（不能写死 `?v=107`，否则下次 bump 就失效）。
+16. **测试上下文里的 SW**：`page.route` 造的 mock 数据会被 SW 绕过（同一个 Chromium 老问题）。给 index 加 SW 之后，凡是用 `page.route` 造数据的套件都要 `serviceWorkers: 'block'`；只有专门测离线的那段才允许 SW 生效。
 9. **条数/百分比写死会随快照漂移**：期望值从内联 `__BOOT` 里读（verify6 成就卡就是教训，第 70 轮改过）。
 
 ## 六、标准工作流

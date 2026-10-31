@@ -49,8 +49,8 @@ check('内联：构建脚本串上 inline-boot', /inline-boot\.mjs/.test(build))
 check('样式：骨架屏样式与动画存在', /\.sk-block/.test(css) && /@keyframes sk-shimmer/.test(css));
 check('样式：尊重 reduced-motion（骨架不流动）', /prefers-reduced-motion: reduce[\s\S]{0,120}sk-block/.test(css));
 check('构建：build.mjs 输出 ach_stats 到 meta', /ach_stats:\s*achStats/.test(build));
-check('版本号：style\.css\?v=107 / app\.js\?v=101 / fx.js?v=16',
-  /style\.css\?v=107/.test(html) && /app\.js\?v=101/.test(html) && /fx\.js\?v=16/.test(html));
+check('版本号：style\.css\?v=107 / app\.js\?v=102 / fx.js?v=16',
+  /style\.css\?v=107/.test(html) && /app\.js\?v=102/.test(html) && /fx\.js\?v=16/.test(html));
 
 /* ---------- B/C/D. 浏览器实测 ---------- */
 const browser = await chromium.launch();

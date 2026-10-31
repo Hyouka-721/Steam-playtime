@@ -85,7 +85,8 @@ ok('A8 P7 SW 缓存数据：独立缓存名 + 网络优先（先 fetch，失败�
   })(), '网络优先：fetch → catch → cache.match');
 
 ok('A9 P7 activate 保留两个缓存（否则每次发布都把数据缓存清掉）',
-  /\(k === CACHE \|\| k === DATA_CACHE\) \? null : caches\.delete\(k\)/.test(swNC));
+  // 第 84 轮：首页也进了同一个 SW，缓存从 2 个变 4 个（app-shell / app-data 新增）
+  /\(k === CACHE \|\| k === DATA_CACHE \|\| k === SHELL \|\| k === APP_DATA\) \? null : caches\.delete\(k\)/.test(swNC));
 
 /* ================= mock 数据 ================= */
 const MOCK = {

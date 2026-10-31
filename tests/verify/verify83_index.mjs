@@ -6,7 +6,8 @@
      #14 临门一脚推荐   #15 阶段报告   #16 时间换算   #18 详情扩展
      #19 深链   #20 manifest   #21 周目标与节奏   （#6 由日历二级承载，见 D8）
 
-   断言分组：A 静态（12） / B 运行时（15） */
+   第 84 轮追加：离线可用（Service Worker 与观影页共用一个，见 docs/sw.js）+ 本地封面。
+   断言分组：A 静态（12） / B 运行时（16） / C 离线（5） */
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
 
@@ -133,7 +134,8 @@ const hero = await page.evaluate(() => {
   const el = document.getElementById('hero-bg');
   return el ? { exists: true, opacity: getComputedStyle(el).opacity, bg: el.style.backgroundImage.slice(0, 40) } : { exists: false };
 });
-ok('B7 悬停榜单行时页底浮出该游戏封面底纹', hero.exists && hero.opacity !== '0' && /steamstatic/.test(hero.bg), JSON.stringify(hero));
+ok('B7 悬停榜单行时页底浮出该游戏封面底纹（第 84 轮起优先用本地封面）',
+  hero.exists && hero.opacity !== '0' && /img\/covers\//.test(hero.bg), JSON.stringify(hero));
 
 // #12 勋章墙（在成就视图）
 await page.click('#card-ach');
@@ -221,6 +223,70 @@ const mobile = await page.evaluate(() => {
 });
 ok('B15 390px 下进度条仍在，并落到第二行、无横向溢出',
   mobile.barVisible && mobile.secondLine && mobile.overflow <= 0, JSON.stringify(mobile));
+
+/* ================= C 离线（第 84 轮） ================= */
+console.log('== C 离线 ==');
+{
+  // 干净上下文：不 abort、不用旧缓存；先在线跑一次让 SW 接管并写缓存，再断网刷新
+  const offCtx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  await offCtx.route(/^https?:\/\/(cdn\.cloudflare\.steamstatic\.com|media\.steampowered\.com|cdn\.jsdelivr\.net)\//, (r) => r.abort());
+  const off = await offCtx.newPage();
+  const offErrs = [];
+  off.on('pageerror', (e) => offErrs.push(String(e)));
+  await off.goto(BASE, { waitUntil: 'load', timeout: 60000 });
+  await off.waitForFunction(() => navigator.serviceWorker && navigator.serviceWorker.controller !== null, null, { timeout: 20000 }).catch(() => {});
+  await off.waitForTimeout(1200);
+
+  const swState = await off.evaluate(async () => {
+    const reg = await navigator.serviceWorker.getRegistration();
+    const keys = await caches.keys();
+    let shellHasIndex = false;
+    if (keys.includes('app-shell-v1')) {
+      const c = await caches.open('app-shell-v1');
+      shellHasIndex = !!(await c.match('index.html')) || !!(await c.match('./'));
+    }
+    return { controlled: !!reg && !!reg.active, keys, shellHasIndex };
+  });
+  ok('C1 SW 已注册并接管首页，外壳缓存里有 index.html',
+    swState.controlled && swState.shellHasIndex, JSON.stringify(swState.keys));
+
+  // 断网后刷新：导航回落缓存 → 页面仍能渲染
+  await offCtx.setOffline(true);
+  let offlineOk = false;
+  let offlineRows = 0;
+  try {
+    await off.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
+    await off.waitForTimeout(900);
+    offlineOk = await off.evaluate(() => {
+      const v = document.getElementById('c-lifetime');
+      return !!v && v.textContent.trim() !== '' && v.textContent.trim() !== '—';
+    });
+    offlineRows = await off.evaluate(() => document.querySelectorAll('#lt-list .rank-item').length);
+  } catch (e) {
+    offlineOk = false;
+  }
+  ok('C2 断网刷新后页面仍能打开并渲染出数据（不是空白/报错页）',
+    offlineOk && offlineRows > 20, `ok=${offlineOk} rows=${offlineRows}`);
+
+  // 本地封面在离线时仍然完整（说明命中了 SW 缓存，而不是 404）
+  const coverOk = await off.evaluate(() => {
+    const imgs = [...document.querySelectorAll('#lt-list img.rank-capsule')].slice(0, 3);
+    return imgs.length > 0 && imgs.every((i) => i.complete && i.naturalWidth > 0);
+  });
+  ok('C3 离线状态下前几张封面仍加载成功（来自缓存，非 404）', coverOk);
+
+  const offReal = offErrs.filter((e) => !/Failed to load resource|net::ERR|ERR_BLOCKED|ERR_FAILED/i.test(e));
+  ok('C4 离线过程零 JS 异常', offReal.length === 0, offReal.slice(0, 2).join(' | '));
+
+  // 恢复网络后回到最新（网络优先，不是永久吃缓存）
+  await offCtx.setOffline(false);
+  const fresh = await off.evaluate(async () => {
+    const r = await fetch('data/meta.json', { cache: 'no-store' });
+    return r.ok;
+  });
+  ok('C5 恢复网络后数据仍走网络（网络优先语义未被破坏）', fresh);
+  await offCtx.close();
+}
 
 const realErrs = errs.filter((e) => !/Failed to load resource|net::ERR|ERR_BLOCKED|ERR_FAILED/i.test(e));
 ok('B16 全程零 JS 异常（含视图过渡）', realErrs.length === 0, realErrs.slice(0, 3).join(' | '));
