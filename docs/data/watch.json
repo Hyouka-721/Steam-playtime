@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-31T17:22:01+08:00",
+  "updated_at": "2026-10-31T17:23:54+08:00",
   "items": [
     {
       "id": "2026-10-31-dear-you",
@@ -2344,26 +2344,6 @@
         "科幻"
       ],
       "note": "诸天降临"
-    },
-    {
-      "id": "2019-08-02-forrest-gump",
-      "title": "阿甘正传",
-      "kind": "movie",
-      "watched_at": "2019-08-02",
-      "poster": "img/watch/forrest-gump-24c1e97a.webp",
-      "added_at": "2026-10-25T15:58:59+08:00",
-      "poster_w": 640,
-      "poster_h": 845,
-      "poster_320": "img/watch/forrest-gump-24c1e97a-320.webp",
-      "poster_480": "img/watch/forrest-gump-24c1e97a-480.webp",
-      "title_en": "Forrest Gump",
-      "year": 1994,
-      "rating": 7.5,
-      "tags": [
-        "剧情",
-        "温情"
-      ],
-      "note": "人生就像一盒巧克力"
     },
     {
       "id": "2019-07-11-item",
