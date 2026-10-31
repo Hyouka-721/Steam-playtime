@@ -2,7 +2,8 @@
    第 80 轮对应提交：d120985(feat 七项) / 34b5161(revert A1) / e74ad2a(合并远端 tags)
    第 81 轮：用户指令「在所有界面删除 P2 标签 chip 筛选」→ chip 行连同筛选逻辑整体下线
 
-   ① 内容指纹：线上 watch.html 引用 v19/v14；watch.css / watch.js / sw.js 与本地 md5 全等
+   ① 内容指纹：线上 watch.html 引用 v19/v14；watch.css / watch.js 与工作区 md5 全等；
+      sw.js 与 **HEAD 提交** md5 全等（两页共用文件，工作区可能被另一条线改到一半）
    ② A1 已回退：CSS 里没有 .poster[data-score]，线上网格 0 张卡片带该属性
    ③ 六项生效：颗粒+光晕（含页眉那层）、时间轴 hover、--text-dim、
       编辑模式才出现的删除按钮（第一下只举手、零请求）
@@ -14,6 +15,7 @@
 import { createRequire } from 'module';
 import fs from 'fs';
 import crypto from 'crypto';
+import { execFileSync } from 'child_process';
 const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace/');
 const { chromium } = require('playwright');
 
@@ -27,7 +29,19 @@ const norm = (s) => String(s).replace(/\r\n/g, '\n');
 const md5txt = (s) => md5(Buffer.from(norm(s), 'utf8'));
 const localCss = norm(fs.readFileSync(ROOT + 'watch.css', 'utf8'));
 const localJs = norm(fs.readFileSync(ROOT + 'watch.js', 'utf8'));
-const localSw = norm(fs.readFileSync(ROOT + 'sw.js', 'utf8'));
+/* sw.js 是 index 与 watch 两页共用的文件，另一条线可能在工作区里改到一半（未提交）。
+   线上部署永远来自「已推送的提交」，所以 A4 比 HEAD 而不是工作区 —— 比的是部署结果，
+   不是同事的草稿。判断依据换成 git 对象，工作区脏了也不会误报。（第 83 轮修正） */
+const localSw = (() => {
+  try {
+    return norm(execFileSync('git', ['show', 'HEAD:docs/sw.js'], {
+      cwd: 'C:/Users/33329/WorkBuddy/2026-10-13-18-17-49/steam-playtime', encoding: 'utf8', maxBuffer: 1 << 24,
+    }));
+  } catch (e) {
+    console.log('  (提示) 取不到 HEAD 版 sw.js，回落工作区：' + e.message.split('\n')[0]);
+    return norm(fs.readFileSync(ROOT + 'sw.js', 'utf8'));
+  }
+})();
 const localData = JSON.parse(fs.readFileSync(ROOT + 'data/watch.json', 'utf8').replace(/^\uFEFF/, ''));
 const N = localData.items.length;
 const localTags = JSON.stringify(localData.items.map((x) => [x.title, x.tags]));
@@ -78,7 +92,7 @@ ok('A2 线上 watch.css 与本地逐字节相同（CRLF 归一后 md5 全等）'
 ok('A3 线上 watch.js 与本地逐字节相同',
   md5txt(fetched.js) === md5txt(localJs), md5txt(fetched.js).slice(0, 12));
 
-ok('A4 线上 sw.js 与本地逐字节相同',
+ok('A4 线上 sw.js 与 HEAD 提交逐字节相同（两页共用文件，不比工作区草稿）',
   md5txt(fetched.sw) === md5txt(localSw), md5txt(fetched.sw).slice(0, 12));
 
 const liveData = JSON.parse(fetched.data);
