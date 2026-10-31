@@ -137,6 +137,12 @@ const errs = [];
   await p.waitForFunction(() => document.querySelectorAll('#w-grid .poster').length > 0, null, { timeout: 60000 });
   await p.evaluate(() => document.fonts.ready);
   await p.waitForTimeout(800);
+  /* 第 83 轮补：首卡 img 在解码完成前 currentSrc 可能还是空串（偶发 FAIL 过一次），
+     先等它就绪再读属性。这里只补就绪前提，不改 B4 的期望 —— 真没加载出来照样 FAIL。 */
+  await p.waitForFunction(() => {
+    const im = document.querySelector('#w-grid .poster img');
+    return im && im.complete && !!im.currentSrc;
+  }, null, { timeout: 20000 }).catch(() => {});
 
   const r = await p.evaluate(() => {
     const grid = document.getElementById('w-grid');
