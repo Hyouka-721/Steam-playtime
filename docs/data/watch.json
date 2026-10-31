@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-31T17:09:00+08:00",
+  "updated_at": "2026-10-31T17:09:34+08:00",
   "items": [
     {
       "id": "2026-10-31-dear-you",
@@ -674,11 +674,11 @@
       "poster_480": "img/watch/prehistoric-planet-bbfd4f72-480.webp",
       "title_en": "Prehistoric Planet",
       "year": 2022,
-      "rating": 8.5,
+      "rating": 9,
+      "order": 1,
       "tags": [
         "纪录"
       ],
-      "order": 1,
       "note": "“The prehistoic plant is a green planet.”"
     },
     {
