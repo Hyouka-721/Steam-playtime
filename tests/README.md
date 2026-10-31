@@ -23,7 +23,7 @@ tests/
   ```
   C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe tests/verify/verify70.mjs
   ```
-- 跑全部 28 个套件（在 bash 里循环）：
+- 跑全部 31 个套件（在 bash 里循环；含另一条线的 index 侧 `verify47/48/49/6/82_index/83_index`）：
   ```bash
   NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
   for s in verify6 verify47 verify48 verify49 verify54 verify55 verify56 verify57 verify58 \
@@ -32,7 +32,7 @@ tests/
   done
   ```
 
-## 套件清单与当前基线（第 87 轮：index 侧 7 套件实测 **307 条 0 FAIL**；watch 侧本轮未改动，沿用第 84 轮基线）
+## 套件清单与当前基线（watch 侧第 85 轮：**25 套件 776 条 0 FAIL**；index 侧第 87 轮：7 套件 307 条 0 FAIL —— 两条线轮号各走各的，认文件名后缀 `_watch` / `_index`）
 
 | 脚本 | 覆盖轮次 / 契约 | 条数 |
 |---|---|---|
@@ -63,6 +63,7 @@ tests/
 | `verify80` | 第 80 轮：胶片颗粒+放映机光晕/时间轴 hover 统一/次文字提亮/网页端删除（两段式）/SW 缓存 watch.json（网络优先）。⚠️ ① 原七项中的 A1「评分→海报描边三档」已被用户回退，套件随之删掉 4 条；② 第 81 轮用户要求**删除 P2 标签 chip 筛选**，原 9 条 chip 断言压成 1 条「chip 容器/CSS/JS 四件套必须都不在」，C 段只留默认评分序 / 无残留空档 / 排序切换仍可用 / 零异常 | 22 |
 | `verify82` | 第 82 轮：页脚「共 N 部影视剧」总数（全量，不随类型筛选变；加载/新增/编辑/删除后自动跟上）+ 390px 竖排不溢出不被加号压住 | 14 |
 | `verify83` | 第 83 轮：移除全页 title 悬停气泡（小黄人 / 史蒂夫 / 加号 / 网格短评 / 时间轴评语 + syncAvatar 动态写入），语义改由 aria-label 承载 | 13 |
+| `verify85_watch` | 第 85 轮 watch 侧第二批 P1：**字阶归一**（11.5/12.5/13.5/14.5 四个半像素档并入 12/12/13/14；时间轴 21/18.5/18.5/19 是第 64 轮契约，不在范围，A6 反向守着）+ **片名单行省略**（桌面 `nowrap`+`ellipsis`，≤480 恢复两行 clamp）+ **评分牌 1px 金边**（`padding` 收到 `1px 7px` 抵消边框占位，整体尺寸不变） | 16 |
 | `verify84_watch` | 第 84 轮 watch 侧第一批 P0（纯 CSS）：移动端页眉改两行式（logo/头像第一行、标题第二行独占，页眉 240→183px、标题 3 行→1 行且字号仍 44px/1px）+ 筛选条两组各占满一行 + 时间轴缩略图 `align-items:flex-start` 顶对齐 + 短评 `text-wrap:pretty` 治段末孤字；桌面 ≥861 三条守护（页眉 173±2px、筛选条同行 + 网格 5 列、缩略图仍垂直居中） | 19 |
 
 `online75`（14 条）：Pages 生效 + 海报三档逐字节 + 线上默认态 + **SW 硬证据**（`response.fromServiceWorker()`）。

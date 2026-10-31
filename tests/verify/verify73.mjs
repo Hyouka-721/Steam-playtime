@@ -84,8 +84,8 @@ ok('A6 watch.js：编辑保存解析 anime', /kind = \(kind === 'series' \|\| ki
 ok('A7 watch.js：编辑回填 anime（select 预置）',
   /setField\('add-kind', \(it\.kind === 'series' \|\| it\.kind === 'anime'\) \? it\.kind : 'movie'\)/.test(js));
 ok('A8 scripts/watch-add.mjs：--kind 接受 anime', /args\.kind === 'series' \|\| args\.kind === 'anime'/.test(addJs));
-ok('A9 版本号 bump：watch.css?v=22 / watch.js?v=16',
-  /watch\.css\?v=22"/.test(html) && /watch\.js\?v=16"/.test(html));
+ok('A9 版本号 bump：watch.css?v=23 / watch.js?v=16',
+  /watch\.css\?v=23"/.test(html) && /watch\.js\?v=16"/.test(html));
 
 /* ================= B 数据：海报 + 重分类 ================= */
 console.log('\n== B 数据 ==');

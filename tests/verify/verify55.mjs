@@ -14,7 +14,7 @@ const near = (a, b, t = 0.5) => Math.abs(a - b) <= t;
 
 /* ---------- A：静态指纹 ---------- */
 console.log('== A 静态指纹 ==');
-ok('A1 watch.html 引用 watch.css?v=22', /watch\.css\?v=22"/.test(html));
+ok('A1 watch.html 引用 watch.css?v=23', /watch\.css\?v=23"/.test(html));
 const baseBlock = css.match(/\.w-home \{[^}]*\}/);
 ok('A2 基础 .w-home = 132×132', !!baseBlock && /width: 132px; height: 132px;/.test(baseBlock[0]),
   baseBlock ? baseBlock[0].replace(/\s+/g, ' ').slice(0, 90) : 'no match');

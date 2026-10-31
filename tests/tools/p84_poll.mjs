@@ -1,4 +1,4 @@
-/* 第 84 轮上线后轮询 Pages：watch.html 是否已引用 watch.css?v=22，且 watch.css 字节与本地一致
+/* 第 84 轮上线后轮询 Pages：watch.html 是否已引用 watch.css?v=23，且 watch.css 字节与本地一致
    本机 hosts 把 github 域名指向 127.0.0.1 → 必须走 Playwright（--no-proxy-server）+ 页内 fetch */
 import { createRequire } from 'module';
 import fs from 'fs';
@@ -22,7 +22,7 @@ for (let i = 1; i <= 20; i++) {
     const g = async (u) => { const res = await fetch(site + u, { cache: 'reload' }); return { s: res.status, t: await res.text() }; };
     const html = await g('watch.html?cb=' + Date.now());
     const m = (html.t.match(/watch\.(?:css|js)\?v=(\d+)/g) || []).join(' ');
-    const css = await g('watch.css?v=22');
+    const css = await g('watch.css?v=23');
     return { status: html.s, ver: m, cssLen: css.t.length, css: css.t };
   }, SITE).catch((e) => ({ err: e.message }));
 
@@ -30,7 +30,7 @@ for (let i = 1; i <= 20; i++) {
   else {
     const hit = md5(r.css) === localCss;
     console.log(`[${i}] status=${r.status} ${r.ver} cssLen=${r.cssLen} md5匹配=${hit}`);
-    if (/watch\.css\?v=22/.test(r.ver) && hit) { console.log('PAGES READY'); await browser.close(); process.exit(0); }
+    if (/watch\.css\?v=23/.test(r.ver) && hit) { console.log('PAGES READY'); await browser.close(); process.exit(0); }
   }
   await new Promise((s) => setTimeout(s, 15000));
 }

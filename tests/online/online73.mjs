@@ -70,7 +70,7 @@ for (let i = 1; i <= 30; i++) {
   } catch (e) { console.log('  第 ' + i + ' 次拉取失败'); await page.waitForTimeout(4000); waited += 4; continue; }
   let live = null;
   try { live = JSON.parse(snap.d); } catch (e) {}
-  const verOK = /watch\.css\?v=22"/.test(snap.h) && /watch\.js\?v=16"/.test(snap.h);
+  const verOK = /watch\.css\?v=23"/.test(snap.h) && /watch\.js\?v=16"/.test(snap.h);
   const segOK = /data-kind="anime"[^>]*aria-pressed="false">番剧/.test(snap.h) &&
     /<option value="anime">番剧<\/option>/.test(snap.h);
   const items = live && Array.isArray(live.items) ? live.items : [];

@@ -21,8 +21,8 @@ ok('A1 watch.html 用史蒂夫取代文字按钮（#w-avatar 存在、无 .w-lay
 ok('A2 头像具备与原图标一致的交互属性（role/tabindex/aria-pressed/aria-label；第 83 轮起无 title 气泡）',
   /class="w-avatar" id="w-avatar" role="button" tabindex="0"\s*\n?\s*aria-pressed="false" aria-label="切换到时间轴视图"/.test(html) &&
   !/id="w-avatar"[^>]*\btitle=/.test(html));
-ok('A3 版本号 bump：watch.css?v=22 / watch.js?v=16',
-  /watch\.css\?v=22"/.test(html) && /watch\.js\?v=16"/.test(html));
+ok('A3 版本号 bump：watch.css?v=23 / watch.js?v=16',
+  /watch\.css\?v=23"/.test(html) && /watch\.js\?v=16"/.test(html));
 
 const wav = (cssNC.match(/\.w-avatar \{[^}]*\}/) || [''])[0];
 ok('A4 .w-avatar 132×132 + 同一素材 + 同一投影',

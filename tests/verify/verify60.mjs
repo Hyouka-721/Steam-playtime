@@ -44,8 +44,8 @@ ok('A6 .tl-thumb 62 → 76px（≤480 52 → 66px）',
   /width: 76px/.test(thumb) && /\.tl-thumb \{ width: 66px; \}/.test(b480), /width: (\d+)px/.exec(thumb)[0]);
 /* 2026-10-24 第 61 轮：时间轴文字改成七行竖排，.tl-name/.tl-note 的间距契约已换代，
    相关判据移到 verify61；这里只留版本号。 */
-ok('A9 版本号 bump：watch.css?v=22 / watch.js?v=16',
-  /watch\.css\?v=22"/.test(html) && /watch\.js\?v=16"/.test(html));
+ok('A9 版本号 bump：watch.css?v=23 / watch.js?v=16',
+  /watch\.css\?v=23"/.test(html) && /watch\.js\?v=16"/.test(html));
 
 /* ================= B 网格几何 ================= */
 console.log('\n== B 网格：海报放大比例（基线来自第 59 轮实测）==');
