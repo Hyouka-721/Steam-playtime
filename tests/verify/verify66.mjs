@@ -309,7 +309,7 @@ console.log('\n== F 其他功能不受影响 ==');
 
   const idx = await p.evaluate(async (base) => {
     const h = await (await fetch(base + 'index.html', { cache: 'no-cache' })).text();
-    return ['style.css?v=105', 'app.js?v=99', 'fx.js?v=16'].filter((v) => !h.includes(v));
+    return ['style.css?v=106', 'app.js?v=100', 'fx.js?v=16'].filter((v) => !h.includes(v));
   }, BASE);
   ok('F4 首页三个版本号未受影响', idx.length === 0, idx.join(',') || '全部命中');
   await c.close();

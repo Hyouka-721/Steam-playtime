@@ -60,10 +60,11 @@ README.md                    # 完整说明（管线/部署/密钥/Schema/自检
 
 ## 四、当前进展与版本
 
-- 版本号：`style.css?v=105` / `app.js?v=99` / `fx.js?v=16`（**硬编码在 `verify6.mjs` 第 52 行**）。
+- 版本号：`style.css?v=106` / `app.js?v=100` / `fx.js?v=16`（**硬编码在 `verify6.mjs` 第 52 行**；第 82 轮 index 侧改动后从 105/99 bump）。
 - 最近一次针对游戏站的大改是**第 24 轮「首屏加载优化」**（在 verify6 注释里记着）：数据全内联、`cache:"default"`、月份文件 `Promise.allSettled` 并行、成就按需、骨架屏、`meta.ach_stats` 摘要。
 - 之后 25~80 轮几乎都在做观影页（watch），游戏站只在 CI 每晚改 `docs/index.html` 数据、以及「日历入口收敛到最近游玩」等零散订正。
-- 回归：`tests/verify/verify6.mjs` **35/35**（唯一覆盖游戏站的套件；其余 verify47~80 全是 watch，忽略）。
+- **第 82 轮（index 侧，2026-10-31，本地改动，未提交/未上线）**三项：① 全站移除 `title` 悬停气泡（页眉三项 + 五张概览卡 + 返回按钮 + 日历日期格 + 排行榜行 + 氛围开关禁用态），语义一律改由 `aria-label` 承载；② `.site-title` 加 `user-select:none`（双击不再框选、拖拽不带走文字，点它仍回顶部）；③ 删掉排行榜首行三只吉祥物（加菲猫 / 猫和老鼠 / 企鹅）——模板、CSS 三条规则、三张 webp 全清，`.rank-list` 的 18px 上内边距**刻意保留**（首行位置与 `--cal-lift` 的换算依赖它）。新增 `tests/verify/verify82_index.mjs` **16/16**。
+- 回归：`verify6` **35/35**、`verify47` **72/72**（0.4b 判据改为「aria-label 承载 + title 必为 null」）、`verify54` **23/23**（B2/B3/B6 同步改成 aria-label）、`verify82_index` **16/16**；`verify55/56/58` 页眉几何未受影响（40/40、49/49、23/23）。
 - 数据现状：`docs/data/daily/` 按月一份；`meta.json` 有 `ach_stats`；`achievements.json` 约 285KB。
 
 ## 五、硬约束（违反必炸）
@@ -76,6 +77,7 @@ README.md                    # 完整说明（管线/部署/密钥/Schema/自检
 6. **线上验证用 Playwright（`--no-proxy-server`）+ 页内 `fetch(url,{cache:'reload'})` 按内容指纹判新旧**，别用 curl（CDN 可能回旧内容）。
 7. **沙箱里 CDN/Steam 图片会挂起**：verify6 里 `ctx.route` 把 `cdn.jsdelivr.net / steamstatic.com / steampowered.com / akamaihd` 全 `abort`，否则计时被拖死。
 8. **`blackrose.woff`（TTF）是 `style.css` 的字体回退**，别当冗余删。
+9. **不要再给任何元素加 `title`**（第 82 轮用户要求「全站一个悬停气泡都不留」）：需要向读屏/键盘用户说明的语义写进 `aria-label`；`verify82_index.mjs` 把「整页带 title 属性的元素数 = 0」当硬断言，加了就 FAIL。
 9. **条数/百分比写死会随快照漂移**：期望值从内联 `__BOOT` 里读（verify6 成就卡就是教训，第 70 轮改过）。
 
 ## 六、标准工作流

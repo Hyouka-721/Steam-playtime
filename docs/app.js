@@ -214,11 +214,13 @@
     if (announce) toast(`主题：${themeName(id)}`);
   }
 
-  /** 同步主题开关（史蒂夫头像）的 title 提示（首屏内联脚本先于本脚本应用了
-      持久化主题，文案也要随之更新）。2026-10-24 起这个 id 挂在头像上，不再是小黄人。 */
+  /** 同步主题开关（史蒂夫头像）的无障碍名（首屏内联脚本先于本脚本应用了持久化主题，
+      文案也要随之更新）。2026-10-24 起这个 id 挂在头像上，不再是小黄人。
+      2026-10-31 第 82 轮：全站移除 title 悬停气泡，主题信息改由 aria-label 承载 ——
+      读屏仍能读到「当前：某主题」，鼠标悬停则不再弹任何提示。 */
   function syncThemeUi(id = currentTheme()) {
     const light = $('theme-light');
-    if (light) light.title = `当前主题：${themeName(id)} · 点击切换浅色主题`;
+    if (light) light.setAttribute('aria-label', `切换浅色主题（当前：${themeName(id)}）`);
   }
 
   /** 在指定深/浅组内随机挑一个与当前不同的主题 */
@@ -352,8 +354,6 @@
     // 最近游玩卡：近两周总时长。口径固定，不随日历浮层里选了哪一天而变化
     // （2026-10-21 前此处会跟随"回看态"显示当天总时长，整页回看已移除）
     $('c-recent').textContent = hm(lastNDaysTotal(14).minutes);
-    const recentCard = $('card-recent');
-    if (recentCard) recentCard.title = '点击查看近两周的游玩记录';
 
     // 游戏库卡：玩过 / 拥有
     $('c-games').textContent = `${s.lifetime_played_games ?? 0} / ${s.owned_games ?? 0}`;
@@ -414,7 +414,7 @@
      该列表的行本身没有下钻行为，因此这里只处理日历按钮。 */
   const CAL_ICON_BTN =
     '<button class="cal-icon-btn" type="button" data-cal-toggle ' +
-    'title="点击打开游玩日历，查看某一天的游戏明细" aria-label="打开游玩日历，查看有游玩记录的那一天的游戏明细">' +
+    'aria-label="打开游玩日历，查看有游玩记录的那一天的游戏明细">' +
     '<svg viewBox="0 0 20 20" width="22" height="22" aria-hidden="true" focusable="false">' +
     '<rect x="2.6" y="4.2" width="14.8" height="13.6" rx="2.2"></rect>' +
     '<path d="M2.6 8.6h14.8M7 2.6v3M13 2.6v3"></path>' +
@@ -457,11 +457,11 @@
       // （见 style.css .rank-capsule-wrap / .ring-*）。img 自身不加任何类，
       // 宽高与 object-fit 保持原样，网格列宽、行高、序号位置全不受影响。
       const isPerfect = perfect.has(String(g.appid));
-      return `<div class="rank-item${g.lifetime_minutes === 0 ? ' zero' : ''}" data-appid="${g.appid}" title="点击查看该游戏每日时长趋势">
+      return `<div class="rank-item${g.lifetime_minutes === 0 ? ' zero' : ''}" data-appid="${g.appid}">
           <span class="rank-no${noCls(i)}">${i + 1}</span>
           ${capsuleHtml(g.appid, { perfect: isPerfect, eager, icon })}
-          <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
-          <span class="rank-bar"><span style="${barStyle(pct, i)}"></span>${i === 0 ? '<img class="rank-cat" src="img/rank-cat-8b4e55ad.webp" alt="" draggable="false" width="400" height="225" decoding="async"><img class="rank-tj" src="img/rank-tj-b9b7fccd.webp" alt="" draggable="false" width="560" height="420" decoding="async"><img class="rank-penguin" src="img/rank-penguin-fb2f58a8.webp" alt="" draggable="false" width="520" height="210" decoding="async">' : ''}</span>
+          <span class="rank-name">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
+          <span class="rank-bar"><span style="${barStyle(pct, i)}"></span></span>
           <span class="rank-min">${hm(g.lifetime_minutes)}</span>
           ${lastHtml}
         </div>`;
@@ -546,7 +546,7 @@
         return `<div class="rank-item">
           <span class="rank-no${noCls(i)}">${i + 1}</span>
           ${capsuleHtml(g.appid, { perfect: isPerfect, icon })}
-          <span class="rank-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}</span>
+          <span class="rank-name">${escapeHtml(g.name)}</span>
           <span class="rank-bar"><span style="${barStyle(pct, i)}"></span></span>
           <span class="rank-min">${hm(g.recent)}</span>
           ${lastHtml}
@@ -920,11 +920,11 @@
           <img class="ach-icon" src="${a.icon ?? ''}" alt="" loading="lazy"
                onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{className:'icon-ph ach-icon-ph'}))">
           <div class="ach-main">
-            <div class="ach-name${rare}" title="${escapeHtml(a.name)}">${escapeHtml(a.name)}</div>
+            <div class="ach-name${rare}">${escapeHtml(a.name)}</div>
             <div class="ach-sub"><span class="ach-game">${escapeHtml(a.game)}</span>${a.desc ? ` · ${escapeHtml(a.desc)}` : ''}</div>
           </div>
           <span class="ach-meta">
-            ${p ? `<span class="ach-pct" title="全球玩家完成率">${p}</span>` : ''}
+            ${p ? `<span class="ach-pct">${p}</span>` : ''}
             <span class="ach-date">${d ?? '已解锁'}</span>
           </span>
         </div>`;
@@ -997,7 +997,7 @@
 
     const cap = (g, cls) => {
       const icon = ICON(g.appid, (state.meta.games_lifetime ?? {})[g.appid]?.img_icon_url);
-      return `<span class="tl-game ${cls}" title="${escapeHtml(g.name)} · ${hm(g.minutes)}">
+      return `<span class="tl-game ${cls}">
           <img src="${CAPSULE(g.appid)}" alt="" loading="lazy"
                onerror="this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'">
           <span class="tl-badge">${hoursShort(g.minutes)}</span>
@@ -1174,13 +1174,13 @@
       // 注意 backToCalMonth 会先 resetCalLevel()（把 day 置空）再重绘，
       // 所以选中日必须由调用方用参数显式传进来，不能只读 state.cal.day。
       if (ds === (selDate ?? state.cal.day)) cls.push('sel');
-      const tip = play
-        ? `${ds} · 游玩 ${hm(day.total_minutes)}　点击查看当天明细`
+      const label = play
+        ? `${ds} · 游玩 ${hm(day.total_minutes)}`
         : `${ds} · 无游玩记录`;
       cells.push(
         `<span class="${cls.join(' ')}" data-date="${ds}"` +
           ` role="${play ? 'button' : 'presentation'}" tabindex="${play ? 0 : -1}"` +
-          ` aria-disabled="${play ? 'false' : 'true'}" title="${escapeHtml(tip)}">` +
+          ` aria-disabled="${play ? 'false' : 'true'}" aria-label="${escapeHtml(label)}">` +
           `<span class="cal-num">${n}</span>` +
           (play ? `<span class="cal-min">${hoursShort(day.total_minutes)}</span>` : '') +
           `</span>`,
@@ -1321,7 +1321,7 @@
           `<div class="cal-game">` +
           `<span class="cal-game-no${noCls(i)}">${i + 1}</span>` +
           capsuleHtml(g.appid, { icon }) +
-          `<span class="cal-game-name" title="${escapeHtml(g.name)}">${escapeHtml(g.name)}</span>` +
+          `<span class="cal-game-name">${escapeHtml(g.name)}</span>` +
           `<span class="cal-game-min">${hmText(g.minutes)}</span>` +
           `<span class="cal-game-bar"><span style="width:${pct}%"></span></span>` +
           `</div>`

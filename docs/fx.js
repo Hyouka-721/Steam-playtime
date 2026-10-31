@@ -236,10 +236,11 @@
       const fx = b.dataset.fx;
       b.classList.toggle('active', fx === mode);
       b.setAttribute('aria-pressed', fx === mode ? 'true' : 'false');
-      // 系统偏好「减少动态效果」时只允许「关」，并给出原因提示
+      // 系统偏好「减少动态效果」时只允许「关」。
+      // 第 82 轮：全站移除 title 悬停气泡 —— 这里不再用 title 解释原因，
+      // 按钮本身处于 disabled 状态即已表达「暂不可用」。
       const disabled = off && fx !== 'off';
       b.disabled = disabled;
-      b.title = disabled ? '系统已开启「减少动态效果」，暂不启用动画' : '';
       if (disabled && fx === mode) b.classList.remove('active');
     });
   }

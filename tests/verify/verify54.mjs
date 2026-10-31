@@ -36,11 +36,11 @@ const pa = await ctxA.newPage();
 await pa.goto(URL, { waitUntil: 'domcontentloaded' });
 const grab = (u) => pa.evaluate(async (x) => (await fetch(x, { cache: 'reload' })).text(), u);
 const html = await grab('index.html?cb=' + Date.now());
-const app = await grab('app.js?v=99&cb=' + Date.now());
+const app = await grab('app.js?v=100&cb=' + Date.now());
 const watchHtml = await grab('watch.html?cb=' + Date.now());
 
-ok('A1 版本号 style.css?v=105 / app.js?v=99 / fx.js?v=16',
-  /style\.css\?v=105/.test(html) && /app\.js\?v=99/.test(html) && /fx\.js\?v=16/.test(html));
+ok('A1 版本号 style.css?v=106 / app.js?v=100 / fx.js?v=16',
+  /style\.css\?v=106/.test(html) && /app\.js\?v=100/.test(html) && /fx\.js\?v=16/.test(html));
 
 ok('A2 小黄人是链接（class=logo + href=watch.html + id=logo-watch），不再是 theme-light',
   /<a class="logo" id="logo-watch" href="watch\.html"/.test(html) && !/logo"[^>]*id="theme-light"/.test(html));
@@ -80,7 +80,7 @@ const geo = await page.evaluate(() => {
     kids: [...header.children].map((n) => n.className),
     headerH: +header.getBoundingClientRect().height.toFixed(2),
     logoTag: logo.tagName, logoHref: logo.getAttribute('href'), logoRole: logo.getAttribute('role'),
-    logoTitle: logo.getAttribute('title'),
+    logoTitle: logo.getAttribute('title'), logoAria: logo.getAttribute('aria-label'),
     logoRect: (() => { const r = logo.getBoundingClientRect(); return [+r.width.toFixed(2), +r.height.toFixed(2)]; })(),
     logoCursor: lcs.cursor, logoTransition: lcs.transitionDuration, logoUnderline: lcs.textDecorationLine,
     avRole: av.getAttribute('role'), avTab: av.getAttribute('tabindex'),
@@ -92,11 +92,12 @@ const geo = await page.evaluate(() => {
 
 ok('B1 头部仍是 3 个 grid 子项，高度 173 未变',
   geo.kids.length === 3 && geo.kids[0] === 'brand' && Math.abs(geo.headerH - 173) < 1, { kids: geo.kids, h: geo.headerH });
-ok('B2 小黄人是 <a href="watch.html">，不再声明 role=button',
+ok('B2 小黄人是 <a href="watch.html">，不再声明 role=button；语义归 aria-label、已无 title 气泡',
   geo.logoTag === 'A' && geo.logoHref === 'watch.html' && geo.logoRole === null
-  && geo.logoTitle === '进入观影记录' && geo.logoUnderline === 'none', geo);
-ok('B3 史蒂夫可聚焦、可点击（role=button / tabindex=0 / title 含主题 / 无 aria-hidden）',
-  geo.avRole === 'button' && geo.avTab === '0' && /主题/.test(geo.avTitle || '') && geo.avHidden === null, geo.avTitle);
+  && geo.logoAria === '进入观影记录' && geo.logoTitle === null && geo.logoUnderline === 'none', geo);
+ok('B3 史蒂夫可聚焦、可点击（role=button / tabindex=0 / aria-label 含当前主题 / 无 title 气泡 / 无 aria-hidden）',
+  geo.avRole === 'button' && geo.avTab === '0' && /当前/.test(geo.avAria || '')
+  && geo.avTitle === null && geo.avHidden === null, geo.avAria);
 ok('B4 史蒂夫尺寸未变（132×132，与小黄人同体量）',
   geo.avRect[0] === 132 && geo.avRect[1] === 132 && geo.logoRect[0] === 132, { av: geo.avRect, logo: geo.logoRect });
 ok('B5 两个图标都保留点击反馈（cursor:pointer + transition 非 0）',
@@ -105,18 +106,19 @@ ok('B5 两个图标都保留点击反馈（cursor:pointer + transition 非 0）'
   { lc: geo.logoCursor, ac: geo.avCursor, lt: geo.logoTransition, at: geo.avTransition });
 
 // —— 主题切换：点史蒂夫
-const t0 = await page.evaluate(() => ({ theme: document.documentElement.dataset.theme, stored: localStorage.getItem('theme'), title: document.querySelector('.header-avatar').title }));
+const t0 = await page.evaluate(() => ({ theme: document.documentElement.dataset.theme, stored: localStorage.getItem('theme'), aria: document.querySelector('.header-avatar').getAttribute('aria-label') }));
 await page.click('.header-avatar');
 await page.waitForTimeout(300);
 const t1 = await page.evaluate(() => ({
   theme: document.documentElement.dataset.theme,
   stored: localStorage.getItem('theme'),
-  title: document.querySelector('.header-avatar').title,
+  aria: document.querySelector('.header-avatar').getAttribute('aria-label'),
   toast: (document.querySelector('.toast') || {}).textContent || '',
 }));
-ok('B6 点史蒂夫 → 主题切换 + 写入 localStorage + title/toast 同步',
-  t1.theme !== t0.theme && t1.stored === t1.theme && /当前主题/.test(t1.title) && /主题/.test(t1.toast),
-  { before: t0.theme, after: t1.theme, stored: t1.stored, title: t1.title });
+ok('B6 点史蒂夫 → 主题切换 + 写入 localStorage + aria-label/toast 同步（title 恒为空）',
+  t1.theme !== t0.theme && t1.stored === t1.theme && /当前：/.test(t1.aria) && /主题/.test(t1.toast)
+  && (await page.evaluate(() => document.querySelector('.header-avatar').getAttribute('title'))) === null,
+  { before: t0.theme, after: t1.theme, stored: t1.stored, aria: t1.aria });
 
 // 连点 6 次，始终落在 3 套浅色主题内且每次都变
 const seq = [t1.theme];

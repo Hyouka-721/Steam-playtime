@@ -263,6 +263,10 @@ a { color: var(--accent); }
   font-family: 'Black Rose', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   justify-self: center; text-align: center;
   cursor: pointer;
+  /* 第 82 轮：站名不再是「可选中的文本」—— 双击不再出现蓝色选区、拖拽不再拖走文字、
+     长按不再弹出系统选择菜单；点它仍然执行「返回顶部」。 */
+  user-select: none; -webkit-user-select: none;
+  -webkit-user-drag: none; -webkit-touch-callout: none;
 }
 .site-title:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 8px; }
 /* 2026-10-17：网站名「Game time」花体字（inline SVG 方案）经用户确认**暂不上线**，
@@ -386,9 +390,9 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 
 /* ---- 游戏列表 ---- */
 /* 表头（游戏 / 游戏时长 / 最近游玩时间 + 下划线）已按用户要求移除（2026-10-17）。
-   列表顶部内边距 18px：三只装饰图的锚点（图内地平线）钉在进度条中线上，
-   放大时约 60%~88% 的尺寸是往上长的，留白用于保证它们不顶出面板上边框。
-   （实测：18px 时企鹅头顶距面板上边框约 5px、加菲猫约 20px，均在面板内。） */
+   列表顶部内边距 18px 原是为三只装饰图留的高度，第 82 轮装饰图整体移除后
+   **刻意保留同值**：首行位置、行高与日历图标 --cal-lift 的换算全部依赖它，
+   改小会让整榜上移、连带影响那些按「面板顶 → 首行顶 = 37px」写死的断言。 */
 .rank-list { display: flex; flex-direction: column; gap: 4px; padding-top: 18px; }
 
 /* ---- 骨架屏（2026-10-18 首屏优化）----
@@ -831,80 +835,12 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    通用工具类放这儿；落在 .ach-name 上时需要提权——见成就列表段的 .ach-name.is-gold
    （.ach-name 自带 color 且在本文件更靠后，单类选择器会被它按「后来居上」盖掉）。 */
 .is-gold { color: var(--gold); }
-/* 进度条不再 overflow:hidden——加菲猫要趴在条上（绝对定位、可溢出条体）。
-   填充span自带 border-radius，不依赖外层裁剪。 */
+/* 进度条不设 overflow:hidden：填充 span 自带 border-radius，不依赖外层裁剪。 */
 .rank-bar { height: 7px; background: var(--track); border-radius: 4px; position: relative; }
 .rank-bar > span {
   display: block; height: 100%; border-radius: 4px;
   background: var(--bar-grad);
   transition: width .5s ease;
-}
-/* 加菲猫（2026-10-17）：趴在首行时长条的横线上，左端与进度条左边缘对齐（用户 18:15 要求）。
-   锚点不变量：素材画布 400×225（ratio 1.7778，决定 width:auto 的渲染宽度），
-   平肚皮底线落在画布高度 60.5% 处（=row 134），下方留出爪子下垂的部分；
-   用 translate(0, calc(-60.5% - 4px)) 把图片自身 60.5% 处钉在进度条竖直中线上方
-   4px（先上移 10px、再下移 5px、再下移 1px，净偏移 -4px）。
-   pointer-events:none 保证整行仍可点击下钻。
-   2026-10-17 放大 70px → 84px：transform 用的是自身高度的百分比，
-   放大后图内地平线仍钉在进度条中线 -3.9px 处，"站在条上"的关系不变。
-   2026-10-20 第 42 轮：整体下移 1px（--cat-drop）。
-     原因：第 41 轮把素材自带的柱子四行（y=135~138）在"猫身两侧的裸列"清零，
-     但猫身覆盖的那部分列仍保留着这四行 —— 于是柱体只出现在猫身的轮廓内。
-     素材柱子在素材坐标里占 y135~138.9，而页面真柱体（.rank-bar > span）占
-     y137.20~155.95，即素材柱子顶边比页面条顶高出约 2.2 素材行（≈0.82 CSS px）。
-     猫身底边与页面条顶之间就空出一条透出页面底色的 1px 亮带 —— 用户看到的
-     "白色横线间隙"。把整张图下移 1px 后，素材柱子落到条体内部，间隙闭合。
-     仍是 pure transform：尺寸 / 比例 / 层级 / 行高 / 其它元素位置全部不变。
-   2026-10-23 换精修素材：rank-cat-4657a654 → rank-cat-8b4e55ad（400×225 WebP q85，12,078 B）。
-     新素材从白底原画重抠后，按「同画布 + 同内容 bbox + 平肚皮底线同样落在 row 134」
-     重建，因此上面的 transform / --cat-drop / height / left 一个字都没改 ——
-     实测 .rank-cat 的 rect 与换图前逐项相等（618, 367.967, 149.328, 84）。
-     以后换图请照此办理：先量旧图「可见内容 bbox + 肚皮底线所在行」，把新图缩放/裁切到
-     与旧图同宽同底线再输出 400×225，否则 transform 的百分比会把整只猫拉走。 */
-
-.rank-cat {
-  --cat-drop: 1px;   /* 整张猫图的纵向附加偏移；改这一个值即可微调贴合度 */
-  position: absolute; left: 0; top: 50%;
-  transform: translate(0, calc(-60.5% - 3.9px + var(--cat-drop)));
-  height: 84px; width: auto;
-  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
-  pointer-events: none;
-  user-select: none; -webkit-user-drag: none;
-}
-/* 视口 <1080px 时进度条被网格挤到 <124px（存量布局特性：minmax(150,340) 名称列
-   先于 1fr 吃掉剩余空间），加菲猫会溢出条体压到游戏名/时长列——此宽度下直接隐藏。
-   ≤860px 时 .rank-bar 本就 display:none，猫随之隐藏。 */
-@media (max-width: 1080px) {
-  .rank-cat { display: none; }
-}
-/* 企鹅（首行最右端，与加菲猫左右对称）：
-   源图 1000×404，内部横杆满宽行 351-357，中线 354 = 87.6%；
-   用 translate(0, -87.6%) 把杆中线钉在进度条竖直中线上。
-   2026-10-17 放大 64px → 77px（同加菲猫，百分比 transform 保证杆中线不漂移）。 */
-.rank-penguin {
-  position: absolute; right: 0; top: 50%;
-  transform: translate(0, calc(-87.6% - 2.7px));
-  height: 77px; width: auto;
-  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
-  pointer-events: none;
-  user-select: none; -webkit-user-drag: none;
-}
-@media (max-width: 1080px) {
-  .rank-penguin { display: none; }
-}
-/* 猫和老鼠（首行正中间，替换小黄人）：
-   源图 1600×1200 白底 JPG 抠图，内部地面线位于 y≈1151-1156，中线 96.1%；
-   用 translate(-50%, -96.1%) 把地面线钉在进度条竖直中线上。 */
-.rank-tj {
-  position: absolute; left: 50%; top: 50%;
-  transform: translate(-50%, calc(-96.1% - 2.5px));
-  height: 62px; width: auto;
-  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.35));
-  pointer-events: none;
-  user-select: none; -webkit-user-drag: none;
-}
-@media (max-width: 1080px) {
-  .rank-tj { display: none; }
 }
 .rank-min { font-variant-numeric: tabular-nums; color: var(--text-strong); text-align: center; font-weight: 600; font-size: 13.5px; }
 .rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: center; font-size: 12px; position: relative; }

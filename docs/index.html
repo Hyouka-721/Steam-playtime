@@ -28,7 +28,7 @@
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=105">
+<link rel="stylesheet" href="style.css?v=106">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -58,39 +58,39 @@
          它改为**观影记录入口**（点击进入 watch.html）。观影页里同一个形象负责返回，
          于是这个图标在全站统一表示「游戏时长 ⇄ 观影记录」的页面切换。 -->
     <a class="logo" id="logo-watch" href="watch.html"
-       title="进入观影记录" aria-label="进入观影记录">
+       aria-label="进入观影记录">
       <img src="img/minion-0ef9a202.webp" alt="小黄人" draggable="false" width="460" height="420" decoding="async">
     </a>
   </div>
   <h1 class="site-title" id="site-title" role="button" tabindex="0"
-      title="点击返回顶部" aria-label="返回顶部">My Game Time</h1>
+      aria-label="返回顶部">My Game Time</h1>
   <!-- Minecraft 史蒂夫+狼：2026-10-24 起是**主题切换开关**（原由左侧小黄人承担）。
        交互契约沿用小黄人原来那一套：单击在三套浅色主题间随机切换并写入 localStorage，
-       回车 / 空格同样可用；当前主题名由 app.js 的 syncThemeUi() 实时写进 title。
+       回车 / 空格同样可用；第 82 轮起全站不再有 title 悬停气泡，当前主题名改由 aria-label 承载。
        它不再负责氛围特效（那是页脚 #fx-seg 文字开关）。 -->
   <div class="header-avatar" id="theme-light" role="button" tabindex="0"
-       title="点击切换浅色主题" aria-label="切换浅色主题"></div>
+       aria-label="切换浅色主题"></div>
 </header>
 
 <!-- 概览 · 五张统计卡（其中四张可点击导航，替代原 Tab 栏） -->
 <section class="cards" id="cards">
-  <div class="card card-nav card-hero" id="card-lifetime" data-view="lifetime" title="点击查看所有游戏的累计时长">
+  <div class="card card-nav card-hero" id="card-lifetime" data-view="lifetime">
     <div class="card-label">游戏时长</div>
     <div class="card-value sk-value" id="c-lifetime">—</div>
   </div>
-  <div class="card card-nav" id="card-recent" data-view="recent" title="点击查看近两周的游玩记录">
+  <div class="card card-nav" id="card-recent" data-view="recent">
     <div class="card-label">最近游玩</div>
     <div class="card-value sk-value" id="c-recent">—</div>
   </div>
-  <div class="card card-nav" id="card-ach" data-view="ach" title="点击查看成就详情">
+  <div class="card card-nav" id="card-ach" data-view="ach">
     <div class="card-label">成就</div>
     <div class="card-value sk-value" id="c-ach">—</div>
   </div>
-  <div class="card card-nav" id="card-games" data-view="timeline" title="点击查看游戏时间轴">
+  <div class="card card-nav" id="card-games" data-view="timeline">
     <div class="card-label">游戏库</div>
     <div class="card-value sk-value" id="c-games">—</div>
   </div>
-  <div class="card card-nav" id="card-data" data-view="data" title="点击查看数据详情与导出">
+  <div class="card card-nav" id="card-data" data-view="data">
     <div class="card-label">数据</div>
     <div class="card-value sk-value" id="c-data">—</div>
   </div>
@@ -119,7 +119,7 @@
     <div class="panel">
       <div class="panel-head">
         <div class="panel-title">
-          <button class="btn btn-back" id="btn-drill-back" title="返回游戏时长列表">← 返回</button>
+          <button class="btn btn-back" id="btn-drill-back">← 返回</button>
           <h2 id="drill-title">每日时长趋势</h2>
         </div>
         <div class="ctrl">
@@ -150,7 +150,7 @@
   <div class="panel">
     <div class="panel-head">
       <div class="ctrl"><span class="hint" id="ach-hint">—</span></div>
-      <div class="ctrl"><select id="ach-game" title="选择游戏"></select></div>
+      <div class="ctrl"><select id="ach-game" aria-label="选择游戏"></select></div>
     </div>
     <div id="ach-list" class="ach-list"></div>
   </div>
@@ -245,11 +245,11 @@
         <!-- 日期文本两侧的「前一天 / 后一天」：只留箭头，文字说明走 title / aria-label。
              用 ←/→ 而非 ‹/›，是为了不与左侧「返回月历」的 ‹ 撞脸（两者仅隔 6px）。 -->
         <div class="cal-day-nav">
-          <button class="cal-step" id="cal-day-prev" type="button" title="前一天" aria-label="前一天">
+          <button class="cal-step" id="cal-day-prev" type="button" aria-label="前一天">
             <span class="cal-step-ico" aria-hidden="true">←</span>
           </button>
           <div class="cal-title" id="cal-day-title">—</div>
-          <button class="cal-step" id="cal-day-next" type="button" title="后一天" aria-label="后一天">
+          <button class="cal-step" id="cal-day-next" type="button" aria-label="后一天">
             <span class="cal-step-ico" aria-hidden="true">→</span>
           </button>
         </div>
@@ -276,6 +276,6 @@
 <!-- fx.js 自己绑定页脚的氛围开关（#fx-seg），app.js 不再参与特效状态；
      仍保持它先加载，任何外部脚本都能安全读取 window.__fx -->
 <script src="fx.js?v=16"></script>
-<script src="app.js?v=99" onerror="__appFail()"></script>
+<script src="app.js?v=100" onerror="__appFail()"></script>
 </body>
 </html>

@@ -104,7 +104,7 @@ await page.waitForTimeout(1200);
 // ---------- 0. 版本与结构 ----------
 const v = await page.evaluate(() =>
   [...document.querySelectorAll('script[src]')].map((s) => s.getAttribute('src')).find((s) => s.includes('app.js')));
-ok('0.1 app.js 版本号已 bump 到 ?v=99', v === 'app\.js\?v=99', v);
+ok('0.1 app.js 版本号已 bump 到 ?v=100', v === 'app\.js\?v=100', v);
 
 const head = await page.evaluate(() => {
   const hd = document.querySelector('.cal-head-day');
@@ -141,9 +141,10 @@ ok('0.4a 按钮上不再显示「前一天 / 后一天」文字标签',
   && !head.prevHtml.includes('前一天') && !head.nextHtml.includes('后一天'), head);
 ok('0.4a2 步进箭头与「返回 / 上下月」的 ‹ › 不撞脸',
   head.backTxt === '‹' && head.prevTxt !== head.backTxt && head.nextTxt !== head.backTxt, head);
-ok('0.4b 语义由 title + aria-label 承载（提示与无障碍名不变）',
+// 第 82 轮：全站移除 title 悬停气泡 → 语义只由 aria-label 承载，title 必须不存在
+ok('0.4b 语义由 aria-label 承载，且已无 title 悬停气泡',
   head.prevAria === '前一天' && head.nextAria === '后一天'
-  && head.prevTitle === '前一天' && head.nextTitle === '后一天', head);
+  && head.prevTitle === null && head.nextTitle === null, head);
 ok('0.4c 按钮为正方形图标按钮（计算样式 宽=高）',
   head.prevBox.w === head.prevBox.h && head.nextBox.w === head.nextBox.h && head.prevBox.w >= 24, head);
 ok('0.5 .cal-page 未被设 display（[hidden] 仍能隐藏页面）', head.dayPageDisplayWhenHidden === 'none', head.dayPageDisplayWhenHidden);
