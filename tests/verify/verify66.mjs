@@ -46,8 +46,8 @@ ok('A7 评分格式改为 toFixed(1)（整数也带小数位）', /n\.toFixed\(1
 ok('A8 上映字段优先取 release_date，缺省回退 year',
   /function releaseText\(it\)/.test(js) && /it\.release_date/.test(js) && /releaseText\(it\)/.test(js));
 
-ok('A9 版本号 bump：watch.css?v=21 / watch.js?v=16',
-  /watch\.css\?v=21"/.test(html) && /watch\.js\?v=16"/.test(html));
+ok('A9 版本号 bump：watch.css?v=22 / watch.js?v=16',
+  /watch\.css\?v=22"/.test(html) && /watch\.js\?v=16"/.test(html));
 
 /* -- 数据 -- */
 const byTitle = (t) => data.items.filter((x) => x.title === t);
@@ -309,7 +309,7 @@ console.log('\n== F 其他功能不受影响 ==');
 
   const idx = await p.evaluate(async (base) => {
     const h = await (await fetch(base + 'index.html', { cache: 'no-cache' })).text();
-    return ['style.css?v=109', 'app.js?v=104', 'fx.js?v=16'].filter((v) => !h.includes(v));
+    return ['style.css?v=110', 'app.js?v=105', 'fx.js?v=16'].filter((v) => !h.includes(v));
   }, BASE);
   ok('F4 首页三个版本号未受影响', idx.length === 0, idx.join(',') || '全部命中');
   await c.close();

@@ -14,14 +14,21 @@ const near = (a, b, t = 0.5) => Math.abs(a - b) <= t;
 
 /* ---------- A：静态指纹 ---------- */
 console.log('== A 静态指纹 ==');
-ok('A1 watch.html 引用 watch.css?v=21', /watch\.css\?v=21"/.test(html));
+ok('A1 watch.html 引用 watch.css?v=22', /watch\.css\?v=22"/.test(html));
 const baseBlock = css.match(/\.w-home \{[^}]*\}/);
 ok('A2 基础 .w-home = 132×132', !!baseBlock && /width: 132px; height: 132px;/.test(baseBlock[0]),
   baseBlock ? baseBlock[0].replace(/\s+/g, ' ').slice(0, 90) : 'no match');
 const m860 = css.slice(css.indexOf('@media (max-width: 860px)'), css.indexOf('@media (max-width: 480px)'));
 ok('A3 ≤860 断点内无 .w-home 尺寸覆盖', !/\.w-home\s*\{/.test(m860));
 const m480 = css.slice(css.indexOf('@media (max-width: 480px)'));
-ok('A4 ≤480 断点 .w-home = 88×88', /\.w-home \{ width: 88px; height: 88px; \}/.test(m480));
+/* 第 84 轮改判：原判据是逐字面量匹配 `.w-home { width: 88px; height: 88px; }`，
+   而第 84 轮 P0-1 给同一条规则加了 `grid-row/grid-column`（页眉两行式，logo 固定在 row 1）
+   → 字面量一改就误红。契约是「≤480 时 logo 仍是 88×88、与首页 .logo 同值」，
+   所以改成解析出规则体后按声明判断，不看书写顺序。 */
+const home480 = (m480.match(/\.w-home \{[^}]*\}/) || [''])[0];
+ok('A4 ≤480 断点 .w-home = 88×88',
+  /width: 88px/.test(home480) && /height: 88px/.test(home480),
+  home480 ? home480.replace(/\s+/g, ' ').slice(0, 80) : 'no match');
 ok('A5 .w-home img 仍 width:100%（等比，未写死高度）', /\.w-home img \{ width: 100%; height: auto;/.test(css));
 const sizeDecls = [...css.matchAll(/\.w-home\s*\{[^}]*?(width:\s*\d+px; height:\s*\d+px;)/g)].map((m) => m[1]);
 ok('A6 .w-home 尺寸声明恰好 2 处（132 + 88）', sizeDecls.length === 2 && /132/.test(sizeDecls[0]) && /88/.test(sizeDecls[1]),

@@ -34,18 +34,35 @@ function sortKey(d) {
   return m[1] + '-' + (m[2] || '00') + '-' + (m[3] || '00');
 }
 function stampKey(s) { const t = Date.parse(String(s || '')); return Number.isNaN(t) ? 0 : t; }
+/* 第 84 轮补：cmpTime / cmpRating 都少了一级「手动排序 order」——
+   页面 watch.js 的 cmpTime = 观影时间倒序 → **order 升序** → added_at 正序 → id，
+   cmpRating = 评分倒序 → **order 升序** → cmpTime。这里没跟上的后果是：
+   用户一旦给某两条评分相同的番剧填了不同 order，页面顺序就与测试期望不一致，
+   C1/C3 会红 —— 「用户真用了功能」反而变成失败原因（第 80 轮在 verify72/75 栽过一次，
+   当时漏补了本文件）。orderVal 的归一化规则与 watch.js 逐字一致：缺字段/空串/非法值 → 3。 */
+function orderVal(it) {
+  const v = it && it.order;
+  if (v === undefined || v === null || v === '') return 3;
+  const s = String(v);
+  return /^[0-5]$/.test(s) ? Number(s) : 3;
+}
+function cmpOrder(a, b) { return orderVal(a) - orderVal(b); }
 function cmpTime(a, b) {
   const d = sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
   if (d !== 0) return d;
+  const o = cmpOrder(a, b);
+  if (o !== 0) return o;
   const s = stampKey(a.added_at) - stampKey(b.added_at);
   if (s !== 0) return s;
   return String(a.id || '').localeCompare(String(b.id || ''));
 }
-// 第 75 轮：网格默认评分序（与 watch.js cmpRating 同规则：评分降序 → 回落 cmpTime）
+// 第 75 轮：网格默认评分序（与 watch.js cmpRating 同规则：评分降序 → order 升序 → 回落 cmpTime）
 function ratingVal(it) { const n = Number(it && it.rating); return isFinite(n) && n > 0 ? n : -1; }
 function cmpRating(a, b) {
   const vb = ratingVal(b), va = ratingVal(a);
   if (vb !== va) return vb - va;
+  const o = cmpOrder(a, b);
+  if (o !== 0) return o;
   return cmpTime(a, b);
 }
 
@@ -67,8 +84,8 @@ ok('A6 watch.js：编辑保存解析 anime', /kind = \(kind === 'series' \|\| ki
 ok('A7 watch.js：编辑回填 anime（select 预置）',
   /setField\('add-kind', \(it\.kind === 'series' \|\| it\.kind === 'anime'\) \? it\.kind : 'movie'\)/.test(js));
 ok('A8 scripts/watch-add.mjs：--kind 接受 anime', /args\.kind === 'series' \|\| args\.kind === 'anime'/.test(addJs));
-ok('A9 版本号 bump：watch.css?v=21 / watch.js?v=16',
-  /watch\.css\?v=21"/.test(html) && /watch\.js\?v=16"/.test(html));
+ok('A9 版本号 bump：watch.css?v=22 / watch.js?v=16',
+  /watch\.css\?v=22"/.test(html) && /watch\.js\?v=16"/.test(html));
 
 /* ================= B 数据：海报 + 重分类 ================= */
 console.log('\n== B 数据 ==');

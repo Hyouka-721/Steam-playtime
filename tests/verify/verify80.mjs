@@ -11,7 +11,7 @@
    D 删除（7）：只在编辑模式出现、两段确认、无 Token 零请求、有 Token 一次 PUT 且数据真的少了、
       390px 页脚不把提示压成一字一行
    E 实体数据（2）：tags 字段全部保留、词表符合约定
-   ⚠️ 版本号：watch.css?v=21 / watch.js?v=16（第 81 轮 bump）
+   ⚠️ 版本号：watch.css?v=22 / watch.js?v=16（第 81 轮 bump）
    ⚠️ 所有 mock 上下文都带 serviceWorkers:'block' —— 第 80 轮起 SW 也拦 watch.json
       （网络优先），屏蔽 SW 才能保证 page.route 造数绝对生效。 */
 import { createRequire } from 'module';
@@ -36,8 +36,8 @@ const P = 'img/minion-0ef9a202.webp';
 
 /* ================= A 静态指纹 ================= */
 console.log('== A 静态指纹 ==');
-ok('A1 版本号 bump：watch.css?v=21 / watch.js?v=16',
-  /watch\.css\?v=21"/.test(html) && /watch\.js\?v=16"/.test(html));
+ok('A1 版本号 bump：watch.css?v=22 / watch.js?v=16',
+  /watch\.css\?v=22"/.test(html) && /watch\.js\?v=16"/.test(html));
 
 ok('A2 胶片颗粒：body::before 两层点阵 + pointer-events:none（不挡点击）',
   /body::before \{[\s\S]{0,420}pointer-events: none/.test(cssNC) &&
@@ -338,9 +338,17 @@ console.log('\n== 实体数据（tags 保留，只是不再有筛选 UI）==');
 {
   const data = JSON.parse(rd('data/watch.json'));
   const N = data.items.length;
-  const noTag = data.items.filter((x) => !Array.isArray(x.tags) || !x.tags.length);
-  ok(`E1 本地 ${N} 条仍全部带非空 tags 数组（删筛选≠删数据，一条都不许被清掉）`,
-    N > 0 && noTag.length === 0, noTag.map((x) => x.title).slice(0, 5).join('、'));
+  /* 第 84 轮修正：原判据要求「全部条目非空 tags」，但用户在网页端新录的片子
+     （2026-10-31 当天录的《给阿嬷的情书》《狂飙》《破冰行动》《阿甘正传》）根本没填标签，
+     tags 字段都不存在 —— 那是合法输入，不是「数据被清空」。这条断言的本意是
+     「第 81 轮删 chip UI 时不许顺手把已有 tags 删掉」，所以按时间分界：只要第 80 轮
+     补过标签的旧条目一条都没丢，契约就成立。 */
+  const CUTOFF = '2026-10-31';   // 第 80 轮批量补 tags 的时点；当天及之后新录的允许不填
+  const oldOnes = data.items.filter((x) => String(x.added_at || '').slice(0, 10) < CUTOFF);
+  const oldNoTag = oldOnes.filter((x) => !Array.isArray(x.tags) || !x.tags.length);
+  const withTag = data.items.filter((x) => Array.isArray(x.tags) && x.tags.length).length;
+  ok(`E1 第 80 轮补过 tags 的 ${oldOnes.length} 条至今仍全部非空（删筛选≠删数据；当天及之后新录的可不填标签，现有 ${withTag}/${N} 条带标签）`,
+    oldOnes.length > 0 && oldNoTag.length === 0, oldNoTag.map((x) => x.title).slice(0, 5).join('、'));
 
   /* 13 个预设词 + 「灾难」（用户在网页端自己加的，2026-10-30 合并远端时保留，不要静默丢掉用户的输入） */
   const ALLOW = ['剧情', '爱情', '犯罪', '悬疑', '科幻', '奇幻', '动画', '历史', '战争', '温情', '喜剧', '冒险', '纪录', '灾难'];

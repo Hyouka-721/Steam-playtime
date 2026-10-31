@@ -21,8 +21,8 @@ ok('A1 watch.html 用史蒂夫取代文字按钮（#w-avatar 存在、无 .w-lay
 ok('A2 头像具备与原图标一致的交互属性（role/tabindex/aria-pressed/aria-label；第 83 轮起无 title 气泡）',
   /class="w-avatar" id="w-avatar" role="button" tabindex="0"\s*\n?\s*aria-pressed="false" aria-label="切换到时间轴视图"/.test(html) &&
   !/id="w-avatar"[^>]*\btitle=/.test(html));
-ok('A3 版本号 bump：watch.css?v=21 / watch.js?v=16',
-  /watch\.css\?v=21"/.test(html) && /watch\.js\?v=16"/.test(html));
+ok('A3 版本号 bump：watch.css?v=22 / watch.js?v=16',
+  /watch\.css\?v=22"/.test(html) && /watch\.js\?v=16"/.test(html));
 
 const wav = (cssNC.match(/\.w-avatar \{[^}]*\}/) || [''])[0];
 ok('A4 .w-avatar 132×132 + 同一素材 + 同一投影',
@@ -33,7 +33,12 @@ ok('A5 .w-avatar 三个反馈态齐全（hover 1.05 / active 0.96 / focus-visibl
   /\.w-avatar:active \{ transform: scale\(0\.96\); \}/.test(cssNC) &&
   /\.w-avatar:focus-visible \{ outline: 2px solid var\(--accent\); outline-offset: 4px; border-radius: 12px; \}/.test(cssNC));
 const m480 = cssNC.slice(cssNC.indexOf('@media (max-width: 480px)'));
-ok('A6 ≤480px .w-avatar 88×88', /\.w-avatar \{ width: 88px; height: 88px; \}/.test(m480));
+/* 第 84 轮改判：同 verify55 A4 —— P0-1 给 .w-avatar 加了 grid-row/grid-column，
+   字面量匹配失效。契约是「≤480 头像仍 88×88、与首页 .header-avatar 同值」→ 解析规则体后判断。 */
+const avatar480 = (m480.match(/\.w-avatar \{[^}]*\}/) || [''])[0];
+ok('A6 ≤480px .w-avatar 88×88',
+  /width: 88px/.test(avatar480) && /height: 88px/.test(avatar480),
+  avatar480 ? avatar480.replace(/\s+/g, ' ').slice(0, 80) : 'no match');
 
 /* 「与原图标保持一致」的硬口径：把首页 .header-avatar 与本页 .w-avatar 的声明集逐条对比 */
 const declOf = (block) => block.split('\n').map((s) => s.trim()).filter((s) => s && !s.startsWith('/*') && !s.startsWith('*'));

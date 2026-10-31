@@ -23,16 +23,16 @@ tests/
   ```
   C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe tests/verify/verify70.mjs
   ```
-- 跑全部 27 个套件（在 bash 里循环）：
+- 跑全部 28 个套件（在 bash 里循环）：
   ```bash
   NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
   for s in verify6 verify47 verify48 verify49 verify54 verify55 verify56 verify57 verify58 \
-           verify60 verify62 verify63 verify64 verify65 verify66 verify67 verify68 verify69 verify70 verify72 verify73 verify75 verify78 verify79 verify80 verify82 verify83; do
+           verify60 verify62 verify63 verify64 verify65 verify66 verify67 verify68 verify69 verify70 verify72 verify73 verify75 verify78 verify79 verify80 verify82 verify83 verify84_watch; do
     echo "== $s =="; "$NODE" tests/verify/$s.mjs 2>&1 | tail -2
   done
   ```
 
-## 套件清单与当前基线（第 83 轮，共 27 套件 973 条）
+## 套件清单与当前基线（第 84 轮，共 28 套件 992 条 = watch 侧 24 套件 760 条 + index 侧 4 套件 232 条）
 
 | 脚本 | 覆盖轮次 / 契约 | 条数 |
 |---|---|---|
@@ -63,6 +63,7 @@ tests/
 | `verify80` | 第 80 轮：胶片颗粒+放映机光晕/时间轴 hover 统一/次文字提亮/网页端删除（两段式）/SW 缓存 watch.json（网络优先）。⚠️ ① 原七项中的 A1「评分→海报描边三档」已被用户回退，套件随之删掉 4 条；② 第 81 轮用户要求**删除 P2 标签 chip 筛选**，原 9 条 chip 断言压成 1 条「chip 容器/CSS/JS 四件套必须都不在」，C 段只留默认评分序 / 无残留空档 / 排序切换仍可用 / 零异常 | 22 |
 | `verify82` | 第 82 轮：页脚「共 N 部影视剧」总数（全量，不随类型筛选变；加载/新增/编辑/删除后自动跟上）+ 390px 竖排不溢出不被加号压住 | 14 |
 | `verify83` | 第 83 轮：移除全页 title 悬停气泡（小黄人 / 史蒂夫 / 加号 / 网格短评 / 时间轴评语 + syncAvatar 动态写入），语义改由 aria-label 承载 | 13 |
+| `verify84_watch` | 第 84 轮 watch 侧第一批 P0（纯 CSS）：移动端页眉改两行式（logo/头像第一行、标题第二行独占，页眉 240→183px、标题 3 行→1 行且字号仍 44px/1px）+ 筛选条两组各占满一行 + 时间轴缩略图 `align-items:flex-start` 顶对齐 + 短评 `text-wrap:pretty` 治段末孤字；桌面 ≥861 三条守护（页眉 173±2px、筛选条同行 + 网格 5 列、缩略图仍垂直居中） | 19 |
 
 `online75`（14 条）：Pages 生效 + 海报三档逐字节 + 线上默认态 + **SW 硬证据**（`response.fromServiceWorker()`）。
 `online77`（14 条）：《情书》海报替换全链路 —— 线上五字段 + **整份 watch.json md5 全等** + 新三档逐字节 + **旧三档必须 404** + 网格 `currentSrc` 命中变体 + 时间轴缩略图 + 该海报的 SW 命中。⚠️ 里面「故意探旧图 404」用 `probing404` 开关把浏览器的 404 控制台日志排除掉，否则会把自己的探针算成站点 JS 异常。
@@ -83,7 +84,7 @@ tests/
 
 ## 关键约定（改代码/改回归前必读）
 
-- **版本号 `?v=N` 是硬编码在多个脚本里的**，bump 必须同步。`watch.css?v=21` / `watch.js?v=16` 现在散落在 verify55/56/57/58/60/62/63/64/65/66/67/68/69/72/73/75/78/79/80 与 online72/73/75/79/80 的断言里（有的脚本只有 css，有的两者都有）。**注意每个文件里有两处**：ok() 描述里的纯文本 + 正则断言里的转义形态（`watch\.js\?v=16`），只换一处会漏。第 78 轮一次 bump 实测 19 个文件 / 59 处，第 81 轮 26 个文件 / 91 处，都用 Node 脚本按「替换前后计数相等」核对，`grep` 收尾查零残留（`fx.js?v=16`、`style.css?v=105` 是 index 页的，别误伤）。⚠️ bump 脚本**别把自己的字面量也算进去**：脚本里那几对「旧→新」字符串要拼接构造（`'watch.cs' + 's?v='`），否则第一次跑就把它自己改成了空操作。
+- **版本号 `?v=N` 是硬编码在多个脚本里的**，bump 必须同步。`watch.css?v=22` / `watch.js?v=16` 现在散落在 verify55/56/57/58/60/62/63/64/65/66/67/68/69/72/73/75/78/79/80 与 online72/73/75/79/80 的断言里（有的脚本只有 css，有的两者都有）。**注意每个文件里有两处、且形态不同**：ok() 描述里的纯文本 `watch.css?v=22` + 判据正则里的转义形态 `watch\.css\?v=22`。第 84 轮一次 bump 只处理了前者（28 文件 33 处），**7 个套件（verify72/73/78/79/80/82/83）集体误红**，补跑 `tests/tools/bump84_css_re.mjs` 处理转义形态（24 处）才全绿 —— 所以 **bump 必须两个脚本一起跑**，跑完 `grep -rn 'css\\\?v=21' tests/` 收尾查零残留。第 78 轮 bump 实测 19 个文件 / 59 处，第 81 轮 26 个文件 / 91 处，都用 Node 脚本按「替换前后计数相等」核对（`fx.js?v=16`、`style.css?v=105` 是 index 页的，别误伤）。⚠️ bump 脚本**别把自己的字面量也算进去**：脚本里那几对「旧→新」字符串要拼接构造（`'watch.cs' + 's?v='`），否则第一次跑就把它自己改成了空操作。⚠️ bump 还会**改到 `.md` 里的历史陈述**（README/CONTINUE 里写着「现在是 v=21」那类句子会被顺手改掉，读起来自相矛盾）→ bump 完必须 `git diff` 扫一遍 `.md`。
 - **条目点击编辑的入口范围是契约，不是实现细节**（第 79 轮用户明确要求保持）：事件委托只挂在 `#w-tl` 上，网格卡片 `.poster` 点不开、也聚焦不到。`verify79` 就是这条契约的守卫（静态 8 条 + 运行时 8 条），**以后谁想给网格加编辑入口，先改需求再改这条套件**，不要顺手把绑定挪到 `#w-grid` 上。
 - **条数要从数据推导**（`N = data.items.length`），别写死 `22` / `26` / `39`。
 - **快照/用户数据算出来的值（百分比、条数）期望都从数据里读**，别写死（`verify6` 的成就卡就是教训）。
@@ -97,6 +98,10 @@ tests/
 - ⚠️ 想验证「SW 到底有没有接管」时，别只看 `response.fromServiceWorker()`：**SW 里直接 `return fetch(req)` 透传网络响应时，Chromium 不置这个标志**（实测恒为 false，会误判成「SW 没拦」）。可靠信号是 `performance.getEntriesByType('resource')` 里该 URL 的 `workerStart > 0`，再配一条「缓存里确实有副本」`caches.open('watch-data-v1').match(...)`。`verify75` C3 就是这么改的（原判据「`page.route` 命中 ≥2」在 P7 之后必然恒 0 —— 代理失效不等于契约破坏）。
 - ⚠️ **别在 CSS 里另起一个 `@media (max-width: 860px)` 块**：`verify60` / `verify62` 是按「文件里**第一个** 860 块」取内容的，新块插在前面会把它们要看的那块挤到第二位，断言全落空（本轮就踩了一次，表现为「改了个表单页脚，网格断点却 FAIL」）。窄屏规则一律追加进那个既有的 860 块。第 82 轮页脚「共 N 部影视剧」就是这么加的（`display:flex; flex-direction:column` + 隐藏 `·` + `padding-bottom:64px` 躲开右下角加号）。
 - ⚠️ **新元素的名字先 grep 一遍历史守卫**：第 82 轮本想给页脚总数用 `#w-count`，可 `verify72` A2 早就有一条 `!/w-count/.test(html)`（第 72 轮删掉旧「共 N 部」计数条时钉下的）→ 直接撞车，改名 `#w-total` 才对。**「某个名字必须不存在」也是契约，别为了省事复用旧 id。**
+- ⚠️ **解析 CSS 规则前必须先剥注释**：第 84 轮 `verify84_watch` A1 写了个「取块内第一个 `.w-title{…}` 规则」的正则，而我恰好在 CSS 注释里写了同一串字面量 → 正则把**注释**当成规则体，解析出 `…` 这种假声明，断言显示详情为 `...`，排查半天。凡是用 `/\.[\w-]+\s*\{([^}]*)\}/` 这类正则取声明的套件，先 `s.replace(/\/\*[\s\S]*?\*\//g, '')` 再匹配；同理，注释里也别写看起来像选择器的字面量（写成「第一条 .w-title 规则」这种自然语言）。
+- ⚠️ **同一元素的多组属性尽量写进同一条规则**：`verify58` A3 是按「块内**第一条** `.w-title` 规则」取 `font-size` 的，第 84 轮我把 grid 定位和 `font-size` 拆成两条 `.w-title` 规则 → 取到的那条没有 `font-size`，A3 与 B[480/390/360] 共 4 条全 FAIL。窄屏改写要动某选择器时，**把新属性并进原来那条**，别另起一条同名规则。
+- ⚠️ **改版式前先 grep 旧套件里的「字面量断言」**：`verify55` A4 / `verify56` A6 原本是 `/\.w-home \{ width: 88px; height: 88px; \}/` 这种**逐字符**匹配 —— 第 84 轮给同一条规则前面加了 `grid-row: 1; grid-column: 1;`（值一个没变），立刻误红。这类判据的正确形态是「先用 `/\.w-home \{[^}]*\}/` 抠出规则体，再判断 `width: 88px` / `height: 88px` 是否在体内」，与书写顺序无关。同轮 `verify63` B[860] 的「三列垂直居中」则是**真契约变更**（P0-3 把 ≤860 改成顶对齐）→ 改判成「≤860 顶对齐（`body.t = thumb.t`）/ ≥1000 仍居中」，**桌面那条不放松**。判据过期有两种：书写形式过期（改判据）与契约本身变了（改需求文档 + 改判据），别混。
+- ⚠️ **`verify58` 钉着跨页一致性**：≤480 的 `.w-title` 与首页 `.site-title` 必须逐值相同（44px / 1px），logo 与头像的 `left`/`right` 也逐像素比对（`iconsOK`）→ `.w-header` 的**横向 padding 必须保持 16px**。第 84 轮为了两行式把它改成 18px（想和 `.w-main` 的 18 对齐），4 条断言立刻红，改回 16px 才过 —— 想要更宽的边距，只能改 `.w-main`。
 
 ## 关于旧脚本
 

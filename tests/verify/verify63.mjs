@@ -23,7 +23,7 @@ ok('A2 .tl-body 改为 align-items: center（原 baseline）',
   /align-items: center/.test(body) && !/align-items: baseline/.test(body), body.replace(/\s+/g, ' ').trim());
 const meta = (cssNC.match(/\.tl-meta \{([^}]*)\}/) || [, ''])[1];
 ok('A3 .tl-meta 也是 align-items: center', /align-items: center/.test(meta));
-ok('A4 版本号 bump：watch.css?v=21', /watch\.css\?v=21"/.test(html));
+ok('A4 版本号 bump：watch.css?v=22', /watch\.css\?v=22"/.test(html));
 
 /* ================= B 桌面实测 ================= */
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });
@@ -51,7 +51,7 @@ const geo = async (W) => {
     const ir = item.getBoundingClientRect();
     return { body: box('.tl-body'), head: box('.tl-head'), name: box('.tl-name'), en: box('.tl-en'),
       meta: box('.tl-meta'), note: box('.tl-note'),
-      thumb: { h: +th.height.toFixed(2), cy: +((th.top + th.bottom) / 2).toFixed(2) },
+      thumb: { t: +th.top.toFixed(2), h: +th.height.toFixed(2), cy: +((th.top + th.bottom) / 2).toFixed(2) },
       itemH: +ir.height.toFixed(2), itemCy: +((ir.top + ir.bottom) / 2).toFixed(2),
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
   });
@@ -78,9 +78,16 @@ for (const W of [1440, 1100, 860]) {
     ok(`B[${W}] 评语也垂直居中（note.cy = body.cy）`,
       Math.abs(r.note.cy - r.body.cy) < 0.5, `note ${r.note.cy} / body ${r.body.cy}`);
   }
-  ok(`B[${W}] 正文容器在条目内居中（body.cy = item.cy），海报同样居中`,
-    Math.abs(r.body.cy - r.itemCy) < 0.5 && Math.abs(r.thumb.cy - r.itemCy) < 0.5,
-    `body ${r.body.cy} thumb ${r.thumb.cy} item ${r.itemCy}`);
+  /* 第 84 轮改判：P0-3 把 ≤860 的 .tl-item 改成 `align-items: flex-start` —— 窄屏文字块会折成
+     3~4 段（高约 170px），缩略图若继续垂直居中就会落在「片名」和「短评」之间、与片名错位。
+     所以 ≤860 的契约从「三列居中」变成「三列顶对齐」；桌面 ≥1000 仍必须居中（第 63 轮本意，不动）。 */
+  const centered = Math.abs(r.body.cy - r.itemCy) < 0.5 && Math.abs(r.thumb.cy - r.itemCy) < 0.5;
+  const topAligned = Math.abs(r.body.t - r.thumb.t) < 0.5;
+  ok(W <= 860
+    ? `B[${W}] ≤860 正文与海报顶对齐（第 84 轮 P0-3 改判，原判据为垂直居中）`
+    : `B[${W}] 正文容器在条目内居中（body.cy = item.cy），海报同样居中`,
+  W <= 860 ? topAligned : centered,
+  `body.t ${r.body.t} thumb.t ${r.thumb.t} | body.cy ${r.body.cy} thumb ${r.thumb.cy} item ${r.itemCy}`);
   ok(`B[${W}] 条目高仍由海报主导（142px，文字块 52.94 未把条目撑高）`,
     r.itemH === 142, `itemH=${r.itemH} bodyH=${r.body.h}`);
   ok(`B[${W}] 无横向溢出`, r.overflow === 0);
