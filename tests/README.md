@@ -23,16 +23,16 @@ tests/
   ```
   C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe tests/verify/verify70.mjs
   ```
-- 跑全部 26 个套件（在 bash 里循环）：
+- 跑全部 27 个套件（在 bash 里循环）：
   ```bash
   NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
   for s in verify6 verify47 verify48 verify49 verify54 verify55 verify56 verify57 verify58 \
-           verify60 verify62 verify63 verify64 verify65 verify66 verify67 verify68 verify69 verify70 verify72 verify73 verify75 verify78 verify79 verify80 verify82; do
+           verify60 verify62 verify63 verify64 verify65 verify66 verify67 verify68 verify69 verify70 verify72 verify73 verify75 verify78 verify79 verify80 verify82 verify83; do
     echo "== $s =="; "$NODE" tests/verify/$s.mjs 2>&1 | tail -2
   done
   ```
 
-## 套件清单与当前基线（第 82 轮，共 26 套件 960 条）
+## 套件清单与当前基线（第 83 轮，共 27 套件 973 条）
 
 | 脚本 | 覆盖轮次 / 契约 | 条数 |
 |---|---|---|
@@ -62,6 +62,7 @@ tests/
 | `verify79` | **守卫**：网格卡片不可点击编辑、只有时间轴条目可点（第 69 轮的绑定范围不许扩大） | 16 |
 | `verify80` | 第 80 轮：胶片颗粒+放映机光晕/时间轴 hover 统一/次文字提亮/网页端删除（两段式）/SW 缓存 watch.json（网络优先）。⚠️ ① 原七项中的 A1「评分→海报描边三档」已被用户回退，套件随之删掉 4 条；② 第 81 轮用户要求**删除 P2 标签 chip 筛选**，原 9 条 chip 断言压成 1 条「chip 容器/CSS/JS 四件套必须都不在」，C 段只留默认评分序 / 无残留空档 / 排序切换仍可用 / 零异常 | 22 |
 | `verify82` | 第 82 轮：页脚「共 N 部影视剧」总数（全量，不随类型筛选变；加载/新增/编辑/删除后自动跟上）+ 390px 竖排不溢出不被加号压住 | 14 |
+| `verify83` | 第 83 轮：移除全页 title 悬停气泡（小黄人 / 史蒂夫 / 加号 / 网格短评 / 时间轴评语 + syncAvatar 动态写入），语义改由 aria-label 承载 | 13 |
 
 `online75`（14 条）：Pages 生效 + 海报三档逐字节 + 线上默认态 + **SW 硬证据**（`response.fromServiceWorker()`）。
 `online77`（14 条）：《情书》海报替换全链路 —— 线上五字段 + **整份 watch.json md5 全等** + 新三档逐字节 + **旧三档必须 404** + 网格 `currentSrc` 命中变体 + 时间轴缩略图 + 该海报的 SW 命中。⚠️ 里面「故意探旧图 404」用 `probing404` 开关把浏览器的 404 控制台日志排除掉，否则会把自己的探针算成站点 JS 异常。
