@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-31T16:33:28+08:00",
+  "updated_at": "2026-10-31T17:09:00+08:00",
   "items": [
     {
       "id": "2026-10-31-dear-you",
@@ -1410,19 +1410,20 @@
       "kind": "series",
       "watched_at": "2020-12-12",
       "poster": "img/watch/item-1db61517.webp",
+      "added_at": "2026-10-25T13:45:55+08:00",
       "poster_w": 640,
       "poster_h": 960,
       "poster_320": "img/watch/item-1db61517-320.webp",
       "poster_480": "img/watch/item-1db61517-480.webp",
       "title_en": "アンナチュラル",
       "year": 2018,
-      "rating": 9,
+      "rating": 8.5,
+      "order": 1,
       "tags": [
         "悬疑",
         "剧情"
       ],
-      "note": "时至今日，你仍是我的光",
-      "added_at": "2026-10-25T13:45:55+08:00"
+      "note": "时至今日，你仍是我的光"
     },
     {
       "id": "2020-12-06-item",
