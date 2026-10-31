@@ -1,13 +1,13 @@
 {
-  "updated_at": "2026-10-31T16:18:04+08:00",
+  "updated_at": "2026-10-31T16:33:28+08:00",
   "items": [
     {
       "id": "2026-10-31-dear-you",
       "title": "给阿嬷的情书",
       "kind": "movie",
       "watched_at": "2026-10-31",
-      "added_at": "2026-10-31T16:17:11+08:00",
       "poster": "img/watch/dear-you-debeb470.webp",
+      "added_at": "2026-10-31T16:17:11+08:00",
       "poster_w": 640,
       "poster_h": 960,
       "poster_320": "img/watch/dear-you-debeb470-320.webp",
@@ -16,7 +16,7 @@
       "year": 2026,
       "rating": 9.9,
       "order": 2,
-      "note": "纸短情长，伏惟珍重"
+      "note": "江海万里，心中念你，便不觉遥远"
     },
     {
       "id": "2026-10-24-dead-to-rights",
