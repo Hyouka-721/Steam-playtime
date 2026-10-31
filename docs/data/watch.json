@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-31T17:18:43+08:00",
+  "updated_at": "2026-10-31T17:22:01+08:00",
   "items": [
     {
       "id": "2026-10-31-dear-you",
@@ -701,6 +701,23 @@
       ],
       "order": 1,
       "note": "时间的尽头~"
+    },
+    {
+      "id": "2023-02-15-punch-out",
+      "title": "狂飙",
+      "kind": "series",
+      "watched_at": "2023-02-15",
+      "added_at": "2026-10-31T17:22:01+08:00",
+      "poster": "img/watch/punch-out-ad547063.webp",
+      "poster_w": 640,
+      "poster_h": 1138,
+      "poster_320": "img/watch/punch-out-ad547063-320.webp",
+      "poster_480": "img/watch/punch-out-ad547063-480.webp",
+      "title_en": "Punch Out",
+      "year": 2023,
+      "rating": 8,
+      "order": 3,
+      "note": "共情反派，是因为真正受害者的缺席"
     },
     {
       "id": "2023-01-29-the-wandering-earth",
