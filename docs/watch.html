@@ -8,7 +8,7 @@
 <link rel="icon" type="image/webp" href="img/minion-0ef9a202.webp">
 <!-- 与游戏站同一套本地花体字，保持品牌一致；preload + font-display:block 消除 FOUT -->
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="watch.css?v=23">
+<link rel="stylesheet" href="watch.css?v=24">
 </head>
 <body>
 
@@ -107,8 +107,14 @@
             <span class="w-pick-ph" id="add-poster-ph">未选择</span>
           </div>
           <div class="w-pick-tip">
-            <input class="w-file" type="file" id="add-poster" accept="image/*">
-            <p id="add-poster-tip">不上传也行 —— 会自动生成一张带片名的深色占位图。<br>上传的图会压成 WebP（宽 640，只缩不放），按内容哈希命名。</p>
+            <!-- 第 86 轮 P2-2：原生 file input 的「Choose File / No file chosen」是浏览器内置英文，
+                 改不了字 → 视觉隐藏它，用 <label for> 自绘「选择海报」+ 文件名 -->
+            <div class="w-file-row">
+              <input class="w-file" type="file" id="add-poster" accept="image/*">
+              <label class="w-file-btn" for="add-poster">选择海报</label>
+              <span class="w-file-name" id="add-poster-name">未选择文件</span>
+            </div>
+            <p id="add-poster-tip">不上传也行，会自动生成带片名的占位图；上传的图会压成 WebP。</p>
           </div>
         </div>
       </div>
@@ -154,7 +160,7 @@
       </div>
 
       <div class="w-field">
-        <label class="w-label" for="add-tags">标签<span class="w-hint">逗号分隔</span></label>
+        <label class="w-label" for="add-tags">标签<span class="w-hint">逗号或顿号分隔</span></label>
         <input class="w-input" type="text" id="add-tags" placeholder="传记, 历史" autocomplete="off">
       </div>
 

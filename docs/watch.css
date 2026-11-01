@@ -26,12 +26,44 @@
   --text-strong: #f5f5f8;
   /* 第 80 轮 A4：11.5px 的日期/次要信息在深色下对比只有约 4.6:1，提亮一档到 5.9:1 */
   --text-dim: #9696a6;
+  /* ---- 第 86 轮 P2-1：文字色阶补齐为五档 strong / text / soft / dim / faint ----
+     soft 是短评与时间轴评语（比正文弱、比次要信息强），faint 是表单说明与占位。
+     原 #5b5b67（placeholder / 海报占位字）并入 faint —— 两者语义都是「最弱的辅助文字」，
+     且 #5b5b67 在 --bg 上对比只有 3.1:1，提亮一档到 3.6:1 更好读。 */
+  --text-soft: #a8a8b4;
+  --text-faint: #6a6a77;
+  /* ---- 第 86 轮 P2-1：面与线 ----
+     well 是输入框 / 海报框的「凹陷」底。原来 #0e0e12（滚动条）与 #0e0e13（输入框）
+     差 1 个色阶，纯属手写的抖动，合一。 */
+  --well: #0e0e13;
+  --img-bg: #1a1a22;        /* 图片未加载时的占位底 */
+  --on-accent: #1a1408;     /* 金色底上的深色字（主按钮 / 右下角加号） */
+  --danger: #d65c5c;
+  /* ---- 第 86 轮 P2-1：金色透明度三档，按用途分而不是按数值凑 ----
+     wash 选中态底 / edge 细描边 / line hover 边线 */
+  --accent-wash: rgba(232, 176, 75, 0.13);
+  --accent-edge: rgba(232, 176, 75, 0.30);
+  --accent-line: rgba(232, 176, 75, 0.40);
   --accent: #e8b04b;
   --accent-2: #c08a2e;
   --ring: rgba(232, 176, 75, 0.26);
-  --radius: 14px;
+  /* 第 86 轮 P2-3：原来的 --radius: 14px 已被 --r-md 取代（全文件唯一用处是 .w-empty） */
   --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 10px 26px rgba(0, 0, 0, 0.45);
   --card-hover-shadow: 0 18px 40px rgba(0, 0, 0, 0.62), 0 0 0 1px var(--ring);
+  /* ---- 第 86 轮 P2-3：圆角五档 ----
+     原来 5/6/8/9/10/11/12/14/18 九种写法，其中 8~12 五档挤在 4px 内肉眼难辨。
+     对外「容器 = --r-md 12、内部控件 = --r-sm 8」，对话框 --r-lg 18，胶囊 --r-pill。 */
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-pill: 999px;
+  /* ---- 第 86 轮 P3：动效三档时长 + 一条曲线 ----
+     t-1 颜色 / 背景 / 边框 / 透明度，t-2 位移 / 缩放 / 阴影，t-3 大图放大与入场。 */
+  --t-1: 0.16s;
+  --t-2: 0.22s;
+  --t-3: 0.32s;
+  --ease: cubic-bezier(0.22, 0.68, 0.28, 1);
 }
 
 @font-face {
@@ -83,13 +115,13 @@ code {
   color: var(--accent);
   background: rgba(232, 176, 75, 0.10);
   padding: 1px 5px;
-  border-radius: 5px;
+  border-radius: var(--r-xs);
 }
 
 /* 深色滚动条 */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: #0e0e12; }
-::-webkit-scrollbar-thumb { background: #2c2c37; border-radius: 6px; border: 2px solid #0e0e12; }
+::-webkit-scrollbar-track { background: var(--well); }
+::-webkit-scrollbar-thumb { background: #2c2c37; border-radius: var(--r-xs); border: 2px solid var(--well); }
 ::-webkit-scrollbar-thumb:hover { background: #3b3b49; }
 
 /* ================= header ================= */
@@ -121,7 +153,7 @@ code {
   width: 132px; height: 132px;
   display: grid; place-items: center;
   filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.55));
-  transition: transform .18s ease;
+  transition: transform var(--t-2) var(--ease);
   -webkit-tap-highlight-color: transparent;
 }
 .w-home img { width: 100%; height: auto; display: block; -webkit-user-drag: none; }
@@ -145,7 +177,7 @@ code {
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  transition: color .18s ease;
+  transition: color var(--t-1) var(--ease);
 }
 .w-title:hover { color: var(--accent); }
 .w-title:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 8px; }
@@ -154,6 +186,10 @@ code {
    2026-10-24 第 56 轮复制到观影页，职责 = 网格视图 ⇄ 时间轴视图 的切换器
    （原「网格 / 时间轴」文字按钮组已按用户确认删除）。
    想改这里先看 style.css:279 的 .header-avatar，两处必须同步，否则两页会出现「同图不同手感」。 */
+/* ⚠️ 第 86 轮例外：头像与站名的 transition / focus-visible 圆角**故意不参与 P2-3/P3 归一**。
+   第 56 轮 verify56 把「watch 页头像与首页 .header-avatar 的声明集完全相同」钉成了契约
+   （A5 逐字断言三条反馈态、A7 逐条比对声明集），而 index 线另有安排、不会跟着 token 化。
+   归一让位于契约 —— 与第 85 轮「时间轴 21/18.5 不许归一」同理。 */
 .w-avatar {
   width: 132px; height: 132px;
   background: url("img/steve-ceb15b8a.webp") center / contain no-repeat;
@@ -177,19 +213,19 @@ code {
   padding: 4px;
   background: var(--panel);
   border: 1px solid var(--card-border);
-  border-radius: 11px;
+  border-radius: var(--r-md);
 }
 .w-seg-btn {
   appearance: none; border: 0; background: none;
   padding: 6px 18px;
   font: inherit; font-size: 13px;
   color: var(--text-dim);
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   cursor: pointer;
-  transition: color .16s, background .16s;
+  transition: color var(--t-1) var(--ease), background var(--t-1) var(--ease);
 }
 .w-seg-btn:hover { color: var(--text); }
-.w-seg-btn.is-on { color: var(--accent); background: rgba(232, 176, 75, 0.13); font-weight: 600; }
+.w-seg-btn.is-on { color: var(--accent); background: var(--accent-wash); font-weight: 600; }
 .w-seg-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 /* 第 72 轮：「共 N 部」计数条 → 排序切换（评分 / 观看时间），视觉与左侧筛选条同款。
    单独起规则而不并进 .w-seg：静态断言按「首个 .w-seg{} 片段」取声明，合并会污染它。 */
@@ -198,19 +234,19 @@ code {
   padding: 4px;
   background: var(--panel);
   border: 1px solid var(--card-border);
-  border-radius: 11px;
+  border-radius: var(--r-md);
 }
 .w-sort-btn {
   appearance: none; border: 0; background: none;
   padding: 6px 18px;
   font: inherit; font-size: 13px;
   color: var(--text-dim);
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   cursor: pointer;
-  transition: color .16s, background .16s;
+  transition: color var(--t-1) var(--ease), background var(--t-1) var(--ease);
 }
 .w-sort-btn:hover { color: var(--text); }
-.w-sort-btn.is-on { color: var(--accent); background: rgba(232, 176, 75, 0.13); font-weight: 600; }
+.w-sort-btn.is-on { color: var(--accent); background: var(--accent-wash); font-weight: 600; }
 .w-sort-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* 筛选后空结果（有数据、但当前「类型」档位没有匹配） */
@@ -244,24 +280,24 @@ code {
   position: relative;
   width: 100%;
   aspect-ratio: 2 / 3;          /* 海报标准比例，避免不同尺寸图片把网格拉歪 */
-  border-radius: 11px;
+  border-radius: var(--r-md);
   overflow: hidden;
-  background: #1a1a22;
+  background: var(--img-bg);
   border: 1px solid var(--card-border);
   box-shadow: var(--card-shadow);
-  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+  transition: transform var(--t-2) var(--ease), box-shadow var(--t-2) var(--ease), border-color var(--t-2) var(--ease);
 }
 .poster-pic img {
   width: 100%; height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform .35s ease, opacity .3s ease;
+  transition: transform var(--t-3) var(--ease), opacity var(--t-3) var(--ease);
   opacity: 0;
 }
 .poster-pic img.is-loaded { opacity: 1; }
 .poster:hover .poster-pic {
   transform: translateY(-4px);
-  border-color: rgba(232, 176, 75, 0.42);
+  border-color: var(--accent-line);
   box-shadow: var(--card-hover-shadow);
 }
 .poster:hover .poster-pic img { transform: scale(1.05); }
@@ -279,8 +315,8 @@ code {
   font-size: 13px; font-weight: 700;
   color: var(--accent);
   background: rgba(8, 8, 11, 0.76);
-  border: 1px solid rgba(232, 193, 90, 0.30);
-  border-radius: 999px;
+  border: 1px solid var(--accent-edge);
+  border-radius: var(--r-pill);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 2px 8px rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(4px);
   font-variant-numeric: tabular-nums;
@@ -314,7 +350,7 @@ code {
 .poster-note {
   margin: 0;
   font-size: 12px; line-height: 1.55;
-  color: #a8a8b4;
+  color: var(--text-soft);
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden;
   word-break: break-word;
@@ -360,8 +396,8 @@ code {
   position: relative;   /* 第 80 轮 A3：金色竖线的定位基准 */
   display: flex; gap: 18px; align-items: center;   /* 文字块比缩略图矮时垂直居中，不贴着图顶 */
   padding: 14px 16px 14px 0;   /* 第 68 轮：缩略图落到内容左轨（与网格卡片同一 x） */
-  border-radius: 12px;
-  transition: background .18s, transform .18s ease;
+  border-radius: var(--r-md);
+  transition: background var(--t-1) var(--ease), transform var(--t-2) var(--ease);
 }
 /* 2026-10-24 第 60 轮：条目之间留缝 —— 原来靠 padding 首尾相接，视觉上挤成一整块 */
 .tl-item + .tl-item { margin-top: 6px; }
@@ -377,7 +413,7 @@ code {
   opacity: 0;
   transform: scaleY(.35);
   transform-origin: center;
-  transition: opacity .18s ease, transform .24s ease;
+  transition: opacity var(--t-1) var(--ease), transform var(--t-2) var(--ease);
   pointer-events: none;
 }
 .tl-item:hover::after { opacity: .85; transform: scaleY(1); }
@@ -394,15 +430,15 @@ code {
   /* 第 62 轮：文字块回到单行（约 41px）比缩略图矮，撤掉第 61 轮的贴顶，交回 .tl-item 的 align-items:center 居中 */
   width: 76px;
   aspect-ratio: 2 / 3;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   overflow: hidden;
-  background: #1a1a22;
+  background: var(--img-bg);
   border: 1px solid var(--card-border);
-  transition: border-color .2s ease, box-shadow .2s ease;
+  transition: border-color var(--t-2) var(--ease), box-shadow var(--t-2) var(--ease);
 }
-.tl-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .28s ease; }
+.tl-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform var(--t-3) var(--ease); }
 /* 第 80 轮 A3：时间轴的缩略图也响应 hover（与网格卡片 img 的 1.05 同一手感，幅度小一档） */
-.tl-item:hover .tl-thumb { border-color: rgba(232, 176, 75, 0.4); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5); }
+.tl-item:hover .tl-thumb { border-color: var(--accent-line); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5); }
 .tl-item:hover .tl-thumb img { transform: scale(1.04); }
 
 /* 2026-10-24 第 62 轮：横向一行。名称与英文名同占一列（.tl-head，英文名在中文名正下方），
@@ -427,6 +463,8 @@ code {
   font-size: 21px; font-weight: 600; line-height: 1.3;
   color: var(--text-strong);
   word-break: break-word;
+  /* 第 86 轮 P3：hover 时片名转金（见下方 .tl-item:hover .tl-name），原先没有过渡是瞬变 */
+  transition: color var(--t-1) var(--ease);
 }
 /* 第 69 轮：悬停时片名变金，提示「整条可点」（放在 .tl-name 主规则之后，避免污染「取首个 .tl-name{…} 取 font-size」的静态断言） */
 .tl-item:hover .tl-name { color: var(--accent); }
@@ -486,7 +524,7 @@ code {
 .tl-note {
   margin: 0;
   flex: 1 1 160px; min-width: 0;
-  font-size: 19px; line-height: 1.5; color: #a8a8b4;
+  font-size: 19px; line-height: 1.5; color: var(--text-soft);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
@@ -498,7 +536,7 @@ code {
   text-align: center;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: var(--radius);
+  border-radius: var(--r-md);
   box-shadow: var(--card-shadow);
 }
 .w-empty[hidden] { display: none; }
@@ -516,7 +554,7 @@ code {
   color: var(--text);
   background: #0d0d11;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--r-md);
   overflow-x: auto;
   white-space: pre;
 }
@@ -527,8 +565,10 @@ code {
   font-size: 12px;
   color: var(--text-dim);
 }
-.w-foot a { color: var(--text-dim); text-decoration: none; border-bottom: 1px solid transparent; }
-.w-foot a:hover { color: var(--accent); border-bottom-color: rgba(232, 176, 75, 0.4); }
+/* 第 86 轮 P3：页脚链接 hover 同时改文字色与下划线色，原先没有过渡是瞬变 */
+.w-foot a { color: var(--text-dim); text-decoration: none; border-bottom: 1px solid transparent;
+  transition: color var(--t-1) var(--ease), border-bottom-color var(--t-1) var(--ease); }
+.w-foot a:hover { color: var(--accent); border-bottom-color: var(--accent-line); }
 .w-foot-sep { margin: 0 8px; opacity: .5; }
 
 /* ================= 手动添加（加号 / 对话框 / 轻提示） =================
@@ -543,10 +583,10 @@ code {
   display: grid; place-items: center;
   border: 0; border-radius: 50%;
   background: linear-gradient(150deg, var(--accent), var(--accent-2));
-  color: #1a1408;
+  color: var(--on-accent);
   cursor: pointer;
   box-shadow: 0 10px 26px rgba(0, 0, 0, .55), 0 0 0 1px rgba(232, 176, 75, .35);
-  transition: transform .18s ease, box-shadow .18s ease;
+  transition: transform var(--t-2) var(--ease), box-shadow var(--t-2) var(--ease);
 }
 .w-fab svg { display: block; }
 .w-fab:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 16px 34px rgba(0, 0, 0, .6), 0 0 0 1px rgba(232, 176, 75, .55); }
@@ -559,7 +599,7 @@ code {
   max-height: calc(100vh - 40px);
   padding: 0;
   border: 1px solid var(--border-hi);
-  border-radius: 18px;
+  border-radius: var(--r-lg);
   background: var(--panel);
   color: var(--text);
   box-shadow: 0 30px 70px rgba(0, 0, 0, .7);
@@ -586,10 +626,10 @@ code {
   appearance: none; border: 0; background: none;
   width: 30px; height: 30px; padding: 0;
   display: grid; place-items: center;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
   color: var(--text-dim); font-size: 15px; line-height: 1;
   cursor: pointer;
-  transition: color .16s, background .16s;
+  transition: color var(--t-1) var(--ease), background var(--t-1) var(--ease);
 }
 .w-add-x:hover { color: var(--text-strong); background: rgba(255, 255, 255, .07); }
 .w-add-x:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -606,20 +646,20 @@ code {
   margin-bottom: 5px;
   font-size: 12px; color: var(--text-dim); letter-spacing: .3px;
 }
-.w-hint { font-size: 12px; color: #6a6a77; }
+.w-hint { font-size: 12px; color: var(--text-faint); }
 .w-req { font-size: 12px; color: var(--accent); }
 
 .w-input {
   width: 100%;
   padding: 9px 11px;
   border: 1px solid var(--card-border);
-  border-radius: 9px;
-  background: #0e0e13;
+  border-radius: var(--r-sm);
+  background: var(--well);
   color: var(--text-strong);
   font: inherit; font-size: 14px;
-  transition: border-color .16s, box-shadow .16s;
+  transition: border-color var(--t-1) var(--ease), box-shadow var(--t-1) var(--ease);
 }
-.w-input::placeholder { color: #5b5b67; }
+.w-input::placeholder { color: var(--text-faint); }
 .w-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring); }
 .w-textarea { resize: vertical; min-height: 58px; }
 select.w-input { cursor: pointer; }
@@ -633,36 +673,49 @@ select.w-input { cursor: pointer; }
   width: 74px; aspect-ratio: 2 / 3;
   display: grid; place-items: center;
   border: 1px dashed var(--border-hi);
-  border-radius: 9px;
-  background: #0e0e13;
+  border-radius: var(--r-sm);
+  background: var(--well);
   overflow: hidden;
 }
 .w-pick-img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .w-pick-img[hidden] { display: none; }
-.w-pick-ph { font-size: 12px; color: #5b5b67; }
+.w-pick-ph { font-size: 12px; color: var(--text-faint); }
 .w-pick-tip { flex: 1 1 auto; min-width: 0; }
-.w-pick-tip p { margin: 7px 0 0; font-size: 12px; line-height: 1.55; color: #6a6a77; }
+.w-pick-tip p { margin: 7px 0 0; font-size: 12px; line-height: 1.55; color: var(--text-faint); }
+/* 第 86 轮 P2-2：原生 file input 的按钮文案「Choose File」与右侧「No file chosen」是浏览器内置的
+   英文，CSS 改不了字 → 视觉隐藏 input，用 <label for> 自绘按钮 + 文件名。
+   ⚠️ 用 clip 而不是 display:none —— 保证 Playwright setInputFiles / 键盘 Tab 仍能作用到它；
+   ⚠️ 编辑模式下 JS 会给 input 置 hidden，靠下面的兄弟选择器一并收起按钮与文件名（纯 CSS 联动，不加 JS 分支）。 */
 .w-file {
-  width: 100%;
-  font-size: 12px;
-  color: var(--text-dim);
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
-.w-file::file-selector-button {
-  margin-right: 10px; padding: 6px 12px;
-  border: 1px solid var(--card-border); border-radius: 8px;
+.w-file-row { display: flex; align-items: center; gap: 10px; min-width: 0; margin-bottom: 7px; }
+.w-file-btn {
+  flex: 0 0 auto;
+  padding: 5px 12px;
+  border: 1px solid var(--card-border); border-radius: var(--r-sm);
   background: #16161d; color: var(--text);
-  font: inherit; font-size: 12px;
+  font-size: 12px; line-height: 1.5;
   cursor: pointer;
-  transition: border-color .16s, color .16s;
+  transition: border-color var(--t-1) var(--ease), color var(--t-1) var(--ease);
 }
-.w-file::file-selector-button:hover { border-color: var(--accent); color: var(--accent); }
+.w-file-btn:hover { border-color: var(--accent); color: var(--accent); }
+#add-poster:focus-visible + .w-file-btn { outline: 2px solid var(--accent); outline-offset: 2px; }
+#add-poster[hidden] ~ .w-file-btn,
+#add-poster[hidden] ~ .w-file-name { display: none; }
+.w-file-name {
+  flex: 1 1 auto; min-width: 0;
+  font-size: 12px; color: var(--text-faint);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
 /* Token 折叠区 */
 .w-token {
   margin: 4px 0 10px;
   border: 1px solid var(--border);
-  border-radius: 10px;
-  background: #101015;
+  border-radius: var(--r-md);
+  background: var(--panel);
   padding: 10px 12px;
 }
 .w-token summary {
@@ -673,7 +726,7 @@ select.w-input { cursor: pointer; }
 .w-token summary::-webkit-details-marker { display: none; }
 .w-token summary::before { content: '▸'; color: var(--accent); font-size: 11px; }
 .w-token[open] summary::before { content: '▾'; }
-.w-token-tip { margin: 9px 0; font-size: 12px; line-height: 1.6; color: #6a6a77; }
+.w-token-tip { margin: 9px 0; font-size: 12px; line-height: 1.55; color: var(--text-faint); }
 .w-token-row { display: flex; gap: 8px; }
 .w-token-row .w-input { flex: 1 1 auto; min-width: 0; }
 
@@ -682,14 +735,14 @@ select.w-input { cursor: pointer; }
   appearance: none;
   padding: 9px 18px;
   border: 1px solid transparent;
-  border-radius: 9px;
+  border-radius: var(--r-sm);
   font: inherit; font-size: 13px;
   cursor: pointer;
-  transition: color .16s, background .16s, border-color .16s, opacity .16s;
+  transition: color var(--t-1) var(--ease), background var(--t-1) var(--ease), border-color var(--t-1) var(--ease), opacity var(--t-1) var(--ease), filter var(--t-1) var(--ease);
   white-space: nowrap;
 }
 .w-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.w-btn-primary { background: linear-gradient(150deg, var(--accent), var(--accent-2)); color: #1a1408; font-weight: 600; }
+.w-btn-primary { background: linear-gradient(150deg, var(--accent), var(--accent-2)); color: var(--on-accent); font-weight: 600; }
 .w-btn-primary:hover { filter: brightness(1.06); }
 .w-btn-primary[disabled] { opacity: .55; cursor: progress; }
 .w-btn-ghost { background: transparent; border-color: var(--card-border); color: var(--text); }
@@ -703,9 +756,9 @@ select.w-input { cursor: pointer; }
   color: #d98a8a;
   margin-right: auto;
 }
-.w-btn-danger:hover { border-color: #d65c5c; color: #f0a0a0; background: rgba(214, 92, 92, 0.08); }
+.w-btn-danger:hover { border-color: var(--danger); color: #f0a0a0; background: rgba(214, 92, 92, 0.08); }
 .w-btn-danger.is-armed {
-  border-color: #d65c5c;
+  border-color: var(--danger);
   background: rgba(214, 92, 92, 0.16);
   color: #ffb3b3;
   font-weight: 600;
@@ -731,7 +784,7 @@ select.w-input { cursor: pointer; }
   transform: translateX(-50%);
   max-width: min(86vw, 420px);
   padding: 10px 18px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   border: 1px solid rgba(232, 176, 75, .4);
   background: rgba(20, 20, 26, .96);
   color: var(--text-strong);

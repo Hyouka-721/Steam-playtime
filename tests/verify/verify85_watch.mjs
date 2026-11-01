@@ -39,8 +39,8 @@ const baseCss = css.slice(0, css.indexOf('@media'));           // 默认规则�
 const i480 = css.indexOf('@media (max-width: 480px)');
 const b480 = css.slice(i480, css.indexOf('@media', i480 + 10));
 
-ok('A1 watch.html 引用 watch.css?v=23 / watch.js?v=16（js 本轮未动）',
-  /watch\.css\?v=23/.test(html) && /watch\.js\?v=16/.test(html),
+ok('A1 watch.html 引用 watch.css?v=24 / watch.js?v=16（js 本轮未动）',
+  /watch\.css\?v=24/.test(html) && /watch\.js\?v=16/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const halfPx = css.match(/font-size:\s*(?:11|12|13|14)\.5px/g) || [];

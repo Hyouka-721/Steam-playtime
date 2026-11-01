@@ -401,6 +401,7 @@
   var submitEl = document.getElementById('w-add-submit');
   var deleteBtn = document.getElementById('w-add-delete');   // 第 80 轮 P6：编辑模式的删除按钮
   var fileEl = document.getElementById('add-poster');
+  var fileNameEl = document.getElementById('add-poster-name');   // 第 86 轮 P2-2：自绘按钮旁的文件名
   var previewEl = document.getElementById('add-preview');
   var previewPhEl = document.getElementById('add-poster-ph');
   var tokenEl = document.getElementById('add-token');
@@ -573,10 +574,12 @@
 
   /* ---- 表单交互 ---- */
   var previewUrl = '';
+  var FILE_NONE = '未选择文件';
   function resetPreview() {
     if (previewEl) { previewEl.hidden = true; previewEl.removeAttribute('src'); }
     if (previewPhEl) previewPhEl.hidden = false;
     if (fileEl) fileEl.value = '';
+    if (fileNameEl) fileNameEl.textContent = FILE_NONE;
     if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = ''; }
   }
   function onPick() {
@@ -587,6 +590,7 @@
     previewEl.src = previewUrl;
     previewEl.hidden = false;
     previewPhEl.hidden = true;
+    if (fileNameEl) fileNameEl.textContent = f.name;   // 第 86 轮 P2-2
   }
   function openAdd() {
     resetAddChrome();
@@ -732,7 +736,7 @@
       if (previewPhEl) previewPhEl.hidden = true;
     }
     if (fileEl) { fileEl.disabled = true; fileEl.hidden = true; }
-    if (posterTipEl) posterTipEl.textContent = '编辑时保持原海报不变；如需换图，可先用脚本或网页重新录入该条。';
+    if (posterTipEl) posterTipEl.textContent = '编辑时保持原海报；要换图请重新录入该条。';
 
     if (typeof dlgEl.showModal === 'function') dlgEl.showModal();
     else dlgEl.setAttribute('open', '');

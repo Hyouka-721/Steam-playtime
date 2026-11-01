@@ -41,7 +41,18 @@ tests/                # 第 70 轮新收编：回归测试套件
 .github/workflows/daily.yml  # 每晚 CI 快照
 ```
 
-## 三、当前进度（截至 2026-10-31 22:05，**第 84 轮 P0 与第 85 轮 P1 均已上线**，线上 `watch.css?v=23` / `watch.js?v=16`；本地 **25 套件 776 条 0 FAIL**，线上 **111 条 0 FAIL**；watch **121 条**）
+## 三、当前进度（截至 2026-11-01 19:05，**第 84 轮 P0、第 85 轮 P1 已上线**（线上 `watch.css?v=23`）；**第 86 轮第三批 P2+P3 本地已改完、未提交**（`watch.css?v=24`）；本地 **26 套件 800 条 0 FAIL**，线上 **111 条 0 FAIL**；watch **121 条**）
+
+- 第 86 轮（**本地已改完，未提交、未推送**；版本 `watch.css v23→v24`，`watch.js` 有一处小改）= 视觉评审**第三批 P2 + P3**，四条都是「不改结构、只收一致性」的活。**方法论仍是数据先行**：先写审计脚本量出「同值散落几次 / 圆角几档 / 过渡几档」，再定改法：
+  ① **P2-1 颜色令牌归一**：全文件 65 种颜色字面量 / 81 处，其中同值散落多处的有 10 组 → 新增 9 个令牌：文字色阶补齐为五档（`--text-strong` / `--text` / **`--text-soft`** #a8a8b4 / `--text-dim` / **`--text-faint`** #6a6a77）、面（`--well` #0e0e13 / `--img-bg` #1a1a22 / `--on-accent` #1a1408 / `--danger`）、金色透明度按**用途**分三档（`--accent-wash` .13 选中底 / `--accent-edge` .30 细边 / `--accent-line` .40 hover 线）。顺手修掉三处手写抖动：`#0e0e12` 与 `#0e0e13` 差 1 个色阶（滚动条 vs 输入框）合进 `--well`；`#5b5b67`（placeholder）并入 `--text-faint`（对比 3.1→3.6:1，更好读）；第 85 轮评分牌的 `rgba(232,193,90,.30)` 色相偏黄、与 `--accent`(#e8b04b) 不一致 → 归一到 `--accent-edge`
+  ② **P2-2 表单说明文案**：真正的毛病不在措辞，而在**原生 file input 在中文界面里显示英文「Choose File / No file chosen」** → 视觉隐藏 input（`clip` 不用 `display:none`，保住 `setInputFiles` 与键盘 Tab）+ `<label for>` 自绘「选择海报」按钮 + `#add-poster-name` 文件名，编辑模式靠 `#add-poster[hidden] ~ .w-file-btn` 纯 CSS 联动收起（零 JS 分支）；说明文字砍掉「宽 640，只缩不放 / 按内容哈希命名」这类技术细节，390 下从 **4 行压到 2 行**；「逗号分隔」→「逗号或顿号分隔」（实际分隔符支持 `, ， 、 ;`）；`.w-token-tip` 行高 1.6→1.55 与 `.w-pick-tip p` 对齐。⚠️ 排序那条的措辞被 `verify78` / `online79` 锁死（`0~5…默认 3…小的排在前` 必须连在 span 内），**一个字都没动**
+  ③ **P2-3 圆角归一**：26 处圆角原有 **12 种写法**，其中 8/9/10/11/12 五档挤在 4px 内（与第 85 轮的字阶半像素档同类）→ 收成 `--r-xs` 6 / `--r-sm` 8 / `--r-md` 12 / `--r-lg` 18 / `--r-pill` 999 五档 + `50%`（圆形）+ `2px`（`.tl-item::after` 金线）两个特例，最终**只落 7 种**。刻意保住嵌套关系：容器 `.w-seg`/`.w-sort` 11→12、内部按钮仍 8；`.poster-pic` 11→12 与 `.tl-item` 12 统一。删掉已无人引用的 `--radius: 14px`
+  ④ **P3 动效归一 + 补漏**：17 组 transition 原有 **8 档时长**（.16/.18/.2/.22/.24/.28/.3/.35）与 2 条曲线（`ease`×16 / `linear`×6）→ 收成三档（`--t-1` .16s 颜色类 / `--t-2` .22s 位移阴影类 / `--t-3` .32s 大图放大）+ 一条 `--ease: cubic-bezier(.22,.68,.28,1)`。**更重要的是修了三处「瞬变」**：`.w-btn-primary:hover` 用 `filter: brightness(1.06)` 但 `.w-btn` 的 transition 列表里没有 `filter`（其他按钮都渐变、只有主按钮硬切）、`.tl-name` hover 转金无过渡、`.w-foot a` hover 无过渡
+  ⑤ **⚠️ 契约优先于归一的三个例外**（`verify56` 当场红给我看）：`.w-avatar` 的 `transition: transform .18s ease`、`.w-avatar:focus-visible` 的 `border-radius: 12px`、`.w-title:focus-visible` 的 `border-radius: 8px` **全部原样保留** —— 第 56 轮把「watch 页头像与首页 `.header-avatar` 声明集完全相同」钉成了契约，index 线不会跟着 token 化，硬归一就是破坏跨页一致。同理 `.w-home:focus-visible` 的 12px 也留着。`verify86_watch` A13 反向守着这条
+  ⑥ 版本 `watch.css v23→v24`；`tests/tools/bump86_css.mjs` 一次处理两种字面量（纯文本 39 + 转义 30 = **69 处 / 31 文件**，含 `docs/watch.html` 自身的引用）
+  ⑦ 新增 `tests/verify/verify86_watch.mjs` **24 条**（静态 13 + 1440 运行时 7 + 390 运行时 3 + 时间轴守护 1），全量 **watch 侧 26 套件 800 条 0 FAIL**
+  ⑧ ⚠️ **两个判据级教训**：① 运行时取 `.tl-item` 的圆角 → 网格视图下该元素不存在、返回 null（第 84 轮 `online84` 同样的坑）；② 一个元素同时过渡多属性时 `transitionTimingFunction` 返回**逗号分隔的多段曲线**（`.w-seg-btn` 是 `cubic-bezier(...), cubic-bezier(...)`），不能直接 `===` 比较
+  ⑨ 用户后续可选：第四批（暂无清单，需重新评审）、或直接上线本批，**未获指令不动**
 
 - 第 85 轮（**已上线**：主改动 `6d6ec4b`、复验脚本 `15aa89b`，推送 `48a9865..6d6ec4b`；**Pages 第 1 次轮询即命中** `watch.css?v=23`，线上 css md5 `4c76cb497f1d` 与本地全等）= 视觉评审**第二批 P1**，三条都是「肉眼可见但不改结构」的收口，**纯 CSS**：
   ① **P1-1 字阶归一**：原来 11.5 / 12.5 / 13.5 / 14.5 四个**半像素**档挤在 3px 里（肉眼分不出、维护全靠猜）→ 并入 **12 / 12 / 13 / 14**，全文件只剩 **10 / 11 / 12 / 13 / 14 / 15** 六个整数正文档（显示级 17 / 18.5 / 19 / 21 / 24 / 44 / 70 不动）。⚠️ **时间轴的 21 / 18.5 / 18.5 / 19 是第 64 轮「字号统一 +4」定的契约，不在归一范围**，`verify85_watch` A6 反向守着
