@@ -7,8 +7,8 @@ const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace
 const { chromium } = require('playwright');
 
 const SITE = 'https://hyouka-721.github.io/Steam-playtime/';
-const CSS_V = '111';
-const APP_V = '106';
+const CSS_V = '112';
+const APP_V = '107';
 
 let pass = 0;
 let fail = 0;
@@ -72,6 +72,7 @@ const lay = await page.evaluate(() => {
     label: document.getElementById('heat-month').textContent,
     sum: document.getElementById('heat-sum').textContent,
     stats: [...pair.querySelectorAll('.hm-stat')].map((x) => x.textContent),
+    times: [...pair.querySelectorAll('.hc i')].map((x) => x.textContent),
     overflow: document.documentElement.scrollWidth - window.innerWidth,
   };
 });
@@ -79,8 +80,10 @@ ok('B1 线上热力图是两列月份块（同一行、有间距）',
   lay.cols === 2 && lay.blocks.length === 2 && lay.sameRow === true && lay.gap >= 10, lay.blocks);
 ok('B2 格子宽高比 1.0~1.6（单月铺满时代是 2.3）',
   lay.cellW / lay.cellH >= 1.0 && lay.cellW / lay.cellH <= 1.6, `${lay.cellW}×${lay.cellH}`);
-ok('B3 日期数字 ≥15px、时长数字 ≥14px（第 87 轮是 12.5 / 13）',
-  lay.dateFont >= 15 && lay.timeFont >= 14, `${lay.dateFont} / ${lay.timeFont}`);
+ok('B3 日期数字 ≥15px、时长数字 ≥15px（第 88 轮是 15 / 14）',
+  lay.dateFont >= 15 && lay.timeFont >= 15, `${lay.dateFont} / ${lay.timeFont}`);
+ok('B6 时长文字是「数字 + 空格 + 单位」',
+  lay.times.length > 0 && lay.times.every((t) => /^[\d.,]+ (min|h)$/.test(t)), lay.times.slice(0, 4));
 ok('B4 月份标题 ≥14px、汇总行 ≥13px', lay.titleFont >= 14 && lay.sumFont >= 13, `${lay.titleFont} / ${lay.sumFont}`);
 ok('B5 月份范围标签 + 月内统计 + 汇总行（有记录/合计）齐全',
   /^\d{4} 年 \d{1,2}(–\d{1,2})? 月$/.test(lay.label) && /天有记录/.test(lay.sum) && /合计/.test(lay.sum)

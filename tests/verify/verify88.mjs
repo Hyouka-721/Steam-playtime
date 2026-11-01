@@ -57,8 +57,8 @@ const src = await (async () => {
 })();
 const appV = (src.html.match(/app\.js\?v=(\d+)/) || [])[1];
 const cssV = (src.html.match(/style\.css\?v=(\d+)/) || [])[1];
-ok('0.1 index.html 引用 app.js?v=106 / style.css?v=111',
-  appV === '106' && cssV === '111', { app: appV, css: cssV });
+ok('0.1 index.html 引用 app.js?v=107 / style.css?v=112',
+  appV === '107' && cssV === '112', { app: appV, css: cssV });
 ok('0.2 热力图容器改为两列（.heat-pair）且不再有单月网格占位',
   src.html.includes('class="heat-pair" id="heat-drill"') && !src.html.includes('class="heat heat-cal" id="heat-drill"'));
 ok('0.3 app.js 有分页/范围标签/两月常量',
@@ -262,9 +262,13 @@ const fonts = await page.evaluate(() => {
   };
 });
 ok('5.1 热力图日期数字 ≥ 15px（第 87 轮 12.5px）', fonts.date >= 15, fonts.date);
-ok('5.2 热力图时长数字 ≥ 14px（第 87 轮 13px）', fonts.time >= 14, fonts.time);
+ok('5.2 热力图时长数字 ≥ 15px（与日期同号；第 88 轮 14px）', fonts.time >= 15, fonts.time);
 ok('5.3 月份标题 / 汇总 / 月份标签都 ≥ 13px',
   fonts.hmTitle >= 13.5 && fonts.sum >= 13 && fonts.month >= 13.5, fonts);
+// 第 89 轮（用户）：数字与单位之间必须有空格（「49 min」不是「49min」）
+const timeText = await page.evaluate(() => [...document.querySelectorAll('#heat-drill .hc i')].map((el) => el.textContent));
+ok('5.5 时长文字是「数字 + 空格 + 单位」（min / h）',
+  timeText.length > 0 && timeText.every((t) => /^[\d.,]+ (min|h)$/.test(t)), timeText.slice(0, 4));
 ok('5.4 正文小字（提示 / 卡片标签）≥ 13px（第 87 轮 12px）',
   fonts.hint >= 13 && fonts.cardLabel >= 13, { hint: fonts.hint, cardLabel: fonts.cardLabel });
 

@@ -705,11 +705,11 @@
         /* 第 87 轮：格子是「当日明细」的入口。有数据的日子都可点 —— 包括「当天这款没玩」
            的 0 分钟格，因为那天的明细里还有别的游戏。可访问名给出日期 + 时长 + 动作。 */
         const label = min > 0
-          ? `${x.m} 月 ${d} 日 · ${appid ? '这款玩了 ' : '当天 '}${hoursShort(min)}，查看当天明细`
+          ? `${x.m} 月 ${d} 日 · ${appid ? '这款玩了 ' : '当天 '}${heatTime(min)}，查看当天明细`
           : `${x.m} 月 ${d} 日 · ${appid ? '这款当天没玩' : '当天没有游玩'}，仍可查看明细`;
         cells.push(
           `<span class="${cls.join(' ')}" data-date="${ds}" role="button" tabindex="0"` +
-            ` aria-label="${escapeHtml(label)}"><b>${d}</b>${min > 0 ? `<i>${hoursShort(min)}</i>` : ''}</span>`,
+            ` aria-label="${escapeHtml(label)}"><b>${d}</b>${min > 0 ? `<i>${heatTime(min)}</i>` : ''}</span>`,
         );
       }
       while (cells.length % 7 !== 0) cells.push('<span class="hc is-blank"></span>');
@@ -936,6 +936,13 @@
     if (n < 60) return `${n}min`;
     const h = Math.round((n / 60) * 10) / 10;
     return `${h % 1 === 0 ? Math.round(h) : h.toFixed(1)}h`;
+  }
+
+  /** 热力图格子里用的短时长：数字与单位之间留一个空格（「49 min」「4.4 h」）。
+      第 89 轮用户要求；只在热力图的可见文字与 aria-label 里用，时间轴角标仍是紧凑写法。 */
+  function heatTime(m) {
+    const s = hoursShort(m);
+    return s === '0' ? s : s.replace(/^([\d.]+)(.+)$/, '$1 $2');
   }
 
   /** 该日期所在周的周一（Asia/Shanghai 无关紧要：数据本身就是日期字符串） */
