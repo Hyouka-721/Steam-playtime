@@ -27,8 +27,10 @@ const ok = (n, c, extra = '') => {
 /* ---------- 本地期望（从仓库读，不写死尺寸表以外的内容） ---------- */
 const localHtml = fs.readFileSync('docs/index.html', 'utf8');
 const localManifest = JSON.parse(fs.readFileSync('docs/manifest.webmanifest', 'utf8'));
-const expectIcons = [...localHtml.matchAll(/href="(img\/(?:favicon|apple-touch-icon)-[^"]+)"/g)].map((m) => m[1]);
-console.log('本地期望图标：', expectIcons.join(', '));
+// 期望尺寸一律从 link 的 sizes 属性读：apple-touch-icon 的文件名里没有数字
+const expectIcons = [...localHtml.matchAll(/<link rel="(?:icon|apple-touch-icon)"[^>]*sizes="(\d+)x\d+"[^>]*href="([^"]+)"/g)]
+  .map((m) => ({ size: Number(m[1]), href: m[2] }));
+console.log('本地期望图标：', expectIcons.map((i) => `${i.href}(${i.size})`).join(', '));
 
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 950 } });
@@ -61,7 +63,7 @@ ok('A2 页眉 h1 也是「Game Time」，不再有 My 前缀',
 ok('A3 线上不再有内联 base64 图标', !/href="data:image\/png;base64,/.test(html));
 
 /* ---------- A4/A5 图标文件 ---------- */
-for (const rel of expectIcons) {
+for (const { href: rel, size: want } of expectIcons) {
   const url = `${SITE}${rel}?t=${Date.now()}`;
   const res = await fetch(url);
   ok(`A4 ${rel} 线上 200`, res.status === 200, res.status);
@@ -74,7 +76,6 @@ for (const rel of expectIcons) {
       const im = await createImageBitmap(new Blob([arr], { type: 'image/png' }));
       return { w: im.width, h: im.height };
     }, buf.toString('base64'));
-    const want = Number((rel.match(/-(\d+)-[0-9a-f]{8}\.png$/) || [])[1]);
     ok(`A5 ${rel} 解码尺寸 = ${want}×${want}`, bmp.w === want && bmp.h === want, `${bmp.w}×${bmp.h} / ${(buf.length / 1024).toFixed(1)}KB`);
   }
 }
