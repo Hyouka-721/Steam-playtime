@@ -81,12 +81,15 @@ const waitCovers = async (page, ms = 1200) => {
   await waitCovers(page);
   await page.screenshot({ path: `${OUT}/90b-01-时间轴最新三轮.png` });
 
-  // ② 里程碑区（滚到第一个带里程碑的周）
-  await page.evaluate(() => {
-    const ms = document.querySelector('#timeline .tl-milestone');
-    const item = ms?.closest('.tl-item');
-    item?.scrollIntoView({ block: 'center' });
+  // ② 里程碑区：直接定位「突破 1000h」那一周（用户口头确认是 2026-04-16）
+  const ms1000Week = await page.evaluate(() => {
+    const ms = [...document.querySelectorAll('#timeline .tl-milestone')]
+      .find((e) => e.textContent.includes('1000h'));
+    if (!ms) return null;
+    ms.closest('.tl-item')?.scrollIntoView({ block: 'center' });
+    return ms.closest('.tl-item')?.querySelector('.tl-week')?.textContent?.trim() ?? null;
   });
+  log('1000h 里程碑所在周:', ms1000Week);
   await waitCovers(page);
   await page.screenshot({ path: `${OUT}/90b-02-时间轴里程碑区.png` });
 

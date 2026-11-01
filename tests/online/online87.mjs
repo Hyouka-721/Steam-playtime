@@ -11,8 +11,8 @@ const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace
 const { chromium } = require('playwright');
 
 const SITE = 'https://hyouka-721.github.io/Steam-playtime/';
-const CSS_V = '114';
-const APP_V = '109';
+const CSS_V = '115';
+const APP_V = '110';
 
 let pass = 0;
 let fail = 0;

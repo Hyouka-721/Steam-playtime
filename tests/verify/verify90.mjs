@@ -59,7 +59,7 @@ const daily = JSON.parse(fs.readFileSync('docs/data/daily/2026-10.json', 'utf8')
 
 const appV = (html.match(/app\.js\?v=(\d+)/) || [])[1];
 const cssV = (html.match(/style\.css\?v=(\d+)/) || [])[1];
-ok('0.1 index.html 引用 app.js?v=109 / style.css?v=114', appV === '109' && cssV === '114', { app: appV, css: cssV });
+ok('0.1 index.html 引用 app.js?v=110 / style.css?v=115', appV === '110' && cssV === '115', { app: appV, css: cssV });
 
 // 剥注释后再解析规则（第 84 轮的坑：注释里的选择器字面量会被当成规则体）
 const cssNoComment = css.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -275,6 +275,11 @@ ok('3.7 10.12-10.18 的王国保卫战徽章 = 真实 ' + weekReal + 'min + 补�
   Array.isArray(tl.kk1012) && tl.kk1012[0] === `${expectMerged % 1 === 0 ? expectMerged : expectMerged.toFixed(1)}h`,
   { badges: tl.kk1012, expectMerged });
 ok('3.8 时间轴没有任何破图（补录带来的新游戏也有本地封面）', tl.broken.length === 0, tl.broken.slice(0, 5));
+// 用户口头确认：突破 1000h 发生在 **2026-04-16** → 里程碑必须落在包含该日的那一周
+const WEEK_1000H = '2026-04-16';
+const ms1000 = expectMs.find((x) => x.h === 1000 * 60); // 1000h = 60000 分钟 = 第 10 个 100h 档
+ok('3.9 突破 1000h 落在包含 ' + WEEK_1000H + ' 的那一周（' + weekStartOf(WEEK_1000H) + '）',
+  !!ms1000 && ms1000.ws === weekStartOf(WEEK_1000H), { got: ms1000?.ws, expect: weekStartOf(WEEK_1000H) });
 
 /* ================= 4 隔离性 ================= */
 const sumDaily = Object.values(daily.days).reduce((a, v) => a + v.total_minutes, 0);
@@ -378,12 +383,17 @@ ok('4.8 最近游玩榜完全一致（补录没混进「最近两周」）',
 ok('4.9 热力图汇总与月份块统计完全一致（合计/天数/峰值都没被抬高）',
   JSON.stringify(A.heatSum) === JSON.stringify(B.heatSum), { A: A.heatSum, B: B.heatSum });
 const realWeeks = new Set(Object.keys(daily.days).map(weekStartOf)).size;
-ok(`4.10 差异只出现在时间轴：周数 ${ascWeeks.length}→${realWeeks}、里程碑 ${expectMs.length}→0、王国保卫战徽章回落到真实值`,
+// 徽章数量不必相等：补录本身会多带来几周王国保卫战（如 10.05 那周 2h），
+// 真正要守的是「10.12 那周合并成 8h、抹掉数据后回落到真实的 6.4h」。
+const hShort = (m) => (m < 60 ? m + 'min' : (() => { const h = Math.round((m / 60) * 10) / 10; return (h % 1 === 0 ? Math.round(h) : h.toFixed(1)) + 'h'; })());
+const mergedBadge = hShort(weekReal + extra1012);
+const realBadge = hShort(weekReal);
+ok(`4.10 差异只出现在时间轴：周数 ${ascWeeks.length}→${realWeeks}、里程碑 ${expectMs.length}→0、王国保卫战徽章 ${mergedBadge}→${realBadge}`,
   A.timeline.weeks === ascWeeks.length && B.timeline.weeks === realWeeks
   && A.timeline.milestones === expectMs.length && B.timeline.milestones === 0
-  && A.timeline.badges.length === B.timeline.badges.length
-  && A.timeline.badges.some((b, i) => b !== B.timeline.badges[i]),
-  { A: { ...A.timeline, badges: undefined }, B: { ...B.timeline, badges: undefined } });
+  && A.timeline.badges.includes(mergedBadge) && !B.timeline.badges.includes(mergedBadge)
+  && B.timeline.badges.includes(realBadge),
+  { A: { ...A.timeline, badges: undefined }, B: { ...B.timeline, badges: undefined }, mergedBadge, realBadge });
 ok('4.11 两个版本都没有补录字样（删掉数据也不会冒出/消失提示行）',
   A.timeline.extras === 0 && B.timeline.extras === 0 && !A.timeline.hasWord && !B.timeline.hasWord);
 
