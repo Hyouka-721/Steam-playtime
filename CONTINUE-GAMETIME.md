@@ -74,7 +74,7 @@ README.md                    # 完整说明（管线/部署/密钥/Schema/自检
   ⑥ 用户「整体调大字号、加深颜色」→ **≤17px 的字号档位统一 +1px（79 处）**（11→12 … 17→18，标题 44/70 与大数字不动）；四套主题的 `--text-dim` / `--text-faint` 提高一档对比度（cream 7.64/4.38、mint 7.18/4.07、dawn 7.98/4.57、night 9.43/6.2，均过 AA 正文 4.5 或作为辅助色 ≥4）。暗色主题是「提亮」而不是「加深」——暗底上提高对比度才是「更清楚」。
   ⑦ 热力图数字：日期 `.hc b` 12.5→**15px / 600 / --text-strong**；时长 `.hc i` 13→**14px**；窄屏分档 13/12.5（≤860）、12.5/12（≤400）、11（≤360），并把 `.hc` 的 min-height 从 78 降到 74。
   ⑧ 测试：新建 `verify88` **42 条**（两列几何 + 格子比例 + 月份块内部 + 空月占位 + 翻页 + 字号 + 四主题对比度 + 量词 + 7 档响应式；翻页/三月数据用 `page.route` 改写内联 `__BOOT` 造出来）；`verify6` / `verify83_index` 的月份判据改成范围式 + 内层 `.heat-cal` 7 列；`verify47` 改成从月份块 `data-ym` 取月份、并加 `ensurePageWith` 先翻页再点格子；新建 `online88` **12 条**。index 侧 8 套件 **349 条 0 FAIL**。
-  ⑨ 踩坑：网格项默认 `min-width:auto`（窄屏横向溢出，`.hc` 必须显式归零）；`<script>window.__BOOT={…};</script>` 里 JSON 后面有个分号，route 改写时正则要把它切出去，否则 `JSON.parse` 报「Unexpected non-whitespace character after JSON」。
+  ⑨ 踩坑：网格项默认 `min-width:auto`（窄屏横向溢出，`.hc` 必须显式归零）；`<script>window.__BOOT={…};</script>` 里 JSON 后面有个分号，route 改写时正则要把它切出去，否则 `JSON.parse` 报「Unexpected non-whitespace character after JSON」；**线上轮询必须带 cache-busting 参数**（`index.html?t=…`）—— Pages 给 index.html 设了 `max-age=600`，第一轮若拿到旧版就会在浏览器缓存里待 10 分钟，后面 39 次全在看同一份旧文件（本轮 `online88` 白等了 7 分钟，实际 3 分钟前就已生效）。
 
 - **第 87 轮（index 侧，2026-10-31）**热力图时长字样放大 + 日明细入口并入热力图：
   ① 用户「热力图中时间字样放大，颜色加深」→ `.hc i` 从 11.5px / 继承色 / opacity .95 改为 **13px / 600 重 / --text-strong / opacity 1**（`h4` 实心格里仍是白字，靠 `.hc.h4 i` 更高的特异性守住，没被这条盖掉）；窄屏 ≤860 用 12px、≤360 用 11px。

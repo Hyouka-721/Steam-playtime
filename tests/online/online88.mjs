@@ -28,7 +28,9 @@ console.log('== A 等待 Pages 生效 ==');
 let html = '';
 for (let i = 1; i <= 40; i++) {
   try {
-    const r = await page.goto(SITE + 'index.html', { waitUntil: 'domcontentloaded', timeout: 45000 });
+    // ⚠️ 必须带 cache-busting 参数：Pages 给 index.html 设了 max-age=600，
+    // 第一轮如果拿到旧版就会在浏览器缓存里待 10 分钟，后面几十次全在看同一份旧文件。
+    const r = await page.goto(`${SITE}index.html?t=${Date.now()}-${i}`, { waitUntil: 'domcontentloaded', timeout: 45000 });
     html = await r.text();
   } catch (e) {
     console.log(`  · 第 ${i} 次打开失败：${e.message.split('\n')[0]}`);
@@ -119,8 +121,12 @@ for (const w of [900, 390, 360]) {
   await page.click('#card-lifetime');
   await page.waitForTimeout(400);
   if (await page.evaluate(() => document.getElementById('lt-detail').hidden)) {
-    await page.click('#card-lifetime');
+    await page.click('#card-lifetime');   // 第一下可能只是把视图切回「游戏时长」
     await page.waitForTimeout(400);
+  }
+  if (await page.evaluate(() => document.getElementById('lt-detail').hidden)) {
+    await page.click('#card-lifetime');   // 第二下才真正进下钻
+    await page.waitForTimeout(450);
   }
   const m = await page.evaluate(() => {
     const pair = document.getElementById('heat-drill');
