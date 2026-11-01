@@ -2,7 +2,7 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-10-31T19:25:21.268Z",
+  "generated_at": "2026-11-01T11:37:17.238Z",
   "generated_at_local": "2026-11-01",
   "tracking_since": "2026-10-13",
   "last_snapshot_date": "2026-10-31",
@@ -466,6 +466,15 @@
       "last_played": null
     }
   },
+  "timeline_extra": [
+    {
+      "date": "2026-10-12",
+      "appid": "246420",
+      "name": "王国保卫战",
+      "minutes": 96,
+      "note": "用户手动补录（仅时间轴）"
+    }
+  ],
   "health": {
     "gap_days": 1,
     "low_confidence_days": 1,

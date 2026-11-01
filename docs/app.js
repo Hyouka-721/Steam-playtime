@@ -960,20 +960,36 @@
       return;
     }
 
-    // 按周聚合：周一 -> {games: Map<appid, {name, minutes}>}
+    // 按周聚合：周一 -> {games: Map<appid, {name, minutes}>, realMinutes, extras}
+    // realMinutes 只累真实采集到的分钟数，补录不参与 —— 里程碑档位靠它算，
+    // 这样补录不会把某个 100h 阈值挤到相邻的周去（与第 89 轮行为完全一致）。
     const weeks = new Map();
     for (const d of state.allDates) {
       const day = state.days.get(d);
       if (!day) continue;
       const ws = weekStart(d);
-      if (!weeks.has(ws)) weeks.set(ws, { start: ws, games: new Map() });
+      if (!weeks.has(ws)) weeks.set(ws, { start: ws, games: new Map(), realMinutes: 0, extras: [] });
       const w = weeks.get(ws);
       for (const g of day.games ?? []) {
         const cur = w.games.get(g.appid);
         if (cur) cur.minutes += g.minutes;
         else w.games.set(g.appid, { appid: g.appid, name: g.name, minutes: g.minutes });
+        w.realMinutes += g.minutes;
       }
     }
+    /* 第 90 轮："游戏库 → 时间轴"的补录（meta.timeline_extra）。
+       只并进这里的周聚合，**不进 state.days** —— 所以热力图、统计汇总、最近游玩
+       都不会看到这些分钟数（用户明确要求「仅用于时间轴」）。 */
+    for (const e of state.meta?.timeline_extra ?? []) {
+      const ws = weekStart(e.date);
+      if (!weeks.has(ws)) weeks.set(ws, { start: ws, games: new Map(), realMinutes: 0, extras: [] });
+      const w = weeks.get(ws);
+      const cur = w.games.get(e.appid);
+      if (cur) cur.minutes += e.minutes;
+      else w.games.set(e.appid, { appid: e.appid, name: e.name, minutes: e.minutes });
+      (w.extras ??= []).push(e);
+    }
+
     if (!weeks.size) {
       hint.textContent = '—';
       box.innerHTML = '<p class="empty">暂无每周游玩数据。</p>';
@@ -982,13 +998,14 @@
 
     const asc = [...weeks.values()].sort((a, b) => a.start.localeCompare(b.start));
     // 累计里程碑（每满 100h 一档）：以终身累计为基准锚定，周内跨越阈值即在该周标记
-    const allTotal = asc.reduce((a, w) => a + [...w.games.values()].reduce((x, g) => x + g.minutes, 0), 0);
+    // 用 realMinutes 而不是 games 总和 —— 补录不参与里程碑定位。
+    const allTotal = asc.reduce((a, w) => a + w.realMinutes, 0);
     const base = Math.max(0, (state.meta.stats?.lifetime_minutes ?? 0) - allTotal);
     const STEP = 6000; // 100h
     let cum = base;
     for (const w of asc) {
       const before = cum;
-      for (const g of w.games.values()) cum += g.minutes;
+      cum += w.realMinutes;
       w.milestones = [];
       for (let m = Math.floor(before / STEP) + 1; m * STEP <= cum; m++) {
         w.milestones.push(m * STEP);
@@ -1030,6 +1047,12 @@
         const ms = (w.milestones ?? [])
           .map((m) => `<div class="tl-milestone">游戏时长突破 <b>${hoursShort(m)}</b></div>`)
           .join('');
+        // 补录明细：让「哪一天补了什么」在时间轴上看得见（只在这一行里，不影响别处）。
+        // 括号里点明「不计入统计」，因为徽章数字已含这几十分钟，不说明会被当成真实采集。
+        const ex = (w.extras ?? [])
+          .map((e) => `${Number(e.date.slice(5, 7))}.${Number(e.date.slice(8, 10))} ${escapeHtml(e.name)} ${hoursShort(e.minutes)}`)
+          .join(' · ');
+        const exHtml = ex ? `<div class="tl-extra">补录 ${ex}<span class="tl-extra-note">（不计入统计）</span></div>` : '';
         return `<div class="tl-item">
           <div class="tl-left">
             ${showMonth ? `<div class="tl-month">${month}</div>` : '<div class="tl-month tl-month-ph"></div>'}
@@ -1039,6 +1062,7 @@
           <div class="tl-body">
             <div class="tl-games">${games}</div>
             ${ms}
+            ${exHtml}
           </div>
         </div>`;
       })

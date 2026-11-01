@@ -1016,6 +1016,15 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   font-size: 14px;
 }
 .tl-milestone b { font-size: 17px; margin-left: 4px; }
+/* 第 90 轮：时间轴补录明细（「补录 10.12 王国保卫战 1.6h」）。
+   只在有补录的那一周出现，样式比里程碑弱一档，不抢徽章的注意力。 */
+.tl-extra {
+  margin-top: 8px; font-size: 12.5px; color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+/* 括号里的补充说明整体不可拆：390 窄屏下文案恰好跨行，
+   不加 nowrap 会被断成「…1.6h（不计入 / 统计）」，括号被劈成两半很难看。 */
+.tl-extra-note { opacity: 0.72; white-space: nowrap; }
 
 /* ---- 每日记录 ---- */
 .day-summary { font-size: 14.5px; color: var(--text-dim); margin: 2px 0 12px; }
@@ -1392,7 +1401,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .hc i {
   /* 第 89 轮（用户）：时长再放大一档到 15px（与日期同号），数字与单位之间留空格，
      两行都吃满格宽：日期贴左上、时长贴右下。 */
-  font-style: normal; font-size: 15px; font-weight: 600;
+  font-style: normal; font-size: 15px; font-weight: 700;
   margin-top: auto; text-align: right; white-space: nowrap;
   color: var(--text-strong); opacity: 1;
   font-variant-numeric: tabular-nums; line-height: 1.2;
@@ -1469,7 +1478,11 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .hc b { font-size: 12.5px; }
 }
 @media (max-width: 360px) {
-  .hc { padding: 6px 2px; }
+  /* 第 90 轮：时间标签加粗后「49 min」在 360 宽下比 600 字重时宽约 4px，
+     格内宽度只剩 34.3px（38.3 格宽 − 2×2 内边距）而字要 38px → 会压过格子左边界。
+     压字号到 10px 并把内边距收到 1.5px，把这一步找回来（实测余量 ~1.9px）。 */
+  .hc { padding: 4px 1.5px; }
+  .hc i { font-size: 10px; letter-spacing: -0.2px; }
 }
 
 /* #14 接下来玩什么 */

@@ -34,9 +34,37 @@ function loadNameOverrides() {
   }
 }
 
+/**
+ * 只给「游戏库 → 时间轴」用的补录数据（第 90 轮）：
+ * 有些游玩发生在自动采集开始之前（跟踪期首日之前），Steam 的每日差分拿不到，
+ * 但用户希望在时间轴上补上。这类记录**绝不能进 daily**——否则热力图、统计汇总、
+ * 最近游玩都会被污染。所以单独放 data/overrides/timeline-extra.json，
+ * 由 build 原样下发到 meta.timeline_extra，前端只有 renderTimeline 会去读它。
+ */
+function loadTimelineExtra() {
+  const file = path.join(OVERRIDE_DIR, 'timeline-extra.json');
+  if (!fs.existsSync(file)) return [];
+  try {
+    const arr = readJson(file);
+    if (!Array.isArray(arr)) throw new Error('顶层必须是数组');
+    return arr
+      .filter((e) => e && /^\d{4}-\d{2}-\d{2}$/.test(e.date) && Number(e.minutes) > 0)
+      .map((e) => ({
+        date: e.date,
+        appid: String(e.appid ?? ''),
+        name: String(e.name ?? ''),
+        minutes: Math.round(Number(e.minutes)),
+        note: e.note ? String(e.note) : '',
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  } catch (e) {
+    console.warn('[build] WARN: overrides/timeline-extra.json 解析失败:', e.message);
+    return [];
+  }
+}
+
 /** 最新快照里的游戏元信息（名称/图标），权威来源是 Steam */
-function loadGameMetaFromLatestSnapshot() {
-  if (!fs.existsSync(SNAP_DIR)) return {};
+function loadGameMetaFromLatestSnapshot() {  if (!fs.existsSync(SNAP_DIR)) return {};
   const files = fs.readdirSync(SNAP_DIR).filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort();
   if (!files.length) return {};
   const latest = readJson(path.join(SNAP_DIR, files[files.length - 1]));
@@ -159,6 +187,7 @@ function main() {
   }
 
   const nameOverrides = loadNameOverrides();
+  const timelineExtra = loadTimelineExtra();
   const snapMeta = loadGameMetaFromLatestSnapshot();
 
   const monthFiles = fs.readdirSync(DAILY_DIR).filter((f) => /^\d{4}-\d{2}\.json$/.test(f)).sort();
@@ -311,6 +340,8 @@ function main() {
     },
     games_index: gamesIndex,
     games_lifetime: gamesLifetime,
+    // 只给「游戏库 → 时间轴」的补录（不进 daily，所以热力图/统计汇总不受影响）
+    timeline_extra: timelineExtra,
     health: {
       gap_days: gapDays,
       low_confidence_days: lowConfidenceDays,
@@ -327,6 +358,7 @@ function main() {
   log(`已生成 docs/data/meta.json（${dates.length} 天，${playedGames} 款追踪期游戏 / ${lifetimePlayed} 款终身有游玩）`);
   log(`终身累计 ${lifetimeMinutes} min（${meta.stats.lifetime_hours} h），追踪期累计 ${totalMinutes} min`);
   log('⚠ 校验：meta.json 中不含完整 steamid =', !JSON.stringify(meta).includes('7656119'));
+  if (timelineExtra.length) log(`时间轴补录 ${timelineExtra.length} 条（仅时间轴展示，不进 daily）`);
 
   // 最后把首屏数据内联进 index.html（2026-10-18）：GitHub Pages 每个请求的
   // TTFB 要 320~580ms，为此让首屏少发 1~2 次请求比省几 KB 更值钱。

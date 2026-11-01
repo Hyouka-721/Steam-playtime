@@ -23,7 +23,7 @@ tests/
   ```
   C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe tests/verify/verify70.mjs
   ```
-- 跑全部 33 个套件（在 bash 里循环；含另一条线的 index 侧 `verify47/48/49/6/82_index/83_index/88`）：
+- 跑全部 33 个套件（在 bash 里循环；含另一条线的 index 侧 `verify47/48/49/6/82_index/83_index/88/90`）：
   ```bash
   NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
   for s in verify6 verify47 verify48 verify49 verify54 verify55 verify56 verify57 verify58 \
@@ -32,7 +32,7 @@ tests/
   done
   ```
 
-## 套件清单与当前基线（watch 侧第 86 轮：**26 套件 800 条 0 FAIL**；index 侧第 89 轮：8 套件 350 条 0 FAIL —— 两条线轮号各走各的，认文件名后缀 `_watch` / `_index`）
+## 套件清单与当前基线（watch 侧第 86 轮：**26 套件 800 条 0 FAIL**；index 侧第 90 轮：9 套件 390 条 0 FAIL —— 两条线轮号各走各的，认文件名后缀 `_watch` / `_index`）
 
 | 脚本 | 覆盖轮次 / 契约 | 条数 |
 |---|---|---|
@@ -65,6 +65,7 @@ tests/
 | `verify83` | 第 83 轮：移除全页 title 悬停气泡（小黄人 / 史蒂夫 / 加号 / 网格短评 / 时间轴评语 + syncAvatar 动态写入），语义改由 aria-label 承载 | 13 |
 | `verify85_watch` | 第 85 轮 watch 侧第二批 P1：**字阶归一**（11.5/12.5/13.5/14.5 四个半像素档并入 12/12/13/14；时间轴 21/18.5/18.5/19 是第 64 轮契约，不在范围，A6 反向守着）+ **片名单行省略**（桌面 `nowrap`+`ellipsis`，≤480 恢复两行 clamp）+ **评分牌 1px 金边**（`padding` 收到 `1px 7px` 抵消边框占位，整体尺寸不变） | 16 |
 | `verify86_watch` | 第 86 轮 watch 侧第三批 P2+P3：**颜色令牌归一**（文字色阶补齐 五档、金色透明度按用途分 wash/edge/line、`#0e0e12` 与 `#0e0e13` 差 1 阶合一）+ **表单说明文案**（原生 file input 的英文「Choose File / No file chosen」改自绘中文按钮、海报说明 4 行→2 行、标签「逗号或顿号分隔」）+ **圆角归一**（12 种写法→7 种，8/9/10/11/12 五档挤 4px 内收成 8/12）+ **动效归一**（8 档时长→3 档、`ease`→一条 `cubic-bezier(.22,.68,.28,1)`，并补上 `.w-btn-primary` 漏掉的 `filter`、`.tl-name` 与 `.w-foot a` 漏掉的 color 过渡）。**A13 反向守着第 56 轮跨页契约**：头像 transition 与头像/站名焦点环圆角不参与归一 | 24 |
+| `verify90` | 第 90 轮 index 侧：热力图时间标签 **加粗到 700**（全 17 格字重恒 700、字号/nowrap/行高不变、日期仍 600、汇总行与月份块未被连带）+ 游戏库时间轴 **补录 10.12 王国保卫战 1.6h**（`data/overrides/timeline-extra.json` → `meta.timeline_extra` → 只进 `renderTimeline` 的周聚合与一行说明，**不进 `daily`**）+ **隔离性 A/B 对照**（route 抹掉 `timeline_extra` 重载，五张卡/最近游玩榜/热力图汇总逐字相同，差异只在时间轴）+ 四主题 + 7 档响应式；360 单独降档 10px | 40 |
 | `verify88` | 第 88 轮 index 侧：热力图两月并排（两列几何 / 格子宽高比 / 月份块内部 / 空月占位 / 翻页〔route 改写内联 `__BOOT` 造 3 个月数据〕）+ 字号档位 + 四主题对比度 + 换算量词不重复 + 7 档响应式；时长文字「数字 + 空格 + 单位」 | 43 |
 | `verify84_watch` | 第 84 轮 watch 侧第一批 P0（纯 CSS）：移动端页眉改两行式（logo/头像第一行、标题第二行独占，页眉 240→183px、标题 3 行→1 行且字号仍 44px/1px）+ 筛选条两组各占满一行 + 时间轴缩略图 `align-items:flex-start` 顶对齐 + 短评 `text-wrap:pretty` 治段末孤字；桌面 ≥861 三条守护（页眉 173±2px、筛选条同行 + 网格 5 列、缩略图仍垂直居中） | 19 |
 
