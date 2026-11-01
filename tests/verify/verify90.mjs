@@ -59,7 +59,7 @@ const daily = JSON.parse(fs.readFileSync('docs/data/daily/2026-10.json', 'utf8')
 
 const appV = (html.match(/app\.js\?v=(\d+)/) || [])[1];
 const cssV = (html.match(/style\.css\?v=(\d+)/) || [])[1];
-ok('0.1 index.html 引用 app.js?v=108 / style.css?v=113', appV === '108' && cssV === '113', { app: appV, css: cssV });
+ok('0.1 index.html 引用 app.js?v=109 / style.css?v=114', appV === '109' && cssV === '114', { app: appV, css: cssV });
 
 // 剥注释后再解析规则（第 84 轮的坑：注释里的选择器字面量会被当成规则体）
 const cssNoComment = css.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -86,15 +86,29 @@ ok('0.5 build.mjs 有 loadTimelineExtra 且把结果写进 meta.timeline_extra',
   && /timeline_extra:\s*timelineExtra/.test(fs.readFileSync('scripts/build.mjs', 'utf8')));
 const extraFile = 'data/overrides/timeline-extra.json';
 const extraRows = fs.existsSync(extraFile) ? JSON.parse(fs.readFileSync(extraFile, 'utf8')) : null;
-ok('0.6 补录数据文件存在、字段合法、日期是 10.12 且分钟数为正',
-  Array.isArray(extraRows) && extraRows.length >= 1
-  && extraRows.every((r) => /^\d{4}-\d{2}-\d{2}$/.test(r.date) && Number(r.minutes) > 0 && r.name && r.appid),
-  extraRows);
-ok('0.7 renderTimeline 读 state.meta.timeline_extra，且整段没有往 state.days 写补录',
+const dowOf = (s) => (new Date(`${s}T12:00:00Z`).getUTCDay() + 6) % 7; // 周一 = 0
+ok('0.6 补录数据文件字段齐全（日期/分钟/名字/appid），且每条 date 都是周一',
+  Array.isArray(extraRows) && extraRows.length >= 50
+  && extraRows.every((r) => /^\d{4}-\d{2}-\d{2}$/.test(r.date) && Number(r.minutes) > 0 && r.name && /^\d{5,7}$/.test(r.appid))
+  && extraRows.every((r) => dowOf(r.date) === 0),
+  { rows: extraRows?.length, notMonday: (extraRows ?? []).filter((r) => dowOf(r.date) !== 0).slice(0, 3) });
+const dupKey = new Map();
+for (const r of extraRows ?? []) dupKey.set(`${r.date}|${r.appid}`, (dupKey.get(`${r.date}|${r.appid}`) ?? 0) + 1);
+ok('0.7 补录里没有「同一周 × 同一游戏」重复条目（重复会在合并时被悄悄加两次）',
+  [...dupKey.values()].every((n) => n === 1), [...dupKey.entries()].filter(([, n]) => n > 1).slice(0, 3));
+ok('0.8 renderTimeline 读 state.meta.timeline_extra，且整段没有往 state.days 写补录',
   /state\.meta\?\.timeline_extra/.test(app)
   && !/state\.days\.(set|get)\([^)]*timeline_extra/.test(app));
-ok('0.8 里程碑仍按真实分钟累加（补录不参与，realMinutes 守卫）',
-  /cum \+= w\.realMinutes/.test(app) && /asc\.reduce\(\(a, w\) => a \+ w\.realMinutes/.test(app));
+// 第 90 轮续：补录就是「没被快照覆盖的那些周」的历史，里程碑按周内全部分钟累加（与采集一视同仁）
+ok('0.9 里程碑按周内全部分钟累加（补录参与），不再有 realMinutes 那条旁路',
+  /for \(const g of w\.games\.values\(\)\) cum \+= g\.minutes/.test(app)
+  && !/realMinutes/.test(app));
+// 用户明确「删除…的字样，此后也不出现这样的提示」→ 模板与样式都不许残留
+ok('0.10 补录提示行已彻底删除（app.js 无 tl-extra，style.css 无 .tl-extra 规则）',
+  !/tl-extra/.test(app) && !/\.tl-extra/.test(css));
+ok('0.11 页面可见文字里没有「补录」二字（健康度那项已改称「手动修正天数」）',
+  !/['"`][^'"`]*补录[^'"`]*['"`]\s*[,)]/.test(app.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/(?!.*http).*$/gm, ''))
+  && !html.includes('补录'), 'app.js 的非注释字符串 / index.html 均不含');
 
 /* ================= 1 热力图时间标签加粗 ================= */
 await freshPage(1440, 1000, 1);
@@ -161,45 +175,106 @@ ok('2.2 月份块标题/统计仍是 600/700 之外的原值，且格子容器�
   others.cell !== '700' && others.hmTitle !== null, others);
 ok('2.3 下钻标题 #drill-title 字重未变', others.drillTitle !== null && others.drillTitle !== '700', others.drillTitle);
 
-/* ================= 3 时间轴补录 ================= */
+/* ================= 3 时间轴（补录扩展成整年历史，且不显示任何补录字样） ================= */
 await page.click('#btn-drill-back');
 await page.waitForTimeout(350);
 await page.click('#card-games');
-await page.waitForTimeout(600);
+await page.waitForTimeout(800);
+
+/* 复刻 renderTimeline 的周聚合与里程碑算法，期望全部从数据推导（不写死周数/条数） */
+const addDaysStr = (s, n) => {
+  const d = new Date(`${s}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+};
+const weekStartOf = (s) => {
+  const dow = (new Date(`${s}T12:00:00Z`).getUTCDay() + 6) % 7; // 周一 = 0
+  return addDaysStr(s, -dow);
+};
+const wkMap = new Map(); // weekStart -> Map(appid -> minutes)
+const addMin = (ws, appid, minutes) => {
+  if (!wkMap.has(ws)) wkMap.set(ws, new Map());
+  const g = wkMap.get(ws);
+  g.set(appid, (g.get(appid) ?? 0) + minutes);
+};
+for (const [d, v] of Object.entries(daily.days)) for (const g of v.games ?? []) addMin(weekStartOf(d), g.appid, g.minutes);
+for (const e of meta.timeline_extra ?? []) addMin(weekStartOf(e.date), e.appid, e.minutes);
+const ascWeeks = [...wkMap.keys()].sort();
+const allMin = [...wkMap.values()].reduce((a, g) => a + [...g.values()].reduce((x, y) => x + y, 0), 0);
+const baseMin = Math.max(0, (meta.stats?.lifetime_minutes ?? 0) - allMin);
+const STEP = 6000;
+let acc = baseMin;
+const expectMs = [];
+for (const ws of ascWeeks) {
+  const before = acc;
+  acc += [...wkMap.get(ws).values()].reduce((x, y) => x + y, 0);
+  for (let m = Math.floor(before / STEP) + 1; m * STEP <= acc; m++) expectMs.push({ h: m * STEP, ws });
+}
+const expectMonths = [...new Set(ascWeeks.map((w) => w.slice(0, 7)))].sort().reverse();
 
 const tl = await page.evaluate(() => {
-  const extras = [...document.querySelectorAll('.tl-extra')];
-  const inTimeline = extras.filter((e) => e.closest('#timeline'));
-  const one = inTimeline[0];
-  const item = one?.closest('.tl-item');
-  const games = [...(item?.querySelectorAll('.tl-game') ?? [])].map((g) => ({
-    badge: g.querySelector('.tl-badge')?.textContent?.trim(),
-    img: g.querySelector('img')?.getAttribute('src') ?? '',
-  }));
+  const items = [...document.querySelectorAll('#timeline .tl-item')];
+  const weekText = (el) => el?.querySelector('.tl-week')?.textContent?.trim() ?? '';
+  const find = (w) => items.find((it) => weekText(it) === w);
+  const wk1012 = find('10.12-10.18');
   return {
-    total: extras.length,
-    inTimeline: inTimeline.length,
-    text: one?.textContent?.trim() ?? null,
-    week: item?.querySelector('.tl-week')?.textContent?.trim() ?? null,
-    games,
+    weeks: items.length,
+    weekLabels: items.map(weekText),
+    extras: document.querySelectorAll('.tl-extra').length,
+    bodyHasWord: document.body.innerText.includes('补录'),
+    months: [...new Set([...document.querySelectorAll('#timeline .tl-month')].map((e) => e.textContent.trim()).filter(Boolean))],
+    milestones: [...document.querySelectorAll('#timeline .tl-milestone')].map((e) => ({
+      text: e.textContent.replace(/\s+/g, ' ').trim(),
+      week: weekText(e.closest('.tl-item')),
+    })),
+    broken: [...document.querySelectorAll('#timeline .tl-game img')]
+      .filter((im) => im.complete && im.naturalWidth === 0 && (im.getAttribute('src') ?? '') && !(im.getAttribute('src') ?? '').startsWith('data:'))
+      .map((im) => im.getAttribute('src')),
+    kk1012: wk1012
+      ? [...wk1012.querySelectorAll('.tl-game')]
+        .filter((g) => (g.querySelector('img')?.getAttribute('src') ?? '').includes('246420'))
+        .map((g) => g.querySelector('.tl-badge')?.textContent?.trim())
+      : null,
   };
 });
-ok('3.1 时间轴里恰好一条补录说明（不重复、不漏）', tl.inTimeline === 1, { total: tl.total, inTimeline: tl.inTimeline });
-ok('3.2 文案是「补录 10.12 王国保卫战 1.6h（不计入统计）」',
-  !!tl.text && tl.text.includes('10.12') && tl.text.includes('王国保卫战') && tl.text.includes('1.6h'), tl.text);
-ok('3.3 补录落在 10.12-10.18 这一周', tl.week === '10.12-10.18', tl.week);
+ok('3.1 时间轴里没有任何补录说明行（.tl-extra 计数为 0）', tl.extras === 0, tl.extras);
+ok('3.2 页面可见文字不含「补录」二字', tl.bodyHasWord === false);
+ok(`3.3 时间轴周数 = 从数据推导的 ${ascWeeks.length} 周（补录 ∪ 真实）`, tl.weeks === ascWeeks.length, { page: tl.weeks, expect: ascWeeks.length });
+ok(`3.4 月份标签覆盖 ${expectMonths.length} 个月且顺序由新到旧`,
+  tl.months.length === expectMonths.length
+  && tl.months.every((m, i) => m === expectMonths[i].replace('-', '.')),
+  { page: tl.months, expect: expectMonths });
+const firstWeek = ascWeeks[0];
+const lastWeek = ascWeeks[ascWeeks.length - 1];
+ok('3.5 最早一周与最新一周都排在里面（新→旧渲染，首项是最新）',
+  tl.weekLabels[0] === `${Number(lastWeek.slice(5, 7))}.${Number(lastWeek.slice(8, 10))}-${Number(addDaysStr(lastWeek, 6).slice(5, 7))}.${Number(addDaysStr(lastWeek, 6).slice(8, 10))}`
+  && tl.weekLabels[tl.weekLabels.length - 1] === `${Number(firstWeek.slice(5, 7))}.${Number(firstWeek.slice(8, 10))}-${Number(addDaysStr(firstWeek, 6).slice(5, 7))}.${Number(addDaysStr(firstWeek, 6).slice(8, 10))}`,
+  { head: tl.weekLabels[0], tail: tl.weekLabels[tl.weekLabels.length - 1] });
 
-// 该周王国保卫战 = 真实(13+82+82+50+157=384) + 补录 96 = 480 → 8h
+// 里程碑落点必须与「lifetime 锚定 + 周内全部分钟累加」推导出来的完全一致
+const expectMsPage = expectMs
+  .map((x) => ({
+    text: `游戏时长突破 ${x.h / 60 >= 100 ? Math.round(x.h / 60) : (x.h / 60).toFixed(1)}h`,
+    week: `${Number(x.ws.slice(5, 7))}.${Number(x.ws.slice(8, 10))}-${Number(addDaysStr(x.ws, 6).slice(5, 7))}.${Number(addDaysStr(x.ws, 6).slice(8, 10))}`,
+  }))
+  .reverse(); // 页面按新→旧渲染
+ok(`3.6 里程碑 ${expectMs.length} 条，文案与落点都与推导一致`,
+  tl.milestones.length === expectMs.length
+  && tl.milestones.every((m, i) => m.text === expectMsPage[i].text && m.week === expectMsPage[i].week),
+  { page: tl.milestones.slice(0, 3), expect: expectMsPage.slice(0, 3) });
+
+// 10.12 那周：真实王国保卫战 + 补录 1.6h 合并成一个徽章
 const weekReal = Object.entries(daily.days)
   .filter(([d]) => d >= '2026-10-12' && d <= '2026-10-18')
   .reduce((a, [, v]) => a + (v.games ?? []).filter((g) => g.appid === '246420').reduce((x, g) => x + g.minutes, 0), 0);
-const expectMerged = Math.round((weekReal + 96) / 60 * 10) / 10;
-const kkBadge = tl.games
-  .map((g, i) => ({ ...g, i }))
-  .filter((g) => g.img.includes('/246420/') || g.img.includes('246420'))[0];
-ok('3.4 该周王国保卫战徽章已合并补录（真实 ' + weekReal + 'min + 96min = ' + expectMerged + 'h）',
-  !!kkBadge && kkBadge.badge === `${expectMerged % 1 === 0 ? expectMerged : expectMerged.toFixed(1)}h`,
-  { badge: kkBadge?.badge, weekReal, expectMerged });
+const extra1012 = (meta.timeline_extra ?? [])
+  .filter((e) => weekStartOf(e.date) === '2026-10-12' && e.appid === '246420')
+  .reduce((a, e) => a + e.minutes, 0);
+const expectMerged = Math.round((weekReal + extra1012) / 60 * 10) / 10;
+ok('3.7 10.12-10.18 的王国保卫战徽章 = 真实 ' + weekReal + 'min + 补录 ' + extra1012 + 'min = ' + expectMerged + 'h',
+  Array.isArray(tl.kk1012) && tl.kk1012[0] === `${expectMerged % 1 === 0 ? expectMerged : expectMerged.toFixed(1)}h`,
+  { badges: tl.kk1012, expectMerged });
+ok('3.8 时间轴没有任何破图（补录带来的新游戏也有本地封面）', tl.broken.length === 0, tl.broken.slice(0, 5));
 
 /* ================= 4 隔离性 ================= */
 const sumDaily = Object.values(daily.days).reduce((a, v) => a + v.total_minutes, 0);
@@ -282,7 +357,10 @@ const snapshot = async (withExtra) => {
   await p.click('#card-games');
   await p.waitForTimeout(500);
   const timeline = await p.evaluate(() => ({
+    weeks: document.querySelectorAll('#timeline .tl-item').length,
+    milestones: document.querySelectorAll('#timeline .tl-milestone').length,
     extras: document.querySelectorAll('.tl-extra').length,
+    hasWord: document.body.innerText.includes('补录'),
     badges: [...document.querySelectorAll('#timeline .tl-game img')]
       .filter((i) => (i.getAttribute('src') || '').includes('246420'))
       .map((i) => i.parentElement.querySelector('.tl-badge')?.textContent?.trim()),
@@ -299,11 +377,15 @@ ok('4.8 最近游玩榜完全一致（补录没混进「最近两周」）',
   JSON.stringify(A.recent) === JSON.stringify(B.recent), { aLen: A.recent.length, bLen: B.recent.length });
 ok('4.9 热力图汇总与月份块统计完全一致（合计/天数/峰值都没被抬高）',
   JSON.stringify(A.heatSum) === JSON.stringify(B.heatSum), { A: A.heatSum, B: B.heatSum });
-ok('4.10 差异只出现在时间轴：补录行 1→0、王国保卫战徽章回落到真实值',
-  A.timeline.extras === 1 && B.timeline.extras === 0
+const realWeeks = new Set(Object.keys(daily.days).map(weekStartOf)).size;
+ok(`4.10 差异只出现在时间轴：周数 ${ascWeeks.length}→${realWeeks}、里程碑 ${expectMs.length}→0、王国保卫战徽章回落到真实值`,
+  A.timeline.weeks === ascWeeks.length && B.timeline.weeks === realWeeks
+  && A.timeline.milestones === expectMs.length && B.timeline.milestones === 0
   && A.timeline.badges.length === B.timeline.badges.length
   && A.timeline.badges.some((b, i) => b !== B.timeline.badges[i]),
-  { A: A.timeline, B: B.timeline });
+  { A: { ...A.timeline, badges: undefined }, B: { ...B.timeline, badges: undefined } });
+ok('4.11 两个版本都没有补录字样（删掉数据也不会冒出/消失提示行）',
+  A.timeline.extras === 0 && B.timeline.extras === 0 && !A.timeline.hasWord && !B.timeline.hasWord);
 
 /* ================= 5 四套主题 ================= */
 await freshPage(1440, 1000, 1);

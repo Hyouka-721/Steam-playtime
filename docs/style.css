@@ -1016,15 +1016,6 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   font-size: 14px;
 }
 .tl-milestone b { font-size: 17px; margin-left: 4px; }
-/* 第 90 轮：时间轴补录明细（「补录 10.12 王国保卫战 1.6h」）。
-   只在有补录的那一周出现，样式比里程碑弱一档，不抢徽章的注意力。 */
-.tl-extra {
-  margin-top: 8px; font-size: 12.5px; color: var(--text-dim);
-  font-variant-numeric: tabular-nums;
-}
-/* 括号里的补充说明整体不可拆：390 窄屏下文案恰好跨行，
-   不加 nowrap 会被断成「…1.6h（不计入 / 统计）」，括号被劈成两半很难看。 */
-.tl-extra-note { opacity: 0.72; white-space: nowrap; }
 
 /* ---- 每日记录 ---- */
 .day-summary { font-size: 14.5px; color: var(--text-dim); margin: 2px 0 12px; }
