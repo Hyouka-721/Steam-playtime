@@ -17,10 +17,10 @@ import path from 'path';
 const ROOT = 'C:/Users/33329/WorkBuddy/2026-10-13-18-17-49/steam-playtime';
 const BS = '\\';
 
-const CSS_FROM = 114;
-const CSS_TO = 115;
-const APP_FROM = 109;
-const APP_TO = 110;
+const CSS_FROM = 115;
+const CSS_TO = 116;
+const APP_FROM = 110;
+const APP_TO = 111;
 
 const CSSF = String(CSS_FROM);
 const CSST = String(CSS_TO);

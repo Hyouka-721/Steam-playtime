@@ -994,12 +994,12 @@
     }
 
     const asc = [...weeks.values()].sort((a, b) => a.start.localeCompare(b.start));
-    // 累计里程碑（每满 100h 一档）：以终身累计为基准锚定，周内跨越阈值即在该周标记。
+    // 累计里程碑（每满 500h 一档）：以终身累计为基准锚定，周内跨越阈值即在该周标记。
     // 第 90 轮续：补录被视为真实历史的一部分（它补的正是「没被快照覆盖的那些周」），
     // 所以这里用周内全部分钟累加，补录与采集数据一视同仁。
     const allTotal = asc.reduce((a, w) => a + [...w.games.values()].reduce((x, g) => x + g.minutes, 0), 0);
     const base = Math.max(0, (state.meta.stats?.lifetime_minutes ?? 0) - allTotal);
-    const STEP = 6000; // 100h
+    const STEP = 30000; // 500h（第 91 轮：用户要求里程碑改为每 500h 记一次）
     let cum = base;
     for (const w of asc) {
       const before = cum;

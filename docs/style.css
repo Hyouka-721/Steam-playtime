@@ -969,7 +969,9 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   letter-spacing: 1px;
 }
 .tl-month-ph { min-height: 29px; }
-.tl-week { font-size: 13px; color: var(--text-faint); margin-top: 2px; font-variant-numeric: tabular-nums; }
+/* 第 91 轮（用户）：周日期整体 +2px（13 → 15），基准是原来的 13px。.
+   左列 116px（≤860 收 78px）放得下「10.26-11.1」，见 verify91 的溢出轨。 */
+.tl-week { font-size: 15px; color: var(--text-faint); margin-top: 2px; font-variant-numeric: tabular-nums; }
 /* 中列：时间轴主线 + 周节点圆点 */
 .tl-node { position: relative; height: 100%; min-height: 70px; }
 .tl-node::before {
@@ -1008,14 +1010,16 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   padding: 0 7px; border-radius: 5px; line-height: 1.7;
   pointer-events: none;
 }
-/* 周内累计里程碑（每满 100h） */
+/* 周内累计里程碑（第 91 轮起每满 500h） */
 .tl-milestone {
   margin-top: 10px; display: inline-block;
   background: var(--tint-2); border: 1px solid var(--tint-border);
   color: var(--accent); border-radius: 8px; padding: 4px 14px;
   font-size: 14px;
 }
-.tl-milestone b { font-size: 17px; margin-left: 4px; }
+/* 第 91 轮（用户）：「500h」比「游戏时长突破」大 2px（14 + 2 = 16），基准是 .tl-milestone 的 14px。.
+   原来是 17px（差 3px），按要求收到 16px。 */
+.tl-milestone b { font-size: 16px; margin-left: 4px; }
 
 /* ---- 每日记录 ---- */
 .day-summary { font-size: 14.5px; color: var(--text-dim); margin: 2px 0 12px; }

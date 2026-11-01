@@ -16,8 +16,8 @@ const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace
 const { chromium } = require('playwright');
 
 const SITE = 'https://hyouka-721.github.io/Steam-playtime/';
-const CSS_V = '115';
-const APP_V = '110';
+const CSS_V = '116';
+const APP_V = '111';
 
 let pass = 0;
 let fail = 0;
@@ -52,7 +52,9 @@ for (const e of meta.timeline_extra ?? []) addMin(weekStartOf(e.date), e.appid, 
 const ascWeeks = [...wkMap.keys()].sort();
 const allMin = [...wkMap.values()].reduce((a, g) => a + [...g.values()].reduce((x, y) => x + y, 0), 0);
 const baseMin = Math.max(0, (meta.stats?.lifetime_minutes ?? 0) - allMin);
-const STEP = 6000;
+// 里程碑档位从本地 app.js 读（第 91 轮起 500h = 30000 分钟），套件不写死
+const STEP = Number((fs.readFileSync('docs/app.js', 'utf8').match(/const STEP = (\d+);/) || [])[1]);
+console.log('里程碑档位 STEP =', STEP, '分钟（' + STEP / 60 + 'h）');
 let acc = baseMin;
 const expectMs = [];
 for (const ws of ascWeeks) {

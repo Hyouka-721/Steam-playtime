@@ -59,7 +59,7 @@ const daily = JSON.parse(fs.readFileSync('docs/data/daily/2026-10.json', 'utf8')
 
 const appV = (html.match(/app\.js\?v=(\d+)/) || [])[1];
 const cssV = (html.match(/style\.css\?v=(\d+)/) || [])[1];
-ok('0.1 index.html 引用 app.js?v=110 / style.css?v=115', appV === '110' && cssV === '115', { app: appV, css: cssV });
+ok('0.1 index.html 引用 app.js?v=111 / style.css?v=116', appV === '111' && cssV === '116', { app: appV, css: cssV });
 
 // 剥注释后再解析规则（第 84 轮的坑：注释里的选择器字面量会被当成规则体）
 const cssNoComment = css.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -202,7 +202,10 @@ for (const e of meta.timeline_extra ?? []) addMin(weekStartOf(e.date), e.appid, 
 const ascWeeks = [...wkMap.keys()].sort();
 const allMin = [...wkMap.values()].reduce((a, g) => a + [...g.values()].reduce((x, y) => x + y, 0), 0);
 const baseMin = Math.max(0, (meta.stats?.lifetime_minutes ?? 0) - allMin);
-const STEP = 6000;
+// 里程碑档位从 products 源码读，别在套件里写死 —— 第 91 轮它从 100h 改成了 500h，
+// 写死会让「落点一致」这条断言跟着档位一起过期（档位本身由 verify91 守）。
+const STEP = Number((app.match(/const STEP = (\d+);/) || [])[1]);
+if (!Number.isFinite(STEP)) { console.error('FAIL  取不到 app.js 里的 STEP'); process.exit(1); }
 let acc = baseMin;
 const expectMs = [];
 for (const ws of ascWeeks) {
@@ -258,7 +261,7 @@ const expectMsPage = expectMs
     week: `${Number(x.ws.slice(5, 7))}.${Number(x.ws.slice(8, 10))}-${Number(addDaysStr(x.ws, 6).slice(5, 7))}.${Number(addDaysStr(x.ws, 6).slice(8, 10))}`,
   }))
   .reverse(); // 页面按新→旧渲染
-ok(`3.6 里程碑 ${expectMs.length} 条，文案与落点都与推导一致`,
+ok(`3.6 里程碑 ${expectMs.length} 条（按 app.js 的 STEP=${STEP} 分钟推导），文案与落点都与推导一致`,
   tl.milestones.length === expectMs.length
   && tl.milestones.every((m, i) => m.text === expectMsPage[i].text && m.week === expectMsPage[i].week),
   { page: tl.milestones.slice(0, 3), expect: expectMsPage.slice(0, 3) });
