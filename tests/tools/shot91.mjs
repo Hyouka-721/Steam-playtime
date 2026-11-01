@@ -15,7 +15,8 @@ const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace
 const { chromium } = require('playwright');
 
 const OUT = process.argv[2] || 'C:/Users/33329/AppData/Local/Temp/shot91';
-const SITE = 'http://127.0.0.1:8895/index.html';
+// SITE 可覆盖：本地默认 8895，线上用 SITE=https://hyouka-721.github.io/Steam-playtime/index.html
+const SITE = process.env.SITE || 'http://127.0.0.1:8895/index.html';
 mkdirSync(OUT, { recursive: true });
 const log = (...a) => console.log(...a);
 

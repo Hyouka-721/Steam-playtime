@@ -20,9 +20,10 @@ const APP_V = '111';
 
 let pass = 0;
 let fail = 0;
+const fmt = (v) => (typeof v === 'string' ? v : JSON.stringify(v));
 const ok = (n, c, extra = '') => {
-  c ? (pass++, console.log(`PASS ${n}${extra ? '  — ' + extra : ''}`))
-    : (fail++, console.log(`FAIL ${n}  — ${extra}`));
+  const s = extra === '' ? '' : '  — ' + fmt(extra);
+  c ? (pass++, console.log(`PASS ${n}${s}`)) : (fail++, console.log(`FAIL ${n}${s}`));
 };
 
 /* ---------- 本地推导 ---------- */
