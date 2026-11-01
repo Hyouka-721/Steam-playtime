@@ -221,7 +221,11 @@ const narrow = await page.evaluate(() => {
   };
 });
 ok('F1 360px 无横向溢出、仍是 7 列', narrow.docOverflow <= 0 && narrow.cols === 7, JSON.stringify(narrow));
-ok('F2 360px 下时长字样仍比旧版大（≥11px）且不越出格子', narrow.fontSize >= 11 && narrow.textInside, JSON.stringify(narrow));
+// 第 90 轮加粗到 700 后，11px 的「49 min」在 360 宽下文字要 36px、格内只有 34.3px
+// → 溢出 4px 会压出格子，所以 ≤360 单独降到 10px + letter-spacing -0.2px。
+// 门槛从 11 改成 10 是**契约真的变了**（可读性的下限仍是「不越出格子」，见 textInside）。
+ok('F2 360px 下时长字样仍有 10px 且不越出格子（第 90 轮加粗后 11px 会溢出）',
+  narrow.fontSize >= 10 && narrow.textInside, JSON.stringify(narrow));
 
 const realErrs = errs.filter((e) => !/Failed to load resource|net::ERR|ERR_BLOCKED|ERR_FAILED/i.test(e));
 ok('G1 全程零 JS 异常', realErrs.length === 0, realErrs.slice(0, 2).join(' | '));
