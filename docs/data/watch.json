@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-31T21:49:48+08:00",
+  "updated_at": "2026-11-01T19:50:25+08:00",
   "items": [
     {
       "id": "2026-10-31-dear-you",
@@ -1305,6 +1305,7 @@
       "kind": "anime",
       "watched_at": "2021-01-25",
       "poster": "img/watch/item-335fe398.webp",
+      "added_at": "2026-10-25T13:27:33+08:00",
       "poster_w": 640,
       "poster_h": 960,
       "poster_320": "img/watch/item-335fe398-320.webp",
@@ -1312,12 +1313,12 @@
       "title_en": "魔女の旅々",
       "year": 2020,
       "rating": 8,
+      "order": 3,
       "tags": [
         "动画",
         "奇幻"
       ],
-      "note": "“有缘再见吧 约定好了哟”",
-      "added_at": "2026-10-25T13:27:33+08:00"
+      "note": "“有缘再见吧，约定好了哟”"
     },
     {
       "id": "2021-01-19-item",
