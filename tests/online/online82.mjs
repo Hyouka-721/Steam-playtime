@@ -2,7 +2,7 @@
    对应提交：5416f1e(feat 页脚总数) / 8876151(docs 状态同步)，推送 8a9474a..8876151
 
    ① 内容指纹：线上 watch.html 引用 v20/v15；watch.css / watch.js 与本地 md5 全等
-   ② 页脚三段顺序：更新于 → 共 N 部影视剧 → ← 回到 My Game Time
+   ② 页脚三段顺序：更新于 → 共 N 部影视剧 → ← 回到 Game Time（第 92 轮站名去掉 My）
    ③ 数字契约：线上总数 = 线上 watch.json 的条数（从数据推导，不写死）
    ④ 行为契约：切「电影」总数不变（全量而非筛选数）；时间轴视图照常显示
    ⑤ 窄屏契约：390px 下文档不横向溢出，#w-total 不被右下角加号压住
@@ -89,7 +89,7 @@ const foot = await p.evaluate(() => {
     hasTags: document.querySelectorAll('#w-tags').length,
   };
 });
-ok('B1 页脚三段顺序：更新于 → 共 N 部影视剧 → ← 回到 My Game Time',
+ok('B1 页脚三段顺序：更新于 → 共 N 部影视剧 → ← 回到 Game Time',
   JSON.stringify(foot.order) === JSON.stringify(['w-updated', 'w-total', 'a']), foot.order.join(' / '));
 
 ok('B2 线上 HTML 已不含 chip 容器（第 81 轮的撤销也在线上生效）', foot.hasTags === 0, `#w-tags=${foot.hasTags}`);

@@ -32,7 +32,7 @@ var APP_DATA_RE = /\/data\/(?:meta\.json|achievements\.json|daily\/\d{4}-\d{2}\.
 var ASSET_RE = /\.(?:css|js|woff2?|png|webmanifest)$/;
 
 /* 首屏外壳：只预缓存不随数据变化的那几件，避免每次 bump 都回来改清单 */
-var SHELL_LIST = ['./', 'index.html', 'manifest.webmanifest', 'img/icon-192.png', 'img/icon-512.png', 'blackrose.woff2'];
+var SHELL_LIST = ['./', 'index.html', 'manifest.webmanifest', 'img/icon-game-192-fb74092c.png', 'img/icon-game-512-fb74092c.png', 'blackrose.woff2'];
 
 self.addEventListener('install', function (e) {
   self.skipWaiting();
@@ -45,7 +45,7 @@ self.addEventListener('install', function (e) {
  *  版本号是变的，所以这里**从 index.html 现场解析**（?v=NN），不在 SW 里写死。 */
 function warmup() {
   return caches.open(SHELL).then(function (cache) {
-    var base = ['./', 'index.html', 'manifest.webmanifest', 'img/icon-192.png', 'img/icon-512.png', 'blackrose.woff2'];
+    var base = ['./', 'index.html', 'manifest.webmanifest', 'img/icon-game-192-fb74092c.png', 'img/icon-game-512-fb74092c.png', 'blackrose.woff2'];
     return fetch('index.html', { cache: 'reload' })
       .then(function (r) { return r.ok ? r.text() : ''; })
       .catch(function () { return ''; })

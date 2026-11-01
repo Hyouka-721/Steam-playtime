@@ -65,6 +65,17 @@ README.md                    # 完整说明（管线/部署/密钥/Schema/自检
 - 之后 25~80 轮几乎都在做观影页（watch），游戏站只在 CI 每晚改 `docs/index.html` 数据、以及「日历入口收敛到最近游玩」等零散订正。
 - **第 82 轮（index 侧，2026-10-31，本地改动，未提交/未上线）**三项：① 全站移除 `title` 悬停气泡（页眉三项 + 五张概览卡 + 返回按钮 + 日历日期格 + 排行榜行 + 氛围开关禁用态），语义一律改由 `aria-label` 承载；② `.site-title` 加 `user-select:none`（双击不再框选、拖拽不带走文字，点它仍回顶部）；③ 删掉排行榜首行三只吉祥物（加菲猫 / 猫和老鼠 / 企鹅）——模板、CSS 三条规则、三张 webp 全清，`.rank-list` 的 18px 上内边距**刻意保留**（首行位置与 `--cal-lift` 的换算依赖它）。新增 `tests/verify/verify82_index.mjs` **16/16**。
 - 回归：`verify6` **35/35**、`verify47` **72/72**（0.4b 判据改为「aria-label 承载 + title 必为 null」）、`verify54` **23/23**（B2/B3/B6 同步改成 aria-label）、`verify82_index` **16/16**；`verify55/56/58` 页眉几何未受影响（40/40、49/49、23/23）。
+- **第 92 轮（index 侧，2026-11-01）**站点图标换成「游戏手柄」+ 站名改 Game Time：
+  ① 用户「游戏网站图标改为 [游戏手柄图]，名称改为 Game Time，T 大写」→ 图标从**内联 base64 的小黄人**换成用户素材 `<title>Game Time</title>`；页眉 `h1` 也从「My Game Time」去掉 My（**只改 tab 名会造成「标签叫 Game Time、大标题叫 My Game Time」的自相矛盾，所以一起改**）。
+  ② 素材入库：`docs/img/gamepad-fb74092c.webp`（256×256、真透明，9.2KB → webp 5.3KB），文件名带内容 hash（沿用 minion/steve 的惯例）。
+  ③ `scripts/make-icons.mjs` 改造：源素材从史蒂夫换成手柄，除 PWA 的 192/512 外**一并产出 favicon 16/32/48 与 apple-touch-icon 180**。底色分两套 —— PWA 与 apple-touch 铺 cream（`#fbf7f1`，**iOS 不支持透明，透明会被填黑底**），favicon 三档保留透明（标签页背景色由浏览器定，透明才不会出现白框）。
+  ④ **输出文件名带素材 hash**（`favicon-32-fb74092c.png` 这种）：`sw.js` 对 `*.png` 是 cache-first，固定文件名会让以后换图被旧缓存挡住；带 hash 就是「换图 = 换 URL」。
+  ⑤ favicon 从内联 data URI 改成文件引用（三档尺寸内联会让 HTML 多出约 40KB，且 16px 用不到 512 的清晰度）；`apple-touch-icon` 同步改文件。旧的 `img/icon-192.png` / `icon-512.png` **删除**（避免两份图标并存），`manifest` 与 `sw.js` 的预缓存清单都指向新名。
+  ⑥ 跨页文案：`watch.html` 页脚的「← 回到 My Game Time」→「← 回到 Game Time」。
+  ⑦ 布局实测（改名只会让页眉**变矮**，不是回归）：1440 一行（页眉 173px 不变）、480 **从 2 行变 1 行**（页眉 117px）、390/360 从 3 行变 2 行（页眉 169.8px）。≤480 的 `.site-title` 仍是 44px/1px，`user-select:none` 与「点它回顶部」的 role/tabindex 都还在。窄屏两行是因为中间列只有 150/120px（左右各 88px 插画），**要单行得让标题跨列，本轮没做**。
+  ⑧ 测试：新建 `verify92` **25 条**（title/h1/manifest/三条 favicon link/无 base64/六个图标的真实像素尺寸与透明通道/hash 命名/旧图标已删/源素材入库/sw 清单一致/运行时 title 与图标 HTTP 200 且能解码/改名后页眉几何与交互未坏/跨页文案）。index 侧 11 套件 **437 条 0 FAIL**；watch 侧 `verify82` 14/14、`verify60` 31/31。
+  ⑨ **版本号没 bump**：css/js 一个字节都没动，只改了 HTML/manifest/sw。`sw.js` 变了会触发 SW 更新，而导航是「网络优先」，所以刷新就能拿到新 title 与新图标。
+
 - **第 91 轮（index 侧，2026-11-01）**里程碑改 500h 一档 + 两处字号 +2px：
   ① 用户「将游戏时长突破的记录改为每 500h 记录一次」→ `const STEP = 6000` → **`30000`**（100h → 500h）。当前数据下里程碑从 10 条降到 **2 条**：`500h@12.8-12.14`、`1000h@4.13-4.19`（1000 是 500 的倍数，所以用户确认过的 2026-04-16 那条**没有被跳掉**，`verify91` 1.5 专门守这条）。
   ② 用户「『500h』比『游戏时长突破』大 2px」→ `.tl-milestone b` **17px → 16px**（正文 `.tl-milestone` 仍是 14px，差值正好 2px；原来是差 3px）。

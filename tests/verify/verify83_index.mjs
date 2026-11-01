@@ -60,9 +60,9 @@ ok('A9 meta 回到「无封面主色、无临门一脚」的干净状态',
   meta.ach_almost === undefined,
   `bar=${Object.values(meta.games_lifetime).filter((g) => g.bar).length} almost=${String(meta.ach_almost)}`);
 
-ok('A10 manifest 与 192/512 图标仍在',
+ok('A10 manifest 与 192/512 图标仍在（第 92 轮起文件名带素材 hash）',
   fs.existsSync(`${DOCS}/manifest.webmanifest`) &&
-  fs.existsSync(`${DOCS}/img/icon-192.png`) && fs.existsSync(`${DOCS}/img/icon-512.png`));
+  fs.readdirSync(`${DOCS}/img`).filter((f) => /^icon-game-(192|512)-[0-9a-f]{8}\.png$/.test(f)).length === 2);
 
 ok('A11 窄屏两行榜单规则仍在（进度条没有被 display:none）',
   !/\.rank-bar,\s*\.rank-last\s*\{\s*display:\s*none/.test(css) &&

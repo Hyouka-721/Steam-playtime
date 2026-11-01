@@ -44,9 +44,9 @@ ok('A2 watch.js 有 syncCount() 且在 paint() 开头被调用（加载/新增/�
   /function syncCount\(\) \{[\s\S]{0,200}countEl\.textContent = '共 ' \+ ALL\.length \+ ' 部影视剧'/.test(jsNC) &&
   /function paint\(\) \{\s*syncCount\(\);/.test(jsNC));
 
-ok('A3 页脚三段顺序：更新于 → 总数 → 回到 My Game Time（DOM 顺序 = 视觉顺序）',
+ok('A3 页脚三段顺序：更新于 → 总数 → 回到 Game Time（DOM 顺序 = 视觉顺序）',
   (() => {
-    const i = html.indexOf('id="w-updated"'), j = html.indexOf('id="w-total"'), k = html.indexOf('回到 My Game Time');
+    const i = html.indexOf('id="w-updated"'), j = html.indexOf('id="w-total"'), k = html.indexOf('回到 Game Time');
     return i > 0 && j > i && k > j;
   })());
 
