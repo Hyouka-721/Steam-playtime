@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "month": "2026-11",
+  "tz": "Asia/Shanghai",
+  "unit": "minute",
+  "generated_at": "2026-11-01T19:50:11.227Z",
+  "days": {
+    "2026-11-01": {
+      "total_minutes": 264,
+      "span_days": 1,
+      "confidence": "high",
+      "source": "auto",
+      "flags": [],
+      "games": [
+        {
+          "appid": "105600",
+          "name": "Terraria",
+          "minutes": 213,
+          "is_new": false
+        },
+        {
+          "appid": "246420",
+          "name": "Kingdom Rush",
+          "minutes": 51,
+          "is_new": false
+        }
+      ]
+    }
+  }
+}
