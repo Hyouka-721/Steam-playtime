@@ -424,6 +424,19 @@ a { color: var(--accent); }
   gap: 12px; flex-wrap: wrap; margin-bottom: 14px;
 }
 .panel-head h2 { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-strong); }
+/* 第 93 轮：热力图面板的标题在容器内**水平居中**（用户反馈它明显偏左）。
+   实测 1440 下标题中心 224.9 vs 面板中心 720，偏了 495px。
+   用绝对定位是为了绕开「返回按钮 + 标题 + 右侧月份导航」的两端对齐结构：
+   标题不占流，左侧返回按钮与右侧导航的排布完全不变。
+   ⚠️ 只对 #lt-detail 这一处生效 —— .panel-head 在导出/健康度/关于数据等面板里
+   是「只有一个 h2」的结构，那里居中会显得怪。
+   ⚠️ 只在 ≥861px 启用：窄屏标题会换行，绝对定位会压到返回按钮上。 */
+@media (min-width: 861px) {
+  #lt-detail .panel-head { position: relative; }
+  #lt-detail .panel-head > .panel-title > h2 {
+    position: absolute; left: 50%; transform: translateX(-50%);
+  }
+}
 .panel-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .btn-back {
   padding: 5px 12px; font-size: 13.5px; color: var(--text-dim);
@@ -1366,7 +1379,18 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    ‹ › 一次翻一页（2 个月）；最后一页永远是满的，当前月总落在右列。 */
 .heat-pair {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px; margin-bottom: 12px;
+  /* 第 93 轮：22 → 40px。用户反馈「相邻两个月间隔过小、区分不明显」——
+     原来两块之间只有 22px，而格子本身间隙就有 4~6px，两块读起来像一整片。
+     同时补一条竖直分隔线（见下面的 ::before），边界才真正分明。 */
+  gap: 40px; margin-bottom: 12px; position: relative;
+}
+/* 两列之间的竖直分隔线：只在并排时出现（≤899px 变单列，加线反而割裂上下两个月）。
+   40px 的 gap 中点正好是 50%，所以线落在两块正中间。 */
+@media (min-width: 900px) {
+  .heat-pair::before {
+    content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+    top: 4px; bottom: 4px; width: 1px; background: var(--border);
+  }
 }
 .heat-mb { min-width: 0; display: flex; flex-direction: column; }
 /* 占位卡（整月无数据）撑满与相邻月份等高，视觉上才是一块完整的"月份"，
@@ -1463,6 +1487,11 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 @media (max-width: 1100px) {
   .hc { padding: 6px 6px; }
   .hc i { font-size: 13px; }
+  /* 第 93 轮：900~1100 两列时格子只剩 50~56px，「49 min」这类带空格的值本来就贴在
+     临界线上（verify90 的 6.900 会量有没有被切）。实测 gap 加到 26 仍溢出 6px、
+     加到 40 溢出 7px —— 这一档**间距不能再大**，所以保持原来的 22px，
+     月与月之间的辨识度由那条竖直分隔线承担（≥1101px 才同时加大间距到 40）。 */
+  .heat-pair { gap: 22px; }
 }
 @media (max-width: 899px) {
   .heat-pair { grid-template-columns: 1fr; gap: 16px; }
