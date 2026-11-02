@@ -1,4 +1,7 @@
-/* 第 87 轮 watch 侧：站点图标换成用户素材的「电影摄像机」（六档一次生成；2026-11-02 换掉了首版的胶片放映机）
+/* 第 87 轮 watch 侧：站点图标换成用户素材的「电影胶片」（六档一次生成）
+   ⚠️ 素材换过三次：放映机 → 摄像机 → 电影胶片。前两次主体是深色，favicon 铺了暖白圆角盘；
+   第 88 轮用户明确说「不想要铺暖白盘的 favicon」，换成亮蓝圆盘后 favicon 回到**纯透明**，
+   只有 iOS/Android 那三档仍铺实底（纯白）—— 套件里 A6/A7/A8 就是这三条口径的守卫。
    对 http://127.0.0.1:8895 跑。⚠️ 与 index 线的 verify92（首页换成游戏手柄）不同文件，本文件带 _watch 后缀。
 
    ① 静态：html 的六条 link / 旧小黄人 favicon 已撤 / 六个文件的真实像素尺寸 /
@@ -21,7 +24,7 @@ const DOCS = ROOT + 'docs/';
 const html = fs.readFileSync(DOCS + 'watch.html', 'utf8').replace(/\r\n/g, '\n');
 
 /* 源素材名里的 8 位哈希就是图标文件名的后缀 —— 从磁盘推导，不手抄（换图时套件自动跟上） */
-const srcName = fs.readdirSync(DOCS + 'img').find((f) => /^(?:camera|projector)-[0-9a-f]{8}\.png$/.test(f)) || '';
+const srcName = fs.readdirSync(DOCS + 'img').find((f) => /^(?:film|camera|projector)-[0-9a-f]{8}\.png$/.test(f)) || '';
 const HASH = (srcName.match(/-([0-9a-f]{8})\.png$/) || [])[1] || '';
 const N = (base) => base.replace(/\.png$/, '') + '-' + HASH + '.png';
 
@@ -43,7 +46,7 @@ const wantLinks = [
   ['192x192', 'img/' + N('icon-watch-192.png')],
   ['512x512', 'img/' + N('icon-watch-512.png')],
 ];
-ok('A1 五条 rel=icon（16/32/48/192/512）都指向新的摄像机图标',
+ok('A1 五条 rel=icon（16/32/48/192/512）都指向新的电影胶片图标',
   iconLinks.length === 5 && wantLinks.every(([s, h]) => iconLinks.some((l) => l.includes(`sizes="${s}"`) && l.includes(h))),
   iconLinks.map((l) => (l.match(/sizes="([^"]+)"/) || [])[1] + '→' + (l.match(/href="([^"]+)"/) || [])[1]).join(' | '));
 
@@ -85,7 +88,7 @@ for (const f of S1) {
   const d = await px(f);
   smallCorner.push(alphaAt(d, metas[f].width, 0, 0));
 }
-ok('A6 三档 favicon 盘外四角透明（标签页上不留白框的硬边）',
+ok('A6 三档 favicon 四角透明 —— 没有底盘，标签页上不留白框的硬边（第 88 轮去盘后重新钉的一条）',
   smallCorner.every((a) => a === 0), smallCorner.join(','));
 
 const S2 = [N('apple-touch-icon-watch.png'), N('icon-watch-192.png'), N('icon-watch-512.png')];
@@ -97,17 +100,15 @@ for (const f of S2) {
 ok('A7 180/192/512 三档满幅不透明（iOS 不会把透明填成黑底）',
   bigOpaque.every(Boolean), bigOpaque.join(','));
 
-/* A8 底色就是暖白 #fbf7f1（与首页图标同族），六档一致 */
+/* A8 大档实底是纯白 rgb(255,255,255)（保住黑环轮廓）；小档不铺底，四角已在 A6 验过透明 */
 const bgSamples = [];
-for (const [f] of FILES) {
+for (const f of S2) {
   const { data, info } = await sharp(DOCS + 'img/' + f).raw().toBuffer({ resolveWithObject: true });
-  /* 取盘内左上角一点（避开主体）：半径为圆角的地方仍透明，往里挪一点 */
-  const inset = Math.round(info.width * 0.12);
-  const i = ((Math.round(info.height * 0.1)) * info.width + inset) * info.channels;
+  const i = 0;                                   /* 左上角就是纯底色：大档内容占比 0.78，角落必是背景 */
   bgSamples.push([f, data[i], data[i + 1], data[i + 2]]);
 }
-ok('A8 六档底色都是暖白 rgb(251,247,241)',
-  bgSamples.every(([, r, g, b]) => Math.abs(r - 251) <= 2 && Math.abs(g - 247) <= 2 && Math.abs(b - 241) <= 2),
+ok('A8 180/192/512 的实底是纯白 rgb(255,255,255)',
+  bgSamples.every(([, r, g, b]) => r === 255 && g === 255 && b === 255),
   bgSamples.map(([f, r, g, b]) => `${f.split('-')[0]}:${r},${g},${b}`).join(' '));
 
 /* A9 一致性：主体占画布的比例六档各自一致（这就是「各尺寸不跑形」的量化口径） */
@@ -117,16 +118,20 @@ for (const [f, size] of FILES) {
   let minX = 1e9, maxX = -1, minY = 1e9, maxY = -1;
   for (let y = 0; y < info.height; y++) {
     for (let x = 0; x < info.width; x++) {
-      const i = (y * info.width + x) * info.channels;
-      const a = data[i + 3];
-      if (a < 128) continue;                     /* 盘外透明不算主体 */
-      const lum = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
-      if (lum < 120) {                            /* 深色机身/齿轮才算主体，暖白盘不算 */
-        if (x < minX) minX = x;
-        if (x > maxX) maxX = x;
-        if (y < minY) minY = y;
-        if (y > maxY) maxY = y;
-      }
+      const ch = info.channels;
+      const i = (y * info.width + x) * ch;
+      /* ⚠️ 调色板 PNG 满幅不透明时 sharp 解出来是 **3 通道**（没有 alpha），
+         照旧读 data[i+3] 会把隔壁像素的蓝值当成 alpha → 掩码乱掉、bbox 缩水（第 88 轮踩的） */
+      const a = ch === 4 ? data[i + 3] : 255;
+      if (a < 128) continue;                     /* 透明不算主体 */
+      /* 非背景 = 既不是透明也不是近白（白底 / 白色圆孔）。第 88 轮改的：
+         原来只数「亮度 < 120」的像素，而这张图的亮蓝 #2F88FF 亮度 125 差一点就被漏掉，
+         量法绑在素材配色上迟早再翻车 → 改成「与背景色无关」的口径 */
+      if (data[i] > 243 && data[i + 1] > 243 && data[i + 2] > 243) continue;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
     }
   }
   ratios[f] = { w: (maxX - minX + 1) / size, h: (maxY - minY + 1) / size, size };
@@ -134,17 +139,17 @@ for (const [f, size] of FILES) {
 const spread = (arr) => Math.max(...arr) - Math.min(...arr);
 const smallW = S1.map((f) => ratios[f].w);
 const bigW = S2.map((f) => ratios[f].w);
-ok('A9 小档 16/32/48 的主体宽度占比一致（极差 ≤0.02）',
-  spread(smallW) <= 0.02 && smallW.every((v) => Math.abs(v - 0.813) <= 0.03),
+ok('A9 小档 16/32/48 的主体宽度占比一致（0.94 主体 / 极差 ≤0.02）',
+  spread(smallW) <= 0.02 && smallW.every((v) => Math.abs(v - 0.938) <= 0.03),
   smallW.map((v) => v.toFixed(3)).join(' / '));
-ok('A10 大档 180/192/512 的主体宽度占比一致（极差 ≤0.01，且比小档小 —— 留了系统圆角的安全区）',
-  spread(bigW) <= 0.01 && bigW.every((v) => Math.abs(v - 0.719) <= 0.01) && bigW[0] < smallW[0],
+ok('A10 大档 180/192/512 的主体宽度占比一致（0.78 / 极差 ≤0.01，且比小档小 —— 留了系统圆角的安全区）',
+  spread(bigW) <= 0.01 && bigW.every((v) => Math.abs(v - 0.779) <= 0.01) && bigW[0] < smallW[0],
   bigW.map((v) => v.toFixed(3)).join(' / '));
 
 /* A11 体积：标签页那张别超过 4KB（每开一个标签就取一次） */
 const bytes = FILES.map(([f]) => fs.statSync(DOCS + 'img/' + f).size);
 const kb = (n) => (n / 1024).toFixed(1) + 'KB';
-ok('A11 16/32/48 三档单张 ≤4KB，整套 ≤60KB',
+ok('A11 16/32/48 三档单张 ≤4KB，整套 ≤60KB（大档走 32 色调色板 PNG：512 从 41KB 压到 19KB）',
   bytes.slice(0, 3).every((b) => b <= 4096) && bytes.reduce((a, b) => a + b, 0) <= 60 * 1024,
   bytes.map(kb).join(' / '));
 

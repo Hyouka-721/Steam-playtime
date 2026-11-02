@@ -1,5 +1,5 @@
 /**
- * 第 87 轮（watch 侧）归档图：新图标（电影摄像机）在三类底色上的可读性 + 六档全集
+ * 第 87/88 轮（watch 侧）归档图：新图标（电影胶片，favicon 无底盘）在三类底色上的可读性 + 六档全集
  *
  * 说明：浏览器自带的标签条截不到（Playwright 只能截页面内容），
  * 所以这里用「真实素材 + 复刻的标签条底色」拼图，属于**模拟**而不是真机截图 —— 归档里如实标注。
@@ -20,7 +20,7 @@ const IMG = ROOT + 'img/';
 const OUT = path.join(os.tmpdir(), 'shots87icons');
 fs.mkdirSync(OUT, { recursive: true });
 
-const srcName = fs.readdirSync(IMG).find((f) => /^(?:camera|projector)-[0-9a-f]{8}\.png$/.test(f)) || '';
+const srcName = fs.readdirSync(IMG).find((f) => /^(?:film|camera|projector)-[0-9a-f]{8}\.png$/.test(f)) || '';
 const HASH = (srcName.match(/-([0-9a-f]{8})/) || [])[1] || '';
 const N = (b) => b.replace(/\.png$/, '') + '-' + HASH + '.png';
 
