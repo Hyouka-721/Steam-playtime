@@ -315,23 +315,22 @@ a { color: var(--accent); }
 }
 .site-title:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 8px; }
 
-/* 第 93 轮：给标题一个「按真字体量出来」的最小宽度，消掉字体切换带来的 CLS。
-   背景：内联 CSS 之后首绘提前到约 644ms，但花体字 woff2 往往还没到 —— 标题先按
-   回退字体渲染（窄），字体到位后变宽，而 .site-header 的中间列是 `auto`，
-   列宽一变化就把左右两张插画挤动了。实测 CLS 0.0006，来源只有 .site-title。
-   4.94em 是「Game Time」在 70px 字号下的实测宽度 345.6px ÷ 70 ≈ 4.937，
+/* 第 93 轮：给标题一个「按真字体量出来」的固定宽度，消掉字体切换带来的 CLS。
+   背景：花体字 woff2 到位前，标题先按回退字体渲染（PingFang SC / 微软雅黑），
+   比花体字**更宽**；而 .site-header 的中间列是 `auto`，列宽一变就把左右两张
+   插画挤动了（线上实测 CLS 0.0006；把字体延迟 1.5s 模拟慢网可达 0.0562）。
+   6.73em 是「My Game Time」在 70px 字号下的实测宽度 471.1px ÷ 70 ≈ 6.73，
    用 em 表达可以跟着字号断点自适应，不用写死 px。
    ⚠️ 只在 ≥861px（单行页眉、中间列有余量）启用：窄屏标题独占一行、且列宽只有
    120~150px，强加固定宽度会把布局撑破。
-   ⚠️ 用 `width` 而不是 `min-width`：回退字体（PingFang SC / 微软雅黑）渲染
-   "Game Time" 可能比花体字**更宽**，min-width 压不住它，字体到达后仍会缩回来。
-   固定宽度后元素包围盒完全不动。文字万一溢出也不会被看见 —— 因为
-   font-display: block 的阻塞期内文字本来就是不可见的，字体到位即恢复正常。
-   ⚠️ 必须同时 `white-space: nowrap`：回退字体更宽时，固定宽度会把它**挤成两行**
-   （实测标题 112px → 224px、页眉 173 → 265px，整页下移，CLS 0.0562），
-   加了 nowrap 才会「溢出但不折行」，高度恒定。 */
+   ⚠️ 用 `width` 而不是 `min-width`：回退字体更宽时 min-width 压不住，字体到达后
+   仍会缩回来。固定宽度后元素包围盒完全不动。
+   ⚠️ 必须同时 `white-space: nowrap`：否则回退字体更宽时会被固定宽度**挤成两行**
+   （实测标题 112px → 224px、页眉 173 → 265px，整页下移）。文字溢出也看不见 ——
+   font-display: block 的阻塞期内文字本来就不可见。
+   ⚠️ 改站名文案时必须同步改这个 em 值（按「实测宽度 ÷ 字号」重算）。 */
 @media (min-width: 861px) {
-  .site-title { width: 4.94em; white-space: nowrap; }
+  .site-title { width: 6.73em; white-space: nowrap; }
 }
 /* 2026-10-17：网站名「Game time」花体字（inline SVG 方案）经用户确认**暂不上线**，
    相关 HTML/CSS 已整体移除，dock 栏中部留空；矢量底稿存档于工作区 gametime.svg，

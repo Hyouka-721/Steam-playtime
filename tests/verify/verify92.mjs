@@ -36,8 +36,8 @@ const manifest = JSON.parse(fs.readFileSync(`${DOCS}/manifest.webmanifest`, 'utf
 const sw = fs.readFileSync(`${DOCS}/sw.js`, 'utf8');
 
 ok('0.1 <title> 是「Game Time」（T 大写）', /<title>Game Time<\/title>/.test(html), (html.match(/<title>[^<]*<\/title>/) || [])[0]);
-ok('0.2 页眉站名是「Game Time」，不再带 My 前缀',
-  /aria-label="返回顶部">Game Time<\/h1>/.test(html) && !html.includes('My Game Time'));
+ok('0.2 页眉站名仍是「My Game Time」（第 93 轮纠正：用户只要求改标签页标题，页眉不动）',
+  /aria-label="返回顶部">My Game Time<\/h1>/.test(html));
 ok('0.3 manifest 的 name / short_name 都是 Game Time 口径',
   manifest.name === 'Game Time · Steam 游戏时长' && manifest.short_name === 'Game Time', { name: manifest.name, short: manifest.short_name });
 
@@ -111,7 +111,7 @@ const h1 = await page.evaluate(() => {
   const el = document.getElementById('site-title');
   return { text: el?.textContent?.trim(), role: el?.getAttribute('role'), tab: el?.getAttribute('tabindex'), label: el?.getAttribute('aria-label') };
 });
-ok('1.2 页眉 h1 文本是「Game Time」', h1.text === 'Game Time', h1);
+ok('1.2 页眉 h1 文本是「My Game Time」，与 <title> 的「Game Time」各自独立', h1.text === 'My Game Time', h1);
 ok('1.3 「点它回顶部」的交互没被改名破坏（role=button + tabindex=0 + aria-label）',
   h1.role === 'button' && h1.tab === '0' && h1.label === '返回顶部', h1);
 
