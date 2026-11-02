@@ -365,6 +365,13 @@ function main() {
   // 单独拆成脚本是为了可以幂等重跑；这里自动串上，避免 CI 产出过期内联数据。
   const r = spawnSync(process.execPath, [path.join(__dirname, 'inline-boot.mjs')], { stdio: 'inherit' });
   if (r.status !== 0) log('⚠ inline-boot 失败，首屏将回退到 fetch 取数');
+
+  // 第 93 轮 P0：把 style.css 内联进 index.html。
+  // 理由同上一行 —— Pages 的 TTFB ≈400ms 且与文件大小无关，CSS 是首绘的唯一闸门
+  // （实测 4G 下 style.css 650ms 到达、FCP 1416ms，且 FP == FCP 就是因为它）。
+  // 内联后 gzip 体积几乎不变（41.5KB vs HTML 12.8 + CSS 29.1 = 41.9KB），但少一个 RTT。
+  const r2 = spawnSync(process.execPath, [path.join(__dirname, 'inline-css.mjs')], { stdio: 'inherit' });
+  if (r2.status !== 0) log('⚠ inline-css 失败，将退回外链 style.css');
 }
 
 main();

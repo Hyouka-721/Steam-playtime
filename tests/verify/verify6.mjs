@@ -61,6 +61,17 @@ await ctx.route(/^https?:\/\/(cdn\.jsdelivr\.net|cdn\.bootcdn\.net|fonts\.loli\.
 await ctx.route(/^https?:\/\/(cdn\.cloudflare\.steamstatic\.com|media\.steampowered\.com|steamcdn-a\.akamaihd\.net)\//, (r) => r.abort());
 
 const page = await ctx.newPage();
+// 在页面最早时刻开始监听「首张卡片出现真实数值」，记录真实渲染时刻而不是 evaluate 执行时刻
+await page.addInitScript(() => {
+  window.__firstCardAt = null;
+  const tick = () => {
+    const el = document.getElementById('c-lifetime');
+    const v = el && el.textContent ? el.textContent.trim() : '';
+    if (v && v !== '—') { window.__firstCardAt = Math.round(performance.now()); return; }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+});
 const reqs = [];
 const errors = [];
 page.on('request', (r) => reqs.push({ url: r.url(), t: Date.now() }));
@@ -106,7 +117,11 @@ check('骨架屏：脚本未到位时用骨架占位（而非空白「—」）'
 // 首屏可读时刻：优先取 DCL 时刻（内联数据后 DCL 即完成渲染），
 // 若 DCL 时仍未渲染完，则页内轮询到真实渲染时刻（避免跨进程 evaluate 建上下文开销污染计时）
 let readyAt = null;
-if (timing.cardsReady) {
+// 优先用页面内早期监听记下的真实时刻（最准）；它没跑起来再退回 DCL/轮询
+const earlyAt = await page.evaluate(() => window.__firstCardAt ?? null);
+if (earlyAt) {
+  readyAt = earlyAt;
+} else if (timing.cardsReady) {
   readyAt = timing.dcl;
 } else {
   try {

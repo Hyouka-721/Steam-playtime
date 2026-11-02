@@ -10,6 +10,11 @@
   // 保留 CDN 地址做兜底：新入库、还没跑过脚本的游戏仍能显示封面。
   const CAPSULE_CDN = (appid) => `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/header.jpg`;
   const CAPSULE = (appid) => `img/covers/${appid}.webp`;
+  /* 第 93 轮：320 宽变体（scripts/cover-variants.mjs 生成，省约 47% 体积）。
+     用 x 描述符而不是 w 描述符 —— 原图宽度不保证恒为 460（用户换过封面），
+     而 x 描述符只表达「这是几倍图」，不依赖真实像素宽。
+     榜单封面显示 130×60，所以 1x 拿 320、2x 拿原图刚好。 */
+  const CAPSULE_SET = (appid) => `img/covers/${appid}-320.webp 1x, img/covers/${appid}.webp 2x`;
 
   /* 1x1 透明 GIF 占位（35 字节）：
      胶囊图在真正需要时才赋 src（见 observeCapsules）。用 data URI 而不是
@@ -26,6 +31,14 @@
   function hydrateCapsule(img) {
     if (capsuleSeen.has(img)) return;
     capsuleSeen.add(img);
+    // 第 93 轮：先用 srcset 让浏览器按 DPR 选（1x 拿 320 变体、2x 拿原图），
+    // 再设 src 作为最老浏览器的兜底。注意 srcset 必须先于 src 设，
+    // 否则部分浏览器会先把 1x 的那张下载下来再被 srcset 覆盖。
+    const set = img.dataset.srcset;
+    if (set) {
+      img.srcset = set;
+      delete img.dataset.srcset;
+    }
     const src = img.dataset.src;
     if (src) {
       img.src = src;
@@ -844,9 +857,9 @@
         '</span>'
       : '';
     return `<span class="rank-capsule-wrap${isPerfect ? ' is-perfect' : ''}">` +
-      `<img class="rank-capsule" data-src="${CAPSULE(appid)}" src="${BLANK_GIF}" alt=""` +
+      `<img class="rank-capsule" data-src="${CAPSULE(appid)}" data-srcset="${CAPSULE_SET(appid)}" src="${BLANK_GIF}" alt=""` +
       `${eager ? ' loading="eager" fetchpriority="high"' : ''} decoding="async" width="130" height="60"` +
-      ` onerror="if(!this.dataset.fb){this.dataset.fb=1;this.src='${CAPSULE_CDN(appid)}'}else{this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'}">` +
+      ` onerror="this.removeAttribute('srcset');if(!this.dataset.fb){this.dataset.fb=1;this.src='${CAPSULE_CDN(appid)}'}else{this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'}">` +
       `${rings}</span>`;
   }
 
@@ -1016,8 +1029,8 @@
     const cap = (g, cls) => {
       const icon = ICON(g.appid, (state.meta.games_lifetime ?? {})[g.appid]?.img_icon_url);
       return `<span class="tl-game ${cls}">
-          <img src="${CAPSULE(g.appid)}" alt="" loading="lazy"
-               onerror="this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'">
+          <img src="${CAPSULE(g.appid)}" srcset="${CAPSULE_SET(g.appid)}" alt="" loading="lazy"
+               onerror="this.removeAttribute('srcset');this.onerror=null;this.classList.add('is-icon');this.src='${icon ?? ''}'">
           <span class="tl-badge">${hoursShort(g.minutes)}</span>
         </span>`;
     };

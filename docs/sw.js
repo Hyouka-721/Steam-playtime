@@ -18,7 +18,8 @@
 var CACHE = 'watch-posters-v1';
 var DATA_CACHE = 'watch-data-v1';
 var SHELL = 'app-shell-v1';
-var APP_DATA = 'app-data-v1';
+// 第 93 轮：achievements 改走 SWR，数据缓存的语义变了 → 换版本号，旧缓存随 activate 清掉
+var APP_DATA = 'app-data-v2';
 
 // 海报及其 320/480 变体（文件名含内容哈希，永不变内容）
 var IMMUTABLE_RE = /\/img\/watch\/[^?#]+\.webp$/;
@@ -26,8 +27,13 @@ var IMMUTABLE_RE = /\/img\/watch\/[^?#]+\.webp$/;
 var DATA_RE = /\/data\/watch\.json$/;
 // 本地化封面（第 84 轮）：文件名是 appid，内容可能随发布变化 → 仍按 URL 缓存，靠版本发布更替
 var COVER_RE = /\/img\/covers\/[^?#]+\.webp$/;
-// 首页数据（可变，网络优先）
-var APP_DATA_RE = /\/data\/(?:meta\.json|achievements\.json|daily\/\d{4}-\d{2}\.json)$/;
+// 首页数据（可变，网络优先）—— 第 93 轮把 achievements.json 单独拆出去走 SWR
+var APP_DATA_RE = /\/data\/(?:meta\.json|daily\/\d{4}-\d{2}\.json)$/;
+// 成就明细（第 93 轮）：解压 287KB / gzip 62KB，只在点「成就」卡时才需要。
+// 它不需要「绝对不吃旧值」—— 每晚 23:30 才更新一次，而且页面上显示的是摘要
+// （来自内联 meta），明细晚一版没有任何影响。所以给它 stale-while-revalidate：
+// 有缓存就立刻给（实测第二次从 5.5s 降到几十毫秒），后台再悄悄更新。
+var ACH_RE = /\/data\/achievements\.json$/;
 // 带版本号的静态资源（css / js / 字体 / 图标 / manifest）
 var ASSET_RE = /\.(?:css|js|woff2?|png|webmanifest)$/;
 
@@ -107,6 +113,22 @@ function cacheFirst(req, cacheName) {
   });
 }
 
+/** stale-while-revalidate（第 93 轮）：有缓存立刻给，同时后台更新；无缓存才等网络。
+ *  用于「晚一版无所谓、但等不起」的资源 —— 目前只有成就明细。 */
+function staleWhileRevalidate(req, cacheName) {
+  return caches.open(cacheName).then(function (cache) {
+    return cache.match(req).then(function (hit) {
+      var revalidate = fetch(req).then(function (res) {
+        if (res && res.ok) cache.put(req, res.clone());
+        return res;
+      }).catch(function () {
+        return hit || Response.error();
+      });
+      return hit || revalidate;
+    });
+  });
+}
+
 self.addEventListener('fetch', function (e) {
   var req = e.request;
   if (req.method !== 'GET') return;
@@ -138,9 +160,15 @@ self.addEventListener('fetch', function (e) {
     return;
   }
 
-  /* ---- 第 84 轮：首页数据（meta / 月度 / 成就）—— 同样网络优先 ---- */
+  /* ---- 第 84 轮：首页数据（meta / 月度）—— 网络优先 ---- */
   if (APP_DATA_RE.test(url.pathname)) {
     e.respondWith(netFirst(req, APP_DATA));
+    return;
+  }
+
+  /* ---- 第 93 轮：成就明细 —— stale-while-revalidate（有缓存瞬间给，后台更新） ---- */
+  if (ACH_RE.test(url.pathname)) {
+    e.respondWith(staleWhileRevalidate(req, APP_DATA));
     return;
   }
 
