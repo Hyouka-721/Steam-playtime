@@ -37,7 +37,7 @@
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
 <!-- INLINE_CSS_START -->
-<style>/* style.css?v=116 —— 第 93 轮内联（scripts/inline-css.mjs 生成，请勿手改）
+<style>/* style.css?v=117 —— 第 93 轮内联（scripts/inline-css.mjs 生成，请勿手改）
    省掉首屏一个关键 RTT（Pages 的 TTFB ≈400ms，与文件大小无关）。
    改样式请编辑 docs/style.css，然后跑 node scripts/build.mjs 重新内联。 */
 /* Steam 游戏时长统计 —— 多主题（3 套，全浅色）配色系统，点击站标随机切换，
@@ -356,6 +356,25 @@ a { color: var(--accent); }
   -webkit-user-drag: none; -webkit-touch-callout: none;
 }
 .site-title:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 8px; }
+
+/* 第 93 轮：给标题一个「按真字体量出来」的最小宽度，消掉字体切换带来的 CLS。
+   背景：内联 CSS 之后首绘提前到约 644ms，但花体字 woff2 往往还没到 —— 标题先按
+   回退字体渲染（窄），字体到位后变宽，而 .site-header 的中间列是 `auto`，
+   列宽一变化就把左右两张插画挤动了。实测 CLS 0.0006，来源只有 .site-title。
+   4.94em 是「Game Time」在 70px 字号下的实测宽度 345.6px ÷ 70 ≈ 4.937，
+   用 em 表达可以跟着字号断点自适应，不用写死 px。
+   ⚠️ 只在 ≥861px（单行页眉、中间列有余量）启用：窄屏标题独占一行、且列宽只有
+   120~150px，强加固定宽度会把布局撑破。
+   ⚠️ 用 `width` 而不是 `min-width`：回退字体（PingFang SC / 微软雅黑）渲染
+   "Game Time" 可能比花体字**更宽**，min-width 压不住它，字体到达后仍会缩回来。
+   固定宽度后元素包围盒完全不动。文字万一溢出也不会被看见 —— 因为
+   font-display: block 的阻塞期内文字本来就是不可见的，字体到位即恢复正常。
+   ⚠️ 必须同时 `white-space: nowrap`：回退字体更宽时，固定宽度会把它**挤成两行**
+   （实测标题 112px → 224px、页眉 173 → 265px，整页下移，CLS 0.0562），
+   加了 nowrap 才会「溢出但不折行」，高度恒定。 */
+@media (min-width: 861px) {
+  .site-title { width: 4.94em; white-space: nowrap; }
+}
 /* 2026-10-17：网站名「Game time」花体字（inline SVG 方案）经用户确认**暂不上线**，
    相关 HTML/CSS 已整体移除，dock 栏中部留空；矢量底稿存档于工作区 gametime.svg，
    用户满意后可随时恢复（快照 index_with_gametime_v49_snapshot.html）。 */
