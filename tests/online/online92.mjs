@@ -58,8 +58,8 @@ for (let i = 1; i <= 40; i++) {
 ok('A1 线上 index.html 已是新版（title = Game Time 且 favicon 带素材 hash）',
   html.includes('<title>Game Time</title>') && html.includes(HASH),
   { title: (html.match(/<title>[^<]*<\/title>/) || [])[0], hasHash: html.includes(HASH) });
-ok('A2 页眉 h1 也是「Game Time」，不再有 My 前缀',
-  /aria-label="返回顶部">Game Time<\/h1>/.test(html) && !html.includes('My Game Time'));
+ok('A2 页眉 h1 是「My Game Time」（第 93 轮纠正：只改标签页标题，页眉不动）',
+  /aria-label="返回顶部">My Game Time<\/h1>/.test(html));
 ok('A3 线上不再有内联 base64 图标', !/href="data:image\/png;base64,/.test(html));
 
 /* ---------- A4/A5 图标文件 ---------- */
@@ -113,8 +113,8 @@ const head = await page.evaluate(() => {
     links,
   };
 });
-ok('B2 页眉 h1 = Game Time，且「点它回顶部」的 role/tabindex/aria-label 都在',
-  head.text === 'Game Time' && head.role === 'button' && head.tab === '0' && head.label === '返回顶部', head);
+ok('B2 页眉 h1 = My Game Time，且「点它回顶部」的 role/tabindex/aria-label 都在',
+  head.text === 'My Game Time' && head.role === 'button' && head.tab === '0' && head.label === '返回顶部', head);
 ok('B3 四条图标 link：favicon 16/32/48 + apple-touch 180',
   head.links.length === 4
   && ['16x16', '32x32', '48x48'].every((s) => head.links.some((l) => l.rel === 'icon' && l.sizes === s))
