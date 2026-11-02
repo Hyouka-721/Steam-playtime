@@ -1,4 +1,4 @@
-/* 第 87 轮 watch 侧：站点图标换成「胶片放映机」（六档一次生成）
+/* 第 87 轮 watch 侧：站点图标换成用户素材的「电影摄像机」（六档一次生成；2026-11-02 换掉了首版的胶片放映机）
    对 http://127.0.0.1:8895 跑。⚠️ 与 index 线的 verify92（首页换成游戏手柄）不同文件，本文件带 _watch 后缀。
 
    ① 静态：html 的六条 link / 旧小黄人 favicon 已撤 / 六个文件的真实像素尺寸 /
@@ -21,7 +21,7 @@ const DOCS = ROOT + 'docs/';
 const html = fs.readFileSync(DOCS + 'watch.html', 'utf8').replace(/\r\n/g, '\n');
 
 /* 源素材名里的 8 位哈希就是图标文件名的后缀 —— 从磁盘推导，不手抄（换图时套件自动跟上） */
-const srcName = fs.readdirSync(DOCS + 'img').find((f) => /^projector-[0-9a-f]{8}\.png$/.test(f)) || '';
+const srcName = fs.readdirSync(DOCS + 'img').find((f) => /^(?:camera|projector)-[0-9a-f]{8}\.png$/.test(f)) || '';
 const HASH = (srcName.match(/-([0-9a-f]{8})\.png$/) || [])[1] || '';
 const N = (base) => base.replace(/\.png$/, '') + '-' + HASH + '.png';
 
@@ -43,7 +43,7 @@ const wantLinks = [
   ['192x192', 'img/' + N('icon-watch-192.png')],
   ['512x512', 'img/' + N('icon-watch-512.png')],
 ];
-ok('A1 五条 rel=icon（16/32/48/192/512）都指向新的放映机图标',
+ok('A1 五条 rel=icon（16/32/48/192/512）都指向新的摄像机图标',
   iconLinks.length === 5 && wantLinks.every(([s, h]) => iconLinks.some((l) => l.includes(`sizes="${s}"`) && l.includes(h))),
   iconLinks.map((l) => (l.match(/sizes="([^"]+)"/) || [])[1] + '→' + (l.match(/href="([^"]+)"/) || [])[1]).join(' | '));
 
