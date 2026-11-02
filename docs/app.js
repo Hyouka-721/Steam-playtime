@@ -740,7 +740,10 @@
     });
 
     $('heat-drill').innerHTML = blocks.join('');
-    $('heat-months').innerHTML = heads.join('');
+    /* 第 96 轮：两个月份头分居工具条两端 —— 第一个紧跟「← 返回」，
+       第二个贴到月份切换器左侧（用户要求）。上个月翻页只剩一个月时，第二个容器清空。 */
+    $('heat-months').innerHTML = heads[0] ?? '';
+    $('heat-months-b').innerHTML = heads[1] ?? '';
     $('heat-month').textContent = heatRangeLabel(page);
     $('heat-prev').disabled = pi <= 0;
     $('heat-next').disabled = pi >= pages.length - 1;

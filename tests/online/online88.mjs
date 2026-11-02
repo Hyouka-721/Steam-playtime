@@ -68,7 +68,7 @@ const lay = await page.evaluate(() => {
     cellW: +cr.width.toFixed(1), cellH: +cr.height.toFixed(1),
     dateFont: px(live?.querySelector('b')), timeFont: px(live?.querySelector('i')),
     // 第 95 轮：月份头搬到工具条 #heat-months
-    titleFont: px(document.querySelector('#heat-months .hm-title')),
+    titleFont: px(document.querySelector('.heat-months .hm-title')),
     sumFont: px(document.getElementById('heat-sum')),
     label: document.getElementById('heat-month').textContent,
     sum: document.getElementById('heat-sum').textContent,

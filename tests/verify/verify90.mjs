@@ -68,7 +68,7 @@ const daily = (() => {
 
 const appV = (html.match(/app\.js\?v=(\d+)/) || [])[1];
 const cssV = (html.match(/style\.css\?v=(\d+)/) || [])[1];
-ok('0.1 index.html 引用 app.js?v=112 / style.css?v=120', appV === '112' && cssV === '120', { app: appV, css: cssV });
+ok('0.1 index.html 引用 app.js?v=113 / style.css?v=121', appV === '113' && cssV === '121', { app: appV, css: cssV });
 
 // 剥注释后再解析规则（第 84 轮的坑：注释里的选择器字面量会被当成规则体）
 const cssNoComment = css.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -174,11 +174,11 @@ const others = await page.evaluate(() => {
     heatSum: fw('#heat-sum'),
     heatMonth: fw('#heat-month'),
     // 第 95 轮：月份头搬到工具条，#drill-title 已删除
-    hmTitle: fw('#heat-months .hm-title'),
-    hmStat: fw('#heat-months .hm-stat'),
+    hmTitle: fw('.heat-months .hm-title'),
+    hmStat: fw('.heat-months .hm-stat'),
     cell: fw('#heat-drill .hc'),
     drillTitle: fw('#drill-title'),
-    monthHeads: document.querySelectorAll('#heat-months .hm-head').length,
+    monthHeads: document.querySelectorAll('.heat-months .hm-head').length,
   };
 });
 ok('2.1 汇总行 #heat-sum 仍是常规字重（没被加成 700）', others.heatSum !== '700', others.heatSum);

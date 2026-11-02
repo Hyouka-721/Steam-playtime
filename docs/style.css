@@ -1403,13 +1403,17 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .heat-mb { padding: 14px 14px 12px; }
 }
 /* 第 95 轮：月份头（名称 + 统计）搬到顶部工具条的 #heat-months，
-   两个并排、各自与下方的卡片左对齐（宽度取卡片列宽的一半）。 */
+   第 96 轮：两个头分居两端 —— 第一个在「← 返回」右侧（.panel-title 里），
+   第二个在月份切换器左侧（.ctrl 里，.is-right）。
+   .ctrl 里已经有 gap: 10px，所以这里只对齐、不再加额外间距。 */
 .heat-months { display: flex; gap: 22px; align-items: flex-start; min-width: 0; }
+.heat-months.is-right { justify-content: flex-end; }
 @media (min-width: 1101px) { .heat-months { gap: 28px; } }
 .heat-months .hm-head { margin-bottom: 0; }
+/* 窄屏：工具条会折行，两个头并成一组更省空间（否则右边那个会被挤到第二行最右） */
 @media (max-width: 899px) {
-  /* 单列时两张卡片上下排，月份头也改成上下两行，避免横向挤 */
-  .heat-months { flex-direction: column; gap: 2px; }
+  .heat-months, .heat-months.is-right { flex-direction: row; gap: 12px; }
+  .heat-months .hm-head { display: flex; flex-direction: column; }
 }
 /* 占位卡（整月无数据）撑满与相邻月份等高，视觉上才是一块完整的"月份"，
    否则左列会只剩一条细卡、右下大片空白（第 88 轮实测截图里很明显）。 */

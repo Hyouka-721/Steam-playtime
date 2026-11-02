@@ -57,8 +57,8 @@ const src = await (async () => {
 })();
 const appV = (src.html.match(/app\.js\?v=(\d+)/) || [])[1];
 const cssV = (src.html.match(/style\.css\?v=(\d+)/) || [])[1];
-ok('0.1 index.html 引用 app.js?v=112 / style.css?v=120',
-  appV === '112' && cssV === '120', { app: appV, css: cssV });
+ok('0.1 index.html 引用 app.js?v=113 / style.css?v=121',
+  appV === '113' && cssV === '121', { app: appV, css: cssV });
 ok('0.2 热力图容器改为两列（.heat-pair）且不再有单月网格占位',
   src.html.includes('class="heat-pair" id="heat-drill"') && !src.html.includes('class="heat heat-cal" id="heat-drill"'));
 ok('0.3 app.js 有分页/范围标签/两月常量',
@@ -127,7 +127,7 @@ const mb = await page.evaluate(() => {
 const solid = mb.filter((x) => !x.empty);
 // 第 95 轮：月份头在顶部工具条 #heat-months，按 DOM 顺序与月份块一一对应
 const heads = await page.evaluate(() =>
-  [...document.querySelectorAll('#heat-months .hm-head')].map((h) => ({
+  [...document.querySelectorAll('.heat-months .hm-head')].map((h) => ({
     title: h.querySelector('.hm-title')?.textContent?.trim() ?? '',
     hasStat: !!h.querySelector('.hm-stat'),
   })));

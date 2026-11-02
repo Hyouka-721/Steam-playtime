@@ -80,7 +80,7 @@ const drillOpen = await page.evaluate(() => ({
   detailShown: !document.getElementById('lt-detail').hidden,
   mainHidden: document.getElementById('lt-main').hidden,
   // 第 95 轮：面板标题已删，改看工具条里渲染了几个月份头
-  heads: document.querySelectorAll('#heat-months .hm-title').length,
+  heads: document.querySelectorAll('.heat-months .hm-title').length,
 }));
 ok('B1 点「游戏时长」卡进入下钻，主列表隐藏', drillOpen.detailShown && drillOpen.mainHidden,
   JSON.stringify(drillOpen));
@@ -179,7 +179,7 @@ await page.click('#lt-list .rank-item');
 await page.waitForTimeout(500);
 const single = await page.evaluate(() => ({
   // 第 95 轮：面板标题已删，改看工具条里渲染了几个月份头
-  heads: document.querySelectorAll('#heat-months .hm-title').length,
+  heads: document.querySelectorAll('.heat-months .hm-title').length,
   cells: document.querySelectorAll('#heat-drill .hc').length,
   hash: location.hash,
   month: (document.getElementById('heat-month').textContent || '').trim(),
