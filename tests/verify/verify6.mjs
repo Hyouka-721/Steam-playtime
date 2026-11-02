@@ -138,10 +138,18 @@ check('骨架屏：真实列表已渲染', after.rows > 0, `${after.rows} 行`);
 const achReqEarly = reqs.filter((r) => r.url.includes('achievements.json')).length;
 check('请求：首屏不请求 achievements.json（285KB 移出关键路径）', achReqEarly === 0, `${achReqEarly} 次`);
 
-// 数据请求总数与并行关系
+// 数据请求总数与并行关系。
+// ⚠️ inline-boot 只内联「最新一个月」（months.slice(-1)），所以跨月后首屏必然多 1 个
+//    「上个月 daily」的请求 —— 这是设计内的，不是退化。判据是「≤1 个，且必须是历史月份」。
 const dataReqs = reqs.filter((r) => r.url.includes('/data/'));
-check('请求：首屏数据请求 0 个（已完全内联）', dataReqs.length === 0,
-  dataReqs.length ? dataReqs.map((r) => r.url.split('/data/')[1]).join(', ') : '零请求');
+const inlineMonth = (await page.evaluate(() => Object.keys(window.__BOOT?.daily ?? {})))[0] ?? null;
+const monthlyReqs = dataReqs.filter((r) => /\/data\/daily\/\d{4}-\d{2}\.json$/.test(r.url));
+const nonMonthReqs = dataReqs.filter((r) => !/\/data\/daily\/\d{4}-\d{2}\.json$/.test(r.url));
+check('请求：首屏最多 1 个历史月 daily 请求（当月已内联），且不请求 meta.json / achievements',
+  monthlyReqs.length <= 1
+  && nonMonthReqs.length === 0
+  && monthlyReqs.every((r) => !inlineMonth || !r.url.includes(inlineMonth)),
+  `内联=${inlineMonth}；月请求=${monthlyReqs.map((r) => r.url.split('/').pop()).join(',') || '无'}；其余=${nonMonthReqs.length}`);
 
 // 概览卡成就值来自 meta.ach_stats —— 期望值也从内联数据里读，避免快照一更新就漂
 const ach = await page.evaluate(() => {
@@ -279,7 +287,15 @@ const ready2 = await (async () => {
   }
   return null;
 })();
-check('缓存：二次加载（浏览器缓存命中）显著更快', ready2 !== null && ready2 < (readyAt ?? 99999), `首次 ${readyAt}ms → 二次 ${ready2}ms`);
+// 第 92 轮：原来判「二次加载耗时 < 首次」——本地内存服务下两者都是 50~60ms 的噪声，
+// 谁快谁慢随机，属于「拿耗时当缓存命中」的代理判据。换成硬证据：Resource Timing 里
+// css/js/字体 的 transferSize === 0 且 deliveryType 以 cache 开头（cache-storage = SW 缓存）。
+const cacheHits = await page.evaluate(() => performance.getEntriesByType('resource')
+  .filter((e) => /\/[^/]+\.(?:css|js|woff2)(?:\?|$)/.test(e.name))
+  .map((e) => ({ n: e.name.split('/').pop().split('?')[0], size: e.transferSize, dt: e.deliveryType })));
+check('缓存：二次加载的 css/js/字体全部命中缓存（transferSize=0 且 deliveryType=cache*）',
+  cacheHits.length >= 3 && cacheHits.every((h) => h.size === 0 && /^cache/.test(h.dt || '')),
+  `${cacheHits.map((h) => `${h.n}:${h.dt}/${h.size}B`).join(', ')}（首次 ${readyAt}ms → 二次 ${ready2}ms）`);
 
 /* ---- 稳定性 ---- */
 const realErrs = errors.filter((e) => !/Failed to load resource|net::ERR|ERR_BLOCKED|ERR_FAILED/i.test(e));

@@ -196,12 +196,18 @@ const ds = await page.evaluate(async () => {
   return { calTitleNow: t ? t.textContent : null };
 });
 const data = await page.evaluate(async () => {
-  const [daily, meta, boot] = await Promise.all([
-    fetch('data/daily/2026-10.json', { cache: 'reload' }).then((r) => r.json()),
+  const [meta, boot] = await Promise.all([
     fetch('data/meta.json', { cache: 'reload' }).then((r) => r.json()),
     fetch('index.html', { cache: 'reload' }).then((r) => r.text()),
   ]);
-  const days = daily.days || {};
+  // 数据按月分文件：14 天窗口会跨月，只读某一个月会让 winTotal 少算 —— 全部读回来合并。
+  const days = {};
+  for (const m of meta.months ?? []) {
+    try {
+      const j = await fetch(`data/daily/${m}.json`, { cache: 'reload' }).then((r) => r.json());
+      Object.assign(days, j.days || {});
+    } catch { /* 该月文件缺失就当空 */ }
+  }
   const dates = Object.keys(days).sort();
   // 14 天窗口：与 app 的 lastNDaysTotal(14) 同一口径（以 meta.last_snapshot_date 为终点）
   const end = meta.last_snapshot_date;

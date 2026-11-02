@@ -28,7 +28,16 @@ const ok = (n, c, extra = '') => {
 
 /* ---------- 本地推导 ---------- */
 const meta = JSON.parse(fs.readFileSync('docs/data/meta.json', 'utf8'));
-const daily = JSON.parse(fs.readFileSync('docs/data/daily/2026-10.json', 'utf8'));
+// 数据按月分文件（docs/data/daily/YYYY-MM.json），这里全部读进来合并 ——
+// 只读某一个月的话，跨月之后 sumDaily / activeDays / 热力图汇总全都会对不上。
+const daily = (() => {
+  const dir = 'docs/data/daily';
+  const days = {};
+  for (const f of fs.readdirSync(dir).filter((x) => /^\d{4}-\d{2}\.json$/.test(x))) {
+    Object.assign(days, JSON.parse(fs.readFileSync(`${dir}/${f}`, 'utf8')).days ?? {});
+  }
+  return { days };
+})();
 const STEP = Number((fs.readFileSync('docs/app.js', 'utf8').match(/const STEP = (\d+);/) || [])[1]);
 const addDaysStr = (s, n) => {
   const d = new Date(`${s}T12:00:00Z`);

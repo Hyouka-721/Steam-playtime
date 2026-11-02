@@ -232,17 +232,22 @@ await page.waitForTimeout(300);
 
 // 取「有数据的那一页里、最右边那个月」的数据（期望全部从数据源推导，不写死日期）
 // 第 88 轮起一页两个月，标题是「2026 年 9–10 月」这样的范围 → 月份从月份块的 data-ym 读
+// 热力图一页最多两个月（第 88 轮起两月并排），所以**所有可见月份块都要读**：
+// 只取最后一个块的话，跨月后会把新月份那几天当成全部数据，MIN/MAX 全错位。
 const ds = await page.evaluate(async () => {
   const blocks = [...document.querySelectorAll('#heat-drill .heat-mb:not(.is-empty)')];
-  const ym = blocks[blocks.length - 1].dataset.ym;
-  const [daily, meta] = await Promise.all([
-    fetch(`data/daily/${ym}.json`, { cache: 'reload' }).then((r) => r.json()),
-    fetch('data/meta.json', { cache: 'reload' }).then((r) => r.json()),
-  ]);
-  const days = daily.days || {};
+  const yms = blocks.map((b) => b.dataset.ym).filter(Boolean);
+  const meta = await fetch('data/meta.json', { cache: 'reload' }).then((r) => r.json());
+  const days = {};
+  for (const ym of yms) {
+    try {
+      const m = await fetch(`data/daily/${ym}.json`, { cache: 'reload' }).then((r) => r.json());
+      Object.assign(days, m.days || {});
+    } catch { /* 该月文件缺失就当空 */ }
+  }
   const dates = Object.keys(days).sort();
   return {
-    month: ym, dates, label: document.getElementById('heat-month').textContent,
+    month: yms.join('+'), dates, label: document.getElementById('heat-month').textContent,
     totals: Object.fromEntries(dates.map((d) => [d, days[d].total_minutes ?? 0])),
     counts: Object.fromEntries(dates.map((d) => [d, (days[d].games ?? []).length])),
     min: dates[0],
