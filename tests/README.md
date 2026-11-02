@@ -32,7 +32,7 @@ tests/
   done
   ```
 
-## 套件清单与当前基线（watch 侧第 88 轮：**27 套件 821 条 0 FAIL**；index 侧第 92 轮：11 套件 437 条 0 FAIL —— 两条线轮号各走各的，认文件名后缀 `_watch` / `_index`）
+## 套件清单与当前基线（watch 侧第 88 轮：**27 套件 821 条 0 FAIL**、线上 **145 条 0 FAIL**；index 侧第 92 轮：11 套件 437 条 0 FAIL —— 两条线轮号各走各的，认文件名后缀 `_watch` / `_index`）
 
 | 脚本 | 覆盖轮次 / 契约 | 条数 |
 |---|---|---|
@@ -76,7 +76,9 @@ tests/
 `online77`（14 条）：《情书》海报替换全链路 —— 线上五字段 + **整份 watch.json md5 全等** + 新三档逐字节 + **旧三档必须 404** + 网格 `currentSrc` 命中变体 + 时间轴缩略图 + 该海报的 SW 命中。⚠️ 里面「故意探旧图 404」用 `probing404` 开关把浏览器的 404 控制台日志排除掉，否则会把自己的探针算成站点 JS 异常。
 `online79`（17 条）：第 79 轮上线复验 —— ① 内容指纹（`watch.js`/`watch.css` **字节 md5 与本地全等**，⚠️ 比之前必须把 CRLF 归一成 LF，否则本地工作区永远"不一样"）② 排序字段线上预填 3 + 非法值阻断且 **PUT 计数必须为 0**（线上安全边界）③ **线上 119 条顺序与「不含 order 的旧比较器」算出的期望逐条相同**（证明老数据零影响）④ 网格点击不开弹窗、时间轴条目不点得开。
 
-`online/`：`online65/66/68/69/70/72/75/77/79/80/82/84_watch/85_watch.mjs` —— 上线后对 Pages 做内容指纹复验（判定线上/本地 md5 一致、功能生效），**线上验证写操作时要设计安全边界**（如 online69 故意在无 Token 的浏览器点保存，用 `page.on('request')` 数 PUT 必须为 0）。旧 online 脚本是一次性历史记录（online70 的海报 hash / 站名判据已被后续轮次改旧），复验当轮用最新那个。`online75` 额外验 **Service Worker**：海报响应必须 `response.fromServiceWorker() === true`（硬证据，不能只看 `transferSize=0`——HTTP 缓存也会给 0）。
+`online/`：`online65/66/68/69/70/72/75/77/79/80/82/84_watch/85_watch/86_watch/88_watch.mjs` —— 上线后对 Pages 做内容指纹复验（判定线上/本地 md5 一致、功能生效），**线上验证写操作时要设计安全边界**（如 online69 故意在无 Token 的浏览器点保存，用 `page.on('request')` 数 PUT 必须为 0）。旧 online 脚本是一次性历史记录（online70 的海报 hash / 站名判据已被后续轮次改旧），复验当轮用最新那个。`online75` 额外验 **Service Worker**：海报响应必须 `response.fromServiceWorker() === true`（硬证据，不能只看 `transferSize=0`——HTTP 缓存也会给 0）。
+
+`online88_watch`（**18 条**，watch 页图标）：第 87/88 轮上线复验 —— ① 六条 link → `-97e35b7b`、css/js 未 bump 且**字节 md5 与本地全等** ② 六张 200 + `image/png` + 真实像素尺寸 + **线上字节 md5 与本地全等** ③ **盘型在线上解码验证**（小档四角 alpha 0 / 大档满幅不透明 / 占比 0.938·0.779 —— 不看本地，直接量线上那份字节）④ **旧 hash `-064bab46` 六张必须 404**（换 hash 的意义就在这，旧缓存顶不上来）⑤ 1440/390 运行时 6 条 link、页眉 logo 仍是小黄人、零 JS 异常。⚠️ **图标字节必须在页内 `fetch` 后 base64 回传**（Node 直连 github.io 走不通），`--no-proxy-server` 照旧。
 `online82`（15 条，watch 页）：第 82 轮上线复验 —— 线上 css/js **字节 md5 与本地全等**、页脚三段顺序（更新于 → 共 N 部影视剧 → 返回）、**总数 = 线上 watch.json 条数（从数据推导）**、切「电影」总数不变（全量非筛选数）、时间轴视图仍显示、**全程 0 次 PUT**、390px 文档不溢出且总数矩形与右下角加号**不相交**。⚠️ 同目录还有另一条线的 `online82_index.mjs`（游戏站 index，12 条），**轮号撞号但文件不撞**，引用时说清楚哪一份。
 
 `online80`（19 条）：第 80 轮上线复验 + 第 81 轮撤销 chip —— watch.css/watch.js/sw.js **字节 md5 与本地全等**、线上 119 条 tags 与本地逐条相同（词表 14 个，含用户加的「灾难」，**tags 数据保留、只是不再有筛选 UI**）、**A1 已回退**（CSS 无 `data-score`、网格 0 张卡片带该属性）、各项静态指纹、**线上无 `#w-tags` 且 DOM 里搜不到 chip、排序条→网格间距 ≤ 60px**、删除按钮只在编辑模式且**第一下只举手、PUT 必须 0**、watch.json 经 SW 且已入 `watch-data-v1`。⚠️ 验 SW 必须先 `navigator.serviceWorker.ready` 再 **reload 一次**，否则首屏那次请求没经过 SW，`workerStart` 恒 0。
