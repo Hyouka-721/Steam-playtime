@@ -75,24 +75,35 @@ for (const W of WIDTHS) {
   await page.goto(BASE + 'index.html', { waitUntil: 'load' });
   await page.waitForTimeout(350);
   const a = await box(page, '.header-avatar');
-  /* 2026-10-24 第 58 轮：标题字号已与首页同值 -> 行数判据改为「不超过首页」，不再硬编码 2 行 */
-  const homeLines = await page.evaluate(() => {
-    const t = document.querySelector('.site-title');
-    return Math.round(t.getBoundingClientRect().height / parseFloat(getComputedStyle(t).lineHeight));
-  });
+  /* 2026-10-24 第 58 轮：标题字号已与首页同值 -> 行数判据改为「不超过首页」，不再硬编码 2 行。
+     2026-11-02 第 88 轮：那条是**代理判据**，已到期 —— index 线把站名从 `My Game Time`
+     改短成 `Game Time` 后，700px 下首页只剩 1 行、观影页 `My Watch List` 仍是 2 行，
+     判据红了但页面没毛病。改成各自容器的真实约束：
+       ① 不横向溢出（整页 scrollWidth）
+       ② 标题自己内部不溢出（scrollWidth ≤ clientWidth）
+       ③ 标题不压到头像（两矩形无交集）
+     「字号与首页同值」这条已有 verify58 A3 直接守着，不用行数代理。 */
   await page.goto(BASE + 'watch.html', { waitUntil: 'load' });
   await page.waitForTimeout(350);
   const b = await box(page, '.w-avatar');
-  const lines = await page.evaluate(() => {
+  const wt = await page.evaluate(() => {
     const t = document.querySelector('.w-title');
-    return Math.round(t.getBoundingClientRect().height / parseFloat(getComputedStyle(t).lineHeight));
+    const av = document.querySelector('.w-avatar');
+    const r = t.getBoundingClientRect();
+    const ra = av.getBoundingClientRect();
+    return {
+      lines: Math.round(r.height / parseFloat(getComputedStyle(t).lineHeight)),
+      selfOverflow: t.scrollWidth - t.clientWidth,
+      collide: !(r.right <= ra.left + 0.5 || ra.right <= r.left + 0.5 || r.bottom <= ra.top + 0.5 || ra.bottom <= r.top + 0.5),
+    };
   });
   ROWS.push({ W, a, b });
   ok(`B[${W}] 尺寸完全相同（${a.w}×${a.h} vs ${b.w}×${b.h}）`, a.w === b.w && a.h === b.h);
   ok(`B[${W}] 横向位置完全相同（left ${a.left}/${b.left}，right ${a.right}/${b.right}，右边距 ${a.rightGap}/${b.rightGap}）`,
     a.left === b.left && a.right === b.right && a.rightGap === b.rightGap);
-  ok(`B[${W}] 无横向溢出 + 标题行数≤首页 + 零 JS 异常`, a.overflow === 0 && b.overflow === 0 && lines <= homeLines && errs.length === 0,
-    `lines=${lines}`);
+  ok(`B[${W}] 无横向溢出 + 标题自身不溢出 + 不压头像 + 零 JS 异常`,
+    a.overflow === 0 && b.overflow === 0 && wt.selfOverflow <= 1 && !wt.collide && errs.length === 0,
+    `lines=${wt.lines} selfOv=${wt.selfOverflow} collide=${wt.collide}`);
   await ctx.close();
 }
 
