@@ -652,9 +652,9 @@
   /** 月历热力图：每页两个月份块，每块 7 列（周一→周日），格子带日期与当日时长 */
   function renderDrill() {
     const appid = state.drill.appid;
-    const gl = state.meta.games_lifetime ?? {};
-    const title = appid ? (gl[appid]?.name ?? `App ${appid}`) : '全部游戏';
-    $('drill-title').textContent = `${title} · 每日游玩热力图`;
+    /* 第 95 轮：面板标题（「全部游戏 · 每日游玩热力图」）已按用户要求删除，
+       这里不再写 #drill-title，也不再需要 games_lifetime（原来只为取游戏名）。
+       游戏名仍由 renderDrillMore 与格子的 aria-label 承载。 */
 
     const pages = heatPages();
     const wanted = state.drill.month || heatDefaultMonth();
@@ -691,14 +691,19 @@
     // ② 渲染：每个月一块；整月无数据（追踪开始前）给占位卡而不是 42 个虚线空格
     const since = state.meta?.tracking_since;
     const sinceText = since ? `${Number(since.slice(5, 7))} 月 ${Number(since.slice(8, 10))} 日开始` : '';
+    /* 第 95 轮：月份头（名称 + 「N 天 · X h Y min」）不再放在月份块内部，
+       而是收集起来渲染到顶部工具条的 #heat-months（排在「← 返回」右侧）。
+       所以月份块本身只剩星期表头 + 日历格子，视觉上就是两块干净的卡片。 */
+    const heads = [];
     const blocks = months.map((x) => {
-      const head =
+      heads.push(
         `<div class="hm-head"><span class="hm-title">${x.y} 年 ${x.m} 月</span>` +
         (x.tracked ? `<span class="hm-stat">${x.active} 天 · ${hm(x.sum)}</span>` : '') +
-        `</div>`;
+        `</div>`,
+      );
       if (!x.tracked) {
         return (
-          `<section class="heat-mb is-empty" data-ym="${x.ym}">${head}` +
+          `<section class="heat-mb is-empty" data-ym="${x.ym}">` +
           `<p class="hm-none">尚未开始记录${sinceText ? `<span>数据自 ${sinceText}积累</span>` : ''}</p></section>`
         );
       }
@@ -727,7 +732,7 @@
       }
       while (cells.length % 7 !== 0) cells.push('<span class="hc is-blank"></span>');
       return (
-        `<section class="heat-mb" data-ym="${x.ym}">${head}` +
+        `<section class="heat-mb" data-ym="${x.ym}">` +
         `<div class="heat-week" aria-hidden="true"><span>一</span><span>二</span><span>三</span>` +
         `<span>四</span><span>五</span><span>六</span><span>日</span></div>` +
         `<div class="heat heat-cal">${cells.join('')}</div></section>`
@@ -735,6 +740,7 @@
     });
 
     $('heat-drill').innerHTML = blocks.join('');
+    $('heat-months').innerHTML = heads.join('');
     $('heat-month').textContent = heatRangeLabel(page);
     $('heat-prev').disabled = pi <= 0;
     $('heat-next').disabled = pi >= pages.length - 1;

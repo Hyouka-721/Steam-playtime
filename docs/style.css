@@ -1379,20 +1379,38 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    ‹ › 一次翻一页（2 个月）；最后一页永远是满的，当前月总落在右列。 */
 .heat-pair {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-  /* 第 93 轮：22 → 40px。用户反馈「相邻两个月间隔过小、区分不明显」——
-     原来两块之间只有 22px，而格子本身间隙就有 4~6px，两块读起来像一整片。
-     同时补一条竖直分隔线（见下面的 ::before），边界才真正分明。 */
-  gap: 40px; margin-bottom: 12px; position: relative;
+  /* 第 95 轮：两个月改成两块**独立卡片**（浅底 + 圆角），用户要求「类似顶部独立栏」
+     那样的区块感。间距保持 22px 一档不变 —— 900~1100px 的格子里「49 min」本来就
+     贴着裁切红线，卡片内边距只在 ≥1101px 才给（见下）。 */
+  gap: 14px; margin-bottom: 12px; position: relative;
 }
-/* 两列之间的竖直分隔线：只在并排时出现（≤899px 变单列，加线反而割裂上下两个月）。
-   40px 的 gap 中点正好是 50%，所以线落在两块正中间。 */
-@media (min-width: 900px) {
-  .heat-pair::before {
-    content: ''; position: absolute; left: 50%; transform: translateX(-50%);
-    top: 4px; bottom: 4px; width: 1px; background: var(--border);
-  }
+/* 第 95 轮：原来的竖直分隔线删除 —— 卡片本身的底色与间隙已经把两个月分开了。 */
+@media (min-width: 1101px) {
+  .heat-pair { gap: 28px; }
 }
-.heat-mb { min-width: 0; display: flex; flex-direction: column; }
+.heat-mb { min-width: 0; display: flex; flex-direction: column; background: var(--sunken); border-radius: 12px; }
+/* 卡片内边距分三档 —— 这套数值是被格子的裁切红线逼出来的：
+   · 900~1024：**0**。这一档格子只有 49~50px，内容区 35px，「49 min」正好 35.4px，
+     卡片再吃 12px 内边距就溢出 7px（verify90 的 6.900 会红）。靠底色 + 圆角区分即可。
+   · 1025~1100：6px。格子回到 58px 以上，吃得下。
+   · ≥1101：14px。格子 63px+，卡片才真正像图 2 那种「独立栏」。 */
+@media (min-width: 1025px) {
+  .heat-mb { padding: 6px 6px 4px; }
+}
+/* ≥1101 才给足内边距：格子 63px+，卡片才真正像图 2 那种「独立栏」。
+   ⚠️ 必须写在 1025 那条之后（同 specificity，后写的赢）。 */
+@media (min-width: 1101px) {
+  .heat-mb { padding: 14px 14px 12px; }
+}
+/* 第 95 轮：月份头（名称 + 统计）搬到顶部工具条的 #heat-months，
+   两个并排、各自与下方的卡片左对齐（宽度取卡片列宽的一半）。 */
+.heat-months { display: flex; gap: 22px; align-items: flex-start; min-width: 0; }
+@media (min-width: 1101px) { .heat-months { gap: 28px; } }
+.heat-months .hm-head { margin-bottom: 0; }
+@media (max-width: 899px) {
+  /* 单列时两张卡片上下排，月份头也改成上下两行，避免横向挤 */
+  .heat-months { flex-direction: column; gap: 2px; }
+}
 /* 占位卡（整月无数据）撑满与相邻月份等高，视觉上才是一块完整的"月份"，
    否则左列会只剩一条细卡、右下大片空白（第 88 轮实测截图里很明显）。 */
 .heat-mb.is-empty .hm-none { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; }
@@ -1490,11 +1508,10 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 @media (max-width: 1100px) {
   .hc { padding: 6px 6px; }
   .hc i { font-size: 13px; }
-  /* 第 93 轮：900~1100 两列时格子只剩 50~56px，「49 min」这类带空格的值本来就贴在
-     临界线上（verify90 的 6.900 会量有没有被切）。实测 gap 加到 26 仍溢出 6px、
-     加到 40 溢出 7px —— 这一档**间距不能再大**，所以保持原来的 22px，
-     月与月之间的辨识度由那条竖直分隔线承担（≥1101px 才同时加大间距到 40）。 */
-  .heat-pair { gap: 22px; }
+  /* 第 95 轮：卡片有了 6px 内边距，所以间距从 22 收到 14 来补偿 —— 净变化为零，
+     900 档的格子仍是 50px 以上（verify90 的 6.900 专量「49 min」有没有被裁）。
+     ⚠️ 这一条必须与 .heat-mb 的 padding 成对调整，单独改任一边都会裁字。 */
+  .heat-pair { gap: 14px; }
 }
 @media (max-width: 899px) {
   .heat-pair { grid-template-columns: 1fr; gap: 16px; }

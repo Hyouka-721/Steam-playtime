@@ -68,7 +68,7 @@ const daily = (() => {
 
 const appV = (html.match(/app\.js\?v=(\d+)/) || [])[1];
 const cssV = (html.match(/style\.css\?v=(\d+)/) || [])[1];
-ok('0.1 index.html 引用 app.js?v=111 / style.css?v=119', appV === '111' && cssV === '119', { app: appV, css: cssV });
+ok('0.1 index.html 引用 app.js?v=111 / style.css?v=120', appV === '111' && cssV === '120', { app: appV, css: cssV });
 
 // 剥注释后再解析规则（第 84 轮的坑：注释里的选择器字面量会被当成规则体）
 const cssNoComment = css.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -173,16 +173,19 @@ const others = await page.evaluate(() => {
   return {
     heatSum: fw('#heat-sum'),
     heatMonth: fw('#heat-month'),
-    hmTitle: fw('#heat-drill .hm-title'),
-    hmStat: fw('#heat-drill .hm-stat'),
+    // 第 95 轮：月份头搬到工具条，#drill-title 已删除
+    hmTitle: fw('#heat-months .hm-title'),
+    hmStat: fw('#heat-months .hm-stat'),
     cell: fw('#heat-drill .hc'),
     drillTitle: fw('#drill-title'),
+    monthHeads: document.querySelectorAll('#heat-months .hm-head').length,
   };
 });
 ok('2.1 汇总行 #heat-sum 仍是常规字重（没被加成 700）', others.heatSum !== '700', others.heatSum);
-ok('2.2 月份块标题/统计仍是 600/700 之外的原值，且格子容器本身没变粗',
-  others.cell !== '700' && others.hmTitle !== null, others);
-ok('2.3 下钻标题 #drill-title 字重未变', others.drillTitle !== null && others.drillTitle !== '700', others.drillTitle);
+ok('2.2 月份头（工具条里）字重仍是原值，且格子容器本身没变粗',
+  others.cell !== '700' && others.hmTitle === '700' && others.hmStat === '400' && others.monthHeads === 2, others);
+ok('2.3 面板标题 #drill-title 已按第 95 轮需求删除（不得被加回来）',
+  others.drillTitle === null, others.drillTitle);
 
 /* ================= 3 时间轴（补录扩展成整年历史，且不显示任何补录字样） ================= */
 await page.click('#btn-drill-back');

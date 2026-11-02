@@ -79,7 +79,8 @@ await page.waitForSelector('#lt-detail:not([hidden])', { timeout: 15000 });
 const drillOpen = await page.evaluate(() => ({
   detailShown: !document.getElementById('lt-detail').hidden,
   mainHidden: document.getElementById('lt-main').hidden,
-  title: (document.getElementById('drill-title').textContent || '').trim(),
+  // 第 95 轮：面板标题已删，改看工具条里渲染了几个月份头
+  heads: document.querySelectorAll('#heat-months .hm-title').length,
 }));
 ok('B1 点「游戏时长」卡进入下钻，主列表隐藏', drillOpen.detailShown && drillOpen.mainHidden,
   JSON.stringify(drillOpen));
@@ -177,17 +178,19 @@ const firstApp = await page.evaluate(() => document.querySelector('#lt-list .ran
 await page.click('#lt-list .rank-item');
 await page.waitForTimeout(500);
 const single = await page.evaluate(() => ({
-  title: (document.getElementById('drill-title').textContent || '').trim(),
+  // 第 95 轮：面板标题已删，改看工具条里渲染了几个月份头
+  heads: document.querySelectorAll('#heat-months .hm-title').length,
   cells: document.querySelectorAll('#heat-drill .hc').length,
+  hash: location.hash,
   month: (document.getElementById('heat-month').textContent || '').trim(),
   sum: (document.getElementById('heat-sum').textContent || '').trim(),
   kv: document.querySelectorAll('#drill-more .dm-head .dm-kv').length,
   share: !!document.querySelector('#drill-more .dm-share'),
   ach: !!document.querySelector('#drill-more .dm-ach'),
 }));
-ok('F1 单游戏下钻是同一套月历热力图（标题带游戏名）',
-  single.title.endsWith('· 每日游玩热力图') && single.title !== '全部游戏 · 每日游玩热力图' &&
-  single.cells % 7 === 0 && single.cells > 0, `${single.title} / ${single.cells} 格 ${single.month}`);
+ok('F1 单游戏下钻是同一套月历热力图（深链带 g/<appid>，格数仍是 7 的倍数）',
+  /(^#|&)g\/\d+/.test(single.hash) && single.cells % 7 === 0 && single.cells > 0,
+  `${single.hash} / ${single.cells} 格 ${single.month}`);
 ok('F2 单游戏面板带占比 + 期内游玩 + 成就区（下钻信息不因去掉图表而缩水）',
   single.share && single.kv >= 3 && single.ach, `kv=${single.kv} share=${single.share} ach=${single.ach}`);
 

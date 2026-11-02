@@ -57,8 +57,8 @@ const src = await (async () => {
 })();
 const appV = (src.html.match(/app\.js\?v=(\d+)/) || [])[1];
 const cssV = (src.html.match(/style\.css\?v=(\d+)/) || [])[1];
-ok('0.1 index.html 引用 app.js?v=111 / style.css?v=119',
-  appV === '111' && cssV === '119', { app: appV, css: cssV });
+ok('0.1 index.html 引用 app.js?v=111 / style.css?v=120',
+  appV === '111' && cssV === '120', { app: appV, css: cssV });
 ok('0.2 热力图容器改为两列（.heat-pair）且不再有单月网格占位',
   src.html.includes('class="heat-pair" id="heat-drill"') && !src.html.includes('class="heat heat-cal" id="heat-drill"'));
 ok('0.3 app.js 有分页/范围标签/两月常量',
@@ -115,22 +115,33 @@ const mb = await page.evaluate(() => {
     const nums = cells.map((c) => (c.querySelector('b') ? Number(c.querySelector('b').textContent) : null)).filter((n) => n !== null);
     return {
       ym, empty: b.classList.contains('is-empty'),
-      title: b.querySelector('.hm-title')?.textContent ?? '',
+      // 第 95 轮：月份头已移到顶部工具条，这里取占位（真正比对在下面用 heads 做）
+      title: '',
       cols: grid ? getComputedStyle(grid).gridTemplateColumns.split(' ').length : 0,
       total: cells.length, days: nums, dim,
       weekdays: b.querySelectorAll('.heat-week span').length,
-      hasStat: !!b.querySelector('.hm-stat'),
+      hasStat: false,
     };
   });
 });
 const solid = mb.filter((x) => !x.empty);
-ok('2.1 每个月份块都有「YYYY 年 M 月」标题，且与 data-ym 对得上',
-  mb.every((x) => x.title === `${Number(x.ym.slice(0, 4))} 年 ${Number(x.ym.slice(5, 7))} 月`), mb.map((x) => x.title));
+// 第 95 轮：月份头在顶部工具条 #heat-months，按 DOM 顺序与月份块一一对应
+const heads = await page.evaluate(() =>
+  [...document.querySelectorAll('#heat-months .hm-head')].map((h) => ({
+    title: h.querySelector('.hm-title')?.textContent?.trim() ?? '',
+    hasStat: !!h.querySelector('.hm-stat'),
+  })));
+ok('2.1 每个月份块都有「YYYY 年 M 月」标题（工具条里同序），且与 data-ym 对得上',
+  heads.length === mb.length &&
+  mb.every((x, i) => heads[i].title === `${Number(x.ym.slice(0, 4))} 年 ${Number(x.ym.slice(5, 7))} 月`),
+  { heads: heads.map((h) => h.title), ym: mb.map((x) => x.ym) });
 ok('2.2 有数据的月份块：7 列 + 7 个星期表头 + 格数整除 7',
   solid.every((x) => x.cols === 7 && x.weekdays === 7 && x.total % 7 === 0), solid);
 ok('2.3 有数据的月份块：日期 1..当月天数 一个不少、顺序正确',
   solid.every((x) => x.days.length === x.dim && x.days[0] === 1 && x.days[x.days.length - 1] === x.dim), solid.map((x) => `${x.ym}:${x.days.length}/${x.dim}`));
-ok('2.4 有数据的月份块带月内统计（N 天 · 合计）', solid.every((x) => x.hasStat), solid.map((x) => x.hasStat));
+ok('2.4 有数据的月份块带月内统计（N 天 · 合计，同样在工具条里）',
+  solid.every((x) => heads[mb.indexOf(x)]?.hasStat === true),
+  solid.map((x) => heads[mb.indexOf(x)]?.hasStat));
 const overlap = await page.evaluate(() => {
   const g = [...document.querySelectorAll('#heat-drill .heat-cal')].map((x) => x.getBoundingClientRect());
   if (g.length < 2) return null;
