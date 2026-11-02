@@ -1402,9 +1402,12 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   display: flex; flex-direction: column; align-items: flex-start; gap: 1px;
   margin-bottom: 8px;
 }
-.hm-title { font-size: 14.5px; font-weight: 700; color: var(--text-strong); letter-spacing: .3px; }
+/* 第 94 轮：用户反馈月份块的头两行字太小，各 +5px（14.5 → 19.5、12.5 → 17.5）。
+   这两行是 flex column 里的独立元素，字号只影响自身高度与宽度，不会挤压下面的
+   日历格子（格子宽度由 7 列网格决定）。 */
+.hm-title { font-size: 19.5px; font-weight: 700; color: var(--text-strong); letter-spacing: .3px; }
 .hm-stat {
-  font-size: 12.5px; color: var(--text-dim);
+  font-size: 17.5px; color: var(--text-dim);
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 /* 整月无数据（追踪开始之前）：给一张占位卡，而不是 42 个虚线空格 */
@@ -1505,8 +1508,8 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .heat-cal, .heat-week { gap: 4px; }
   .heat-week { font-size: 12px; }
   .heat-week span { padding-left: 5px; }
-  .hm-title { font-size: 13.5px; }
-  .hm-stat { font-size: 12px; }
+  .hm-title { font-size: 18.5px; }
+  .hm-stat { font-size: 17px; }
   .hm-none { padding: 26px 10px; font-size: 13px; }
 }
 @media (max-width: 480px) {
