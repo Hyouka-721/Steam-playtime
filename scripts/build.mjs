@@ -366,12 +366,14 @@ function main() {
   const r = spawnSync(process.execPath, [path.join(__dirname, 'inline-boot.mjs')], { stdio: 'inherit' });
   if (r.status !== 0) log('⚠ inline-boot 失败，首屏将回退到 fetch 取数');
 
-  // 第 93 轮 P0：把 style.css 内联进 index.html。
-  // 理由同上一行 —— Pages 的 TTFB ≈400ms 且与文件大小无关，CSS 是首绘的唯一闸门
-  // （实测 4G 下 style.css 650ms 到达、FCP 1416ms，且 FP == FCP 就是因为它）。
-  // 内联后 gzip 体积几乎不变（41.5KB vs HTML 12.8 + CSS 29.1 = 41.9KB），但少一个 RTT。
-  const r2 = spawnSync(process.execPath, [path.join(__dirname, 'inline-css.mjs')], { stdio: 'inherit' });
-  if (r2.status !== 0) log('⚠ inline-css 失败，将退回外链 style.css');
+  // 第 93 轮：曾经在这里内联 style.css（scripts/inline-css.mjs），**已回退**。
+  // 原因：内联后 HTML 变成 42KB(gzip)，而外链时是 HTML 12.8KB + CSS 29.6KB **两个请求
+  // 并行**。总字节几乎相同，但「并行拿两个」比「串行拿一个」更快 —— 线上六次取样中位
+  // 全线变差：FCP 976ms（基线 772）、LCP 1736ms（基线 1300）、首行 2379ms（基线 1885）。
+  // 脚本保留在 scripts/inline-css.mjs 供参考（它本身是对的，只是这个站点的场景不适用：
+  // 本站 CSS 只有 29KB 且与 HTML 同域，并行成本本来就低）。
+  // ⚠️ 若将来 CSS 涨到 100KB+ 或首屏必须靠它压 FCP，可重新评估。
+  // const r2 = spawnSync(process.execPath, [path.join(__dirname, 'inline-css.mjs')], { stdio: 'inherit' });
 }
 
 main();
