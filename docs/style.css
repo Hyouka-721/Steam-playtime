@@ -604,10 +604,13 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 
 /* ---- 骨架屏（2026-10-18 首屏优化）----
    数据未到位时占住真实内容的形状，让等待有"进度感"而不是一张空白框。
-   刻意复用 .rank-item 的六列网格与行高，数据到达后替换成真实行时**零布局跳动**。
-   动画只做背景位移（transform/background-position），不触发布局重排。 */
+   刻意复用 .rank-item 的七列网格与行高，数据到达后替换成真实行时**零布局跳动**。
+   动画只做背景位移（transform/background-position），不触发布局重排。
+   ⚠️ 第 102 轮 .rank-item 加了「占比」列 → 这里必须同步加一列 + 一个 .sk-pct，
+   否则骨架与真实行的列宽对不上，数据到达那一瞬间会横向跳一下。 */
 .sk-row {
-  display: grid; grid-template-columns: 44px 130px minmax(150px, 340px) 1fr 150px 110px;
+  display: grid;
+  grid-template-columns: 44px 130px minmax(150px, 300px) minmax(120px, 340px) 118px 78px minmax(140px, 1fr);
   gap: 14px; align-items: center; padding: 7px 12px;
 }
 .sk-block {
@@ -621,6 +624,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .sk-no { width: 16px; height: 14px; }
 .sk-bar { height: 7px; border-radius: 4px; }
 .sk-min { width: 72px; height: 13px; margin-left: auto; }
+.sk-pct { width: 38px; height: 12px; margin-left: auto; }
 .sk-date { width: 58px; height: 11px; margin-left: auto; }
 /* 概览卡数值占位：与 .card-value 同高，避免渲染后卡片高度跳动 */
 .card-value.sk-value {
@@ -642,12 +646,16 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .rank-list[hidden] { display: none; }
 .rank-item {
   display: grid;
-  /* 第 101 轮：最后一列从固定 110px 改成 minmax(110px, 1fr) ——
-     第 98 轮把进度条列封顶到 420px 后，1440 下剩 54px 无处可去、全堆在日期右侧，
-     整行看起来「右边空了一截」。让日期列当弹性列吸收剩余空间，并把日期右对齐，
-     视觉上就是「日期贴右边缘」，不再是「一排内容左边挤、右边留白」。
-     1440 下日期列 164px；1088 下会缩到 min-content，仍放得下日期 + 相对时间两行。 */
-  grid-template-columns: 44px 130px minmax(150px, 340px) minmax(120px, 420px) 150px minmax(110px, 1fr);
+  /* 第 102 轮：六列 → 七列，在时长与日期之间插入「占比」列（C），
+     同时进度条上限 420 → 340（E）。七列分别是
+     序号 44 / 封面 130 / 名称 / 进度条 / **时长 118** / **占比 78** / 日期。
+     ⚠️ 顺序不能错：DOM 是 …rank-bar → rank-min → rank-pct → rank-last，
+     时长列必须排在占比列前面，否则 84px 的窄格子会落到「1394 h 36 min」头上。
+     占比内容最长只有「100.0%」（≈43px），78px 足够，省下的宽度全部让给日期列，
+     让「2026-10-25 · 9 天前」在 1088 下也放得进单行（min 140px）。
+     最后一列仍是 minmax(140px, 1fr) 弹性列（第 101 轮加的），1440 下实测 222px。 */
+  grid-template-columns:
+    44px 130px minmax(150px, 300px) minmax(120px, 340px) 118px 78px minmax(140px, 1fr);
   gap: 14px; align-items: center; cursor: pointer;
   padding: 7px 12px; border-radius: 9px; background: transparent; border: 1px solid transparent;
   position: relative;
@@ -1072,18 +1080,43 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
   transition: width .5s ease;
 }
-.rank-min { font-variant-numeric: tabular-nums; color: var(--text-strong); text-align: center; font-weight: 600; font-size: 14.5px; }
+/* 第 102 轮：text-align center → right。
+   加了占比列之后时长与占比是并排的两个数值，居中会让「500 h」与「173 h 54 min」
+   各自居中、左右两边都不齐（截图里看着像散落）；右对齐后两列各成一条右边界，
+   与最右侧右对齐的日期连成一条纵线。窄屏本来就是 right，这里同步。 */
+.rank-min { font-variant-numeric: tabular-nums; color: var(--text-strong); text-align: right; font-weight: 600; font-size: 14.5px; white-space: nowrap; }
+/* 第 102 轮：新增「占比」列（用户在 C 方案里选的那条）。
+   放在时长与日期之间，右对齐与时长列形成一组数值。 */
+.rank-pct { font-variant-numeric: tabular-nums; color: var(--text-dim); text-align: right; font-size: 13px; }
+
 /* 第 101 轮：右对齐 + 相对时间。
    原来 text-align: center，日期在 110px 的列里居中，右边还挂着面板的剩余空间，
    整行像「没排满」。改成右对齐后，日期成为整行的右边界锚点。
    ⚠️ 相对时间用 ::after + attr(data-rel) 而不是插 <em> —— verify48 的 1.4
    守着「.rank-last 里不挂任何子元素」（第 47 轮清空壳的留档），插真节点会打红它。
-   伪元素不进 children，样式仍是两行。 */
-.rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: right; font-size: 13px; position: relative; }
+   第 102 轮（用户要求）：两行改**单行**「日期 · N 天前」，颜色从 text-faint 提到
+   text-dim 并去掉 opacity —— 原来 0.75 透明度太淡，用户看不清。
+   整格统一到 text-dim（日期与相对时间同一档，单行读起来才是一条完整信息）。 */
+.rank-last { font-variant-numeric: tabular-nums; color: var(--text-dim); text-align: right; font-size: 13px; position: relative; white-space: nowrap; }
 .rank-last[data-rel]::after {
-  content: attr(data-rel);
-  display: block; font-size: 11px; line-height: 1.5;
-  color: var(--text-faint); opacity: .75; letter-spacing: .2px;
+  content: ' · ' attr(data-rel);
+  font-size: 13px; line-height: 1.5; letter-spacing: .2px;
+}
+/* 第 102 轮：861~1000 这一档退回六列（藏掉占比）。
+   七列的最小宽度之和 = 44+130+150+120+118+78+140 + 6×14(gap) = 864px，
+   而 861px 视口下榜单面板的实际内容宽只有约 799px → 横向溢出 65px
+   （verify49 的 6.861 报了 docOverflow=65）。这一档再压 name/bar 的 min 也只剩
+   5px 余量，太脆；而占比列 78+14=92px 是唯一能整列撤掉的 → 撤它。
+   六列 = 44+130+150+120+118+136 + 5×14 = 768px，余量 31px，稳。
+   日期列 min 取 136 不是 130 —— 实测「2025-12-31 · 10 个月前」这种最宽组合
+   在 130px 里还差 5px（会向左压到进度条上）。
+   ⚠️ .sk-row 骨架必须同步，否则数据到达那一刻列宽会跳。 */
+@media (min-width: 861px) and (max-width: 1000px) {
+  .rank-item,
+  .sk-row {
+    grid-template-columns: 44px 130px minmax(150px, 300px) minmax(120px, 340px) 118px minmax(136px, 1fr);
+  }
+  .rank-pct, .sk-pct { display: none; }
 }
 /* 第 87 轮：首行日期上方那枚「游玩日历」小图标（.cal-icon-btn 的 24×24 按钮、
    --cal-lift 那套 32px 上抬与 focus-visible 规则）已随「入口并入下钻热力图」整体删除。
@@ -1330,7 +1363,10 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   }
   .rank-capsule-wrap:has(> .rank-capsule.is-icon) { justify-self: stretch; }
   .rank-capsule-wrap > .rank-capsule.is-icon { width: 30px; height: 30px; margin: 0; }
-  .rank-last { display: none; }
+  /* 窄屏两行布局只放得下「序号/封面/片名 + 进度条/时长」，
+     日期本来就隐藏；第 102 轮新增的占比列同理一并隐藏，
+     否则它会被自动排到第三行，把每行撑高约 20px。 */
+  .rank-last, .rank-pct { display: none; }
   .rank-min { min-width: 84px; text-align: right; }
   .ach-item { grid-template-columns: 40px 1fr auto; gap: 10px; }
   .ach-icon, .ach-icon-ph { width: 40px; height: 40px; }
