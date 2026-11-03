@@ -36,7 +36,7 @@
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=121">
+<link rel="stylesheet" href="style.css?v=122">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -107,7 +107,7 @@
 <!-- ① 游戏时长（原游戏累计，经游戏时长卡进入） -->
 <section class="view active" id="view-lifetime">
   <div id="lt-main">
-    <div class="panel">
+    <div class="panel panel-main">
       <div id="lt-list" class="rank-list">
         <!-- 骨架屏（2026-10-18 首屏优化）：直接写在 HTML 里，随首个字节就显示，
              不必等 app.js 下载执行（GitHub Pages 每次请求 TTFB 300~580ms，
@@ -124,7 +124,7 @@
     </div>
   </div>
   <div id="lt-detail" hidden>
-    <div class="panel">
+    <div class="panel panel-main">
       <div class="panel-head">
         <div class="panel-title">
           <button class="btn btn-back" id="btn-drill-back">← 返回</button>
@@ -207,7 +207,7 @@
     <div class="pace" id="pace"></div>
     <div class="convert" id="convert"></div>
   </div>
-  <div class="panel">
+  <div class="panel panel-lo">
     <div class="panel-head"><h2>导出</h2></div>
     <div class="row-actions">
       <button class="btn" id="btn-csv-daily">下载每日时长 CSV</button>
@@ -215,11 +215,11 @@
       <a class="btn btn-ghost" href="data/meta.json" target="_blank" rel="noopener">查看 meta.json</a>
     </div>
   </div>
-  <div class="panel">
+  <div class="panel panel-lo">
     <div class="panel-head"><h2>采集健康度</h2></div>
     <div id="health" class="health"></div>
   </div>
-  <div class="panel">
+  <div class="panel panel-lo">
     <div class="panel-head"><h2>关于数据</h2></div>
     <div class="about">
       <p class="day-summary" id="data-range">—</p>

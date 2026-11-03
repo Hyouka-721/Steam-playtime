@@ -39,8 +39,8 @@ const html = await grab('index.html?cb=' + Date.now());
 const app = await grab('app.js?v=113&cb=' + Date.now());
 const watchHtml = await grab('watch.html?cb=' + Date.now());
 
-ok('A1 版本号 style.css?v=121 / app.js?v=113 / fx.js?v=16',
-  /style\.css\?v=121/.test(html) && /app\.js\?v=113/.test(html) && /fx\.js\?v=16/.test(html));
+ok('A1 版本号 style.css?v=122 / app.js?v=113 / fx.js?v=16',
+  /style\.css\?v=122/.test(html) && /app\.js\?v=113/.test(html) && /fx\.js\?v=16/.test(html));
 
 ok('A2 小黄人是链接（class=logo + href=watch.html + id=logo-watch），不再是 theme-light',
   /<a class="logo" id="logo-watch" href="watch\.html"/.test(html) && !/logo"[^>]*id="theme-light"/.test(html));
@@ -91,8 +91,8 @@ const geo = await page.evaluate(() => {
   };
 });
 
-ok('B1 头部仍是 3 个 grid 子项，高度 173 未变',
-  geo.kids.length === 3 && geo.kids[0] === 'brand' && Math.abs(geo.headerH - 173) < 1, { kids: geo.kids, h: geo.headerH });
+ok('B1 头部仍是 3 个 grid 子项，高度 172（第 97 轮去掉 1px 硬边线，改由 ::after 绝对定位绘制，故少 1px）',
+  geo.kids.length === 3 && geo.kids[0] === 'brand' && Math.abs(geo.headerH - 172) < 1, { kids: geo.kids, h: geo.headerH });
 ok('B2 小黄人是 <a href="watch.html">，不再声明 role=button；语义归 aria-label、已无 title 气泡',
   geo.logoTag === 'A' && geo.logoHref === 'watch.html' && geo.logoRole === null
   && geo.logoAria === '进入观影记录' && geo.logoTitle === null && geo.logoUnderline === 'none', geo);

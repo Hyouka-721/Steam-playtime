@@ -24,12 +24,23 @@
 :root,
 [data-theme="cream"] {
   --bg: #fbf7f1;
+  /* 第 97 轮：背景层加强。原来 alpha 只有 0.13 / 0.12 / 0.07，620px 就衰减完，
+     实拍几乎等于纯色 —— 用户要的「层次感」其实一直没生效。
+     现在半径 760→980 / 680→860 / 900→1100、alpha 提到 0.20 / 0.16 / 0.10，
+     并补第 4 层冷调（蓝灰 0.05）放在右下，与左上暖光形成冷暖对角，
+     滚动页面时背景有缓慢的明暗过渡，不再是平铺一块米色。 */
   --bg-layers:
-    radial-gradient(760px 420px at 12% -6%, rgba(217, 118, 47, 0.13), transparent 62%),
-    radial-gradient(680px 400px at 88% 2%, rgba(245, 158, 66, 0.12), transparent 60%),
-    radial-gradient(900px 520px at 50% 112%, rgba(190, 90, 120, 0.07), transparent 66%);
+    radial-gradient(980px 560px at 10% -8%, rgba(217, 118, 47, 0.20), transparent 64%),
+    radial-gradient(860px 500px at 92% 0%, rgba(245, 158, 66, 0.16), transparent 62%),
+    radial-gradient(1100px 640px at 50% 116%, rgba(190, 90, 120, 0.10), transparent 68%),
+    radial-gradient(720px 460px at 78% 62%, rgba(120, 150, 190, 0.05), transparent 66%);
   --panel: #fdf0df;
   --panel-2: #fae7d0;
+  /* 第 97 轮：面板分三档，让「主内容 / 默认 / 说明」有视觉重量差（见 .panel-hi / .panel-lo） */
+  --panel-hi: #fff8ee;
+  --panel-lo: rgba(253, 240, 223, 0.62);
+  /* 卡片顶部 1px 高光：浅色下靠它表现「厚度」，比加阴影更干净 */
+  --card-shine: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   --sunken: #f3e6d3;
   --border: #eee5d9;
   --border-hi: #dccdbb;
@@ -125,12 +136,22 @@
 [data-theme="night"] {
   color-scheme: dark;
   --bg: #14131a;
+  /* 第 97 轮：深色下背景层同样加强（原来 alpha 0.16/0.10/0.07 太保守，
+     深色底上几乎看不出）。冷调放左上、暖调放右下，与浅色主题反向，
+     避免整屏都是同一种紫色倾向。 */
   --bg-layers:
-    radial-gradient(760px 420px at 12% -6%, rgba(139, 123, 255, 0.16), transparent 62%),
-    radial-gradient(680px 400px at 88% 2%, rgba(90, 200, 250, 0.10), transparent 60%),
-    radial-gradient(900px 520px at 50% 112%, rgba(240, 163, 92, 0.07), transparent 66%);
+    radial-gradient(980px 560px at 10% -8%, rgba(139, 123, 255, 0.24), transparent 64%),
+    radial-gradient(860px 500px at 92% 0%, rgba(90, 200, 250, 0.15), transparent 62%),
+    radial-gradient(1100px 640px at 50% 116%, rgba(240, 163, 92, 0.10), transparent 68%),
+    radial-gradient(720px 460px at 78% 62%, rgba(60, 90, 160, 0.08), transparent 66%);
   --panel: #1c1b24;
   --panel-2: #232230;
+  /* 第 97 轮：深色下三档面板的亮度差要拉得更开 —— 原 --bg 与 --panel 只差 8 个亮度值，
+     整屏发闷。--panel-hi 提到 #262533，主内容明显浮在背景之上。 */
+  --panel-hi: #262533;
+  --panel-lo: rgba(28, 27, 36, 0.55);
+  /* 深色没有「白色高光」可用，用 5% 的白模拟上沿反光 */
+  --card-shine: inset 0 1px 0 rgba(255, 255, 255, 0.055);
   --sunken: #1a1922;
   --border: #2b2938;
   --border-hi: #3c394d;
@@ -167,12 +188,17 @@
 /* ⑦ 薄荷晨：淡青白底 + 青绿强调（浅色） */
 [data-theme="mint"] {
   --bg: #f1faf7;
+  /* 第 97 轮：与 cream 同规格加强（青绿主光 + 天蓝副光 + 底部青绿反射 + 一点暖调平衡） */
   --bg-layers:
-    radial-gradient(760px 420px at 12% -6%, rgba(15, 158, 142, 0.13), transparent 62%),
-    radial-gradient(680px 400px at 88% 2%, rgba(56, 189, 248, 0.11), transparent 60%),
-    radial-gradient(900px 520px at 50% 112%, rgba(163, 230, 53, 0.09), transparent 66%);
+    radial-gradient(980px 560px at 10% -8%, rgba(15, 158, 142, 0.20), transparent 64%),
+    radial-gradient(860px 500px at 92% 0%, rgba(56, 189, 248, 0.15), transparent 62%),
+    radial-gradient(1100px 640px at 50% 116%, rgba(163, 230, 53, 0.11), transparent 68%),
+    radial-gradient(720px 460px at 78% 62%, rgba(245, 170, 90, 0.05), transparent 66%);
   --panel: #e6f6f0;
   --panel-2: #d8efe7;
+  --panel-hi: #f2fbf7;
+  --panel-lo: rgba(230, 246, 240, 0.62);
+  --card-shine: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   --sunken: #dcf0e9;
   --border: #e0f0ea;
   --border-hi: #c2e2d6;
@@ -208,12 +234,17 @@
 /* ⑧ 晨曦紫：淡紫白底 + 紫强调（浅色） */
 [data-theme="dawn"] {
   --bg: #f8f6ff;
+  /* 第 97 轮：与 cream 同规格加强（紫主光 + 品红副光 + 底部天蓝反射 + 一点暖调平衡） */
   --bg-layers:
-    radial-gradient(760px 420px at 12% -6%, rgba(124, 92, 240, 0.13), transparent 62%),
-    radial-gradient(680px 400px at 88% 2%, rgba(236, 72, 153, 0.09), transparent 60%),
-    radial-gradient(900px 520px at 50% 112%, rgba(56, 189, 248, 0.09), transparent 66%);
+    radial-gradient(980px 560px at 10% -8%, rgba(124, 92, 240, 0.20), transparent 64%),
+    radial-gradient(860px 500px at 92% 0%, rgba(236, 72, 153, 0.14), transparent 62%),
+    radial-gradient(1100px 640px at 50% 116%, rgba(56, 189, 248, 0.11), transparent 68%),
+    radial-gradient(720px 460px at 78% 62%, rgba(240, 170, 90, 0.05), transparent 66%);
   --panel: #f1edff;
   --panel-2: #e7e1fc;
+  --panel-hi: #f8f5ff;
+  --panel-lo: rgba(241, 237, 255, 0.62);
+  --card-shine: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   --sunken: #e9e4fb;
   --border: #e9e5f6;
   --border-hi: #d2caf0;
@@ -248,11 +279,31 @@
 
 * { box-sizing: border-box; }
 
+/* 第 97 轮：字号阶梯（6 档）。
+   代码里原本散着 19.5 / 17.5 / 16 / 14.5 / 13.5 / 13 / 12.5 / 12 八个值，很容易继续长出新值。
+   这里定义 6 档作为**后续新代码的统一入口**；存量样式暂不整体改写 ——
+   热力图那几档只有 1~2px 余量（格子里的「49 min」正好贴裁切线），
+   贸然替换会裁字，需要逐屏核对才能动。改字号时优先引用变量。 */
+:root {
+  --fs-xl: 24px;    /* 跨页大数字 */
+  --fs-lg: 19.5px;  /* 月份块标题（第 94 轮用户调过） */
+  --fs-md: 16px;    /* 面板标题 / 正文基准 */
+  --fs-sm: 14.5px;  /* 次级信息、榜单时长 */
+  --fs-xs: 13px;    /* 辅助说明、日期 */
+  --fs-2xs: 12.5px; /* 角标、标签 */
+}
+
 html, body {
   margin: 0;
   padding: 0;
   background-color: var(--bg);
-  background-image: var(--bg-layers);
+  /* 第 97 轮：在最底层铺一层 140×140 的 SVG 噪点（5% 不透明度）。
+     大半径径向渐变在 8bit 色深下会出色带，噪点能吃掉它，同时给一点纸张颗粒感，
+     和花体字、手绘插画的调性一致。用 data URI 而不是图片文件：为这点质感多一个
+     请求不划算（这个站刚为「少一个请求」做过 A/B）。 */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"),
+    var(--bg-layers);
   background-attachment: fixed;
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Roboto, sans-serif;
@@ -275,8 +326,17 @@ a { color: var(--accent); }
   padding: 20px 28px;
   background: var(--header-bg);
   backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--border);
+  /* 第 97 轮：去掉 1px 硬边线。它把页面切成「页眉」「内容」两段，
+     滚动时那条线一直在。改用伪元素画两端渐隐的细线（见下方 ::after），
+     页眉就像浮在内容之上。 */
+  border-bottom: 0;
   position: sticky; top: 0; z-index: 10;
+  transition: background-color .3s ease;
+}
+.site-header::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border) 14%, var(--border) 86%, transparent);
+  pointer-events: none;
 }
 .brand { display: flex; align-items: center; gap: 16px; justify-self: start; }
 
@@ -381,11 +441,14 @@ a { color: var(--accent); }
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: var(--radius); padding: 18px 20px;
-  transition: border-color .2s, transform .2s, box-shadow .2s;
+  /* 第 97 轮：顶部 1px 高光 + 外阴影 = 「浮起」。深色主题下高光是 5% 白，
+     浅色下是 70% 白 —— 同一个变量，两种明暗关系。 */
+  box-shadow: var(--card-shine), var(--card-shadow);
+  transition: border-color .2s, transform .2s, box-shadow .2s, background-color .3s ease;
   /* 网格把五张卡拉成同高，内容垂直居中避免高低不齐 */
   display: flex; flex-direction: column; justify-content: center;
 }
-.card:hover { border-color: var(--border-hi); transform: translateY(-2px); box-shadow: var(--card-hover-shadow); }
+.card:hover { border-color: var(--border-hi); transform: translateY(-2px); box-shadow: var(--card-shine), var(--card-hover-shadow); }
 .card-nav { cursor: pointer; }
 .card-nav .card-value { transition: color .15s; }
 .card-nav:hover { border-color: var(--tint-border); }
@@ -394,7 +457,7 @@ a { color: var(--accent); }
   background:
     linear-gradient(150deg, var(--tint-2), transparent 60%),
     var(--card-bg);
-  box-shadow: 0 0 0 1px var(--ring), var(--card-shadow);
+  box-shadow: 0 0 0 1px var(--ring), var(--card-shine), var(--card-shadow);
 }
 .card-hero {
   background:
@@ -405,7 +468,10 @@ a { color: var(--accent); }
 .card-label { font-size: 13px; color: var(--text-dim); letter-spacing: .8px; }
 .card-value { font-size: 27px; font-weight: 700; color: var(--text-strong); margin-top: 5px; line-height: 1.25; font-variant-numeric: tabular-nums; }
 .card-hero .card-value {
-  font-size: 30px;
+  /* 第 97 轮：30px 固定字号在 1088 宽下装不下「1394 h 36 min」（卡宽 ~234、内容区 ~194，
+     而这个值约 210px），会折成「1394 h 36 / min」两行 —— 首屏最显眼的数字反而断行。
+     改成随视口收缩：1088 下约 22.8px（~160px 宽，一行放得下），1440 起仍是 30px。 */
+  font-size: clamp(22px, 2.1vw, 30px);
   background: linear-gradient(90deg, var(--accent-2), var(--accent));
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
@@ -418,7 +484,15 @@ a { color: var(--accent); }
   background: var(--panel); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 18px 20px; margin-bottom: 18px;
   box-shadow: var(--card-shadow);
+  /* 第 97 轮：主题切换时面板底色跟着柔和过渡（原来只有 body 有过渡，
+     面板是硬切，切到深色主题时内容区会「啪」一下跳色）。 */
+  transition: background-color .3s ease, border-color .3s ease;
 }
+/* 第 97 轮：面板分三档，靠**明度差**而不是边框来分主次 ——
+   之前统计卡、榜单、说明卡全是同一种浅桃色 + 1px 边框，视觉重量一模一样，
+   眼睛分不出「先说这个」。 */
+.panel-main { background: var(--panel-hi); }
+.panel-lo { background: var(--panel-lo); box-shadow: none; }
 .panel-head {
   display: flex; align-items: center; justify-content: space-between;
   gap: 12px; flex-wrap: wrap; margin-bottom: 14px;
@@ -511,12 +585,28 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 /* display:flex 会覆盖 [hidden] 的 UA 样式，必须显式声明，否则折叠区永远展开 */
 .rank-list[hidden] { display: none; }
 .rank-item {
-  display: grid; grid-template-columns: 44px 130px minmax(150px, 340px) 1fr 150px 110px;
+  display: grid;
+  /* 第 97 轮：进度条那列从 1fr 改成带上限的 minmax —— 1440 下 1fr 会把它拉到近 500px，
+     时长与日期被推到屏幕两端，一行要横跨整屏才读完。限到 420px 后
+     名称 / 条形 / 数值聚成三簇，扫视更快。 */
+  grid-template-columns: 44px 130px minmax(150px, 340px) minmax(120px, 420px) 150px 110px;
   gap: 14px; align-items: center; cursor: pointer;
   padding: 7px 12px; border-radius: 9px; background: transparent; border: 1px solid transparent;
+  position: relative;
   transition: background .15s, border-color .15s;
 }
-.rank-item:hover { background: var(--tint-1); border-color: var(--border); }
+/* 第 97 轮：hover 原来只有 0.06 alpha 的底色，几乎看不见。现在底色升到 tint-2、
+   序号变强调色、左侧滑入一条 3px 竖条 —— 长列表里能明确「我在看哪一行」。 */
+.rank-item::before {
+  content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px;
+  border-radius: 0 3px 3px 0; background: var(--accent);
+  transform: scaleY(0); transform-origin: center;
+  transition: transform .16s ease;
+}
+.rank-item:hover { background: var(--tint-2); border-color: var(--border); }
+.rank-item:hover::before { transform: scaleY(1); }
+/* 前三名保留奖牌色，不给 hover 的强调色盖掉 */
+.rank-item:hover .rank-no:not(.r1):not(.r2):not(.r3) { color: var(--accent); }
 .rank-item.zero { opacity: .55; }
 /* 排名序号：靠左对齐、放大；前三名金 / 银 / 铜 */
 .rank-no {
@@ -913,10 +1003,13 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    （.ach-name 自带 color 且在本文件更靠后，单类选择器会被它按「后来居上」盖掉）。 */
 .is-gold { color: var(--gold); }
 /* 进度条不设 overflow:hidden：填充 span 自带 border-radius，不依赖外层裁剪。 */
-.rank-bar { height: 7px; background: var(--track); border-radius: 4px; position: relative; }
+/* 第 97 轮：轨道加内阴影（沉入感）、填充加 1px 顶部高光（玻璃质感）——
+   成本几乎为零，但进度条不再是一片平涂的色块。 */
+.rank-bar { height: 7px; background: var(--track); border-radius: 4px; position: relative; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08); }
 .rank-bar > span {
   display: block; height: 100%; border-radius: 4px;
   background: var(--bar-grad);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
   transition: width .5s ease;
 }
 .rank-min { font-variant-numeric: tabular-nums; color: var(--text-strong); text-align: center; font-weight: 600; font-size: 14.5px; }
@@ -1043,10 +1136,19 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 }
 /* 周内累计里程碑（第 91 轮起每满 500h） */
 .tl-milestone {
-  margin-top: 10px; display: inline-block;
+  margin-top: 10px; display: inline-block; position: relative;
   background: var(--tint-2); border: 1px solid var(--tint-border);
-  color: var(--accent); border-radius: 8px; padding: 4px 14px;
-  font-size: 14px;
+  color: var(--accent); border-radius: 8px; padding: 5px 16px 5px 14px;
+  font-size: 14px; font-weight: 600;
+  /* 第 97 轮：加左侧小三角指向时间轴，让它成为「轴线上的一个节点」，
+     而不是一条横着贴上去的标签。 */
+  box-shadow: var(--card-shine);
+}
+.tl-milestone::before {
+  content: ''; position: absolute; left: -6px; top: 50%; margin-top: -5px;
+  width: 0; height: 0;
+  border-top: 5px solid transparent; border-bottom: 5px solid transparent;
+  border-right: 6px solid var(--tint-border);
 }
 /* 第 91 轮（用户）：「500h」比「游戏时长突破」大 2px（14 + 2 = 16），基准是 .tl-milestone 的 14px。.
    原来是 17px（差 3px），按要求收到 16px。 */
@@ -1093,10 +1195,13 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .h-value.warn { color: var(--warn); }
 .h-value.ok { color: var(--ok); }
 
-.about { font-size: 14.5px; color: var(--text-dim); max-width: 780px; }
+/* 第 97 轮：行高 1.6 → 1.75、段间距与列表项间距放大 —— 14.5px 的字配 1.6 行高，
+   连续七八行读起来很累，说明区从「说明书」变成「能读的文字」。 */
+.about { font-size: 14.5px; color: var(--text-dim); max-width: 780px; line-height: 1.75; }
 .about strong { color: var(--text); }
+.about p { margin: 0 0 14px; }
 .about ul { padding-left: 18px; }
-.about li { margin: 5px 0; }
+.about li { margin: 8px 0; }
 
 .site-footer {
   padding: 16px 28px 30px; color: var(--text-faint); font-size: 13px;
