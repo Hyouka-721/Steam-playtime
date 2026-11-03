@@ -442,11 +442,14 @@ a { color: var(--accent); }
 }
 /* 第 98 轮：721~1024 五列塞不下 —— 900 宽下 1fr 的内容区只剩 114~145px，而
    「19 h 55 min」@27px 要 149px、「2026-11-02」要 146px，实测三张卡折行
-   （第 97 轮基线同样折三张，只是换哪张折）。这一档改成 3 列 2 行：
-   每张约 272px、内容区 232px，五个值全部单行。
+   （第 97 轮基线同样折三张，只是换哪张折）。
+   改成 6 列底网格：前 3 张各占 2 格（= 三列），后 2 张各占 3 格（= 两列），
+   两行都铺满，不会在第二行右侧留一格空白。
    >1024 保持五列（1088 已实测全单行），≤720 走上面的单列。 */
 @media (min-width: 721px) and (max-width: 1024px) {
-  .cards { grid-template-columns: repeat(3, 1fr); }
+  .cards { grid-template-columns: repeat(6, 1fr); }
+  .cards > * { grid-column: span 2; }
+  .cards > :nth-child(4), .cards > :nth-child(5) { grid-column: span 3; }
 }
 .card {
   background: var(--card-bg);
