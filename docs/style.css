@@ -607,7 +607,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    刻意复用 .rank-item 的六列网格与行高，数据到达后替换成真实行时**零布局跳动**。
    动画只做背景位移（transform/background-position），不触发布局重排。 */
 .sk-row {
-  display: grid; grid-template-columns: 44px 130px minmax(150px, 340px) 1fr 150px 110px;
+  display: grid; grid-template-columns: 44px 130px minmax(150px, 260px) minmax(140px, 1fr) 150px 110px;
   gap: 14px; align-items: center; padding: 7px 12px;
 }
 .sk-block {
@@ -642,12 +642,18 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .rank-list[hidden] { display: none; }
 .rank-item {
   display: grid;
-  /* 第 101 轮：最后一列从固定 110px 改成 minmax(110px, 1fr) ——
-     第 98 轮把进度条列封顶到 420px 后，1440 下剩 54px 无处可去、全堆在日期右侧，
-     整行看起来「右边空了一截」。让日期列当弹性列吸收剩余空间，并把日期右对齐，
-     视觉上就是「日期贴右边缘」，不再是「一排内容左边挤、右边留白」。
-     1440 下日期列 164px；1088 下会缩到 min-content，仍放得下日期 + 相对时间两行。 */
-  grid-template-columns: 44px 130px minmax(150px, 340px) minmax(120px, 420px) 150px minmax(110px, 1fr);
+  /* 第 102 轮（回退后按用户要求重定）：进度条回到**弹性列 1fr**、日期回到**固定 110px**。
+     用户两次反馈的诉求是同一件事的两面：
+       · 「柱子更长，延展到右侧」 → 第 97/98 轮把它封顶到 420px 就截断了，1440 下本来能到 472px；
+       · 「游玩时间与最近游玩日期贴近」 → 第 101 轮把日期列改成 minmax(110px,1fr) 当弹性列，
+         日期被推到面板右缘，和时长之间裂出 50 多 px 的缝。
+     现在：进度条吃满所有剩余（1440 实测 472px），时长 150 与日期 110 紧邻（只隔 14px 的 gap），
+     日期右对齐当右边界锚点。
+     ⚠️ 进度条不能写成光秃秃的 `1fr`：`1fr` 的 min 是 0，而名称列 minmax(150,340) 会先涨到 340，
+     结果 1088 下柱子只剩 120px、900 以下直接塌成 **0**（实测 900/861 全是 0）→ 必须给下限 140px。
+     min 之和 44+130+150+140+150+110 = 724 + 6×14 = 808px，最窄桌面档 861 也放得下。
+     这套模板与下方 .sk-row 骨架必须逐字一致。 */
+  grid-template-columns: 44px 130px minmax(150px, 260px) minmax(140px, 1fr) 150px 110px;
   gap: 14px; align-items: center; cursor: pointer;
   padding: 7px 12px; border-radius: 9px; background: transparent; border: 1px solid transparent;
   position: relative;
