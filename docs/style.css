@@ -642,10 +642,12 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .rank-list[hidden] { display: none; }
 .rank-item {
   display: grid;
-  /* 第 97 轮：进度条那列从 1fr 改成带上限的 minmax —— 1440 下 1fr 会把它拉到近 500px，
-     时长与日期被推到屏幕两端，一行要横跨整屏才读完。限到 420px 后
-     名称 / 条形 / 数值聚成三簇，扫视更快。 */
-  grid-template-columns: 44px 130px minmax(150px, 340px) minmax(120px, 420px) 150px 110px;
+  /* 第 101 轮：最后一列从固定 110px 改成 minmax(110px, 1fr) ——
+     第 98 轮把进度条列封顶到 420px 后，1440 下剩 54px 无处可去、全堆在日期右侧，
+     整行看起来「右边空了一截」。让日期列当弹性列吸收剩余空间，并把日期右对齐，
+     视觉上就是「日期贴右边缘」，不再是「一排内容左边挤、右边留白」。
+     1440 下日期列 164px；1088 下会缩到 min-content，仍放得下日期 + 相对时间两行。 */
+  grid-template-columns: 44px 130px minmax(150px, 340px) minmax(120px, 420px) 150px minmax(110px, 1fr);
   gap: 14px; align-items: center; cursor: pointer;
   padding: 7px 12px; border-radius: 9px; background: transparent; border: 1px solid transparent;
   position: relative;
@@ -1071,7 +1073,18 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   transition: width .5s ease;
 }
 .rank-min { font-variant-numeric: tabular-nums; color: var(--text-strong); text-align: center; font-weight: 600; font-size: 14.5px; }
-.rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: center; font-size: 13px; position: relative; }
+/* 第 101 轮：右对齐 + 相对时间。
+   原来 text-align: center，日期在 110px 的列里居中，右边还挂着面板的剩余空间，
+   整行像「没排满」。改成右对齐后，日期成为整行的右边界锚点。
+   ⚠️ 相对时间用 ::after + attr(data-rel) 而不是插 <em> —— verify48 的 1.4
+   守着「.rank-last 里不挂任何子元素」（第 47 轮清空壳的留档），插真节点会打红它。
+   伪元素不进 children，样式仍是两行。 */
+.rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: right; font-size: 13px; position: relative; }
+.rank-last[data-rel]::after {
+  content: attr(data-rel);
+  display: block; font-size: 11px; line-height: 1.5;
+  color: var(--text-faint); opacity: .75; letter-spacing: .2px;
+}
 /* 第 87 轮：首行日期上方那枚「游玩日历」小图标（.cal-icon-btn 的 24×24 按钮、
    --cal-lift 那套 32px 上抬与 focus-visible 规则）已随「入口并入下钻热力图」整体删除。
    .rank-last 上的 position:relative 是历史残留（已无绝对定位子元素），留着无害。 */
