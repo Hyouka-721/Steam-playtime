@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-01T19:50:25+08:00",
+  "updated_at": "2026-11-03T18:09:53+08:00",
   "items": [
     {
       "id": "2026-10-31-dear-you",
@@ -2408,6 +2408,22 @@
         "冒险"
       ],
       "note": "Spider Man"
+    },
+    {
+      "id": "2019-06-29-item",
+      "title": "少年派",
+      "kind": "movie",
+      "watched_at": "2019-06-29",
+      "added_at": "2026-11-03T18:09:53+08:00",
+      "poster": "img/watch/item-3b4f3178.webp",
+      "poster_w": 640,
+      "poster_h": 915,
+      "poster_320": "img/watch/item-3b4f3178-320.webp",
+      "poster_480": "img/watch/item-3b4f3178-480.webp",
+      "year": 2019,
+      "rating": 7,
+      "order": 3,
+      "note": "少年时代"
     },
     {
       "id": "2018-07-27-forrest-gump",
