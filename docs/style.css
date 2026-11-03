@@ -440,13 +440,15 @@ a { color: var(--accent); }
 @media (max-width: 720px) {
   .cards { grid-template-columns: 1fr; }
 }
-/* 第 98 轮：721~1024 五列塞不下 —— 900 宽下 1fr 的内容区只剩 114~145px，而
-   「19 h 55 min」@27px 要 149px、「2026-11-02」要 146px，实测三张卡折行
-   （第 97 轮基线同样折三张，只是换哪张折）。
+/* 第 98 轮：721~1080 五列塞不下。
+   · 900 宽下 1fr 的内容区只剩 114~145px，而「19 h 55 min」@27px 要 149px、
+     「2026-11-02」要 146px —— 实测三张卡折行（第 97 轮基线同样折三张，只是换哪张折）。
+   · 断点取 1080 而不是 1024：1025~1080 这段五列时内容区只有 112~175px，同样折行；
+     1088 下内容区 153px 刚好够（需要 149px），所以 ≥1081 才安全回到五列。
    改成 6 列底网格：前 3 张各占 2 格（= 三列），后 2 张各占 3 格（= 两列），
    两行都铺满，不会在第二行右侧留一格空白。
-   >1024 保持五列（1088 已实测全单行），≤720 走上面的单列。 */
-@media (min-width: 721px) and (max-width: 1024px) {
+   >1080 保持五列，≤720 走上面的单列。 */
+@media (min-width: 721px) and (max-width: 1080px) {
   .cards { grid-template-columns: repeat(6, 1fr); }
   .cards > * { grid-column: span 2; }
   .cards > :nth-child(4), .cards > :nth-child(5) { grid-column: span 3; }
