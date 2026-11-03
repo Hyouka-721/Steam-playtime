@@ -8,6 +8,7 @@
  *
  * 基准（第 90 轮线上值）：.tl-week 13px、.tl-milestone 14px（b 原 17px）
  * 本轮目标：.tl-week 15px、.tl-milestone b 16px（= 14 + 2，差正好 2px）
+ * ⚠️ 第 99 轮（用户要求）：.tl-week 再收 0.5px → 14.5px，下面的断言已跟随。
  *
  * 覆盖：
  *  0 静态：版本号、STEP=30000、三条 font-size 字面量、结构与旧版一致
@@ -62,7 +63,7 @@ const daily = (() => {
 
 const appV = (html.match(/app\.js\?v=(\d+)/) || [])[1];
 const cssV = (html.match(/style\.css\?v=(\d+)/) || [])[1];
-ok('0.1 index.html 引用 app.js?v=113 / style.css?v=124', appV === '113' && cssV === '124', { app: appV, css: cssV });
+ok('0.1 index.html 引用 app.js?v=113 / style.css?v=125', appV === '113' && cssV === '125', { app: appV, css: cssV });
 
 ok('0.2 里程碑步长改成 500h（STEP = 30000 分钟）', /const STEP = 30000;/.test(app), (app.match(/const STEP = \d+;/) || [])[0]);
 ok('0.3 旧的 100h 步长（6000）已不存在', !/const STEP = 6000;/.test(app));
@@ -78,7 +79,7 @@ const weekRule = ruleOf('.tl-week');
 const msRule = ruleOf('.tl-milestone');
 const msBRule = ruleOf('.tl-milestone b');
 const px = (rule, prop) => (rule ? parseFloat((rule.match(new RegExp(prop + ':\\s*([\\d.]+)px')) || [])[1]) : NaN);
-ok('0.4 .tl-week 从 13px 提到 15px（基准 13 + 2）', px(weekRule, 'font-size') === 15, weekRule);
+ok('0.4 .tl-week 从 13px 提到 14.5px（第 91 轮先到 15，第 99 轮用户再收 0.5px）', px(weekRule, 'font-size') === 14.5, weekRule);
 ok('0.5 .tl-milestone 正文仍是 14px（基准没动）', px(msRule, 'font-size') === 14, msRule);
 ok('0.6 .tl-milestone b 从 17px 收到 16px（= 14 + 2，正好大 2px）',
   px(msBRule, 'font-size') === 16 && px(msBRule, 'font-size') - px(msRule, 'font-size') === 2,
@@ -167,7 +168,7 @@ ok('1.5 用户确认过的「突破 1000h ∈ 2026-04-16 那周」仍成立（10
   { got: tl.milestones.find((m) => m.text.includes('1000h'))?.week, expect: label(weekStartOf('2026-04-16')) });
 
 /* ================= 2 字号（运行时） ================= */
-ok('2.1 周日期 .tl-week 运行时是 15px', tl.weekFont === '15px', tl.weekFont);
+ok('2.1 周日期 .tl-week 运行时是 14.5px', tl.weekFont === '14.5px', tl.weekFont);
 ok('2.2 里程碑正文运行时是 14px', tl.msFont === '14px', tl.msFont);
 ok('2.3 里程碑数字运行时是 16px', tl.msBFont === '16px', tl.msBFont);
 ok('2.4 数字比正文正好大 2px（用户要求的差值）',
@@ -227,7 +228,7 @@ const themed = await page.evaluate(() => {
   return out;
 });
 ok('5.1 四套主题下三处字号都不变（15 / 14 / 16）',
-  Object.values(themed).every((v) => v.week === '15px' && v.text === '14px' && v.bold === '16px'), themed);
+  Object.values(themed).every((v) => v.week === '14.5px' && v.text === '14px' && v.bold === '16px'), themed);
 
 /* ================= 6 响应式 ================= */
 for (const w of [1440, 1024, 900, 768, 430, 390, 360]) {
