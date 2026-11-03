@@ -439,35 +439,14 @@
       const icon = ICON(g.appid, g.img_icon_url);
       const pct = Math.max(g.lifetime_minutes > 0 ? 1.5 : 0, (g.lifetime_minutes / max) * 100);
       const playing = (recent.get(g.appid) ?? 0) > 0;
-      /* 第 101 轮：日期下面补一行相对时间（「9 天前」）。
-         起因是第 98 轮把进度条列封顶后，日期列右侧留下一截空白，
-         整行右半区全是短文本、撑不住。补一行可感知的时间距离，右列才有内容重量。
-         两个 YYYY-MM-DD 用 UTC 相减，避开时区导致的差一天。 */
-      const daysAgoOf = (ds) => {
-        const [y, m, d] = ds.split('-').map(Number);
-        const [ty, tm, td] = todayStr().split('-').map(Number);
-        return Math.round((Date.UTC(ty, tm - 1, td) - Date.UTC(y, m - 1, d)) / 86400000);
-      };
-      const relDay = (ds) => {
-        if (!ds) return '';
-        let n;
-        try { n = daysAgoOf(ds); } catch { return ''; }
-        if (!Number.isFinite(n) || n < 0) return '';   // 未来日期不显示相对时间
-        if (n === 0) return '今天';
-        if (n === 1) return '昨天';
-        if (n < 30) return `${n} 天前`;
-        if (n < 365) return `${Math.floor(n / 30)} 个月前`;
-        return `${Math.floor(n / 365)} 年前`;
-      };
+      /* 2026-11-03（第 102 轮回退后）：日期下面那行相对时间（「9 天前」）已按用户要求删除。
+         原来的 daysAgoOf / relDay 两个函数与 .rank-last 的 data-rel 属性一并移除，
+         CSS 侧的 .rank-last[data-rel]::after 也删了 —— 日期恢复成单行纯日期。 */
       // 2026-10-20：累计榜已不再挂载日历入口（该入口收敛到「最近游玩」，
       // 见 CAL_ICON_BTN 处注释）。这里与其它行结构完全一致 —— .rank-last 里
-      // 只有日期文字（第 101 轮起多一行相对时间），没有多余按钮节点，
-      // 也不会因缺少绝对定位子元素而改变高度。
-      const lastRel = g.last_played ? relDay(g.last_played) : '';
-      /* 相对时间走 data-rel + CSS ::after，不插真节点 ——
-         verify48 的 1.4 守着「.rank-last 里不挂任何子元素」（第 47 轮清空壳的留档）。 */
+      // 只有日期文字，没有多余按钮节点，也不会因缺少绝对定位子元素而改变高度。
       const lastHtml = g.last_played
-        ? `<span class="rank-last"${lastRel ? ` data-rel="${lastRel}"` : ''}>${g.last_played}</span>`
+        ? `<span class="rank-last">${g.last_played}</span>`
         : '<span class="rank-last">—</span>';
       // 胶囊图按需加载（2026-10-18 首屏优化）：原生 loading="lazy" 的判定时机
       // 在各浏览器/无头环境下差异很大——实测 53 行会一次性发起 53 个 Steam CDN

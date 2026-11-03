@@ -1078,19 +1078,22 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
   transition: width .5s ease;
 }
-.rank-min { font-variant-numeric: tabular-nums; color: var(--text-strong); text-align: center; font-weight: 600; font-size: 14.5px; }
-/* 第 101 轮：右对齐 + 相对时间。
-   原来 text-align: center，日期在 110px 的列里居中，右边还挂着面板的剩余空间，
-   整行像「没排满」。改成右对齐后，日期成为整行的右边界锚点。
-   ⚠️ 相对时间用 ::after + attr(data-rel) 而不是插 <em> —— verify48 的 1.4
-   守着「.rank-last 里不挂任何子元素」（第 47 轮清空壳的留档），插真节点会打红它。
-   伪元素不进 children，样式仍是两行。 */
-.rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: right; font-size: 13px; position: relative; }
-.rank-last[data-rel]::after {
-  content: attr(data-rel);
-  display: block; font-size: 11px; line-height: 1.5;
-  color: var(--text-faint); opacity: .75; letter-spacing: .2px;
+/* 第 102 轮（回退后，2026-11-03）：用户要求「游戏时长右移 20px」。
+   时长列宽不动（150px），只把文字整体右移 —— 用 transform 而不是 padding/margin：
+   加 padding-left 会把内容盒挤窄（150-20=130，最长「1395 h 11 min」约 88px 还够，
+   但一旦以后字号变大就有折行风险），translateX 只挪绘制位置，不参与布局，
+   列宽、行高、折行判定全都不受影响。 */
+.rank-min {
+  font-variant-numeric: tabular-nums; color: var(--text-strong); text-align: center;
+  font-weight: 600; font-size: 14.5px;
+  transform: translateX(20px);
 }
+/* 第 101 轮：日期右对齐 —— 原来居中，右边还挂着面板的剩余空间，整行像「没排满」。
+   右对齐后日期成为整行的右边界锚点。
+   第 102 轮回退后：日期下面那行相对时间（「9 天前」）已按用户要求删除，
+   对应的 `[data-rel]::after` 规则与 app.js 里的 relDay/daysAgoOf 一并移除，
+   现在日期就是单行纯日期。 */
+.rank-last { font-variant-numeric: tabular-nums; color: var(--text-faint); text-align: right; font-size: 13px; position: relative; }
 /* 第 87 轮：首行日期上方那枚「游玩日历」小图标（.cal-icon-btn 的 24×24 按钮、
    --cal-lift 那套 32px 上抬与 focus-visible 规则）已随「入口并入下钻热力图」整体删除。
    .rank-last 上的 position:relative 是历史残留（已无绝对定位子元素），留着无害。 */
