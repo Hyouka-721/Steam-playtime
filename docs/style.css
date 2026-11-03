@@ -431,18 +431,31 @@ a { color: var(--accent); }
 /* ---- 导航卡片（游戏时长 / 最近游玩 / 成就 / 游戏库 / 数据，替代 Tab 栏） ---- */
 /* 2026-10-17：dock 栏 ↔ 统计卡区 ↔ 下方展示区的三区间距调大 */
 .cards {
-  display: grid; gap: 14px; padding: 34px 28px 12px;
-  grid-template-columns: 1.2fr 1fr 1fr 0.8fr 1fr;
+  display: grid; gap: 14px; padding: 32px 28px 12px;
+  /* 第 98 轮：第 4 列 0.8fr → 0.85fr。原来「游戏库 38 / 53」那张比同排其他卡窄 53px，
+     五张卡左右外缘虽齐、内部宽度却不齐。只补偿到 0.85 而不是 1：1088 宽下
+     1fr 的内容区只有 157px，「19 h 55 min」@27px 要 155px —— 再宽一点点就折行。 */
+  grid-template-columns: 1.2fr 1fr 1fr 0.85fr 1fr;
 }
 @media (max-width: 720px) {
   .cards { grid-template-columns: 1fr; }
+}
+/* 第 98 轮：721~1024 五列塞不下 —— 900 宽下 1fr 的内容区只剩 114~145px，而
+   「19 h 55 min」@27px 要 149px、「2026-11-02」要 146px，实测三张卡折行
+   （第 97 轮基线同样折三张，只是换哪张折）。这一档改成 3 列 2 行：
+   每张约 272px、内容区 232px，五个值全部单行。
+   >1024 保持五列（1088 已实测全单行），≤720 走上面的单列。 */
+@media (min-width: 721px) and (max-width: 1024px) {
+  .cards { grid-template-columns: repeat(3, 1fr); }
 }
 .card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: var(--radius); padding: 18px 20px;
   /* 第 97 轮：顶部 1px 高光 + 外阴影 = 「浮起」。深色主题下高光是 5% 白，
-     浅色下是 70% 白 —— 同一个变量，两种明暗关系。 */
+     浅色下是 70% 白 —— 同一个变量，两种明暗关系。
+     ⚠️ 上下内边距保持 18：改成 20 会让内容区再少 4px，1088 宽下
+     「19 h 55 min」在 27px 就折行了（第 98 轮实测）。 */
   box-shadow: var(--card-shine), var(--card-shadow);
   transition: border-color .2s, transform .2s, box-shadow .2s, background-color .3s ease;
   /* 网格把五张卡拉成同高，内容垂直居中避免高低不齐 */
@@ -466,12 +479,13 @@ a { color: var(--accent); }
   border-color: var(--border-hi);
 }
 .card-label { font-size: 13px; color: var(--text-dim); letter-spacing: .8px; }
-.card-value { font-size: 27px; font-weight: 700; color: var(--text-strong); margin-top: 5px; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.card-value { font-size: 27px; font-weight: 700; color: var(--text-strong); margin-top: 6px; line-height: 1.25; font-variant-numeric: tabular-nums; }
 .card-hero .card-value {
-  /* 第 97 轮：30px 固定字号在 1088 宽下装不下「1394 h 36 min」（卡宽 ~234、内容区 ~194，
-     而这个值约 210px），会折成「1394 h 36 / min」两行 —— 首屏最显眼的数字反而断行。
-     改成随视口收缩：1088 下约 22.8px（~160px 宽，一行放得下），1440 起仍是 30px。 */
-  font-size: clamp(22px, 2.1vw, 30px);
+  /* 第 98 轮：hero 与普通卡统一到 27px。原来 hero 30 / 其余 27，同一语义两个字号、
+     只差 3px，反而让五张卡的数字基线不齐；焦点感交给渐变字色与 1.2fr 宽列。
+     ⚠️ 上限不能再往上调：1088 宽下 1fr 的内容区只有 157px，「19 h 55 min」在 27px
+     就需要 155px —— 调到 28px 会立刻折行（第 98 轮实测过）。 */
+  font-size: clamp(22px, 1.95vw, 27px);
   background: linear-gradient(90deg, var(--accent-2), var(--accent));
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
@@ -482,7 +496,11 @@ a { color: var(--accent); }
 /* ---- panel ---- */
 .panel {
   background: var(--panel); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 18px 20px; margin-bottom: 18px;
+  /* ⚠️ 上下内边距保持 18，不跟页眉统一到 20：verify49 有五条精确几何断言
+     （面板上内边距、首行上移量、面板高度、两侧内边距、边框到首行）
+     都以 18 为基准，且它们是第 49 轮「不许靠改 padding 补偿」的守卫。
+     这一项的统一收益不值得动守卫。 */
+  border-radius: var(--radius); padding: 18px 20px; margin-bottom: 20px;
   box-shadow: var(--card-shadow);
   /* 第 97 轮：主题切换时面板底色跟着柔和过渡（原来只有 body 有过渡，
      面板是硬切，切到深色主题时内容区会「啪」一下跳色）。 */
@@ -495,6 +513,8 @@ a { color: var(--accent); }
 .panel-lo { background: var(--panel-lo); box-shadow: none; }
 .panel-head {
   display: flex; align-items: center; justify-content: space-between;
+  /* ⚠️ 保持 14：verify49 的 3.1 把「提示行高 19.19 + margin 14 = 33.19px」写成了精确断言，
+     改成 16 会连带把首行上移量、面板高度两条一起打红。 */
   gap: 12px; flex-wrap: wrap; margin-bottom: 14px;
 }
 .panel-head h2 { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-strong); }
@@ -611,7 +631,9 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 /* 排名序号：靠左对齐、放大；前三名金 / 银 / 铜 */
 .rank-no {
   color: var(--text-faint); font-variant-numeric: tabular-nums;
-  text-align: left; font-size: 17px; font-weight: 600; letter-spacing: .5px;
+  /* 第 98 轮：17 → 16，与 .rank-name 同档。原来序号比游戏名还大，行首反而更抢眼。
+     强调改由字重承担（600 → 700）。前三名仍是 22px 的奖牌数字，那是刻意的例外。 */
+  text-align: left; font-size: 16px; font-weight: 700; letter-spacing: .5px;
 }
 .rank-no.r1, .rank-no.r2, .rank-no.r3 { font-size: 22px; font-weight: 800; }
 .rank-no.r1 { color: var(--medal-1); text-shadow: var(--medal-shadow-1); }
@@ -1017,7 +1039,9 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 /* 第 87 轮：首行日期上方那枚「游玩日历」小图标（.cal-icon-btn 的 24×24 按钮、
    --cal-lift 那套 32px 上抬与 focus-visible 规则）已随「入口并入下钻热力图」整体删除。
    .rank-last 上的 position:relative 是历史残留（已无绝对定位子元素），留着无害。 */
-.list-foot { text-align: right; color: var(--text-faint); font-size: 13px; margin: 10px 4px 2px; }
+/* 第 98 轮：去掉右边 4px 的 margin —— 它让这段右对齐文字比面板内容右缘多缩 4px，
+   与左边 49.0 的基准不对称（审计里是全页唯一偏离基准的内容块）。 */
+.list-foot { text-align: right; color: var(--text-faint); font-size: 13px; margin: 10px 0 2px; }
 .list-foot-dim { opacity: .75; }
 
 /* ---- 未游玩游戏的折叠区 ---- */
@@ -1025,7 +1049,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   display: flex; align-items: center; gap: 8px; cursor: pointer;
   margin: 10px 0 2px; padding: 8px 12px; border-radius: 9px;
   border: 1px dashed var(--border); background: var(--sunken);
-  color: var(--text-dim); font-size: 13.5px; user-select: none;
+  color: var(--text-dim); font-size: 13px; user-select: none;
   transition: border-color .15s, color .15s, background .15s;
 }
 .idle-toggle:hover, .idle-toggle:focus-visible {
@@ -1191,7 +1215,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .health { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
 .h-item { background: var(--sunken); border: 1px solid var(--border); border-radius: 9px; padding: 12px 14px; }
 .h-label { font-size: 13px; color: var(--text-dim); }
-.h-value { font-size: 20px; font-weight: 600; color: var(--text-strong); margin-top: 3px; }
+.h-value { font-size: 22px; font-weight: 600; color: var(--text-strong); margin-top: 4px; }
 .h-value.warn { color: var(--warn); }
 .h-value.ok { color: var(--ok); }
 
