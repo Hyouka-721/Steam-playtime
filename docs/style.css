@@ -619,7 +619,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .sk-cap { height: 60px; border-radius: 8px; }
 .sk-line { height: 11px; }
 .sk-no { width: 16px; height: 14px; }
-.sk-bar { height: 7px; border-radius: 4px; }
+.sk-bar { height: 7px; border-radius: 4px; margin-left: -30px; margin-right: -20px; }
 .sk-min { width: 72px; height: 13px; margin-left: auto; }
 .sk-date { width: 58px; height: 11px; margin-left: auto; }
 /* 概览卡数值占位：与 .card-value 同高，避免渲染后卡片高度跳动 */
@@ -1063,6 +1063,11 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 
 .rank-name {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-strong);
+  /* 第 102 轮（2026-11-03）：进度条左端向左延展 30px 后会探进名称列 16px
+     （30 − 14 的 column-gap），必须在名称右侧留出同等空档，否则进度条会盖住长名字的尾巴。
+     实测全站最长的「Wallpaper Engine：壁纸引擎在玩」文字宽 251.3px，
+     留 22px 后文字最多到 238px，与进度条左端（244px 处）还有 6px 间隙。 */
+  padding-right: 22px;
 }
 /* 稀有成就名（全球完成率 < 10%）：统一走 --gold，只改颜色，不动字号字重，布局零影响。
    通用工具类放这儿；落在 .ach-name 上时需要提权——见成就列表段的 .ach-name.is-gold
@@ -1070,23 +1075,35 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .is-gold { color: var(--gold); }
 /* 进度条不设 overflow:hidden：填充 span 自带 border-radius，不依赖外层裁剪。 */
 /* 第 97 轮：轨道加内阴影（沉入感）、填充加 1px 顶部高光（玻璃质感）——
-   成本几乎为零，但进度条不再是一片平涂的色块。 */
-.rank-bar { height: 7px; background: var(--track); border-radius: 4px; position: relative; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08); }
+   成本几乎为零，但进度条不再是一片平涂的色块。
+   第 102 轮（2026-11-03）：用户要求「柱子最左端往左延 30px、右端往右延 20px，
+   总长度随之增大」→ 用**负外边距**实现：它是 stretch 的 grid item，
+   宽度 = 网格区宽度 −（margin-left + margin-right），所以 -30/-20 让盒子两边各长出
+   30px / 20px，而**网格轨道一点都不变**（不会挤压名称列或时长列，也不产生横向溢出）。
+   左端会探进名称列 16px（30 − 14 gap）→ 已给 .rank-name 加 padding-right: 22px 让位；
+   右端探进时长列 6px（20 − 14 gap），而时长文字在 150px 列里居中、离列左缘还有 30px+，不相撞。 */
+.rank-bar {
+  height: 7px; background: var(--track); border-radius: 4px; position: relative;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+  margin-left: -30px; margin-right: -20px;
+}
 .rank-bar > span {
   display: block; height: 100%; border-radius: 4px;
   background: var(--bar-grad);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
   transition: width .5s ease;
 }
-/* 第 102 轮（回退后，2026-11-03）：用户要求「游戏时长右移 20px」。
-   时长列宽不动（150px），只把文字整体右移 —— 用 transform 而不是 padding/margin：
-   加 padding-left 会把内容盒挤窄（150-20=130，最长「1395 h 11 min」约 88px 还够，
+/* 第 102 轮（回退后，2026-11-03）：用户要求「游戏时长右移 20px」，随后又要求「再往右 20px」，
+   累计 translateX(40px)。用 transform 而不是 padding/margin：
+   加 padding-left 会把内容盒挤窄（150-40=110，最长「1395 h 11 min」约 88px 还够，
    但一旦以后字号变大就有折行风险），translateX 只挪绘制位置，不参与布局，
-   列宽、行高、折行判定全都不受影响。 */
+   列宽、行高、折行判定全都不受影响。
+   ⚠️ 量位移时不能直接比 getBoundingClientRect —— transform 已经作用在上面了，
+   要临时把 transform 置 none 再量一次。 */
 .rank-min {
   font-variant-numeric: tabular-nums; color: var(--text-strong); text-align: center;
   font-weight: 600; font-size: 14.5px;
-  transform: translateX(20px);
+  transform: translateX(40px);
 }
 /* 第 101 轮：日期右对齐 —— 原来居中，右边还挂着面板的剩余空间，整行像「没排满」。
    右对齐后日期成为整行的右边界锚点。
@@ -1326,7 +1343,9 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   /* 两行布局：首行 序号/封面/片名，次行 进度条 + 时长。
      不能写成 4 列 —— 34+100+84 三列定宽后，窄屏上片名只剩 30px，等于没了。 */
   .rank-item { grid-template-columns: 34px 100px minmax(0, 1fr); row-gap: 7px; }
-  .rank-bar { grid-column: 1 / 3; grid-row: 2; }
+  /* 窄屏进度条横跨前两列（序号 + 封面），左端本来就贴着行的左内边距；
+     桌面那套 -30/-20 的负外边距在这里会把条子推出面板，必须清零。 */
+  .rank-bar { grid-column: 1 / 3; grid-row: 2; margin-left: 0; margin-right: 0; }
   .rank-min { grid-column: 3; grid-row: 2; min-width: 0; }
   /* 窄屏：图片 100×46（网格列宽仍按 100px 留位，外框的 2px 由负 margin 溢出吸收），
      外框 = 图片 + 2×环厚 = 104×50。图片尺寸由 .rank-capsule-wrap > .rank-capsule

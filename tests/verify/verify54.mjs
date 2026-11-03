@@ -39,8 +39,8 @@ const html = await grab('index.html?cb=' + Date.now());
 const app = await grab('app.js?v=115&cb=' + Date.now());
 const watchHtml = await grab('watch.html?cb=' + Date.now());
 
-ok('A1 版本号 style.css?v=129 / app.js?v=115 / fx.js?v=16',
-  /style\.css\?v=129/.test(html) && /app\.js\?v=115/.test(html) && /fx\.js\?v=16/.test(html));
+ok('A1 版本号 style.css?v=130 / app.js?v=115 / fx.js?v=16',
+  /style\.css\?v=130/.test(html) && /app\.js\?v=115/.test(html) && /fx\.js\?v=16/.test(html));
 
 ok('A2 小黄人是链接（class=logo + href=watch.html + id=logo-watch），不再是 theme-light',
   /<a class="logo" id="logo-watch" href="watch\.html"/.test(html) && !/logo"[^>]*id="theme-light"/.test(html));
