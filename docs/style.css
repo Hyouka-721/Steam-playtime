@@ -32,6 +32,10 @@
   --bg-layers:
     radial-gradient(980px 560px at 10% -8%, rgba(217, 118, 47, 0.20), transparent 64%),
     radial-gradient(860px 500px at 92% 0%, rgba(245, 158, 66, 0.16), transparent 62%),
+    /* 第 100 轮：加一条**斜向线性渐变**当「方向光」。原来 4 层全是径向，
+       光从四面八方平均照过来，所以画面发平 —— 缺的不是层数，是方向。
+       它夹在远景光斑与近景反射之间，静态绘制，不增加滚动成本。 */
+    linear-gradient(165deg, transparent 0 34%, rgba(217, 118, 47, 0.045) 50%, transparent 66%),
     radial-gradient(1100px 640px at 50% 116%, rgba(190, 90, 120, 0.10), transparent 68%),
     radial-gradient(720px 460px at 78% 62%, rgba(120, 150, 190, 0.05), transparent 66%);
   --panel: #fdf0df;
@@ -54,8 +58,11 @@
   --radius: 10px;
   --card-bg: linear-gradient(170deg, #fdf3e4, #f8e8d2);
   --card-border: #eee5d9;
-  --card-shadow: 0 1px 2px rgba(60, 40, 20, 0.05), 0 6px 18px rgba(90, 60, 25, 0.07);
-  --card-hover-shadow: 0 12px 28px rgba(90, 60, 25, 0.12);
+  --card-shadow: 0 1px 2px rgba(217, 118, 47, 0.07), 0 6px 18px rgba(180, 90, 40, 0.10);
+  --card-hover-shadow: 0 12px 28px rgba(180, 90, 40, 0.16);
+  /* 第 100 轮：阴影从无彩色 rgba(60,40,20) 换成主题色同源，卡片像被暖光照着。
+     另加「内嵌区块受光面」—— 与 --card-shine 同一套语言，形成面板 → 内嵌的两级深度。 */
+  --inset-shine: inset 0 1px 0 rgba(255, 255, 255, 0.55);
   --header-bg: rgba(255, 250, 243, 0.8);
   --medal-1: #c58a00; --medal-2: #8d8175; --medal-3: #b3703c;
   --medal-shadow-1: none; --medal-shadow-2: none; --medal-shadow-3: none;
@@ -142,6 +149,8 @@
   --bg-layers:
     radial-gradient(980px 560px at 10% -8%, rgba(139, 123, 255, 0.24), transparent 64%),
     radial-gradient(860px 500px at 92% 0%, rgba(90, 200, 250, 0.15), transparent 62%),
+    /* 第 100 轮：斜向方向光（深色下取冷紫，与暖调的底部反射形成对角） */
+    linear-gradient(165deg, transparent 0 34%, rgba(139, 123, 255, 0.06) 50%, transparent 66%),
     radial-gradient(1100px 640px at 50% 116%, rgba(240, 163, 92, 0.10), transparent 68%),
     radial-gradient(720px 460px at 78% 62%, rgba(60, 90, 160, 0.08), transparent 66%);
   --panel: #1c1b24;
@@ -165,8 +174,10 @@
   --radius: 10px;
   --card-bg: linear-gradient(170deg, #23212e, #1a1924);
   --card-border: #2e2b3d;
-  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 8px 22px rgba(0, 0, 0, 0.35);
-  --card-hover-shadow: 0 14px 32px rgba(0, 0, 0, 0.5);
+  --card-shadow: 0 1px 2px rgba(90, 70, 180, 0.22), 0 8px 22px rgba(70, 50, 150, 0.28);
+  --card-hover-shadow: 0 14px 32px rgba(70, 50, 150, 0.38);
+  /* 深色下没有白色可用，用 6% 白模拟受光面 */
+  --inset-shine: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   --header-bg: rgba(20, 19, 26, 0.82);
   --medal-1: #f2c14e; --medal-2: #b9b4c9; --medal-3: #cf8f5f;
   --gold: var(--medal-1);
@@ -192,6 +203,8 @@
   --bg-layers:
     radial-gradient(980px 560px at 10% -8%, rgba(15, 158, 142, 0.20), transparent 64%),
     radial-gradient(860px 500px at 92% 0%, rgba(56, 189, 248, 0.15), transparent 62%),
+    /* 第 100 轮：斜向方向光（青绿主题取主色，压在中景） */
+    linear-gradient(165deg, transparent 0 34%, rgba(15, 158, 142, 0.05) 50%, transparent 66%),
     radial-gradient(1100px 640px at 50% 116%, rgba(163, 230, 53, 0.11), transparent 68%),
     radial-gradient(720px 460px at 78% 62%, rgba(245, 170, 90, 0.05), transparent 66%);
   --panel: #e6f6f0;
@@ -212,8 +225,9 @@
   --radius: 10px;
   --card-bg: linear-gradient(170deg, #ecf8f4, #daf0e8);
   --card-border: #e0f0ea;
-  --card-shadow: 0 1px 2px rgba(10, 50, 42, 0.05), 0 6px 18px rgba(10, 60, 50, 0.07);
-  --card-hover-shadow: 0 12px 28px rgba(10, 60, 50, 0.12);
+  --card-shadow: 0 1px 2px rgba(15, 120, 110, 0.07), 0 6px 18px rgba(10, 100, 90, 0.10);
+  --card-hover-shadow: 0 12px 28px rgba(10, 100, 90, 0.16);
+  --inset-shine: inset 0 1px 0 rgba(255, 255, 255, 0.55);
   --header-bg: rgba(247, 253, 251, 0.8);
   --medal-1: #c08a00; --medal-2: #82968f; --medal-3: #a9753c;
   --medal-shadow-1: none; --medal-shadow-2: none; --medal-shadow-3: none;
@@ -238,6 +252,8 @@
   --bg-layers:
     radial-gradient(980px 560px at 10% -8%, rgba(124, 92, 240, 0.20), transparent 64%),
     radial-gradient(860px 500px at 92% 0%, rgba(236, 72, 153, 0.14), transparent 62%),
+    /* 第 100 轮：斜向方向光（紫主题取主色） */
+    linear-gradient(165deg, transparent 0 34%, rgba(124, 92, 240, 0.05) 50%, transparent 66%),
     radial-gradient(1100px 640px at 50% 116%, rgba(56, 189, 248, 0.11), transparent 68%),
     radial-gradient(720px 460px at 78% 62%, rgba(240, 170, 90, 0.05), transparent 66%);
   --panel: #f1edff;
@@ -258,8 +274,9 @@
   --radius: 10px;
   --card-bg: linear-gradient(170deg, #f4f0ff, #e9e3fd);
   --card-border: #e9e5f6;
-  --card-shadow: 0 1px 2px rgba(40, 25, 80, 0.05), 0 6px 18px rgba(50, 30, 100, 0.07);
-  --card-hover-shadow: 0 12px 28px rgba(50, 30, 100, 0.12);
+  --card-shadow: 0 1px 2px rgba(90, 60, 200, 0.07), 0 6px 18px rgba(80, 50, 190, 0.10);
+  --card-hover-shadow: 0 12px 28px rgba(80, 50, 190, 0.16);
+  --inset-shine: inset 0 1px 0 rgba(255, 255, 255, 0.55);
   --header-bg: rgba(251, 250, 255, 0.8);
   --medal-1: #c98a00; --medal-2: #8b85a3; --medal-3: #b06f3c;
   --medal-shadow-1: none; --medal-shadow-2: none; --medal-shadow-3: none;
@@ -311,6 +328,13 @@ html, body {
   line-height: 1.6;
   transition: background-color .25s ease, color .25s ease;
 }
+/* 第 100 轮：窄屏关掉 background-attachment: fixed。
+   手机屏窄，渐变本来就看不出多少变化，但 fixed 会让**每次滚动都重绘整屏背景** ——
+   这是滚动性能里最贵的一项。这一条不增强视觉，是给上面几条光影买预算。
+   桌面端保持不变（视口大、`fixed` 的景深收益才看得出来）。 */
+@media (max-width: 899px) {
+  html, body { background-attachment: scroll; }
+}
 
 a { color: var(--accent); }
 
@@ -336,6 +360,13 @@ a { color: var(--accent); }
 .site-header::after {
   content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
   background: linear-gradient(90deg, transparent, var(--border) 14%, var(--border) 86%, transparent);
+  pointer-events: none;
+}
+/* 第 100 轮：页眉底部 20px 的柔光带 —— 内容从光里穿出来，比再加两层径向渐变更能做出纵深。
+   颜色取 --tint-1（主题强调色 6%），换主题自动跟着变。 */
+.site-header::before {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -20px; height: 20px;
+  background: linear-gradient(to bottom, var(--tint-1), transparent);
   pointer-events: none;
 }
 .brand { display: flex; align-items: center; gap: 16px; justify-self: start; }
@@ -1221,6 +1252,12 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .btn-ghost { background: transparent; }
 
 .health { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+/* 第 100 轮：给「内嵌区块」加受光面（inset 1px 高光），与 --card-shine 同一套语言，
+   形成「页面 → 面板 → 内嵌区块」的三级深度。
+   ⚠️ 只加给真正的区块（下面这几个）；--sunken 还用在 20 多处小元素上
+   （图标占位、日历小圆点、进度条轨道、热力图格子），那些加了会脏。 */
+.h-item, .rp-cell, .heat-mb, .hm-none { box-shadow: var(--inset-shine); }
+
 .h-item { background: var(--sunken); border: 1px solid var(--border); border-radius: 9px; padding: 12px 14px; }
 .h-label { font-size: 13px; color: var(--text-dim); }
 .h-value { font-size: 22px; font-weight: 600; color: var(--text-strong); margin-top: 4px; }
