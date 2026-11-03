@@ -154,7 +154,6 @@
       '<span class="sk-block sk-line"></span>' +
       '<span class="sk-block sk-bar"></span>' +
       '<span class="sk-block sk-min"></span>' +
-      '<span class="sk-block sk-pct"></span>' +
       '<span class="sk-block sk-date"></span>' +
       '</div>'
     ).join('');
@@ -418,19 +417,6 @@
      CSS（.cal-icon-btn / --cal-lift 那一套对位算法）与 #recent-list 的点击委托
      一并删干净了。累计榜与最近榜现在都不再有任何「行内图标」。 */
 
-  /** 第 102 轮：榜单「占比」列（C 方案）。
-   *  分母是当前列表自身的合计（累计榜＝已游玩游戏总时长，最近榜＝近两周总时长），
-   *  所以两榜的百分比都等于「这一行占这张表的多大份」，语义一致、列宽也一致。
-   *  分档：≥1% 一位小数（12.3%），0.1~1% 两位小数（0.43%），更小写成 <0.1%
-   *  —— 53 款游戏里长尾那些如果全写 0.0% 就看不出差异了。 */
-  function sharePct(v, total) {
-    if (!(total > 0) || !(v > 0)) return '—';
-    const p = (v / total) * 100;
-    if (p >= 1) return `${p.toFixed(1)}%`;
-    if (p >= 0.1) return `${p.toFixed(2)}%`;
-    return '<0.1%';
-  }
-
   function renderLifetime() {
     const box = $('lt-list');
     const lifetime = Object.values(state.meta.games_lifetime ?? {});
@@ -475,10 +461,8 @@
       };
       // 2026-10-20：累计榜已不再挂载日历入口（该入口收敛到「最近游玩」，
       // 见 CAL_ICON_BTN 处注释）。这里与其它行结构完全一致 —— .rank-last 里
-      // 只有日期文字（第 101 轮起附带相对时间），没有多余按钮节点，
+      // 只有日期文字（第 101 轮起多一行相对时间），没有多余按钮节点，
       // 也不会因缺少绝对定位子元素而改变高度。
-      // 第 102 轮起整行 7 项：序号 / 封面 / 名称 / 进度条 / 时长 / 占比 / 日期，
-      // 与 .rank-item 的七列模板、以及 .sk-row 骨架一一对应，改一处要三处同步。
       const lastRel = g.last_played ? relDay(g.last_played) : '';
       /* 相对时间走 data-rel + CSS ::after，不插真节点 ——
          verify48 的 1.4 守着「.rank-last 里不挂任何子元素」（第 47 轮清空壳的留档）。 */
@@ -502,7 +486,6 @@
           <span class="rank-name">${escapeHtml(g.name)}${playing ? '<span class="tag playing">在玩</span>' : ''}</span>
           <span class="rank-bar"><span style="${barStyle(pct, i)}"></span></span>
           <span class="rank-min">${hm(g.lifetime_minutes)}</span>
-          <span class="rank-pct">${sharePct(g.lifetime_minutes, totalShown)}</span>
           ${lastHtml}
         </div>`;
     };
@@ -568,8 +551,6 @@
       return;
     }
     const max = Math.max(...list.map((g) => g.recent), 1);
-    // 第 102 轮：占比列的分母 = 近两周合计（与累计榜用同一函数、同一列宽）
-    const totalRecent = list.reduce((a, g) => a + g.recent, 0);
     // 与累计榜同一口径：全成就解锁的游戏胶囊图标金（集合只建一次）
     const perfect = perfectGameSet();
 
@@ -580,15 +561,12 @@
         const isPerfect = perfect.has(String(g.appid));
         // 第 87 轮：原先首行日期上方那枚「游玩日历」图标已删除（功能并入下钻热力图），
         // 所有行结构完全一致 —— .rank-last 里只有日期文字，没有空节点、没有额外占位。
-        // 第 102 轮：补上占比列。两榜共用 .rank-item 的七列网格，这里少一项就会让
-        // 时长被挤进 78px 的占比列、日期跑到时长列去，整行错位。
         return `<div class="rank-item">
           <span class="rank-no${noCls(i)}">${i + 1}</span>
           ${capsuleHtml(g.appid, { perfect: isPerfect, icon })}
           <span class="rank-name">${escapeHtml(g.name)}</span>
           <span class="rank-bar"><span style="${barStyle(pct, i)}"></span></span>
           <span class="rank-min">${hm(g.recent)}</span>
-          <span class="rank-pct">${sharePct(g.recent, totalRecent)}</span>
           <span class="rank-last">${g.last_played ?? '—'}</span>
         </div>`;
       })
