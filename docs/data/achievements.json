@@ -1,12 +1,12 @@
 {
   "schema": 1,
   "ready": true,
-  "generated_at": "2026-11-02T23:10:10.964Z",
-  "snapshot_date": "2026-11-02",
+  "generated_at": "2026-11-03T21:10:54.123Z",
+  "snapshot_date": "2026-11-03",
   "stats": {
-    "unlocked": 842,
+    "unlocked": 843,
     "total": 2504,
-    "pct": 33.6,
+    "pct": 33.7,
     "games": 31
   },
   "games": {
@@ -324,7 +324,7 @@
           "name": "On Fleek",
           "desc": "Spot the sun on a “cool” day.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/f82e79301ae9bbdb2d95a69527ac5ab44faf00a2.jpg",
-          "percent": 1.3,
+          "percent": 1.2,
           "ts": 1788586142
         },
         {
@@ -332,7 +332,7 @@
           "name": "Training Day",
           "desc": "Get your villagers fully combat ready.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/d608a4a962f21ec31d762587303cb46eeab53970.jpg",
-          "percent": 3,
+          "percent": 2.9,
           "ts": 1788586056
         },
         {
@@ -468,7 +468,7 @@
           "name": "Conservationist",
           "desc": "Support sustainable logging by planting 100 acorns.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/c3427a13a22c146f2f17b459c6a9de89818ab809.jpg",
-          "percent": 3.3,
+          "percent": 3.2,
           "ts": 1788353072
         },
         {
@@ -612,7 +612,7 @@
           "name": "Going Oldschool",
           "desc": "Bring back the original title screen.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/04998850ce652bde23901e5a4a5838d03d88c725.jpg",
-          "percent": 10.9,
+          "percent": 10.8,
           "ts": 1787912064
         },
         {
@@ -700,7 +700,7 @@
           "name": "Buckets of Bolts",
           "desc": "Defeat the three nocturnal mechanical menaces: the Twins, the Destroyer, and Skeletron Prime.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/27536dd7b5ee4de46b85be337d0c792d685b14f5.jpg",
-          "percent": 30.9,
+          "percent": 30.8,
           "ts": 1787740227
         },
         {
@@ -1301,14 +1301,22 @@
       "appid": "246420",
       "name": "王国保卫战",
       "total": 74,
-      "unlocked": 37,
+      "unlocked": 38,
       "achievements": [
+        {
+          "api": "ACH_LAW",
+          "name": "I'am the law",
+          "desc": "Do not let The Kingpin escape.",
+          "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/ab6a955d722f4469dd078015e3e1f436077edd18.jpg",
+          "percent": 31.4,
+          "ts": 1793707517
+        },
         {
           "api": "ACH_ENTANGLED",
           "name": "Entangled",
           "desc": "Hold 500 or more enemies with Wrath of the Forest.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/b991d77c006dacf30ce428935ae078a613e3314b.jpg",
-          "percent": 44.6,
+          "percent": 44.7,
           "ts": 1793355173
         },
         {
@@ -1316,7 +1324,7 @@
           "name": "Arachnophobia",
           "desc": "Defeat Sarelgaz and its minions.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/c384b484ce229bb8e9e6d4ecfbc3634de47fe87c.jpg",
-          "percent": 32.8,
+          "percent": 32.9,
           "ts": 1793279110
         },
         {
@@ -1340,7 +1348,7 @@
           "name": "G.I. Joe",
           "desc": "Train 1.00 soldiers.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/997b88e6b72915657f90aa162d1ab91b36029e93.jpg",
-          "percent": 54.6,
+          "percent": 54.7,
           "ts": 1792902392
         },
         {
@@ -1372,7 +1380,7 @@
           "name": "Great Defender",
           "desc": "Complete the campaign.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/891b60bda9108ded465713a61ac900fc3c0cd3f6.jpg",
-          "percent": 52,
+          "percent": 52.1,
           "ts": 1792289838
         },
         {
@@ -1396,7 +1404,7 @@
           "name": "Super Mario",
           "desc": "Earn 30 stars.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/72f1ca38b815bb34023c4f95f378b5f79db1107b.jpg",
-          "percent": 58.7,
+          "percent": 58.8,
           "ts": 1792148790
         },
         {
@@ -1404,7 +1412,7 @@
           "name": "Energy Network",
           "desc": "Build 4 Tesla towers in any stage.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/9d4107ad32a78ad41ad87aec36ed086d4765b2c0.jpg",
-          "percent": 37.4,
+          "percent": 37.5,
           "ts": 1791986543
         },
         {
@@ -1412,7 +1420,7 @@
           "name": "AC/DC",
           "desc": "Kill 300 enemies with electricity.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/b0bab9eb1ab3810da225d9656ebbf08b19781852.jpg",
-          "percent": 48.1,
+          "percent": 48.2,
           "ts": 1791986453
         },
         {
@@ -1420,7 +1428,7 @@
           "name": "Specialist",
           "desc": "Build all 8 towers specializations.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/34de6e0805268e4ec775b20f0eb9d7d08f5ce321.jpg",
-          "percent": 53.7,
+          "percent": 53.8,
           "ts": 1791985425
         },
         {
@@ -1428,7 +1436,7 @@
           "name": "Terminator",
           "desc": "Kill 10.000 enemies.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/71c68c1935b562113b504db14ba52ecd45f830ec.jpg",
-          "percent": 50.6,
+          "percent": 50.7,
           "ts": 1791985108
         },
         {
@@ -1444,7 +1452,7 @@
           "name": "Legend of Linirea.",
           "desc": "Train a hero up to max level.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/f6acfbaa8cfae8ff0457789315a7103d0db898d4.jpg",
-          "percent": 63.3,
+          "percent": 63.4,
           "ts": 1791976501
         },
         {
@@ -1492,7 +1500,7 @@
           "name": "The Architect",
           "desc": "Build 150 towers.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/4ca350628e15c5aaa558d4aaf86eab8a7d1ad6aa.jpg",
-          "percent": 67,
+          "percent": 67.1,
           "ts": 1791721753
         },
         {
@@ -1524,7 +1532,7 @@
           "name": "Armageddon",
           "desc": "Use Rain of Fire 5 times in a single stage.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/871ef248cfd24bc9f80487876304719fa99ea00d.jpg",
-          "percent": 81,
+          "percent": 81.1,
           "ts": 1791716358
         },
         {
@@ -1636,7 +1644,7 @@
           "name": "疯狂的味道",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/262060/e4afd4d9faeff2b7b1f095612a9df7683be12a6e.jpg",
-          "percent": 55.6,
+          "percent": 55.7,
           "ts": 1776830636
         },
         {
@@ -1731,7 +1739,7 @@
           "name": "整装完毕",
           "desc": "GTA 在线模式：完成序章。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/271590/595c85f8093df03700277fc9a4688e7a8cfa581a.jpg",
-          "percent": 74.5,
+          "percent": 74.4,
           "ts": 1775357031
         }
       ]
@@ -1843,7 +1851,7 @@
           "name": "仍是潜入",
           "desc": "在去妙义关口的时候，躲在货车内。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/418240/04df3e6a5ee4a6f674c5df055cefd315be1aff07.jpg",
-          "percent": 12,
+          "percent": 12.1,
           "ts": 1766983366
         },
         {
@@ -2571,7 +2579,7 @@
           "name": "一目了然",
           "desc": "打败肿胀眼魔！",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/4cb400b0bf054143ee448dab50eb3cf587de5e9d.jpg",
-          "percent": 38.6,
+          "percent": 38.7,
           "ts": 1742877489
         },
         {
@@ -3027,7 +3035,7 @@
           "name": "岿然不动",
           "desc": "在战斗中拥有99点或以上格挡。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/646570/694e604130d436208873a3b7e6dee68ef31eef99.jpg",
-          "percent": 38.3,
+          "percent": 38.2,
           "ts": 1744896820
         },
         {
@@ -3075,7 +3083,7 @@
           "name": "肾上腺素",
           "desc": "在一个回合中拥有9点能量。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/646570/84a69a52e1a46585853fe59c45e3eb58462842f6.jpg",
-          "percent": 60.6,
+          "percent": 60.5,
           "ts": 1744612883
         },
         {
@@ -3083,7 +3091,7 @@
           "name": "强大",
           "desc": "在战斗中拥有10项或以上强化效果。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/646570/12b2e276618623ca16f3fb7dd4f2d1b2687641c7.jpg",
-          "percent": 32.8,
+          "percent": 32.7,
           "ts": 1744612883
         },
         {
@@ -3171,7 +3179,7 @@
           "name": "进阶0",
           "desc": "解锁进阶模式。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/646570/a24229e0772b333e8e374c22cffd8619998bb19b.jpg",
-          "percent": 66.4,
+          "percent": 66.3,
           "ts": 1744612883
         },
         {
@@ -3323,7 +3331,7 @@
           "name": "Б",
           "desc": "Б",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/e02811b7ad05b7618837be2dca10bc0e672fc282.jpg",
-          "percent": 13.8,
+          "percent": 13.9,
           "ts": 1761043174
         },
         {
@@ -3491,7 +3499,7 @@
           "name": "Х",
           "desc": "Х",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/75be7cf94b453eb644f8832998fc22d0f88faf6d.jpg",
-          "percent": 20,
+          "percent": 20.1,
           "ts": 1759589361
         },
         {
@@ -3563,7 +3571,7 @@
           "name": "Ц",
           "desc": "Ц",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/4d7ab3fb273dbdab0b8b4d9c519bc99722ca74dd.jpg",
-          "percent": 23.7,
+          "percent": 23.8,
           "ts": 1759399050
         },
         {
@@ -3651,7 +3659,7 @@
           "name": "1",
           "desc": "1",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/3c49904e0f6a719c64f6185edaace89e2c999205.jpg",
-          "percent": 31.8,
+          "percent": 31.9,
           "ts": 1759325060
         },
         {
@@ -4035,7 +4043,7 @@
           "name": "强袭",
           "desc": "单次造成伤害达到200点",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/769560/92b36b5c9889227b7eb3bae1132bffc40b387c94.jpg",
-          "percent": 43.8,
+          "percent": 43.7,
           "ts": 1730261630
         },
         {
@@ -4051,7 +4059,7 @@
           "name": "完好无缺",
           "desc": "完成前六张拼图",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/769560/f61a3b078b5b725c2cb0d0fe99c6efe1914de395.jpg",
-          "percent": 3.6,
+          "percent": 3.5,
           "ts": 1729692605
         },
         {
@@ -4243,7 +4251,7 @@
           "name": "购买了愿望之夜-女巫",
           "desc": "购买了愿望之夜-女巫",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/769560/b344d63fa825a18327b23886d6b464502a9e5980.jpg",
-          "percent": 3.6,
+          "percent": 3.7,
           "ts": 1727936621
         },
         {
@@ -4451,7 +4459,7 @@
           "name": "被抛弃的人",
           "desc": "还有其他需要帮助的人，如果你希望找到他们的话……",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/990630/cfb70deb0f165e291fd7b9e59090700ad26984e6.jpg",
-          "percent": 25,
+          "percent": 24.9,
           "ts": 1775486095
         },
         {
@@ -4491,7 +4499,7 @@
           "name": "沼泽篝火",
           "desc": "余烬人挤在微弱的篝火旁……",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/990630/e5af5304fad53b51065fbf31c0b3cd30d29c6ed6.jpg",
-          "percent": 30.7,
+          "percent": 30.6,
           "ts": 1775390283
         },
         {
@@ -4603,7 +4611,7 @@
           "name": "Eggcelent!",
           "desc": "Crack open all 17 eggs in the Easter level!",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1333910/0f5e68460cdf052c6bf6d78c437d88513aec30e6.jpg",
-          "percent": 20.3,
+          "percent": 20.2,
           "ts": 1775621961
         },
         {
@@ -4667,7 +4675,7 @@
           "name": "All Done!",
           "desc": "Unlock every normal level in Sizeable!",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1333910/44d039cfe925a222421da1a5e66673f6175a9c78.jpg",
-          "percent": 44.7,
+          "percent": 44.6,
           "ts": 1751288801
         },
         {
@@ -4707,7 +4715,7 @@
           "name": "二人同心",
           "desc": "你们成功了！二人同心，其利断金！",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1426210/785537e13a8c7231a63e8d8fa8bd64a060a06b49.jpg",
-          "percent": 30.8,
+          "percent": 30.9,
           "ts": 1784180142
         },
         {
@@ -4995,7 +5003,7 @@
           "name": "火山庆典！",
           "desc": "与女儿一同度过火山庆典",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1669980/c9bd1545a03b7b31716879ebcea3ba95393c5515.jpg",
-          "percent": 69.3,
+          "percent": 69.2,
           "ts": 1779279320
         },
         {
