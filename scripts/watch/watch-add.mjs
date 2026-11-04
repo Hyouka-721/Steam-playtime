@@ -13,9 +13,9 @@
    · 默认不裁剪：海报交给 CSS 的 aspect-ratio + object-fit:cover 处理，
      需要固定比例时用 --crop 2:3 显式裁
    用法：
-     node scripts/watch-add.mjs --img 海报.jpg --title "奥本海默" \
+     node scripts/watch/watch-add.mjs --img 海报.jpg --title "奥本海默" \
        --watched 2026-10-24 --rating 9 --note "一两句感想"
-     node scripts/watch-add.mjs --help
+     node scripts/watch/watch-add.mjs --help
    ============================================================ */
 
 import crypto from 'node:crypto';
@@ -26,7 +26,7 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(HERE, '..');
+const ROOT = path.resolve(HERE, '..', '..');
 const DOCS = path.join(ROOT, 'docs');
 const POSTER_DIR = path.join(DOCS, 'img', 'watch');
 const DATA_FILE = path.join(DOCS, 'data', 'watch.json');

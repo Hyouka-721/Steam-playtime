@@ -18,7 +18,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
-import { addDays, shanghaiDate, shanghaiDateTime, utcISO } from './lib/dates.mjs';
+import { addDays, shanghaiDate, shanghaiDateTime, utcISO } from '../lib/dates.mjs';
 import {
   fetchOwnedGames,
   fetchRecentlyPlayedGames,
@@ -27,11 +27,11 @@ import {
   fetchGlobalAchievementPercent,
   mergeSources,
   SteamApiError,
-} from './lib/steam.mjs';
-import { detectPartial } from './lib/diff-core.mjs';
+} from '../lib/steam.mjs';
+import { detectPartial } from '../lib/diff-core.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', '..');
 const SNAP_DIR = path.join(ROOT, 'data', 'snapshots');
 const ACH_DIR = path.join(ROOT, 'data', 'achievements');
 const ACH_SCHEMA_CACHE = path.join(ROOT, 'data', 'cache', 'ach-schema');

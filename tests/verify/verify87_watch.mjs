@@ -154,9 +154,9 @@ ok('A11 16/32/48 三档单张 ≤4KB，整套 ≤60KB（大档走 32 色调色�
   bytes.map(kb).join(' / '));
 
 /* A12 可复现：生成器与源素材都在（下次换图照着重跑） */
-const genSrc = fs.readFileSync(ROOT + 'scripts/watch-icons.mjs', 'utf8');
+const genSrc = fs.readFileSync(ROOT + 'scripts/media/watch-icons.mjs', 'utf8');
 const BASES = ['favicon-watch-16.png', 'favicon-watch-32.png', 'favicon-watch-48.png', 'apple-touch-icon-watch.png', 'icon-watch-192.png', 'icon-watch-512.png'];
-ok('A12 生成器 scripts/watch-icons.mjs 在，SET 里是这六个基名 + 源素材在库 + 文件名按哈希拼',
+ok('A12 生成器 scripts/media/watch-icons.mjs 在，SET 里是这六个基名 + 源素材在库 + 文件名按哈希拼',
   BASES.every((b) => genSrc.includes(`'${b}'`)) && !!srcName && /NAME\(name\)/.test(genSrc),
   BASES.filter((b) => !genSrc.includes(`'${b}'`)).join(',') || `源 ${srcName} → 后缀 ${HASH}`);
 

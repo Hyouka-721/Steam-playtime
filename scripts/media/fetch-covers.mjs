@@ -7,7 +7,7 @@
  *   · 榜单显示 130×60、时间轴大图 148×69、悬停底纹是模糊背景 —— 460 足够，不必更大。
  *
  * 增量：文件已存在就跳过（新游戏入库时重跑一次即可）。
- * 用法：node scripts/fetch-covers.mjs [--force]
+ * 用法：node scripts/media/fetch-covers.mjs [--force]
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', '..');
 const META = path.join(ROOT, 'docs', 'data', 'meta.json');
 const OUT_DIR = path.join(ROOT, 'docs', 'img', 'covers');
 const FORCE = process.argv.includes('--force');

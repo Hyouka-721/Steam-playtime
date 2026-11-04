@@ -23,7 +23,7 @@ const rd = (f) => fs.readFileSync(ROOT + f, 'utf8').replace(/\r\n/g, '\n');
 const html = rd('watch.html');
 const js = rd('watch.js');
 const swjs = rd('sw.js');
-const addJs = rd('../scripts/watch-add.mjs');
+const addJs = rd('../scripts/watch/watch-add.mjs');
 const data = JSON.parse(fs.readFileSync(ROOT + 'data/watch.json', 'utf8'));
 const N = data.items.length;
 const SIZES_ATTR = '(max-width: 480px) 45vw, (max-width: 860px) 32vw, (min-width: 1440px) 266px, 234px';

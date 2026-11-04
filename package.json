@@ -8,11 +8,11 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "node --test scripts/diff.test.mjs scripts/steam.test.mjs",
-    "fetch": "node scripts/fetch.mjs",
-    "diff": "node scripts/diff.mjs",
-    "build": "node scripts/build.mjs",
-    "pipeline": "node scripts/diff.mjs && node scripts/build.mjs"
+    "test": "node --test scripts/tests/diff.test.mjs scripts/tests/steam.test.mjs",
+    "fetch": "node scripts/pipeline/fetch.mjs",
+    "diff": "node scripts/pipeline/diff.mjs",
+    "build": "node scripts/pipeline/build.mjs",
+    "pipeline": "node scripts/pipeline/diff.mjs && node scripts/pipeline/build.mjs"
   },
   "license": "MIT",
   "dependencies": {

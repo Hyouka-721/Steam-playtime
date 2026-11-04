@@ -7,11 +7,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { utcISO } from './lib/dates.mjs';
-import { rebuildDays } from './lib/diff-core.mjs';
+import { utcISO } from '../lib/dates.mjs';
+import { rebuildDays } from '../lib/diff-core.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', '..');
 const SNAP_DIR = path.join(ROOT, 'data', 'snapshots');
 const DAILY_DIR = path.join(ROOT, 'data', 'daily');
 const MANUAL_DIR = path.join(ROOT, 'data', 'manual');

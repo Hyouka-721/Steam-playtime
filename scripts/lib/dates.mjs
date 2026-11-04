@@ -1,7 +1,7 @@
 // 时区工具：所有「自然日」一律以 Asia/Shanghai 为准，禁止使用本地时区。
 // 2026-10-22 清理：删掉全仓零引用的 monthOf / eachDate / humanMinutes；
 // 把从未被外部 import 的 TZ、assertDateStr 降为模块内私有（仍在本文件内使用）。
-// 保留 shanghaiDateTime / daysBetween —— 它们分别被 scripts/fetch.mjs 与 lib/diff-core.mjs 引用。
+// 保留 shanghaiDateTime / daysBetween —— 它们分别被 scripts/pipeline/fetch.mjs 与 lib/diff-core.mjs 引用。
 const TZ = 'Asia/Shanghai';
 
 const dateFmt = new Intl.DateTimeFormat('en-CA', {

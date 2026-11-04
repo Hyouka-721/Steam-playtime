@@ -1,218 +1,255 @@
-# Steam 游戏时长统计界面 · 交接提示词（可直接复制到新对话）
+# Steam 游戏时长统计界面 · 交接提示词
 
-> 用途：新对话里**只研究 Steam 游戏时长统计界面**（`docs/index.html`），无缝续做。
-> **范围明确排除**：`docs/watch.html` 观影列表（Watch List）及其全部配套，本提示词不涉及。
-> 复制下面整段作为开场即可，模型无需你再解释项目。
+> **用法**：新开一个对话，把本文件**全文**粘进去即可无缝续做，不需要再解释项目。
+> **范围**：只研究 `docs/index.html`（Steam 游戏时长统计界面）。
+> **明确排除**：`docs/watch.html` 观影列表（Watch List）及其 `watch.*` / `data/watch.json` / `img/watch/` 全套资源，本文件不涉及、也不要去改。
 
 ---
 
-## 一、这个界面是什么
+## 一、这是什么
 
-一个**零构建纯静态站**，托管在 GitHub Pages，主页就是「Steam 游戏时长统计」。
+一个**零构建**的纯静态站点（没有打包器、没有 npm build 产物），托管在 GitHub Pages：
 
-- 每晚 23:30（Asia/Shanghai）由 GitHub Actions 自动抓 Steam 快照 → 差分算每日时长 → 生成前端数据并提交。
-- 核心玩法：**每日快照差分**。Steam API 只给 `playtime_forever`（累计分钟），没有「某天玩了多久」，所以 `当日时长 = 今日累计 − 上次快照累计`。由此两点硬限制：① 历史无法回溯（数据从第一份快照起积累）② 首份快照不产出时长，只当基准。
-- 前端数据**内联进 `docs/index.html`**（`window.__BOOT = {generated_at, meta, daily}`），首屏**零数据请求**。
+- 线上：<https://hyouka-721.github.io/Steam-playtime/>
+- 仓库：`Hyouka-721/Steam-playtime`，本地 `C:\Users\33329\WorkBuddy\2026-10-13-18-17-49\steam-playtime`
+- 发布根 = `docs/` 目录本身（**改 `docs/` 里的文件就等于改线上**）
+- 数据每天由 GitHub Actions（UTC 15:30 = 北京 23:30）抓 Steam → 差分 → 生成 `docs/data/*` 并提交
 
-仓库：`C:\Users\33329\WorkBuddy\2026-10-13-18-17-49\steam-playtime`
-远端：`github.com/Hyouka-721/Steam-playtime`（main）｜线上：`hyouka-721.github.io/Steam-playtime/`
+页面做的事：把你 Steam 库里每款游戏**玩了多久、最近哪天玩过、成就解锁多少**可视化——概览卡 + 时长排行榜 + 近两周榜 + 成就榜 + 游玩时间轴 + 每日热力图。
 
-## 二、目录结构（只列游戏时长这侧）
+---
+
+## 二、技术栈与不可违反的硬约束
+
+| 项 | 值 / 规则 |
+|---|---|
+| 前端 | 原生 HTML + CSS + ES2020 JS，**无框架、无构建、无外部 CDN** |
+| 字体 | 本地 `docs/blackrose.woff2`（woff 兜底），标题族；正文走系统字体栈 |
+| 数据格式 | 静态 JSON，`docs/data/{meta,achievements}.json` + `docs/data/daily/YYYY-MM.json` |
+| 首屏数据 | `meta` + 当月 `daily` 由 `scripts/build/inline-boot.mjs` **内联**进 `index.html`（约 49KB），避免首屏多一个 RTT |
+| 缓存 | `docs/sw.js`：`index.html`/`meta`/`daily` 网络优先，图片 cache-first，成就 `stale-while-revalidate`（缓存名 `app-data-v2`） |
+| 主题 | 四套：`cream`（默认）/`mint`/`dawn`/`night`，全部走 `[data-theme="x"]` 上的 CSS 变量 |
+| 响应式 | 桌面 ≥861px 单套布局；≤860px 转「两行」窄屏布局；`.cards` 另有 1080 / 720 断点 |
+
+### 🔴 三条发布纪律（违反必炸）
+
+1. **改 `docs/style.css` 必须 bump `style.css?v=NN`；改 `docs/app.js` 必须 bump `app.js?v=NN`**（现为 `?v=130` / `?v=115`）。两者独立，都改就都 bump。
+   - 事故前科：只 bump CSS 没 bump JS，用户缓存里的旧 JS 调用了已删除的 DOM 节点 → 抛 TypeError → **热力图整块空白**。**本地永远复现不出来**（服务端直接给最新文件）。
+2. **同批次反复改同一文件，每次都要再 bump**。一次发布里改了 3 次 CSS 却只有一个版本号 → 用户命中第一版的缓存。
+3. **`docs/` 就是线上**：不要在里面放临时文件、草稿、`.bak`。
+
+---
+
+## 三、目录地图（2026-11-04 重组后）
 
 ```
-docs/                        # = GitHub Pages 发布根 = 源码（零构建）
-├── index.html               # 主页：源文件+构建产物二合一，CI 每晚改写（内联 __BOOT）
-├── style.css / app.js / fx.js  # 游戏站 样式 / 逻辑 / 特效（meteor）
-├── data/
-│   ├── meta.json            # 统计汇总（含 ach_stats: {unlocked,total,pct,games}）
-│   ├── achievements.json    # 成就明细（285KB，按需加载，不进首屏）
-│   └── daily/YYYY-MM.json   # 每月差分产物（days.games[].minutes）
-└── img/                     # 站点插画：rank-* / minion / steve（+ watch/ 是观影侧，忽略）
-scripts/                     # 数据管线
-├── fetch.mjs                # 拉 Steam → data/snapshots/YYYY-MM-DD.json
-├── diff.mjs                 # 全量快照重算 → data/daily/YYYY-MM.json
-├── localize.mjs             # 游戏名中文本地化
-├── build.mjs                # 生成 docs/data/* + 串 inline-boot 内联进 index.html
-├── inline-boot.mjs          # 内联 __BOOT 数据
-├── backfill-percent.mjs     # 成就百分比回填（一次性工具）
-├── diff.test.mjs            # 差分算法 21 条边界单测
-├── steam.test.mjs           # API 封装单测
-└── lib/{steam.mjs, diff-core.mjs, dates.mjs}  # API 封装 / 差分纯函数 / 上海时区日期
-data/                        # 管线原始数据（git 跟踪，每晚 diff 的源）
-├── snapshots/               # 原始快照，永久保留、永不覆盖（除非 FORCE）
-├── daily/  manual/  overrides/  achievements/  cache/
-.github/workflows/daily.yml  # 每晚 CI：fetch → diff → localize → build → commit+push
-tests/verify/verify6.mjs     # 游戏站回归（35 条，唯一管 index.html 的套件）
-README.md                    # 完整说明（管线/部署/密钥/Schema/自检清单）
+steam-playtime/
+├── docs/                      ← 发布根（GitHub Pages 直接托管这个目录）
+│   ├── index.html             49KB，含内联的首屏数据块（勿手改内联区）
+│   ├── app.js                 85KB，全部页面逻辑（渲染 / 视图切换 / 下钻 / 交互）
+│   ├── style.css              109KB，全部样式 + 四主题变量
+│   ├── fx.js                  14KB，纯装饰层（流星 / 光点），低优先级加载
+│   ├── sw.js                  Service Worker
+│   ├── manifest.webmanifest   PWA 清单
+│   ├── blackrose.woff2/.woff  标题字体
+│   ├── data/                  线上数据（由 build 生成，勿手改）
+│   └── img/                   图标、封面、头像素材
+│       ├── covers/            <appid>-320.webp（srcset 小图）与原图
+│       └── watch/             ← 观影页资源，本任务不涉及
+├── scripts/
+│   ├── pipeline/              每日流水线（CI 调这 4 个）
+│   │   ├── fetch.mjs          调 Steam API → data/snapshots/
+│   │   ├── diff.mjs           差分 → data/daily/
+│   │   ├── localize.mjs       中文名映射
+│   │   ├── build.mjs          生成 docs/data/*
+│   │   └── backfill-percent.mjs  成就全球完成率补录（手动）
+│   ├── build/inline-boot.mjs  把 meta + daily 内联进 index.html
+│   ├── media/                 图标与封面生产（手动跑）
+│   ├── watch/                 观影页数据录入（不涉及）
+│   ├── lib/                   dates / diff-core / steam 三个纯模块
+│   ├── tests/                 单元测试（npm test）
+│   └── legacy/inline-css.mjs  **已回退的方案，仅留证**，不要启用
+├── tests/
+│   ├── verify/                本地回归套件（Playwright 打 127.0.0.1:8895）
+│   ├── online/                上线后对 Pages 的复验
+│   └── tools/
+│       ├── perf-audit.mjs     首屏 / 卡片切换 / 滚动性能审计
+│       ├── perf-lazy.mjs      按需加载耗时
+│       ├── ab-css.mjs         A/B 对照（同机、固定限速）
+│       └── archive/           历史一次性脚本（取证截图 / 版本号 bump / 数据合并），留档备查
+├── data/                      原始数据（快照 / 差分 / 成就 / 中文名覆盖），永久保留
+├── CONTINUE-GAMETIME.md       本文件
+└── README.md                  项目说明（部署 / Secrets / 数据 Schema）
 ```
 
-## 三、页面功能清单（`app.js` + `index.html`）
+---
 
-- **概览卡**（`.cards`，五张）：累计时长 `c-lifetime` / 最近游玩 `c-recent` / 成就 `c-ach` / 游戏数 `c-games` / 数据 `c-data`，点 `.card-nav[data-view]` 切换。
-- **榜单** `#lt-list`：游戏排行（`rank-capsule` 胶囊图懒加载，`data-src` 单向水化），点行进 `#lt-detail` 下钻趋势图（ECharts 按需加载 + 降级提示）。
-- **日历** `cal-*`：月度日历 + 单日详情；入口**只有一处**，在「最近游玩」卡片里（第 24 轮收敛）。
-- **成就** `ach-*`：**按需加载**（切到成就视图才拉 `achievements.json`），带游戏筛选下拉。
-- **数据导出**：`btn-csv-daily` / `btn-csv-lifetime`。
-- **主题**：三套浅色主题 cream/mint/dawn（`documentElement.dataset.theme`，localStorage 持久化），页眉头像切换，**无 dark**。
-- **特效** `#fx-canvas`：meteor 流星。
-- **骨架屏**：`.sk-block/.sk-row`，`init` 先 `paintSkeletons()` 再 `await load()`，尊重 `prefers-reduced-motion`。
-- **页脚**：`footer-gen` 生成时间、`health` 数据健康状态、`logo-watch`（观影页入口）。
+## 四、页面结构与数据流
 
-## 四、当前进展与版本
+### 五个视图（`.view`，靠顶部 `.cards` 里的 `.card-nav` 切换）
 
-- 版本号：`style.css?v=127` / `app.js?v=114` / `fx.js?v=16`（**硬编码在 `verify6.mjs` 第 52 行**；第 91 轮里程碑改 500h 一档 + 两处字号 +2px 后再次 bump）。
-- 最近一次针对游戏站的大改是**第 24 轮「首屏加载优化」**（在 verify6 注释里记着）：数据全内联、`cache:"default"`、月份文件 `Promise.allSettled` 并行、成就按需、骨架屏、`meta.ach_stats` 摘要。
-- 之后 25~80 轮几乎都在做观影页（watch），游戏站只在 CI 每晚改 `docs/index.html` 数据、以及「日历入口收敛到最近游玩」等零散订正。
-- **第 82 轮（index 侧，2026-10-31，本地改动，未提交/未上线）**三项：① 全站移除 `title` 悬停气泡（页眉三项 + 五张概览卡 + 返回按钮 + 日历日期格 + 排行榜行 + 氛围开关禁用态），语义一律改由 `aria-label` 承载；② `.site-title` 加 `user-select:none`（双击不再框选、拖拽不带走文字，点它仍回顶部）；③ 删掉排行榜首行三只吉祥物（加菲猫 / 猫和老鼠 / 企鹅）——模板、CSS 三条规则、三张 webp 全清，`.rank-list` 的 18px 上内边距**刻意保留**（首行位置与 `--cal-lift` 的换算依赖它）。新增 `tests/verify/verify82_index.mjs` **16/16**。
-- 回归：`verify6` **35/35**、`verify47` **72/72**（0.4b 判据改为「aria-label 承载 + title 必为 null」）、`verify54` **23/23**（B2/B3/B6 同步改成 aria-label）、`verify82_index` **16/16**；`verify55/56/58` 页眉几何未受影响（40/40、49/49、23/23）。
-- **第 92 轮（index 侧，2026-11-01）**站点图标换成「游戏手柄」+ 站名改 Game Time：
-  ① 用户「游戏网站图标改为 [游戏手柄图]，名称改为 Game Time，T 大写」→ 图标从**内联 base64 的小黄人**换成用户素材 `<title>Game Time</title>`；页眉 `h1` 也从「My Game Time」去掉 My（**只改 tab 名会造成「标签叫 Game Time、大标题叫 My Game Time」的自相矛盾，所以一起改**）。
-  ② 素材入库：`docs/img/gamepad-fb74092c.webp`（256×256、真透明，9.2KB → webp 5.3KB），文件名带内容 hash（沿用 minion/steve 的惯例）。
-  ③ `scripts/make-icons.mjs` 改造：源素材从史蒂夫换成手柄，除 PWA 的 192/512 外**一并产出 favicon 16/32/48 与 apple-touch-icon 180**。底色分两套 —— PWA 与 apple-touch 铺 cream（`#fbf7f1`，**iOS 不支持透明，透明会被填黑底**），favicon 三档保留透明（标签页背景色由浏览器定，透明才不会出现白框）。
-  ④ **输出文件名带素材 hash**（`favicon-32-fb74092c.png` 这种）：`sw.js` 对 `*.png` 是 cache-first，固定文件名会让以后换图被旧缓存挡住；带 hash 就是「换图 = 换 URL」。
-  ⑤ favicon 从内联 data URI 改成文件引用（三档尺寸内联会让 HTML 多出约 40KB，且 16px 用不到 512 的清晰度）；`apple-touch-icon` 同步改文件。旧的 `img/icon-192.png` / `icon-512.png` **删除**（避免两份图标并存），`manifest` 与 `sw.js` 的预缓存清单都指向新名。
-  ⑥ 跨页文案：`watch.html` 页脚的「← 回到 My Game Time」→「← 回到 Game Time」。
-  ⑦ 布局实测（改名只会让页眉**变矮**，不是回归）：1440 一行（页眉 173px 不变）、480 **从 2 行变 1 行**（页眉 117px）、390/360 从 3 行变 2 行（页眉 169.8px）。≤480 的 `.site-title` 仍是 44px/1px，`user-select:none` 与「点它回顶部」的 role/tabindex 都还在。窄屏两行是因为中间列只有 150/120px（左右各 88px 插画），**要单行得让标题跨列，本轮没做**。
-  ⑧ 测试：新建 `verify92` **25 条**（title/h1/manifest/三条 favicon link/无 base64/六个图标的真实像素尺寸与透明通道/hash 命名/旧图标已删/源素材入库/sw 清单一致/运行时 title 与图标 HTTP 200 且能解码/改名后页眉几何与交互未坏/跨页文案）。index 侧 11 套件 **437 条 0 FAIL**；watch 侧 `verify82` 14/14、`verify60` 31/31。
-  ⑨ **版本号没 bump**：css/js 一个字节都没动，只改了 HTML/manifest/sw。`sw.js` 变了会触发 SW 更新，而导航是「网络优先」，所以刷新就能拿到新 title 与新图标。
+| 视图 | 元素 | 内容 |
+|---|---|---|
+| `lifetime` | `#lt-main` / `#lt-detail` | **主视图**。终身时长排行榜；点任一行 → 下钻到按月热力图 |
+| `recent` | `#recent-list` | 近 14 天游玩榜（同样用 `.rank-item` 网格） |
+| `ach` | `#ach-list` | 成就榜（全站完成率最高的成就） |
+| `timeline` | `#tl` | 按周分组的游玩里程碑时间轴 |
+| `data` | 导出 / 采集健康度 / 关于数据 | 三个说明型面板 |
 
-- **第 91 轮（index 侧，2026-11-01）**里程碑改 500h 一档 + 两处字号 +2px：
-  ① 用户「将游戏时长突破的记录改为每 500h 记录一次」→ `const STEP = 6000` → **`30000`**（100h → 500h）。当前数据下里程碑从 10 条降到 **2 条**：`500h@12.8-12.14`、`1000h@4.13-4.19`（1000 是 500 的倍数，所以用户确认过的 2026-04-16 那条**没有被跳掉**，`verify91` 1.5 专门守这条）。
-  ② 用户「『500h』比『游戏时长突破』大 2px」→ `.tl-milestone b` **17px → 16px**（正文 `.tl-milestone` 仍是 14px，差值正好 2px；原来是差 3px）。
-  ③ 用户「周日期（如 10.26-11.1）整体放大 2px」→ `.tl-week` **13px → 15px**。
-  ④ 「以当前基准字号为参照、保持原有布局与文案结构」：三列轨道仍 `116px 44px 1fr`（≤860 收 `78px 30px 1fr`）；文案仍是「文本节点『游戏时长突破 』+ `<b>数值</b>`」两层，没拆成两个 span。**实测最宽周日期是「10.13-10.19」77.2px**：桌面可用 114px（余 36.8）、窄屏可用 76px（余 6.9），15px 仍装得下（`verify91` 3.2 / 6.x 用 Range 包围盒逐个量）。
-  ⑤ **套件步长不许写死**：`verify90` / `online90` 原来都写着 `const STEP = 6000`，档位一变就跟着红（本轮先红了 3.6 与 4.10）→ 改成 `Number((源码.match(/const STEP = (\d+);/) || [])[1])`，从 `docs/app.js` 读。**档位由 `verify91` 守，「落点一致」由 `verify90` 守，两件事分开。**
-  ⑥ 测试：新建 `verify91` **29 条**（静态 6 / 里程碑 5 / 字号 4 / 布局 3 / 文案结构 2 / 四主题 1 / 7 档响应式 7 / 零异常 1）；index 侧 10 套件 **428 条 0 FAIL**。
-  ⑦ 版本 → `style.css?v=127` / `app.js?v=114`。
+### 排行榜行的网格（**最重要的一块布局**）
 
-- **第 90 轮·第三批（index 侧，2026-11-01）**上线前的数据校订（用户四项）：
-  ① 补上缺的 `10.05-10.11` 那周（王国保卫战 2.0h / 泰拉瑞亚 1.6h / 欧卡 1.3h / 杀戮尖塔 1.0h / Salt Player 0.4h）→ 时间轴 **56 → 57 周**，补录 **223 → 228 条 / 62778 分钟 = 1046.3h**。
-  ② 用户确认「突破 1000h 是 **2026-04-16**」→ 与本算法算出的落点（`4.13-4.19` 那周）**完全吻合**，`base` 不用调。新增 `verify90` **3.9** 把这条钉死：里程碑必须有 `h === 60000` 那条，且其 `ws === weekStartOf('2026-04-16') = 2026-04-13`。
-  ③ `3.30-4.5` 的「星露谷物语 6.0h」是用户笔误 → 改成**欧洲卡车模拟2 6.0h**；星露谷物语从此不出现在任何一周，`GAMES` 表里的 `stardew` 映射与上批补的 `docs/img/covers/413150.webp` 一并删除（不留孤儿文件），封面目录回到 53 张。
-  ④ **`verify90` 4.10 的判据改对了**：原来要求 A/B 两版「王国保卫战徽章数量相等」，但补录本身会多带出几周王国保卫战（如 10.05 那周 2h）→ 改成按**值**判：A 含合并后的 `8h` 且 B 不含、B 含真实的 `6.4h`。
-  ⑤ 结果：57 周 / 239 徽章 / 14 个月份分区，里程碑 10 条（400h@2025-11-10 … 1300h@2026-09-07，其中 **1000h@4.13-4.19**），零破图、正文零「补录」。index 侧 9 套件 **399 条 0 FAIL**。
-  ⑥ 版本 → `style.css?v=115` / `app.js?v=110`，本次**已上线**。
+`.rank-item` 是 6 列 grid，**最近榜与终身榜共用**：
 
-- **第 90 轮·第二批（index 侧，2026-11-01）**删掉补录提示行 + 时间轴补入整年历史：
-  ① 用户「删除『补录 10.12 王国保卫战 1.6h（不计入统计）』的字样，此后也不出现这样的提示」→ 删 `app.js` 的 `ex/exHtml` 模板、删 `style.css` 的 `.tl-extra` / `.tl-extra-note`；**还剩一处没清干净**：数据页健康度的「手动**补录**天数」→ 改「手动**修正**天数」。现在 `document.body.innerText` 里搜不到「补录」（`verify90` 0.10/0.11/3.2 守）。
-  ② 用户「继续为游戏库时间轴补充数据」→ 手写 53 周（2025-09-29 ~ 2026-10-04）经 `tests/tools/gen90_extra.mjs` 转成 **223 条** JSON（合计 **62,400 分钟 = 1040.0h**，30 款游戏），加上第一批那条 10.12 = **54 周**。脚本带 6 项校验：date 必为周一 / 周间隔是 7 的整数倍（缺口只提示）/ 同周不重复游戏 / appid 5~7 位 / 小时×60 必为整数 / 打印合计与按游戏汇总。
-  ③ **里程碑口径反转**：第一批加的 `realMinutes` 旁路（补录不参与里程碑）这次必须去掉 —— 补录成了时间轴主体，`.tl-item` 重新长出「游戏时长突破 XXXh」，共 10 条（400h@2025-11-10 … 1300h@2026-09-07）。⚠️ 与用户原文标注的「1000h 在 3.9-3.15 之间」差 4 周：该算法假设 2025-09-29 之前已有约 **322h**（`base = lifetime 1390.2h − 补录+采集 1068h`），口径不同已告知用户待确认。
-  ④ **顺手补一张封面**：`星露谷物语`(413150) 不在 `meta.games_lifetime` 里，`fetch-covers.mjs` 按 meta 遍历抓不到 → 破图。新增 `tests/tools/cover-one.mjs` 单抓 `header.jpg` → `docs/img/covers/413150.webp`（460×215 / 23KB）。时间轴 **0 破图**。
-  ⑤ 结果：时间轴 **56 周 / 237 徽章 / 14 个月份分区**（2026.10 → 2025.09），最早 `9.29-10.5`、最新 `10.26-11.1`，桌面 1342×7475px。热力图、统计汇总、最近游玩、换算、CSV 全部不受影响（`daily` 仍无 10-12、合计仍 1688、`active_days` 仍 17）。
-  ⑥ 测试：`verify90` 40 → **48 条**。新增/改判：0.6 周一对齐、0.7 同周同游戏不重复、0.9 里程碑全量累加（`!realMinutes`）、0.10 `tl-extra` 全站为 0、0.11 正文无「补录」、3.3 周数=数据推导（56）、3.4 月份 14 个、3.5 首尾周、3.6 里程碑**逐条**与推导一致、3.8 零破图、4.10 A/B 差异（周数 56→3、里程碑 10→0）。index 侧 9 套件 **398 条 0 FAIL**。
-  ⑦ 新增工具：`gen90_extra.mjs`（数据生成+校验）、`shot90b.mjs`（取证截图+自检）、`cover-one.mjs`（单张封面）。
-  ⑧ 踩坑：**长截图 dpr2 的 1342×7475 PNG 是 15.1MB** → 必须 `sharp.resize({width:640}).jpeg({q:86})` 压到 300KB 再归档；「删字样」不能只 grep 自己改过的文件，要用 `innerText` 运行时断言兜底。
+```
+44px          130px               minmax(150px,260px)  minmax(140px,1fr)  150px    110px
+序号 rank-no   封面 capsule-wrap   名称 rank-name       进度条 rank-bar      时长 rank-min  日期 rank-last
+```
 
-- **第 90 轮（index 侧，2026-11-01）**热力图时间标签加粗 + 游戏库时间轴补录（且只补在时间轴上）：
-  ① 用户「将热力图中时间标签的字体加粗显示，确保在所有时间刻度上均生效且不影响其他元素的样式」→ `.hc i` 的 `font-weight` **600 → 700**，**只动这一个属性**：`font-size:15px` / `white-space:nowrap` / `color:var(--text-strong)` / `opacity:1` / `line-height:1.2` / `text-align:right` 全部保持第 89 轮原值。日期 `.hc b` 仍是 600，所以「日期比时长细一档」的层次还在（`verify90` 0.3/0.4、1.2~1.4、2.1~2.3 守）。
-  ② 加粗的连带代价：实测 360 宽下「49 min」的文字宽度从 **34px → 36px**，而格子内部只有 34.28px（38.28 格宽 − 2×2 内边距）→ 溢出从 2px 涨到 4px，超出左内边距，会压出格子边界。**≤360 单独降档**：`.hc padding: 4px 1.5px`、`.hc i { font-size: 10px; letter-spacing: -0.2px }`，实测余量约 1.9px。430/390 仍是 11px，1440/1024/900/768 是 15/13px，都不受影响。
-  ③ 用户「为游戏库时间轴补充数据：10.12 / 王国保卫战 / 1.6h，该数据仅用于时间轴，不得出现在页面其他位置」→ 新增 **`data/overrides/timeline-extra.json`**（`{date, appid, name, minutes, note}`），`build.mjs` 的 `loadTimelineExtra()` 校验（日期 `YYYY-MM-DD`、分钟为正、按日期排序、文件缺失/坏格式容错返回 `[]`）后写进 **`meta.timeline_extra`**。**关键：绝不写进 `daily`** —— 热力图、统计汇总、最近游玩、换算、CSV 全部从 `daily` / `meta.stats` 取数，从数据流上就看不到这几十分钟（`verify90` 4.1~4.3 守）。
-  ④ `renderTimeline()` 在周聚合之后并入 `timeline_extra`（只进这一个 `Map`），并在该周加一行弱化说明：**「补录 10.12 王国保卫战 1.6h（不计入统计）」**（`.tl-extra` + `.tl-extra-note`）。括号里点明「不计入统计」，因为徽章数字已含这几十分钟（该周王国保卫战真实 384min + 96min = **8h**，抹掉补录是 6.4h），不说明会被当成真实采集。
-  ⑤ **里程碑仍按真实分钟累加**：周聚合新增 `realMinutes`（只累 `state.days` 里的分钟），`allTotal` 与 `cum` 都用它 —— 否则补录会把某个 100h 阈值挤到相邻的周（`verify90` 0.8 静态守卫）。
-  ⑥ 窄屏细节：390 下说明行恰好跨行，`.tl-extra-note` 不加 `white-space:nowrap` 会被断成「…1.6h（不计入 / 统计）」，括号劈成两半 → 加 nowrap 让它整体掉到第二行。
-  ⑦ 测试：新建 `verify90` **40 条**。最有价值的是 **A/B 对照**：用 `page.route` 改写内联 `__BOOT` 把 `meta.timeline_extra` 清空后重载，断言五张统计卡 / 最近游玩榜 / 热力图汇总（合计·天数·峰值）**逐字相同**，差异只出现在时间轴（补录行 1→0、徽章 8h→6.4h）。另含 `.hc i` 全 17 格 `font-weight` 恒 700、四主题、7 档响应式。index 侧 9 套件 **390 条 0 FAIL**。
-  ⑧ 踩坑：卡片是导航键 —— 从别的视图点 `#card-lifetime` 只切视图（停在上层列表），**必须再点一次才展开下钻**；测试里要用「检查 `#lt-detail.hidden` 就再点」的循环，别假设点一次就够（本轮 `verify90` 因此超时两次）。
+实测（1440 视口）：`44 / 130 / 260 / 552 / 150 / 110`，横向溢出 0，53 个游戏名在 ≥1088 时 0 截断。
 
-- **第 89 轮（index 侧，2026-11-01）**热力图时长再放大一档 + 数字与单位之间加空格：
-  ① 用户「热力图中时间的字体放大，时间数字与单位之间添加一个空格」→ `heatTime()` 把 `hoursShort()` 的「49min / 4.4h」渲染成「49 min / 4.4 h」（只用于热力图的可见文字与 aria-label；时间轴角标 `.tl-badge` 仍用紧凑写法，不受影响）。
-  ② 字号：`.hc i` 桌面 14→**15px**（与日期同号）；≤1100 收 13px、≤860 收 13px、≤480 收 **11px**——带空格的「49 min」比原来宽约 5px，42px 的窄格放不下，只能降字号保「单行 + 不越界」。
-  ③ 关键约束：`.hc i` 必须 `white-space: nowrap` —— 加了空格后窄屏会在「49 / min」处折行，比溢出更难看（360px 实测）。
-  ④ 内边距分档跟着改：≤1100 → 6px（原 1000 档，因为 1001~1100 两列每格只有 50~65px）、≤480 → 3px、≤360 → 2px。逐档实测「文字起点距左内边界」都 ≥2px，不会压到边框。
-  ⑤ 自检口径：量 `i.scrollWidth - i.clientWidth` 判断文字是否溢出，再用 `paddingLeft - 溢出量` 看它是否还在格子里——只看 `scrollWidth` 会误判（右对齐时溢出向左）。
-  ⑥ 测试：`verify88` 42→**43 条**（新增 5.5「时长文字是『数字 + 空格 + 单位』」，5.2 时长字号门槛提到 15）；`online88` 14→**15 条**（B3 门槛提到 15、新增 B6 空格断言）。index 侧 8 套件 **350 条 0 FAIL**。
+附加规则：
 
-- **第 88 轮（index 侧，2026-10-31）**热力图两月并排 + 全站字号/对比度 + 换算量词修复：
-  ① 用户「格子过宽，一页放两个月更美观」→ `.heat-pair` 两列：一页 = **最多两个月**，每块自带「月份标题 + 月内统计（N 天 · 合计）+ 星期表头 + 7 列网格」。桌面一格从 **181×78（2.3:1 长条）** 变成 **89×74（1.2:1）**，1024 下 59×74。
-  ② 分页规则：月份从 `heatMonths`（meta.months ∪ 每日数据）取，**从最新往回两两切**，保证最后一页是满的（当前月总在右列）；最早一页若只剩 1 个月，往前补一个月 → 补出来的是「尚未开始记录」占位卡（桌面端撑满与相邻块等高，视觉上是一整块月份）。`‹` / `›` 一次翻一页（2 个月），标签是 `2026 年 9–10 月` 这种范围式（跨年写「2025 年 12 月 – 2026 年 1 月」）。
-  ③ **强度归一化改成「本页峰值」**（原来是「本月峰值」）：并排两个月若各按自己的峰值上色，9 月的 1 小时会和 10 月的 4 小时一样深，横向比较就失效了。
-  ④ 响应式：≥900 两列；≤899 竖排（一页上下两个月）**并把空月占位卡整体隐藏**（否则空卡挡在真月份前面占掉一屏）；900~1000 两列时格宽只有 50~55px → 内边距 9px 收到 6px；≤480 收到 4px。
-  ⑤ 用户「修复量词重复」→ `renderConvert` 的 label 原先以量词开头（「场电影」「集 30 分钟的剧」），模板又在数字后补一次 unit → 「694场 场电影」。现在 label 只留「是什么」，量词统一由模板拼在数字后：**694场 电影（2 小时一部） / 2,776集 30 分钟的剧 / 40遍 《战争与和平》 / 3.8年 通勤**。
-  ⑥ 用户「整体调大字号、加深颜色」→ **≤17px 的字号档位统一 +1px（79 处）**（11→12 … 17→18，标题 44/70 与大数字不动）；四套主题的 `--text-dim` / `--text-faint` 提高一档对比度（cream 7.64/4.38、mint 7.18/4.07、dawn 7.98/4.57、night 9.43/6.2，均过 AA 正文 4.5 或作为辅助色 ≥4）。暗色主题是「提亮」而不是「加深」——暗底上提高对比度才是「更清楚」。
-  ⑦ 热力图数字：日期 `.hc b` 12.5→**15px / 600 / --text-strong**；时长 `.hc i` 13→**14px**；窄屏分档 13/12.5（≤860）、12.5/12（≤400）、11（≤360），并把 `.hc` 的 min-height 从 78 降到 74。
-  ⑧ 测试：新建 `verify88` **42 条**（两列几何 + 格子比例 + 月份块内部 + 空月占位 + 翻页 + 字号 + 四主题对比度 + 量词 + 7 档响应式；翻页/三月数据用 `page.route` 改写内联 `__BOOT` 造出来）；`verify6` / `verify83_index` 的月份判据改成范围式 + 内层 `.heat-cal` 7 列；`verify47` 改成从月份块 `data-ym` 取月份、并加 `ensurePageWith` 先翻页再点格子；新建 `online88` **12 条**。index 侧 8 套件 **349 条 0 FAIL**。
-  ⑨ 踩坑：网格项默认 `min-width:auto`（窄屏横向溢出，`.hc` 必须显式归零）；`<script>window.__BOOT={…};</script>` 里 JSON 后面有个分号，route 改写时正则要把它切出去，否则 `JSON.parse` 报「Unexpected non-whitespace character after JSON」；**线上轮询必须带 cache-busting 参数**（`index.html?t=…`）—— Pages 给 index.html 设了 `max-age=600`，第一轮若拿到旧版就会在浏览器缓存里待 10 分钟，后面 39 次全在看同一份旧文件（本轮 `online88` 白等了 7 分钟，实际 3 分钟前就已生效）。
+- **进度条** `.rank-bar` 有 `margin-left:-30px; margin-right:-20px` → 两端各探出（总宽 = 网格区 + 50，1440 下 **602px**）。左端探进名称列 16px，所以 `.rank-name` 必须有 `padding-right:22px` 让位。
+- **时长** `.rank-min` 居中 + `transform: translateX(40px)`（用户实测要求，累计右移 40px）。
+- **日期** `.rank-last` 固定 110px、右对齐、**只有纯日期**（如 `2026-10-25`）。相对时间（「9 天前」）已被用户要求**彻底删除**，别加回来。
+- **骨架屏** `.sk-row` 的列模板必须与 `.rank-item` **逐字一致**；`index.html` 里还有 8 行**静态预置骨架**（随首个字节显示，不等 JS）。改列宽要三处同改：`.rank-item` / `.sk-row` / 静态骨架 + `rankSkeleton()`。
+- ≤860px 时进度条改横跨前两列、负边距清零，日期整列隐藏。
 
-- **第 87 轮（index 侧，2026-10-31）**热力图时长字样放大 + 日明细入口并入热力图：
-  ① 用户「热力图中时间字样放大，颜色加深」→ `.hc i` 从 11.5px / 继承色 / opacity .95 改为 **13px / 600 重 / --text-strong / opacity 1**（`h4` 实心格里仍是白字，靠 `.hc.h4 i` 更高的特异性守住，没被这条盖掉）；窄屏 ≤860 用 12px、≤360 用 11px。
-  ② 用户「删除最近游玩选项卡下的日历图标，其负责的功能（点击日期查看当天游玩的游戏及其时长）并入总时长的热力图」→ 删 `CAL_ICON_BTN` 常量、`renderRecent` 的首行分支、`#recent-list` 的点击委托、`.cal-icon-btn` 整套 CSS（含 `--cal-lift` 那 45 行对位算法）。**浮层的「一级月历」整层也随之删除** —— 热力图本身就是月历，不必再看第二份：`#cal-page-month` / `#cal-grid` / `#cal-title` / `#cal-prev` / `#cal-next` / `#cal-back` / `#cal-status` 的元素与 JS（`renderCalGrid` / `stepMonth` / `backToCalMonth` / `resetCalLevel` / `focusCalDay` / `calRange` / `calDefaultMonth` / `hasPlay`）全清。
-  ③ 新入口：`renderDrill` 给有数据的日子加 `is-live` + `data-date` + `role="button"` + `tabindex="0"` + `aria-label`（日期 / 时长 /「查看当天明细」），在 `#heat-drill` 上委托 click 与 keydown(Enter/Space) → `openDayDetail(date)`；未追踪的日子（`is-na`）与月首月尾补位格不可点。
-  ④ 细节：`.hc.is-sel` 标出「刚看过的那天」，关掉浮层后仍保留（便于接着看相邻日）；步进跨月时背后的热力图自动跟到同月（同步 `state.drill.month` 重绘，并把「关闭后焦点还回谁」改指新格子）；单游戏下钻里点格子，明细仍列**当天全部游戏**，当前那款加 `.cal-game.is-focus` 左侧金线。
-  ⑤ **两个真坑**：`openDayDetail()` 要把 `state.cal.day` 置 null 才被认作「首次打开」，也才会把焦点送进浮层（`closeCal()` 同样要清）；窄屏 `padding: 6px 4px` **必须写在 ≤860 块之后** —— 同特异度靠源码顺序决胜，写在前面的 480 块里会被 860 块的 `padding: 6px 7px` 覆盖（实测内边距一直是 7px，「49min」顶出格子）。
-  ⑥ 顺手修掉第 86 轮的遗留缺陷：**360px 下钻整块横向溢出 13px** —— 网格项默认 `min-width:auto`，格内时长文字的最小宽度把 `1fr` 轨道顶宽；给 `.hc` 加 `min-width: 0` 后归零（360 / 390 / 430 实测 docOverflow 均为 0）。
-  ⑦ 测试：`verify47` **整体重写** 72 → **80 条**（结构 / 入口 / 几何 / 步进 / 空态 / 边界 / 关闭 / 焦点 / 键盘 / 响应式 / 单游戏高亮）；`verify48` 改判 78 → **76 条**（「浮层外零变化」的基线改成「进下钻后、开浮层前」，锚点从最近榜首行换成下钻面板）；`verify49` 第 6 段从「图标几何」改成「图标已删且没留空壳」（47 → **45 条**）；`verify6` 的日历断言改为点格子开明细。新增 `online87`（14 条：字号/颜色、格子可点、明细与线上 daily 对账、无一级月历、图标已删、360px 不溢出）。
-  回归：index 侧 7 套件 **307 条 0 FAIL**（verify6 35 / verify47 80 / verify48 76 / verify49 45 / verify54 23 / verify82_index 16 / verify83_index 32）。
+### 首屏与渲染时序
 
-- **第 86 轮（index 侧，2026-10-31）**热力图改「按月」并取代趋势图：
-  ① 热力图从「18 周 × 7 天的小方块」改成**月历网格**（7 列 = 周一 → 周日，格子内写日期 + 当日时长，四档 `color-mix` 深浅）；只在**下钻界面**出现，数据页那块已删除。
-  ② 下钻（点榜单行 = 单游戏；点「游戏时长」卡 = 全部游戏）原来是 **ECharts 柱状 + 折线**，现在整体换成同一套月历热力图 —— **ECharts 已从站点彻底移除**（`ECHARTS_SRC` / `loadEcharts` / 旧 `renderDrill` / `state.charts` / `drillRange` / `cssVar` 全删），首屏与下钻都不再联网取图表库。
-  ③ 月份翻页 `#heat-prev` / `#heat-next`，边界 = 「首份数据月 → 最新数据月」；汇总行「本月 N 天有记录 · 峰值 · 合计」。
-  ④ 三个真坑：`openDrill` 不再 async 后，调用点的 `.catch()` 会抛错；`closeDrill` 必须清 `state.drill.appid`，否则深链一直挂着 `g/<旧游戏>`；**深链直达要 `switchView(v,{instant:true})`** —— View Transition 的回调是异步的，会把紧随其后打开的详情面板又关回去。
-  回归：`verify6` 的「趋势图」判据改为「月历热力图 + 无 ECharts」；`verify83_index` 32 条同步；`verify49` 的 hint 清单去掉 heat-hint。
-  **已上线**：提交 `41eb769`（19 文件）+ `17d9b75`（新增 `tests/online/online86.mjs`），推送 `22eb8dc..17d9b75`；Pages 第 4 次轮询切到 `style.css?v=109`。线上复验 `online86` **16/16**、`online84` **7/7**。
-  `online86` 的期望一律从线上 `data/meta.json` 推导（`months` 决定可翻阅范围），**别写死月份**；「‹」的禁用断言按「线上只有 1 个月时两个按钮都灰」判，否则刚上线月份少时必红。
-- **第 85 轮（index 侧，2026-10-31，回退轮）**—— 用户点名撤掉第 83 轮的三项，并把热力图换页：
-  ① **#8 封面主色进度条 → 撤回**：`barStyle()` 回到两参（只用十色 `topPalette`），`build.mjs` 不再合并 `game-colors.json`，`meta.games_lifetime[].bar` 字段消失；`scripts/rank-colors.mjs` 与 `data/overrides/game-colors.json` **已删除**（需要时从 `fca115e` 取回）。
-  ② **#14「接下来玩什么」→ 整块删除**：HTML 容器、`renderSuggest()`、`bindMore` 里的点击委托、`meta.ach_almost` 与构建期计算全清；`.sg-*` / `.panel-strip` 样式一并删掉。
-  ③ **「游戏时长 / 时间轴」视图合并 → 撤回**：恢复五张卡（`#card-games` + `#c-games` 回来）、恢复独立的 `#view-timeline` 视图与 `#tl-hint`，`switchView('timeline')` 重新是真视图；`#lt-mode` 分段控件、`setLtMode()`、`state.ltMode`、深链里的 `/week` 全部移除。⚠️ **删卡时别忘绑定**：`#card-games` 的 click 必须在 `bindMore()` 里重新挂上，否则卡点了没反应（本轮踩过）。
-  ④ **活动热力图从「游戏时长」移到「数据」**：`#panel-heat` 整体搬进 `#view-data` 的第一块面板；`renderHeat()` 改为 `switchView('data')` 时重算（初始化仍会算一次，隐藏时也能算）。
-  回归：`verify83_index` 重写为 **32 条**（12 静态 + 15 运行时 + 5 离线）；`verify6/47/48/49/54/55/56/58/75/80/82_index` 全绿。
-- **第 83 轮（index 侧，2026-10-31，已提交）14 项体验改造**（用户点名「除 #2 #3 #9 #17 外全做」；其中 **#1 / #8 / #14 已于第 85 轮回退**，下面保留原始记录）：
-  ① **合并视图**：删掉独立的「游戏库/时间轴」视图，`#card-games` 卡一并移除 → 概览 4 张卡；榜单用 `#lt-mode`（排名/时间轴）切换两种画法，`switchView('timeline')` 仍保留为别名（老书签/深链不炸）。
-  ② **活动热力图**（`#heatmap`）：18 周 × 7 天 = **126 格**，四档亮度按「当日分钟/期内峰值」；格子固定 **11px**（用 `1fr` 会被撑到 60px，整块 623px 高——踩过）。
-  ③ **接下来玩什么**（`#panel-suggest`，`.panel-strip` 窄条）：两组 —— 「差 ≤3 个成就」(`meta.ach_almost`，构建期算) 与「买了没启动」。**不能做成大面板**：会把握手榜挤出首屏。
-  ④ **全成就勋章墙**：放在**成就视图**顶部（不是游戏时长页），数据来自 `meta.ach_perfect`。
-  ⑤ **封面主色进度条**：`scripts/rank-colors.mjs` 用 sharp 从 `header.jpg` 提主色写 `data/overrides/game-colors.json`，`build.mjs` 合并进 `meta.games_lifetime[].bar`；缺表自动回落十色板。
-  ⑥ **悬停底纹**：`#hero-bg`（JS 动态创建，`position:fixed; z-index:-1`），悬停榜单行换成该游戏封面模糊图。
-  ⑦ **数字滚动 + View Transitions**：`countUp()` 尊重 reduced-motion；`switchView` 用 `document.startViewTransition`，**必须加 `state.vt` 锁**，否则连续切换会抛 `Transition was skipped`（会变成 pageerror）。
-  ⑧ **深色主题 `night`**：第 4 套主题，变量与 cream 一一对齐；首屏脚本**首次访问跟随系统 `prefers-color-scheme`**，手动选过以 localStorage 为准。
-  ⑨ **阶段报告 + 周目标 + 换算**（数据页）：`#report`（追踪天数/期内总时长/最长连续/最佳单日/期内最常玩）、`#pace`（周目标环，目标存 `localStorage.weekGoalH`，默认 10h，本周 vs 上周）、`#convert`（电影/剧集/《战争与和平》/通勤 四条换算）。
-  ⑩ **单游戏详情扩展**（`#drill-more`）：占终身比重条 + 期内/首次/最近 + 最近 8 条成就（含稀有度金色）。
-  ⑪ **深链**：`#/视图`、`#/lifetime/week`、`#/lifetime/g/<appid>`，`history.replaceState` 同步。
-  ⑫ **PWA**：`manifest.webmanifest` + `icon-192/512.png`（`scripts/make-icons.mjs` 用史蒂夫合成）。**离线缓存刻意没做** —— index 侧再注册一个 SW 会与 watch 页的 `sw.js`（同 scope）互相替换。
-  ⑬ **窄屏两行榜单**：≤860px 改成 `34px 100px 1fr`，进度条落第二行；**别写成 4 列**（定宽吃光后片名只剩 30px）。
-  ⑭ **页脚去重**：删掉 `#footer-gen`（与「数据」卡重复）。
-  新增 `tests/verify/verify83_index.mjs` **28 条**；回归：verify6 35、47 72、48 78、49 47、54 23、55 40、56 49、58 23、82_index 16、83_index 28 —— **全绿**。
-- **第 84 轮（index 侧，2026-10-31，发布轮）两项**：
-  ① **封面本地化**：`scripts/fetch-covers.mjs` 把 53 张 `header.jpg` 下成 `docs/img/covers/<appid>.webp`（460 宽 q78，合计约 1MB）；`CAPSULE()` 改指本地，另留 `CAPSULE_CDN()` 兜底，胶囊图 `onerror` 走「本地 → CDN → 小图标」三级，悬停底纹用双层 `background-image`。**新游戏入库后要重跑这个脚本**（增量，已存在的跳过）。
-  ② **离线可用**：`docs/sw.js` 从「只管观影页」扩成两页共用 —— 导航网络优先回落缓存、`/data/*` 网络优先、`?v=` 资源与 `/img/covers/*` 缓存优先；首页也注册同一个 SW。**预热必须从 index.html 现场解析出 `style.css?v=` / `app.js?v=` 再收进缓存**（首次访问时 SW 还没接管，那几个请求没经过 fetch 事件，不预热就会「断网刷新一片空白」）。
-  新增 `tests/verify/verify83_index.mjs` 的 C 段 **5 条离线断言**（SW 接管 / 断网刷新仍渲染 53 行 / 离线封面仍显示 / 零异常 / 恢复网络仍走网络）+ `tests/online/online84.mjs` 上线复验。
-- **⚠️ 本次发布明确排除**：「按类型推荐」（依赖 `appid → 类型` 映射，素材未提供，从未实现，无需回滚）。
-- 数据现状：`docs/data/daily/` 按月一份；`meta.json` 有 `ach_stats` / `ach_perfect` / `ach_almost`；`achievements.json` 约 285KB。
+1. `index.html` 自带内联的 `meta + 当月 daily`，所以**首屏不等网络就能画**；
+2. `app.js` 执行 → `renderLifetime()` 替换骨架 → 封面图按 `IntersectionObserver` 临近视口才赋 `src`；
+3. `achievements.json` 只在切到成就卡时拉，第二次走 SWR；
+4. `fx.js` 最后加载（`defer fetchpriority=low`），只做装饰。
 
-## 五、硬约束（违反必炸）
+---
 
-1. **改 `docs/` 静态资源必须 bump `?v=N`**（style/app/fx 各自独立计数），并同步 `verify6` 里的硬编码。
-2. **`docs/` 是发布根**，别往里塞构建步骤/源码；**两个页面资源互不引用**（index 不加载 watch 的 css/js）。
-3. **别动 `data/` 原始数据**（snapshots/daily/manual/overrides/achievements/cache）——每晚 diff 的源，删了历史就断。
-4. **CI 每晚改 `docs/index.html` + `docs/data/*`** → 本地推送前必须 `fetch/rebase`（否则被 CI 的 `chore(data): snapshot` 卡住，禁 `--force`）。
-5. **本机 `hosts` 把 github 系列域名指到 127.0.0.1**：判断能否推送用 `git ls-remote origin main`；代理端口会变（`env | grep -i proxy`）；裸 curl github 加 `--ssl-no-revoke`、访问本地加 `--noproxy '*'`。
-6. **线上验证用 Playwright（`--no-proxy-server`）+ 页内 `fetch(url,{cache:'reload'})` 按内容指纹判新旧**，别用 curl（CDN 可能回旧内容）。
-7. **沙箱里 CDN/Steam 图片会挂起**：verify6 里 `ctx.route` 把 `cdn.jsdelivr.net / steamstatic.com / steampowered.com / akamaihd` 全 `abort`，否则计时被拖死。
-8. **`blackrose.woff`（TTF）是 `style.css` 的字体回退**，别当冗余删。
-9. **不要再给任何元素加 `title`**（第 82 轮用户要求「全站一个悬停气泡都不留」）：需要向读屏/键盘用户说明的语义写进 `aria-label`；`verify82_index.mjs` 把「整页带 title 属性的元素数 = 0」当硬断言，加了就 FAIL。
-10. **首屏预算**（第 85 轮现状）：游戏时长视图里**只有榜单一块面板**（热力图已挪到「数据」页）。别再往榜单上面加面板 —— 一旦把首行挤出首屏，`verify6` 的「视口内胶囊图已水化」会直接挂。
-11. **新面板一律 `.panel` + `.panel-head`**（`.panel-strip` 已随「接下来玩什么」一起删除）。热力图格子用固定 **11px**，**不要用 `1fr`** —— 容器宽 1180 时会被撑到 60px 一方，整块 623px 高（踩过）。
-12. **构建期产物只剩 `meta.ach_stats` 与 `meta.ach_perfect`**（`ach_almost` / `games_lifetime[].bar` 已随第 85 轮回退删除）：改 `build.mjs` 后必须重跑 `npm run build` 让 `meta.json` 与内联 `__BOOT` 同步。
-13. **View Transition 必须加锁**：`state.vt` 在跑就别再开第二个，否则 Chromium 抛 `Transition was skipped`，会以 pageerror 计入「零 JS 异常」断言。
-14. **两个页面共用一个 Service Worker**（同域同 scope 只能有一个）：改 `sw.js` 时观影页那两条规则（海报 cache-first、`watch.json` 网络优先）**不许动**，`verify75 A5` / `verify80 A8-A9` 盯着；新增缓存要在 `activate` 里一起保留，否则每次发布都把缓存清掉。
-15. **首页的 css/js 必须写进 SW 预热**，且版本号要**从 index.html 现场解析**（不能写死 `?v=107`，否则下次 bump 就失效）。
-16. **测试上下文里的 SW**：`page.route` 造的 mock 数据会被 SW 绕过（同一个 Chromium 老问题）。给 index 加 SW 之后，凡是用 `page.route` 造数据的套件都要 `serviceWorkers: 'block'`；只有专门测离线的那段才允许 SW 生效。
-9. **条数/百分比写死会随快照漂移**：期望值从内联 `__BOOT` 里读（verify6 成就卡就是教训，第 70 轮改过）。
+## 五、数据契约（只列本界面用到的）
 
-## 六、标准工作流
+`docs/data/meta.json`（脱敏后发布，**不含完整 steamid**）：
 
-改代码 → bump `?v` 并同步 verify6 → 起本地服务跑 `verify6`（`tests/README.md` 有命令）→ `git commit` → 用户说「上线」才 fetch/rebase/重跑/push → 轮询 Pages 指纹 → 归档到 `Documents\Misc\对话成果\Steam游戏时长站\06_验证截图\` + 追加索引。
+| 字段 | 说明 |
+|---|---|
+| `generated_at` / `generated_at_local` | 生成时间（UTC / 北京日期） |
+| `tracking_since` / `last_snapshot_date` | 追踪起点 / 最后一次快照日期 |
+| `steamid_hash` | steamid 的哈希，只用于展示与差分对齐 |
+| `games_lifetime` | `{appid: {name, lifetime_minutes, last_played, img_icon_url}}`，终身累计 |
+| `tracking_totals` | 追踪期合计 |
 
-## 七、最常踩的坑（游戏站这侧）
+`docs/data/daily/YYYY-MM.json`：按月的每日分钟数，热力图与「近 14 天」都从这里算。
+`docs/data/achievements.json`：成就定义 + 解锁状态 + 全球完成率。
 
-- 本地服务：`cd docs && python -m http.server 8895 --bind 127.0.0.1`；Node 用 `C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe`；Playwright 在 `C:/Users/33329/.workbuddy/binaries/node/workspace/`（脚本内 `createRequire` 指向它）。
-- 沙箱里 ECharts/CDN/Steam 图连不上 → 必须 `route.abort`，且趋势图只断言「canvas 或降级提示」二选一，不要求图真画出来。
-- 胶囊图懒加载：先滚回顶部再测，否则 22 行全落预热带 → 远屏占位断言假失败。
-- 字体 swap 会污染逐像素截图 → 「取稳定帧」（连续两次 md5 相同才采信）。
-- 骨架屏窗口极短，别用 MutationObserver 抓（addInitScript 跑在 documentElement 之前会抛错）；用「人为延迟 app.js 4s」验证骨架确实顶上。
-- bash 双引号里写 `node -e` 带反引号会丢字 → 用 `.cjs`/`.py` 补丁文件或 `<<'EOF'`。
+---
 
-## 八、可能待办（游戏站）
+## 六、视觉契约（动 CSS 前必读）
 
-- 数据 Schema / 管线已稳定，主要可玩点在前端体验：主题、日历、趋势图、成就视图的打磨。
-- 若 CI 停更（公开仓库 60 天无活动会禁用 schedule），到 Actions 点一次「Enable workflow」即可恢复。
+- **站名**：`<title>` = `Game Time`；页眉 `h1` = **`My Game Time`**（两者独立，别顺手改另一个）。
+- **`.site-title` 有 `width:6.73em; white-space:nowrap`**（≥861px）：为消 CLS —— 字体未到时回退字体更宽会折行、把页眉从 112 撑到 224。**改站名文案必须同步改这个 em 值**。
+- **`--bg-layers` 是 5 层**（4 层径向 + 1 层 `linear-gradient(165deg,…)` 方向光），`body` 另铺 140×140 SVG 噪点。改背景**别把噪点冲掉**。
+- **`--inset-shine` 只给 `.h-item`/`.rp-cell`/`.heat-mb`/`.hm-none` 四个真区块**；`--sunken` 有 20 多处小元素，全局加会像坏点。
+- **`.card-nav.active` 必须带 `var(--card-shine)`**（曾被整条 box-shadow 覆盖，导致选中的卡反而没高光）。
+- **`.panel` 的 padding 18 / `.panel-head` 的 margin 14 不能动** —— `verify49` 有五条精确几何断言（面板边框到首行 = 1 + 18 + 18 = 37px），是「不许靠改 padding 补偿」的守卫。
+- **`.cards` 断点 1080**：721~1080 六列底网格、≥1081 五列、≤720 单列；**1081 是最窄安全宽度**。
+- **热力图余量只有 1~2px**：`.heat-pair` gap、`.heat-mb` 内边距、`.hc` 字号三者联动；卡片内边距分档 0 / 6px / 14px（900~1024 / 1025~1100 / ≥1101）。`verify90` 专量。
+- **`.tl-week` 14.5px**、里程碑正文 14 / 数字 16，不在字阶归一范围。
+- 图标：文件名带源图 hash（`<用途>-<md5 前8>.png`），换素材＝换 URL；`sw.js` 对 png 是 cache-first，**固定名会被旧缓存挡住**。
+
+---
+
+## 七、当前状态（2026-11-04）
+
+| 项 | 值 |
+|---|---|
+| 线上提交 | `24ca89b` |
+| 版本参数 | `style.css?v=130` / `app.js?v=115` / `fx.js?v=16` |
+| 本地回归 | index 侧 **11 套件 451 条 0 FAIL** |
+| 线上复验 | `tests/online/online102.mjs` **16 条 0 FAIL** |
+| 性能（线上热 CDN 3 次中位） | FCP/LCP **772/1300ms**、首行榜单 1885ms、**CLS 0.000**、二次访问 FCP 56ms、滚动 P50 17ms / **>50ms 帧 0** |
+| 数据规模 | 38 款已游玩（终身 1395h）、20 天追踪、成就 842/2504 |
+
+### 🔴 三条性能红线（不许退化）
+
+二次访问 FCP ≤ 100ms ｜ 滚动 >50ms 的帧 = 0 ｜ CLS = 0.000。
+动 CSS / 图片必须同跑功能回归 + 四主题 × 多宽度截图比对。
+
+---
+
+## 八、标准工作流
+
+```bash
+# 0) 本地静态服务（docs/ → 8895，必须后台跑，否则会被 shell 结束时杀掉）
+cd docs && C:/Users/33329/.workbuddy/binaries/python/envs/default/Scripts/python.exe -m http.server 8895 --bind 127.0.0.1
+
+# 1) 改代码：docs/style.css、docs/app.js、docs/index.html
+# 2) bump 版本号（只 bump 改过的那条键）
+#    三种字面量形态要一起覆盖：style.css?v=130 / style\.css\?v=130 / cssV === '130'
+# 3) 跑回归（Node 用托管运行时）
+NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
+for s in verify6 verify47 verify48 verify49 verify54 verify82_index verify83_index verify88 verify90 verify91 verify92; do
+  "$NODE" tests/verify/$s.mjs | tail -2
+done
+
+# 4) 性能红线抽查
+"$NODE" tests/tools/perf-audit.mjs http://127.0.0.1:8895/index.html 本地
+
+# 5) commit（未收到「推送」指令就不推）
+# 6) 推送：先 git fetch，落后就 git merge origin/main（**不要 rebase、不要 --force**）
+# 7) 等 Pages 生效：轮询 index.html 的版本号指纹（带 ?t= 破缓存，可能要 1~7 次，约 15~80 秒）
+# 8) 线上复验：node tests/online/online102.mjs（或新建 onlineNNN.mjs）
+```
+
+Playwright 不在项目依赖里，脚本统一用
+`createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace/')` 再 `require('playwright')`，
+启动参数加 `--no-proxy-server`（本机 hosts 把 github 域名指到 127.0.0.1）。
+
+---
+
+## 九、高频坑（都踩过）
+
+**测量类**
+
+- `.card-value` 有 **900ms countUp**，量宽度 / 折行必须等 ≥1.2s，否则量到中间值。
+- **`getClientRects().length` 对 block 恒为 1**，判折行要用 `Range.selectNodeContents()` + 按 `top` 去重。
+- **右对齐 + `overflow:visible` 的文字向左溢出，`scrollWidth - clientWidth` 恒为 0**（测不出）→ 临时改 `text-align:left` 再量。
+- **Range 包围盒不含 `::after`**。
+- **`transform` 已作用时，前后两次 `getBoundingClientRect()` 一样** → 量位移要临时置 `transform:none`。
+- **`1fr` 的 min 是 0**：`minmax(150px,340px)` 的邻居会先涨到上限，`fr` 轨只能吃剩下的 → 关键列要写 `minmax(140px,1fr)` 给下限。
+
+**实现类**
+
+- `.rank-item` / `.sk-row` / `index.html` 静态骨架 **三处列模板必须逐字一致**，少一处数据到达时列宽横跳。
+- 两榜共用 `.rank-item` 网格 → 给一行加元素必须两处都加，否则整行错位。
+- 删功能要三处一起清（JS 生成 / CSS 规则 / 静态骨架），否则留死代码或空 `::after`。
+- 批量删代码块后**必须开页面跑一次**：`node --check` 全绿但页面可能空白（删 `var x` 连带吞掉相邻 `var`）。
+- 解析 CSS 规则前**先剥注释**，注释里别写像选择器的字面量。
+
+**流程类**
+
+- **别用 shell heredoc 或 `node -e` 写含反引号的内容** → 反引号会被当成命令替换，内容吃空。一律用写文件工具。
+- 本地静态服务用 `&` 起会随命令结束被杀 → 必须后台任务方式启动，命令前先 curl 探活。
+- 「线上 == 本地」断言会假红 → 跑前先 `git fetch`。
+
+---
+
+## 十、已知短板与待办候选
+
+1. **成就卡首次加载慢**（`achievements.json` 62KB gzip，一次给）—— 可考虑分片，或列表页只取必要字段。
+2. `timeline_extra` 可外置，但只省约 25ms、请求数不变，ROI 低。
+3. `app.js` 85KB 单文件，可拆但收益需实测（零构建下多文件 = 多 RTT，**不一定更快**）。
+4. 窄屏仍是「两行」卡片式，信息密度可再优化。
+5. 热力图字号与分档已定稿，改动前先看 `verify90` 的余量断言。
+
+> ⚠️ **审美类改动（加列 / 改间距 / 右移多少 px / 换配色）属于需求判断，不是实现细节**：先给 2~3 个方案 + 预期效果让用户选，不要做完再让人看效果——本界面曾因此返工四轮。
+
+---
+
+## 十一、验收口径
+
+任何一次改动交付前，至少确认：
+
+- [ ] 11 个 index 套件全绿（451 条，0 FAIL）
+- [ ] 1440 / 1288 / 1088 / 900 / 390 五个宽度**无横向溢出**
+- [ ] 四主题（cream / mint / dawn / night）× 两宽度截图看过，无错位、对比度足够
+- [ ] CLS = 0.000，滚动 >50ms 帧 = 0
+- [ ] 版本参数已 bump（且只 bump 改过的那条）
+- [ ] 未收到推送指令则不推送；推送前 `git fetch`，禁 `--force`

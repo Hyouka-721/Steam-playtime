@@ -1,4 +1,4 @@
-/* scripts/inline-boot.mjs
+/* scripts/build/inline-boot.mjs
  * 2026-10-18 首屏优化：把首屏必需的数据（meta + 当月 daily）内联进 docs/index.html。
  *
  * 为什么：GitHub Pages 每个请求的 TTFB 要 320~580ms，而这份数据 gzip 后不到 5KB。
@@ -13,7 +13,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', '..');
 const DOCS = path.join(ROOT, 'docs');
 const HTML = path.join(DOCS, 'index.html');
 
@@ -36,7 +36,7 @@ const payload = JSON.stringify(boot).replace(/<\//g, '<\\/');
 
 const block =
   `${START}\n` +
-  `  <!-- 首屏数据内联（scripts/inline-boot.mjs 生成，请勿手改）：\n` +
+  `  <!-- 首屏数据内联（scripts/build/inline-boot.mjs 生成，请勿手改）：\n` +
   `       meta + 当月 daily 合并为一份，省掉首屏 1~2 次请求往返。\n` +
   `       前端超过 36 小时会忽略它并回退到 fetch，不会展示过期数据。 -->\n` +
   `  <script>window.__BOOT=${payload};</script>\n` +
@@ -86,7 +86,7 @@ if (ENABLE_HERO_PRELOAD) {
     const appid = top[0];
     const block =
       `${HERO_START}\n` +
-      `  <!-- 首屏第一张封面预加载（scripts/inline-boot.mjs 生成） -->\n` +
+      `  <!-- 首屏第一张封面预加载（scripts/build/inline-boot.mjs 生成） -->\n` +
       `  <link rel="preload" as="image" href="img/covers/${appid}-320.webp"` +
       ` imagesrcset="img/covers/${appid}-320.webp 1x, img/covers/${appid}.webp 2x">\n` +
       `  ${HERO_END}`;

@@ -21,7 +21,7 @@ fs.mkdirSync(OUT, { recursive: true });
 const rd = (f) => fs.readFileSync(ROOT + f, 'utf8').replace(/\r\n/g, '\n');
 const html = rd('watch.html');
 const js = rd('watch.js');
-const addJs = rd('../scripts/watch-add.mjs');
+const addJs = rd('../scripts/watch/watch-add.mjs');
 const data = JSON.parse(fs.readFileSync(ROOT + 'data/watch.json', 'utf8'));
 const N = data.items.length;
 
@@ -83,7 +83,7 @@ ok('A5 watch.js：新增录入解析 anime', /kindEl\.value === 'anime'/.test(js
 ok('A6 watch.js：编辑保存解析 anime', /kind = \(kind === 'series' \|\| kind === 'anime'\) \? kind : 'movie';/.test(js));
 ok('A7 watch.js：编辑回填 anime（select 预置）',
   /setField\('add-kind', \(it\.kind === 'series' \|\| it\.kind === 'anime'\) \? it\.kind : 'movie'\)/.test(js));
-ok('A8 scripts/watch-add.mjs：--kind 接受 anime', /args\.kind === 'series' \|\| args\.kind === 'anime'/.test(addJs));
+ok('A8 scripts/watch/watch-add.mjs：--kind 接受 anime', /args\.kind === 'series' \|\| args\.kind === 'anime'/.test(addJs));
 ok('A9 版本号 bump：watch.css?v=24 / watch.js?v=16',
   /watch\.css\?v=24"/.test(html) && /watch\.js\?v=16"/.test(html));
 

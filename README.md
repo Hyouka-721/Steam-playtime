@@ -30,13 +30,18 @@ Steam Web API **没有「某天玩了多久」这个接口**，只提供：
 
 ```
 scripts/
-  fetch.mjs            调 Steam API → data/snapshots/YYYY-MM-DD.json
-  diff.mjs             全量快照重算 → data/daily/YYYY-MM.json
-  build.mjs            生成 docs/data/*（含脱敏与统计汇总）
-  diff.test.mjs        21 条边界用例的可执行单测
-  lib/steam.mjs        API 封装：重试、429 退避、隐私/部分返回检测
-  lib/diff-core.mjs    差分算法（纯函数）
-  lib/dates.mjs        Asia/Shanghai 日期工具
+  pipeline/            每日流水线，CI 逐个调用
+    fetch.mjs          调 Steam API → data/snapshots/YYYY-MM-DD.json
+    diff.mjs           全量快照重算 → data/daily/YYYY-MM.json
+    localize.mjs       中文名映射
+    build.mjs          生成 docs/data/*（含脱敏与统计汇总）
+    backfill-percent.mjs  成就全球完成率补录（手动）
+  build/inline-boot.mjs  把 meta + daily 内联进 index.html（幂等，可重跑）
+  media/               图片生产：封面变体 / 图标 / 海报变体（手动跑）
+  watch/               观影页数据录入
+  lib/                 dates / diff-core / steam 三个纯模块
+  tests/               单元测试（npm test）
+  legacy/inline-css.mjs  已回退的内联 CSS 方案，仅留证
 data/
   snapshots/           原始快照，永久保留，永不覆盖（除非 FORCE）
   daily/               差分产物
@@ -46,10 +51,11 @@ docs/                  GitHub Pages 发布源（index.html / app.js / style.css 
   watch.html/.css/.js  观影记录页（完全独立，自带影院黑主题，不加载 index 的资源）
   data/watch.json      观影数据唯一来源；img/watch/*.webp 电影海报
 tests/                 回归测试套件（第 70 轮起收编，见 tests/README.md）
-  verify/              19 个本地回归脚本（verify6 / verify47~70.mjs）
+  verify/              本地回归脚本（index 侧 11 个 + watch 侧若干，认后缀 _watch / _index）
   online/              上线后对 Pages 的内容指纹复验
-  tools/               rebase 时 watch.json 冲突合并器
-CONTINUE.md            项目交接提示词（可直接复制到新对话无缝续做）
+  tools/               常驻工具：perf-audit / perf-lazy / ab-css
+    archive/           历史一次性脚本（取证截图 / 版本号 bump / 数据合并），留档备查
+CONTINUE-GAMETIME.md   游戏时长界面交接提示词（新对话直接粘贴即可续做）
 ```
 
 ---
@@ -195,7 +201,7 @@ grep -rn "STEAM_API_KEY" .github/          # 只应出现 ${{ secrets.STEAM_API_
 
 ### `docs/data/watch.json`
 
-观影记录（`watch.html` 的唯一数据源）。`items` 按 `watched_at` 倒序排，**同一天的按 `added_at` 正序（先上传的居前）**，由 `scripts/watch-add.mjs` 与网页加号共同维护，一般不用手写。
+观影记录（`watch.html` 的唯一数据源）。`items` 按 `watched_at` 倒序排，**同一天的按 `added_at` 正序（先上传的居前）**，由 `scripts/watch/watch-add.mjs` 与网页加号共同维护，一般不用手写。
 
 ```json
 {
@@ -280,7 +286,7 @@ Token **只写进本机 `localStorage`**（键名 `watch-gh-token`），页面�
 在**仓库根目录**执行（需要 `sharp`，`npm i` 时已装）：
 
 ```bash
-node scripts/watch-add.mjs \
+node scripts/watch/watch-add.mjs \
   --img ~/Downloads/海报.jpg \
   --title "奥本海默" \
   --en Oppenheimer \

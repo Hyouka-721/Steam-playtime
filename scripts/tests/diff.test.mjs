@@ -12,8 +12,8 @@ import {
   maxPerGame,
   mergeDays,
   pickSnapshotChain,
-} from './lib/diff-core.mjs';
-import { fetchOwnedGames, SteamApiError } from './lib/steam.mjs';
+} from '../lib/diff-core.mjs';
+import { fetchOwnedGames, SteamApiError } from '../lib/steam.mjs';
 
 // ---- helpers ----
 const snap = (date, games) => ({ date, games });

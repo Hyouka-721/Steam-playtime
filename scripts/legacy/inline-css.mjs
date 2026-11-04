@@ -17,14 +17,14 @@
    ⚠️ style.css 文件本身保留（它是构建源，也是版本号的真实载体）。
 
    幂等：用固定标记块包裹，重复运行只替换块内容。
-   用法：node scripts/inline-css.mjs [--dry]
+   用法：node scripts/legacy/inline-css.mjs [--dry]
    ============================================================ */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', '..');
 const DOCS = path.join(ROOT, 'docs');
 const HTML = path.join(DOCS, 'index.html');
 const CSS = path.join(DOCS, 'style.css');
@@ -44,9 +44,9 @@ if (!v) throw new Error('找不到 style.css 版本号（link 与内联注释里
 const safeCss = css.replace(/<\/style/gi, '<\\/style');
 const block =
   `${START}\n` +
-  `<style>/* style.css?v=${v} —— 第 93 轮内联（scripts/inline-css.mjs 生成，请勿手改）\n` +
+  `<style>/* style.css?v=${v} —— 第 93 轮内联（scripts/legacy/inline-css.mjs 生成，请勿手改）\n` +
   `   省掉首屏一个关键 RTT（Pages 的 TTFB ≈400ms，与文件大小无关）。\n` +
-  `   改样式请编辑 docs/style.css，然后跑 node scripts/build.mjs 重新内联。 */\n` +
+  `   改样式请编辑 docs/style.css，然后跑 node scripts/pipeline/build.mjs 重新内联。 */\n` +
   `${safeCss}\n</style>\n` +
   `${END}`;
 

@@ -6,7 +6,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { fetchAchievementSchema, fetchPlayerAchievements, fetchOwnedGames, fetchGlobalAchievementPercent } from './lib/steam.mjs';
+import { fetchAchievementSchema, fetchPlayerAchievements, fetchOwnedGames, fetchGlobalAchievementPercent } from '../lib/steam.mjs';
 
 /** 临时替换 globalThis.fetch，返回恢复函数 */
 const mockFetch = (handler) => {

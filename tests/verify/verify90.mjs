@@ -91,8 +91,8 @@ const hcbRule = ruleOf('.hc b');
 ok('0.4 日期数字 .hc b 仍是 600（没被连带给成 700）', !!hcbRule && /font-weight:\s*600/.test(hcbRule), hcbRule?.match(/font-weight:[^;]*/)?.[0]);
 
 ok('0.5 build.mjs 有 loadTimelineExtra 且把结果写进 meta.timeline_extra',
-  /function loadTimelineExtra/.test(fs.readFileSync('scripts/build.mjs', 'utf8'))
-  && /timeline_extra:\s*timelineExtra/.test(fs.readFileSync('scripts/build.mjs', 'utf8')));
+  /function loadTimelineExtra/.test(fs.readFileSync('scripts/pipeline/build.mjs', 'utf8'))
+  && /timeline_extra:\s*timelineExtra/.test(fs.readFileSync('scripts/pipeline/build.mjs', 'utf8')));
 const extraFile = 'data/overrides/timeline-extra.json';
 const extraRows = fs.existsSync(extraFile) ? JSON.parse(fs.readFileSync(extraFile, 'utf8')) : null;
 const dowOf = (s) => (new Date(`${s}T12:00:00Z`).getUTCDay() + 6) % 7; // 周一 = 0

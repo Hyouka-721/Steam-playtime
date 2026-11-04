@@ -45,17 +45,17 @@ jobs:
           STEAM_ID64: ${{ secrets.STEAM_ID64 }}
           OVERRIDE_DATE: ${{ inputs.backfill_date }}
           FORCE: ${{ inputs.force }}
-        run: node scripts/fetch.mjs
+        run: node scripts/pipeline/fetch.mjs
 
       - name: Compute daily deltas
-        run: node scripts/diff.mjs
+        run: node scripts/pipeline/diff.mjs
 
       - name: Localize game names (zh-CN)
-        run: node scripts/localize.mjs
+        run: node scripts/pipeline/localize.mjs
         continue-on-error: true
 
       - name: Build site data
-        run: node scripts/build.mjs
+        run: node scripts/pipeline/build.mjs
 
       - name: Commit and push
         run: |

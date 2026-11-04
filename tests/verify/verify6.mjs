@@ -23,7 +23,7 @@ const check = (name, ok, detail = '') => {
 const js = fs.readFileSync(`${DOCS}/app.js`, 'utf8');
 const css = fs.readFileSync(`${DOCS}/style.css`, 'utf8');
 const html = fs.readFileSync(`${DOCS}/index.html`, 'utf8');
-const build = fs.readFileSync('C:/Users/33329/WorkBuddy/2026-10-13-18-17-49/steam-playtime/scripts/build.mjs', 'utf8');
+const build = fs.readFileSync('C:/Users/33329/WorkBuddy/2026-10-13-18-17-49/steam-playtime/scripts/pipeline/build.mjs', 'utf8');
 
 // 剥注释后再断言，避免"清理说明"写进注释被误判
 const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');

@@ -14,7 +14,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', '..');
 const SNAP_DIR = path.join(ROOT, 'data', 'snapshots');
 const OUT = path.join(ROOT, 'data', 'overrides', 'game-names.json');
 const DELAY_MS = 400;

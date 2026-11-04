@@ -8,10 +8,10 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-import { utcISO, shanghaiDate, addDays } from './lib/dates.mjs';
+import { utcISO, shanghaiDate, addDays } from '../lib/dates.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', '..');
 const DAILY_DIR = path.join(ROOT, 'data', 'daily');
 const OVERRIDE_DIR = path.join(ROOT, 'data', 'overrides');
 const SNAP_DIR = path.join(ROOT, 'data', 'snapshots');
@@ -363,17 +363,17 @@ function main() {
   // 最后把首屏数据内联进 index.html（2026-10-18）：GitHub Pages 每个请求的
   // TTFB 要 320~580ms，为此让首屏少发 1~2 次请求比省几 KB 更值钱。
   // 单独拆成脚本是为了可以幂等重跑；这里自动串上，避免 CI 产出过期内联数据。
-  const r = spawnSync(process.execPath, [path.join(__dirname, 'inline-boot.mjs')], { stdio: 'inherit' });
+  const r = spawnSync(process.execPath, [path.join(__dirname, '..', 'build', 'inline-boot.mjs')], { stdio: 'inherit' });
   if (r.status !== 0) log('⚠ inline-boot 失败，首屏将回退到 fetch 取数');
 
-  // 第 93 轮：曾经在这里内联 style.css（scripts/inline-css.mjs），**已回退**。
+  // 第 93 轮：曾经在这里内联 style.css（脚本现归档在 scripts/legacy/inline-css.mjs），**已回退**。
   // 原因：内联后 HTML 变成 42KB(gzip)，而外链时是 HTML 12.8KB + CSS 29.6KB **两个请求
   // 并行**。总字节几乎相同，但「并行拿两个」比「串行拿一个」更快 —— 线上六次取样中位
   // 全线变差：FCP 976ms（基线 772）、LCP 1736ms（基线 1300）、首行 2379ms（基线 1885）。
-  // 脚本保留在 scripts/inline-css.mjs 供参考（它本身是对的，只是这个站点的场景不适用：
+  // 脚本保留在 scripts/legacy/inline-css.mjs 供参考（它本身是对的，只是这个站点的场景不适用：
   // 本站 CSS 只有 29KB 且与 HTML 同域，并行成本本来就低）。
   // ⚠️ 若将来 CSS 涨到 100KB+ 或首屏必须靠它压 FCP，可重新评估。
-  // const r2 = spawnSync(process.execPath, [path.join(__dirname, 'inline-css.mjs')], { stdio: 'inherit' });
+  // const r2 = spawnSync(process.execPath, [path.join(__dirname, '..', 'legacy', 'inline-css.mjs')], { stdio: 'inherit' });
 }
 
 main();

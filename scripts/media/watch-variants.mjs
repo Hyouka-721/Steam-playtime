@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 /* ============================================================
    watch-variants.mjs — 第 75 轮：为既有海报生成响应式变体（性能优化）
-   规则与 scripts/watch-add.mjs 完全一致：只缩不放 / WebP q80 effort4。
+   规则与 scripts/watch/watch-add.mjs 完全一致：只缩不放 / WebP q80 effort4。
    · 每个海报生成 <stem>-320.webp（原图宽 > 320 时）
    · 原图宽 > 480 时再生成 <stem>-480.webp
    · JSON 里补 poster_320 / poster_480 两个可选字段（缺省回退 base，向前兼容）
    幂等：文件已存在且 JSON 已有字段 → 跳过；可用 --force 重生成。
-   用法：node scripts/watch-variants.mjs [--dry] [--force]
+   用法：node scripts/media/watch-variants.mjs [--dry] [--force]
    ============================================================ */
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 
-const REPO = path.resolve(import.meta.dirname, '..');
+const REPO = path.resolve(import.meta.dirname, '..', '..');
 const DATA = path.join(REPO, 'docs/data/watch.json');
 const IMG_DIR = path.join(REPO, 'docs/img/watch');
 const WIDTHS = [320, 480];

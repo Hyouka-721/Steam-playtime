@@ -7,13 +7,13 @@
    做法与 `watch-variants.mjs` 完全一致：只缩不放 / WebP q80 effort4。
    · 原图宽 > 320 时生成 `<appid>-320.webp`
    · 幂等：文件已存在就跳过，`--force` 重生成
-   用法：node scripts/cover-variants.mjs [--dry] [--force]
+   用法：node scripts/media/cover-variants.mjs [--dry] [--force]
    ============================================================ */
 import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
 
-const REPO = path.resolve(import.meta.dirname, '..');
+const REPO = path.resolve(import.meta.dirname, '..', '..');
 const IMG_DIR = path.join(REPO, 'docs/img/covers');
 const W = 320;
 

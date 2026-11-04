@@ -26,7 +26,7 @@ const ok = (n, c, extra = '') => {
 
 const html = rd('watch.html'), css = rd('watch.css'), js = rd('watch.js');
 const jsNC = stripCmt(js), cssNC = stripCmt(css);
-const cli = fs.readFileSync('C:/Users/33329/WorkBuddy/2026-10-13-18-17-49/steam-playtime/scripts/watch-add.mjs', 'utf8');
+const cli = fs.readFileSync('C:/Users/33329/WorkBuddy/2026-10-13-18-17-49/steam-playtime/scripts/watch/watch-add.mjs', 'utf8');
 const P = 'img/minion-0ef9a202.webp';   // 复用现成图，避免 404 噪音
 
 /* ================= A 静态指纹 ================= */

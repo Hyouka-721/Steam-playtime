@@ -12,14 +12,14 @@
  *     iOS 的 apple-touch-icon 不支持透明，透明会被填成黑底
  *   · favicon 16/32/48 保留透明：标签页背景色由浏览器决定，透明才不会出现白框
  *
- * 用法：node scripts/make-icons.mjs
+ * 用法：node scripts/media/make-icons.mjs
  */
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DOCS = path.resolve(__dirname, '..', 'docs');
+const DOCS = path.resolve(__dirname, '..', '..', 'docs');
 const SRC = path.join(DOCS, 'img', 'gamepad-fb74092c.webp');
 // 输出文件名带素材 hash：sw.js 对 *.png 是 cache-first，固定名会让换图被旧缓存挡住
 const HASH = (path.basename(SRC).match(/-([0-9a-f]{8})\.webp$/) || [])[1] || 'v1';

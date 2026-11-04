@@ -3,7 +3,7 @@
  * 第 87 轮（watch 侧）建、第 88 轮改：生成观影页的站点图标
  * （浏览器标签页 / 书签 / iOS 桌面 / Android 主屏 四类场景）。
  *
- * 与 `scripts/make-icons.mjs`（首页图标）并列而不是合并，原因：
+ * 与 `scripts/media/make-icons.mjs`（首页图标）并列而不是合并，原因：
  * 两页各有自己的形象素材与底色（首页 cream 主题、观影页影院黑），
  * 合成一个脚本就得传一堆参数；分开后各自读一张源图、各自一套输出名，互不干扰。
  *
@@ -25,8 +25,8 @@
  *     浏览器与 Service Worker 里的旧图自然失效，不用改缓存版本号
  *   · 小尺寸 0.94（圆盘贴边一点，16px 才够醒目），大尺寸 0.78（给 iOS/Android 的圆角遮罩留余量）
  *
- * 用法：node scripts/watch-icons.mjs
- *      node scripts/watch-icons.mjs --preview   # 只在 %TEMP% 出对比图，不写 docs/img
+ * 用法：node scripts/media/watch-icons.mjs
+ *      node scripts/media/watch-icons.mjs --preview   # 只在 %TEMP% 出对比图，不写 docs/img
  */
 import path from 'node:path';
 import os from 'node:os';
@@ -35,7 +35,7 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DOCS = path.resolve(__dirname, '..', 'docs');
+const DOCS = path.resolve(__dirname, '..', '..', 'docs');
 const IMG = path.join(DOCS, 'img');
 const SRC = path.join(IMG, 'film-97e35b7b.png');
 

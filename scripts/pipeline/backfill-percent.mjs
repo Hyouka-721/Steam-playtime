@@ -10,17 +10,17 @@
  * 修复后新采集会走 GetGlobalAchievementPercentagesForApp 拿真实值；
  * 本脚本用于把**历史快照**也补上，避免要等下一次采集才生效。
  *
- * 用法：node scripts/backfill-percent.mjs [YYYY-MM-DD]
+ * 用法：node scripts/pipeline/backfill-percent.mjs [YYYY-MM-DD]
  *   不给日期则处理 data/achievements/ 下最新一份。
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { fetchGlobalAchievementPercent } from './lib/steam.mjs';
+import { fetchGlobalAchievementPercent } from '../lib/steam.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', '..');
 const ACH_DIR = path.join(ROOT, 'data', 'achievements');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
