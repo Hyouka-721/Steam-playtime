@@ -57,8 +57,8 @@ const src = await (async () => {
 })();
 const appV = (src.html.match(/app\.js\?v=(\d+)/) || [])[1];
 const cssV = (src.html.match(/style\.css\?v=(\d+)/) || [])[1];
-ok('0.1 index.html 引用 app.js?v=115 / style.css?v=130',
-  appV === '115' && cssV === '130', { app: appV, css: cssV });
+ok('0.1 index.html 引用 app.js?v=116 / style.css?v=130',
+  appV === '116' && cssV === '130', { app: appV, css: cssV });
 ok('0.2 热力图容器改为两列（.heat-pair）且不再有单月网格占位',
   src.html.includes('class="heat-pair" id="heat-drill"') && !src.html.includes('class="heat heat-cal" id="heat-drill"'));
 ok('0.3 app.js 有分页/范围标签/两月常量',

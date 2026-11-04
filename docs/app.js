@@ -513,45 +513,8 @@
     });
   }
 
-  // ---------- ①b 最近游玩（近两周时长） ----------
-  // 2026-10-22：头部「近 14 天 · 共 N 款游戏」提示行已按用户要求删除，
-  // #recent-hint 元素与这里的两处赋值一并移除（不再有 hint 引用）。
-  function renderRecent() {
-    const box = $('recent-list');
-    const lifetime = state.meta.games_lifetime ?? {};
-    const recent = recentMinutesByApp(14);
-    const list = Object.values(lifetime)
-      .map((g) => ({ ...g, recent: recent.get(g.appid) ?? 0 }))
-      .filter((g) => g.recent > 0)
-      .sort((a, b) => b.recent - a.recent);
-
-    if (!list.length) {
-      box.innerHTML = '<p class="empty">最近两周还没有游玩记录（每日数据自首次快照后开始积累）。</p>';
-      return;
-    }
-    const max = Math.max(...list.map((g) => g.recent), 1);
-    // 与累计榜同一口径：全成就解锁的游戏胶囊图标金（集合只建一次）
-    const perfect = perfectGameSet();
-
-    box.innerHTML = list
-      .map((g, i) => {
-        const icon = ICON(g.appid, g.img_icon_url);
-        const pct = Math.max(1.5, (g.recent / max) * 100);
-        const isPerfect = perfect.has(String(g.appid));
-        // 第 87 轮：原先首行日期上方那枚「游玩日历」图标已删除（功能并入下钻热力图），
-        // 所有行结构完全一致 —— .rank-last 里只有日期文字，没有空节点、没有额外占位。
-        return `<div class="rank-item">
-          <span class="rank-no${noCls(i)}">${i + 1}</span>
-          ${capsuleHtml(g.appid, { perfect: isPerfect, icon })}
-          <span class="rank-name">${escapeHtml(g.name)}</span>
-          <span class="rank-bar"><span style="${barStyle(pct, i)}"></span></span>
-          <span class="rank-min">${hm(g.recent)}</span>
-          <span class="rank-last">${g.last_played ?? '—'}</span>
-        </div>`;
-      })
-      .join('');
-    observeCapsules(box); // 与累计榜同一套按需加载
-  }
+  /* 「最近14天游玩记录」模块已整体删除（#recent-list 容器与其渲染逻辑）；
+     近两周总时长仍由「最近游玩」概览卡展示，数据来源与口径不变。 */
 
   // ---------- ①c 二级界面（下钻）：按月热力图 ----------
   /** 2026-10-31 第 86 轮：原来的「累计柱状 + 每日折线」（ECharts，按需还要联网拉 ~1MB）
@@ -589,10 +552,8 @@
     state.drill.appid = appid;
     state.drill.month = heatDefaultMonth();
     state.drill.sel = null; // 进入一个新的下钻，不保留上一个游戏看过的那天
-    $('lt-main').hidden = true;
-    $('lt-detail').hidden = false;
-    renderDrill();
-    syncHash();
+    // 热力图已归属「最近游玩」栏目：进入下钻即切到该栏目，内容与数据保持不变
+    switchView('recent', { instant: true });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -600,9 +561,6 @@
     // 必须清掉 appid：否则深链会一直挂着 g/<旧游戏>（切走再切回也回不来）
     state.drill.appid = null;
     state.drill.sel = null;
-    $('lt-detail').hidden = true;
-    $('lt-main').hidden = false;
-    syncHash();
   }
 
   /* 第 88 轮（用户）：「格子过宽，一页放两个月更美观」。
@@ -1597,7 +1555,7 @@
   /* ---------- #19 深链 ---------- */
   function syncHash() {
     const parts = ['#/' + state.view];
-    if (state.view === 'lifetime' && state.drill.appid) parts.push('g/' + state.drill.appid);
+    if (state.view === 'recent' && state.drill.appid) parts.push('g/' + state.drill.appid);
     const next = parts.join('/');
     if (location.hash !== next) history.replaceState(null, '', next);
   }
@@ -1611,7 +1569,7 @@
     switchView(view, { instant: true });
     const gi = seg.indexOf('g');
     const appid = gi >= 0 ? seg[gi + 1] : null;
-    if (appid && view === 'lifetime') openDrill(appid);
+    if (appid && (view === 'recent' || view === 'lifetime')) openDrill(appid);
     return true;
   }
 
@@ -1656,7 +1614,7 @@
       document.querySelectorAll('.card-nav').forEach((c) => c.classList.toggle('active', c.dataset.view === v));
       document.querySelectorAll('.view').forEach((sec) => sec.classList.toggle('active', sec.id === `view-${v}`));
       if (v === 'lifetime') closeDrill();
-      if (v === 'recent') renderRecent();
+      if (v === 'recent') renderDrill();
       if (v === 'ach') {
         // 成就**明细**（285KB）按需加载：首屏只带 stats 摘要，这里才去取 games。
         // 先同步渲染一次（显示摘要 + "加载中"），到位后再渲染一次（填充明细列表）。
@@ -1741,8 +1699,6 @@
     $('card-lifetime').addEventListener('click', () => {
       if (state.view !== 'lifetime') {
         switchView('lifetime');
-      } else if (!$('lt-detail').hidden) {
-        closeDrill();
       } else {
         openDrill(null);
       }
@@ -1769,7 +1725,7 @@
        `#recent-list` 委托已整体移除），避免留下一个空委托误导下一轮。 */
 
     $('btn-drill-back').addEventListener('click', () => {
-      closeDrill();
+      switchView('lifetime');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
@@ -1801,7 +1757,6 @@
       // 下面这些只依赖 meta（已在 load 里拿到），可立即渲染，
       // 不必等成就明细——这正是"首屏不再等 285KB"的关键
       renderLifetime();
-      renderRecent();
       renderAch();      // 此处只有 stats 摘要，成就页显示骨架
       renderHealth();
       buildAchSelect();
