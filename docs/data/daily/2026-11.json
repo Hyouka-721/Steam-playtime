@@ -3,7 +3,7 @@
   "month": "2026-11",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-11-03T21:10:54.118Z",
+  "generated_at": "2026-11-04T21:23:36.165Z",
   "days": {
     "2026-11-01": {
       "total_minutes": 264,
@@ -52,6 +52,21 @@
           "appid": "246420",
           "name": "王国保卫战",
           "minutes": 48,
+          "is_new": false
+        }
+      ]
+    },
+    "2026-11-04": {
+      "total_minutes": 53,
+      "span_days": 1,
+      "confidence": "high",
+      "source": "auto",
+      "flags": [],
+      "games": [
+        {
+          "appid": "246420",
+          "name": "王国保卫战",
+          "minutes": 53,
           "is_new": false
         }
       ]
