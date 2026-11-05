@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-04T20:30:36+08:00",
+  "updated_at": "2026-11-05T21:43:57+08:00",
   "items": [
     {
       "id": "2026-10-31-dear-you",
@@ -1264,6 +1264,7 @@
       "kind": "anime",
       "watched_at": "2021-03-21",
       "poster": "img/watch/item-5e1496bd.webp",
+      "added_at": "2026-10-25T12:17:22+08:00",
       "poster_w": 602,
       "poster_h": 867,
       "poster_320": "img/watch/item-5e1496bd-320.webp",
@@ -1271,13 +1272,13 @@
       "title_en": "たまこまーけっと",
       "year": 2013,
       "rating": 8.5,
+      "order": 4,
       "tags": [
         "动画",
         "喜剧",
         "温情"
       ],
-      "note": "最喜欢了饼藏了！请讲！",
-      "added_at": "2026-10-25T12:17:22+08:00"
+      "note": "最喜欢了饼藏了！请讲！"
     },
     {
       "id": "2021-03-07-2",
