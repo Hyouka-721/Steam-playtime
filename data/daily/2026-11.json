@@ -3,7 +3,7 @@
   "month": "2026-11",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-11-04T21:23:36.061Z",
+  "generated_at": "2026-11-05T21:30:30.680Z",
   "days": {
     "2026-11-01": {
       "total_minutes": 264,
@@ -67,6 +67,21 @@
           "appid": "246420",
           "name": "Kingdom Rush",
           "minutes": 53,
+          "is_new": false
+        }
+      ]
+    },
+    "2026-11-05": {
+      "total_minutes": 71,
+      "span_days": 1,
+      "confidence": "high",
+      "source": "auto",
+      "flags": [],
+      "games": [
+        {
+          "appid": "246420",
+          "name": "Kingdom Rush",
+          "minutes": 71,
           "is_new": false
         }
       ]
