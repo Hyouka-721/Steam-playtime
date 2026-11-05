@@ -37,7 +37,7 @@ const js = await page.evaluate(async () => {
   return r.ok ? r.text() : '';
 });
 ok('A2 线上 fx.js 已加载且为优化版（密度 / 亮度 / 层次 / 渐隐 / 内容避让）', !!js &&
-  /spawnPerSec:\s*\[0\.55,\s*1\.15\]/.test(js) && /alpha:\s*\[0\.2,\s*0\.36\]/.test(js) &&
+  /spawnPerSec:\s*\[0\.55,\s*1\.15\]/.test(js) && /alpha:\s*\[0\.20,\s*0\.36\]/.test(js) &&
   /layers:\s*\[/.test(js) && /fadeOutFrac/.test(js) && /avoidAlpha/.test(js) &&
   /col: colors\.meteor\.slice\(\)/.test(js) && /g\.addColorStop\(0\.65/.test(js), { len: js.length });
 const cssSrc = await page.evaluate(async () => {
