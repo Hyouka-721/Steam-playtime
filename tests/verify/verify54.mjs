@@ -36,11 +36,11 @@ const pa = await ctxA.newPage();
 await pa.goto(URL, { waitUntil: 'domcontentloaded' });
 const grab = (u) => pa.evaluate(async (x) => (await fetch(x, { cache: 'reload' })).text(), u);
 const html = await grab('index.html?cb=' + Date.now());
-const app = await grab('app.js?v=117&cb=' + Date.now());
+const app = await grab('app.js?v=118&cb=' + Date.now());
 const watchHtml = await grab('watch.html?cb=' + Date.now());
 
-ok('A1 版本号 style.css?v=130 / app.js?v=117 / fx.js?v=16',
-  /style\.css\?v=130/.test(html) && /app\.js\?v=117/.test(html) && /fx\.js\?v=16/.test(html));
+ok('A1 版本号 style.css?v=131 / app.js?v=118 / fx.js?v=16',
+  /style\.css\?v=131/.test(html) && /app\.js\?v=118/.test(html) && /fx\.js\?v=16/.test(html));
 
 ok('A2 小黄人是链接（class=logo + href=watch.html + id=logo-watch），不再是 theme-light',
   /<a class="logo" id="logo-watch" href="watch\.html"/.test(html) && !/logo"[^>]*id="theme-light"/.test(html));
@@ -51,7 +51,7 @@ ok('A3 #theme-light 挂在史蒂夫头像上',
 ok('A4 小黄人素材没被换错（仍是 minion-0ef9a202.webp）',
   /<a class="logo"[^>]*>\s*<img src="img\/minion-0ef9a202\.webp"/.test(html.replace(/\r?\n\s*/g, ' ')));
 
-ok('A5 主题仍由 app.js 的 bindFlip 绑在 #theme-light 上（第 83 轮起四套一起随机，mode=all）',
+ok('A5 主题仍由 app.js 的 bindFlip 绑在 #theme-light 上（第 105 轮起五套一起随机，mode=all）',
   /const bindFlip = \(el, mode\) =>/.test(app)
   && /bindFlip\(\$\('theme-light'\), 'all'\);/.test(app)
   && !/bindFlip\(\$\('logo/.test(app)
@@ -129,8 +129,9 @@ for (let i = 0; i < 6; i++) {
   seq.push(await page.evaluate(() => document.documentElement.dataset.theme));
 }
 // 第 83 轮：新增第四套深色主题 night，随机池从三套扩到四套
-const THEMES = ['cream', 'mint', 'dawn', 'night'];
-ok('B7 连点 6 次：每次都换、且只落在 cream/mint/dawn/night 四套主题',
+// 第 105 轮：新增第五套 cinema「影院黑」，两套深色并列，随机池扩到五套
+const THEMES = ['cream', 'mint', 'dawn', 'night', 'cinema'];
+ok('B7 连点 6 次：每次都换、且只落在 cream/mint/dawn/night/cinema 五套主题',
   seq.every((v, i) => i === 0 || v !== seq[i - 1]) && seq.every((v) => THEMES.includes(v)), seq);
 
 // 键盘：聚焦史蒂夫后 Enter / Space

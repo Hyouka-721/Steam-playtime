@@ -51,9 +51,10 @@ ok('A6 全成就勋章墙仍在成就视图顶部', /id="view-ach"[\s\S]{0,400}i
 
 ok('A7 页脚仍不重复「数据生成于 …」', !html.includes('footer-gen'));
 
-ok('A8 四套主题齐备，night 变量块在 CSS 里',
-  ["'cream'", "'mint'", "'dawn'", "'night'"].every((t) => js.includes(t)) &&
-  /\[data-theme="night"\]\s*\{[\s\S]{200,}?\}/.test(css));
+ok('A8 五套主题齐备，night / cinema 变量块都在 CSS 里',
+  ["'cream'", "'mint'", "'dawn'", "'night'", "'cinema'"].every((t) => js.includes(t)) &&
+  /\[data-theme="night"\]\s*\{[\s\S]{200,}?\}/.test(css) &&
+  /\[data-theme="cinema"\]\s*\{[\s\S]{200,}?\}/.test(css));
 
 ok('A9 meta 回到「无封面主色、无临门一脚」的干净状态',
   Object.values(meta.games_lifetime).filter((g) => g.bar).length === 0 &&

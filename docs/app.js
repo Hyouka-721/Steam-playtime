@@ -202,14 +202,17 @@
   }
 
   // ---------- 主题 ----------
-  /** 4 套主题（3 浅 + 1 深）：切换只改 <html data-theme>，配色全部走 CSS 变量。
+  /** 5 套主题（3 浅 + 2 深）：切换只改 <html data-theme>，配色全部走 CSS 变量。
       2026-10-31 第 83 轮：加入 night —— 用户点名要的一条，破例首次引入深色。
-      单击史蒂夫会在四套里随机挑一套（原来只在浅色组里随机）。 */
+      2026-11-05 第 105 轮：加入 cinema「影院黑」—— 与观影页 watch.html 同源的
+      影院黑 + 放映机暖光 + 胶片颗粒；night 保留，两套深色并列。
+      单击史蒂夫会在五套里随机挑一套（原来只在浅色组里随机）。 */
   const THEMES = [
     { id: 'cream', name: '暖阳米', mode: 'light' },
     { id: 'mint', name: '薄荷晨', mode: 'light' },
     { id: 'dawn', name: '晨曦紫', mode: 'light' },
     { id: 'night', name: '夜航', mode: 'dark' },
+    { id: 'cinema', name: '影院黑', mode: 'dark' },
   ];
   const themeName = (id) => (THEMES.find((t) => t.id === id) ?? THEMES[0]).name;
 
@@ -237,7 +240,7 @@
     if (light) light.setAttribute('aria-label', `切换主题（当前：${themeName(id)}）`);
   }
 
-  /** 随机挑一个与当前不同的主题；mode='all' 时四套一起参与（第 83 轮起含深色） */
+  /** 随机挑一个与当前不同的主题；mode='all' 时五套一起参与（第 83 轮起含深色，第 105 轮起两套深色） */
   function randomTheme(mode) {
     const cur = currentTheme();
     const all = mode === 'all' ? THEMES : THEMES.filter((t) => t.mode === mode);

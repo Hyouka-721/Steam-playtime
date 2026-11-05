@@ -39,7 +39,7 @@ const a = await page.evaluate(() => ({
   cards: [...document.querySelectorAll('.card-label')].map((e) => e.textContent.trim()),
   views: [...document.querySelectorAll('.view')].map((e) => e.id),
 }));
-ok('A1 版本参数 CSS 130 / APP 117', a.cssV === '130' && a.appV === '117', { css: a.cssV, app: a.appV });
+ok('A1 版本参数 CSS 131 / APP 118', a.cssV === '131' && a.appV === '118', { css: a.cssV, app: a.appV });
 ok('A2 显示名改为 Wallpaper Engine', a.bootName === 'Wallpaper Engine', a.bootName);
 ok('A3 页面无「壁纸引擎」残留', a.hasChinese === false);
 ok('A4 榜单里确有一行 Wallpaper Engine', a.pageNames.some((n) => n.startsWith('Wallpaper Engine')), a.pageNames.filter((n) => /Wallpaper/i.test(n)));

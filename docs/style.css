@@ -196,6 +196,96 @@
   --fx-meteor: #a48bff;
 }
 
+/* ⑩ 影院黑：与观影页 watch.html 同源的一套深色（第 105 轮，用户点名要的第五条主题）。
+   变量清单与 night 完全对齐，只换值不换结构 —— 任何组件都不需要为它写第二套规则。
+   和 night 的区别：night 是紫蓝调「夜航」，这套是 #0b0b0e 影院黑 + 放映机金，
+   并且额外带来两件 night 没有的东西 —— 顶部打光、背景胶片颗粒。
+
+   ① 打光：watch.css 的 --bg-glow 是「中间一束窄暖光 + 一圈宽散射 + 右上冷补光」，
+      这里把它并进 index 的 --bg-layers，保留本站的斜向方向光与底部反射，
+      避免只有顶上亮、下半屏死黑。页眉自身是 0.82 黑底会吃掉 body 的暖光，
+      所以 .site-header 再叠一层同形状的光（与 watch 页 .w-header 的做法一致）。
+   ② 纹理：watch.css 第 80 轮的两层错位点阵（3px / 5px）铺在 body::before 上，
+      固定视口、pointer-events:none、z-index 2 —— 只做质感，不参与点击与布局，
+      且压在页眉（z-index 10）之下让页眉保持干净。它叠在本站原有的 SVG 噪点之上。
+   ③ 所有新增规则一律带 [data-theme="cinema"] 前缀，其余四套主题零影响。 */
+[data-theme="cinema"] {
+  color-scheme: dark;
+  --bg: #0b0b0e;
+  --bg-layers:
+    radial-gradient(620px 190px at 50% -40px, rgba(232, 176, 75, 0.40), transparent 76%),
+    radial-gradient(1200px 560px at 50% -12%, rgba(232, 176, 75, 0.15), transparent 64%),
+    radial-gradient(1500px 760px at 50% -22%, rgba(232, 176, 75, 0.07), transparent 70%),
+    radial-gradient(760px 420px at 92% 8%, rgba(120, 130, 200, 0.055), transparent 60%),
+    linear-gradient(165deg, transparent 0 34%, rgba(232, 176, 75, 0.055) 50%, transparent 66%),
+    radial-gradient(1100px 640px at 50% 116%, rgba(232, 176, 75, 0.06), transparent 68%),
+    linear-gradient(180deg, rgba(232, 176, 75, 0.05), transparent 260px);
+  --panel: #14141a;
+  --panel-2: #1b1b23;
+  --panel-hi: #1e1e27;
+  --panel-lo: rgba(20, 20, 26, 0.55);
+  --card-shine: inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  --inset-shine: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --sunken: #0f0f14;
+  --border: #1e1e26;
+  --border-hi: #33333f;
+  --text: #c9c9d2;
+  --text-dim: #9696a6;
+  --text-faint: #6a6a77;
+  --text-strong: #f5f5f8;
+  --accent: #e8b04b;
+  --accent-2: #c08a2e;
+  --warn: #e0a24a;
+  --ok: #5ad6a0;
+  --tint-1: rgba(232, 176, 75, 0.08);
+  --tint-2: rgba(232, 176, 75, 0.16);
+  --tint-border: rgba(232, 176, 75, 0.45);
+  --ring: rgba(232, 176, 75, 0.26);
+  --radius: 10px;
+  --card-bg: linear-gradient(170deg, #17171e, #101015);
+  --card-border: #23232d;
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 10px 26px rgba(0, 0, 0, 0.45);
+  --card-hover-shadow: 0 18px 40px rgba(0, 0, 0, 0.62), 0 0 0 1px var(--ring);
+  --header-bg: rgba(10, 10, 13, 0.82);
+  --medal-1: #e8b04b; --medal-2: #b9b4c9; --medal-3: #cf8f5f;
+  --medal-shadow-1: none; --medal-shadow-2: none; --medal-shadow-3: none;
+  --gold: var(--medal-1);
+  --gold-glow: rgba(232, 176, 75, 0.30);
+  --ring-backdrop: #0b0b0e;
+  --track: rgba(255, 255, 255, 0.10);
+  --bar-grad: linear-gradient(90deg, #c08a2e, #e8b04b);
+  --badge-bg: rgba(20, 20, 26, 0.92); --badge-text: #f5f5f8;
+  --tl-line: linear-gradient(180deg, rgba(232, 176, 75, 0.5), transparent);
+  --scroll-thumb: #2c2c37;
+  --chart-axis: #9696a6; --chart-split: rgba(255, 255, 255, 0.12); --chart-title: #9696a6;
+  --chart-tip-bg: #17171e; --chart-tip-border: #33333f; --chart-tip-text: #f5f5f8;
+  --chart-legend-off: #5a5a67;
+  --chart-cum-a: #e8b04b; --chart-cum-b: #c08a2e; --chart-line: #f0c878;
+  --chart-cum-a2: #f0a35c; --chart-cum-b2: #c97a2f; --chart-line2: #f0b47a;
+  --fx-meteor: #e8b04b;
+}
+
+[data-theme="cinema"] .site-header {
+  background:
+    radial-gradient(620px 160px at 50% -36px, rgba(232, 176, 75, 0.36), transparent 74%),
+    radial-gradient(1200px 420px at 50% -20%, rgba(232, 176, 75, 0.10), transparent 70%),
+    var(--header-bg);
+}
+
+[data-theme="cinema"] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1.4px),
+    radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1.5px);
+  background-size: 3px 3px, 5px 5px;
+  background-position: 0 0, 1px 2px;
+  opacity: .62;
+}
+
 /* ⑦ 薄荷晨：淡青白底 + 青绿强调（浅色） */
 [data-theme="mint"] {
   --bg: #f1faf7;
