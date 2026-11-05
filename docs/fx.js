@@ -22,6 +22,13 @@
  *   只回调生成节奏（生成率约翻倍、同屏上限 6→10、静默期缩短、最小间隔缩短），
  *   亮度 / 速度 / 尾迹 / 层次 / 渐隐 / 内容避让一律不动 —— 密度提高但仍是「极淡暖光」。
  *   窄屏仍按视口缩放；同屏上限 10 仍明显低于改造前的 18。
+ * 2026-11-05 第 110 轮：用户要求「密度再翻倍，速度略微提高，不透明度提高，峰值亮度提高」。
+ *   四项分别落在 CONFIG.meteor 与 drawMeteor()：
+ *   · 密度：生成率 [2.20,4.20]、同屏上限 20、最小间隔 0.16、静默 [0.02,0.10]
+ *   · 速度：[240,460] → [280,530]（约 +17%，仍远低于改造前的 560–1050）
+ *   · 光带不透明度：haloAlpha / 中层 globalAlpha / 渐变中段系数 / 内容区避让 / 头部柔光全部上调
+ *   · 峰值亮度：alpha [0.20,0.36] → [0.26,0.46]（仍低于改造前 0.35–0.72 的上限）
+ *   层次 / 渐隐 / 尾迹 / 方向 / 配色 / 功能契约一律不动；窄屏仍按视口缩放。
  * ---------------------------------------------------------------------------
  * 调参入口：下方 CONFIG（meteor / layers / dust / lite）集中了全部视觉参数
  * ========================================================================== */
@@ -37,24 +44,24 @@
     // ---- 流星 ----
     meteor: {
       colorVar: '--fx-meteor',
-      spawnPerSec: [1.10, 2.10], // 第 109 轮：每秒颗数回调（108 轮 0.55–1.15，改造前 1.1–2.3）
-      maxAlive: 10,              // 第 109 轮：同屏上限 6→10（改造前 18，仍按视口再缩）
-      speed: [240, 460],         // px/秒（原 560–1050）
+      spawnPerSec: [2.20, 4.20], // 第 110 轮：密度再翻倍（109 轮 1.10–2.10）
+      maxAlive: 20,              // 第 110 轮：同屏上限 10→20（仍按视口再缩）
+      speed: [280, 530],         // 第 110 轮：速度略微提高（109 轮 240–460；改造前 560–1050）
       length: [70, 170],         // 尾迹 px（原 110–260）
       thickness: [0.7, 1.5],     // 头部线宽 px（原 1.0–2.2）
-      alpha: [0.20, 0.36],       // 峰值亮度（原 0.35–0.72）；经层次 / 内容区折减后仍柔和
+      alpha: [0.26, 0.46],       // 第 110 轮：峰值亮度提高（109 轮 0.20–0.36；改造前 0.35–0.72）
       halo: 4.6,                 // 外发光更宽
-      haloAlpha: 0.28,           // 外发光适度提亮：亮度给光带而非针尖（原 0.35）
+      haloAlpha: 0.38,           // 第 110 轮：不透明度提高（109 轮 0.28）
       angleDeg: 30,              // 与水平线夹角，向左下划落
       angleJitter: 6,            // 方向轻微散布，不再全部平行
       ttl: [1.6, 2.6],           // 生命周期秒：保证单颗可见 ≥1.2s
       fadeInFrac: 0.14,          // 前段淡入
       fadeOutFrac: 0.32,         // 后段淡出（原来只有淡入，边缘会突断）
-      minGap: 0.32,              // 第 109 轮：最小生成间隔缩短（仍防扎堆）
-      silence: [0.05, 0.22],     // 第 109 轮：静默期缩短，保留呼吸节奏但不再稀疏
+      minGap: 0.16,              // 第 110 轮：最小生成间隔再减半（仍防扎堆）
+      silence: [0.02, 0.10],     // 第 110 轮：静默期再缩短，保留呼吸节奏
       spawnTop: [-0.14, 0.42],   // 出生 y 区间（视口高度比例），偏上
       spawnSideBias: 0.62,       // 偏向左右留白的概率
-      avoidAlpha: 0.72,          // 落在内容区时的亮度系数（内容区仍可见但明显更淡）
+      avoidAlpha: 0.82,          // 第 110 轮：不透明度提高 → 内容区衰减放松（109 轮 0.72）
     },
 
     /** 远 / 中 / 近三档：权重与速度 / 长度 / 粗细 / 亮度倍率
@@ -197,7 +204,7 @@
   }
 
   function aliveCap() {
-    // 直接随视口缩放：1440 → 10 颗，390 → 4 颗，窄屏仍保持稀疏
+    // 第 110 轮：直接随视口缩放，1440 → 20 颗，390 → 8 颗，窄屏仍保持稀疏
     return Math.max(2, Math.round(CONFIG.meteor.maxAlive * scale));
   }
 
@@ -263,26 +270,26 @@
       // 让流星在深色背景里是一缕可辨的暖光，而不是一个几乎看不见的小点。
       const g = ctx.createLinearGradient(p.x, p.y, tailX, tailY);
       g.addColorStop(0, rgba(p.col, alpha));
-      g.addColorStop(0.28, rgba(p.col, alpha * 0.88));
-      g.addColorStop(0.65, rgba(p.col, alpha * 0.42));
+      g.addColorStop(0.28, rgba(p.col, alpha * 0.92)); // 第 110 轮：衰减放缓，尾迹更实
+      g.addColorStop(0.65, rgba(p.col, alpha * 0.52)); // 第 110 轮：同上（109 轮 0.42）
       g.addColorStop(1, rgba(p.col, 0));
       ctx.strokeStyle = g;
       // ① 最外层宽光晕：负责「融进背景」
       ctx.lineWidth = p.thick * c.halo;
       ctx.globalAlpha = c.haloAlpha;
       ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(tailX, tailY); ctx.stroke();
-      // ② 中层实体光带：给尾迹一点可见的宽度，但不抬高头部峰值
+      // ② 中层实体光带：给尾迹可见宽度，但不抬高头部峰值
       ctx.lineWidth = p.thick * 2.4;
-      ctx.globalAlpha = 0.45;
+      ctx.globalAlpha = 0.62; // 第 110 轮：不透明度提高（109 轮 0.45）
       ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(tailX, tailY); ctx.stroke();
       // ③ 细主线：只保留极窄的亮脊
       ctx.globalAlpha = 1;
       ctx.lineWidth = p.thick;
       ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(tailX, tailY); ctx.stroke();
-      // 头部改为两层极淡柔光晕，不再是实心「针尖」
-      ctx.fillStyle = rgba(p.col, alpha * 0.18);
+      // 头部改为两层柔光晕，不再是实心「针尖」
+      ctx.fillStyle = rgba(p.col, alpha * 0.22); // 第 110 轮：0.18→0.22
       ctx.beginPath(); ctx.arc(p.x, p.y, p.thick * 3.2, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = rgba(p.col, alpha * 0.38);
+      ctx.fillStyle = rgba(p.col, alpha * 0.46); // 第 110 轮：0.38→0.46
       ctx.beginPath(); ctx.arc(p.x, p.y, p.thick * 1.2, 0, Math.PI * 2); ctx.fill();
     }
   }

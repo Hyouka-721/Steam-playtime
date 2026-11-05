@@ -4,8 +4,10 @@
  * 柔和轻盈（速度与亮度下调、双向渐隐、柔光头）、有层次（远中近三档 + 微光尘）、
  * 不过度抢眼（峰值透明度、同屏密度、内容区衰减）、适配窄屏（参数随视口缩放）、
  * 流畅（微光尘离屏预渲染、同屏上限、无每帧 DOM 查询）。
- * 第 109 轮同步：用户要求「流星的密度提高」→ A2 / A2b / B3b 改守新密度区间，
- * 其余柔化与功能契约保持第 108 轮原样；本轮不新建套件，沿用本文件与 online108。
+ * 第 109 轮同步：用户要求「流星的密度提高」→ A2 / A2b / B3b 改守新密度区间。
+ * 第 110 轮同步：用户要求「密度再翻倍，速度略微提高，不透明度提高，峰值亮度提高」
+ *   → A2 改为守四项新区间、新增 A2c（光带整体不透明度）、A2b 阈值同步、B2 峰值判据同步。
+ *   层次 / 渐隐 / 尾迹 / 方向 / 配色 / 功能契约保持第 108 轮原样；沿用本文件与 online108。
  *
  * 用法：cd 到仓库根后 node tests/verify/verify108.mjs（需起 127.0.0.1:8895 静态服务）
  */
@@ -46,20 +48,27 @@ const sat = (hex) => {
 const cssV = (html.match(/style\.css\?v=(\d+)/) || [])[1];
 const appV = (html.match(/app\.js\?v=(\d+)/) || [])[1];
 const fxV = (html.match(/fx\.js\?v=(\d+)/) || [])[1];
-ok('A1 版本参数 CSS 133 / APP 119 / FX 18（app.js 未改不 bump）',
-  cssV === '133' && appV === '119' && fxV === '18', { css: cssV, app: appV, fx: fxV });
+ok('A1 版本参数 CSS 133 / APP 119 / FX 19（app.js 未改不 bump）',
+  cssV === '133' && appV === '119' && fxV === '19', { css: cssV, app: appV, fx: fxV });
 
 const rate = pair('spawnPerSec'), speed = pair('speed'), alpha = pair('alpha'),
   len = pair('length'), ttl = pair('ttl'), thick = pair('thickness');
 const gap = num('minGap'), silence = pair('silence');
-ok('A2 第 109 轮密度回调；速度 / 亮度 / 尾迹仍保持第 108 轮柔化值',
-  rate && rate[0] >= 1.0 && rate[1] <= 2.2 &&
-  num('maxAlive') >= 8 && num('maxAlive') <= 10 && speed && speed[1] <= 460 &&
-  alpha && alpha[1] <= 0.38 && alpha[0] >= 0.18 && len && len[1] <= 170 && thick && thick[1] <= 1.5,
+ok('A2 第 110 轮四项：密度再翻倍 / 速度略提 / 峰值亮度提高 / 尾迹与粗细不变',
+  rate && rate[0] >= 2.0 && rate[1] <= 4.5 &&
+  num('maxAlive') >= 18 && num('maxAlive') <= 22 &&
+  speed && speed[0] >= 260 && speed[1] >= 500 && speed[1] <= 560 &&
+  alpha && alpha[0] >= 0.24 && alpha[1] >= 0.42 && alpha[1] <= 0.50 &&
+  len && len[1] <= 170 && thick && thick[1] <= 1.5,
   { rate, maxAlive: num('maxAlive'), speed, alpha, len, thick });
 ok('A2b 生成节奏确实更密，但仍保留最小间隔与随机静默（未变成连续喷射）',
-  gap > 0 && gap <= 0.35 && silence && silence[1] <= 0.25,
+  gap > 0 && gap <= 0.20 && silence && silence[1] <= 0.12,
   { minGap: gap, silence });
+ok('A2c 光带整体不透明度提高（外发光 / 中层 / 渐变中段 / 内容区避让 / 头部柔光）',
+  num('haloAlpha') >= 0.36 && js.includes('ctx.globalAlpha = 0.62') &&
+  js.includes('alpha * 0.92') && js.includes('alpha * 0.52') &&
+  num('avoidAlpha') >= 0.80 && js.includes('alpha * 0.22') && js.includes('alpha * 0.46'),
+  { haloAlpha: num('haloAlpha'), avoidAlpha: num('avoidAlpha') });
 ok('A3 生命周期 ≥1.6s 且双向渐隐（fadeIn / fadeOut 均存在）',
   ttl && ttl[0] >= 1.6 && num('fadeInFrac') > 0 && num('fadeOutFrac') > 0 &&
   js.includes('smooth(clamp(t / c.fadeInFrac'), { ttl, fadeIn: num('fadeInFrac'), fadeOut: num('fadeOutFrac') });
@@ -131,10 +140,11 @@ for (let i = 0; i < 24; i++) {
   samples.push([s.n, s.max]);
   await page.waitForTimeout(220);
 }
-// 第 109 轮：密度提高后同屏多颗光带的头部柔光会局部叠加，实测峰值 112–151/255。
-// 上限放宽到 0.67 并留出余量，仍明显低于改造前「单颗即 0.72+」的亮线水平。
-ok('B2 画面峰值透明度 ≤ 0.67（多颗局部叠加；改造前单颗即 0.72+），无亮斑',
-  peak <= 170, { peak, of255: 255 });
+// 第 110 轮：峰值亮度提高 + 密度再翻倍 → 多颗光带局部叠加，实测峰值 150–176/255。
+// 判据改为双向：「确实更亮（≥100）」且「未炸白（≤205，0.80）」。
+// 注意单颗 alpha 上限只有 0.46（仍低于改造前 0.72），画面峰值偏高是多颗叠加所致。
+ok('B2 峰值亮度提高且未炸白（0.39–0.80；多颗叠加，单颗上限仍 0.46）',
+  peak >= 100 && peak <= 205, { peak, of255: 255 });
 ok('B2b 观察窗内确有流星划过且可见（峰值显著高于静态底噪 15–20）',
   peak >= 30 && maxN >= 30, { peak, maxN, samples });
 ok('B3 非透明像素占比 ≤1.5%（不密集、不遮挡内容）', ratio <= 0.015,
