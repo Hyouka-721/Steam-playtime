@@ -49,8 +49,8 @@ check('内联：构建脚本串上 inline-boot', /inline-boot\.mjs/.test(build))
 check('样式：骨架屏样式与动画存在', /\.sk-block/.test(css) && /@keyframes sk-shimmer/.test(css));
 check('样式：尊重 reduced-motion（骨架不流动）', /prefers-reduced-motion: reduce[\s\S]{0,120}sk-block/.test(css));
 check('构建：build.mjs 输出 ach_stats 到 meta', /ach_stats:\s*achStats/.test(build));
-check('版本号：style\.css\?v=130 / app\.js\?v=116 / fx.js?v=16',
-  /style\.css\?v=130/.test(html) && /app\.js\?v=116/.test(html) && /fx\.js\?v=16/.test(html));
+check('版本号：style\.css\?v=130 / app\.js\?v=117 / fx.js?v=16',
+  /style\.css\?v=130/.test(html) && /app\.js\?v=117/.test(html) && /fx\.js\?v=16/.test(html));
 
 /* ---------- B/C/D. 浏览器实测 ---------- */
 const browser = await chromium.launch();
@@ -216,9 +216,10 @@ const cards = await page.evaluate(() =>
 check('回归：五张概览卡有值', cards.length === 5 && cards.every((v) => v && v !== '—'), JSON.stringify(cards));
 
 // 当日明细浮层（成就明细已加载，应精确回溯）
-// 第 87 轮：入口从「最近游玩」首行的小日历图标改为「游戏时长」下钻里的月历热力图格子，
-// 断言同步改为：进下钻 → 点一个带时长的格子 → 浮层列出当天明细。
-await page.click('#card-lifetime');
+// 第 87 轮：入口从「最近游玩」首行的小日历图标改为月历热力图格子。
+// 第 104 轮：热力图只由「最近游玩」卡进入，测试入口同步改用该卡；断言本身不变 ——
+// 进热力图 → 点一个带时长的格子 → 浮层列出当天明细。
+await page.click('#card-recent');
 await page.waitForSelector('#lt-detail:not([hidden])', { timeout: 10000 });
 await page.waitForTimeout(300);
 const firstCell = await page.evaluate(() => {
