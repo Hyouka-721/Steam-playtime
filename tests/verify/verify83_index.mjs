@@ -51,9 +51,9 @@ ok('A6 全成就勋章墙仍在成就视图顶部', /id="view-ach"[\s\S]{0,400}i
 
 ok('A7 页脚仍不重复「数据生成于 …」', !html.includes('footer-gen'));
 
-ok('A8 五套主题齐备，night / cinema 变量块都在 CSS 里',
-  ["'cream'", "'mint'", "'dawn'", "'night'", "'cinema'"].every((t) => js.includes(t)) &&
-  /\[data-theme="night"\]\s*\{[\s\S]{200,}?\}/.test(css) &&
+ok('A8 只剩两套主题，mint / dawn / night 变量块已彻底删除',
+  ["'cream'", "'cinema'"].every((t) => js.includes(t)) &&
+  ['mint', 'dawn', 'night'].every((t) => !css.includes('[data-theme="' + t + '"]')) &&
   /\[data-theme="cinema"\]\s*\{[\s\S]{200,}?\}/.test(css));
 
 ok('A9 meta 回到「无封面主色、无临门一脚」的干净状态',
@@ -201,16 +201,17 @@ const dm = await page.evaluate(() => ({
 }));
 ok('B12 单游戏详情仍有「占终身比重 + 期段信息」', dm.share && dm.kv >= 3, JSON.stringify(dm));
 
-await page.evaluate(() => localStorage.setItem('theme', 'night'));
+/* 第 106 轮：night 已删除，深色主题改用 cinema「影院黑」；阈值不动 */
+await page.evaluate(() => localStorage.setItem('theme', 'cinema'));
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(900);
-const night = await page.evaluate(() => {
+const cinemaTheme = await page.evaluate(() => {
   const bg = getComputedStyle(document.body).backgroundColor;
   const m = bg.match(/\d+/g).map(Number);
   return { theme: document.documentElement.dataset.theme, bg, lum: (m[0] * 0.299 + m[1] * 0.587 + m[2] * 0.114) / 255 };
 });
 ok('B13 深色主题生效且底色确实变暗（亮度 < 0.25）',
-  night.theme === 'night' && night.lum < 0.25, JSON.stringify(night));
+  cinemaTheme.theme === 'cinema' && cinemaTheme.lum < 0.25, JSON.stringify(cinemaTheme));
 
 await page.goto(BASE, { waitUntil: 'networkidle' });
 await page.waitForTimeout(600);

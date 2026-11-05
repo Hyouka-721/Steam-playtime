@@ -42,12 +42,12 @@ const a = await page.evaluate(async () => {
     css, js,
   };
 });
-ok('A1 线上版本 CSS 131 / APP 118', a.cssV === '131' && a.appV === '118', { css: a.cssV, app: a.appV });
+ok('A1 线上版本 CSS 132 / APP 119', a.cssV === '132' && a.appV === '119', { css: a.cssV, app: a.appV });
 ok('A2 线上首屏白名单含 cinema', /'cinema'/.test(a.whitelist), a.whitelist.trim());
 const themeIds = [...((a.js.match(/const THEMES = \[([\s\S]*?)\];/) || [])[1] || '')
   .matchAll(/id:\s*'([^']+)'/g)].map((m) => m[1]);
-ok('A3 线上 app.js 恰为五套主题', JSON.stringify(themeIds) ===
-  JSON.stringify(['cream', 'mint', 'dawn', 'night', 'cinema']), themeIds);
+ok('A3 线上 app.js 恰为两套主题', JSON.stringify(themeIds) ===
+  JSON.stringify(['cream', 'cinema']), themeIds);
 const cine = (a.css.match(/\[data-theme="cinema"\]\s*\{([\s\S]*?)\n\}/) || [])[1] || '';
 ok('A4 线上 CSS 含影院黑配色与顶部打光', cine.includes('--bg: #0b0b0e') &&
   cine.includes('--accent: #e8b04b') && (cine.match(/radial-gradient\(/g) || []).length >= 4 &&
@@ -111,14 +111,14 @@ ok('C2 点最近游玩卡进热力图且数据完整', c2.active === 'view-recen
   c2.count === 1 && c2.parent === 'view-recent', c2);
 
 await page.click('#card-lifetime');
-const THEMES = ['cream', 'mint', 'dawn', 'night', 'cinema'];
+const THEMES = ['cream', 'cinema'];
 const seq = [];
 for (let i = 0; i < 8; i++) {
   await page.click('.header-avatar');
   await page.waitForTimeout(160);
   seq.push(await page.evaluate(() => document.documentElement.dataset.theme));
 }
-ok('C3 线上连点 8 次只落在五套主题内且每次都换',
+ok('C3 线上连点 8 次只落在两套主题内且每次都换',
   seq.every((v, i) => i === 0 || v !== seq[i - 1]) && seq.every((v) => THEMES.includes(v)), seq);
 
 /* ---------- D 三档宽度 ---------- */

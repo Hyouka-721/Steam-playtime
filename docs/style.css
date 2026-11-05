@@ -137,69 +137,10 @@
   --fx-meteor: #e8964a;
 }
 
-/* ⑨ 夜航：深色主题（2026-10-31 第 83 轮，用户点名要的一条）。
-   前 8 套全是浅色是刻意的设计决定，这里破例加入 —— 变量清单与 cream 完全对齐，
-   只换值不换结构，所以任何组件都不需要为深色写第二套规则。 */
-[data-theme="night"] {
-  color-scheme: dark;
-  --bg: #14131a;
-  /* 第 97 轮：深色下背景层同样加强（原来 alpha 0.16/0.10/0.07 太保守，
-     深色底上几乎看不出）。冷调放左上、暖调放右下，与浅色主题反向，
-     避免整屏都是同一种紫色倾向。 */
-  --bg-layers:
-    radial-gradient(980px 560px at 10% -8%, rgba(139, 123, 255, 0.24), transparent 64%),
-    radial-gradient(860px 500px at 92% 0%, rgba(90, 200, 250, 0.15), transparent 62%),
-    /* 第 100 轮：斜向方向光（深色下取冷紫，与暖调的底部反射形成对角） */
-    linear-gradient(165deg, transparent 0 34%, rgba(139, 123, 255, 0.06) 50%, transparent 66%),
-    radial-gradient(1100px 640px at 50% 116%, rgba(240, 163, 92, 0.10), transparent 68%),
-    radial-gradient(720px 460px at 78% 62%, rgba(60, 90, 160, 0.08), transparent 66%);
-  --panel: #1c1b24;
-  --panel-2: #232230;
-  /* 第 97 轮：深色下三档面板的亮度差要拉得更开 —— 原 --bg 与 --panel 只差 8 个亮度值，
-     整屏发闷。--panel-hi 提到 #262533，主内容明显浮在背景之上。 */
-  --panel-hi: #262533;
-  --panel-lo: rgba(28, 27, 36, 0.55);
-  /* 深色没有「白色高光」可用，用 5% 的白模拟上沿反光 */
-  --card-shine: inset 0 1px 0 rgba(255, 255, 255, 0.055);
-  --sunken: #1a1922;
-  --border: #2b2938;
-  --border-hi: #3c394d;
-  --text: #e8e6f0; --text-dim: #c2bed4; --text-faint: #9d99b2; --text-strong: #f7f5ff;
-  --accent: #8b7bff; --accent-2: #6f5df0;
-  --warn: #f0a35c; --ok: #5ad6a0;
-  --tint-1: rgba(139, 123, 255, 0.08);
-  --tint-2: rgba(139, 123, 255, 0.16);
-  --tint-border: rgba(139, 123, 255, 0.5);
-  --ring: rgba(139, 123, 255, 0.28);
-  --radius: 10px;
-  --card-bg: linear-gradient(170deg, #23212e, #1a1924);
-  --card-border: #2e2b3d;
-  --card-shadow: 0 1px 2px rgba(90, 70, 180, 0.22), 0 8px 22px rgba(70, 50, 150, 0.28);
-  --card-hover-shadow: 0 14px 32px rgba(70, 50, 150, 0.38);
-  /* 深色下没有白色可用，用 6% 白模拟受光面 */
-  --inset-shine: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  --header-bg: rgba(20, 19, 26, 0.82);
-  --medal-1: #f2c14e; --medal-2: #b9b4c9; --medal-3: #cf8f5f;
-  --gold: var(--medal-1);
-  --gold-glow: rgba(242, 193, 78, 0.3);
-  --ring-backdrop: #0d0c12;
-  --track: rgba(255, 255, 255, 0.1);
-  --bar-grad: linear-gradient(90deg, #6f5df0, #a48bff);
-  --badge-bg: rgba(28, 27, 36, 0.92); --badge-text: #e8e6f0;
-  --tl-line: linear-gradient(180deg, rgba(139, 123, 255, 0.55), transparent);
-  --scroll-thumb: #3c394d;
-  --chart-axis: #a9a5bd; --chart-split: rgba(255, 255, 255, 0.12); --chart-title: #a9a5bd;
-  --chart-tip-bg: #232130; --chart-tip-border: #3c394d; --chart-tip-text: #e8e6f0;
-  --chart-legend-off: #5a5670;
-  --chart-cum-a: #a48bff; --chart-cum-b: #6f5df0; --chart-line: #c0a9ff;
-  --chart-cum-a2: #f0a35c; --chart-cum-b2: #c97a2f; --chart-line2: #f0b47a;
-  --fx-meteor: #a48bff;
-}
-
-/* ⑩ 影院黑：与观影页 watch.html 同源的一套深色（第 105 轮，用户点名要的第五条主题）。
-   变量清单与 night 完全对齐，只换值不换结构 —— 任何组件都不需要为它写第二套规则。
-   和 night 的区别：night 是紫蓝调「夜航」，这套是 #0b0b0e 影院黑 + 放映机金，
-   并且额外带来两件 night 没有的东西 —— 顶部打光、背景胶片颗粒。
+/* ⑩ 影院黑：与观影页 watch.html 同源的一套深色（第 105 轮加入；第 106 轮起成为站上唯一的深色主题）。
+   变量清单与 cream 完全对齐，只换值不换结构 —— 任何组件都不需要为它写第二套规则。
+   本站仅存的另一套主题是浅色「暖阳米」；这套是 #0b0b0e 影院黑 + 放映机金，
+   并且额外带来浅色主题没有的两件东西 —— 顶部打光、背景胶片颗粒。
 
    ① 打光：watch.css 的 --bg-glow 是「中间一束窄暖光 + 一圈宽散射 + 右上冷补光」，
       这里把它并进 index 的 --bg-layers，保留本站的斜向方向光与底部反射，
@@ -208,7 +149,7 @@
    ② 纹理：watch.css 第 80 轮的两层错位点阵（3px / 5px）铺在 body::before 上，
       固定视口、pointer-events:none、z-index 2 —— 只做质感，不参与点击与布局，
       且压在页眉（z-index 10）之下让页眉保持干净。它叠在本站原有的 SVG 噪点之上。
-   ③ 所有新增规则一律带 [data-theme="cinema"] 前缀，其余四套主题零影响。 */
+   ③ 所有新增规则一律带 [data-theme="cinema"] 前缀，另一套主题零影响。 */
 [data-theme="cinema"] {
   color-scheme: dark;
   --bg: #0b0b0e;
@@ -284,104 +225,6 @@
   background-size: 3px 3px, 5px 5px;
   background-position: 0 0, 1px 2px;
   opacity: .62;
-}
-
-/* ⑦ 薄荷晨：淡青白底 + 青绿强调（浅色） */
-[data-theme="mint"] {
-  --bg: #f1faf7;
-  /* 第 97 轮：与 cream 同规格加强（青绿主光 + 天蓝副光 + 底部青绿反射 + 一点暖调平衡） */
-  --bg-layers:
-    radial-gradient(980px 560px at 10% -8%, rgba(15, 158, 142, 0.20), transparent 64%),
-    radial-gradient(860px 500px at 92% 0%, rgba(56, 189, 248, 0.15), transparent 62%),
-    /* 第 100 轮：斜向方向光（青绿主题取主色，压在中景） */
-    linear-gradient(165deg, transparent 0 34%, rgba(15, 158, 142, 0.05) 50%, transparent 66%),
-    radial-gradient(1100px 640px at 50% 116%, rgba(163, 230, 53, 0.11), transparent 68%),
-    radial-gradient(720px 460px at 78% 62%, rgba(245, 170, 90, 0.05), transparent 66%);
-  --panel: #e6f6f0;
-  --panel-2: #d8efe7;
-  --panel-hi: #f2fbf7;
-  --panel-lo: rgba(230, 246, 240, 0.62);
-  --card-shine: inset 0 1px 0 rgba(255, 255, 255, 0.7);
-  --sunken: #dcf0e9;
-  --border: #e0f0ea;
-  --border-hi: #c2e2d6;
-  --text: #122620; --text-dim: #3a564d; --text-faint: #5f7c73; --text-strong: #0a1a15;
-  --accent: #0f9e8e; --accent-2: #0a7d70;
-  --warn: #b45309; --ok: #15803d;
-  --tint-1: rgba(15, 158, 142, 0.06);
-  --tint-2: rgba(15, 158, 142, 0.12);
-  --tint-border: rgba(15, 158, 142, 0.45);
-  --ring: rgba(15, 158, 142, 0.22);
-  --radius: 10px;
-  --card-bg: linear-gradient(170deg, #ecf8f4, #daf0e8);
-  --card-border: #e0f0ea;
-  --card-shadow: 0 1px 2px rgba(15, 120, 110, 0.07), 0 6px 18px rgba(10, 100, 90, 0.10);
-  --card-hover-shadow: 0 12px 28px rgba(10, 100, 90, 0.16);
-  --inset-shine: inset 0 1px 0 rgba(255, 255, 255, 0.55);
-  --header-bg: rgba(247, 253, 251, 0.8);
-  --medal-1: #c08a00; --medal-2: #82968f; --medal-3: #a9753c;
-  --medal-shadow-1: none; --medal-shadow-2: none; --medal-shadow-3: none;
-  --track: rgba(18, 38, 32, 0.09);
-  --bar-grad: linear-gradient(90deg, #0a7d70, #2bb8a5);
-  --badge-bg: rgba(255, 255, 255, 0.92); --badge-text: #122620;
-  --tl-line: linear-gradient(180deg, rgba(15, 158, 142, 0.5), transparent);
-  --scroll-thumb: #c2e2d6;
-  --chart-axis: #4f6d64; --chart-split: rgba(18, 38, 32, 0.1); --chart-title: #4f6d64;
-  --chart-tip-bg: #fbfffe; --chart-tip-border: #cfe9e0; --chart-tip-text: #122620;
-  --chart-legend-off: #a8c2ba;
-  --chart-cum-a: #2bb8a5; --chart-cum-b: #0a7d70; --chart-line: #0f9e8e;
-  --chart-cum-a2: #0f9e8e; --chart-cum-b2: #076057; --chart-line2: #2f8fd1;
-  /* 背景氛围层配色：青绿主题下流星用亮青 */
-  --fx-meteor: #2bb8a5;
-}
-
-/* ⑧ 晨曦紫：淡紫白底 + 紫强调（浅色） */
-[data-theme="dawn"] {
-  --bg: #f8f6ff;
-  /* 第 97 轮：与 cream 同规格加强（紫主光 + 品红副光 + 底部天蓝反射 + 一点暖调平衡） */
-  --bg-layers:
-    radial-gradient(980px 560px at 10% -8%, rgba(124, 92, 240, 0.20), transparent 64%),
-    radial-gradient(860px 500px at 92% 0%, rgba(236, 72, 153, 0.14), transparent 62%),
-    /* 第 100 轮：斜向方向光（紫主题取主色） */
-    linear-gradient(165deg, transparent 0 34%, rgba(124, 92, 240, 0.05) 50%, transparent 66%),
-    radial-gradient(1100px 640px at 50% 116%, rgba(56, 189, 248, 0.11), transparent 68%),
-    radial-gradient(720px 460px at 78% 62%, rgba(240, 170, 90, 0.05), transparent 66%);
-  --panel: #f1edff;
-  --panel-2: #e7e1fc;
-  --panel-hi: #f8f5ff;
-  --panel-lo: rgba(241, 237, 255, 0.62);
-  --card-shine: inset 0 1px 0 rgba(255, 255, 255, 0.7);
-  --sunken: #e9e4fb;
-  --border: #e9e5f6;
-  --border-hi: #d2caf0;
-  --text: #1b1730; --text-dim: #4a4462; --text-faint: #6e6889; --text-strong: #120e24;
-  --accent: #7c5cf0; --accent-2: #6143d6;
-  --warn: #b45309; --ok: #15803d;
-  --tint-1: rgba(124, 92, 240, 0.06);
-  --tint-2: rgba(124, 92, 240, 0.13);
-  --tint-border: rgba(124, 92, 240, 0.45);
-  --ring: rgba(124, 92, 240, 0.22);
-  --radius: 10px;
-  --card-bg: linear-gradient(170deg, #f4f0ff, #e9e3fd);
-  --card-border: #e9e5f6;
-  --card-shadow: 0 1px 2px rgba(90, 60, 200, 0.07), 0 6px 18px rgba(80, 50, 190, 0.10);
-  --card-hover-shadow: 0 12px 28px rgba(80, 50, 190, 0.16);
-  --inset-shine: inset 0 1px 0 rgba(255, 255, 255, 0.55);
-  --header-bg: rgba(251, 250, 255, 0.8);
-  --medal-1: #c98a00; --medal-2: #8b85a3; --medal-3: #b06f3c;
-  --medal-shadow-1: none; --medal-shadow-2: none; --medal-shadow-3: none;
-  --track: rgba(27, 23, 48, 0.09);
-  --bar-grad: linear-gradient(90deg, #6143d6, #8f74ff);
-  --badge-bg: rgba(255, 255, 255, 0.92); --badge-text: #1b1730;
-  --tl-line: linear-gradient(180deg, rgba(124, 92, 240, 0.5), transparent);
-  --scroll-thumb: #d2caf0;
-  --chart-axis: #5f5878; --chart-split: rgba(27, 23, 48, 0.1); --chart-title: #5f5878;
-  --chart-tip-bg: #fffeff; --chart-tip-border: #e0daf7; --chart-tip-text: #1b1730;
-  --chart-legend-off: #b3adcb;
-  --chart-cum-a: #8f74ff; --chart-cum-b: #6143d6; --chart-line: #6a4fd0;
-  --chart-cum-a2: #a78bfa; --chart-cum-b2: #6d4bd6; --chart-line2: #d946a8;
-  /* 背景氛围层配色：紫主题的流星取亮紫 */
-  --fx-meteor: #a78bfa;
 }
 
 * { box-sizing: border-box; }
@@ -1491,7 +1334,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 
 /* ================= 当日明细浮层 ================= */
 /* 第 87 轮：入口改为「游戏时长」下钻里的月历热力图格子（点格子看当天玩了哪些游戏、各多久）；
-   点空白 / Esc / × 关闭。四套主题均为浅色，色值直接走 CSS 变量。 */
+   点空白 / Esc / × 关闭。两套主题色值直接走 CSS 变量。 */
 .cal-overlay {
   position: fixed; inset: 0; z-index: 60;
   display: flex; align-items: center; justify-content: center; padding: 24px;

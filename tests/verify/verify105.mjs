@@ -2,7 +2,7 @@
  *
  * 契约：与观影页 watch.html 同源的深色（#0b0b0e + 放映机金 #e8b04b），
  * 顶部打光 + 背景胶片颗粒；night「夜航」保留，两套深色并列。
- * 新增规则一律带 [data-theme="cinema"] 前缀，其余四套主题零影响。
+ * 新增规则一律带 [data-theme="cinema"] 前缀，另一套浅色主题零影响。
  *
  * 用法：cd 到仓库根后 node tests/verify/verify105.mjs（需起 127.0.0.1:8895 静态服务）
  */
@@ -29,12 +29,12 @@ const ok = (name, cond, extra) => {
 /* ---------- A 源码契约 ---------- */
 const cssV = (html.match(/style\.css\?v=(\d+)/) || [])[1];
 const appV = (html.match(/app\.js\?v=(\d+)/) || [])[1];
-ok('A1 版本参数 CSS 131 / APP 118', cssV === '131' && appV === '118', { css: cssV, app: appV });
+ok('A1 版本参数 CSS 132 / APP 119', cssV === '132' && appV === '119', { css: cssV, app: appV });
 
 const themesBlock = (js.match(/const THEMES = \[([\s\S]*?)\];/) || [])[1] || '';
 const themeIds = [...themesBlock.matchAll(/id:\s*'([^']+)'/g)].map((m) => m[1]);
-ok('A2 THEMES 恰为五套且新增 cinema', JSON.stringify(themeIds) ===
-  JSON.stringify(['cream', 'mint', 'dawn', 'night', 'cinema']), themeIds);
+ok('A2 THEMES 恰为两套（cream + cinema）', JSON.stringify(themeIds) ===
+  JSON.stringify(['cream', 'cinema']), themeIds);
 ok('A3 cinema 标为深色、名为「影院黑」', /id:\s*'cinema',\s*name:\s*'影院黑',\s*mode:\s*'dark'/.test(themesBlock));
 
 const idsLine = (html.match(/var ids = \[([^\]]+)\]/) || [])[1] || '';
@@ -60,12 +60,12 @@ ok('A8 胶片颗粒两层错位点阵 + 固定视口 + 不拦截点击',
   /position:\s*fixed/.test(grainRule) && /pointer-events:\s*none/.test(grainRule) &&
   /z-index:\s*2/.test(grainRule) && /background-size:\s*3px 3px, 5px 5px/.test(grainRule));
 
-/* 隔离性：所有 cinema 专属选择器都要带前缀，不能污染另外四套主题 */
+/* 隔离性：所有 cinema 专属选择器都要带前缀，不能污染另一套浅色主题 */
 const bareGrain = (css.match(/(?<!\[data-theme="cinema"\]\s)\bbody::before\s*\{/g) || []).length;
 ok('A9 body::before 只出现在带 cinema 前缀的规则里', bareGrain === 0, bareGrain);
-ok('A10 原有四套主题变量块仍在',
+ok('A10 三套已删主题的变量块全站为零',
   /:root,\s*\[data-theme="cream"\]\s*\{/.test(css) &&
-  ['mint', 'dawn', 'night'].every((t) => new RegExp('\\[data-theme="' + t + '"\\]\\s*\\{').test(css)));
+  ['mint', 'dawn', 'night'].every((t) => !new RegExp('\\[data-theme="' + t + '"\\]\\s*\\{').test(css)));
 
 /* ---------- B 运行时（影院黑 + 持久化） ---------- */
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });
@@ -119,8 +119,8 @@ const back = await page.evaluate(() => {
 });
 ok('B7 切回 cream 后颗粒消失', back.grainBg === 'none' && back.bg === '#fbf7f1', back);
 
-/* ---------- C 五套主题 × 五个宽度 ---------- */
-const THEMES = ['cream', 'mint', 'dawn', 'night', 'cinema'];
+/* ---------- C 两套主题 × 五个宽度 ---------- */
+const THEMES = ['cream', 'cinema'];
 const WIDTHS = [1440, 1280, 1088, 900, 390];
 for (const t of THEMES) {
   const bad = [];
@@ -161,7 +161,7 @@ ok('D2 点最近游玩卡进热力图且数据完整', d2.active === 'view-recen
 ok('D3 热力图仅一份、归属最近游玩、近 14 天榜已删',
   d2.detailCount === 1 && d2.parent === 'view-recent' && d2.recentList === 0, d2);
 
-/* ---------- E 五套主题都参与随机切换 ---------- */
+/* ---------- E 两套主题来回切换 ---------- */
 await page.click('#card-lifetime');
 const seq = [];
 for (let i = 0; i < 8; i++) {
@@ -169,7 +169,7 @@ for (let i = 0; i < 8; i++) {
   await page.waitForTimeout(140);
   seq.push(await page.evaluate(() => document.documentElement.dataset.theme));
 }
-ok('E1 连点 8 次每次都换且只落在五套主题内',
+ok('E1 连点 8 次每次都换且只落在两套主题内',
   seq.every((v, i) => i === 0 || v !== seq[i - 1]) && seq.every((v) => THEMES.includes(v)), seq);
 
 ok('Z1 全程零 JS 异常', errs.length === 0, errs.slice(0, 5));

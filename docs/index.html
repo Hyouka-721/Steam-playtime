@@ -14,18 +14,21 @@
   <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon-fb74092c.png">
 <script>
   /* 主题持久化（2026-10-18 起，取代原先「每次进入/刷新随机换主题」）：
-     沿用 localStorage 里用户手动选过的主题；从未选过则用默认「暖阳米」cream。
+     沿用 localStorage 里用户手动选过的主题；从未选过则跟随系统深浅
+     （浅色 → 暖阳米 cream，深色 → 影院黑 cinema）。
      仍在首屏前应用，避免闪默认配色；隐私模式下读写抛错时静默回落默认。 */
   (function () {
-    /* 2026-11-05 第 105 轮：白名单加入 cinema「影院黑」，与 app.js 的 THEMES 保持一致。
-       漏了这里的话，用户手动选过影院黑后刷新会被判为无效值而回落到默认主题。 */
-    var ids = ['cream', 'mint', 'dawn', 'night', 'cinema'];
+    /* 2026-11-05 第 106 轮：只保留 cream / cinema 两套（mint / dawn / night 已删除）。
+       白名单必须与 app.js 的 THEMES 一致：漏了这里，用户选过影院黑后刷新会被判为
+       无效值而回落到默认主题。 */
+    var ids = ['cream', 'cinema'];
     var saved = null;
     try { saved = localStorage.getItem('theme'); } catch (e) {}
-    /* 2026-10-31 第 83 轮：首次访问跟随系统深浅；用户手动选过就以 localStorage 为准 */
+    /* 首次访问跟随系统深浅；第 106 轮起系统深色直接落到 cinema（night 已删除）。
+       用户手动选过就以 localStorage 为准。 */
     var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     document.documentElement.dataset.theme =
-      ids.indexOf(saved) >= 0 ? saved : (sysDark ? 'night' : 'cream');
+      ids.indexOf(saved) >= 0 ? saved : (sysDark ? 'cinema' : 'cream');
   })();
 </script>
 <!-- 资源提示（2026-10-18 首屏优化）：
@@ -38,7 +41,7 @@
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=131">
+<link rel="stylesheet" href="style.css?v=132">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -299,7 +302,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
-<script src="app.js?v=118" onerror="__appFail()"></script>
+<script src="app.js?v=119" onerror="__appFail()"></script>
 <!-- 第 93 轮：背景流星（纯装饰、不参与首屏渲染）降到最低下载优先级，且**排在 app.js
      之后** —— 只写 fetchpriority="low" 时浏览器仍会先于 app.js 发起 fx.js 的请求
      （标签在文档里更靠前），实测请求顺序是 fx.js → app.js。调换位置后才真正让路。

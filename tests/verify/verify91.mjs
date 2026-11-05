@@ -16,7 +16,7 @@
  *  2 字号：运行时 computed 精确值 + 差值恒为 2px + 基准参照关系
  *  3 布局：`.tl-week` 文字不越出左列（Range 围盒 vs 可用宽度）、三列轨道未变
  *  4 文案结构：仍是「游戏时长突破 <b>500h</b>」，文本节点与 b 的层级不变
- *  5 四套主题下字号不变
+ *  5 两套主题下字号不变
  *  6 响应式：7 档宽度无横向溢出、周日期不被切
  *  7 无 JS 异常
  */
@@ -63,7 +63,7 @@ const daily = (() => {
 
 const appV = (html.match(/app\.js\?v=(\d+)/) || [])[1];
 const cssV = (html.match(/style\.css\?v=(\d+)/) || [])[1];
-ok('0.1 index.html 引用 app.js?v=118 / style.css?v=131', appV === '118' && cssV === '131', { app: appV, css: cssV });
+ok('0.1 index.html 引用 app.js?v=119 / style.css?v=132', appV === '119' && cssV === '132', { app: appV, css: cssV });
 
 ok('0.2 里程碑步长改成 500h（STEP = 30000 分钟）', /const STEP = 30000;/.test(app), (app.match(/const STEP = \d+;/) || [])[0]);
 ok('0.3 旧的 100h 步长（6000）已不存在', !/const STEP = 6000;/.test(app));
@@ -213,10 +213,10 @@ ok('4.1 仍是「游戏时长突破 」文本 + <b>数字</b> 两层，没有把
   && tl.structure?.boldTag === 'B', tl.structure);
 ok('4.2 <b> 里只有数字（如 1000h），没有多塞文字', /^\d+h$/.test(tl.structure?.boldText ?? ''), tl.structure?.boldText);
 
-/* ================= 5 四套主题 ================= */
+/* ================= 5 两套主题 ================= */
 const themed = await page.evaluate(() => {
   const out = {};
-  for (const th of ['cream', 'mint', 'dawn', 'night']) {
+  for (const th of ['cream', 'cinema']) {
     document.documentElement.dataset.theme = th;
     out[th] = {
       week: getComputedStyle(document.querySelector('.tl-week')).fontSize,
@@ -227,7 +227,7 @@ const themed = await page.evaluate(() => {
   document.documentElement.dataset.theme = 'cream';
   return out;
 });
-ok('5.1 四套主题下三处字号都不变（15 / 14 / 16）',
+ok('5.1 两套主题下三处字号都不变（15 / 14 / 16）',
   Object.values(themed).every((v) => v.week === '14.5px' && v.text === '14px' && v.bold === '16px'), themed);
 
 /* ================= 6 响应式 ================= */
