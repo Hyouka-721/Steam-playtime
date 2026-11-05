@@ -31,13 +31,14 @@ const ver = await page.evaluate(() => {
     fx: (h.match(/fx\.js\?v=(\d+)/) || [])[1],
   };
 });
-ok('A1 线上版本 CSS 133 / APP 119 / FX 17', ver.css === '133' && ver.app === '119' && ver.fx === '17', ver);
+ok('A1 线上版本 CSS 133 / APP 119 / FX 18', ver.css === '133' && ver.app === '119' && ver.fx === '18', ver);
 const js = await page.evaluate(async () => {
-  const r = await fetch('fx.js?v=17&t=' + Date.now(), { cache: 'no-store' });
+  const r = await fetch('fx.js?v=18&t=' + Date.now(), { cache: 'no-store' });
   return r.ok ? r.text() : '';
 });
-ok('A2 线上 fx.js 已加载且为优化版（密度 / 亮度 / 层次 / 渐隐 / 内容避让）', !!js &&
-  /spawnPerSec:\s*\[0\.55,\s*1\.15\]/.test(js) && /alpha:\s*\[0\.20,\s*0\.36\]/.test(js) &&
+ok('A2 线上 fx.js 已加载且为第 109 轮密度回调版（密度 / 亮度 / 层次 / 渐隐 / 内容避让）', !!js &&
+  /spawnPerSec:\s*\[1\.10,\s*2\.10\]/.test(js) && /maxAlive:\s*10/.test(js) &&
+  /alpha:\s*\[0\.20,\s*0\.36\]/.test(js) &&
   /layers:\s*\[/.test(js) && /fadeOutFrac/.test(js) && /avoidAlpha/.test(js) &&
   /col: colors\.meteor\.slice\(\)/.test(js) && /g\.addColorStop\(0\.65/.test(js), { len: js.length });
 const cssSrc = await page.evaluate(async () => {
@@ -72,7 +73,8 @@ for (let i = 0; i < 24; i++) {
   ratio = Math.max(ratio, s.n / s.total);
   await page.waitForTimeout(220);
 }
-ok('B1 线上画面峰值透明度 ≤0.51、无亮斑', peak <= 130, peak);
+// 第 109 轮：密度提高后多颗光带局部叠加，上限同步放宽到 0.67（仍低于改造前 0.72+）
+ok('B1 线上画面峰值透明度 ≤0.67、无亮斑', peak <= 170, peak);
 ok('B1b 线上确有流星划过且可见（峰值显著高于静态底噪）', peak >= 30 && maxN >= 30,
   { peak, maxN });
 ok('B2 线上非透明像素占比 ≤1.5%', ratio <= 0.015, Math.round(ratio * 10000) / 10000);
