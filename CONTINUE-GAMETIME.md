@@ -3,7 +3,7 @@
 > **用法**：新开一个对话，把本文件**全文**粘进去即可无缝续做，不需要再解释项目。
 > **范围**：只研究 `docs/index.html`（Steam 游戏时长统计界面）。
 > **明确排除**：`docs/watch.html` 观影列表（Watch List）及其 `watch.*` / `data/watch.json` / `img/watch/` 全套资源，本文件不涉及、也不要去改。
-> **最后同步**：2026-11-05 第 106 轮（含第 103/104/105 轮的栏目结构、入口、主题变更）。
+> **最后同步**：2026-11-05 第 108 轮（含第 103/104/105/106 轮的栏目结构、入口、主题变更，以及流星特效视觉优化）。
 
 ---
 
@@ -35,7 +35,7 @@
 
 ### 🔴 三条发布纪律（违反必炸）
 
-1. **改 `docs/style.css` 必须 bump `style.css?v=NN`；改 `docs/app.js` 必须 bump `app.js?v=NN`**（现为 `?v=132` / `?v=119`）。两者独立，都改就都 bump。
+1. **改哪个文件就 bump 哪条版本号，三条互相独立**：`style.css?v=NN`、`app.js?v=NN`、`fx.js?v=NN`（现为 `?v=133` / `?v=119` / `?v=17`）。第 108 轮只改了 `style.css` 与 `fx.js`，`app.js` 保持 `119` 不动。
    - 事故前科：只 bump CSS 没 bump JS，用户缓存里的旧 JS 调用了已删除的 DOM 节点 → 抛 TypeError → **热力图整块空白**。**本地永远复现不出来**（服务端直接给最新文件）。
    - bump 要覆盖多种字面量形态：`style.css?v=NN` / 正则里转义过的 `style\.css\?v=NN` / 裸串 `cssV === 'NN'`、`appV`、`CSS_V`、`APP_V`；脚本自身的新旧字面量要拼接构造，注释里也别写版本号。
 2. **同批次反复改同一文件，每次都要再 bump**。一次发布里改了 3 次 CSS 却只有一个版本号 → 用户命中第一版的缓存。
@@ -92,7 +92,7 @@ steam-playtime/
 │       ├── ab-css.mjs         A/B 对照（同机、固定限速）
 │       └── archive/           历史一次性脚本（取证截图 / 版本号 bump / 数据合并），留档备查
 ├── data/                      原始数据（快照 / 差分 / 成就 / 中文名覆盖），永久保留
-├── CONTINUE-GAMETIME.md       本文件（第 106 轮已同步）
+├── CONTINUE-GAMETIME.md       本文件（第 108 轮已同步）
 └── README.md                  项目说明（部署 / Secrets / 数据 Schema）
 ```
 
@@ -145,7 +145,7 @@ steam-playtime/
 1. `index.html` 首屏内联脚本先定 `data-theme`（白名单 + 系统深浅回落），自带内联 `meta + 当月 daily`，**首屏不等网络就能画**；
 2. `app.js` 执行 → `renderLifetime()` 替换骨架 → 封面图按 `IntersectionObserver` 临近视口才赋 `src`；
 3. `achievements.json` 只在切到成就卡时拉，第二次走 SWR；
-4. `fx.js` 最后加载（`defer fetchpriority=low`），只做装饰。
+4. `fx.js` 最后加载（`defer fetchpriority=low`），只做装饰；第 108 轮起是柔化的流星氛围层，不参与布局也不接收点击。
 
 ---
 
@@ -183,19 +183,29 @@ steam-playtime/
 - 图标：文件名带源图 hash（`<用途>-<md5 前8>.png`），换素材＝换 URL；`sw.js` 对 png 是 cache-first，**固定名会被旧缓存挡住**。改图标同步三处：两页 link / `manifest` icons / `sw.js` 的 `SHELL_LIST`。
 - ⚠️不要在窄屏覆盖里另起第一个 `@media (max-width:860px)` 块（部分套件取第一个 860 块）。
 
+### 流星特效契约（第 108 轮，只改视觉 / 节奏，风格 · 布局 · 功能零改动）
+
+`docs/fx.js` 是原生 Canvas 2D 装饰层，配色由两套主题的 `--fx-meteor` 提供（cream `#c9ad8e` / cinema `#bfa677`，均为低饱和暖灰金，**不与 `--accent` 同值**）。设计目标是「背景深处偶尔飘过一缕极淡暖光」，不是橙色亮线划屏。
+
+- 视觉：远 / 中 / 近三档层次 + 离屏预渲染的静态微光尘；多段渐隐光带（外层宽光晕 / 中层实体光带 / 细主线三层）+ 两层柔光头；`smooth()` 双向渐隐，出现与消失都柔；方向轻微散布、随机静默期、最小生成间隔防扎堆。
+- 节奏：密度 `0.55–1.15 颗/秒`、同屏上限 6（再按视口宽度缩放，390px 只留 3）、速度 `240–460 px/s`、峰值透明度 `0.20–0.36`（原版 0.35–0.72）。**亮度预算要摊在整条尾迹上**：只提头部会变成「几乎看不见的针尖」，实测诊断图曾因此连续两轮判为不可辨。
+- 融合：内容区（页眉 / 卡片 / 当前视图面板）亮度乘 `0.72`；矩形每秒低频刷新一次，**不在每帧查 DOM**；每颗粒子出生时锁定颜色，主题切换时在屏粒子不突变。
+- 🔴 功能契约不许动：两态开关 `#fx-seg`、`localStorage` 键 `fx-mode`、`prefers-reduced-motion`、页面隐藏暂停 / 恢复、resize 160ms 节流、窄屏 DPR 降级、`#fx-canvas` 的 `pointer-events:none` + `z-index:20` + 打印隐藏、`window.__fx` 的 `mode/toggle/onChange`。
+- 🔴 测特效亮度必须**逐像素**采样（头部亮点只有 1–3px，每 4/16 像素抽 1 会大幅低估峰值）；观察窗要 ≥5s（ttl 1.6–2.6s、生成间隔 1–2.5s），窗口太短会整段错过峰值而假红。
+
 ---
 
-## 七、当前状态（2026-11-05，第 106 轮）
+## 七、当前状态（2026-11-05，第 108 轮）
 
 | 项 | 值 |
 |---|---|
-| 线上 / 本地 | 第 106 轮系列提交（代码 `22b785c` + 交接文档同步），**推送后线上 = 本地** |
-| 版本参数 | `style.css?v=132` / `app.js?v=119` / `fx.js?v=16` |
+| 线上 / 本地 | **线上仍是第 106 轮**；本地第 108 轮已 commit、**未推送**（用户本轮只说「实施」）。收到「推送」并按标准流发布后线上 = 本地；状态行不写死线上 hash，避免下次发布即过期 |
+| 版本参数 | 本地 `style.css?v=133` / `app.js?v=119` / `fx.js?v=17`；线上仍 `132/119/16` |
 | 主题 | `cream` 暖阳米 + `cinema` 影院黑；深色系统首次访问直接是影院黑 |
-| 本地回归 | 10 个活跃套件 **260 条 0 FAIL**（`verify106` 21 / `verify105` 24 / `verify104` 23 / `verify103` 32 / `verify6` 35 / `verify54` 23 / `verify82_index` 16 / `verify83_index` 32 / `verify91` 29 / `verify92` 25） |
-| 线上复验 | `online102/103/104/105`（第 105 轮基线 71 条）+ `online106`（第 106 轮上线后跑） |
+| 本地回归 | 11 个活跃套件 **282 条 0 FAIL**（`verify108` 22 / `verify106` 21 / `verify105` 24 / `verify104` 23 / `verify103` 32 / `verify6` 35 / `verify54` 23 / `verify82_index` 16 / `verify83_index` 32 / `verify91` 29 / `verify92` 25） |
+| 线上复验 | 第 106 轮基线 `online102/103/104/105/106` 共 **83 条 0 FAIL**；`online108` 已写好、语法检查通过，**须等本轮上线后再跑** |
 | 性能（线上热 CDN 3 次中位） | FCP/LCP **772/1300ms**、首行榜单 1885ms、**CLS 0.000**、二次访问 FCP 56ms、滚动 P50 17ms / **>50ms 帧 0** |
-| 第 106 轮本地实测（5 次取样中位） | cream 二次访问 FCP 64ms / cinema **88ms**、CLS 0.000、滚动 P50 16.7ms、>50ms 帧 0 |
+| 第 108 轮本地实测（3 次取样） | 二次访问 FCP **60ms**（≤100ms）、**CLS 0.000**、滚动 P50 **17ms** / P95 19–23ms / **>50ms 帧 0**、longtask **0**；`fx.js` 仅 18.2KB |
 | 数据规模 | 以 `docs/data/meta.json` 为准（每日快照会变，别写死数字） |
 
 ### 🔴 三条性能红线（不许退化）
@@ -217,7 +227,7 @@ cd docs && C:/Users/33329/.workbuddy/binaries/python/envs/default/Scripts/python
 # 2) bump 版本号（只 bump 改过的那条键，覆盖第二节列出的全部字面量形态）
 # 3) 跑回归 —— 🔴 必须 cd 到仓库根（verify91/92 按 cwd 找 docs/app.js）
 NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
-for s in verify6 verify54 verify82_index verify83_index verify91 verify92 verify103 verify104 verify105 verify106; do
+for s in verify6 verify54 verify82_index verify83_index verify91 verify92 verify103 verify104 verify105 verify106 verify108; do
   "$NODE" tests/verify/$s.mjs | tail -2
 done
 
@@ -227,7 +237,7 @@ done
 # 5) commit（未收到「推送」指令就不推）
 # 6) 推送：先 git fetch，落后就 git merge origin/main（**不要 rebase、不要 --force**）
 # 7) 等 Pages 生效：轮询 index.html 的版本号指纹（带 ?t= 破缓存，max-age=600，可能要 1~7 次）
-# 8) 线上复验：online102/103/104/105/106（新轮次另建 onlineNNN.mjs）
+# 8) 线上复验：online102/103/104/105/106/108（新轮次另建 onlineNNN.mjs）
 ```
 
 - 新功能＝新轮次 + 新建 `tests/verify/<下一号>.mjs`；**旧套件留档，不为跑绿调阈值**。
@@ -284,7 +294,7 @@ done
 
 任何一次改动交付前，至少确认：
 
-- [ ] 10 个活跃本地套件全绿（当前 260 条，0 FAIL）；历史留档套件不调阈值
+- [ ] 11 个活跃本地套件全绿（当前 282 条，0 FAIL）；历史留档套件不调阈值
 - [ ] 1440 / 1280 / 1088 / 900 / 390 五个宽度**无横向溢出**
 - [ ] 两套主题（cream / cinema）× 多宽度截图看过，无错位、对比度足够；切回 cream 时无颗粒/暖光残留
 - [ ] CLS = 0.000，滚动 >50ms 帧 = 0，二次访问 FCP ≤100ms

@@ -41,7 +41,7 @@
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=132">
+<link rel="stylesheet" href="style.css?v=133">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -308,6 +308,6 @@ if ('serviceWorker' in navigator) {
      （标签在文档里更靠前），实测请求顺序是 fx.js → app.js。调换位置后才真正让路。
      fx.js 是独立 IIFE，只读 localStorage 与 CSS 变量，不依赖 app.js，
      所以「执行时机从 app.js 之前挪到之后」不会影响它。 -->
-<script src="fx.js?v=16" defer fetchpriority="low"></script>
+<script src="fx.js?v=17" defer fetchpriority="low"></script>
 </body>
 </html>

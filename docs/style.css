@@ -133,8 +133,10 @@
   --chart-legend-off: #c0b2a3;
   --chart-cum-a: #e08b3f; --chart-cum-b: #b85c1c; --chart-line: #8a4a12;
   --chart-cum-a2: #d9762f; --chart-cum-b2: #9c4f16; --chart-line2: #5f7f2f;
-  /* 背景氛围层配色（流星）：暖琥珀流星（＝本主题 accent 家族） */
-  --fx-meteor: #e8964a;
+  /* 背景氛围层配色（流星）：第 108 轮改为低饱和暖灰金。
+     原 #e8964a 是高饱和琥珀橙，在浅米底上对比过强、像亮线划屏；
+     现值更淡更灰，配合 fx.js 下调后的峰值透明度，只在余光里可感。 */
+  --fx-meteor: #c9ad8e;
 }
 
 /* ⑩ 影院黑：与观影页 watch.html 同源的一套深色（第 105 轮加入；第 106 轮起成为站上唯一的深色主题）。
@@ -203,7 +205,9 @@
   --chart-legend-off: #5a5a67;
   --chart-cum-a: #e8b04b; --chart-cum-b: #c08a2e; --chart-line: #f0c878;
   --chart-cum-a2: #f0a35c; --chart-cum-b2: #c97a2f; --chart-line2: #f0b47a;
-  --fx-meteor: #e8b04b;
+  /* 第 108 轮：与顶部放映机暖光同系，但更淡、更去饱和，
+     避免与金色强调色 / 选中卡高光混淆成「亮斑」。 */
+  --fx-meteor: #bfa677;
 }
 
 [data-theme="cinema"] .site-header {
