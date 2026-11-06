@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-05T21:43:57+08:00",
+  "updated_at": "2026-11-06T18:10:49+08:00",
   "items": [
     {
       "id": "2026-10-31-dear-you",
@@ -245,6 +245,7 @@
       "kind": "movie",
       "watched_at": "2026-04-05",
       "poster": "img/watch/the-secret-life-of-walter-mitty-a89dc6fc.webp",
+      "added_at": "2026-10-24T22:42:53+08:00",
       "poster_w": 640,
       "poster_h": 948,
       "poster_320": "img/watch/the-secret-life-of-walter-mitty-a89dc6fc-320.webp",
@@ -252,12 +253,12 @@
       "title_en": "The Secret Life of Walter Mitty",
       "year": 2013,
       "rating": 7,
+      "order": 3,
       "tags": [
         "剧情",
         "温情"
       ],
-      "note": "To see the world, to draw closer, to find each other",
-      "added_at": "2026-10-24T22:42:53+08:00"
+      "note": "To see the world, to find each other"
     },
     {
       "id": "2026-02-14-swords-into-plowshares",
@@ -679,7 +680,7 @@
       "tags": [
         "纪录"
       ],
-      "note": "“The prehistoic plant is a green planet.”"
+      "note": "The prehistoic plant is a green planet."
     },
     {
       "id": "2023-05-06-three-body",
@@ -767,14 +768,14 @@
       "poster_h": 906,
       "poster_320": "img/watch/yes-minister-ed97481e-320.webp",
       "poster_480": "img/watch/yes-minister-ed97481e-480.webp",
-      "title_en": "Yes Minister",
+      "title_en": "Yes, Minister",
       "year": 1980,
       "rating": 9.9,
+      "order": 0,
       "tags": [
         "喜剧",
         "剧情"
       ],
-      "order": 0,
       "note": "Yes Minister"
     },
     {
@@ -969,11 +970,11 @@
       "title_en": "白い巨塔",
       "year": 2003,
       "rating": 9.5,
+      "order": 1,
       "tags": [
         "剧情"
       ],
-      "order": 1,
-      "note": "里見、僕に不安がないよただ、ただ、無念だ"
+      "note": "僕に不安がないよただ、ただ、無念だ"
     },
     {
       "id": "2022-01-27-re",
@@ -1749,8 +1750,8 @@
       "title": "若能与你共乘海浪之上",
       "kind": "movie",
       "watched_at": "2020-09-06",
-      "added_at": "2026-10-25T15:48:01+08:00",
       "poster": "img/watch/item-d2c7ae62.webp",
+      "added_at": "2026-10-25T15:48:01+08:00",
       "poster_w": 640,
       "poster_h": 896,
       "poster_320": "img/watch/item-d2c7ae62-320.webp",
@@ -1758,11 +1759,12 @@
       "title_en": "きみと、波にのれたら",
       "year": 2019,
       "rating": 7,
+      "order": 3,
       "tags": [
         "动画",
         "爱情"
       ],
-      "note": "没有我的日子，也请务必乘上最高的那朵海浪"
+      "note": "没有我的日子，也请乘上那朵最高的海浪"
     },
     {
       "id": "2020-08-31-the-last-emperor",
@@ -2104,6 +2106,7 @@
       "title_en": "嘉靖与海瑞",
       "year": 2007,
       "rating": 9.9,
+      "order": 2,
       "tags": [
         "历史",
         "剧情"
