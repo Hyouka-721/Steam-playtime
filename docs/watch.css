@@ -305,21 +305,17 @@ code {
 
 /* 第 66 轮：左上角「电影 / 剧集」角标已按需求删除（.poster-kind 规则整条移除） */
 /* 评分：金色，放右下角，压在图上 */
-/* 第 85 轮 P1-3：加 1px 金色描边 + 内高光。原来只有半透明黑底，压在浅色海报
-   （如《情书》的白雪、《海蒂》的亮天空）上时边缘糊成一片；描边给出确定的轮廓，
-   padding 由 2px 8px 收到 1px 7px 抵消边框占位，整体尺寸不变。
-   第 89 轮（用户：「淡化评分和灰色背景填充的存在感」）—— 上面那套在浅色海报上
-   就是一块贴纸。存在感来自**硬边界 + 三层边界强调**（金描边 / 内高光 / 硬投影），
-   不是来自「黑」：
-     A 软边：本体彻底透明（底 / 描边 / 投影 / backdrop-filter 全撤），底盘改由
-       ::before 画成一团模糊暗影（inset -2px + blur(6px)）→ 边界从 1px 突变摊成
-       十几 px 的渐变。实测单像素亮度跳变 0.393 → 0.034。
-     B 默认安静：颜色与底都降到「刚好能读」（#dcb978 + 0.55），鼠标停到卡片上
-       （或键盘聚焦到卡内）才回到 var(--accent) + 0.74。
-   字号 13/700 → 12/600、星星 10/.85 → 9/.7；padding 2px 8px 接住边框让出的 1px。
-   字上补一层暗晕是浅海报的可读性保险：亮合成底上「字芯 vs 紧邻暗晕」实测 5.77:1，
-   而「字芯 vs 盘面」只有 2.17:1 —— 可读性是被 text-shadow 撑住的，不是被底盘。
-   ⚠️ 别只把底降到 0.3 就完事：浅色海报上金字的对比度会掉到 1 附近，直接读不出来。 */
+/* 评分：金色，放右下角，压在图上
+   第 85 轮 P1-3 曾加 1px 金描边 + 内高光 + 半透明黑胶囊；第 89 轮先改成 ::before
+   模糊软边，随后用户进一步要求「**完全删除背景填充，只保留金色评分数字**」——
+   于是底盘整条删掉，角标现在就是一串纯金文字（★ + 数字），没有任何底色 / 描边 /
+   投影 / 伪元素。
+   ⚠️ 为什么 text-shadow 必须留：底盘没了以后，浅色海报（《情书》白雪、《冰菓》亮黄
+   路面）上纯金字的对比度只有 ~1.6:1，肉眼读不出来；可读性全部由字形自带的一层紧暗晕
+   提供（字芯 vs 紧邻暗晕实测 ≥4.5:1）。这不是「背景填充」—— 它只跟着字形走，
+   不形成任何块状区域。别把它当成胶囊一起删。
+   ⚠️ border-radius / padding 保留：无底色时它们不可见，但 verify86 的圆角令牌契约与
+   角标盒子尺寸（51×23）都靠它们守住，去掉会让跨页令牌统计和旧尺寸断言一起红。 */
 .poster-score {
   position: absolute; right: 8px; bottom: 8px;
   display: flex; align-items: baseline; gap: 2px;
@@ -328,35 +324,17 @@ code {
   color: #dcb978;
   border: 0;
   border-radius: var(--r-pill);
-  isolation: isolate;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.72), 0 0 1px rgba(0, 0, 0, 0.55);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.78), 0 0 2px rgba(0, 0, 0, 0.6);
   font-variant-numeric: tabular-nums;
-  transition: color var(--t-2) var(--ease);
-}
-/* 底盘画成「一团模糊的暗影」，而不是一块实色胶囊。
-   ⚠️ 为什么不用 backdrop-filter：它的滤镜区恒等于元素 border-box，边界一定硬 ——
-   第 89 轮横切实测单像素亮度跳变 0.39（1px 硬边），肉眼就是「贴纸」。
-   只有 `filter: blur()` 画出来的形状边界会自己糊掉（实测渐变带 15 CSS px），
-   这才是「A 软边」真正的做法。顺带比 backdrop-filter 便宜（121 张卡不再各开一层滤镜）。 */
-.poster-score::before {
-  content: ''; position: absolute; inset: -2px; z-index: -1;
-  border-radius: inherit;
-  background: rgba(8, 8, 11, 0.55);
-  filter: blur(6px);
-  transition: background-color var(--t-2) var(--ease), filter var(--t-2) var(--ease);
+  transition: color var(--t-2) var(--ease), text-shadow var(--t-2) var(--ease);
 }
 .poster-score i { font-style: normal; font-size: 9px; opacity: .7; }
-/* B：鼠标停在卡片上（或键盘聚焦到卡内）才点亮 —— 浏览时评分是「可选信息」，
-   要看的时候自然会停过去。触屏没有 hover，靠上面的默认态保证可读。 */
+/* B（第 89 轮保留）：鼠标停在卡片上 / 键盘聚焦到卡内才把字色点亮回原亮金，
+   只动字色和字形暗晕，**绝不引入任何背景**。触屏没有 hover，靠默认态保证可读。 */
 .poster:hover .poster-score,
 .poster:focus-within .poster-score {
   color: var(--accent);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6), 0 0 1px rgba(0, 0, 0, 0.45);
-}
-.poster:hover .poster-score::before,
-.poster:focus-within .poster-score::before {
-  background: rgba(8, 8, 11, 0.74);
-  filter: blur(4px);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.68), 0 0 2px rgba(0, 0, 0, 0.5);
 }
 
 /* 第 66 轮：片名与观看日期同一排 —— 片名占左侧可折行、日期靠右且不换行；

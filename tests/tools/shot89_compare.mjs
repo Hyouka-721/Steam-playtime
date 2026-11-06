@@ -38,7 +38,7 @@ const fig1 = `${HEAD}
 <table>
   <tr><th></th>
     <th>改前（第 85 轮）<small>0.76 近黑底 + 1px 金描边 + 内高光 + 硬投影 · 13/700 · #e8b04b</small></th>
-    <th>改后（第 89 轮 A+B）<small>::before 0.55 + blur(6px) 软晕，无描边无投影 · 12/600 · #dcb978 · hover 点亮</small></th></tr>
+    <th>改后（第 89 轮迭代 · 零填充）<small>底盘 / 描边 / 投影 / 伪元素全删，只剩纯金文字 · 12/600 · #dcb978 · hover 只换字色</small></th></tr>
   ${[['情书', '深蓝夜景（中暗）'], ['冰菓', '粉白樱花 + 亮黄路面（最亮）']].map(([r, d]) => `<tr>
     <td class="name"><b>${r}</b>${d}</td>
     <td><img src="${uri(`before-${r}-close.png`)}" style="width:300px;border-radius:6px;display:block"></td>
@@ -50,8 +50,8 @@ const fig2 = `${HEAD}
 <h2>② B 段：默认安静，鼠标停在卡片上才点亮（《冰菓》）</h2>
 <table>
   <tr>
-    <th>默认态<small>::before 0.55 / blur 6px · #dcb978 · 不抢注意力</small></th>
-    <th>hover 态<small>::before 0.74 / blur 4px · var(--accent) · 回到原来的强度</small></th>
+    <th>默认态<small>纯金文字 #dcb978 · 零背景 · 不抢注意力</small></th>
+    <th>hover 态<small>字色 var(--accent) · 依然零背景</small></th>
   </tr>
   <tr>
     <td><img src="${uri('after-冰菓-close.png')}" style="width:330px;border-radius:6px;display:block"></td>

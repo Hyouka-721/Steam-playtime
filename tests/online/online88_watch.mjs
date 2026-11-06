@@ -1,5 +1,5 @@
 /* 第 87/88 轮 watch 侧线上复验：站点图标（电影胶片，favicon 无底盘）
-   对应提交 6800ff3（+ 1c07576 / 57c00b2），预期线上 watch.css?v=25 不变、六条 link 指向 -97e35b7b
+   对应提交 6800ff3（+ 1c07576 / 57c00b2），预期线上 watch.css?v=26 不变、六条 link 指向 -97e35b7b
 
    ① 指纹：六条 link 都在 → -97e35b7b；不再引用 -064bab46 / minion webp；css/js 与本地 md5 全等
    ② 文件：六张 200 + image/png + 真实像素尺寸 = 声明；字节 md5 与本地全等
@@ -73,10 +73,10 @@ ok('A2 六条 link 全部指向 -' + HASH,
 ok('A3 不再拿 img/minion-*.webp 当 favicon（小黄人仍是站内 logo，不删）',
   !/<link rel="icon"[^>]*image\/webp/.test(html) && /minion-[0-9a-f]{8}\.webp/.test(html));
 
-const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=25&t=' + TS);
+const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=26&t=' + TS);
 const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=16&t=' + TS);
-ok('A4 watch.css?v=25 / watch.js?v=16 未变（本轮不 bump —— 换的是文件 URL），且与本地字节全等',
-  /watch\.css\?v=25/.test(html) && /watch\.js\?v=16/.test(html) &&
+ok('A4 watch.css?v=26 / watch.js?v=16 未变（本轮不 bump —— 换的是文件 URL），且与本地字节全等',
+  /watch\.css\?v=26/.test(html) && /watch\.js\?v=16/.test(html) &&
   md5txt(liveCss) === md5txt(localCss) && md5txt(liveJs) === md5txt(localJs),
   `css ${md5txt(liveCss).slice(0, 12)} / js ${md5txt(liveJs).slice(0, 12)}`);
 
