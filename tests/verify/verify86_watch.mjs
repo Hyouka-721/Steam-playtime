@@ -41,7 +41,7 @@ const ok = (n, c, extra = '') => {
 console.log('== A 静态 ==');
 
 ok('A1 版本号 v24（css）/ v16（js，本轮未动）',
-  /watch\.css\?v=24/.test(html) && /watch\.js\?v=16/.test(html),
+  /watch\.css\?v=25/.test(html) && /watch\.js\?v=16/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const NEED_TOKENS = ['--text-soft', '--text-faint', '--well', '--img-bg', '--on-accent', '--danger',
@@ -63,7 +63,11 @@ ok('A3 规则体里零颜色字面量残留（全部走 var()，同值只写一�
    ⚠️ :focus-visible 的圆角**不参与归一**：第 56 轮 verify56 把头像/站名的焦点环钉成跨页契约
       （与首页 .header-avatar / .site-title 逐字一致），而 index 线不会跟着 token 化。 */
 const noFocus = rulesOnly.replace(/[\w-]+:focus-visible\s*\{[^}]*\}/g, '');
-const radii = [...noFocus.matchAll(/border-radius:\s*([^;]+);/g)].map((m) => m[1].trim());
+/* 第 89 轮：伪元素的 `border-radius: inherit` **不是新档位** —— 它复制的是父元素已经落档的
+   令牌值（`.poster-score::before` 用 inherit 跟住胶囊圆角，这样父类只改一处）。伪元素块同样
+   从统计里剔除，真元素仍只允许 5 档令牌 + 50% + 2px。 */
+const noPseudo = noFocus.replace(/[\w-]+(?:::before|::after)\s*\{[^}]*\}/g, '');
+const radii = [...noPseudo.matchAll(/border-radius:\s*([^;]+);/g)].map((m) => m[1].trim());
 const OK_RADII = new Set(['var(--r-xs)', 'var(--r-sm)', 'var(--r-md)', 'var(--r-lg)', 'var(--r-pill)', '50%', '2px']);
 const badRadii = [...new Set(radii.filter((v) => !OK_RADII.has(v)))];
 ok(`A4 圆角（:focus-visible 除外）只落 5 档令牌 + 50% + 2px（共 ${radii.length} 处，改前 26 处 / 12 种写法）`,

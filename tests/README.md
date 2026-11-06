@@ -32,12 +32,15 @@ tests/
   ```bash
   NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
   for s in verify6 verify47 verify48 verify49 verify54 verify55 verify56 verify57 verify58 \
-           verify60 verify62 verify63 verify64 verify65 verify66 verify67 verify68 verify69 verify70 verify72 verify73 verify75 verify78 verify79 verify80 verify82 verify83 verify84_watch; do
+           verify60 verify62 verify63 verify64 verify65 verify66 verify67 verify68 verify69 verify70 verify72 verify73 verify75 verify78 verify79 verify80 verify82 verify83 verify84_watch verify85_watch verify86_watch verify87_watch verify89_watch; do
     echo "== $s =="; "$NODE" tests/verify/$s.mjs 2>&1 | tail -2
   done
   ```
+  ⚠️ **没有 `verify88_watch`**（第 88 轮换图标是扩写 `verify87_watch`，不新起编号）；同理第 87 轮也没有新编号。
 
-## 套件清单与当前基线（watch 侧第 88 轮：**27 套件 821 条 0 FAIL**、线上 **145 条 0 FAIL**；index 侧第 102 轮：**11 套件 451 条 0 FAIL**（线上 online102 16 条 0 FAIL） —— 两条线轮号各走各的，认文件名后缀 `_watch` / `_index`）
+## 套件清单与当前基线（watch 侧第 89 轮：**28 套件 849 条 → 848 PASS / 1 已知红**；线上 **145 条 0 FAIL**；index 侧第 102 轮：**11 套件 451 条 0 FAIL**（线上 online102 16 条 0 FAIL） —— 两条线轮号各走各的，认文件名后缀 `_watch` / `_index`）
+
+⚠️ **那 1 条已知红 = `verify56` B11「两页页眉高度相同」**：1440 差 `172 / 173`、860 差 `160 / 161`，根因是 `style.css` 的 `.site-header` 在 **index 线第 97 轮**（`8c162ed`）被加了 `border-bottom: 0`，而 `.w-header` 从建站起就有 `1px solid var(--border)` —— 属跨线遗留，不是 watch 侧改动引入的。**不许用「减去 1px 边框再比」抹平**（那是调阈值掩盖），要修就二选一：index 侧恢复页眉下边线，或 watch 侧去掉它。
 
 | 脚本 | 覆盖轮次 / 契约 | 条数 |
 |---|---|---|
@@ -71,6 +74,7 @@ tests/
 | `verify85_watch` | 第 85 轮 watch 侧第二批 P1：**字阶归一**（11.5/12.5/13.5/14.5 四个半像素档并入 12/12/13/14；时间轴 21/18.5/18.5/19 是第 64 轮契约，不在范围，A6 反向守着）+ **片名单行省略**（桌面 `nowrap`+`ellipsis`，≤480 恢复两行 clamp）+ **评分牌 1px 金边**（`padding` 收到 `1px 7px` 抵消边框占位，整体尺寸不变） | 16 |
 | `verify86_watch` | 第 86 轮 watch 侧第三批 P2+P3：**颜色令牌归一**（文字色阶补齐 五档、金色透明度按用途分 wash/edge/line、`#0e0e12` 与 `#0e0e13` 差 1 阶合一）+ **表单说明文案**（原生 file input 的英文「Choose File / No file chosen」改自绘中文按钮、海报说明 4 行→2 行、标签「逗号或顿号分隔」）+ **圆角归一**（12 种写法→7 种，8/9/10/11/12 五档挤 4px 内收成 8/12）+ **动效归一**（8 档时长→3 档、`ease`→一条 `cubic-bezier(.22,.68,.28,1)`，并补上 `.w-btn-primary` 漏掉的 `filter`、`.tl-name` 与 `.w-foot a` 漏掉的 color 过渡）。**A13 反向守着第 56 轮跨页契约**：头像 transition 与头像/站名焦点环圆角不参与归一 | 24 |
 | `verify87_watch` | 第 87 轮 watch 侧：站点图标换成用户素材，**素材换过三次，最终版是第 88 轮的「电影胶片」**（放映机 `-a60e802b` → 摄像机 `-064bab46` → 胶片 `-97e35b7b`；原先是直接拿 460×420 站标 webp 当 favicon，无尺寸、非正方）。六档一次生成：16/32/48 标签页与书签、180 iOS 桌面、192/512 Android 主屏。**判据分三层**：① 结构（六条 link + 旧小黄人 favicon 已撤但 logo 仍在）② 文件（真实像素尺寸、盘型 —— **小档四角透明 / 大档满幅不透明**、大档底色 `rgb(255,255,255)`、体积 16/32/48 ≤4KB 且整套 ≤60KB）③ **一致性（量化）**：主体宽度占比 = alpha>128 且**非近白**像素的包围盒 / 画布边长；16/32/48 同为 **0.938**（极差 ≤0.02）、180/192/512 同为 **0.779**（极差 ≤0.01）—— 「不跑形」只有这个口径能量。文件名带源图哈希，套件从 `(film\|camera\|projector)-<hash>.png` 推导期望值，换素材时自动跟上。**⚠️ 盘型规则（第 88 轮改定）**：favicon 铺不铺盘看**主体明度**，不看素材喜好 —— 深色主体（放映机 `#283848` / 摄像机 `#321b41`）压深蓝标签条 `#0b2a45` 只剩轮廓，必须铺盘；亮蓝主体（胶片 `#2F88FF`，自身够亮）纯透明反而更干净，三种底色实测都认得出。iOS/Android 三档**永远必须铺实底**（iOS 会把透明填成黑底，且系统自己遮圆角 → 不自己画圆角） | 21 |
+| `verify89_watch` | 第 89 轮 watch 侧：**评分角标降噪（用户原话「如何淡化评分和灰色背景填充的存在感」→ 选 A 软边 + B 默认安静）**。诊断结论：原来的「重」不是来自「黑」，而是来自**硬边界 + 三层边界强调**（1px 金描边 / 内高光 / 硬投影）。改法 = 拆掉 border、box-shadow、backdrop-filter，本体彻底透明，底盘改由 `.poster-score::before`（`inset:-2px` + `rgba(8,8,11,.55)` + **`filter: blur(6px)`**）画成一团暗影；字号 13/700 → 12/600、金色 `#e8b04b` → `#dcb978`、星星 10/`.85` → 9/`.7`、`padding 1px 7px` → `2px 8px` 接住边框让出的 1px（整体尺寸不变）。B 段 = `hover` / `focus-within` 才点亮（0.74 + blur 4px + `var(--accent)`）。**量化判据**：静息态横切边界单像素亮度跳变 **0.393 → 0.0336**（B8 ≤0.05）、渐变带 **0 → 30 设备像素**（B9 ≥8）、字芯 vs 紧邻暗晕 **5.77:1**（B10 ≥4.5，12px/600 属小字取 AA 档）、字芯 vs 盘面满强度 **2.17:1**（B11 ≥2.0，反过度淡化）。⚠️ 三条假红全出在**测量方法**上，见文末踩坑区（hover 态冒充静息态 / 10~90% 起止写反 / CSS px 与设备像素混用） | 28 |
 | `verify92` | 第 92 轮 index 侧：站点图标换成用户素材「游戏手柄」（favicon 16/32/48 透明 + apple-touch 180 / PWA 192·512 铺 cream 底，**文件名带素材 hash** 绕开 SW 的 cache-first）+ 站名改 **Game Time**（title / 页眉 h1 / manifest 去掉 My 前缀）+ 旧的 icon-192·512 删除 + watch 页返回链接同步 + 改名后页眉几何（≤480 仍 44px/1px、不溢出、不被头像压住）与「点它回顶部」交互未坏 | 25 |
 | `verify91` | 第 91 轮 index 侧：里程碑改 **500h 一档**（STEP 30000；条数/取值/间隔全从数据推导，且必须是 500 的整数倍）+ **周日期 13→15px** + **里程碑数字 17→16px（比正文 14px 正好大 2px）** + 文案结构仍是「文本 + `<b>数值</b>`」+ 三列轨道 116/44/1fr 未变 + 最长周日期「10.13-10.19」不越出左列 + 四主题 + 7 档响应式 | 29 |
 | `verify90` | 第 90 轮 index 侧：热力图时间标签 **加粗到 700**（全 17 格字重恒 700、字号/nowrap/行高不变、日期仍 600、汇总行与月份块未被连带）+ 游戏库时间轴 **补录 10.12 王国保卫战 1.6h**（`data/overrides/timeline-extra.json` → `meta.timeline_extra` → 只进 `renderTimeline` 的周聚合，**不进 `daily`**）+ **隔离性 A/B 对照**（route 抹掉 `timeline_extra` 重载，五张卡/最近游玩榜/热力图汇总逐字相同，差异只在时间轴）+ 四主题 + 7 档响应式；360 单独降档 10px。**第二批**：删掉补录提示行（`.tl-extra` 全站为 0、正文无「补录」）+ 时间轴补入整年历史（54 周/223 条/1040h，周数与里程碑**从数据推导**逐条比对、A/B 抹数据后 57→3 周）+ 零破图 + 突破 1000h 必须落在含 2026-04-16 的那一周 | 49 |
@@ -124,7 +128,13 @@ tests/
 - ⚠️ **解析 CSS 规则前必须先剥注释**：第 84 轮 `verify84_watch` A1 写了个「取块内第一个 `.w-title{…}` 规则」的正则，而我恰好在 CSS 注释里写了同一串字面量 → 正则把**注释**当成规则体，解析出 `…` 这种假声明，断言显示详情为 `...`，排查半天。凡是用 `/\.[\w-]+\s*\{([^}]*)\}/` 这类正则取声明的套件，先 `s.replace(/\/\*[\s\S]*?\*\//g, '')` 再匹配；同理，注释里也别写看起来像选择器的字面量（写成「第一条 .w-title 规则」这种自然语言）。
 - ⚠️ **同一元素的多组属性尽量写进同一条规则**：`verify58` A3 是按「块内**第一条** `.w-title` 规则」取 `font-size` 的，第 84 轮我把 grid 定位和 `font-size` 拆成两条 `.w-title` 规则 → 取到的那条没有 `font-size`，A3 与 B[480/390/360] 共 4 条全 FAIL。窄屏改写要动某选择器时，**把新属性并进原来那条**，别另起一条同名规则。
 - ⚠️ **改版式前先 grep 旧套件里的「字面量断言」**：`verify55` A4 / `verify56` A6 原本是 `/\.w-home \{ width: 88px; height: 88px; \}/` 这种**逐字符**匹配 —— 第 84 轮给同一条规则前面加了 `grid-row: 1; grid-column: 1;`（值一个没变），立刻误红。这类判据的正确形态是「先用 `/\.w-home \{[^}]*\}/` 抠出规则体，再判断 `width: 88px` / `height: 88px` 是否在体内」，与书写顺序无关。同轮 `verify63` B[860] 的「三列垂直居中」则是**真契约变更**（P0-3 把 ≤860 改成顶对齐）→ 改判成「≤860 顶对齐（`body.t = thumb.t`）/ ≥1000 仍居中」，**桌面那条不放松**。判据过期有两种：书写形式过期（改判据）与契约本身变了（改需求文档 + 改判据），别混。
-- ⚠️ **`verify58` 钉着跨页一致性**：≤480 的 `.w-title` 与首页 `.site-title` 必须逐值相同（44px / 1px），logo 与头像的 `left`/`right` 也逐像素比对（`iconsOK`）→ `.w-header` 的**横向 padding 必须保持 16px**。第 84 轮为了两行式把它改成 18px（想和 `.w-main` 的 18 对齐），4 条断言立刻红，改回 16px 才过 —— 想要更宽的边距，只能改 `.w-main`。
+- ⚠️ **`backdrop-filter` 做不出软边，别拿它当「柔和」**（第 89 轮实测）：它的滤镜区**恒等于元素 border-box**，只改盒子内部的像素，边界仍由 border-box 决定 → 横切量到**单像素亮度跳变 0.39**（1px 硬边级），肉眼就是贴纸。真正会自己糊掉边界的是 `filter: blur()`：把底盘画成 `::before` + `inset:-2px` + `blur(6px)`（配 `isolation: isolate` + `z-index:-1` 才粘在父元素背后），实测跳变降到 **0.0336**、渐变带宽 **30 设备像素（15 CSS px）**。顺带比 `backdrop-filter` 便宜——121 张卡不再各开一层滤镜。
+- ⚠️ **量「静息态」之前必须把鼠标移开**（第 89 轮 B8/B9 假红）：前一条断言刚 hover 过第一张卡，`::before` 还停在点亮态（更实 + 模糊更紧），量出来的边界更硬、ramp 更窄。凡是「默认态 vs hover 态」两套值的组件，剖面/取样前先 `page.mouse.move(1, 1)` 再等 300ms。
+- ⚠️ **10%~90% 渐变带的起止条件极易写反**（第 89 轮 B9 假红，`ramp` 恒 0）：降序剖面下「刚开始过渡」= 首次跌破 `hi − 10%·span`、「过渡结束」= 首次跌破 `hi − 90%·span`；两个条件都写成「暗侧阈值」会让 `s1/s2` 挤在相邻像素上。打印 `t90/t10` 与 `s1/s2` 一眼就能看出反了。
+- ⚠️ **CSS px 与设备像素混用**（第 89 轮 B10 假红，对比度 0.96）：`boundingBox()` / `clip` 都是 CSS px，`screenshot()` 出的是 dpr=2 的位图。取样窗按 `pad*2 + 8` 算会越过 pad-left（8 CSS px = 16 设备像素）直接吃进字形，取到金色像素。坐标一律先乘 DPR 再取整，并且用 `Math.round((bb.x - clip.x) * DPR)` 反推元素在**位图**里的左边界（clip 会被 Playwright 取整，别自己算）。
+- ⚠️ **「对比度」要分两个口径量，别混**（第 89 轮）：① **局部对比** = 字形核心 vs 紧邻暗晕（`text-shadow` 打出来的那圈），这是眼睛实际判断可读性的量，实测 **5.77:1**；② **字 vs 底盘** = 字形核心 vs 盘面满强度，反映"淡化"的代价，实测 **2.17:1**。底盘淡下去以后只量 ② 会得出「不合格」的结论，但页面看着是清楚的——因为可读性是被 `text-shadow` 撑住的。两个数都要记录，别只留一个。
+- ⚠️ **`before` 对照图必须自己注入旧规则**（第 89 轮）：`docs/*.css` 已经是新版时，直接截图得到的 before 和 after 逐像素相同。从 `git show HEAD:docs/watch.css` 里逐字取回旧块，用 `addStyleTag` 注入，还得补 `::before { display:none }` 和 `text-shadow:none`（旧版没有暗晕；`text-shadow` 是**可继承属性**，别漏）。
+- ⚠️ **跨线过期的字面量快照，改判而不是调阈值**（第 89 轮一次遇到三条）：`verify66` F4 硬编码 `app.js?v=115`（index 线已 bump 到 v=119）、`verify58` D 的两张标题截图被 index 页的流星画布（`position:fixed` + `z-index:20`，**盖在标题上方**）随机盖住 → md5 永不稳定、`verify56` B11 的「两页页眉同高」差了 1px（`style.css` 的 `.site-header` 在 **index 线第 97 轮** `8c162ed` 加了 `border-bottom: 0`，而 `.w-header` 从建站起就有 `1px solid`）。前两条改判成实质约束（三件资产仍带 `?v=NN` 且不串 `watch.*`；截图前 `window.__fx.toggle()` 关特效）；B11 是**真的几何契约差 1px**，不属本条，留着红并上报，**不许用「减去边框再比」把它抹平**。
 
 ## 关于旧脚本
 

@@ -61,7 +61,7 @@ ok('A4 字体族与字重也与首页一致（Black Rose / normal）', (() => {
   const wt = (t) => (t.match(/font-weight:\s*([^;]+);/) || [])[1];
   return fam(w) === fam(s) && wt(w) === wt(s);
 })());
-ok('A5 版本号 bump：watch.css?v=24', /watch\.css\?v=24"/.test(html));
+ok('A5 版本号 bump：watch.css?v=25', /watch\.css\?v=25"/.test(html));
 
 /* ================= B 浏览器：十一档实测 ================= */
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });
@@ -166,6 +166,12 @@ const flatten = (pg, ts, hs) => pg.evaluate(([t, h]) => {
   hdr.style.background = '#ffffff';
   hdr.style.backdropFilter = 'none';
   hdr.style.setProperty('-webkit-backdrop-filter', 'none');
+  /* 第 89 轮补：index 页 fx.js 的流星画布是 position:fixed + z-index:20，**盖在标题上方**，
+     所以 .site-title 的元素截图会把飘过的流星一起截进去 → 连拍 12 张都抓不到两张相同，
+     D 段「同一文案渲染逐字节相同」开始假红（index 线第 108~110 轮把密度翻到 2.2~4.2/s、
+     同屏上限 20 颗之后必然偶发）。这里先关掉特效再截 —— 关的时候 setMode('off') 内部会
+     stop() + clearCanvas()，画布不留残帧。观页没有 fx.js，用 __fx 存在性守卫。 */
+  if (window.__fx && window.__fx.mode() !== 'off') window.__fx.toggle();
   const el = document.querySelector(t);
   el.textContent = 'Game time';
   el.style.color = '#000000';

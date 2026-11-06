@@ -46,8 +46,8 @@ ok('A7 评分格式改为 toFixed(1)（整数也带小数位）', /n\.toFixed\(1
 ok('A8 上映字段优先取 release_date，缺省回退 year',
   /function releaseText\(it\)/.test(js) && /it\.release_date/.test(js) && /releaseText\(it\)/.test(js));
 
-ok('A9 版本号 bump：watch.css?v=24 / watch.js?v=16',
-  /watch\.css\?v=24"/.test(html) && /watch\.js\?v=16"/.test(html));
+ok('A9 版本号 bump：watch.css?v=25 / watch.js?v=16',
+  /watch\.css\?v=25"/.test(html) && /watch\.js\?v=16"/.test(html));
 
 /* -- 数据 -- */
 const byTitle = (t) => data.items.filter((x) => x.title === t);
@@ -307,11 +307,19 @@ console.log('\n== F 其他功能不受影响 ==');
     dlg.open && dlg.missing.length === 0 && dlg.ratingStep === '0.5', JSON.stringify(dlg));
   await p.evaluate(() => document.getElementById('w-add').close());
 
+  /* 第 89 轮改判：原来硬编码三个**绝对版本号**（style.css?v=133 / app.js?v=115 / fx.js?v=19）
+     —— 那是另一条线（index）当轮的快照，index 线一 bump 就必红（现在 app.js 已到 v=119）。
+     典型的「代理判据过期」：它名义上守「观影页的改动没碰到首页」，实际守的是「index 不许改版」。
+     换成两条实质约束：① 三件资产仍带 ?v=NN；② 首页不引用任何 watch.* 资源（两页资产不串线）。 */
   const idx = await p.evaluate(async (base) => {
     const h = await (await fetch(base + 'index.html', { cache: 'no-cache' })).text();
-    return ['style.css?v=133', 'app.js?v=115', 'fx.js?v=19'].filter((v) => !h.includes(v));
+    const need = ['style.css', 'app.js', 'fx.js'].filter((f) => !new RegExp(f.replace('.', '\\.') + '\\?v=\\d+').test(h));
+    const leaked = ['watch.css', 'watch.js'].filter((f) => h.includes(f));
+    return { need, leaked };
   }, BASE);
-  ok('F4 首页三个版本号未受影响', idx.length === 0, idx.join(',') || '全部命中');
+  ok('F4 首页三件资产仍带 ?v=NN、且不含任何 watch.* 资源（第 89 轮改判，原判据是另一条线的版本号快照）',
+    idx.need.length === 0 && idx.leaked.length === 0,
+    `缺版本号 ${idx.need.join(',') || '无'} / 串线 ${idx.leaked.join(',') || '无'}`);
   await c.close();
 }
 

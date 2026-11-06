@@ -7,6 +7,9 @@
    ② P1-2 片名单行省略：1440 下 121 部里只有 2 部会折两行，但那一排的短评起始位置会低一整行
       （19.6px）→ 改单行后同排短评对齐。≤480 恢复两行 clamp（390 下有 23 部折行）。
    ③ P1-3 评分牌加 1px 金边：原来只有半透明黑底，压在浅色海报上边缘糊掉。
+      ⚠️ 第 89 轮用户要求「淡化评分和灰底的存在感」→ 那 1px 金边连同内高光、硬投影一起
+      换成了「无描边 + 大半径软晕 + backdrop-filter 压暗」。A5 已按新契约改判，
+      新的视觉契约由 `verify89_watch` 正面守。
 
    写法约定：静态断言读 docs/watch.css 原文（**先剥注释**）；运行时走本地 8895。 */
 import { createRequire } from 'module';
@@ -39,8 +42,8 @@ const baseCss = css.slice(0, css.indexOf('@media'));           // 默认规则�
 const i480 = css.indexOf('@media (max-width: 480px)');
 const b480 = css.slice(i480, css.indexOf('@media', i480 + 10));
 
-ok('A1 watch.html 引用 watch.css?v=24 / watch.js?v=16（js 本轮未动）',
-  /watch\.css\?v=24/.test(html) && /watch\.js\?v=16/.test(html),
+ok('A1 watch.html 引用 watch.css?v=25 / watch.js?v=16（js 本轮未动）',
+  /watch\.css\?v=25/.test(html) && /watch\.js\?v=16/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const halfPx = css.match(/font-size:\s*(?:11|12|13|14)\.5px/g) || [];
@@ -58,8 +61,14 @@ ok('A4 ≤480 块内 .poster-name 恢复两行 clamp（390 下 23 部会折行�
   pn480.replace(/\s+/g, ' ').slice(0, 110));
 
 const sc = rule('.poster-score', baseCss);
-ok('A5 .poster-score 有 1px 描边，且 padding 收到 1px 7px 抵消边框占位',
-  /border:\s*1px solid/.test(sc) && /padding:\s*1px 7px/.test(sc),
+/* 第 89 轮（用户要求「淡化评分和灰底的存在感」）把第 85 轮的「1px 金边 + 内高光 + 硬投影」
+   整条换成了「无描边 + 大半径软晕 + backdrop-filter 压暗」。**需求变了，判据跟着变**：
+   这里不再要求描边，改守换代后的两条硬事实 ——
+     ① 硬描边必须为 0（去掉贴纸感的前提）
+     ② padding 从 1px 7px 长到 2px 8px（边框的 1px 让位给留白，整体尺寸基本不变）
+   新的视觉契约（软晕 / brightness / 字号 12·600 / hover 提亮）由 `verify89_watch` 正面守。 */
+ok('A5 .poster-score 已去掉硬描边（第 89 轮换代），padding 1px 7px → 2px 8px 接住边框让出的 1px',
+  !/border:\s*1px solid/.test(sc) && /border:\s*0/.test(sc) && /padding:\s*2px 8px/.test(sc),
   sc.replace(/\s+/g, ' ').slice(0, 120));
 
 /* 反守卫：第 62/64 轮定的时间轴字号一个都不许被「字阶归一」顺手改掉。
@@ -115,6 +124,7 @@ const run = async (W, H) => {
         noteTop: +note.getBoundingClientRect().top.toFixed(1),
         scoreBorder: getComputedStyle(score).borderTopWidth,
         scoreFont: parseFloat(getComputedStyle(score).fontSize),
+        scoreH: +sRect.height.toFixed(1),
         scoreInside: sRect.right <= pRect.right + 0.6 && sRect.bottom <= pRect.bottom + 0.6
           && sRect.left >= pRect.left - 0.6 && sRect.top >= pRect.top - 0.6,
       };
@@ -151,9 +161,13 @@ console.log('\n== B 1440 桌面：单行 + 同排短评对齐 + 评分牌描边 
     data.clipped.slice(0, 3).join(' / '));
 
   const s = data.rows[0];
-  ok('B4 评分牌 computed 1px 描边 + 字号 ≥13px（视觉不变小）',
-    data.rows.every((r) => r.scoreBorder === '1px') && s.scoreFont >= 13,
-    `${s.scoreBorder} / ${s.scoreFont}px`);
+  /* 第 89 轮改判：第 85 轮这里是「1px 金描边 + 字号 ≥13px（视觉不变小）」—— 用户明确要求
+     「淡化评分和灰色背景填充的存在感」，1px 描边与 13/700 都被推翻（描边是「贴纸感」的主因），
+     字号刻意降一档到 12/600。原判据的真实意图是「别把牌子做塌了」，所以换成：
+     ① 全部卡片 border 归零（描边不许回来）② 字号 12 ③ 牌子高度仍 ≥20px（不塌）。 */
+  ok('B4 评分牌 border 归零 + 字号 12（第 89 轮刻意降一档）+ 高度仍 ≥20px 不塌',
+    data.rows.every((r) => r.scoreBorder === '0px' && r.scoreFont === 12 && r.scoreH >= 20),
+    `${s.scoreBorder} / ${s.scoreFont}px / h${s.scoreH}`);
   ok('B5 1440 无横向溢出 + 零 JS 异常', data.overflow === 0 && errs.length === 0,
     `overflow ${data.overflow} / err ${errs.length}`);
 }
