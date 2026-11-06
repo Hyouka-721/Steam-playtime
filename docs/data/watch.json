@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-06T18:06:57+08:00",
+  "updated_at": "2026-11-06T18:07:20+08:00",
   "items": [
     {
       "id": "2026-10-31-dear-you",
@@ -1749,8 +1749,8 @@
       "title": "若能与你共乘海浪之上",
       "kind": "movie",
       "watched_at": "2020-09-06",
-      "added_at": "2026-10-25T15:48:01+08:00",
       "poster": "img/watch/item-d2c7ae62.webp",
+      "added_at": "2026-10-25T15:48:01+08:00",
       "poster_w": 640,
       "poster_h": 896,
       "poster_320": "img/watch/item-d2c7ae62-320.webp",
@@ -1758,11 +1758,12 @@
       "title_en": "きみと、波にのれたら",
       "year": 2019,
       "rating": 7,
+      "order": 3,
       "tags": [
         "动画",
         "爱情"
       ],
-      "note": "没有我的日子，也请务必乘上最高的那朵海浪"
+      "note": "没有我的日子，也请乘上那朵最高的海浪"
     },
     {
       "id": "2020-08-31-the-last-emperor",
