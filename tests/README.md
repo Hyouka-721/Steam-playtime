@@ -28,17 +28,21 @@ tests/
   ```
   C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe tests/verify/verify70.mjs
   ```
-- 跑全部 33 个套件（在 bash 里循环；含另一条线的 index 侧 `verify47/48/49/6/82_index/83_index/88/90`）：
+- 跑 watch 侧全部 **30 个活跃套件**（在 bash 里循环）：
   ```bash
   NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
-  for s in verify6 verify47 verify48 verify49 verify54 verify55 verify56 verify57 verify58 \
-           verify60 verify62 verify63 verify64 verify65 verify66 verify67 verify68 verify69 verify70 verify72 verify73 verify75 verify78 verify79 verify80 verify82 verify83 verify84_watch verify85_watch verify86_watch verify87_watch verify89_watch; do
+  for s in verify6 verify54 verify55 verify56 verify57 verify58 \
+           verify60 verify62 verify63 verify64 verify65 verify66 verify67 verify68 verify69 \
+           verify70 verify72 verify73 verify75 verify78 verify79 verify80 verify82 verify83 \
+           verify84_watch verify85_watch verify86_watch verify87_watch verify89_watch verify90_watch; do
     echo "== $s =="; "$NODE" tests/verify/$s.mjs 2>&1 | tail -2
   done
   ```
+  ⚠️ **第 90 轮起 `verify47/48/49` 从活跃循环移除**：它们等的是 index 页 `#recent-list .rank-item`，该榜在 index 线第 103/104 轮已彻底删除，跑起来必然 30s 超时白屏。属跨线停用历史套件，**留档不跑、不改判据也不调阈值**；本轮只改了 `docs/watch.*`，`docs/index.html` / `docs/app.js` 一字未动。
+  ⚠️ **index 侧另一条线单跑**（`verify103/104/105/106/108/82_index/83_index/91/92`，再加共用的 `verify6/54`）= 11 套件 285 条，本轮实测 0 FAIL。
   ⚠️ **没有 `verify88_watch`**（第 88 轮换图标是扩写 `verify87_watch`，不新起编号）；同理第 87 轮也没有新编号。
 
-## 套件清单与当前基线（watch 侧第 89 轮**迭代 · 零填充 · 已上线**：`watch.css?v=26`、**28 套件 849 条 → 848 PASS / 1 已知红**、线上 **`online89_watch` 17 条 0 FAIL**；index 侧第 102 轮：**11 套件 451 条 0 FAIL**（线上 online102 16 条 0 FAIL） —— 两条线轮号各走各的，认文件名后缀 `_watch` / `_index`）
+## 套件清单与当前基线（watch 侧第 90 轮**评分移入标题行 · 本地完成、待「上线」指令**：`watch.css?v=28` / `watch.js?v=17`、**30 套件 907 条 → 906 PASS / 1 已知红**；index 侧第 110 轮：**11 套件 285 条 0 FAIL** —— 两条线轮号各走各的，认文件名后缀 `_watch` / `_index`。⚠️ **线上仍停在上一轮 `watch.css?v=26` / `watch.js?v=16`**，本轮没收到推送指令所以没推；上线复验脚本 `online90_watch` 已备好，等 push 后再跑）
 
 ⚠️ **那 1 条已知红 = `verify56` B11「两页页眉高度相同」**：1440 差 `172 / 173`、860 差 `160 / 161`，根因是 `style.css` 的 `.site-header` 在 **index 线第 97 轮**（`8c162ed`）被加了 `border-bottom: 0`，而 `.w-header` 从建站起就有 `1px solid var(--border)` —— 属跨线遗留，不是 watch 侧改动引入的。**不许用「减去 1px 边框再比」抹平**（那是调阈值掩盖），要修就二选一：index 侧恢复页眉下边线，或 watch 侧去掉它。
 
@@ -75,6 +79,7 @@ tests/
 | `verify86_watch` | 第 86 轮 watch 侧第三批 P2+P3：**颜色令牌归一**（文字色阶补齐 五档、金色透明度按用途分 wash/edge/line、`#0e0e12` 与 `#0e0e13` 差 1 阶合一）+ **表单说明文案**（原生 file input 的英文「Choose File / No file chosen」改自绘中文按钮、海报说明 4 行→2 行、标签「逗号或顿号分隔」）+ **圆角归一**（12 种写法→7 种，8/9/10/11/12 五档挤 4px 内收成 8/12）+ **动效归一**（8 档时长→3 档、`ease`→一条 `cubic-bezier(.22,.68,.28,1)`，并补上 `.w-btn-primary` 漏掉的 `filter`、`.tl-name` 与 `.w-foot a` 漏掉的 color 过渡）。**A13 反向守着第 56 轮跨页契约**：头像 transition 与头像/站名焦点环圆角不参与归一 | 24 |
 | `verify87_watch` | 第 87 轮 watch 侧：站点图标换成用户素材，**素材换过三次，最终版是第 88 轮的「电影胶片」**（放映机 `-a60e802b` → 摄像机 `-064bab46` → 胶片 `-97e35b7b`；原先是直接拿 460×420 站标 webp 当 favicon，无尺寸、非正方）。六档一次生成：16/32/48 标签页与书签、180 iOS 桌面、192/512 Android 主屏。**判据分三层**：① 结构（六条 link + 旧小黄人 favicon 已撤但 logo 仍在）② 文件（真实像素尺寸、盘型 —— **小档四角透明 / 大档满幅不透明**、大档底色 `rgb(255,255,255)`、体积 16/32/48 ≤4KB 且整套 ≤60KB）③ **一致性（量化）**：主体宽度占比 = alpha>128 且**非近白**像素的包围盒 / 画布边长；16/32/48 同为 **0.938**（极差 ≤0.02）、180/192/512 同为 **0.779**（极差 ≤0.01）—— 「不跑形」只有这个口径能量。文件名带源图哈希，套件从 `(film\|camera\|projector)-<hash>.png` 推导期望值，换素材时自动跟上。**⚠️ 盘型规则（第 88 轮改定）**：favicon 铺不铺盘看**主体明度**，不看素材喜好 —— 深色主体（放映机 `#283848` / 摄像机 `#321b41`）压深蓝标签条 `#0b2a45` 只剩轮廓，必须铺盘；亮蓝主体（胶片 `#2F88FF`，自身够亮）纯透明反而更干净，三种底色实测都认得出。iOS/Android 三档**永远必须铺实底**（iOS 会把透明填成黑底，且系统自己遮圆角 → 不自己画圆角） | 21 |
 | `verify89_watch` | 第 89 轮 watch 侧 **评分角标，用户追加「完全删除背景填充，只保留金色评分数字」后的最终态（零填充）**。演化：第 85 轮 `rgba(8,8,11,.76)` 胶囊 + 1px 金描边 + 内高光 + 硬投影 → 第 89 轮第一版 `::before + blur(6px)` 软边（跳变 0.393→0.034）→ **迭代版把 `::before` 整条删掉**，角标只剩一串纯金文字（★ + 数字），hover/focus 只换字色。⚠️ **唯一保留的「暗」是 `text-shadow` 双层紧暗晕**：它只跟着字形走、不形成块区，纯金字压亮黄路面只有 1.64:1，可读性全靠它。反向守卫 A5/B3/C1 抓任何复活的 `::before` / `background` / `filter`。**判据从「量软边」改成「证零填充」**：合成纯色亮底后，盒外沿与内边距逐像素偏离 ≤0.01（B8/B9 实测 **0**）、文字区仍有 **33.7%** 未改动亮底像素（B10 ≥15%，有块状填充会趋近 0）、亮底/字形暗晕 **5.14:1** 且 金字/暗晕 **3.14:1**（B11 ≥4.5 / ≥2.5）。⚠️ 「字芯 vs 暗晕」口径在零填充后失效：取文字区最亮像素会取到亮海报本身（0.872 > 金字 0.513），不再是金字 | 28 |
+| `verify90_watch` | 第 90 轮 watch 侧 **「★和金色评分数字移到影视剧名称旁边，保持一定空格」**：评分从 `.poster-pic` 搬进 `.poster-head`（JS 渲染结构 + CSS 都改，两条缓存键各 bump）。空格 = 标题行 `gap: 8px` + 评分 `margin-left: 4px` = **12px 全库恒定**（124 张逐张量，极差 0），不是裸空格字符；片名 `flex: 0 1 auto` 只缩不涨（否则短名会把评分推到行尾）、日期 `margin-left:auto` 贴右、≤480 日期独占第二行右对齐。零填充 / ★ 9px / 金色 / 暗晕 / hover 只换字色 / 时间轴 `tl-score` 全部原样保留。⚠️ 窄屏长片名曾因 `flex-wrap` 独占第一行把评分挤到第二行（gap 掉到 −213），靠 `max-width: calc(100% - 64px)` 修好；「窄屏标题行全库等高」是错判据（第 85 轮起本就有 16 张折两行），换成「评分与片名严格同排 + 高度只按行数分两档」 | 23 |
 | `verify92` | 第 92 轮 index 侧：站点图标换成用户素材「游戏手柄」（favicon 16/32/48 透明 + apple-touch 180 / PWA 192·512 铺 cream 底，**文件名带素材 hash** 绕开 SW 的 cache-first）+ 站名改 **Game Time**（title / 页眉 h1 / manifest 去掉 My 前缀）+ 旧的 icon-192·512 删除 + watch 页返回链接同步 + 改名后页眉几何（≤480 仍 44px/1px、不溢出、不被头像压住）与「点它回顶部」交互未坏 | 25 |
 | `verify91` | 第 91 轮 index 侧：里程碑改 **500h 一档**（STEP 30000；条数/取值/间隔全从数据推导，且必须是 500 的整数倍）+ **周日期 13→15px** + **里程碑数字 17→16px（比正文 14px 正好大 2px）** + 文案结构仍是「文本 + `<b>数值</b>`」+ 三列轨道 116/44/1fr 未变 + 最长周日期「10.13-10.19」不越出左列 + 四主题 + 7 档响应式 | 29 |
 | `verify90` | 第 90 轮 index 侧：热力图时间标签 **加粗到 700**（全 17 格字重恒 700、字号/nowrap/行高不变、日期仍 600、汇总行与月份块未被连带）+ 游戏库时间轴 **补录 10.12 王国保卫战 1.6h**（`data/overrides/timeline-extra.json` → `meta.timeline_extra` → 只进 `renderTimeline` 的周聚合，**不进 `daily`**）+ **隔离性 A/B 对照**（route 抹掉 `timeline_extra` 重载，五张卡/最近游玩榜/热力图汇总逐字相同，差异只在时间轴）+ 四主题 + 7 档响应式；360 单独降档 10px。**第二批**：删掉补录提示行（`.tl-extra` 全站为 0、正文无「补录」）+ 时间轴补入整年历史（54 周/223 条/1040h，周数与里程碑**从数据推导**逐条比对、A/B 抹数据后 57→3 周）+ 零破图 + 突破 1000h 必须落在含 2026-04-16 的那一周 | 49 |
@@ -88,6 +93,8 @@ tests/
 `online/`：`online65/66/68/69/70/72/75/77/79/80/82/84_watch/85_watch/86_watch/88_watch.mjs` —— 上线后对 Pages 做内容指纹复验（判定线上/本地 md5 一致、功能生效），**线上验证写操作时要设计安全边界**（如 online69 故意在无 Token 的浏览器点保存，用 `page.on('request')` 数 PUT 必须为 0）。旧 online 脚本是一次性历史记录（online70 的海报 hash / 站名判据已被后续轮次改旧），复验当轮用最新那个。`online75` 额外验 **Service Worker**：海报响应必须 `response.fromServiceWorker() === true`（硬证据，不能只看 `transferSize=0`——HTTP 缓存也会给 0）。
 
 `online89_watch`（**17 条**，watch 页评分角标零填充 · 第 89 轮迭代）：① 指纹 5（线上 `watch.css?v=26` / `watch.js?v=16`、**css 与 js 字节 md5 与本地全等**、线上 CSS 里没有 `.poster-score::before/::after` 且 `text-shadow` 仍在、**线上 watch.json 与本地全等**）② 1440 运行时 10（**卡片数 = 本地 `watch.json.items.length` = 124**、本体零背景、`::before` 不生成、12/600/`#dcb978`、**★ 仍是 9px 且字形暗晕在**、hover 只换字色仍零背景、**合成底逐像素零填充（外沿/内边距偏离 0）**、未改动亮底 33.7%、亮底/暗晕 5.14:1 与金/暗晕 3.14:1、无溢出零异常）③ 390 运行时 2（仍在海报内、尺寸不塌、零底盘、★ 仍在、无溢出零异常）。**上线结果 17/17 一次修脚本后全绿**（第一次 B1 假红：`watch.json` 顶层是 `{updated_at, items:[...]}`，直接 `.length` 拿到 undefined）。⚠️ **旧 `online85_watch` B4 断言「1px 描边 + 13px」已过期**，历史 online 套件留档不跑，复验用 `online89_watch`；同理线上 CSS 内容要用**字节 md5**核（不能只看版本号）。
+`online90_watch`（**16 条**，watch 页评分移入标题行 · 第 90 轮，**已备好但未跑**）：① 指纹 5（线上 `watch.css?v=28` / `watch.js?v=17`、css/js **字节 md5 与本地全等**、线上 CSS 规则确实是「无 absolute + flex 0 0 auto + margin-left 4px + 零填充」那版、线上 `watch.json` 与本地全等）② 1440 全库 9（条数 = 本地 `items.length`、DOM 顺序、12px 空格全库恒定、评分在标题行且与片名同排不压日期、★ + 一位小数、计算样式零填充 + ★ 9px、hover 不位移不画盘、**时间轴 `tl-score` 隔离**、无溢出零异常）③ 390 运行时 2（间距仍 12px、日期独占第二行、无溢出零异常）。⚠️ **本轮线上尚未更新**，收到「上线」指令后按 fetch/merge → push → Pages `?t=` 指纹轮询 → 本脚本的顺序走；旧 `online89_watch` 的 B5/C1「角标仍在海报内」是上一版快照，留档不跑。
+
 `online88_watch`（**18 条**，watch 页图标）：第 87/88 轮上线复验 —— ① 六条 link → `-97e35b7b`、css/js 未 bump 且**字节 md5 与本地全等** ② 六张 200 + `image/png` + 真实像素尺寸 + **线上字节 md5 与本地全等** ③ **盘型在线上解码验证**（小档四角 alpha 0 / 大档满幅不透明 / 占比 0.938·0.779 —— 不看本地，直接量线上那份字节）④ **旧 hash `-064bab46` 六张必须 404**（换 hash 的意义就在这，旧缓存顶不上来）⑤ 1440/390 运行时 6 条 link、页眉 logo 仍是小黄人、零 JS 异常。⚠️ **图标字节必须在页内 `fetch` 后 base64 回传**（Node 直连 github.io 走不通），`--no-proxy-server` 照旧。
 `online82`（15 条，watch 页）：第 82 轮上线复验 —— 线上 css/js **字节 md5 与本地全等**、页脚三段顺序（更新于 → 共 N 部影视剧 → 返回）、**总数 = 线上 watch.json 条数（从数据推导）**、切「电影」总数不变（全量非筛选数）、时间轴视图仍显示、**全程 0 次 PUT**、390px 文档不溢出且总数矩形与右下角加号**不相交**。⚠️ 同目录还有另一条线的 `online82_index.mjs`（游戏站 index，12 条），**轮号撞号但文件不撞**，引用时说清楚哪一份。
 
@@ -140,7 +147,13 @@ tests/
 - ⚠️ **「取区内最亮像素 = 字芯」只在有底盘时成立**（第 89 轮迭代踩坑）：有 `rgba(8,8,11,.55)` 底盘时背景被压到 L≈0.17，金字 L=0.513 自然是最亮；**底盘删掉后亮海报 L=0.872 比金字还亮**，`Math.max` 取到的是背景，算出来的「字芯 vs 暗晕 5.14:1」其实是「亮底 vs 暗晕」。零填充下正确的三个量：亮底/暗晕（轮廓对比）、金字**理论亮度**（由 computed color 算）/暗晕、以及「未改动亮底像素占比」。别把设计值当测量值，也别把测量值当设计值。
 - ⚠️ **证明「零填充」别只 grep CSS，要逐像素**（第 89 轮迭代）：把海报换成纯色合成底后，角标盒**外沿**与**内边距**逐像素都应等于该纯色（实测 `max|ΔL| = 0`）；文字区内还得有 ≥15% 像素完全未被改动（实测 33.7%）—— 若有人偷偷加回半透明块或大范围投影，这两条立刻红。CSS 静态守卫（无 `::before` / 无 `background`）+ 运行时守卫（`getComputedStyle(s,'::before').content === 'none'`）+ 像素守卫，三层都要有。
 - ⚠️ **`watch.json` 顶层是 `{ updated_at, items: [...] }`，不是数组**（第 89 轮上线复验 B1 假红）：写「线上卡片数 = 本地条数」时直接 `JSON.parse(...).length` 会拿到 `undefined`；一律 `.items.length`，也别手抄 121 / 124 这类绝对值（CI 每天加数据）。
-- ⚠️ **历史 `online85_watch` B4 仍断言「评分牌 1px 描边 + 13px」**，这是第 85 轮的一次性线上快照，第 89 轮换代后已过期；按惯例旧 online 脚本留档不动，**上线复验用当轮最新的那个**（本轮应新建 `online89_watch`），别拿旧 online 的红灯去改代码。
+- ⚠️ **历史 `online85_watch` B4 仍断言「评分牌 1px 描边 + 13px」**，这是第 85 轮的一次性线上快照，第 89 轮换代后已过期；按惯例旧 online 脚本留档不动，**上线复验用当轮最新的那个**，别拿旧 online 的红灯去改代码。
+- ⚠️ **一次改动同时碰 CSS 与 JS 时，bump 要处理四种字面量**（第 90 轮）：`watch.css?v=N` / `watch\.css\?v=N` / `watch.js?v=N` / `watch\.js\?v=N`，任何一组漏掉都会让对应套件集体假红（`bump90_watch.mjs` 一次命中 48/35/41/29 处、38 文件）。同批次**再改一次 CSS 就要再 bump 一次**（`bump90b_css.mjs`：49/36 处、37 文件），哪怕中间版从未上线 —— 按红线走，别凭「反正没发布」跳过。
+- ⚠️ **`page.route` 的 glob 前缀会误拦同名前缀文件**（第 90 轮白屏）：想拦 `watch.js` 时写 `**/watch.js*`，`data/watch.json` 的前八个字符正好也是 `watch.js`，于是 JS 文本被当 JSON 返回，控制台报 `Unexpected token '/'`，`#w-grid` 一张卡都没有。改成按 pathname 精确判断（`u.pathname.endsWith('/watch.js')`）。另外**注释里千万别写出这个 glob 本身**：`**/` 里的 `*/` 会提前闭合块注释，直接 `SyntaxError`（本轮踩了两次）。
+- ⚠️ **角标搬出海报后，海报的 `box-shadow` 会落到标题行上**（第 89→90 轮测量口径失效）：给 `.poster-head` 填纯色合成底，实测 x=8 处 y=32→64 的亮度是 `0.497→0.777` 的垂直渐变而非恒定 `0.8721`，于是「盒外沿逐像素等于纯底」三条全红。这不是页面坏了，是**多了一个干扰源** —— 测量时把 `.poster-pic` 的 `box-shadow` 一并置 `none`，三条立刻回到偏离 0；**不许靠放宽 ≤0.01 的阈值掩盖**。
+- ⚠️ **`flex-wrap: wrap` 下长片名会独占第一行**（第 90 轮真 bug）：`.poster-name` 在窄屏是 `-webkit-box` 两行 clamp，`flex-basis: auto` 取的是 max-content（整句不换行、300px+），换行算法判断它一个人就超过 172px 列宽 → 单独成行，评分被挤到第二行，全库 `score.left − name.right` 掉到 **−213**。前 3 张都是短片名，截图完全看不出来，只有**全库逐张量**才暴露。修法是给窄屏片名 `max-width: calc(100% - 64px)`（评分最宽 35 + gap 16 + margin 4 + 余量 9），让「片名 + 评分」必然同排；短片名仍按内容宽，间距照样 12px。
+- ⚠️ **「窄屏标题行全库等高」是错判据**（第 90 轮）：第 85 轮起窄屏本来就有 16 张片名折两行（两行 clamp），headH 自然是 `37.1 / 54.7` 两档、差正好一个行高 17.6px。把桌面的「全库单行等高」契约套到窄屏会得到 17.55px 的假极差。换成页面自身的真实约束：**评分与片名严格同排**（顶边差 ≤2px）+ **高度只按片名行数分两档**。
+- ⚠️ **before/after 对照图不用改文件**（第 90 轮）：`page.route` 把 `watch.css` / `watch.js` 的响应换成 `git show HEAD:docs/watch.*`，同一份数据、同一浏览器、同一视口，只有这两份资源不同，before 图就是真实的上一版。截**首屏之外的卡片**时先 `scrollIntoView` 并 `waitForFunction(img.complete && naturalWidth>0)`，否则 `elementHandle.screenshot()` 会截出一块空灰底（lazy 图没加载）。
 
 ## 关于旧脚本
 

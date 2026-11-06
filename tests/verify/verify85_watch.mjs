@@ -42,8 +42,8 @@ const baseCss = css.slice(0, css.indexOf('@media'));           // 默认规则�
 const i480 = css.indexOf('@media (max-width: 480px)');
 const b480 = css.slice(i480, css.indexOf('@media', i480 + 10));
 
-ok('A1 watch.html 引用 watch.css?v=26 / watch.js?v=16（js 本轮未动）',
-  /watch\.css\?v=26/.test(html) && /watch\.js\?v=16/.test(html),
+ok('A1 watch.html 引用 watch.css?v=28 / watch.js?v=17（js 本轮未动）',
+  /watch\.css\?v=28/.test(html) && /watch\.js\?v=17/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const halfPx = css.match(/font-size:\s*(?:11|12|13|14)\.5px/g) || [];
@@ -61,14 +61,17 @@ ok('A4 ≤480 块内 .poster-name 恢复两行 clamp（390 下 23 部会折行�
   pn480.replace(/\s+/g, ' ').slice(0, 110));
 
 const sc = rule('.poster-score', baseCss);
-/* 第 89 轮（用户要求「淡化评分和灰底的存在感」）把第 85 轮的「1px 金边 + 内高光 + 硬投影」
-   整条换成了「无描边 + 大半径软晕 + backdrop-filter 压暗」。**需求变了，判据跟着变**：
-   这里不再要求描边，改守换代后的两条硬事实 ——
-     ① 硬描边必须为 0（去掉贴纸感的前提）
-     ② padding 从 1px 7px 长到 2px 8px（边框的 1px 让位给留白，整体尺寸基本不变）
-   新的视觉契约（软晕 / brightness / 字号 12·600 / hover 提亮）由 `verify89_watch` 正面守。 */
-ok('A5 .poster-score 已去掉硬描边（第 89 轮换代），padding 1px 7px → 2px 8px 接住边框让出的 1px',
-  !/border:\s*1px solid/.test(sc) && /border:\s*0/.test(sc) && /padding:\s*2px 8px/.test(sc),
+/* 三次换代，判据跟着需求变（每次都改判据，不是调阈值）：
+   第 85 轮「1px 金边 + 内高光 + 硬投影」→ 第 89 轮「零填充纯金文字」→
+   第 90 轮「从海报搬进标题行，紧跟片名」。
+   这里守住两次换代都没被推翻的两条硬事实 ——
+     ① 硬描边必须为 0（贴纸感的根源，不许回来）
+     ② padding 归零：1px 7px → 2px 8px 是胶囊时代为接住 1px 边框留的；零填充后它
+        只是空盒子尺寸，第 90 轮进标题行还会白吃 16px 片名宽度，故改成 0。
+   空格改由标题行 gap 8px + 本元素 margin-left 4px 表达（12px），由 verify90_watch 量。 */
+ok('A5 .poster-score 硬描边为 0；第 90 轮搬进标题行后 padding 归零（空格改由 gap + margin 表达）',
+  !/border:\s*1px solid/.test(sc) && /border:\s*0/.test(sc) && /padding:\s*0/.test(sc) &&
+  /margin-left:\s*4px/.test(sc),
   sc.replace(/\s+/g, ' ').slice(0, 120));
 
 /* 反守卫：第 62/64 轮定的时间轴字号一个都不许被「字阶归一」顺手改掉。
@@ -113,6 +116,7 @@ const run = async (W, H) => {
       const lh = parseFloat(cs.lineHeight);
       const sRect = score.getBoundingClientRect();
       const pRect = pic.getBoundingClientRect();
+      const hRect = c.querySelector('.poster-head').getBoundingClientRect();
       return {
         cardTop: Math.round(c.getBoundingClientRect().top),
         name: n.textContent.trim(),
@@ -125,8 +129,10 @@ const run = async (W, H) => {
         scoreBorder: getComputedStyle(score).borderTopWidth,
         scoreFont: parseFloat(getComputedStyle(score).fontSize),
         scoreH: +sRect.height.toFixed(1),
-        scoreInside: sRect.right <= pRect.right + 0.6 && sRect.bottom <= pRect.bottom + 0.6
-          && sRect.left >= pRect.left - 0.6 && sRect.top >= pRect.top - 0.6,
+        /* 第 90 轮：评分不再贴海报，改为「完整落在标题行内 + 不在海报里」 */
+        scoreInHead: sRect.right <= hRect.right + 0.6 && sRect.bottom <= hRect.bottom + 0.6
+          && sRect.left >= hRect.left - 0.6 && sRect.top >= hRect.top - 0.6,
+        scoreInPic: pic.contains(score),
       };
     });
     const groups = new Map();
@@ -161,24 +167,28 @@ console.log('\n== B 1440 桌面：单行 + 同排短评对齐 + 评分牌描边 
     data.clipped.slice(0, 3).join(' / '));
 
   const s = data.rows[0];
-  /* 第 89 轮改判：第 85 轮这里是「1px 金描边 + 字号 ≥13px（视觉不变小）」—— 用户明确要求
-     「淡化评分和灰色背景填充的存在感」，1px 描边与 13/700 都被推翻（描边是「贴纸感」的主因），
-     字号刻意降一档到 12/600。原判据的真实意图是「别把牌子做塌了」，所以换成：
-     ① 全部卡片 border 归零（描边不许回来）② 字号 12 ③ 牌子高度仍 ≥20px（不塌）。 */
-  ok('B4 评分牌 border 归零 + 字号 12（第 89 轮刻意降一档）+ 高度仍 ≥20px 不塌',
-    data.rows.every((r) => r.scoreBorder === '0px' && r.scoreFont === 12 && r.scoreH >= 20),
-    `${s.scoreBorder} / ${s.scoreFont}px / h${s.scoreH}`);
+  /* 第 90 轮再次改判：原来「牌子高度 ≥20px」守的是「作为海报角标别做塌」；
+     现在评分是标题行里的内联文字（实测 16.2px，片名 18.9px），23px 的旧牌子反而会
+     把标题行撑高、破坏第 85 轮刚修好的「同排短评对齐」。实质约束换成：
+     ① border 归零 ② 字号仍 12 ③ 高度 ≥14px（字没塌）且 ≤片名行高 +1（不撑行）。 */
+  ok('B4 评分内联进标题行：border 归零 + 字号 12 + 高度 ≥14px 且不超过片名行高（不塌也不撑行）',
+    data.rows.every((r) => r.scoreBorder === '0px' && r.scoreFont === 12 &&
+      r.scoreH >= 14 && r.scoreH <= r.nameH + 1),
+    `${s.scoreBorder} / ${s.scoreFont}px / h${s.scoreH}（片名 h${s.nameH}）`);
   ok('B5 1440 无横向溢出 + 零 JS 异常', data.overflow === 0 && errs.length === 0,
     `overflow ${data.overflow} / err ${errs.length}`);
 }
 
-console.log('\n== C 390 窄屏：两行 clamp 仍生效 + 评分牌不越界 ==');
+console.log('\n== C 390 窄屏：两行 clamp 仍生效 + 评分在标题行内不越界 ==');
 {
   const { data, errs } = await run(390, 844);
   ok(`C1 窄屏仍有片名折两行（${data.multiLine} 张两行，clamp 生效而不是被单行规则带走）`,
     data.multiLine > 0, `multiLine ${data.multiLine}`);
-  ok('C2 评分牌完全落在海报矩形内（描边没有把它顶出去）',
-    data.rows.every((r) => r.scoreInside), `越界 ${data.rows.filter((r) => !r.scoreInside).length} 张`);
+  /* 第 90 轮改判：评分搬出海报，判据从「落在海报矩形内」换成
+     「完整落在标题行内 + 海报里一个都不剩」——窄屏日期换行后标题行变高，更要守这条。 */
+  ok('C2 评分完全落在标题行矩形内，且海报内一个都不剩（第 90 轮迁移）',
+    data.rows.every((r) => r.scoreInHead && !r.scoreInPic),
+    `越界 ${data.rows.filter((r) => !r.scoreInHead).length} 张 / 残留海报 ${data.rows.filter((r) => r.scoreInPic).length} 张`);
   ok('C3 390 无横向溢出 + 零 JS 异常', data.overflow === 0 && errs.length === 0,
     `overflow ${data.overflow} / err ${errs.length}`);
 }

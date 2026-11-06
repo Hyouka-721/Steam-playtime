@@ -38,16 +38,19 @@ ok('A4 删除角标：JS 不再生成 .poster-kind 元素', !/poster-kind/.test(
 
 ok('A5 网格卡片改用 .poster-head（片名 + 日期同排），旧的 .poster-sub 已退役',
   /poster-head/.test(js) && /poster-date/.test(js) && !/poster-sub/.test(js) && !/\.poster-sub\s*\{/.test(cssNC) && !/function subLine/.test(js));
-ok('A6 .poster-head 是 flex 行、.poster-date 不换行靠右，片名可缩',
+/* 第 90 轮改判：片名原来 flex 1 1 auto（撑满整行、把日期顶到最右）；
+   评分进标题行后若继续 grow，短片名会把评分一路推到行尾，就不是「名称旁边」了。
+   这里不调阈值，把代理判据换成新契约的实质约束：片名只缩不涨（0 1 auto）。 */
+ok('A6 .poster-head 是 flex 行、.poster-date 不换行靠右，片名只缩不涨（第 90 轮评分才能紧跟片名）',
   /\.poster-head \{[^}]*display: flex/.test(cssNC) && /\.poster-date \{[^}]*white-space: nowrap/.test(cssNC) &&
-  /\.poster-name \{[^}]*flex: 1 1 auto/s.test(cssNC));
+  /\.poster-name \{[^}]*flex: 0 1 auto/s.test(cssNC));
 
 ok('A7 评分格式改为 toFixed(1)（整数也带小数位）', /n\.toFixed\(1\)/.test(js) && !/n % 1 === 0/.test(js));
 ok('A8 上映字段优先取 release_date，缺省回退 year',
   /function releaseText\(it\)/.test(js) && /it\.release_date/.test(js) && /releaseText\(it\)/.test(js));
 
-ok('A9 版本号 bump：watch.css?v=26 / watch.js?v=16',
-  /watch\.css\?v=26"/.test(html) && /watch\.js\?v=16"/.test(html));
+ok('A9 版本号 bump：watch.css?v=28 / watch.js?v=17',
+  /watch\.css\?v=28"/.test(html) && /watch\.js\?v=17"/.test(html));
 
 /* -- 数据 -- */
 const byTitle = (t) => data.items.filter((x) => x.title === t);
@@ -102,7 +105,7 @@ for (const W of [1440, 1100, 860, 480, 390, 360]) {
   const r = await p.evaluate(() => {
     const cards = [...document.querySelectorAll('#w-grid .poster')];
     const bad = [];
-    let sameRow = 0, dateRight = 0, noteGap = 0, noteVisible = 0, dateText = 0, headKids = 0;
+    let sameRow = 0, dateRight = 0, noteGap = 0, noteVisible = 0, dateText = 0, headKids = 0, dateBelow = 0;
     for (const cd of cards) {
       const head = cd.querySelector('.poster-head');
       const nm = cd.querySelector('.poster-name');
@@ -116,6 +119,8 @@ for (const W of [1440, 1100, 860, 480, 390, 360]) {
       // 同一排：日期纵向中心落在片名纵向区间内
       const cy = dr.top + dr.height / 2;
       if (cy >= nr.top - 1 && cy <= nr.bottom + 1) sameRow++;
+      // 第 90 轮：≤480 时列宽只够「片名 + 评分」，日期独占第二行
+      if (dr.top >= nr.bottom - 1) dateBelow++;
       // 日期靠右：右边缘贴齐卡片右边缘，且不压住片名
       if (Math.abs(dr.right - cr.right) <= 1.5 && dr.left >= nr.left - 0.5) dateRight++;
       // 短评紧跟 head（中间没有别的行）
@@ -125,15 +130,15 @@ for (const W of [1440, 1100, 860, 480, 390, 360]) {
         if (gap >= 0 && gap <= 12) noteGap++;
         if (nt.parentElement !== cd || nt.previousElementSibling !== head) bad.push('短评未紧跟片名行');
       }
-      // 海报内只剩 img + 评分角标
+      // 第 90 轮：评分已搬进标题行，海报内只剩 img 一个子元素（多一个就是评分跑回去了）
       if (pic.querySelector('.poster-kind')) bad.push('仍有 poster-kind');
-      if (pic.children.length > 2) bad.push('海报内多出元素:' + pic.children.length);
+      if (pic.children.length > 1) bad.push('海报内多出元素:' + pic.children.length);
     }
     const first = cards[0].getBoundingClientRect();
     const cols = cards.filter((x) => Math.abs(x.getBoundingClientRect().top - first.top) < 2).length;
     return {
       n: cards.length, cols, w: +first.width.toFixed(2), h: +cards[0].querySelector('.poster-pic').getBoundingClientRect().height.toFixed(2),
-      bad: bad.slice(0, 3), sameRow, dateRight, noteGap, dateText, headKids,
+      bad: bad.slice(0, 3), sameRow, dateBelow, dateRight, noteGap, dateText, headKids,
       noteAll: cards.filter((x) => x.querySelector('.poster-note')).length, noteVisible,
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       scores: cards.map((x) => { const s = x.querySelector('.poster-score'); return s ? s.textContent.trim() : null; }).filter(Boolean),
@@ -141,10 +146,14 @@ for (const W of [1440, 1100, 860, 480, 390, 360]) {
   });
   gridStats[W] = r;
 
-  ok(`B[${W}] 无「电影 / 剧集」角标、海报内只剩 2 个子元素`, r.bad.length === 0, r.bad.join(' | ') || 'ok');
-  ok(`B[${W}] 全部 ${r.n} 张卡片：片名 + 观看日期同排且日期贴右`,
-    r.sameRow === r.n && r.dateRight === r.n && r.dateText === r.n && r.headKids === r.n * 2,
-    `同排 ${r.sameRow}/${r.n} 贴右 ${r.dateRight}/${r.n} 日期格式 ${r.dateText}/${r.n} head 子元素 ${r.headKids}`);
+  ok(`B[${W}] 无「电影 / 剧集」角标、海报内只剩 img（评分已进标题行）`, r.bad.length === 0, r.bad.join(' | ') || 'ok');
+  /* 第 90 轮改判：标题行从「片名 + 日期」变成「片名 + 评分 + 日期」三件；
+     ≥861 三者同排，≤480 日期独占第二行（否则 172px 列宽会把片名压到只剩 6 个字）。
+     这是需求变更后的版式契约，不是把原来的「同排」阈值调松。 */
+  ok(`B[${W}] 全部 ${r.n} 张卡片：片名 + 评分 + 日期三件齐全、日期贴右（${W > 480 ? '同排' : '日期第二行'}）`,
+    (W > 480 ? r.sameRow === r.n : r.dateBelow === r.n) && r.dateRight === r.n &&
+    r.dateText === r.n && r.headKids === r.n * 3,
+    `同排 ${r.sameRow}/${r.n} 第二行 ${r.dateBelow}/${r.n} 贴右 ${r.dateRight}/${r.n} 日期格式 ${r.dateText}/${r.n} head 子元素 ${r.headKids}`);
   ok(`B[${W}] 短评紧贴片名行（可见 ${r.noteVisible} 条，间隙 0~12px）`,
     r.noteVisible === r.noteGap,
     `可见 ${r.noteVisible} / 合格 ${r.noteGap}（全库 ${r.noteAll} 条，窄屏为 CSS 隐藏）`);

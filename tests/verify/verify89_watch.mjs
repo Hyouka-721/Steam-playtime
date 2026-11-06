@@ -1,13 +1,18 @@
 /* 第 89 轮 watch 侧回归：评分角标「完全删除背景填充，只保留金色评分数字」
-   用户先后两句：
+   用户先后三句：
      ①「如何淡化评分和灰色背景填充的存在感」→ 选 A 软边 + B 默认安静；
-     ②「完全删除背景填充，只保留金色评分数字」→ 把 ① 的软边底盘也删掉，最终态。
+     ②「完全删除背景填充，只保留金色评分数字」→ 把 ① 的软边底盘也删掉；
+     ③「★和金色评分数字移到影视剧名称旁边，保持一定空格」→ 第 90 轮把评分从海报
+        右下角搬进标题行。本文件守的「零填充」契约**没有变**，变的是位置/尺寸：
+        A9、B1、B5、B8~B11、C1 一律改成迁移后的等价守卫，不是调阈值掩盖。
+        新位置契约（12px 空格 / 全库一致 / 时间轴隔离）由 verify90_watch 正面守。
 
    演化：
      第 85 轮 P1-3：rgba(8,8,11,.76) 胶囊 + 1px 金描边 + 内高光 + 硬投影 + backdrop-filter
        → 在浅色海报上就是一块贴纸；存在感来自**硬边界 + 三层边界强调**，不是「黑」。
      第 89 轮第一版：::before + blur(6px) 软边暗影（跳变 0.393→0.034，渐变带 30 设备像素）。
-     第 89 轮迭代（本文件守的最终态）：**底盘整条删除**，角标只剩一串纯金文字。
+     第 89 轮迭代：**底盘整条删除**，角标只剩一串纯金文字。
+     第 90 轮：文字从 .poster-pic 移进 .poster-head，absolute / right / bottom / padding 全部退休。
 
    ⚠️ 关键实测（走错的路，记在这里）：曾用 background + backdrop-filter 的
    brightness(0.55) 做「软边」，横切量到单像素亮度跳变 0.39 —— 因为 backdrop-filter
@@ -52,8 +57,8 @@ const rule = (sel, scope = css) => {
 
 /* ---------- A 静态契约 ---------- */
 console.log('== A 静态契约 ==');
-ok('A1 watch.html 引用 watch.css?v=26 / watch.js?v=16（纯 CSS 改动，js 未动）',
-  /watch\.css\?v=26/.test(html) && /watch\.js\?v=16/.test(html));
+ok('A1 watch.html 引用 watch.css?v=28 / watch.js?v=17（第 90 轮改了渲染结构，两条缓存键都 bump）',
+  /watch\.css\?v=28/.test(html) && /watch\.js\?v=17/.test(html));
 
 const sc = rule('.poster-score');
 ok('A2 本体彻底透明：无 background、无 backdrop-filter、无 isolation',
@@ -72,8 +77,12 @@ ok('A7 金色降饱和：#dcb978（不再是 var(--accent) 那支亮金）',
   /color:\s*#dcb978/.test(sc) && !/color:\s*var\(--accent\)/.test(sc));
 ok('A8 字形自带双层紧暗晕（零填充后可读性唯一来源，删了浅海报上就读不出来）',
   /text-shadow:\s*0 1px 3px rgba\(0,\s*0,\s*0,\s*0\.78\), 0 0 2px rgba\(0,\s*0,\s*0,\s*0\.6\)/.test(sc));
-ok('A9 结构未动：圆角仍 --r-pill、定位仍 right/bottom 8px、padding 2px 8px',
-  /right:\s*8px;\s*bottom:\s*8px/.test(sc) && /border-radius:\s*var\(--r-pill\)/.test(sc) && /padding:\s*2px 8px/.test(sc));
+/* 第 90 轮改判：定位与 padding 是「海报角标」时代的契约，评分搬进标题行后全部作废。
+   新的结构守卫：静态流入标题行（flex 0 0 auto、绝无 absolute）、圆角令牌仍在（verify86
+   的跨页统计靠它）、padding 归零、以及用 margin-left 4px 表达的空格。 */
+ok('A9 已搬进标题行：flex 0 0 auto、无 absolute 定位、padding 0、margin-left 4px、圆角仍 --r-pill',
+  /flex:\s*0 0 auto/.test(sc) && !/position:\s*absolute/.test(sc) && !/right:\s*8px/.test(sc) &&
+  /border-radius:\s*var\(--r-pill\)/.test(sc) && /padding:\s*0/.test(sc) && /margin-left:\s*4px/.test(sc));
 const star = rule('.poster-score i');
 ok('A10 星星缩到 9px / opacity .7（原 10px / .85）',
   /font-size:\s*9px/.test(star) && /opacity:\s*\.7/.test(star), star);
@@ -110,9 +119,12 @@ console.log('== B 1440 运行时 ==');
 const { c, p, errs } = await open(1440, 1000);
 const rt = await p.evaluate(() => {
   const s = document.querySelector('.poster-score');
-  const pic = s.closest('.poster-pic');
+  const hd = s.closest('.poster-head');
+  const nm = hd.querySelector('.poster-name');
+  const dt = hd.querySelector('.poster-date');
+  const pic = document.querySelector('#w-grid .poster-pic');
   const cs = getComputedStyle(s), bs = getComputedStyle(s, '::before');
-  const r = s.getBoundingClientRect(), pr2 = pic.getBoundingClientRect();
+  const r = s.getBoundingClientRect(), hr = hd.getBoundingClientRect(), nr = nm.getBoundingClientRect(), dr = dt.getBoundingClientRect();
   return {
     bg: cs.backgroundColor, border: cs.borderTopWidth,
     none: (cs.backdropFilter || cs.webkitBackdropFilter || 'none') + '|' + cs.boxShadow,
@@ -120,16 +132,20 @@ const rt = await p.evaluate(() => {
     fs: cs.fontSize, fw: cs.fontWeight, color: cs.color,
     trans: cs.transitionProperty,
     w: +r.width.toFixed(1), h: +r.height.toFixed(1),
-    inside: r.right <= pr2.right + 0.6 && r.bottom <= pr2.bottom + 0.6 && r.left >= pr2.left - 0.6 && r.top >= pr2.top - 0.6,
-    /* ⚠️ .poster-pic 自己有 1px 边框，绝对定位参照的是它的内边距盒 → 实测 gap 是 8+1 */
-    picBorder: parseFloat(getComputedStyle(pic).borderRightWidth) || 0,
-    gapRight: +(pr2.right - r.right).toFixed(1), gapBottom: +(pr2.bottom - r.bottom).toFixed(1),
+    inHead: r.right <= hr.right + 0.6 && r.bottom <= hr.bottom + 0.6 && r.left >= hr.left - 0.6 && r.top >= hr.top - 0.6,
+    gap: +(r.left - nr.right).toFixed(1),
+    order: [...hd.children].map((x) => x.className).join(','),
+    dateRight: +(hr.right - dr.right).toFixed(1),
+    scoreInPic: !!pic.querySelector('.poster-score'),
+    picKids: pic.children.length,
     overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
   };
 });
-ok('B1 角标仍在海报内，右边距 / 下边距 = 8px + 海报边框 1px',
-  rt.inside && Math.abs(rt.gapRight - (8 + rt.picBorder)) <= 0.6 && Math.abs(rt.gapBottom - (8 + rt.picBorder)) <= 0.6,
-  `gap ${rt.gapRight}/${rt.gapBottom}（pic 边框 ${rt.picBorder}）`);
+/* 第 90 轮改判：「角标在海报内 right/bottom 8px」整条作废，换成迁移后的位置契约 */
+ok('B1 评分在标题行内、紧跟片名间隔 12px（gap 8 + margin 4），顺序 name→score→date，海报内一个都不剩',
+  rt.inHead && Math.abs(rt.gap - 12) <= 0.6 && rt.dateRight <= 0.6 &&
+  rt.order === 'poster-name,poster-score,poster-date' && !rt.scoreInPic && rt.picKids === 1,
+  `gap=${rt.gap} 顺序=${rt.order} 日期贴右=${rt.dateRight} 海报子元素=${rt.picKids}`);
 ok('B2 本体：底透明 / border 0 / 无 backdrop-filter、无 box-shadow',
   /rgba\(0,\s*0,\s*0,\s*0\)|transparent/.test(rt.bg) && parseFloat(rt.border) === 0 && rt.none === 'none|none',
   `${rt.bg} | border=${rt.border} | ${rt.none}`);
@@ -138,8 +154,10 @@ ok('B3 ::before 根本不生成（content none / 背景透明 / filter none）�
   `content=${rt.preContent} | ${rt.preBg} | ${rt.preFilter}`);
 ok('B4 计算样式：12px / 600 / #dcb978', rt.fs === '12px' && rt.fw === '600' && rt.color === 'rgb(220, 185, 120)',
   `${rt.fs} ${rt.fw} ${rt.color}`);
-ok('B5 角标尺寸比改动前小一档但仍不塌（高 20~24px，宽 40~60px）',
-  rt.h >= 20 && rt.h <= 24 && rt.w >= 40 && rt.w <= 60, `${rt.w}×${rt.h}`);
+/* 第 90 轮改判：51×23 是胶囊时代的盒子尺寸（padding 2px 8px 撑出来的）；
+   内联文字实测 35×16.2（★10.0）/ 27.6×16.2（★9.9），高度不超过片名行高 18.9。 */
+ok('B5 评分是内联文字：高 15~19px、宽 25~40px（不塌，也不再撑高标题行）',
+  rt.h >= 15 && rt.h <= 19 && rt.w >= 25 && rt.w <= 40, `${rt.w}×${rt.h}`);
 ok('B6 1440 无横向溢出 + 零 JS 异常', rt.overflow === 0 && errs.length === 0, `ov=${rt.overflow} err=${errs.length}`);
 
 /* hover 点亮：真鼠标移上去再读计算值 */
@@ -158,16 +176,19 @@ ok('B7 hover 后字色回到原亮金 rgb(232,176,75)，且仍零背景（只换
   hov.shadow === 'none' && /rgba\(0,\s*0,\s*0,\s*0\)|transparent/.test(hov.preBg),
   hov ? `${hov.color} | bg=${hov.bg} | shadow=${hov.shadow}` : 'hover 未命中');
 
-/* ---------- B8~B11 零填充剖面（合成底，去掉海报内容的干扰）----------
-   ⚠️ 采样的坑（都踩过）：
-   ① 按颜色剔「金色像素」再取背景中位 → 亮黄海报的路面 r-b 也有 80+，被当成字剔掉，
-      剩下全是最暗角落，对比度虚高到 10+（假绿）；
-   ② 只取左右内边距两条竖带 → 右侧正好压在海报深色区，中位被拉黑，同样虚高；
-   ③ 取「字周围 3px 内最亮的非字像素」→ 抗锯齿边像素被判成背景，对比度掉到 1.1（假红）；
-   ④ B7 刚 hover 过卡片，量到的是点亮态 → 剖面取样前必须 `page.mouse.move(1,1)`；
-   ⑤ CSS px 与设备像素混用：clip / boundingBox 是 CSS px，截图是 dpr=2 位图，坐标先乘 DPR。
-   → 把海报换成**纯色合成底**（img 藏起来、.poster-pic 填色），填充与否就完全可计算了：
-     没有底盘时，除字形及其紧暗晕以外的每一个像素都必须逐像素等于合成底。 */
+/* ---------- B8~B11 零填充剖面（合成底）----------
+   ⚠️ 第 90 轮改判：评分已不在 .poster-pic 里，原「藏 img + 给海报填色」量不到任何东西。
+   改成给 .poster-head 填纯色亮底，并把同一行里的片名 / 日期文字临时透明化
+   （只动 color 与 text-shadow，**不碰角标**），标题行里就只剩角标一串字可量。
+   ⚠️ 评分盒 padding 已归零，原「盒内边距竖带」判据作废，换成「盒左邻域 + 盒右邻域」
+   两条横切：任何底盘 / 软晕 / 描边都会向左右溢出，被逐像素抓到；盒内有没有被整块
+   填满，仍由 B10 的「未改动亮底占比」守住。邻域留 8 设备像素避开暗晕的 3px blur。
+   ⚠️ 第 90 轮新踩的坑：海报 .poster-pic 的 box-shadow 会向下投在标题行上，把「纯色
+   合成底」压成一条 L=0.497→0.777 的垂直渐变（实测 x=8 处 y=32→64 逐行变亮）。
+   角标在海报内部时不受影响，搬出来就多了一个干扰源 —— 测量时把投影也置 none，
+   **不去放宽 ≤0.01 的偏离阈值**。
+   ⚠️ 历史采样坑仍然成立：按颜色剔金色会误剔亮黄路面；取字周围最亮像素会把抗锯齿
+   边当背景；B7 刚 hover 过量到点亮态要先移开鼠标；CSS px 与设备像素不能混用。 */
 const lin = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
 const L = (r, g, b) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
 const ratio = (a, b) => +(((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)).toFixed(2));
@@ -177,10 +198,17 @@ const GOLD = L(220, 185, 120);              // #dcb978 的理论相对亮度 = 0
 
 const setSolid = (color) => p.evaluate((col) => {
   [...document.querySelectorAll('#w-grid .poster')].slice(0, 14).forEach((card) => {
+    const head = card.querySelector('.poster-head');
     const pic = card.querySelector('.poster-pic');
-    const img = pic.querySelector('img');
-    if (img) img.style.visibility = 'hidden';
-    pic.style.background = col;
+    head.style.background = col || '';
+    /* 海报投影会落在标题行上，把纯色底压成渐变 —— 只在本测量窗口里撤掉，复原时清回 */
+    pic.style.boxShadow = col ? 'none' : '';
+    ['poster-name', 'poster-date'].forEach((cls) => {
+      const el = card.querySelector('.' + cls);
+      if (!el) return;
+      el.style.color = col ? 'transparent' : '';
+      el.style.textShadow = col ? 'none' : '';
+    });
   });
 }, color);
 
@@ -190,28 +218,29 @@ const profile = async (bb, clip) => {
   const buf = await p.screenshot({ clip, path: path.join(OUT, 'solid-bright.png') });
   const { data, info } = await sharp(buf).raw().toBuffer({ resolveWithObject: true });
   const ch = info.channels, W = info.width, H = info.height;
-  const left = Math.round((bb.x - clip.x) * DPR);            // 角标左边界（设备像素）
-  const textL = left + 8 * DPR;                              // 文字起点 = 左边界 + pad-left 8
-  const textR = left + Math.round(bb.width * DPR) - 8 * DPR;  // 文字终点 = 右边界 - pad-right 8
+  const px = (x, y) => { const i = (y * W + x) * ch; return L(data[i], data[i + 1], data[i + 2]); };
+  const left = Math.round((bb.x - clip.x) * DPR);
+  const top = Math.round((bb.y - clip.y) * DPR);
+  const bw = Math.round(bb.width * DPR), bh = Math.round(bb.height * DPR);
+  const right = left + bw;
 
   const y = Math.floor(H / 2);
   const lum = [];
-  for (let x = 0; x < W; x++) { const i = (y * W + x) * ch; lum.push(L(data[i], data[i + 1], data[i + 2])); }
-  /* ① 盒外沿 + ② 内边距：逐像素偏离纯合成底的最大值。有底盘 / 软边 / 描边时这里必 >0.1 */
+  for (let x = 0; x < W; x++) lum.push(px(x, y));
   const dev = (a, b) => {
     let mx = 0, at = 0;
     for (let x = a; x < b && x < W; x++) { const d = Math.abs(lum[x] - BG); if (d > mx) { mx = d; at = x; } }
     return { max: +mx.toFixed(4), at };
   };
-  const outside = dev(0, left - 2);
-  const padding = dev(left, left + 8);
+  const outside = dev(0, Math.max(0, left - 8));
+  const beside = dev(right + 8, Math.min(W, right + 28));
 
-  /* ③ 2D 文字区：最暗 = 字形暗晕；「完全未被改动」的亮底像素占比 = 有没有块状填充 */
+  /* 2D 文字区：最暗 = 字形暗晕；「完全未被改动」的亮底像素占比 = 有没有块状填充 */
   let halo = 1, pure = 0, total = 0;
-  const y0 = Math.floor(H * 0.3), y1 = Math.ceil(H * 0.7);
+  const y0 = Math.max(0, top), y1 = Math.min(H, top + bh);
   for (let yy = y0; yy < y1; yy++) {
-    for (let x = textL; x < Math.min(W, textR); x++) {
-      const i = (yy * W + x) * ch, v = L(data[i], data[i + 1], data[i + 2]);
+    for (let x = left; x < Math.min(W, right); x++) {
+      const v = px(x, yy);
       if (v < halo) halo = v;
       total++;
       if (Math.abs(v - BG) <= 0.01) pure++;
@@ -219,10 +248,10 @@ const profile = async (bb, clip) => {
   }
   return {
     outsideMax: outside.max, outsideAt: outside.at,
-    padMax: padding.max, padAt: padding.at,
+    padMax: beside.max, padAt: beside.at,
     halo: +halo.toFixed(3), purePct: +(pure / total * 100).toFixed(1),
     outline: ratio(BG, halo), goldVsHalo: ratio(GOLD, halo), goldVsBg: ratio(GOLD, BG),
-    W, H,
+    W, H, bw, bh,
   };
 };
 
@@ -239,11 +268,11 @@ await p.waitForTimeout(240);
 const bb = await badge.boundingBox();
 const clip = { x: bb.x - PAD, y: bb.y - PAD, width: bb.width + PAD * 2, height: bb.height + PAD * 2 };
 const pr3 = await profile(bb, clip);
-ok('B8 零填充：角标盒外沿逐像素等于纯合成底（偏离 ≤0.01；改前硬边 0.39 / 软边 0.03）',
+ok('B8 零填充：评分盒左邻域逐像素等于纯合成底（偏离 ≤0.01；底盘 / 软晕 / 描边都会外溢）',
   pr3.outsideMax <= 0.01, `max|ΔL|=${pr3.outsideMax} @x=${pr3.outsideAt}/${pr3.W}`);
-ok('B9 零填充：角标盒内边距也逐像素等于纯合成底（偏离 ≤0.01，连软晕都不能有）',
+ok('B9 零填充：评分盒右邻域也逐像素等于纯合成底（padding 归零后原「内边距竖带」判据作废）',
   pr3.padMax <= 0.01, `max|ΔL|=${pr3.padMax} @x=${pr3.padAt}`);
-ok('B10 文字区不是一块被填满的暗板：仍有 ≥15% 像素是未改动的亮底（实测 33.7%）',
+ok('B10 文字区不是一块被填满的暗板：仍有 ≥15% 像素是未改动的亮底（迁移后实测 18.8%，海报内时代 33.7%）',
   pr3.purePct >= 15, `未改动亮底 ${pr3.purePct}%`);
 ok('B11 零底盘后仍可读：亮底/字形暗晕 ≥4.5:1 且 金字/暗晕 ≥2.5:1（全靠 text-shadow）',
   pr3.outline >= 4.5 && pr3.goldVsHalo >= 2.5,
@@ -256,21 +285,28 @@ console.log('== C 390 运行时 ==');
 const mob = await open(390, 844);
 const mr = await mob.p.evaluate(() => {
   const s = document.querySelector('.poster-score');
-  const pic = s.closest('.poster-pic');
-  const r = s.getBoundingClientRect(), pr2 = pic.getBoundingClientRect();
+  const hd = s.closest('.poster-head');
+  const nm = hd.querySelector('.poster-name');
+  const dt = hd.querySelector('.poster-date');
+  const r = s.getBoundingClientRect(), hr = hd.getBoundingClientRect(), nr = nm.getBoundingClientRect(), dr = dt.getBoundingClientRect();
   const bs = getComputedStyle(s, '::before');
   return {
-    inside: r.right <= pr2.right + 0.6 && r.bottom <= pr2.bottom + 0.6 && r.left >= pr2.left - 0.6 && r.top >= pr2.top - 0.6,
+    inHead: r.right <= hr.right + 0.6 && r.bottom <= hr.bottom + 0.6 && r.left >= hr.left - 0.6 && r.top >= hr.top - 0.6,
+    gap: +(r.left - nr.right).toFixed(1),
+    dateBelow: dr.top >= nr.bottom - 2,
+    dateRight: +(hr.right - dr.right).toFixed(1),
     h: +r.height.toFixed(1),
     preContent: bs.content, bg: getComputedStyle(s).backgroundColor,
     overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
   };
 });
-ok('C1 390 下角标仍在海报内、尺寸不塌（高 ≥20px）、依然零底盘',
-  mr.inside && mr.h >= 20 && mr.preContent === 'none' && /rgba\(0,\s*0,\s*0,\s*0\)|transparent/.test(mr.bg),
-  `h=${mr.h} content=${mr.preContent} bg=${mr.bg}`);
+/* 第 90 轮改判：390 下日期换行到第二行，评分仍与片名同排、仍是 12px 空格 */
+ok('C1 390 下评分仍在标题行内、紧跟片名 12px、日期独占第二行右对齐、尺寸不塌、依然零底盘',
+  mr.inHead && Math.abs(mr.gap - 12) <= 0.6 && mr.dateBelow && mr.dateRight <= 0.6 &&
+  mr.h >= 15 && mr.preContent === 'none' && /rgba\(0,\s*0,\s*0,\s*0\)|transparent/.test(mr.bg),
+  `gap=${mr.gap} 日期第二行=${mr.dateBelow} 贴右=${mr.dateRight} h=${mr.h} content=${mr.preContent} bg=${mr.bg}`);
 ok('C2 390 无横向溢出 + 零 JS 异常', mr.overflow === 0 && mob.errs.length === 0, `ov=${mr.overflow} err=${mob.errs.length}`);
 
 await browser.close();
-console.log(`\n===== 第 89 轮 watch（评分角标零填充）：${pass} PASS / ${fail} FAIL =====`);
+console.log(`\n===== 第 89 轮 watch（零填充契约，位置判据已按第 90 轮改判）：${pass} PASS / ${fail} FAIL =====`);
 process.exit(fail ? 1 : 0);

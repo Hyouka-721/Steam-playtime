@@ -183,10 +183,13 @@
               dim +
               (eager ? ' loading="eager" fetchpriority="high"' : ' loading="lazy"') +
               ' decoding="async">' +
-            scoreHtml(it.rating) +   /* 第 66 轮：左上角「电影 / 剧集」角标已按需求删除 */
           '</div>' +
           '<div class="poster-head">' +
             '<h3 class="poster-name">' + esc(it.title) + '</h3>' +
+            /* 第 90 轮：评分从海报右下角搬进标题行，紧跟片名（空格由 CSS 的
+               gap 8px + margin-left 4px 固定，不靠裸空格字符）；
+               时间轴仍走 tl-score，不受这次迁移影响。 */
+            scoreHtml(it.rating) +
             (it.watched_at ? '<span class="poster-date">' + esc(it.watched_at) + '</span>' : '') +
           '</div>' +
           (it.note ? '<p class="poster-note">' + esc(it.note) + '</p>' : '') +
