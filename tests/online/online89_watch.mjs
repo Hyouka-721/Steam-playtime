@@ -26,7 +26,10 @@ const norm = (s) => String(s).replace(/\r\n/g, '\n');
 const md5txt = (s) => md5(Buffer.from(norm(s), 'utf8'));
 const localCss = norm(fs.readFileSync(ROOT + 'watch.css', 'utf8'));
 const localJs = norm(fs.readFileSync(ROOT + 'watch.js', 'utf8'));
-const localWatch = JSON.parse(norm(fs.readFileSync(ROOT + 'data/watch.json', 'utf8')));
+/* ⚠️ watch.json 顶层是 `{ updated_at, items: [...] }`，不是数组 —— 直接 `.length` 会拿到
+   undefined，B1 会假红。条数一律从 items 推导，别手抄 121/124 这类绝对值。 */
+const localWatchRaw = norm(fs.readFileSync(ROOT + 'data/watch.json', 'utf8'));
+const localWatch = JSON.parse(localWatchRaw).items;
 
 let pass = 0, fail = 0;
 const ok = (n, c, extra = '') => {
@@ -66,8 +69,7 @@ ok('A4 线上 CSS 里没有 .poster-score 的 ::before / ::after 规则，且 te
   !/\.poster-score\s*::\s*(before|after)/.test(liveNoCmt) && /\.poster-score\s*\{[^}]*text-shadow:/.test(liveNoCmt));
 const liveWatch = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'data/watch.json?t=' + TS);
 ok('A5 线上 watch.json 与本地全等（merge 了 7 个 CI 数据提交后仍一致）',
-  norm(liveWatch) === norm(fs.readFileSync(ROOT + 'data/watch.json', 'utf8')),
-  `本地 ${localWatch.length} 条`);
+  norm(liveWatch) === localWatchRaw, `本地 ${localWatch.length} 条`);
 
 /* ---------- ② 1440 运行时 ---------- */
 console.log('== ② 1440 运行时 ==');
