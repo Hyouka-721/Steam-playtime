@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-06T18:08:48+08:00",
+  "updated_at": "2026-11-06T18:10:12+08:00",
   "items": [
     {
       "id": "2026-10-31-dear-you",
@@ -245,6 +245,7 @@
       "kind": "movie",
       "watched_at": "2026-04-05",
       "poster": "img/watch/the-secret-life-of-walter-mitty-a89dc6fc.webp",
+      "added_at": "2026-10-24T22:42:53+08:00",
       "poster_w": 640,
       "poster_h": 948,
       "poster_320": "img/watch/the-secret-life-of-walter-mitty-a89dc6fc-320.webp",
@@ -252,12 +253,12 @@
       "title_en": "The Secret Life of Walter Mitty",
       "year": 2013,
       "rating": 7,
+      "order": 3,
       "tags": [
         "剧情",
         "温情"
       ],
-      "note": "To see the world, to draw closer, to find each other",
-      "added_at": "2026-10-24T22:42:53+08:00"
+      "note": "To see the world, to find each other"
     },
     {
       "id": "2026-02-14-swords-into-plowshares",
