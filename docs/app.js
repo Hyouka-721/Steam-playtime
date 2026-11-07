@@ -78,8 +78,6 @@
     allDates: [],     // 有记录的日期索引（升序）
     view: 'lifetime',
     drill: { appid: null, year: null, sel: null }, // 二级界面：null = 全部游戏；year = 热力图年份；sel = 最近点开的那天
-    // ---- 当日明细浮层（第 87 轮：入口改为下钻月历热力图的格子）----
-    cal: { open: false, busy: false, lastFocus: null, day: null },
     heroAppid: null,  // 悬停中的游戏（背景底纹用），null = 恢复默认底
     vt: null,         // 正在跑的 ViewTransition（Chromium 不允许叠第二个）
   };
@@ -92,16 +90,6 @@
     const h = Math.floor(n / 60);
     const r = n % 60;
     return r === 0 ? `${h} h` : `${h} h ${r} min`;
-  }
-  /** 当天明细用的可读时长：'2 小时 11 分钟' / '45 分钟' / '不足 1 分钟'。
-      整分钟数据里 0 分钟 = 玩了一下但不足一分钟，不能显示成 '0 分钟'（会被当成没玩） */
-  function hmText(m) {
-    const n = Math.round(Number(m) || 0);
-    if (n <= 0) return '不足 1 分钟';
-    if (n < 60) return `${n} 分钟`;
-    const h = Math.floor(n / 60);
-    const r = n % 60;
-    return r === 0 ? `${h} 小时` : `${h} 小时 ${r} 分钟`;
   }
   const ymd = (d) => (d instanceof Date ? d : new Date(d)).toISOString().slice(0, 10);
   function addDaysStr(dateStr, n) {
@@ -1170,237 +1158,8 @@
     return rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
   }
 
-  // ---------- 当日明细浮层（第 87 轮：入口改为下钻月历热力图的格子） ----------
   /** 一周从周一起算，与 renderTimeline 的 weekStart 保持一致 */
   const todayStr = () => ymd(new Date());
-
-  function setDayStatus(msg, isErr = false) {
-    const el = $('cal-day-status');
-    if (!el) return;
-    el.textContent = msg ?? '';
-    el.classList.toggle('err', !!isErr);
-  }
-
-  function setCalBusy(on, text) {
-    state.cal.busy = on;
-    const mask = $('cal-mask');
-    if (mask) {
-      mask.hidden = !on;
-      const t = mask.querySelector('.cal-mask-text');
-      if (t) t.textContent = text ?? '加载中…';
-    }
-  }
-
-  // ---------- 日历二级界面：某一天的游戏游玩明细 ----------
-  /** 图标 hash 查表：daily 数据里只有 appid/name/minutes，图标要从 meta 的 games_lifetime 取 */
-  function gameIconHash(appid) {
-    const k = String(appid);
-    return state.meta?.games_lifetime?.[k]?.img_icon_url ?? '';
-  }
-
-  /** 当天游玩明细：同一游戏当天的多条记录合并为「当天总时长」；
-      按当天时长降序，时长相同按游戏名称排序（中文按拼音，localeCompare 稳定）。
-      只收录当天 games 里出现过的游戏 —— 没记录的根本不会进这个数组。 */
-  function calDayGames(date) {
-    const day = state.days.get(date);
-    const merged = new Map();
-    for (const g of day?.games ?? []) {
-      const k = String(g.appid);
-      const cur = merged.get(k);
-      if (cur) {
-        cur.minutes += Number(g.minutes) || 0;
-        if (!cur.name && g.name) cur.name = g.name; // 个别记录可能缺 name，用已知的补上
-      } else {
-        merged.set(k, {
-          appid: g.appid,
-          name: g.name ?? String(g.appid),
-          minutes: Number(g.minutes) || 0,
-        });
-      }
-    }
-    return [...merged.values()].sort(
-      (a, b) => b.minutes - a.minutes || String(a.name).localeCompare(String(b.name), 'zh-Hans-CN'),
-    );
-  }
-
-  /** 可步进的日期范围：首条每日记录 ~ 最新快照日。
-      刻意不拿「今天」当上界：数据滞后一天，翻到没有数据的日期只会看到空态。
-      范围内**允许**落到没有记录的日子（如采集缺口），此时展示空状态。 */
-  function calDayRange() {
-    const min = state.allDates[0];
-    const max = state.meta?.last_snapshot_date ?? state.allDates[state.allDates.length - 1];
-    return min && max ? { min, max } : null;
-  }
-
-  /** 按当前日期刷新「前一天 / 后一天」的可用状态，并在状态行说明边界原因 */
-  function syncCalDayNav(date, gamesCount) {
-    const prev = $('cal-day-prev');
-    const next = $('cal-day-next');
-    const status = $('cal-day-status');
-    if (!prev || !next) return;
-    const r = calDayRange();
-    const atMin = !r || addDaysStr(date, -1) < r.min;
-    const atMax = !r || addDaysStr(date, 1) > r.max;
-    prev.disabled = atMin;
-    next.disabled = atMax;
-    // 焦点不能落在被禁用的按钮上：浏览器会把它丢到 body，键盘用户就迷路了
-    const a = document.activeElement;
-    if (a && a !== document.body && a.matches('.cal-step') && a.disabled) {
-      const other = a === prev ? next : prev;
-      if (other && !other.disabled) other.focus();
-    }
-    if (status) {
-      status.classList.remove('err');
-      status.textContent = !gamesCount
-        ? '该日没有游玩记录'
-        : atMin
-          ? '已是最早一天的记录'
-          : atMax
-            ? '已是最新一天的记录'
-            : '按当天时长从高到低';
-    }
-  }
-
-  /** 二级界面里切换前一天 / 后一天（日期文本两侧的按钮） */
-  function stepCalDay(delta) {
-    if (state.cal.busy) return;
-    const cur = state.cal.day;
-    if (!cur) return;
-    const to = addDaysStr(cur, delta);
-    // 越界时静默返回：按钮此时是 disabled，键盘方向键同样不该有动作
-    // （越界日没有每日记录，二级界面只会显示空态，翻过去没有意义）
-    const r = calDayRange();
-    if (r && (to < r.min || to > r.max)) return;
-    openCalDay(to);
-  }
-
-  function renderCalDay(date) {
-    const day = state.days.get(date);
-    const games = calDayGames(date);
-    // total_minutes 缺失或为 0 时退回合并和，避免摘要与列表对不上
-    const total = (day?.total_minutes ?? 0) || games.reduce((a, g) => a + g.minutes, 0);
-    const wd = '周' + '日一二三四五六'[new Date(`${date}T12:00:00Z`).getUTCDay()];
-    const [, m, d] = date.split('-').map(Number);
-    $('cal-day-title').textContent = `${m} 月 ${d} 日 ${wd}`;
-    // 没有明细时显示 0 分钟，不能用 hmText(0)（那是"不足 1 分钟"，语义相反）
-    $('cal-day-total').textContent = games.length ? hmText(total) : '0 分钟';
-    $('cal-day-note').textContent = `${date} · 共 ${games.length} 款游戏`;
-
-    const box = $('cal-day-games');
-    if (!games.length) {
-      // 范围内但当日没有明细：采集缺口，或尚未采集的日期
-      box.innerHTML = '<p class="cal-empty">当天没有游玩记录</p>';
-      syncCalDayNav(date, 0);
-      return;
-    }
-    const max = Math.max(...games.map((g) => g.minutes), 1);
-    box.innerHTML = games
-      .map((g, i) => {
-        const hash = gameIconHash(g.appid);
-        // 查不到图标时给透明占位：否则 onerror 会把 src 设成空串（解析成当前页 URL）
-        const icon = hash ? ICON(g.appid, hash) : BLANK_GIF;
-        const pct = Math.max(2, (g.minutes / max) * 100);
-        // 第 87 轮：从「单游戏下钻」点进来时，把那一款标出来 —— 明细里永远列当天的**全部**
-        // 游戏（这才是"当天玩了哪些"），高亮用来回答"我现在看的是哪一款"。
-        const focus = state.drill.appid && String(state.drill.appid) === String(g.appid);
-        return (
-          `<div class="cal-game${focus ? ' is-focus' : ''}">` +
-          `<span class="cal-game-no${noCls(i)}">${i + 1}</span>` +
-          capsuleHtml(g.appid, { icon }) +
-          `<span class="cal-game-name">${escapeHtml(g.name)}</span>` +
-          `<span class="cal-game-min">${hmText(g.minutes)}</span>` +
-          `<span class="cal-game-bar"><span style="width:${pct}%"></span></span>` +
-          `</div>`
-        );
-      })
-      .join('');
-    syncCalDayNav(date, games.length);
-    observeCapsules(box); // 与其它列表同一套按需加载
-  }
-
-  /** 把热力图里「当前正在看的那天」标成选中态（不整块重绘，保住焦点与滚动位置） */
-  function markHeatSel(date) {
-    const box = $('heat-drill');
-    if (!box) return;
-    box.querySelectorAll('.hc.is-sel').forEach((c) => c.classList.remove('is-sel'));
-    const cell = box.querySelector(`.hc[data-date="${date}"]`);
-    if (cell) cell.classList.add('is-sel');
-  }
-
-  /** 打开/切换「某一天」的明细。入口只有一个：下钻月历热力图的格子。
-      只影响浮层内部状态：浮层外的页面布局与数据一律不动。 */
-  function openCalDay(date) {
-    if (state.cal.busy) return;
-    if (!state.meta) {
-      setDayStatus('数据尚未加载完成，请稍候再试', true);
-      return;
-    }
-    setDayStatus('');
-    // 浮层已经开着 → 这是步进（← / →），不要抢焦点（用户正盯着某个按钮）
-    const stepping = state.cal.day !== null;
-    setCalBusy(true, stepping ? '正在切换日期…' : '正在载入当天明细…');
-    // 渲染是同步 CPU 操作，先让浏览器把遮罩画出来再算
-    requestAnimationFrame(() => {
-      try {
-        renderCalDay(date);
-        state.cal.day = date;
-        state.drill.sel = date;
-        /* 第 111 轮：热力图换成一年点阵后不再需要「翻月份页」——
-           整年都在视野里，只要有数据就能看见这一天。这里只重绘一次让选中态跟上。 */
-        const drilled = $('lt-detail') && !$('lt-detail').hidden;
-        if (drilled) {
-          renderDrill();
-          const back = $('hx-grid')?.querySelector(`.hx-c[data-date="${date}"]`);
-          if (back) state.cal.lastFocus = back;
-        } else {
-          markHeatSel(date);
-        }
-        setCalBusy(false);
-        if (!stepping) $('cal-day-close').focus(); // 首次打开把焦点送进浮层
-      } catch (err) {
-        // 失败只提示：已渲染的内容与浮层外的页面都不受影响
-        console.error('载入当天明细失败', err);
-        setCalBusy(false);
-        setDayStatus(`载入失败：${err.message}`, true);
-      }
-    });
-  }
-
-
-  /** 打开浮层看某一天的明细（唯一入口：下钻月历热力图的格子，见 #heat-drill 的委托） */
-  function openDayDetail(date) {
-    if (state.cal.open) return;
-    state.cal.open = true;
-    state.cal.lastFocus = document.activeElement; // 关闭时把焦点还回那个格子
-    state.cal.day = null; // 置空 → openCalDay 认为这是「首次打开」，会把焦点送进浮层
-    $('cal-overlay').hidden = false;
-    document.addEventListener('keydown', onCalKey, true);
-    openCalDay(date);
-  }
-
-  function closeCal() {
-    if (!state.cal.open) return;
-    state.cal.open = false;
-    setCalBusy(false);
-    state.cal.day = null;
-    $('cal-overlay').hidden = true;
-    document.removeEventListener('keydown', onCalKey, true);
-    const f = state.cal.lastFocus;
-    if (f && f.isConnected && f.focus) f.focus();
-  }
-
-  function onCalKey(e) {
-    if (e.key === 'Escape') {
-      if (state.cal.busy) return;
-      e.preventDefault();
-      e.stopPropagation();
-      closeCal();
-    } else if (e.key === 'ArrowLeft' && !state.cal.busy) {
-      stepCalDay(-1); // 只有一层了：← / → 一律步进「前一天 / 后一天」
-    } else if (e.key === 'ArrowRight' && !state.cal.busy) {
-      stepCalDay(1);
-    }
-  }
 
   // ================= 第 83 轮新增模块 =================
   /* 用户 2026-10-31 点名的一批体验改动：#7 热力图 / #8 封面主色进度条 / #10 悬停底纹
@@ -1588,17 +1347,17 @@
           return a + (hit?.minutes ?? 0);
         }, 0)
       : (state.meta?.stats?.total_minutes ?? 0);
-    const head = g
-      ? `<div class="dm-head">
+    /* 第 113 轮（用户：「删除期内合计和有记录」）：这两张卡只在**年视图**出现过，
+       现在整个区块留空；下钻某款游戏时的详情（占比 / 期段 / 成就）照旧。 */
+    if (!g) { box.innerHTML = ''; return; }
+    box.innerHTML =
+      `<div class="dm-head">
           <div class="dm-share"><span>占终身时长</span><b>${share.toFixed(1)}%</b><i style="width:${Math.min(100, share).toFixed(1)}%"></i></div>
           <div class="dm-kv"><span>期内游玩</span><b>${hm(inPeriod)}</b></div>
           <div class="dm-kv"><span>首次记录</span><b>${days[0] ?? '—'}</b></div>
           <div class="dm-kv"><span>最近游玩</span><b>${g.last_played ?? '—'}</b></div>
-        </div>`
-      : `<div class="dm-head"><div class="dm-kv"><span>期内合计</span><b>${hm(inPeriod)}</b></div>
-         <div class="dm-kv"><span>有记录</span><b>${days.length} 天</b></div></div>`;
-    box.innerHTML = head + (appid ? '<div class="dm-ach" id="dm-ach"><p class="dm-empty">成就明细按需加载…</p></div>' : '');
-    if (!appid) return;
+        </div>` +
+      '<div class="dm-ach" id="dm-ach"><p class="dm-empty">成就明细按需加载…</p></div>';
     ensureAchDetail().then(() => {
       const mine = state.ach?.games?.[appid];
       const box2 = $('dm-ach');
@@ -1729,15 +1488,6 @@
     // 氛围特效开关在页脚（fx.js 自己绑定 #fx-seg）。
     bindFlip($('theme-light'), 'all');
 
-    // 当日明细浮层（第 87 轮：入口已从「最近游玩」的小日历图标改为下钻热力图的格子）
-    $('cal-day-close').addEventListener('click', () => closeCal());
-    $('cal-day-prev').addEventListener('click', () => stepCalDay(-1));
-    $('cal-day-next').addEventListener('click', () => stepCalDay(1));
-    $('cal-overlay').addEventListener('click', (e) => {
-      if (e.target.closest('.cal-panel')) return; // 面板内的点击不关闭
-      if (!state.cal.busy) closeCal();
-    });
-
     /* 热力图（第 111 轮换成一年点阵）：
        悬停出气泡、点击在点阵下方展开当天游戏列表；再点同一天 = 收起。
        未采集的日子（.lna）没有 role/tabindex，不参与交互。 */
@@ -1759,7 +1509,20 @@
         if (minutesOn(ds, state.drill.appid) === null) return false;
         state.drill.sel = state.drill.sel === ds ? null : ds;  // 同一天再点 = 收起
         renderDrill();
-        $('hx-day')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        /* 第 113 轮（用户：点开当天后「上方元素会跳一下很突兀」）：
+           原来无条件 scrollIntoView({block:'nearest'}) 会把列表底边拽进视口，
+           整页跟着上滚 200~300px。现在只有「列表头完全在视口外」才轻推一下，
+           且只推到头行露出来为止 —— 头行本来就在视野里时一步都不滚。 */
+        const box = $('hx-day');
+        if (box && !box.hidden) {
+          const head = box.querySelector('.hx-day-head') || box;
+          const r = head.getBoundingClientRect();
+          const vh = window.innerHeight;
+          if (r.top > vh - 24) {
+            const dy = Math.min(r.top - 96, r.top - vh + 96);
+            if (dy > 0) window.scrollBy({ top: dy, behavior: 'smooth' });
+          }
+        }
         return true;
       };
       hxGrid.addEventListener('click', (e) => pickDay(e.target.closest('.hx-c')));
@@ -1798,7 +1561,7 @@
       });
     }
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !state.cal.open) {
+      if (e.key === 'Escape') {
         hxTipHide();
         if (state.drill.sel) { state.drill.sel = null; renderDrill(); }
       }

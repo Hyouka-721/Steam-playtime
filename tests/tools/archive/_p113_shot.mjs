@@ -1,0 +1,17 @@
+import { createRequire } from 'node:module';
+const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace/');
+const { chromium } = require('playwright');
+const W = Number(process.argv[2] || 1442);
+const DPR = Number(process.argv[3] || 1.75);
+const OUT = process.argv[4] || 'C:/Users/33329/AppData/Local/Temp/_local_panel.png';
+const browser = await chromium.launch({ args: ['--no-proxy-server'] });
+const ctx = await browser.newContext({ viewport: { width: W, height: 900 }, deviceScaleFactor: DPR });
+const page = await ctx.newPage();
+await page.goto('http://127.0.0.1:8895/index.html', { waitUntil: 'load' });
+await page.waitForTimeout(1000);
+await page.click('#card-recent');
+await page.waitForTimeout(800);
+const el = await page.$('#lt-detail');
+await el.screenshot({ path: OUT });
+console.log(OUT);
+await browser.close();

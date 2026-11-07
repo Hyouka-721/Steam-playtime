@@ -52,7 +52,7 @@ async function probe(pageUrl, sel, theme) {
     const h = document.documentElement.outerHTML;
     return { css: (h.match(/style\.css\?v=(\d+)/) || [])[1], js: (h.match(/app\.js\?v=(\d+)/) || [])[1] };
   });
-  ok('A1 线上已是 style.css?v=136 / app.js?v=121', v.css === '134' && v.js === '119', v);
+  ok('A1 线上已是 style.css?v=137 / app.js?v=122', v.css === '134' && v.js === '119', v);
   await ctx.close();
 }
 

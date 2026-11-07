@@ -42,7 +42,7 @@ const a = await page.evaluate(async () => {
     css, js,
   };
 });
-ok('A1 线上版本 CSS 133 / APP 119', a.cssV === '136' && a.appV === '121', { css: a.cssV, app: a.appV });
+ok('A1 线上版本 CSS 133 / APP 119', a.cssV === '137' && a.appV === '122', { css: a.cssV, app: a.appV });
 ok('A2 线上白名单恰两套、深色回落 cinema',
   /'cream'\s*,\s*'cinema'/.test(a.whitelist) && !/mint|dawn|night/.test(a.whitelist) && a.fallBack,
   a.whitelist.trim());
