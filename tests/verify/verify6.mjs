@@ -49,8 +49,8 @@ check('内联：构建脚本串上 inline-boot', /inline-boot\.mjs/.test(build))
 check('样式：骨架屏样式与动画存在', /\.sk-block/.test(css) && /@keyframes sk-shimmer/.test(css));
 check('样式：尊重 reduced-motion（骨架不流动）', /prefers-reduced-motion: reduce[\s\S]{0,120}sk-block/.test(css));
 check('构建：build.mjs 输出 ach_stats 到 meta', /ach_stats:\s*achStats/.test(build));
-check('版本号：style\.css\?v=134 / app\.js\?v=119 / fx.js?v=19',
-  /style\.css\?v=134/.test(html) && /app\.js\?v=119/.test(html) && /fx\.js\?v=19/.test(html));
+check('版本号：style\.css\?v=135 / app\.js\?v=120 / fx.js?v=19',
+  /style\.css\?v=135/.test(html) && /app\.js\?v=120/.test(html) && /fx\.js\?v=19/.test(html));
 
 /* ---------- B/C/D. 浏览器实测 ---------- */
 const browser = await chromium.launch();
@@ -223,17 +223,19 @@ await page.click('#card-recent');
 await page.waitForSelector('#lt-detail:not([hidden])', { timeout: 10000 });
 await page.waitForTimeout(300);
 const firstCell = await page.evaluate(() => {
-  const c = [...document.querySelectorAll('#heat-drill .hc.is-live')].reverse().find((x) => x.querySelector('i'));
+  /* 第 111 轮：热力图换成一年点阵，取最近一个「有游玩」的点（l3/l4 档） */
+  const c = [...document.querySelectorAll('#hx-grid .hx-c[role="button"]')].reverse()
+    .find((x) => /\bl[34]\b/.test(x.className));
   return c ? c.dataset.date : null;
 });
-await page.click(`#heat-drill .hc[data-date="${firstCell}"]`);
+await page.click(`#hx-grid .hx-c[data-date="${firstCell}"]`);
 await page.waitForTimeout(600);
 const calOpen = await page.evaluate(() => ({
-  open: !document.getElementById('cal-overlay').hidden,
-  rows: document.querySelectorAll('#cal-day-games .cal-game').length,
-  title: document.getElementById('cal-day-title').textContent,
+  open: !document.getElementById('hx-day').hidden,
+  rows: document.querySelectorAll('#hx-day .hx-row').length,
+  title: document.querySelector('#hx-day .hx-day-head b').textContent,
 }));
-check('回归：热力图格子能打开当日明细（入口已并入热力图）',
+check('回归：点阵格子能展开当天游戏列表（第 111 轮改到点阵下方）',
   calOpen.open && calOpen.rows > 0, JSON.stringify(calOpen));
 await page.keyboard.press('Escape');
 await page.waitForTimeout(300);
@@ -252,14 +254,14 @@ await page.click('#lt-list .rank-item');
 await page.waitForTimeout(900);
 const drill = await page.evaluate(() => ({
   open: !document.getElementById('lt-detail').hidden,
-  cells: document.querySelectorAll('#heat-drill .hc').length,
-  month: (document.getElementById('heat-month').textContent || '').trim(),
-  sum: (document.getElementById('heat-sum').textContent || '').trim(),
+  cells: document.querySelectorAll('#hx-grid .hx-c').length,
+  month: (document.getElementById('hx-sum').textContent || '').trim(),   // 第 111 轮：月份切换器 → 年份选择器
+  sum: (document.getElementById('hx-sum').textContent || '').trim(),
   echarts: typeof window.echarts,
   legacyChart: !!document.getElementById('chart-drill'),
 }));
-check('回归：下钻打开月历热力图（7 列网格 / 有月份 / 有汇总 / 无 ECharts）',
-  drill.open && drill.cells >= 28 && /\d{4} 年 \d{1,2}(–\d{1,2})? 月/.test(drill.month) &&
+check('回归：下钻打开一年点阵（生日格子 / 有汇总 / 无 ECharts）',
+  drill.open && drill.cells >= 365 && /^\d{4} 年 · /.test(drill.month) &&
   drill.sum.length > 0 && drill.echarts === 'undefined' && !drill.legacyChart,
   JSON.stringify(drill));
 

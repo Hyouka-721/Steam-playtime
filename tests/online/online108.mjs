@@ -43,7 +43,7 @@ ok('A2 线上 fx.js 已加载且为第 110 轮四项调整版（密度 / 速度 
   /layers:\s*\[/.test(js) && /fadeOutFrac/.test(js) && /avoidAlpha/.test(js) &&
   /col: colors\.meteor\.slice\(\)/.test(js) && /g\.addColorStop\(0\.65/.test(js), { len: js.length });
 const cssSrc = await page.evaluate(async () => {
-  const r = await fetch('style.css?v=134&t=' + Date.now(), { cache: 'no-store' });
+  const r = await fetch('style.css?v=135&t=' + Date.now(), { cache: 'no-store' });
   return r.ok ? r.text() : '';
 });
 const fxColors = [...cssSrc.matchAll(/--fx-meteor:\s*(#[0-9a-f]{6})/gi)].map((m) => m[1]);

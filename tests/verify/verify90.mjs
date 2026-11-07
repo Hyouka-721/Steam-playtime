@@ -68,7 +68,7 @@ const daily = (() => {
 
 const appV = (html.match(/app\.js\?v=(\d+)/) || [])[1];
 const cssV = (html.match(/style\.css\?v=(\d+)/) || [])[1];
-ok('0.1 index.html 引用 app.js?v=119 / style.css?v=134', appV === '119' && cssV === '134', { app: appV, css: cssV });
+ok('0.1 index.html 引用 app.js?v=120 / style.css?v=135', appV === '120' && cssV === '135', { app: appV, css: cssV });
 
 // 剥注释后再解析规则（第 84 轮的坑：注释里的选择器字面量会被当成规则体）
 const cssNoComment = css.replace(/\/\*[\s\S]*?\*\//g, '');

@@ -41,7 +41,7 @@
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=134">
+<link rel="stylesheet" href="style.css?v=135">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -137,29 +137,31 @@
       <div class="panel-head">
         <div class="panel-title">
           <button class="btn btn-back" id="btn-drill-back">← 返回</button>
-          <!-- 第 95 轮：面板标题（原 #drill-title）删除。
-               第 96 轮：两个月份头分居工具条两端 —— 第一个紧跟返回键，第二个紧贴月份切换器左侧。 -->
-          <div class="heat-months" id="heat-months"></div>
+          <h2 class="hx-title">游玩热力图</h2>
         </div>
         <div class="ctrl">
-          <div class="heat-months is-right" id="heat-months-b"></div>
-          <!-- 第 88 轮：一格 = 一天，单月铺满 1300px 会让格子变成 180×78 的长条 →
-               改成**一页两个月并排**（每格约 86×78，接近正方），‹ › 一次翻一页（2 个月） -->
-          <div class="heat-nav">
-            <button class="cal-nav" id="heat-prev" type="button" aria-label="上两个月">‹</button>
-            <span class="heat-month" id="heat-month">—</span>
-            <button class="cal-nav" id="heat-next" type="button" aria-label="下两个月">›</button>
-          </div>
+          <select class="hx-year" id="hx-year" aria-label="选择年份"></select>
         </div>
       </div>
-      <!-- 月份块（每个含自己的月份标题 / 星期表头 / 7 列网格）由 renderDrill 渲染 -->
-      <div class="heat-pair" id="heat-drill"></div>
-      <div class="heat-foot">
-        <span class="heat-sum" id="heat-sum">—</span>
-        <span class="heat-legend" aria-hidden="true">
-          <span>少</span><i class="h0"></i><i class="h1"></i><i class="h2"></i><i class="h3"></i><i class="h4"></i><span>多</span>
-        </span>
+      <!-- 一年点阵（第 111 轮，参考「听歌统计」插件）：7 行 = 周一~周日，每列 = 一周，
+           一个点 = 一天。悬停出气泡、点击在下方展开当天玩过的游戏。由 renderDrill 渲染。 -->
+      <p class="hx-sum" id="hx-sum">—</p>
+      <div class="hx" id="hx-root">
+        <div class="hx-dow" aria-hidden="true">
+          <span>一</span><span></span><span>三</span><span></span><span>五</span><span></span><span>日</span>
+        </div>
+        <div class="hx-months" id="hx-months" aria-hidden="true"></div>
+        <div class="hx-grid" id="hx-grid" role="grid" aria-label="一年游玩热力图"></div>
+        <div class="hx-foot">
+          <span class="hx-hint">悬停查看当天时长 · 点击展开当天游戏</span>
+          <span class="hx-legend" aria-hidden="true">
+            <span>少</span><i class="hx-c l0"></i><i class="hx-c l1"></i><i class="hx-c l2"></i><i class="hx-c l3"></i><i class="hx-c l4"></i><span>多</span>
+          </span>
+        </div>
+        <div class="hx-tip" id="hx-tip" role="tooltip" hidden></div>
       </div>
+      <!-- 点击某天 → 这里展开当天玩过的游戏与时长 -->
+      <div class="hx-day" id="hx-day" hidden></div>
       <div id="drill-more" class="drill-more"></div>
     </div>
   </div>
@@ -302,7 +304,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
-<script src="app.js?v=119" onerror="__appFail()"></script>
+<script src="app.js?v=120" onerror="__appFail()"></script>
 <!-- 第 93 轮：背景流星（纯装饰、不参与首屏渲染）降到最低下载优先级，且**排在 app.js
      之后** —— 只写 fetchpriority="low" 时浏览器仍会先于 app.js 发起 fx.js 的请求
      （标签在文档里更靠前），实测请求顺序是 fx.js → app.js。调换位置后才真正让路。

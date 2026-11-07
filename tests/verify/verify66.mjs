@@ -316,7 +316,7 @@ console.log('\n== F 其他功能不受影响 ==');
     dlg.open && dlg.missing.length === 0 && dlg.ratingStep === '0.5', JSON.stringify(dlg));
   await p.evaluate(() => document.getElementById('w-add').close());
 
-  /* 第 89 轮改判：原来硬编码三个**绝对版本号**（style.css?v=134 / app.js?v=115 / fx.js?v=19）
+  /* 第 89 轮改判：原来硬编码三个**绝对版本号**（style.css?v=135 / app.js?v=115 / fx.js?v=19）
      —— 那是另一条线（index）当轮的快照，index 线一 bump 就必红（现在 app.js 已到 v=119）。
      典型的「代理判据过期」：它名义上守「观影页的改动没碰到首页」，实际守的是「index 不许改版」。
      换成两条实质约束：① 三件资产仍带 ?v=NN；② 首页不引用任何 watch.* 资源（两页资产不串线）。 */

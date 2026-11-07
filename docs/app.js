@@ -77,7 +77,7 @@
     days: new Map(),  // 'YYYY-MM-DD' -> day（全量；日历二级界面按日期直接取用）
     allDates: [],     // 有记录的日期索引（升序）
     view: 'lifetime',
-    drill: { appid: null, month: null, sel: null }, // 二级界面：null = 全部游戏；month = 'YYYY-MM'；sel = 最近看过的那天
+    drill: { appid: null, year: null, sel: null }, // 二级界面：null = 全部游戏；year = 热力图年份；sel = 最近点开的那天
     // ---- 当日明细浮层（第 87 轮：入口改为下钻月历热力图的格子）----
     cal: { open: false, busy: false, lastFocus: null, day: null },
     heroAppid: null,  // 悬停中的游戏（背景底纹用），null = 恢复默认底
@@ -520,26 +520,17 @@
       整体换成**按月热力图**。用户要的是「哪几天玩得多」的强弱，不是精确曲线；
       顺带把 ECharts 这个最大的外部依赖从站点里彻底摘掉。 */
 
-  /** 默认月份 = 最新数据所在月 */
-  function heatDefaultMonth() {
-    const last = state.allDates[state.allDates.length - 1];
-    return last ? last.slice(0, 7) : todayStr().slice(0, 7);
-  }
+  /* ---------- 游玩热力图：一年点阵（2026-11-07 重做，参考「听歌统计」插件的点阵热力图） ----------
+     形态：7 行（周一→周日）× N 列（每周一列，一年 53 列），**一个点 = 一天**。
+     交互：悬停出气泡（日期 + 当天游玩时长），点击在点阵**下方**展开当天玩过的游戏与时长。
+     数据：state.days ← docs/data/daily/YYYY-MM.json 的 days[date]：
+           · total_minutes 决定点的深浅（四档，相对本年度峰值）与气泡主数值
+           · games[] = [{appid, name, minutes, is_new}] 就是点击后那天的列表
+           · 该日无对象 = 还没采集到（.lna 空心点），与「有记录但 0 分钟」区分开
+     ⚠️ 与旧「两个月并排日历」是完全不同的 DOM（.hx-*）：旧套件里断言 .hc / .heat-mb /
+        .heat-nav / .hm-title 的会失效 —— 第 111 轮起由 verify111 守新契约。 */
 
-  /** 可翻阅的月份区间（首份数据月 → 最新数据月） */
-  function heatMonthBounds() {
-    const first = (state.allDates[0] ?? todayStr()).slice(0, 7);
-    const last = (state.allDates[state.allDates.length - 1] ?? todayStr()).slice(0, 7);
-    return { min: first, max: last };
-  }
-
-  function shiftMonth(ym, delta) {
-    const [y, m] = ym.split('-').map(Number);
-    const d = new Date(Date.UTC(y, m - 1 + delta, 1));
-    return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
-  }
-
-  /** 某天某游戏的分钟数；appid 为空 = 当天总和。返回 null 表示「那天还没有数据」 */
+  /** 某天某游戏的分钟数；appid 为空 = 当天总和。返回 null = 那天还没有数据 */
   function minutesOn(date, appid) {
     const day = state.days.get(date);
     if (!day) return null;
@@ -547,11 +538,12 @@
     return (day.games ?? []).find((g) => String(g.appid) === String(appid))?.minutes ?? 0;
   }
 
+  /** 点榜单某一行 → 下钻到该游戏的一年热力图 */
   function openDrill(appid) {
     state.drill.appid = appid;
-    state.drill.month = heatDefaultMonth();
-    state.drill.sel = null; // 进入一个新的下钻，不保留上一个游戏看过的那天
-    // 热力图已归属「最近游玩」栏目：进入下钻即切到该栏目，内容与数据保持不变
+    state.drill.year = null;   // 回到「最新数据所在年」
+    state.drill.sel = null;    // 进入新的下钻，不保留上一个游戏点开的那天
+    // 热力图归属「最近游玩」栏目：进入下钻即切过去，数据不变
     switchView('recent', { instant: true });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -562,175 +554,202 @@
     state.drill.sel = null;
   }
 
-  /* 第 88 轮（用户）：「格子过宽，一页放两个月更美观」。
-     单月铺满整幅面板时一格是 181×78（2.3:1 的长条），两月并排后约 86×78（接近正方）。
-     顺带把强度归一化从「本月峰值」改成「本页峰值」—— 并排看两个月时，只有同一把尺子
-     量出来的深浅才能横向比较（否则 9 月的 1 小时会和 10 月的 4 小时一样深）。 */
-  const HEAT_PER_PAGE = 2;
-
-  /** 数据覆盖的全部月份（升序，取 meta.months 与每日数据并集，避免翻到空月） */
-  function heatMonths() {
-    const b = heatMonthBounds();
-    const set = new Set(state.meta?.months ?? []);
-    for (const d of state.allDates) set.add(d.slice(0, 7));
-    const out = [...set].filter((ym) => ym >= b.min && ym <= b.max).sort();
-    if (out.length) return out;
-    return [heatDefaultMonth()];
-  }
-
-  /** 分页：从最新往回两两切，保证**最后一页是满的**（当前月永远落在右列）；
-      最早那一页若只剩 1 个月，往前补一个月（多半会渲染成「尚未开始记录」占位卡）——
-      否则一页只有一个块，右边空半边，比单月铺满还难看。 */
-  function heatPages() {
-    const ms = heatMonths();
-    const pages = [];
-    for (let end = ms.length; end > 0; end -= HEAT_PER_PAGE) {
-      pages.unshift(ms.slice(Math.max(0, end - HEAT_PER_PAGE), end));
+  /** 可选年份：首份数据年 ~ 最新数据年，外加今年 */
+  function hxYears() {
+    const ys = new Set();
+    for (const d of state.allDates) {
+      const y = Number(d.slice(0, 4));
+      if (Number.isFinite(y)) ys.add(y);
     }
-    if (pages.length && pages[0].length < HEAT_PER_PAGE) {
-      const pad = [];
-      for (let k = pages[0].length; k < HEAT_PER_PAGE; k++) pad.push(shiftMonth(pages[0][0], -(HEAT_PER_PAGE - k)));
-      pages[0] = pad.concat(pages[0]);
-    }
-    return pages.length ? pages : [[]];
+    ys.add(new Date().getFullYear());
+    return [...ys].sort((a, b) => a - b);
   }
 
-  /** 某个月落在第几页（找不到 → 最后一页） */
-  function heatPageOf(ym) {
-    const pages = heatPages();
-    const i = pages.findIndex((p) => p.includes(ym));
-    return i >= 0 ? i : pages.length - 1;
+  /** 当前年份：state.drill.year 优先，否则落到最新数据所在年 */
+  function hxYear() {
+    const y = Number(state.drill.year);
+    if (Number.isFinite(y) && y > 1970) return y;
+    const last = state.allDates[state.allDates.length - 1];
+    return last ? Number(last.slice(0, 4)) : new Date().getFullYear();
   }
 
-  /** 标题：同一年写「2026 年 9–10 月」，跨年写「2025 年 12 月 – 2026 年 1 月」 */
-  function heatRangeLabel(page) {
-    if (!page.length) return '—';
-    const [y1, m1] = page[0].split('-').map(Number);
-    const [y2, m2] = page[page.length - 1].split('-').map(Number);
-    if (page.length === 1) return `${y1} 年 ${m1} 月`;
-    return y1 === y2 ? `${y1} 年 ${m1}–${m2} 月` : `${y1} 年 ${m1} 月 – ${y2} 年 ${m2} 月`;
+  /** 周一 = 0 … 周日 = 6（原生 getUTCDay 里周日是 0） */
+  const hxDowIndex = (ds) => (new Date(ds + 'T12:00:00Z').getUTCDay() + 6) % 7;
+  const hxDowName = (ds) => '一二三四五六日'[hxDowIndex(ds)];
+  const hxDateLabel = (ds) =>
+    `${ds.slice(0, 4)}年${Number(ds.slice(5, 7))}月${Number(ds.slice(8, 10))}日`;
+
+  /** 气泡：日期 + 当天时长（未采集的日子写「尚未记录」） */
+  function hxTipShow(cell) {
+    const tip = $('hx-tip');
+    const root = $('hx-root');
+    if (!tip || !root || !cell) return;
+    const ds = cell.dataset.date;
+    const min = minutesOn(ds, state.drill.appid);
+    tip.innerHTML =
+      `<b>${hxDateLabel(ds)}</b><span>${min === null ? '尚未记录' : `游玩时长：${hm(min)}`}</span>`;
+    tip.hidden = false;
+    /* 位置：默认落在格子下方 9px；周五~周日那两行贴近面板底部，改成向上弹。
+       左右各留 80px，避免贴边被裁。 */
+    const r = cell.getBoundingClientRect();
+    const rr = root.getBoundingClientRect();
+    const row = hxDowIndex(ds);            // 周一 = 0 … 周日 = 6
+    const up = row >= 5;
+    tip.classList.toggle('is-up', up);
+    const x = Math.min(Math.max(r.left - rr.left + r.width / 2, 80), Math.max(80, rr.width - 80));
+    tip.style.left = `${x.toFixed(1)}px`;
+    tip.style.top = `${(up ? r.top - rr.top - 9 : r.bottom - rr.top + 9).toFixed(1)}px`;
   }
 
-  /** 月历热力图：每页两个月份块，每块 7 列（周一→周日），格子带日期与当日时长 */
+  function hxTipHide() {
+    const tip = $('hx-tip');
+    if (tip) tip.hidden = true;
+  }
+
+  /** 点阵下方：某一天的明细（点击格子后展开；再点同一天 = 收起） */
+  function renderHxDay() {
+    const box = $('hx-day');
+    if (!box) return;
+    const ds = state.drill.sel;
+    if (!ds) { box.hidden = true; box.innerHTML = ''; return; }
+
+    const appid = state.drill.appid;
+    const day = state.days.get(ds);
+    const all = day?.games ?? [];
+    /* 下钻某款游戏时只列这款；否则列当天全部 */
+    const list = (appid ? all.filter((x) => String(x.appid) === String(appid)) : all)
+      .slice()
+      .sort((a, b) => (b.minutes ?? 0) - (a.minutes ?? 0));
+    const total = list.reduce((a, x) => a + (x.minutes ?? 0), 0);
+    const maxMin = list.reduce((a, x) => Math.max(a, x.minutes ?? 0), 0);
+    const scopeName = appid ? (state.meta?.games_lifetime?.[appid]?.name ?? '这款游戏') : '';
+
+    const rows = list.length
+      ? list.map((x) => {
+          const g = state.meta?.games_lifetime?.[x.appid];
+          const icon = g?.img_icon_url ? ICON(x.appid, g.img_icon_url) : '';
+          const w = maxMin > 0 ? Math.max(3, ((x.minutes ?? 0) / maxMin) * 100) : 0;
+          return (
+            `<div class="hx-row">` +
+            (icon
+              ? `<img class="hx-ico" src="${icon}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`
+              : `<span class="hx-ico is-ph" aria-hidden="true"></span>`) +
+            `<span class="hx-nm">${escapeHtml(x.name ?? '')}${x.is_new ? '<i class="tag new">新</i>' : ''}</span>` +
+            `<span class="hx-track"><i style="width:${w.toFixed(1)}%"></i></span>` +
+            `<span class="hx-tt">${hm(x.minutes ?? 0)}</span>` +
+            `</div>`
+          );
+        }).join('')
+      : `<p class="hx-none">${day ? '这天没有游玩记录。' : '这天还没有采集到数据。'}</p>`;
+
+    box.innerHTML =
+      `<div class="hx-day-head">` +
+      `<b>${hxDateLabel(ds)}</b>` +
+      `<span class="hx-dow-tag">周${hxDowName(ds)}</span>` +
+      `<span class="hx-day-sum">${
+        list.length ? `${scopeName ? scopeName + ' · ' : ''}${list.length} 款 · 合计 ${hm(total)}` : '无游玩记录'
+      }</span>` +
+      `<button class="hx-day-x" id="hx-day-x" type="button" aria-label="收起当天明细">×</button>` +
+      `</div>` +
+      `<div class="hx-day-list">${rows}</div>`;
+    box.hidden = false;
+  }
+
+  /** 一年的点阵渲染（下钻某款游戏时，点的深浅换成那款游戏当天的分钟数） */
   function renderDrill() {
     const appid = state.drill.appid;
-    /* 第 95 轮：面板标题（「全部游戏 · 每日游玩热力图」）已按用户要求删除，
-       这里不再写 #drill-title，也不再需要 games_lifetime（原来只为取游戏名）。
-       游戏名仍由 renderDrillMore 与格子的 aria-label 承载。 */
+    const grid = $('hx-grid');
+    const monthsBox = $('hx-months');
+    if (!grid || !monthsBox) return;
 
-    const pages = heatPages();
-    const wanted = state.drill.month || heatDefaultMonth();
-    const pi = Math.min(pages.length - 1, Math.max(0, heatPageOf(wanted)));
-    const page = pages[pi];
+    const year = hxYear();
+    const jan1 = `${year}-01-01`;
+    const lead = hxDowIndex(jan1);
+    const leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+    const daysInYear = leap ? 366 : 365;
+    const cols = Math.ceil((lead + daysInYear) / 7);
     const today = todayStr();
 
-    // ① 先把这一页每个月的逐日数据算出来（渲染前要拿到跨月峰值才能统一色阶）
-    const months = page.map((ym) => {
-      const [y, m] = ym.split('-').map(Number);
-      const dim = new Date(Date.UTC(y, m, 0)).getUTCDate();
-      const lead = (new Date(Date.UTC(y, m - 1, 1)).getUTCDay() + 6) % 7; // 周一 = 0
-      const days = [];
-      let active = 0;
-      let sum = 0;
-      let peak = 0;
-      let tracked = 0;
-      for (let d = 1; d <= dim; d++) {
-        const ds = `${ym}-${String(d).padStart(2, '0')}`;
-        const min = minutesOn(ds, appid);
-        days.push({ d, ds, min });
-        if (min === null) continue;
+    /* ① 先扫一遍拿到峰值：四档深浅是「相对本年度峰值」，与插件一致 */
+    const days = [];
+    let peak = 0, active = 0, sum = 0, tracked = 0;
+    for (let i = 0; i < daysInYear; i++) {
+      const ds = addDaysStr(jan1, i);
+      const min = minutesOn(ds, appid);
+      if (min !== null) {
         tracked++;
-        if (min > 0) { active++; sum += min; }
-        if (min > peak) peak = min;
+        if (min > 0) { active++; sum += min; if (min > peak) peak = min; }
       }
-      return { ym, y, m, dim, lead, days, active, sum, peak, tracked };
-    });
-    const pagePeak = months.reduce((a, x) => Math.max(a, x.peak), 0);
-    let pageActive = 0;
-    let pageSum = 0;
-    for (const x of months) { pageActive += x.active; pageSum += x.sum; }
+      days.push({ ds, min });
+    }
 
-    // ② 渲染：每个月一块；整月无数据（追踪开始前）给占位卡而不是 42 个虚线空格
-    const since = state.meta?.tracking_since;
-    const sinceText = since ? `${Number(since.slice(5, 7))} 月 ${Number(since.slice(8, 10))} 日开始` : '';
-    /* 第 95 轮：月份头（名称 + 「N 天 · X h Y min」）不再放在月份块内部，
-       而是收集起来渲染到顶部工具条的 #heat-months（排在「← 返回」右侧）。
-       所以月份块本身只剩星期表头 + 日历格子，视觉上就是两块干净的卡片。 */
-    const heads = [];
-    const blocks = months.map((x) => {
-      heads.push(
-        `<div class="hm-head"><span class="hm-title">${x.y} 年 ${x.m} 月</span>` +
-        (x.tracked ? `<span class="hm-stat">${x.active} 天 · ${hm(x.sum)}</span>` : '') +
-        `</div>`,
-      );
-      if (!x.tracked) {
-        return (
-          `<section class="heat-mb is-empty" data-ym="${x.ym}">` +
-          `<p class="hm-none">尚未开始记录${sinceText ? `<span>数据自 ${sinceText}积累</span>` : ''}</p></section>`
-        );
+    /* ② 点阵格子：.hx-pad 补首周空位；lna = 未采集；l0 = 有记录但 0 分钟 */
+    const cells = [];
+    for (let k = 0; k < lead; k++) cells.push('<span class="hx-pad"></span>');
+    for (const { ds, min } of days) {
+      let lv;
+      if (min === null) lv = 'na';
+      else if (min <= 0) lv = 0;
+      else {
+        const r = peak > 0 ? min / peak : 0;
+        lv = r <= 0.25 ? 1 : r <= 0.5 ? 2 : r <= 0.75 ? 3 : 4;
       }
-      const cells = [];
-      for (let i = 0; i < x.lead; i++) cells.push('<span class="hc is-blank"></span>');
-      for (const { d, ds, min } of x.days) {
-        if (min === null) {
-          // 追踪开始之前 / 未来：留白格，只显示日期
-          cells.push(`<span class="hc is-na" data-date="${ds}"><b>${d}</b></span>`);
-          continue;
-        }
-        const r = pagePeak > 0 ? min / pagePeak : 0;
-        const lv = min <= 0 ? 0 : r <= 0.25 ? 1 : r <= 0.5 ? 2 : r <= 0.75 ? 3 : 4;
-        const cls = ['hc', `h${lv}`, 'is-live'];
-        if (ds === today) cls.push('is-today');
-        if (ds === state.drill.sel) cls.push('is-sel');
-        /* 第 87 轮：格子是「当日明细」的入口。有数据的日子都可点 —— 包括「当天这款没玩」
-           的 0 分钟格，因为那天的明细里还有别的游戏。可访问名给出日期 + 时长 + 动作。 */
-        const label = min > 0
-          ? `${x.m} 月 ${d} 日 · ${appid ? '这款玩了 ' : '当天 '}${heatTime(min)}，查看当天明细`
-          : `${x.m} 月 ${d} 日 · ${appid ? '这款当天没玩' : '当天没有游玩'}，仍可查看明细`;
-        cells.push(
-          `<span class="${cls.join(' ')}" data-date="${ds}" role="button" tabindex="0"` +
-            ` aria-label="${escapeHtml(label)}"><b>${d}</b>${min > 0 ? `<i>${heatTime(min)}</i>` : ''}</span>`,
-        );
-      }
-      while (cells.length % 7 !== 0) cells.push('<span class="hc is-blank"></span>');
-      return (
-        `<section class="heat-mb" data-ym="${x.ym}">` +
-        `<div class="heat-week" aria-hidden="true"><span>一</span><span>二</span><span>三</span>` +
-        `<span>四</span><span>五</span><span>六</span><span>日</span></div>` +
-        `<div class="heat heat-cal">${cells.join('')}</div></section>`
+      const cls = ['hx-c', 'l' + lv];
+      if (ds === today) cls.push('is-today');
+      if (ds === state.drill.sel) cls.push('is-sel');
+      /* 有数据的日子才可点（键盘可达）；未采集的日子只作视觉占位 */
+      const live = min !== null;
+      const label = !live
+        ? `${hxDateLabel(ds)}，尚未采集`
+        : min > 0
+          ? `${hxDateLabel(ds)}，${appid ? '这款玩了 ' : '当天 '}${hm(min)}，查看当天游戏`
+          : `${hxDateLabel(ds)}，${appid ? '这款当天没玩' : '当天没有游玩'}，仍可查看当天游戏`;
+      cells.push(
+        `<span class="${cls.join(' ')}" data-date="${ds}"` +
+          (live ? ` role="button" tabindex="0"` : '') +
+          ` aria-label="${escapeHtml(label)}"></span>`,
       );
-    });
+    }
+    while (cells.length % 7 !== 0) cells.push('<span class="hx-pad"></span>');
 
-    $('heat-drill').innerHTML = blocks.join('');
-    /* 第 96 轮：两个月份头分居工具条两端 —— 第一个紧跟「← 返回」，
-       第二个贴到月份切换器左侧（用户要求）。上个月翻页只剩一个月时，第二个容器清空。 */
-    $('heat-months').innerHTML = heads[0] ?? '';
-    $('heat-months-b').innerHTML = heads[1] ?? '';
-    $('heat-month').textContent = heatRangeLabel(page);
-    $('heat-prev').disabled = pi <= 0;
-    $('heat-next').disabled = pi >= pages.length - 1;
-    /* 汇总口径：只数「有数据的天」。单月写「10 月 …」，两月写「9–10 月共 …」——
-       写「本月」在两月并排时会指代不清（左列常常是空月）。 */
-    const tracked = months.filter((x) => x.tracked > 0);
-    const scopeText = !tracked.length
-      ? '本期'
-      : tracked.length === 1
-        ? `${tracked[0].m} 月`
-        : `${tracked[0].m}–${tracked[tracked.length - 1].m} 月共`;
-    $('heat-sum').textContent =
-      `${scopeText} ${pageActive} 天有记录 · ${pagePeak > 0 ? '峰值 ' + hm(pagePeak) : '暂无记录'} · 合计 ${hm(pageSum)}`;
+    /* ③ 月份刻度：按「该月 1 号落在第几列」定位；同一列的第二个月份跳过以免叠字 */
+    const marks = [];
+    let lastCol = -1;
+    for (let m = 1; m <= 12; m++) {
+      const first = `${year}-${String(m).padStart(2, '0')}-01`;
+      const doy = Math.round((Date.parse(first + 'T12:00:00Z') - Date.parse(jan1 + 'T12:00:00Z')) / 86400000);
+      const col = Math.floor((lead + doy) / 7);
+      if (col <= lastCol) continue;
+      lastCol = col;
+      marks.push(`<span class="hx-ml" style="grid-column:${col + 1}">${m}月</span>`);
+    }
+
+    const cols3 = `repeat(${cols}, var(--hx))`;
+    grid.style.gridTemplateColumns = cols3;
+    grid.innerHTML = cells.join('');
+    monthsBox.style.gridTemplateColumns = cols3;
+    monthsBox.innerHTML = marks.join('');
+
+    /* ④ 概览 + 年份选择器 */
+    const sumText = tracked
+      ? `${year} 年 · ${active} 天有记录 · 峰值 ${hm(peak)} · 合计 ${hm(sum)}`
+      : `${year} 年 · 暂无记录`;
+    const sumEl = $('hx-sum');
+    if (sumEl) sumEl.textContent = sumText;
+
+    const sel = $('hx-year');
+    if (sel) {
+      const ys = hxYears();
+      const key = ys.join(',');
+      if (sel.dataset.years !== key) {
+        sel.innerHTML = ys.map((y) => `<option value="${y}">${y} 年</option>`).join('');
+        sel.dataset.years = key;
+      }
+      sel.value = String(year);
+    }
+
+    renderHxDay();
     renderDrillMore(appid);
-  }
-
-  /** 翻页：一次两个月（越界直接忽略） */
-  function stepHeatPage(delta) {
-    const pages = heatPages();
-    const pi = heatPageOf(state.drill.month || heatDefaultMonth());
-    const next = pi + delta;
-    if (next < 0 || next >= pages.length) return;
-    const p = pages[next];
-    state.drill.month = p[p.length - 1]; // 用「这一页最右那个月」当锚点
-    renderDrill();
   }
 
   // ---------- ①d 成就详情 ----------
@@ -1270,16 +1289,12 @@
         renderCalDay(date);
         state.cal.day = date;
         state.drill.sel = date;
-        /* 步进可能翻到别的月份：把背后的热力图翻到能看见这一天的**那一页**，关掉浮层后
-           看到的还是这一天所在的月份（整块重绘会换掉格子节点，所以顺手把「关闭后焦点
-           还回谁」指到新格子）。 */
-        const ym = date.slice(0, 7);
+        /* 第 111 轮：热力图换成一年点阵后不再需要「翻月份页」——
+           整年都在视野里，只要有数据就能看见这一天。这里只重绘一次让选中态跟上。 */
         const drilled = $('lt-detail') && !$('lt-detail').hidden;
-        const visible = heatPages()[heatPageOf(state.drill.month || heatDefaultMonth())];
-        if (drilled && !visible.includes(ym)) {
-          state.drill.month = ym;
+        if (drilled) {
           renderDrill();
-          const back = $('heat-drill').querySelector(`.hc[data-date="${date}"]`);
+          const back = $('hx-grid')?.querySelector(`.hx-c[data-date="${date}"]`);
           if (back) state.cal.lastFocus = back;
         } else {
           markHeatSel(date);
@@ -1667,17 +1682,58 @@
       if (!state.cal.busy) closeCal();
     });
 
-    // 热力图格子 → 当日明细（点击 + 键盘 Enter/Space，事件委托挂在容器上）
-    $('heat-drill').addEventListener('click', (e) => {
-      const cell = e.target.closest('.hc.is-live');
-      if (cell && !state.cal.busy) openDayDetail(cell.dataset.date);
-    });
-    $('heat-drill').addEventListener('keydown', (e) => {
-      if (e.key !== 'Enter' && e.key !== ' ') return;
-      const cell = e.target.closest('.hc.is-live');
-      if (!cell || state.cal.busy) return;
-      e.preventDefault();
-      openDayDetail(cell.dataset.date);
+    /* 热力图（第 111 轮换成一年点阵）：
+       悬停出气泡、点击在点阵下方展开当天游戏列表；再点同一天 = 收起。
+       未采集的日子（.lna）没有 role/tabindex，不参与交互。 */
+    const hxGrid = $('hx-grid');
+    if (hxGrid) {
+      hxGrid.addEventListener('mouseover', (e) => {
+        const c = e.target.closest('.hx-c');
+        if (c) hxTipShow(c); else hxTipHide();
+      });
+      hxGrid.addEventListener('mouseleave', hxTipHide);
+      hxGrid.addEventListener('focusin', (e) => {
+        const c = e.target.closest('.hx-c');
+        if (c) hxTipShow(c);
+      });
+      hxGrid.addEventListener('focusout', hxTipHide);
+      const pickDay = (cell) => {
+        if (!cell || !cell.dataset.date) return false;
+        const ds = cell.dataset.date;
+        if (minutesOn(ds, state.drill.appid) === null) return false;
+        state.drill.sel = state.drill.sel === ds ? null : ds;  // 同一天再点 = 收起
+        renderDrill();
+        $('hx-day')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        return true;
+      };
+      hxGrid.addEventListener('click', (e) => pickDay(e.target.closest('.hx-c')));
+      hxGrid.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        if (pickDay(e.target.closest('.hx-c'))) e.preventDefault();
+      });
+    }
+    const hxYearSel = $('hx-year');
+    if (hxYearSel) {
+      hxYearSel.addEventListener('change', (e) => {
+        state.drill.year = Number(e.target.value);
+        state.drill.sel = null;
+        hxTipHide();
+        renderDrill();
+      });
+    }
+    const hxDayBox = $('hx-day');
+    if (hxDayBox) {
+      hxDayBox.addEventListener('click', (e) => {
+        if (!e.target.closest('#hx-day-x')) return;
+        state.drill.sel = null;
+        renderDrill();
+      });
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !state.cal.open) {
+        hxTipHide();
+        if (state.drill.sel) { state.drill.sel = null; renderDrill(); }
+      }
     });
 
     // 网站名：点击返回顶部（键盘 Enter / 空格同样支持）
@@ -1725,9 +1781,8 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // 第 86 轮：月份翻页（原 30/90/365 分段已随趋势图一起移除）
-    $('heat-prev').addEventListener('click', () => stepHeatPage(-1));
-    $('heat-next').addEventListener('click', () => stepHeatPage(1));
+    // 第 111 轮：月份翻页（‹ ›）已随「两月并排日历」一起移除，
+    // 现在由点阵上方的年份选择器切换范围。
 
     $('btn-csv-daily').addEventListener('click', () => download('steam-daily.csv', csvDaily()));
     $('btn-csv-lifetime').addEventListener('click', () => download('steam-games-lifetime.csv', csvLifetime()));

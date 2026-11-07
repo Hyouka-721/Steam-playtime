@@ -1244,11 +1244,6 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .btn-ghost { background: transparent; }
 
 .health { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
-/* 第 100 轮：给「内嵌区块」加受光面（inset 1px 高光），与 --card-shine 同一套语言，
-   形成「页面 → 面板 → 内嵌区块」的三级深度。
-   ⚠️ 只加给真正的区块（下面这几个）；--sunken 还用在 20 多处小元素上
-   （图标占位、日历小圆点、进度条轨道、热力图格子），那些加了会脏。 */
-.h-item, .rp-cell, .heat-mb, .hm-none { box-shadow: var(--inset-shine); }
 
 .h-item { background: var(--sunken); border: 1px solid var(--border); border-radius: 9px; padding: 12px 14px; }
 .h-label { font-size: 13px; color: var(--text-dim); }
@@ -1541,184 +1536,6 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   transition: opacity .45s ease;
 }
 
-/* #7 每日游玩热力图（第 86 轮按月 / 第 88 轮**两月并排**）
-   一格 = 一天，一页 = 最多两个月。单月铺满整幅面板时格子是 181×78 的长条（右边一片空），
-   两月并排后约 86×78，接近正方，日期与时长才填得满一格。
-   ‹ › 一次翻一页（2 个月）；最后一页永远是满的，当前月总落在右列。 */
-.heat-pair {
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-  /* 第 95 轮：两个月改成两块**独立卡片**（浅底 + 圆角），用户要求「类似顶部独立栏」
-     那样的区块感。间距保持 22px 一档不变 —— 900~1100px 的格子里「49 min」本来就
-     贴着裁切红线，卡片内边距只在 ≥1101px 才给（见下）。 */
-  gap: 14px; margin-bottom: 12px; position: relative;
-}
-/* 第 95 轮：原来的竖直分隔线删除 —— 卡片本身的底色与间隙已经把两个月分开了。 */
-@media (min-width: 1101px) {
-  .heat-pair { gap: 28px; }
-}
-.heat-mb { min-width: 0; display: flex; flex-direction: column; background: var(--sunken); border-radius: 12px; }
-/* 卡片内边距分三档 —— 这套数值是被格子的裁切红线逼出来的：
-   · 900~1024：**0**。这一档格子只有 49~50px，内容区 35px，「49 min」正好 35.4px，
-     卡片再吃 12px 内边距就溢出 7px（verify90 的 6.900 会红）。靠底色 + 圆角区分即可。
-   · 1025~1100：6px。格子回到 58px 以上，吃得下。
-   · ≥1101：14px。格子 63px+，卡片才真正像图 2 那种「独立栏」。 */
-@media (min-width: 1025px) {
-  .heat-mb { padding: 6px 6px 4px; }
-}
-/* ≥1101 才给足内边距：格子 63px+，卡片才真正像图 2 那种「独立栏」。
-   ⚠️ 必须写在 1025 那条之后（同 specificity，后写的赢）。 */
-@media (min-width: 1101px) {
-  .heat-mb { padding: 14px 14px 12px; }
-}
-/* 第 95 轮：月份头（名称 + 统计）搬到顶部工具条的 #heat-months，
-   第 96 轮：两个头分居两端 —— 第一个在「← 返回」右侧（.panel-title 里），
-   第二个在月份切换器左侧（.ctrl 里，.is-right）。
-   .ctrl 里已经有 gap: 10px，所以这里只对齐、不再加额外间距。 */
-.heat-months { display: flex; gap: 22px; align-items: flex-start; min-width: 0; }
-.heat-months.is-right { justify-content: flex-end; }
-@media (min-width: 1101px) { .heat-months { gap: 28px; } }
-.heat-months .hm-head { margin-bottom: 0; }
-/* 窄屏：工具条会折行，两个头并成一组更省空间（否则右边那个会被挤到第二行最右） */
-@media (max-width: 899px) {
-  .heat-months, .heat-months.is-right { flex-direction: row; gap: 12px; }
-  .heat-months .hm-head { display: flex; flex-direction: column; }
-}
-/* 占位卡（整月无数据）撑满与相邻月份等高，视觉上才是一块完整的"月份"，
-   否则左列会只剩一条细卡、右下大片空白（第 88 轮实测截图里很明显）。 */
-.heat-mb.is-empty .hm-none { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-/* 月份标题与月内统计**上下两行**：并排时两列的「标题 + 统计」会连成一条长行
-   （右列标题紧贴左列统计），分两行才看得出是两块。 */
-.hm-head {
-  display: flex; flex-direction: column; align-items: flex-start; gap: 1px;
-  margin-bottom: 8px;
-}
-/* 第 94 轮：用户反馈月份块的头两行字太小，各 +5px（14.5 → 19.5、12.5 → 17.5）。
-   这两行是 flex column 里的独立元素，字号只影响自身高度与宽度，不会挤压下面的
-   日历格子（格子宽度由 7 列网格决定）。 */
-.hm-title { font-size: 19.5px; font-weight: 700; color: var(--text-strong); letter-spacing: .3px; }
-.hm-stat {
-  font-size: 17.5px; color: var(--text-dim);
-  font-variant-numeric: tabular-nums; white-space: nowrap;
-}
-/* 整月无数据（追踪开始之前）：给一张占位卡，而不是 42 个虚线空格 */
-.hm-none {
-  margin: 0; padding: 34px 12px; border: 1px dashed var(--border); border-radius: 10px;
-  text-align: center; color: var(--text-dim); font-size: 13.5px; line-height: 1.7;
-  background: var(--sunken);
-}
-.hm-none span { display: block; font-size: 12.5px; color: var(--text-faint); }
-.heat-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-.heat-week {
-  display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
-  font-size: 12.5px; color: var(--text-dim); margin-bottom: 6px;
-}
-.heat-week span { padding-left: 6px; }
-.hc {
-  position: relative; min-height: 74px; border-radius: 10px; padding: 7px 9px;
-  display: flex; flex-direction: column; gap: 2px;
-  background: var(--sunken); border: .5px solid var(--border);
-  color: var(--text-dim); font-size: 13px; font-variant-numeric: tabular-nums;
-  /* 网格项默认 min-width:auto —— 里面那行时长文字的最小宽度会把 1fr 轨道顶宽，
-     窄屏（360px）下整块因此横向溢出。显式归零让轨道可以缩到 1fr。 */
-  min-width: 0;
-}
-/* 第 88 轮（用户）：日期与时长数字都要更清楚 —— 日期升为主角（15px/600/--text-strong），
-   时长紧随（14px/600），两者都吃满格宽的两端：日期贴左上、时长贴右下。 */
-.hc b {
-  font-size: 15px; font-weight: 600; line-height: 1.15;
-  color: var(--text-strong);
-}
-.hc i {
-  /* 第 89 轮（用户）：时长再放大一档到 15px（与日期同号），数字与单位之间留空格，
-     两行都吃满格宽：日期贴左上、时长贴右下。 */
-  font-style: normal; font-size: 15px; font-weight: 700;
-  margin-top: auto; text-align: right; white-space: nowrap;
-  color: var(--text-strong); opacity: 1;
-  font-variant-numeric: tabular-nums; line-height: 1.2;
-}
-.hc.is-blank { background: transparent; border-color: transparent; }
-.hc.is-na { background: transparent; border-style: dashed; opacity: .55; }
-.hc.is-today { box-shadow: inset 0 0 0 1.5px var(--accent); }
-/* 第 87 轮：格子是「当日明细」的入口 —— 指针 + 悬停描边 + 键盘焦点环；
-   .is-sel = 刚在浮层里看过的那天，关掉浮层后仍标出来，便于接着看相邻日期。 */
-.hc.is-live { cursor: pointer; transition: border-color .14s, transform .14s; }
-.hc.is-live:hover { border-color: var(--accent); transform: translateY(-1px); }
-.hc.is-live:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.hc.is-sel { box-shadow: inset 0 0 0 2px var(--accent-2); }
-/* 四档：用 color-mix 调透明度，文字不跟着变淡（旧写法用 opacity 会把日期一起洗白） */
-.hc.h1 { background: color-mix(in srgb, var(--accent) 16%, var(--sunken)); }
-.hc.h2 { background: color-mix(in srgb, var(--accent) 34%, var(--sunken)); }
-.hc.h3 { background: color-mix(in srgb, var(--accent) 56%, var(--sunken)); }
-.hc.h4 { background: var(--accent); border-color: var(--accent); }
-.hc.h4 b, .hc.h4 i { color: #fff; }
-.heat-foot {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
-}
-.heat-sum { font-size: 13px; color: var(--text-dim); }
-.heat-legend {
-  display: flex; align-items: center; gap: 5px;
-  font-size: 12px; color: var(--text-faint);
-}
-.heat-legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
-.heat-legend .h0 { background: var(--tint-1); box-shadow: inset 0 0 0 .5px var(--border); }
-.heat-legend .h1 { background: color-mix(in srgb, var(--accent) 20%, transparent); }
-.heat-legend .h2 { background: color-mix(in srgb, var(--accent) 38%, transparent); }
-.heat-legend .h3 { background: color-mix(in srgb, var(--accent) 60%, transparent); }
-.heat-legend .h4 { background: var(--accent); }
-/* 月份翻页 */
-.heat-nav { display: flex; align-items: center; gap: 6px; }
-.heat-month {
-  font-size: 14px; color: var(--text-strong); min-width: 124px; text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-.heat-nav .cal-nav:disabled { opacity: .35; cursor: default; }
-
-/* 窄屏：两列塞不下（1024 下每格只剩 58px、768 只剩 43px）→ 竖排，一页上下两个月，
-   月份块各占满宽，格子反而比两列时更宽，日期/时长仍用大字号。 */
-/* 900~1100 两列时一格只有 50~65px：带空格的「49 min」在 15px 下放不进内容宽，
-   内边距 9→6px、字号降到 13px 才不越界（<=1px 的余量留给字体渲染差异）。 */
-@media (max-width: 1100px) {
-  .hc { padding: 6px 6px; }
-  .hc i { font-size: 13px; }
-  /* 第 95 轮：卡片有了 6px 内边距，所以间距从 22 收到 14 来补偿 —— 净变化为零，
-     900 档的格子仍是 50px 以上（verify90 的 6.900 专量「49 min」有没有被裁）。
-     ⚠️ 这一条必须与 .heat-mb 的 padding 成对调整，单独改任一边都会裁字。 */
-  .heat-pair { gap: 14px; }
-}
-@media (max-width: 899px) {
-  .heat-pair { grid-template-columns: 1fr; gap: 16px; }
-  /* 竖排时空月会挡在真月份前面占掉一屏 → 窄屏直接不渲染占位卡（桌面端仍保留，用来平衡两列高度） */
-  .heat-mb.is-empty { display: none; }
-}
-@media (max-width: 860px) {
-  .hc { min-height: 58px; padding: 6px 6px; }
-  .hc b { font-size: 13px; }
-  .hc i { font-size: 13px; }
-  .heat-cal, .heat-week { gap: 4px; }
-  .heat-week { font-size: 12px; }
-  .heat-week span { padding-left: 5px; }
-  .hm-title { font-size: 18.5px; }
-  .hm-stat { font-size: 17px; }
-  .hm-none { padding: 26px 10px; font-size: 13px; }
-}
-@media (max-width: 480px) {
-  /* 格宽只有 42~48px：带空格的「49 min」比原来的「49min」宽约 5px，
-     内边距收到 3px + 字号 11px 才放得下一行（nowrap 后越界会压到边框，折行更难看）。 */
-  .hc { padding: 6px 3px; }
-  .hc i { font-size: 11px; }
-  .hm-head { flex-wrap: wrap; gap: 2px 8px; }
-}
-@media (max-width: 400px) {
-  .hc b { font-size: 12.5px; }
-}
-@media (max-width: 360px) {
-  /* 第 90 轮：时间标签加粗后「49 min」在 360 宽下比 600 字重时宽约 4px，
-     格内宽度只剩 34.3px（38.3 格宽 − 2×2 内边距）而字要 38px → 会压过格子左边界。
-     压字号到 10px 并把内边距收到 1.5px，把这一步找回来（实测余量 ~1.9px）。 */
-  .hc { padding: 4px 1.5px; }
-  .hc i { font-size: 10px; letter-spacing: -0.2px; }
-}
-
 /* #14 接下来玩什么 */
 .suggest { display: flex; flex-direction: column; gap: 8px; }
 
@@ -1814,10 +1631,123 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 
 @media (max-width: 860px) {
   .heat { gap: 3px; }
-  .heat-legend { justify-content: flex-start; }
   .report { grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); }
   .rp-value { font-size: 18px; }
   .dm-row { grid-template-columns: minmax(0, 1fr) 54px; }
   .dm-date { display: none; }
   .pace { gap: 12px; }
+}
+
+/* ============================================================
+   游玩热力图 · 一年点阵（第 111 轮，2026-11-07 重做）
+   参考「听歌统计」插件的点阵热力图：7 行（周一→周日）× 每周一列，
+   一个圆角方块 = 一天；深浅四档按「相对本年度峰值」分。
+   ⚠️ 取代旧的「两个月并排日历」（.heat-pair / .heat-mb / .heat-cal / .hc）。
+   ============================================================ */
+.hx {
+  /* 点的大小随视口缩放：1440 下 12.4px、1088 下 9.4px，53 列都放得下不用横向滚动 */
+  --hx: clamp(8px, 0.86vw, 13px);
+  --hx-gap: calc(var(--hx) * 0.34);
+  /* 奶油（默认）：暖沙 → 焦糖四档；未采集比底色再浅一点 */
+  --hx-na: #efe4d4;
+  --hx-l0: #e9ddcb;
+  --hx-l1: #f7cda2;
+  --hx-l2: #eda967;
+  --hx-l3: #dd8438;
+  --hx-l4: #bf6318;
+  position: relative;
+  display: grid;
+  grid-template-columns: 26px auto;
+  align-items: start;
+}
+/* 影院黑：深灰 → 亮蓝四档，取自参考截图的蓝阶；未采集比底色更深 */
+[data-theme="cinema"] .hx {
+  --hx-na: #212129;
+  --hx-l0: #2b2b35;
+  --hx-l1: #2f4fc4;
+  --hx-l2: #4c6ef5;
+  --hx-l3: #7ba4f8;
+  --hx-l4: #b9d6ff;
+}
+.hx-dow { grid-column: 1; grid-row: 2; display: grid; grid-template-rows: repeat(7, var(--hx)); gap: var(--hx-gap); }
+.hx-dow span {
+  display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;
+  font-size: 11px; line-height: 1; color: var(--text-faint);
+}
+.hx-months { grid-column: 2; grid-row: 1; display: grid; gap: var(--hx-gap); height: 21px; align-items: end; margin-bottom: 5px; }
+.hx-ml { font-size: 11.5px; color: var(--text-faint); letter-spacing: .2px; white-space: nowrap; }
+.hx-grid {
+  grid-column: 2; grid-row: 2;
+  display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, var(--hx)); gap: var(--hx-gap);
+}
+.hx-c, .hx-pad { width: var(--hx); height: var(--hx); border-radius: calc(var(--hx) * 0.28); }
+.hx-c { display: block; background: var(--hx-l0); transition: outline-color .12s; }
+.hx-c.l0 { background: var(--hx-l0); }
+.hx-c.l1 { background: var(--hx-l1); }
+.hx-c.l2 { background: var(--hx-l2); }
+.hx-c.l3 { background: var(--hx-l3); }
+.hx-c.l4 { background: var(--hx-l4); }
+.hx-c.lna { background: var(--hx-na); }
+.hx-c[role="button"] { cursor: pointer; }
+.hx-c[role="button"]:hover { outline: 1.5px solid var(--text-strong); outline-offset: 1px; }
+.hx-c.is-today { box-shadow: inset 0 0 0 1px var(--border-hi); }
+.hx-c.is-sel { outline: 2px solid var(--accent); outline-offset: 1.5px; }
+.hx-c:focus-visible { outline: 2px solid var(--accent); outline-offset: 1.5px; }
+
+.hx-foot { grid-column: 1 / -1; grid-row: 3; display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+.hx-hint { font-size: 12px; color: var(--text-faint); }
+.hx-legend { margin-left: auto; display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--text-faint); }
+.hx-legend .hx-c { width: 11px; height: 11px; border-radius: 3px; }
+
+/* 悬停气泡：与插件同款「深色小卡 + 两行」，两套主题共用（浅色下也是深卡，读得清） */
+.hx-tip {
+  /* 默认落在格子**下方** 9px：点阵只有 7 行高，往上弹会压到面板标题。
+     最后一两行（周五~周日）由 JS 换成向上弹。 */
+  position: absolute; z-index: 30; transform: translate(-50%, 0);
+  padding: 7px 10px; border-radius: 8px; background: #14141a; color: #f5f5f8;
+  font-size: 12px; line-height: 1.55; white-space: nowrap; pointer-events: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .3);
+}
+.hx-tip.is-up { transform: translate(-50%, -100%); }
+.hx-tip b { display: block; font-weight: 600; }
+.hx-tip span { color: rgba(245, 245, 248, .74); }
+
+/* 点击某天 → 点阵下方的当日明细 */
+.hx-day { margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: var(--panel-hi); border: 1px solid var(--border); }
+.hx-day-head { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+.hx-day-head b { font-size: 15px; color: var(--text-strong); letter-spacing: .2px; }
+.hx-dow-tag { padding: 2px 7px; border-radius: 6px; background: var(--sunken); font-size: 12px; color: var(--text-dim); }
+.hx-day-sum { font-size: 12.5px; color: var(--text-dim); }
+.hx-day-x {
+  margin-left: auto; padding: 2px 8px; border: 0; border-radius: 6px; background: transparent;
+  color: var(--text-faint); font-size: 18px; line-height: 1; cursor: pointer;
+}
+.hx-day-x:hover { color: var(--text-strong); background: var(--sunken); }
+.hx-day-list { display: flex; flex-direction: column; gap: 8px; }
+.hx-row { display: grid; grid-template-columns: 26px minmax(0, 1fr) 190px 96px; align-items: center; gap: 10px; }
+/* 列表别拉满整行：时间列固定宽后，进度条到时间之间留白会太大 */
+.hx-day-list { max-width: 880px; }
+.hx-ico { width: 26px; height: 26px; border-radius: 6px; object-fit: cover; background: var(--sunken); display: block; }
+.hx-nm { font-size: 13.5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hx-track { height: 6px; border-radius: 3px; background: var(--sunken); overflow: hidden; }
+.hx-track i { display: block; height: 100%; border-radius: 3px; background: var(--bar-grad); }
+.hx-tt { font-size: 13px; color: var(--text-strong); text-align: right; font-variant-numeric: tabular-nums; }
+.hx-none { margin: 0; font-size: 13px; color: var(--text-faint); }
+.hx-title { margin: 0; font-size: 15px; font-weight: 700; color: var(--text-strong); letter-spacing: .3px; }
+/* 概览小字：与参考插件一致，放在标题下方、月份刻度上方 */
+.hx-sum { margin: -2px 0 10px; font-size: 12.5px; color: var(--text-dim); letter-spacing: .2px; }
+.hx-sum { font-size: 12.5px; color: var(--text-dim); }
+.hx-year {
+  padding: 5px 8px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--panel-hi); color: var(--text); font-size: 13px; cursor: pointer;
+}
+
+@media (max-width: 860px) {
+  /* 53 列在手机上放不下：整块横向滚动，不撑破文档（点阵本来就可以左右滑） */
+  .hx { --hx: clamp(6px, 1.55vw, 11px); grid-template-columns: 20px auto; overflow-x: auto; padding-bottom: 6px; }
+  .hx-dow span { padding-right: 5px; font-size: 10px; }
+  .hx-row { grid-template-columns: 24px minmax(0, 1fr) 84px; }
+  .hx-track { display: none; }
+  .hx-foot { flex-wrap: wrap; gap: 8px; }
+  .hx-hint { display: none; }
 }

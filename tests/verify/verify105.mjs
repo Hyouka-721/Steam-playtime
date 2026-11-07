@@ -29,7 +29,7 @@ const ok = (name, cond, extra) => {
 /* ---------- A 源码契约 ---------- */
 const cssV = (html.match(/style\.css\?v=(\d+)/) || [])[1];
 const appV = (html.match(/app\.js\?v=(\d+)/) || [])[1];
-ok('A1 版本参数 CSS 133 / APP 119', cssV === '134' && appV === '119', { css: cssV, app: appV });
+ok('A1 版本参数 CSS 133 / APP 119', cssV === '135' && appV === '120', { css: cssV, app: appV });
 
 const themesBlock = (js.match(/const THEMES = \[([\s\S]*?)\];/) || [])[1] || '';
 const themeIds = [...themesBlock.matchAll(/id:\s*'([^']+)'/g)].map((m) => m[1]);
@@ -155,7 +155,7 @@ const d2 = await page.evaluate(() => ({
   detailCount: document.querySelectorAll('#lt-detail').length,
   parent: document.getElementById('lt-detail')?.parentElement?.id,
   recentList: document.querySelectorAll('#recent-list').length,
-  cells: document.querySelectorAll('#heat-drill .hc').length,
+  cells: document.querySelectorAll('#hx-grid .hx-c').length,
 }));
 ok('D2 点最近游玩卡进热力图且数据完整', d2.active === 'view-recent' && d2.detail && d2.cells > 0, d2);
 ok('D3 热力图仅一份、归属最近游玩、近 14 天榜已删',

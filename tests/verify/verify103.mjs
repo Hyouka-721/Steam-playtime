@@ -39,7 +39,7 @@ const a = await page.evaluate(() => ({
   cards: [...document.querySelectorAll('.card-label')].map((e) => e.textContent.trim()),
   views: [...document.querySelectorAll('.view')].map((e) => e.id),
 }));
-ok('A1 版本参数 CSS 133 / APP 119', a.cssV === '134' && a.appV === '119', { css: a.cssV, app: a.appV });
+ok('A1 版本参数 CSS 133 / APP 119', a.cssV === '135' && a.appV === '120', { css: a.cssV, app: a.appV });
 ok('A2 显示名改为 Wallpaper Engine', a.bootName === 'Wallpaper Engine', a.bootName);
 ok('A3 页面无「壁纸引擎」残留', a.hasChinese === false);
 ok('A4 榜单里确有一行 Wallpaper Engine', a.pageNames.some((n) => n.startsWith('Wallpaper Engine')), a.pageNames.filter((n) => /Wallpaper/i.test(n)));
@@ -72,35 +72,37 @@ await page.waitForTimeout(800);
 const c = await page.evaluate(() => ({
   active: document.querySelector('.view.active')?.id,
   visible: !!document.getElementById('lt-detail')?.getClientRects().length,
-  blocks: document.querySelectorAll('#heat-drill .heat-mb').length,
-  headsA: document.querySelectorAll('#heat-months .hm-title').length,
-  headsB: document.querySelectorAll('#heat-months-b .hm-title').length,
-  cells: document.querySelectorAll('#heat-drill .hc').length,
-  sum: document.getElementById('heat-sum')?.textContent?.trim(),
+  blocks: document.querySelectorAll('#hx-grid').length,
+  headsA: document.querySelectorAll('#hx-months .hx-ml').length,
+  headsB: 0,   // 第 111 轮：一年一块点阵，不再有第二份月份头
+  cells: document.querySelectorAll('#hx-grid .hx-c').length,
+  sum: document.getElementById('hx-sum')?.textContent?.trim(),
   overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
   hash: location.hash,
 }));
 ok('C1 切到「最近游玩」视图', c.active === 'view-recent', c.active);
 ok('C2 热力图可见', c.visible);
-ok('C3 双月月份块保留', c.blocks === 2, c.blocks);
-ok('C4 两个月份头分居两端', c.headsA === 1 && c.headsB === 1, { a: c.headsA, b: c.headsB });
+ok('C3 一年一块点阵（第 111 轮起取代双月块）', c.blocks === 1, c.blocks);
+ok('C4 月份刻度齐 12 个', c.headsA === 12 && c.headsB === 0, { a: c.headsA, b: c.headsB });
 ok('C5 热力图格子有数据', c.cells > 0, c.cells);
-ok('C6 汇总文案保留', /共 \d+ 天有记录/.test(c.sum || ''), c.sum);
+ok('C6 汇总文案保留（新口径）', /天有记录/.test(c.sum || ''), c.sum);
 ok('C7 无横向溢出', c.overflow === 0, c.overflow);
 ok('C8 深链切到 #/recent', c.hash === '#/recent', c.hash);
 
 /* ---------- D 交互未退化 ---------- */
-const liveCell = page.locator('#heat-drill .hc.is-live').first();
+const liveCell = page.locator('#hx-grid .hx-c[role="button"]').first();
 ok('D1 存在可点格子', (await liveCell.count()) > 0);
 if (await liveCell.count()) {
   await liveCell.click();
   await page.waitForTimeout(700);
+  /* 第 111 轮：点格子不再开浮层，改成在点阵下方展开当日游戏列表 */
   const day = await page.evaluate(() => ({
-    open: !document.getElementById('cal-overlay').hidden,
-    title: document.getElementById('cal-day-title')?.textContent?.trim(),
+    open: !document.getElementById('hx-day').hidden,
+    title: document.querySelector('#hx-day .hx-day-head b')?.textContent?.trim(),
+    rows: document.querySelectorAll('#hx-day .hx-row').length,
   }));
-  ok('D2 点格子打开当日明细浮层', day.open && !!day.title, day);
-  await page.click('#cal-day-close');
+  ok('D2 点格子下方展开当日游戏列表', day.open && !!day.title && day.rows > 0, day);
+  await page.click('#hx-day .hx-day-x');
   await page.waitForTimeout(300);
 }
 await page.click('#btn-drill-back');
@@ -111,7 +113,7 @@ await page.locator('#lt-list .rank-item').first().click();
 await page.waitForTimeout(700);
 const d = await page.evaluate(() => ({
   active: document.querySelector('.view.active')?.id,
-  cells: document.querySelectorAll('#heat-drill .hc').length,
+  cells: document.querySelectorAll('#hx-grid .hx-c').length,
   hash: location.hash,
 }));
 ok('D4 点累计榜行 → 切到热力图且可用', d.active === 'view-recent' && d.cells > 0, d);

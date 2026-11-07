@@ -36,9 +36,9 @@ ok('A2 独立的「时间轴」视图恢复（#view-timeline 存在，且不在�
   /<section class="view" id="view-timeline">[\s\S]{0,400}id="timeline"/.test(html) &&
   !/id="view-lifetime"[\s\S]{0,3000}id="timeline"/.test(html));
 
-ok('A3 热力图只出现在下钻界面（#heat-drill + 月份导航），数据页已不含热力图',
-  html.includes('id="heat-drill"') && html.includes('id="heat-month"') &&
-  html.includes('id="heat-prev"') && !html.includes('id="heatmap"') &&
+ok('A3 热力图只出现在下钻界面（#hx-grid 点阵），数据页已不含热力图',
+  html.includes('id="hx-grid"') && html.includes('id="hx-year"') &&
+  html.includes('id="hx-grid"') && !html.includes('id="heatmap"') &&
   !html.includes('panel-heat'));
 
 ok('A4 「接下来玩什么」已整体移除（无容器 / 无函数 / 无条目）',
@@ -70,7 +70,7 @@ ok('A11 窄屏两行榜单规则仍在（进度条没有被 display:none）',
   /\.rank-bar\s*\{[^}]*grid-row:\s*2/.test(css));
 
 ok('A12 保留的新模块函数齐全（热力图/勋章/报告/目标/换算/详情/深链）',
-  ['renderDrill', 'stepHeatPage', 'renderBadges', 'renderReport', 'renderPace', 'renderConvert', 'renderDrillMore', 'syncHash', 'countUp']
+  ['renderDrill', 'hxYears', 'hxTipShow', 'renderHxDay', 'renderBadges', 'renderReport', 'renderPace', 'renderConvert', 'renderDrillMore', 'syncHash', 'countUp']
     .every((f) => new RegExp(`function ${f}\\(`).test(js)));
 
 /* ================= B 运行时 ================= */
@@ -90,18 +90,19 @@ await page.waitForTimeout(1400); // 等数字滚动落地
 await page.click('#lt-list .rank-item');   // 进入下钻：月历热力图
 await page.waitForTimeout(900);
 const heat = await page.evaluate(() => {
-  const cells = [...document.querySelectorAll('#heat-drill .hc')];
+  const cells = [...document.querySelectorAll('#hx-grid .hx-c')];
   const real = cells.filter((c) => !c.classList.contains('is-blank'));
   return {
     total: cells.length,
     real: real.length,
-    lit: real.filter((c) => / h[1-4]/.test(' ' + c.className)).length,
-    month: (document.getElementById('heat-month').textContent || '').trim(),
+    /* 第 111 轮：点阵用 l0~l4 / lna 五档（旧月历是 is-blank + h1~h4） */
+    lit: cells.filter((c) => / (l[1-4])\b/.test(' ' + c.className)).length,
+    month: (document.getElementById('hx-sum').textContent || '').trim(),   // 第 111 轮：月份切换器 → 年份选择器
   };
 });
-ok('B1 下钻是月历热力图：格数是 7 的倍数、覆盖整月、有已点亮的日期',
-  heat.total % 7 === 0 && heat.real >= 28 && heat.real <= 62 && heat.lit > 0 &&
-  /\d{4} 年 \d{1,2}(–\d{1,2})? 月/.test(heat.month), JSON.stringify(heat));
+ok('B1 下钻是一年点阵：格子数 = 一年天数、有已点亮的日期、汇总含年份',
+  heat.total >= 365 && heat.total <= 371 && heat.lit > 0 &&
+  /^\d{4} 年 · /.test(heat.month), JSON.stringify(heat));
 await page.click('#btn-drill-back');
 await page.waitForTimeout(500);
 

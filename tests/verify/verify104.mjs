@@ -29,8 +29,8 @@ const snap = () => page.evaluate(() => ({
   active: document.querySelector('.view.active')?.id,
   hash: location.hash,
   detailVisible: !!document.getElementById('lt-detail')?.getClientRects().length,
-  cells: document.querySelectorAll('#heat-drill .hc').length,
-  blocks: document.querySelectorAll('#heat-drill .heat-mb').length,
+  cells: document.querySelectorAll('#hx-grid .hx-c').length,
+  blocks: document.querySelectorAll('#hx-grid').length,
   overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
 }));
 
@@ -48,7 +48,7 @@ const a = await page.evaluate(() => ({
   detailParent: document.getElementById('lt-detail')?.parentElement?.id,
   rows: document.querySelectorAll('#lt-list .rank-item').length,
 }));
-ok('A1 版本参数 CSS 133 / APP 119', a.cssV === '134' && a.appV === '119', { css: a.cssV, app: a.appV });
+ok('A1 版本参数 CSS 133 / APP 119', a.cssV === '135' && a.appV === '120', { css: a.cssV, app: a.appV });
 ok('A2 五张导航卡名称未变', JSON.stringify(a.cards) === JSON.stringify(['游戏时长', '最近游玩', '成就', '游戏库', '数据']), a.cards);
 ok('A3 五个视图 id 未变', JSON.stringify(a.views) === JSON.stringify(['view-lifetime', 'view-recent', 'view-ach', 'view-timeline', 'view-data']), a.views);
 ok('A4 热力图仍仅一份且归属「最近游玩」', a.detailCount === 1 && a.detailParent === 'view-recent', a);
@@ -85,7 +85,7 @@ await page.click('#card-recent');
 await page.waitForTimeout(900);
 const d = await snap();
 ok('D1 点最近游玩卡进入热力图', d.active === 'view-recent' && d.detailVisible, d);
-ok('D2 双月块与格子数据完整', d.blocks === 2 && d.cells > 0, d);
+ok('D2 一年点阵与格子数据完整（第 111 轮起取代双月块）', d.blocks === 1 && d.cells > 0, d);
 ok('D3 深链为 #/recent', d.hash === '#/recent', d);
 ok('D4 无横向溢出', d.overflow === 0, d.overflow);
 
@@ -110,7 +110,7 @@ ok('G1 返回按钮回累计榜', g.active === 'view-lifetime' && g.hash === '#/
 
 /* ---------- H 深链直达仍可用 ---------- */
 await page.goto(LOCAL + '?t=' + Date.now() + '#/recent/g/431960', { waitUntil: 'domcontentloaded' });
-await page.waitForSelector('#heat-drill .hc', { timeout: 30000 });
+await page.waitForSelector('#hx-grid .hx-c', { timeout: 30000 });
 await page.waitForTimeout(700);
 const h = await snap();
 ok('H1 深链直达带筛选热力图', h.active === 'view-recent' && /#\/recent\/g\/\d+/.test(h.hash) && h.cells > 0, h);

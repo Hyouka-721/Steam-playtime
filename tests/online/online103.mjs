@@ -36,7 +36,7 @@ const a = await page.evaluate(() => ({
   lifetimeRows: document.querySelectorAll('#lt-list .rank-item').length,
   cards: [...document.querySelectorAll('.card-label')].map((e) => e.textContent.trim()),
 }));
-ok('A1 线上版本 style.css?v=134 / app.js?v=119', a.cssV === '134' && a.appV === '119', { css: a.cssV, app: a.appV });
+ok('A1 线上版本 style.css?v=135 / app.js?v=120', a.cssV === '135' && a.appV === '120', { css: a.cssV, app: a.appV });
 ok('A2 线上显示名 Wallpaper Engine', a.bootName === 'Wallpaper Engine', a.bootName);
 ok('A3 线上无「壁纸引擎」残留', a.hasChinese === false);
 ok('A4 热力图仅一份且归属「最近游玩」', a.detailCount === 1 && a.detailParent === 'view-recent', { n: a.detailCount, parent: a.detailParent });
