@@ -42,7 +42,7 @@ const a = await page.evaluate(async () => {
     css, js,
   };
 });
-ok('A1 线上版本 CSS 133 / APP 119', a.cssV === '133' && a.appV === '119', { css: a.cssV, app: a.appV });
+ok('A1 线上版本 CSS 133 / APP 119', a.cssV === '134' && a.appV === '119', { css: a.cssV, app: a.appV });
 ok('A2 线上首屏白名单含 cinema', /'cinema'/.test(a.whitelist), a.whitelist.trim());
 const themeIds = [...((a.js.match(/const THEMES = \[([\s\S]*?)\];/) || [])[1] || '')
   .matchAll(/id:\s*'([^']+)'/g)].map((m) => m[1]);

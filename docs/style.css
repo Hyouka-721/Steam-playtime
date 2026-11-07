@@ -340,7 +340,23 @@ a { color: var(--accent); }
      长按不再弹出系统选择菜单；点它仍然执行「返回顶部」。 */
   user-select: none; -webkit-user-select: none;
   -webkit-user-drag: none; -webkit-touch-callout: none;
+  /* 2026-11-07：按用户要求把观影页 `.w-title` 的文字样式同步过来（截图对照）。
+     三件套一次补齐，参数与 watch.css 的 .w-title 逐字相同：
+       ① 暖金辉光 0 0 26px rgba(232,176,75,.18)  —— 影院黑下让白字「浮」起来的那层光
+       ② 悬停变色 → var(--accent)
+       ③ 过渡 0.16s + cubic-bezier(.22,.68,.28,1)，即 watch 的 --t-1 / --ease 字面值
+     影院黑（cinema）下 --text-strong = #f5f5f8、--accent = #e8b04b，与 watch 的 cinema
+     变量**完全同值**，所以两页标题在这套主题下逐像素一致。
+     奶油（cream）下 --text-strong 是深棕、--accent 是橙，颜色不同但「悬停变强调色」
+     这条交互逻辑完全一致 —— 浅色主题若也用白字会直接看不见。
+     ⚠️ text-shadow / transition 只影响绘制，不参与布局，不会影响 .site-title 的
+     6.73em 定宽与 CLS（见下方第 93 轮注释）。 */
+  text-shadow: 0 0 26px rgba(232, 176, 75, 0.18);
+  transition: color 0.16s cubic-bezier(0.22, 0.68, 0.28, 1);
 }
+/* 与 watch.css 的 `.w-title:hover { color: var(--accent) }` 同一行为：
+   影院黑下白 → 金黄，奶油下深棕 → 橙。 */
+.site-title:hover { color: var(--accent); }
 .site-title:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 8px; }
 
 /* 第 93 轮：给标题一个「按真字体量出来」的固定宽度，消掉字体切换带来的 CLS。
