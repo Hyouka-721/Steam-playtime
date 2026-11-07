@@ -49,7 +49,7 @@ const a = await page.evaluate(() => ({
   detailParent: document.getElementById('lt-detail')?.parentElement?.id,
   rows: document.querySelectorAll('#lt-list .rank-item').length,
 }));
-ok('A1 线上版本 CSS 133 / APP 119', a.cssV === '137' && a.appV === '122', { css: a.cssV, app: a.appV });
+ok('A1 线上版本 CSS 133 / APP 119', a.cssV === '136' && a.appV === '121', { css: a.cssV, app: a.appV });
 ok('A2 五张导航卡名称未变', JSON.stringify(a.cards) === JSON.stringify(['游戏时长', '最近游玩', '成就', '游戏库', '数据']), a.cards);
 ok('A3 五个视图 id 未变', JSON.stringify(a.views) === JSON.stringify(['view-lifetime', 'view-recent', 'view-ach', 'view-timeline', 'view-data']), a.views);
 ok('A4 热力图仍仅一份且归属「最近游玩」', a.detailCount === 1 && a.detailParent === 'view-recent', a);

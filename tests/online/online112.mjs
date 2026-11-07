@@ -29,7 +29,7 @@ const ver = await page.evaluate(() => {
   const h = document.documentElement.outerHTML;
   return { css: (h.match(/style\.css\?v=(\d+)/) || [])[1], js: (h.match(/app\.js\?v=(\d+)/) || [])[1] };
 });
-ok('A1 线上已是 style.css?v=137 / app.js?v=122', ver.css === '136' && ver.js === '121', ver);
+ok('A1 线上已是 style.css?v=136 / app.js?v=121', ver.css === '136' && ver.js === '121', ver);
 ok('A2 旧月历 DOM 已不存在', await page.evaluate(() => !document.querySelector('#heat-drill') && !document.querySelector('.heat-pair')));
 
 /* ---------- B 点阵几何 ---------- */

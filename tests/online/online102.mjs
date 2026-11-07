@@ -32,7 +32,7 @@ const ver = await page.evaluate(() => {
     js: (h.match(/app\.js\?v=(\d+)/) || [])[1],
   };
 });
-ok('A1 线上已是 style.css?v=137 / app.js?v=122', ver.css === '133' && ver.js === '119', ver);
+ok('A1 线上已是 style.css?v=136 / app.js?v=121', ver.css === '133' && ver.js === '119', ver);
 
 /* ---------- B 相对时间已删除 ---------- */
 const b = await page.evaluate(() => {
