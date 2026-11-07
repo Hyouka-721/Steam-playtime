@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-06T18:10:49+08:00",
+  "updated_at": "2026-11-07T09:08:40+08:00",
   "items": [
     {
       "id": "2026-10-31-dear-you",
@@ -627,6 +627,7 @@
       "kind": "movie",
       "watched_at": "2023-10-26",
       "poster": "img/watch/spider-man-across-the-spider-verse-9548171b.webp",
+      "added_at": "2026-10-25T09:25:21+08:00",
       "poster_w": 640,
       "poster_h": 948,
       "poster_320": "img/watch/spider-man-across-the-spider-verse-9548171b-320.webp",
@@ -634,13 +635,13 @@
       "title_en": "Spider-Man: Across the Spider-Verse",
       "year": 2023,
       "rating": 7.5,
+      "order": 3,
       "tags": [
         "动画",
         "科幻",
         "冒险"
       ],
-      "note": "爽",
-      "added_at": "2026-10-25T09:25:21+08:00"
+      "note": "如华美的宝塔"
     },
     {
       "id": "2023-10-26-item",
@@ -2398,8 +2399,8 @@
       "title": "蜘蛛侠：英雄远征",
       "kind": "movie",
       "watched_at": "2019-06-30",
-      "added_at": "2026-10-25T18:17:43+08:00",
       "poster": "img/watch/spider-man-far-from-home-46450c4e.webp",
+      "added_at": "2026-10-25T18:17:43+08:00",
       "poster_w": 640,
       "poster_h": 912,
       "poster_320": "img/watch/spider-man-far-from-home-46450c4e-320.webp",
@@ -2407,6 +2408,7 @@
       "title_en": "Spider-Man: Far from Home",
       "year": 2019,
       "rating": 7.5,
+      "order": 2,
       "tags": [
         "科幻",
         "冒险"
