@@ -1647,7 +1647,10 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .hx {
   /* 点的大小随视口缩放：1440 下 12.4px、1088 下 9.4px，53 列都放得下不用横向滚动 */
   --hx: clamp(8px, 0.86vw, 13px);
-  --hx-gap: calc(var(--hx) * 0.34);
+  --hx-gap: calc(var(--hx) * 0.30);
+  /* 第 112 轮：月份之间的额外间隙列（JS 按实测宽度反解，默认给个等价初值） */
+  --hx-mgap: calc(var(--hx) * 0.9);
+  --hx-dow-w: 26px;
   /* 奶油（默认）：暖沙 → 焦糖四档；未采集比底色再浅一点 */
   --hx-na: #efe4d4;
   --hx-l0: #e9ddcb;
@@ -1681,6 +1684,8 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, var(--hx)); gap: var(--hx-gap);
 }
 .hx-c, .hx-pad { width: var(--hx); height: var(--hx); border-radius: calc(var(--hx) * 0.28); }
+/* 月份间隙列：7 个占满一整列，只负责撑开间距 */
+.hx-mgap { display: block; width: var(--hx-mgap); height: var(--hx); }
 .hx-c { display: block; background: var(--hx-l0); transition: outline-color .12s; }
 .hx-c.l0 { background: var(--hx-l0); }
 .hx-c.l1 { background: var(--hx-l1); }
@@ -1724,14 +1729,19 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 }
 .hx-day-x:hover { color: var(--text-strong); background: var(--sunken); }
 .hx-day-list { display: flex; flex-direction: column; gap: 8px; }
-.hx-row { display: grid; grid-template-columns: 26px minmax(0, 1fr) 190px 96px; align-items: center; gap: 10px; }
-/* 列表别拉满整行：时间列固定宽后，进度条到时间之间留白会太大 */
-.hx-day-list { max-width: 880px; }
-.hx-ico { width: 26px; height: 26px; border-radius: 6px; object-fit: cover; background: var(--sunken); display: block; }
-.hx-nm { font-size: 13.5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.hx-track { height: 6px; border-radius: 3px; background: var(--sunken); overflow: hidden; }
-.hx-track i { display: block; height: 100%; border-radius: 3px; background: var(--bar-grad); }
-.hx-tt { font-size: 13px; color: var(--text-strong); text-align: right; font-variant-numeric: tabular-nums; }
+/* 第 112 轮：当日列表改成与主页榜单一致的**横图行**（复用 .rank-capsule-wrap 134×64），
+   并铺满面板宽度 —— 原来 max-width:880 让右侧空了一大块。
+   列与主页 .rank-item 同构：封面 / 名称 / 进度条 / 时长，末尾不留尾巴。 */
+.hx-row {
+  display: grid;
+  grid-template-columns: 134px minmax(150px, 260px) minmax(120px, 1fr) 96px;
+  align-items: center; gap: 14px;
+}
+.hx-row + .hx-row { margin-top: 2px; }
+.hx-nm { font-size: 14px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hx-bar { height: 7px; border-radius: 4px; background: var(--track); overflow: hidden; }
+.hx-bar > span { display: block; height: 100%; border-radius: 4px; background: var(--bar-grad); }
+.hx-tt { font-size: 14px; font-weight: 600; color: var(--text-strong); text-align: right; font-variant-numeric: tabular-nums; }
 .hx-none { margin: 0; font-size: 13px; color: var(--text-faint); }
 .hx-title { margin: 0; font-size: 15px; font-weight: 700; color: var(--text-strong); letter-spacing: .3px; }
 /* 概览小字：与参考插件一致，放在标题下方、月份刻度上方 */
@@ -1746,8 +1756,9 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   /* 53 列在手机上放不下：整块横向滚动，不撑破文档（点阵本来就可以左右滑） */
   .hx { --hx: clamp(6px, 1.55vw, 11px); grid-template-columns: 20px auto; overflow-x: auto; padding-bottom: 6px; }
   .hx-dow span { padding-right: 5px; font-size: 10px; }
-  .hx-row { grid-template-columns: 24px minmax(0, 1fr) 84px; }
-  .hx-track { display: none; }
+  .hx-row { grid-template-columns: 96px minmax(0, 1fr) 84px; gap: 10px; }
+  .hx-row .rank-capsule-wrap { transform: scale(.72); transform-origin: left center; margin-right: -34px; }
+  .hx-bar { display: none; }
   .hx-foot { flex-wrap: wrap; gap: 8px; }
   .hx-hint { display: none; }
 }

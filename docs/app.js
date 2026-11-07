@@ -606,7 +606,9 @@
     if (tip) tip.hidden = true;
   }
 
-  /** 点阵下方：某一天的明细（点击格子后展开；再点同一天 = 收起） */
+  /** 点阵下方：某一天的明细（点击格子后展开；再点同一天 = 收起）
+      第 112 轮：图标与排版改成与主页榜单行一致的**横图胶囊**（复用 capsuleHtml），
+      并铺满面板宽度（原来 max-width 880 让右侧空了一大块）。 */
   function renderHxDay() {
     const box = $('hx-day');
     if (!box) return;
@@ -627,15 +629,13 @@
     const rows = list.length
       ? list.map((x) => {
           const g = state.meta?.games_lifetime?.[x.appid];
-          const icon = g?.img_icon_url ? ICON(x.appid, g.img_icon_url) : '';
-          const w = maxMin > 0 ? Math.max(3, ((x.minutes ?? 0) / maxMin) * 100) : 0;
+          const w = maxMin > 0 ? Math.max(2, ((x.minutes ?? 0) / maxMin) * 100) : 0;
           return (
             `<div class="hx-row">` +
-            (icon
-              ? `<img class="hx-ico" src="${icon}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`
-              : `<span class="hx-ico is-ph" aria-hidden="true"></span>`) +
+            /* 与主页榜单同一套胶囊：134×64 横图 + 全成就金环（这款若已全解锁会自动带上） */
+            capsuleHtml(x.appid, { icon: g?.img_icon_url }) +
             `<span class="hx-nm">${escapeHtml(x.name ?? '')}${x.is_new ? '<i class="tag new">新</i>' : ''}</span>` +
-            `<span class="hx-track"><i style="width:${w.toFixed(1)}%"></i></span>` +
+            `<span class="hx-bar"><span style="width:${w.toFixed(1)}%"></span></span>` +
             `<span class="hx-tt">${hm(x.minutes ?? 0)}</span>` +
             `</div>`
           );
@@ -653,10 +653,42 @@
       `</div>` +
       `<div class="hx-day-list">${rows}</div>`;
     box.hidden = false;
+    /* 胶囊图走「占位 GIF + 观察器临近视口才赋 src」的懒加载（与主页榜单同一套），
+       新插入的行必须重新挂一次，否则永远是透明占位块。 */
+    observeCapsules(box);
+  }
+
+  /* ---------- 点阵几何：铺满面板宽度 + 月份之间留额外间隙 ----------
+     第 112 轮：用户反馈「点阵右侧留白过多」，要求「加大月份之间的间隙、适当增大列间距」。
+     做法：不再用固定的 --hx（12.4px），而是按容器实测宽度反解出「格子边长 / 列间距 /
+     月份间隙」三个值，让 53 列 + 11 个月份间隙刚好铺满。列模板由 JS 拼成
+     `var(--hx) … var(--hx-mgap) …`，月份边界处插入一个更窄的「间隙列」（7 个 .hx-mgap 占满一列）。
+     窗口变化时只改这三个 CSS 变量，不重绘 DOM。 */
+  const HX_DOW_W = { 26: 26 };   // 与 CSS 的 .hx 首列宽度保持一致
+
+  function hxFit(cols, spaces) {
+    const root = $('hx-root');
+    if (!root) return;
+    const dowW = parseFloat(getComputedStyle(root).getPropertyValue('--hx-dow-w')) || 26;
+    const W = Math.max(220, root.clientWidth - dowW);
+    const total = cols + spaces;
+    /* 第 112 轮（用户：加大月份间隙、增大列间距、减少右侧留白）：
+       不让格子吃掉全部余量 —— 先按「间距 ≈ 0.65 倍格子」定出边长（7~14px），
+       剩下的宽度全摊给列间距；这样既铺满，又不会变成一排大方块。 */
+    const denom = cols + 0.9 * spaces + 0.65 * (total - 1);
+    const c = Math.max(7, Math.min(14, W / denom));
+    const usedByDots = c * cols + 0.9 * c * spaces;
+    const gap = Math.max(2, (W - usedByDots) / (total - 1));
+    const mgap = c * 0.9;
+    root.style.setProperty('--hx', c.toFixed(2) + 'px');
+    root.style.setProperty('--hx-gap', gap.toFixed(2) + 'px');
+    root.style.setProperty('--hx-mgap', mgap.toFixed(2) + 'px');
+    root.dataset.geo = `${cols}|${spaces}`;
   }
 
   /** 一年的点阵渲染（下钻某款游戏时，点的深浅换成那款游戏当天的分钟数） */
   function renderDrill() {
+    hxTipHide();   // 重绘会移动格子，气泡留着会指向错误位置
     const appid = state.drill.appid;
     const grid = $('hx-grid');
     const monthsBox = $('hx-months');
@@ -683,10 +715,35 @@
       days.push({ ds, min });
     }
 
-    /* ② 点阵格子：.hx-pad 补首周空位；lna = 未采集；l0 = 有记录但 0 分钟 */
+    /* ② 每个月 1 号落在第几周 —— 决定「月份间隙列」插在哪里、月份刻度摆在哪儿 */
+    const monthWeek = [];   // [{m, week}]
+    for (let m = 1; m <= 12; m++) {
+      const first = `${year}-${String(m).padStart(2, '0')}-01`;
+      const doy = Math.round((Date.parse(first + 'T12:00:00Z') - Date.parse(jan1 + 'T12:00:00Z')) / 86400000);
+      monthWeek.push({ m, week: Math.floor((lead + doy) / 7) });
+    }
+    const gaps = new Set(monthWeek.filter((x) => x.week > 0).map((x) => x.week));
+
+    /* ③ 拼列模板：正常周用 --hx，月份边界处插一列 --hx-mgap */
+    const tpl = [];
+    const colOf = new Map();   // week → 该周在网格里的列号（1 基）
+    for (let w = 0; w < cols; w++) {
+      if (gaps.has(w)) tpl.push('var(--hx-mgap)');
+      colOf.set(w, tpl.length + 1);
+      tpl.push('var(--hx)');
+    }
+    const template = tpl.join(' ');
+
+    /* ④ 点阵格子：.hx-pad 补首周空位；月份边界插 7 个 .hx-mgap 占满那一列 */
     const cells = [];
+    const pushGapCol = () => { for (let k = 0; k < 7; k++) cells.push('<span class="hx-mgap"></span>'); };
     for (let k = 0; k < lead; k++) cells.push('<span class="hx-pad"></span>');
-    for (const { ds, min } of days) {
+    days.forEach(({ ds, min }, i) => {
+      /* 该格属于第几周；跨到新的一周且正好是月份边界 → 先插间隙列 */
+      const week = Math.floor((lead + i) / 7);
+      const prevWeek = i === 0 ? -1 : Math.floor((lead + i - 1) / 7);
+      if (week !== prevWeek && gaps.has(week)) pushGapCol();
+
       let lv;
       if (min === null) lv = 'na';
       else if (min <= 0) lv = 0;
@@ -697,7 +754,6 @@
       const cls = ['hx-c', 'l' + lv];
       if (ds === today) cls.push('is-today');
       if (ds === state.drill.sel) cls.push('is-sel');
-      /* 有数据的日子才可点（键盘可达）；未采集的日子只作视觉占位 */
       const live = min !== null;
       const label = !live
         ? `${hxDateLabel(ds)}，尚未采集`
@@ -709,28 +765,28 @@
           (live ? ` role="button" tabindex="0"` : '') +
           ` aria-label="${escapeHtml(label)}"></span>`,
       );
-    }
+    });
     while (cells.length % 7 !== 0) cells.push('<span class="hx-pad"></span>');
 
-    /* ③ 月份刻度：按「该月 1 号落在第几列」定位；同一列的第二个月份跳过以免叠字 */
+    /* ⑤ 月份刻度：按 week 映射到真实列号（跳过间隙列），同一列重复的跳过 */
     const marks = [];
     let lastCol = -1;
-    for (let m = 1; m <= 12; m++) {
-      const first = `${year}-${String(m).padStart(2, '0')}-01`;
-      const doy = Math.round((Date.parse(first + 'T12:00:00Z') - Date.parse(jan1 + 'T12:00:00Z')) / 86400000);
-      const col = Math.floor((lead + doy) / 7);
+    for (const { m, week } of monthWeek) {
+      const col = colOf.get(Math.min(week, cols - 1)) ?? 1;
       if (col <= lastCol) continue;
       lastCol = col;
-      marks.push(`<span class="hx-ml" style="grid-column:${col + 1}">${m}月</span>`);
+      marks.push(`<span class="hx-ml" style="grid-column:${col}">${m}月</span>`);
     }
 
-    const cols3 = `repeat(${cols}, var(--hx))`;
-    grid.style.gridTemplateColumns = cols3;
+    grid.style.gridTemplateColumns = template;
     grid.innerHTML = cells.join('');
-    monthsBox.style.gridTemplateColumns = cols3;
+    monthsBox.style.gridTemplateColumns = template;
     monthsBox.innerHTML = marks.join('');
 
-    /* ④ 概览 + 年份选择器 */
+    /* ⑥ 按实测宽度反解尺寸，让点阵铺满（窗口变化时只更新变量） */
+    hxFit(cols, gaps.size);
+
+    /* ⑦ 概览 + 年份选择器 */
     const sumText = tracked
       ? `${year} 年 · ${active} 天有记录 · 峰值 ${hm(peak)} · 合计 ${hm(sum)}`
       : `${year} 年 · 暂无记录`;
@@ -1721,6 +1777,18 @@
         renderDrill();
       });
     }
+    /* 窗口变化只重算「格子/间距/月份间隙」三个变量，不重绘 365 个节点 */
+    let hxResizeT = 0;
+    window.addEventListener('resize', () => {
+      clearTimeout(hxResizeT);
+      hxResizeT = setTimeout(() => {
+        const geo = $('hx-root')?.dataset.geo;
+        if (!geo) return;
+        const [c, s] = geo.split('|').map(Number);
+        if (c > 0) hxFit(c, s);
+      }, 160);
+    });
+
     const hxDayBox = $('hx-day');
     if (hxDayBox) {
       hxDayBox.addEventListener('click', (e) => {

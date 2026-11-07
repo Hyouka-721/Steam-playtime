@@ -67,10 +67,13 @@ const base = await page.evaluate(() => {
     year: document.querySelector('#hx-year')?.value,
     options: document.querySelectorAll('#hx-year option').length,
     sum: document.querySelector('#hx-sum')?.textContent?.trim(),
+    gaps: Math.round(document.querySelectorAll('#hx-grid .hx-mgap').length / 7),   // 每个间隙列 = 7 个占位块
+    fill: +(document.querySelector('#hx-grid').getBoundingClientRect().width / (document.querySelector('#hx-root').clientWidth - 26)).toFixed(3),
   };
 });
 ok('B1 一年 365/366 个格子', base.cells >= 365 && base.cells <= 371, base.cells);
-ok('B2 网格 7 行 × 53 列', base.rows === 7 && base.cols >= 53 && base.cols <= 54, { rows: base.rows, cols: base.cols });
+ok('B2 网格 7 行 × 53 周列（+11 个月份间隙列）', base.rows === 7 && base.cols === 53 + 11, { rows: base.rows, cols: base.cols });
+ok('B2b 月份间隙列存在（11 列）且点阵铺满面板', base.gaps === 11 && base.fill >= 0.9, { gaps: base.gaps, fill: base.fill });
 ok('B3 12 个月份刻度，列位置递增', base.marks.length === 12 && base.marks.every((m, i, a) => i === 0 || m.col > a[i - 1].col), base.marks.map((m) => m.col));
 ok('B4 点是圆角小块（≈12px / 圆角 >0）', base.size >= 8 && base.size <= 20 && parseFloat(base.radius) > 0, { size: base.size, radius: base.radius });
 ok('B5 深浅四档颜色各不相同', ['l1', 'l2', 'l3', 'l4'].every((k) => base.colors[k]) && new Set(['l1', 'l2', 'l3', 'l4'].map((k) => base.colors[k][0])).size === 4, base.colors);
