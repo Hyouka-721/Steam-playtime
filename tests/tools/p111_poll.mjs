@@ -1,5 +1,5 @@
 /* p111_poll.mjs — 2026-11-07 推送后轮询 Pages 是否已生效
-   判据：index.html 引用 style.css?v=134，且 style.css 字节（CRLF→LF 归一）与本地一致
+   判据：index.html 引用 style.css?v=135，且 style.css 字节（CRLF→LF 归一）与本地一致
    本机 hosts 把 github 域名指到 127.0.0.1 → 必须走 Playwright（--no-proxy-server）+ 页内 fetch
    用法：node tests/tools/p111_poll.mjs */
 import { createRequire } from 'module';
@@ -25,7 +25,7 @@ for (let i = 1; i <= 20; i++) {
   const r = await p.evaluate(async ({ site }) => {
     const g = async (u) => { const res = await fetch(site + u, { cache: 'reload' }); return { s: res.status, t: await res.text() }; };
     const html = await g('index.html?cb=' + Date.now());
-    const css = await g('style.css?v=134');
+    const css = await g('style.css?v=135');
     return {
       status: html.s,
       cssTag: (html.t.match(/style\.css\?v=\d+/) || [])[0],
@@ -40,7 +40,7 @@ for (let i = 1; i <= 20; i++) {
   } else {
     const ok = md5(r.css) === localCss;
     console.log(`[${i}] ${r.cssTag} ${r.jsTag} | css ${r.cssLen}B md5匹配=${ok} hover规则=${r.hasHover}`);
-    if (r.cssTag === 'style.css?v=134' && ok && r.hasHover) {
+    if (r.cssTag === 'style.css?v=135' && ok && r.hasHover) {
       console.log('PAGES READY');
       await browser.close();
       process.exit(0);
