@@ -14,7 +14,7 @@ const ROOT = 'C:/Users/33329/WorkBuddy/2026-10-13-18-17-49/steam-playtime/docs/'
 const md5 = (s) => crypto.createHash('md5').update(Buffer.from(String(s).replace(/\r\n/g, '\n'), 'utf8')).digest('hex');
 
 const localCss = md5(fs.readFileSync(ROOT + 'style.css', 'utf8'));
-console.log('本地 style.css md5', localCss.slice(0, 12), '| 期望 v=134');
+console.log('本地 style.css md5', localCss.slice(0, 12), '| 判据 v=139');
 
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });
 const ctx = await browser.newContext({ serviceWorkers: 'block' });
