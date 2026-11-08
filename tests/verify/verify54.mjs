@@ -36,11 +36,11 @@ const pa = await ctxA.newPage();
 await pa.goto(URL, { waitUntil: 'domcontentloaded' });
 const grab = (u) => pa.evaluate(async (x) => (await fetch(x, { cache: 'reload' })).text(), u);
 const html = await grab('index.html?cb=' + Date.now());
-const app = await grab('app.js?v=123&cb=' + Date.now());
+const app = await grab('app.js?v=124&cb=' + Date.now());
 const watchHtml = await grab('watch.html?cb=' + Date.now());
 
-ok('A1 版本号 style.css?v=138 / app.js?v=123 / fx.js?v=19',
-  /style\.css\?v=138/.test(html) && /app\.js\?v=123/.test(html) && /fx\.js\?v=19/.test(html));
+ok('A1 版本号 style.css?v=139 / app.js?v=124 / fx.js?v=19',
+  /style\.css\?v=139/.test(html) && /app\.js\?v=124/.test(html) && /fx\.js\?v=19/.test(html));
 
 ok('A2 小黄人是链接（class=logo + href=watch.html + id=logo-watch），不再是 theme-light',
   /<a class="logo" id="logo-watch" href="watch\.html"/.test(html) && !/logo"[^>]*id="theme-light"/.test(html));

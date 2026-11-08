@@ -69,8 +69,8 @@ ok('A11 窄屏两行榜单规则仍在（进度条没有被 display:none）',
   !/\.rank-bar,\s*\.rank-last\s*\{\s*display:\s*none/.test(css) &&
   /\.rank-bar\s*\{[^}]*grid-row:\s*2/.test(css));
 
-ok('A12 保留的新模块函数齐全（热力图/勋章/报告/目标/换算/详情/深链）',
-  ['renderDrill', 'hxYears', 'hxTipShow', 'renderHxDay', 'renderBadges', 'renderReport', 'renderPace', 'renderConvert', 'renderDrillMore', 'syncHash', 'countUp']
+ok('A12 保留的新模块函数齐全（热力图/勋章/报告/目标/换算/深链；第 115 轮起没有单游戏详情）',
+  ['renderDrill', 'hxYears', 'hxTipShow', 'renderHxDay', 'renderBadges', 'renderReport', 'renderPace', 'renderConvert', 'syncHash', 'countUp']
     .every((f) => new RegExp(`function ${f}\\(`).test(js)));
 
 /* ================= B 运行时 ================= */
@@ -89,21 +89,24 @@ await page.waitForTimeout(1400); // 等数字滚动落地
 
 await page.click('#lt-list .rank-item');   // 进入下钻：月历热力图
 await page.waitForTimeout(900);
-/* 第 114 轮（用户：删掉单个游戏下的热力图/点阵图，只留最近游玩的总点阵）：
-   下钻点阵消失，只剩该游戏详情卡；总览点阵原样保留。 */
-const drill = await page.evaluate(() => ({
-  cells: document.querySelectorAll('#hx-grid .hx-c').length,
-  hxHidden: getComputedStyle(document.getElementById('hx-root')).display === 'none',
-  share: !!document.querySelector('#drill-more .dm-share'),
-  kv: document.querySelectorAll('#drill-more .dm-kv').length,
-  title: (document.querySelector('#lt-detail .hx-title')?.textContent || '').trim(),
+/* 第 115 轮（用户：「从累计榜点进某款游戏时没反应，不可点击」）：点行不再下钻 */
+const rowClick = await page.evaluate(() => {
+  const before = { view: document.querySelector('.view.active')?.id, hash: location.hash };
+  document.querySelector('#lt-list .rank-item')?.click();
+  return before;
+});
+await page.waitForTimeout(700);
+const afterClick = await page.evaluate(() => ({
+  view: document.querySelector('.view.active')?.id,
+  hash: location.hash,
+  cursor: getComputedStyle(document.querySelector('#lt-list .rank-item')).cursor,
+  drillMore: !!document.getElementById('drill-more'),
 }));
-ok('B1 下钻单款游戏不再渲染点阵（整块隐藏），只留该游戏详情卡',
-  drill.cells === 0 && drill.hxHidden && drill.share && drill.kv >= 3 && drill.title !== '游玩热力图',
-  JSON.stringify(drill));
+ok('B1 点累计榜行毫无反应（视图与 hash 都不变、cursor 非 pointer、无详情卡）',
+  afterClick.view === rowClick.view && afterClick.hash === rowClick.hash &&
+  afterClick.cursor !== 'pointer' && !afterClick.drillMore,
+  JSON.stringify({ before: rowClick, ...afterClick }));
 
-await page.click('#btn-drill-back');
-await page.waitForTimeout(500);
 await page.click('#card-recent');
 await page.waitForTimeout(900);
 const heat = await page.evaluate(() => {
@@ -207,15 +210,18 @@ ok('B11 周目标可改并持久化（9h 立刻写进 localStorage 与文案）'
   await page.evaluate(() => localStorage.getItem('weekGoalH') === '9' &&
     /目标 9 h/.test(document.querySelector('#pace .pace-main').textContent)));
 
+/* 第 115 轮：单游戏详情（占比 / 期段 / 成就）随下钻整条线一起删除 */
 await page.click('#card-lifetime');
 await page.waitForTimeout(500);
 await page.click('#lt-list .rank-item');
-await page.waitForTimeout(1200);
+await page.waitForTimeout(800);
 const dm = await page.evaluate(() => ({
-  share: !!document.querySelector('#drill-more .dm-share'),
-  kv: document.querySelectorAll('#drill-more .dm-kv').length,
+  drillMore: !!document.getElementById('drill-more'),
+  back: !!document.getElementById('btn-drill-back'),
+  view: document.querySelector('.view.active')?.id,
 }));
-ok('B12 单游戏详情仍有「占终身比重 + 期段信息」', dm.share && dm.kv >= 3, JSON.stringify(dm));
+ok('B12 单游戏详情卡整块已删除，点行仍停在累计榜',
+  !dm.drillMore && !dm.back && dm.view === 'view-lifetime', JSON.stringify(dm));
 
 /* 第 106 轮：night 已删除，深色主题改用 cinema「影院黑」；阈值不动 */
 await page.evaluate(() => localStorage.setItem('theme', 'cinema'));

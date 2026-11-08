@@ -27,7 +27,7 @@ const leftFns = deadFns.filter((f) => new RegExp('\\b' + f + '\\b').test(js));
 ok('A1 浮层相关函数已全部删除', leftFns.length === 0, leftFns);
 ok('A2 源码无 cal-overlay / cal-day / state.cal 残留',
   !/cal-overlay|cal-day|cal-panel|state\.cal\b/.test(js) && !/cal-overlay/.test(html) && !/\.cal-(overlay|panel|backdrop|games|step)\s*[\{,]/.test(css));
-ok('A3 版本参数 CSS 137 / APP 122', html.includes('style.css?v=138') && html.includes('app.js?v=123'),
+ok('A3 版本参数 CSS 137 / APP 122', html.includes('style.css?v=139') && html.includes('app.js?v=124'),
   { css: (html.match(/style\.css\?v=(\d+)/) || [])[1], app: (html.match(/app\.js\?v=(\d+)/) || [])[1] });
 
 /* ---------- B 运行时 ---------- */
@@ -118,17 +118,19 @@ await page.waitForTimeout(400);
 const closed = await page.evaluate(() => document.getElementById('hx-day').hidden);
 ok('B8 同一天再点一次即收起', again === true && closed === true, { again, closed });
 
-/* B9 下钻某游戏：详情卡仍在（占比 + 3 项期段） */
+/* B9 第 115 轮：单游戏详情整条线删除，点行不再有任何下钻 */
 await page.click('#card-lifetime');
 await page.waitForTimeout(500);
 await page.click('#lt-list .rank-item');
-await page.waitForTimeout(1200);
+await page.waitForTimeout(800);
 const drill = await page.evaluate(() => ({
-  share: !!document.querySelector('#drill-more .dm-share'),
-  kv: document.querySelectorAll('#drill-more .dm-kv').length,
-  detail: document.querySelector('#drill-more .dm-share b')?.textContent,
+  view: document.querySelector('.view.active')?.id,
+  hash: location.hash,
+  drillMore: !!document.getElementById('drill-more'),
+  back: !!document.getElementById('btn-drill-back'),
 }));
-ok('B9 下钻游戏后「占终身时长 + 期段」仍在', drill.share && drill.kv >= 3, drill);
+ok('B9 点累计榜行不再下钻（无详情卡 / 无返回按钮 / 停在累计榜）',
+  drill.view === 'view-lifetime' && drill.hash === '#/lifetime' && !drill.drillMore && !drill.back, drill);
 
 /* B10 视口矮（1440×700）：列表头仍在视野内 → 依然不滚 */
 await ctx.close();

@@ -49,8 +49,8 @@ check('内联：构建脚本串上 inline-boot', /inline-boot\.mjs/.test(build))
 check('样式：骨架屏样式与动画存在', /\.sk-block/.test(css) && /@keyframes sk-shimmer/.test(css));
 check('样式：尊重 reduced-motion（骨架不流动）', /prefers-reduced-motion: reduce[\s\S]{0,120}sk-block/.test(css));
 check('构建：build.mjs 输出 ach_stats 到 meta', /ach_stats:\s*achStats/.test(build));
-check('版本号：style\.css\?v=138 / app\.js\?v=123 / fx.js?v=19',
-  /style\.css\?v=138/.test(html) && /app\.js\?v=123/.test(html) && /fx\.js\?v=19/.test(html));
+check('版本号：style\.css\?v=139 / app\.js\?v=124 / fx.js?v=19',
+  /style\.css\?v=139/.test(html) && /app\.js\?v=124/.test(html) && /fx\.js\?v=19/.test(html));
 
 /* ---------- B/C/D. 浏览器实测 ---------- */
 const browser = await chromium.launch();
@@ -257,7 +257,7 @@ check('回归：点阵格子能展开当天游戏列表（第 111 轮改到点�
   calOpen.open && calOpen.rows > 0, JSON.stringify(calOpen));
 await page.keyboard.press('Escape');
 await page.waitForTimeout(300);
-await page.click('#btn-drill-back'); // 回到榜单列表，后续断言在列表视图上做
+await page.click('#card-lifetime'); // 第 115 轮：返回按钮已删除，改点卡片回榜单
 await page.waitForTimeout(400);
 
 // 主题持久化
@@ -267,29 +267,35 @@ await page.waitForTimeout(300);
 const t2 = await page.evaluate(() => ({ now: document.documentElement.dataset.theme, stored: localStorage.getItem('theme') }));
 check('回归：主题切换并持久化', t2.stored === t2.now, JSON.stringify({ before: t1, ...t2 }));
 
-// 下钻：第 114 轮起单游戏**不再渲染点阵**（用户要求），只显示该游戏详情卡；ECharts 永不加载
+// 榜单行：第 115 轮起**整条下钻线删除**（用户：「从累计榜点进某款游戏时没反应，不可点击」）
+await page.click('#card-lifetime');
+await page.waitForTimeout(500);
+const beforeRow = await page.evaluate(() => ({
+  view: document.querySelector('.view.active')?.id,
+  hash: location.hash,
+}));
 await page.click('#lt-list .rank-item');
-await page.waitForTimeout(900);
-const drill = await page.evaluate(() => ({
-  open: !document.getElementById('lt-detail').hidden,
-  cells: document.querySelectorAll('#hx-grid .hx-c').length,
-  hxHidden: getComputedStyle(document.getElementById('hx-root')).display === 'none',
-  share: !!document.querySelector('#drill-more .dm-share'),
-  title: (document.querySelector('#lt-detail .hx-title')?.textContent || '').trim(),
+await page.waitForTimeout(800);
+const row = await page.evaluate(() => ({
+  view: document.querySelector('.view.active')?.id,
+  hash: location.hash,
+  cursor: getComputedStyle(document.querySelector('#lt-list .rank-item')).cursor,
+  drillMore: !!document.getElementById('drill-more'),
+  backBtn: !!document.getElementById('btn-drill-back'),
   echarts: typeof window.echarts,
   legacyChart: !!document.getElementById('chart-drill'),
 }));
-check('回归：下钻显示该游戏详情卡、点阵不渲染（无 ECharts）',
-  drill.open && drill.cells === 0 && drill.hxHidden && drill.share &&
-  drill.title.length > 0 && drill.title !== '游玩热力图' &&
-  drill.echarts === 'undefined' && !drill.legacyChart,
-  JSON.stringify(drill));
+check('回归：点累计榜行毫无反应（不切视图 / 不改 hash / cursor 非 pointer / 无详情卡 / 无 ECharts）',
+  row.view === beforeRow.view && row.hash === beforeRow.hash &&
+  row.cursor !== 'pointer' && !row.drillMore && !row.backBtn &&
+  row.echarts === 'undefined' && !row.legacyChart,
+  JSON.stringify({ before: beforeRow, ...row }));
 
 // 滚动胶囊图：只断言"水化动作发生了"（沙箱连不上 Steam CDN，图片字节到不了，
 // 不能拿 naturalWidth 判断——那是网络问题不是逻辑问题）
 // 注意：先滚回顶部再测。上面的趋势图流程滚过一遍，若停留在中段，
 // 列表里的 22 行可能全落在 rootMargin 预热带内 → farTotal 恒为 0（假失败）。
-await page.evaluate(() => document.querySelector('#btn-drill-back')?.click());
+await page.evaluate(() => document.getElementById('card-lifetime')?.click());
 await page.waitForTimeout(400);
 await page.evaluate(() => window.scrollTo(0, 0));
 await page.waitForTimeout(600);

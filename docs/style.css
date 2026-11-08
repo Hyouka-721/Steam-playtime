@@ -521,11 +521,6 @@ a { color: var(--accent); }
   }
 }
 .panel-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.btn-back {
-  padding: 5px 12px; font-size: 13.5px; color: var(--text-dim);
-  background: transparent; white-space: nowrap;
-}
-.btn-back:hover { color: var(--accent); border-color: var(--tint-border); background: var(--tint-1); }
 .ctrl { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .hint { font-size: 13px; color: var(--text-dim); }
 
@@ -607,7 +602,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
      min 之和 44+130+150+140+150+110 = 724 + 6×14 = 808px，最窄桌面档 861 也放得下。
      这套模板与下方 .sk-row 骨架必须逐字一致。 */
   grid-template-columns: 44px 130px minmax(150px, 260px) minmax(140px, 1fr) 150px 110px;
-  gap: 14px; align-items: center; cursor: pointer;
+  gap: 14px; align-items: center;
   padding: 7px 12px; border-radius: 9px; background: transparent; border: 1px solid transparent;
   position: relative;
   transition: background .15s, border-color .15s;
@@ -1364,11 +1359,10 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .badges { display: flex; flex-wrap: wrap; gap: 12px; }
 .badge {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
-  padding: 10px 12px 9px; border-radius: 12px; cursor: pointer; font: inherit; color: var(--text);
+  padding: 10px 12px 9px; border-radius: 12px; font: inherit; color: var(--text);
   border: 1px solid var(--border); background: var(--sunken);
   transition: transform .18s ease, border-color .2s ease;
 }
-.badge:hover { transform: translateY(-2px); border-color: var(--tint-border); }
 .badge-name { font-size: 13px; max-width: 134px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .badge-min { font-size: 12px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
 
@@ -1417,33 +1411,6 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 }
 .cv-item b { color: var(--accent); font-size: 15px; margin-right: 2px; font-variant-numeric: tabular-nums; }
 
-/* #18 单游戏详情扩展 */
-.drill-more { margin-top: 10px; }
-.dm-head { display: flex; flex-wrap: wrap; gap: 10px; }
-.dm-share {
-  flex: 1 1 220px; padding: 10px 12px; border-radius: 10px;
-  border: 1px solid var(--border); background: var(--sunken);
-  font-size: 13px; color: var(--text-dim);
-}
-.dm-share b { font-size: 18px; color: var(--accent); margin-left: 6px; font-variant-numeric: tabular-nums; }
-.dm-share i { display: block; height: 6px; border-radius: 3px; background: var(--accent); margin-top: 8px; opacity: .85; }
-.dm-kv {
-  flex: 1 1 118px; padding: 10px 12px; border-radius: 10px; display: flex; flex-direction: column; gap: 2px;
-  border: 1px solid var(--border); background: var(--sunken);
-}
-.dm-kv span { font-size: 12.5px; color: var(--text-dim); }
-.dm-kv b { font-size: 15px; color: var(--text-strong); font-variant-numeric: tabular-nums; }
-.dm-ach { margin-top: 12px; }
-.dm-ach-head { font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
-.dm-row {
-  display: grid; grid-template-columns: minmax(0, 1fr) 62px 92px; gap: 10px; align-items: baseline;
-  padding: 6px 0; font-size: 13.5px; border-bottom: 1px dashed var(--border);
-}
-.dm-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
-.dm-pct, .dm-date { color: var(--text-faint); text-align: right; font-variant-numeric: tabular-nums; }
-.dm-empty { font-size: 13.5px; color: var(--text-dim); margin: 6px 0 0; }
-
-
 /* #11 视图切换过渡（View Transitions API，不支持的浏览器自动忽略） */
 @media (prefers-reduced-motion: no-preference) {
   ::view-transition-old(root) { animation-duration: .18s; }
@@ -1454,8 +1421,6 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .heat { gap: 3px; }
   .report { grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); }
   .rp-value { font-size: 18px; }
-  .dm-row { grid-template-columns: minmax(0, 1fr) 54px; }
-  .dm-date { display: none; }
   .pace { gap: 12px; }
 }
 
@@ -1528,15 +1493,6 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .hx-hint { font-size: 12px; color: var(--text-faint); }
 .hx-legend { margin-left: auto; display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--text-faint); }
 .hx-legend .hx-c { width: 11px; height: 11px; border-radius: 3px; }
-
-/* 第 114 轮（用户：删除单个游戏下的热力图/点阵图，只保留最近游玩下的总点阵）：
-   下钻某款游戏时，整块点阵连同概览小字、年份下拉、当日列表一起隐藏 ——
-   那时面板只剩「← 返回 + 游戏名 + 该游戏的详情卡」。
-   ⚠️ 不能用 [hidden]：.hx / .ctrl 自己的 display 会盖掉 UA 的 [hidden]{display:none}。 */
-#lt-detail.is-drill .hx,
-#lt-detail.is-drill .hx-sum,
-#lt-detail.is-drill .ctrl-year,
-#lt-detail.is-drill #hx-day { display: none; }
 
 /* 悬停气泡：与插件同款「深色小卡 + 两行」，两套主题共用（浅色下也是深卡，读得清） */
 .hx-tip {

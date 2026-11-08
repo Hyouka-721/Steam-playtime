@@ -77,7 +77,7 @@
     days: new Map(),  // 'YYYY-MM-DD' -> day（全量；日历二级界面按日期直接取用）
     allDates: [],     // 有记录的日期索引（升序）
     view: 'lifetime',
-    drill: { appid: null, year: null, sel: null }, // 二级界面：null = 全部游戏；year = 热力图年份；sel = 最近点开的那天
+    drill: { year: null, sel: null }, // 点阵状态：year = 显示的年份；sel = 点开的那一天
     heroAppid: null,  // 悬停中的游戏（背景底纹用），null = 恢复默认底
     vt: null,         // 正在跑的 ViewTransition（Chromium 不允许叠第二个）
   };
@@ -518,28 +518,11 @@
      ⚠️ 与旧「两个月并排日历」是完全不同的 DOM（.hx-*）：旧套件里断言 .hc / .heat-mb /
         .heat-nav / .hm-title 的会失效 —— 第 111 轮起由 verify111 守新契约。 */
 
-  /** 某天某游戏的分钟数；appid 为空 = 当天总和。返回 null = 那天还没有数据 */
-  function minutesOn(date, appid) {
+  /** 某天的总分钟数；返回 null = 那天还没有数据
+      （第 115 轮：删除「下钻单个游戏」后不再有「某款游戏那天玩了多久」的口径） */
+  function minutesOn(date) {
     const day = state.days.get(date);
-    if (!day) return null;
-    if (!appid) return day.total_minutes ?? 0;
-    return (day.games ?? []).find((g) => String(g.appid) === String(appid))?.minutes ?? 0;
-  }
-
-  /** 点榜单某一行 → 下钻到该游戏的一年热力图 */
-  function openDrill(appid) {
-    state.drill.appid = appid;
-    state.drill.year = null;   // 回到「最新数据所在年」
-    state.drill.sel = null;    // 进入新的下钻，不保留上一个游戏点开的那天
-    // 热力图归属「最近游玩」栏目：进入下钻即切过去，数据不变
-    switchView('recent', { instant: true });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  function closeDrill() {
-    // 必须清掉 appid：否则深链会一直挂着 g/<旧游戏>（切走再切回也回不来）
-    state.drill.appid = null;
-    state.drill.sel = null;
+    return day ? day.total_minutes ?? 0 : null;
   }
 
   /** 可选年份：首份数据年 ~ 最新数据年，外加今年 */
@@ -573,7 +556,7 @@
     const root = $('hx-root');
     if (!tip || !root || !cell) return;
     const ds = cell.dataset.date;
-    const min = minutesOn(ds, state.drill.appid);
+    const min = minutesOn(ds);
     tip.innerHTML =
       `<b>${hxDateLabel(ds)}</b><span>${min === null ? '尚未记录' : `游玩时长：${hm(min)}`}</span>`;
     tip.hidden = false;
@@ -603,16 +586,12 @@
     const ds = state.drill.sel;
     if (!ds) { box.hidden = true; box.innerHTML = ''; return; }
 
-    const appid = state.drill.appid;
     const day = state.days.get(ds);
-    const all = day?.games ?? [];
-    /* 下钻某款游戏时只列这款；否则列当天全部 */
-    const list = (appid ? all.filter((x) => String(x.appid) === String(appid)) : all)
+    const list = (day?.games ?? [])
       .slice()
       .sort((a, b) => (b.minutes ?? 0) - (a.minutes ?? 0));
     const total = list.reduce((a, x) => a + (x.minutes ?? 0), 0);
     const maxMin = list.reduce((a, x) => Math.max(a, x.minutes ?? 0), 0);
-    const scopeName = appid ? (state.meta?.games_lifetime?.[appid]?.name ?? '这款游戏') : '';
 
     const rows = list.length
       ? list.map((x) => {
@@ -635,7 +614,7 @@
       `<b>${hxDateLabel(ds)}</b>` +
       `<span class="hx-dow-tag">周${hxDowName(ds)}</span>` +
       `<span class="hx-day-sum">${
-        list.length ? `${scopeName ? scopeName + ' · ' : ''}${list.length} 款 · 合计 ${hm(total)}` : '无游玩记录'
+        list.length ? `${list.length} 款 · 合计 ${hm(total)}` : '无游玩记录'
       }</span>` +
       `<button class="hx-day-x" id="hx-day-x" type="button" aria-label="收起当天明细">×</button>` +
       `</div>` +
@@ -677,32 +656,9 @@
   /** 一年的点阵渲染（下钻某款游戏时，点的深浅换成那款游戏当天的分钟数） */
   function renderDrill() {
     hxTipHide();   // 重绘会移动格子，气泡留着会指向错误位置
-    const appid = state.drill.appid;
     const grid = $('hx-grid');
     const monthsBox = $('hx-months');
     if (!grid || !monthsBox) return;
-
-    /* 第 114 轮（用户：删除单个游戏下的热力图/点阵图，只保留最近游玩下的总点阵）：
-       下钻某款游戏时**不渲染任何格子**，整块点阵由 .is-drill 隐藏，面板只剩
-       「← 返回 + 游戏名 + 这款游戏的详情卡（占比 / 期段 / 成就）」。
-       这样点阵只属于「最近游玩」的总览，一个游戏一份点阵的历史到此结束。 */
-    const gDrill = appid ? state.meta?.games_lifetime?.[appid] : null;
-    const drilling = !!appid;
-    const panel = $('lt-detail');
-    if (panel) panel.classList.toggle('is-drill', drilling);
-    const titleEl = panel?.querySelector('.hx-title');
-    if (titleEl) titleEl.textContent = drilling ? (gDrill?.name ?? '游戏详情') : '游玩热力图';
-    if (drilling) {
-      grid.innerHTML = '';
-      grid.style.gridTemplateColumns = '';
-      monthsBox.innerHTML = '';
-      monthsBox.style.gridTemplateColumns = '';
-      hxTipHide();
-      state.drill.sel = null;   // 没有格子就没有「选中的那天」
-      renderHxDay();            // 清掉可能残留的当日列表
-      renderDrillMore(appid);
-      return;
-    }
 
     const year = hxYear();
     const jan1 = `${year}-01-01`;
@@ -717,7 +673,7 @@
     let peak = 0, active = 0, sum = 0, tracked = 0;
     for (let i = 0; i < daysInYear; i++) {
       const ds = addDaysStr(jan1, i);
-      const min = minutesOn(ds, appid);
+      const min = minutesOn(ds);
       if (min !== null) {
         tracked++;
         if (min > 0) { active++; sum += min; if (min > peak) peak = min; }
@@ -768,8 +724,8 @@
       const label = !live
         ? `${hxDateLabel(ds)}，尚未采集`
         : min > 0
-          ? `${hxDateLabel(ds)}，${appid ? '这款玩了 ' : '当天 '}${hm(min)}，查看当天游戏`
-          : `${hxDateLabel(ds)}，${appid ? '这款当天没玩' : '当天没有游玩'}，仍可查看当天游戏`;
+          ? `${hxDateLabel(ds)}，当天 ${hm(min)}，查看当天游戏`
+          : `${hxDateLabel(ds)}，当天没有游玩，仍可查看当天游戏`;
       cells.push(
         `<span class="${cls.join(' ')}" data-date="${ds}"` +
           (live ? ` role="button" tabindex="0"` : '') +
@@ -815,7 +771,6 @@
     }
 
     renderHxDay();
-    renderDrillMore(appid);
   }
 
   // ---------- ①d 成就详情 ----------
@@ -1236,15 +1191,15 @@
     if (!perfect.length) { panel.hidden = true; return; }
     const gl = state.meta.games_lifetime ?? {};
     panel.hidden = false;
-    if ($('badge-hint')) $('badge-hint').textContent = `${perfect.length} 款全部解锁 · 点一枚看趋势`;
+    if ($('badge-hint')) $('badge-hint').textContent = `${perfect.length} 款全部解锁`;
     box.innerHTML = perfect
       .map((appid) => {
         const g = gl[appid] ?? {};
-        return `<button type="button" class="badge" data-appid="${appid}">
+        return `<div class="badge" data-appid="${appid}">
           ${capsuleHtml(appid, { perfect: true, icon: ICON(appid, g.img_icon_url) })}
           <span class="badge-name">${escapeHtml(g.name ?? 'App ' + appid)}</span>
           <span class="badge-min">${hm(g.lifetime_minutes ?? 0)}</span>
-        </button>`;
+        </div>`;
       })
       .join('');
     observeCapsules(box);
@@ -1351,63 +1306,9 @@
     void gl;
   }
 
-  /* ---------- #18 单游戏详情：占比 / 期段 / 成就解锁 ---------- */
-  function renderDrillMore(appid) {
-    const box = $('drill-more');
-    if (!box) return;
-    const gl = state.meta?.games_lifetime ?? {};
-    const g = appid ? gl[appid] : null;
-    const totalLife = state.meta?.stats?.lifetime_minutes ?? 0;
-    const share = g && totalLife > 0 ? (g.lifetime_minutes / totalLife) * 100 : null;
-    // 与月历热力图同口径：只数「当天真有时长」的日子（基线日的 0 分钟不算）
-    const days = appid
-      ? state.allDates.filter((d) => (state.days.get(d)?.games ?? []).some((x) => String(x.appid) === String(appid)))
-      : state.allDates.filter((d) => (state.days.get(d)?.total_minutes ?? 0) > 0);
-    const inPeriod = appid
-      ? days.reduce((a, d) => {
-          const hit = (state.days.get(d)?.games ?? []).find((x) => String(x.appid) === String(appid));
-          return a + (hit?.minutes ?? 0);
-        }, 0)
-      : (state.meta?.stats?.total_minutes ?? 0);
-    /* 第 113 轮（用户：「删除期内合计和有记录」）：这两张卡只在**年视图**出现过，
-       现在整个区块留空；下钻某款游戏时的详情（占比 / 期段 / 成就）照旧。 */
-    if (!g) { box.innerHTML = ''; return; }
-    box.innerHTML =
-      `<div class="dm-head">
-          <div class="dm-share"><span>占终身时长</span><b>${share.toFixed(1)}%</b><i style="width:${Math.min(100, share).toFixed(1)}%"></i></div>
-          <div class="dm-kv"><span>期内游玩</span><b>${hm(inPeriod)}</b></div>
-          <div class="dm-kv"><span>首次记录</span><b>${days[0] ?? '—'}</b></div>
-          <div class="dm-kv"><span>最近游玩</span><b>${g.last_played ?? '—'}</b></div>
-        </div>` +
-      '<div class="dm-ach" id="dm-ach"><p class="dm-empty">成就明细按需加载…</p></div>';
-    ensureAchDetail().then(() => {
-      const mine = state.ach?.games?.[appid];
-      const box2 = $('dm-ach');
-      if (!box2) return;
-      if (!mine || !(mine.achievements ?? []).length) {
-        box2.innerHTML = '<p class="dm-empty">这款游戏没有成就记录（无成就系统，或尚未采集）。</p>';
-        return;
-      }
-      const un = (mine.achievements ?? []).slice().sort((a, b) => (b.ts ?? 0) - (a.ts ?? 0)).slice(0, 8);
-      box2.innerHTML =
-        `<div class="dm-ach-head">已解锁 ${mine.unlocked}/${mine.total} · 最近 8 条</div>` +
-        un
-          .map(
-            (a) => `<div class="dm-row">
-            <span class="dm-name${a.percent != null && a.percent < ACH_RARE_PCT ? ' is-gold' : ''}">${escapeHtml(a.name)}</span>
-            <span class="dm-pct">${a.percent != null ? a.percent + '%' : ''}</span>
-            <span class="dm-date">${a.ts ? achDate(a.ts) : ''}</span>
-          </div>`,
-          )
-          .join('');
-    });
-  }
-
   /* ---------- #19 深链 ---------- */
   function syncHash() {
-    const parts = ['#/' + state.view];
-    if (state.view === 'recent' && state.drill.appid) parts.push('g/' + state.drill.appid);
-    const next = parts.join('/');
+    const next = '#/' + state.view;
     if (location.hash !== next) history.replaceState(null, '', next);
   }
 
@@ -1417,10 +1318,8 @@
     const seg = h.split('/').filter(Boolean);
     const view = ['lifetime', 'recent', 'ach', 'timeline', 'data'].includes(seg[0]) ? seg[0] : null;
     if (!view) return false;
+    // 第 115 轮：'g/<appid>' 段已废弃（单游戏下钻整条线删除），带了也只按视图处理
     switchView(view, { instant: true });
-    const gi = seg.indexOf('g');
-    const appid = gi >= 0 ? seg[gi + 1] : null;
-    if (appid && (view === 'recent' || view === 'lifetime')) openDrill(appid);
     return true;
   }
 
@@ -1438,12 +1337,8 @@
       });
       list.addEventListener('mouseleave', () => setHero(null));
     }
-    const drillTo = (e) => {
-      const b = e.target.closest('[data-appid]');
-      if (b) openDrill(b.dataset.appid);
-    };
-    if ($('badges')) $('badges').addEventListener('click', drillTo);
-    if ($('suggest')) $('suggest').addEventListener('click', drillTo);
+    /* 第 115 轮：勋章墙与「临门一脚」里的 [data-appid] 徽章原本点击会下钻到单游戏详情，
+       下钻删除后它们只是展示用的标记（悬停底纹仍按 data-appid 走 setHero）。 */
     const pace = $('pace');
     if (pace) {
       pace.addEventListener('change', (e) => {
@@ -1458,13 +1353,12 @@
   }
   // ---------- tabs / init ----------
   /** opts.instant：跳过 View Transition（深链直达时用 —— 过渡的回调是异步执行的，
-   *  会把紧接着 openDrill 打开的详情面板又关回去）。 */
+   *  会把紧接着 applyHash 之后的状态改动覆盖掉）。 */
   function switchView(v, opts = {}) {
     const run = () => {
       state.view = v;
       document.querySelectorAll('.card-nav').forEach((c) => c.classList.toggle('active', c.dataset.view === v));
       document.querySelectorAll('.view').forEach((sec) => sec.classList.toggle('active', sec.id === `view-${v}`));
-      if (v === 'lifetime') closeDrill();
       if (v === 'recent') renderDrill();
       if (v === 'ach') {
         // 成就**明细**（285KB）按需加载：首屏只带 stats 摘要，这里才去取 games。
@@ -1528,7 +1422,7 @@
       const pickDay = (cell) => {
         if (!cell || !cell.dataset.date) return false;
         const ds = cell.dataset.date;
-        if (minutesOn(ds, state.drill.appid) === null) return false;
+        if (minutesOn(ds) === null) return false;
         state.drill.sel = state.drill.sel === ds ? null : ds;  // 同一天再点 = 收起
         renderDrill();
         /* 第 113 轮（用户：点开当天后「上方元素会跳一下很突兀」）：
@@ -1602,9 +1496,8 @@
       });
     }
 
-    // 第 104 轮：热力图只归属「最近游玩」，只能由该卡进入。
-    // 游戏时长卡只负责回到累计榜；停在本栏时再点也不再触发下钻（原 else 的 openDrill
-    // 是热力图移走前的遗留分支，会把人从「游戏时长」直接带进热力图）。
+    // 第 104 轮：热力图只归属「最近游玩」，只能由该卡进入；游戏时长卡只负责回到累计榜。
+    // 第 115 轮：单游戏下钻整条线已删除，本卡更不需要任何跳转分支。
     $('card-lifetime').addEventListener('click', () => {
       if (state.view !== 'lifetime') switchView('lifetime');
     });
@@ -1618,21 +1511,13 @@
       renderAch();
     });
 
-    // 游戏累计列表：点击整行 → 该游戏每日时长热力图（下钻）
-    $('lt-list').addEventListener('click', (e) => {
-      const row = e.target.closest('.rank-item');
-      if (!row) return;
-      openDrill(row.dataset.appid);
-    });
+    /* 第 115 轮（用户：「从累计榜点进某款游戏时没反应，不可点击」）：
+       榜单整行不再挂点击（原来点行会下钻到该游戏的热力图）。
+       现在行只是展示 + 悬停换底纹（setHero），cursor 也回到默认。 */
 
     /* 第 87 轮：「最近游玩」列表原本唯一的交互（首行那枚日历入口）已删除，
        该列表现在**没有任何点击行为**，所以这里不再挂监听器（原来那条
        `#recent-list` 委托已整体移除），避免留下一个空委托误导下一轮。 */
-
-    $('btn-drill-back').addEventListener('click', () => {
-      switchView('lifetime');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
 
     // 第 111 轮：月份翻页（‹ ›）已随「两月并排日历」一起移除，
     // 现在由点阵上方的年份选择器切换范围。

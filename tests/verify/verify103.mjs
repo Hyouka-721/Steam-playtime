@@ -39,7 +39,7 @@ const a = await page.evaluate(() => ({
   cards: [...document.querySelectorAll('.card-label')].map((e) => e.textContent.trim()),
   views: [...document.querySelectorAll('.view')].map((e) => e.id),
 }));
-ok('A1 版本参数 CSS 137 / APP 122', a.cssV === '138' && a.appV === '123', { css: a.cssV, app: a.appV });
+ok('A1 版本参数 CSS 137 / APP 122', a.cssV === '139' && a.appV === '124', { css: a.cssV, app: a.appV });
 ok('A2 显示名改为 Wallpaper Engine', a.bootName === 'Wallpaper Engine', a.bootName);
 ok('A3 页面无「壁纸引擎」残留', a.hasChinese === false);
 ok('A4 榜单里确有一行 Wallpaper Engine', a.pageNames.some((n) => n.startsWith('Wallpaper Engine')), a.pageNames.filter((n) => /Wallpaper/i.test(n)));
@@ -105,22 +105,27 @@ if (await liveCell.count()) {
   await page.click('#hx-day .hx-day-x');
   await page.waitForTimeout(300);
 }
-await page.click('#btn-drill-back');
+await page.click('#card-lifetime');
 await page.waitForTimeout(500);
-ok('D3 「← 返回」回到「游戏时长」', (await page.evaluate(() => document.querySelector('.view.active')?.id)) === 'view-lifetime');
+ok('D3 点「游戏时长」卡回到累计榜（返回按钮第 115 轮已删除）',
+  (await page.evaluate(() => document.querySelector('.view.active')?.id)) === 'view-lifetime');
 
+const dBefore = await page.evaluate(() => ({ view: document.querySelector('.view.active')?.id, hash: location.hash }));
 await page.locator('#lt-list .rank-item').first().click();
 await page.waitForTimeout(700);
 const d = await page.evaluate(() => ({
   active: document.querySelector('.view.active')?.id,
   cells: document.querySelectorAll('#hx-grid .hx-c').length,
-  detail: !!document.querySelector('#drill-more .dm-share'),
+  drillMore: !!document.getElementById('drill-more'),
+  backBtn: !!document.getElementById('btn-drill-back'),
+  cursor: getComputedStyle(document.querySelector('#lt-list .rank-item')).cursor,
   hash: location.hash,
 }));
-/* 第 114 轮（用户：删掉单个游戏下的点阵）：下钻只显示该游戏详情，不再有格子 */
-ok('D4 点累计榜行 → 切到「最近游玩」并显示该游戏详情（点阵不再渲染）',
-  d.active === 'view-recent' && d.detail && d.cells === 0, d);
-ok('D5 深链仍带 g/<appid>', /#\/recent\/g\/\d+/.test(d.hash), d.hash);
+/* 第 115 轮（用户：「从累计榜点进某款游戏时没反应，不可点击」）：整行不再可点 */
+ok('D4 点累计榜行毫无反应（不切视图 / 不改 hash / 非 pointer 光标）',
+  d.active === dBefore.view && d.hash === dBefore.hash && d.cursor !== 'pointer',
+  { before: dBefore, ...d });
+ok('D5 单游戏详情整条线已删除（无 #drill-more / 无返回按钮）', !d.drillMore && !d.backBtn, { more: d.drillMore, back: d.backBtn });
 
 for (const [card, view] of [['#card-ach', 'view-ach'], ['#card-games', 'view-timeline'], ['#card-data', 'view-data'], ['#card-lifetime', 'view-lifetime']]) {
   await page.click(card);
