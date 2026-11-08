@@ -89,21 +89,36 @@ await page.waitForTimeout(1400); // 等数字滚动落地
 
 await page.click('#lt-list .rank-item');   // 进入下钻：月历热力图
 await page.waitForTimeout(900);
+/* 第 114 轮（用户：删掉单个游戏下的热力图/点阵图，只留最近游玩的总点阵）：
+   下钻点阵消失，只剩该游戏详情卡；总览点阵原样保留。 */
+const drill = await page.evaluate(() => ({
+  cells: document.querySelectorAll('#hx-grid .hx-c').length,
+  hxHidden: getComputedStyle(document.getElementById('hx-root')).display === 'none',
+  share: !!document.querySelector('#drill-more .dm-share'),
+  kv: document.querySelectorAll('#drill-more .dm-kv').length,
+  title: (document.querySelector('#lt-detail .hx-title')?.textContent || '').trim(),
+}));
+ok('B1 下钻单款游戏不再渲染点阵（整块隐藏），只留该游戏详情卡',
+  drill.cells === 0 && drill.hxHidden && drill.share && drill.kv >= 3 && drill.title !== '游玩热力图',
+  JSON.stringify(drill));
+
+await page.click('#btn-drill-back');
+await page.waitForTimeout(500);
+await page.click('#card-recent');
+await page.waitForTimeout(900);
 const heat = await page.evaluate(() => {
   const cells = [...document.querySelectorAll('#hx-grid .hx-c')];
-  const real = cells.filter((c) => !c.classList.contains('is-blank'));
   return {
     total: cells.length,
-    real: real.length,
-    /* 第 111 轮：点阵用 l0~l4 / lna 五档（旧月历是 is-blank + h1~h4） */
+    /* 第 111 轮：点阵用 l0~l4 / lna 五档 */
     lit: cells.filter((c) => / (l[1-4])\b/.test(' ' + c.className)).length,
-    month: (document.getElementById('hx-sum').textContent || '').trim(),   // 第 111 轮：月份切换器 → 年份选择器
+    month: (document.getElementById('hx-sum').textContent || '').trim(),
   };
 });
-ok('B1 下钻是一年点阵：格子数 = 一年天数、有已点亮的日期、汇总含年份',
+ok('B1b 总览仍是一年点阵：格子数 = 一年天数、有已点亮的日期、汇总含年份',
   heat.total >= 365 && heat.total <= 371 && heat.lit > 0 &&
   /^\d{4} 年 · /.test(heat.month), JSON.stringify(heat));
-await page.click('#btn-drill-back');
+await page.click('#card-lifetime');
 await page.waitForTimeout(500);
 
 const card = await page.evaluate(() => document.getElementById('c-lifetime').textContent.trim());

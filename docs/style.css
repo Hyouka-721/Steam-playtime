@@ -1529,6 +1529,15 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .hx-legend { margin-left: auto; display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--text-faint); }
 .hx-legend .hx-c { width: 11px; height: 11px; border-radius: 3px; }
 
+/* 第 114 轮（用户：删除单个游戏下的热力图/点阵图，只保留最近游玩下的总点阵）：
+   下钻某款游戏时，整块点阵连同概览小字、年份下拉、当日列表一起隐藏 ——
+   那时面板只剩「← 返回 + 游戏名 + 该游戏的详情卡」。
+   ⚠️ 不能用 [hidden]：.hx / .ctrl 自己的 display 会盖掉 UA 的 [hidden]{display:none}。 */
+#lt-detail.is-drill .hx,
+#lt-detail.is-drill .hx-sum,
+#lt-detail.is-drill .ctrl-year,
+#lt-detail.is-drill #hx-day { display: none; }
+
 /* 悬停气泡：与插件同款「深色小卡 + 两行」，两套主题共用（浅色下也是深卡，读得清） */
 .hx-tip {
   /* 默认落在格子**下方** 9px：点阵只有 7 行高，往上弹会压到面板标题。

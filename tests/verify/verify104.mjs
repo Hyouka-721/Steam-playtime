@@ -48,7 +48,7 @@ const a = await page.evaluate(() => ({
   detailParent: document.getElementById('lt-detail')?.parentElement?.id,
   rows: document.querySelectorAll('#lt-list .rank-item').length,
 }));
-ok('A1 版本参数 CSS 137 / APP 122', a.cssV === '137' && a.appV === '122', { css: a.cssV, app: a.appV });
+ok('A1 版本参数 CSS 137 / APP 122', a.cssV === '138' && a.appV === '123', { css: a.cssV, app: a.appV });
 ok('A2 五张导航卡名称未变', JSON.stringify(a.cards) === JSON.stringify(['游戏时长', '最近游玩', '成就', '游戏库', '数据']), a.cards);
 ok('A3 五个视图 id 未变', JSON.stringify(a.views) === JSON.stringify(['view-lifetime', 'view-recent', 'view-ach', 'view-timeline', 'view-data']), a.views);
 ok('A4 热力图仍仅一份且归属「最近游玩」', a.detailCount === 1 && a.detailParent === 'view-recent', a);
@@ -99,8 +99,9 @@ ok('E1 回到累计榜且不在热力图', e.active === 'view-lifetime' && !e.de
 await page.click('#lt-list .rank-item');
 await page.waitForTimeout(900);
 const f = await snap();
-ok('F1 点累计榜行仍可进入带筛选的热力图', f.active === 'view-recent' && /#\/recent\/g\/\d+/.test(f.hash), f);
-ok('F2 下钻后热力图有数据', f.cells > 0, f);
+ok('F1 点累计榜行仍可进入该游戏详情', f.active === 'view-recent' && /#\/recent\/g\/\d+/.test(f.hash), f);
+/* 第 114 轮（用户：删掉单个游戏下的点阵）：面板只剩「返回 + 游戏名 + 详情卡」 */
+ok('F2 下钻后不再渲染点阵，改显示该游戏详情卡', f.cells === 0 && f.detailVisible, f);
 
 /* ---------- G 返回按钮 ---------- */
 await page.click('#btn-drill-back');
@@ -110,10 +111,11 @@ ok('G1 返回按钮回累计榜', g.active === 'view-lifetime' && g.hash === '#/
 
 /* ---------- H 深链直达仍可用 ---------- */
 await page.goto(LOCAL + '?t=' + Date.now() + '#/recent/g/431960', { waitUntil: 'domcontentloaded' });
-await page.waitForSelector('#hx-grid .hx-c', { timeout: 30000 });
+await page.waitForSelector('#drill-more .dm-share', { timeout: 30000 });
 await page.waitForTimeout(700);
 const h = await snap();
-ok('H1 深链直达带筛选热力图', h.active === 'view-recent' && /#\/recent\/g\/\d+/.test(h.hash) && h.cells > 0, h);
+ok('H1 深链直达该游戏详情（第 114 轮起不再带点阵）',
+  h.active === 'view-recent' && /#\/recent\/g\/\d+/.test(h.hash) && h.cells === 0 && h.detailVisible, h);
 
 ok('Z1 全程零 JS 异常', errs.length === 0, errs.slice(0, 5));
 console.log('\n' + pass + ' PASS / ' + fail + ' FAIL');

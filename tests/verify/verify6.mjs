@@ -49,8 +49,8 @@ check('内联：构建脚本串上 inline-boot', /inline-boot\.mjs/.test(build))
 check('样式：骨架屏样式与动画存在', /\.sk-block/.test(css) && /@keyframes sk-shimmer/.test(css));
 check('样式：尊重 reduced-motion（骨架不流动）', /prefers-reduced-motion: reduce[\s\S]{0,120}sk-block/.test(css));
 check('构建：build.mjs 输出 ach_stats 到 meta', /ach_stats:\s*achStats/.test(build));
-check('版本号：style\.css\?v=137 / app\.js\?v=122 / fx.js?v=19',
-  /style\.css\?v=137/.test(html) && /app\.js\?v=122/.test(html) && /fx\.js\?v=19/.test(html));
+check('版本号：style\.css\?v=138 / app\.js\?v=123 / fx.js?v=19',
+  /style\.css\?v=138/.test(html) && /app\.js\?v=123/.test(html) && /fx\.js\?v=19/.test(html));
 
 /* ---------- B/C/D. 浏览器实测 ---------- */
 const browser = await chromium.launch();
@@ -157,14 +157,32 @@ check('请求：首屏不请求 achievements.json（285KB 移出关键路径）'
 // ⚠️ inline-boot 只内联「最新一个月」（months.slice(-1)），所以跨月后首屏必然多 1 个
 //    「上个月 daily」的请求 —— 这是设计内的，不是退化。判据是「≤1 个，且必须是历史月份」。
 const dataReqs = reqs.filter((r) => r.url.includes('/data/'));
-const inlineMonth = (await page.evaluate(() => Object.keys(window.__BOOT?.daily ?? {})))[0] ?? null;
+const bootState = await page.evaluate(() => {
+  const b = window.__BOOT;
+  const t = b && b.generated_at ? Date.parse(b.generated_at) : NaN;
+  return {
+    ageH: Number.isFinite(t) ? (Date.now() - t) / 3600000 : null,
+    inline: Object.keys(b?.daily ?? {}),
+    months: b?.meta?.months ?? [],
+  };
+});
+const inlineMonth = bootState.inline[0] ?? null;
+const fresh = bootState.ageH !== null && bootState.ageH < 36;   // 与 app.js 的 BOOT_MAX_AGE_H 同阈值
 const monthlyReqs = dataReqs.filter((r) => /\/data\/daily\/\d{4}-\d{2}\.json$/.test(r.url));
 const nonMonthReqs = dataReqs.filter((r) => !/\/data\/daily\/\d{4}-\d{2}\.json$/.test(r.url));
-check('请求：首屏最多 1 个历史月 daily 请求（当月已内联），且不请求 meta.json / achievements',
-  monthlyReqs.length <= 1
-  && nonMonthReqs.length === 0
-  && monthlyReqs.every((r) => !inlineMonth || !r.url.includes(inlineMonth)),
-  `内联=${inlineMonth}；月请求=${monthlyReqs.map((r) => r.url.split('/').pop()).join(',') || '无'}；其余=${nonMonthReqs.length}`);
+/* 第 114 轮改判：判据按「内联新鲜度」分流 —— 夜里 CI 会重写 docs/index.html 的内联数据，
+   本地不 pull 时内联必然超过 36h，走的是兜底路径（meta.json + 补缺的月），
+   这不是退化。原判据只写了快路径，导致「本地两天没 pull」就假红。 */
+const reqOk = fresh
+  ? (monthlyReqs.length <= 1
+     && nonMonthReqs.length === 0
+     && monthlyReqs.every((r) => !inlineMonth || !r.url.includes(inlineMonth)))
+  : (nonMonthReqs.length === 1
+     && /data\/meta\.json$/.test(nonMonthReqs[0].url)
+     && monthlyReqs.length === bootState.months.length);
+check('请求：首屏只拉必要数据（内联新鲜 → 零 meta.json + ≤1 个历史月；过期 → 兜底只补 meta.json + 缺的月）',
+  reqOk,
+  `内联=${inlineMonth}（${fresh ? '新鲜' : '已过期 ' + Math.round(bootState.ageH) + 'h'}）；月请求=${monthlyReqs.map((r) => r.url.split('/').pop()).join(',') || '无'}；其余=${nonMonthReqs.map((r) => r.url.split('/').pop()).join(',') || '无'}`);
 
 // 概览卡成就值来自 meta.ach_stats —— 期望值也从内联数据里读，避免快照一更新就漂
 const ach = await page.evaluate(() => {
@@ -249,20 +267,22 @@ await page.waitForTimeout(300);
 const t2 = await page.evaluate(() => ({ now: document.documentElement.dataset.theme, stored: localStorage.getItem('theme') }));
 check('回归：主题切换并持久化', t2.stored === t2.now, JSON.stringify({ before: t1, ...t2 }));
 
-// 下钻：第 86 轮起是「月历热力图」，不再加载 ECharts
+// 下钻：第 114 轮起单游戏**不再渲染点阵**（用户要求），只显示该游戏详情卡；ECharts 永不加载
 await page.click('#lt-list .rank-item');
 await page.waitForTimeout(900);
 const drill = await page.evaluate(() => ({
   open: !document.getElementById('lt-detail').hidden,
   cells: document.querySelectorAll('#hx-grid .hx-c').length,
-  month: (document.getElementById('hx-sum').textContent || '').trim(),   // 第 111 轮：月份切换器 → 年份选择器
-  sum: (document.getElementById('hx-sum').textContent || '').trim(),
+  hxHidden: getComputedStyle(document.getElementById('hx-root')).display === 'none',
+  share: !!document.querySelector('#drill-more .dm-share'),
+  title: (document.querySelector('#lt-detail .hx-title')?.textContent || '').trim(),
   echarts: typeof window.echarts,
   legacyChart: !!document.getElementById('chart-drill'),
 }));
-check('回归：下钻打开一年点阵（生日格子 / 有汇总 / 无 ECharts）',
-  drill.open && drill.cells >= 365 && /^\d{4} 年 · /.test(drill.month) &&
-  drill.sum.length > 0 && drill.echarts === 'undefined' && !drill.legacyChart,
+check('回归：下钻显示该游戏详情卡、点阵不渲染（无 ECharts）',
+  drill.open && drill.cells === 0 && drill.hxHidden && drill.share &&
+  drill.title.length > 0 && drill.title !== '游玩热力图' &&
+  drill.echarts === 'undefined' && !drill.legacyChart,
   JSON.stringify(drill));
 
 // 滚动胶囊图：只断言"水化动作发生了"（沙箱连不上 Steam CDN，图片字节到不了，

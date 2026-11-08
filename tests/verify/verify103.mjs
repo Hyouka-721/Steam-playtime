@@ -39,7 +39,7 @@ const a = await page.evaluate(() => ({
   cards: [...document.querySelectorAll('.card-label')].map((e) => e.textContent.trim()),
   views: [...document.querySelectorAll('.view')].map((e) => e.id),
 }));
-ok('A1 版本参数 CSS 137 / APP 122', a.cssV === '137' && a.appV === '122', { css: a.cssV, app: a.appV });
+ok('A1 版本参数 CSS 137 / APP 122', a.cssV === '138' && a.appV === '123', { css: a.cssV, app: a.appV });
 ok('A2 显示名改为 Wallpaper Engine', a.bootName === 'Wallpaper Engine', a.bootName);
 ok('A3 页面无「壁纸引擎」残留', a.hasChinese === false);
 ok('A4 榜单里确有一行 Wallpaper Engine', a.pageNames.some((n) => n.startsWith('Wallpaper Engine')), a.pageNames.filter((n) => /Wallpaper/i.test(n)));
@@ -114,9 +114,12 @@ await page.waitForTimeout(700);
 const d = await page.evaluate(() => ({
   active: document.querySelector('.view.active')?.id,
   cells: document.querySelectorAll('#hx-grid .hx-c').length,
+  detail: !!document.querySelector('#drill-more .dm-share'),
   hash: location.hash,
 }));
-ok('D4 点累计榜行 → 切到热力图且可用', d.active === 'view-recent' && d.cells > 0, d);
+/* 第 114 轮（用户：删掉单个游戏下的点阵）：下钻只显示该游戏详情，不再有格子 */
+ok('D4 点累计榜行 → 切到「最近游玩」并显示该游戏详情（点阵不再渲染）',
+  d.active === 'view-recent' && d.detail && d.cells === 0, d);
 ok('D5 深链仍带 g/<appid>', /#\/recent\/g\/\d+/.test(d.hash), d.hash);
 
 for (const [card, view] of [['#card-ach', 'view-ach'], ['#card-games', 'view-timeline'], ['#card-data', 'view-data'], ['#card-lifetime', 'view-lifetime']]) {

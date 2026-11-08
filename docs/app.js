@@ -682,6 +682,28 @@
     const monthsBox = $('hx-months');
     if (!grid || !monthsBox) return;
 
+    /* 第 114 轮（用户：删除单个游戏下的热力图/点阵图，只保留最近游玩下的总点阵）：
+       下钻某款游戏时**不渲染任何格子**，整块点阵由 .is-drill 隐藏，面板只剩
+       「← 返回 + 游戏名 + 这款游戏的详情卡（占比 / 期段 / 成就）」。
+       这样点阵只属于「最近游玩」的总览，一个游戏一份点阵的历史到此结束。 */
+    const gDrill = appid ? state.meta?.games_lifetime?.[appid] : null;
+    const drilling = !!appid;
+    const panel = $('lt-detail');
+    if (panel) panel.classList.toggle('is-drill', drilling);
+    const titleEl = panel?.querySelector('.hx-title');
+    if (titleEl) titleEl.textContent = drilling ? (gDrill?.name ?? '游戏详情') : '游玩热力图';
+    if (drilling) {
+      grid.innerHTML = '';
+      grid.style.gridTemplateColumns = '';
+      monthsBox.innerHTML = '';
+      monthsBox.style.gridTemplateColumns = '';
+      hxTipHide();
+      state.drill.sel = null;   // 没有格子就没有「选中的那天」
+      renderHxDay();            // 清掉可能残留的当日列表
+      renderDrillMore(appid);
+      return;
+    }
+
     const year = hxYear();
     const jan1 = `${year}-01-01`;
     const lead = hxDowIndex(jan1);
