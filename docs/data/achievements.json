@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "ready": true,
-  "generated_at": "2026-11-07T19:30:52.224Z",
-  "snapshot_date": "2026-11-07",
+  "generated_at": "2026-11-08T19:50:55.818Z",
+  "snapshot_date": "2026-11-08",
   "stats": {
     "unlocked": 846,
     "total": 2504,
@@ -100,7 +100,7 @@
           "name": "Fear The Sun",
           "desc": "Dawn the garb of a vampire and get a sunburn.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/0f7433fb1db6414bd4f5e10965c38ee5078fa3cc.jpg",
-          "percent": 0.5,
+          "percent": 0.6,
           "ts": 1788927265
         },
         {
@@ -148,7 +148,7 @@
           "name": "A Rare Realm",
           "desc": "Some very special seeds can lead to unique and rewarding experiences. Can you find one?",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/ee1bf7006604da48b973c5d793c9b13b68ea7b63.jpg",
-          "percent": 12.6,
+          "percent": 12.7,
           "ts": 1788859975
         },
         {
@@ -164,7 +164,7 @@
           "name": "Spicy Licks",
           "desc": "Jam out on a six stringed instrument.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/7ee84aed998d979b5a23472e8d979114d7787a27.jpg",
-          "percent": 4.1,
+          "percent": 4.2,
           "ts": 1788858616
         },
         {
@@ -204,7 +204,7 @@
           "name": "Hot Reels!",
           "desc": "Drop a lure in a pool of lava for a pre-fried haul!",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/b69c78cee817dbe14238c10c042bf478003a9c27.jpg",
-          "percent": 9,
+          "percent": 9.1,
           "ts": 1788841675
         },
         {
@@ -260,7 +260,7 @@
           "name": "Ankhumulation Complete",
           "desc": "Obtain the Ankh Shield, the finest protection from unpleasant maladies and ailments.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/820ecf21246cb8acb0a293fb5781b479c46bc441.jpg",
-          "percent": 11.8,
+          "percent": 11.9,
           "ts": 1788671495
         },
         {
@@ -292,7 +292,7 @@
           "name": "Infinity +1 Sword",
           "desc": "Obtain the Zenith, the culmination of a journey forged into the ultimate sword.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/ad65c49e080605670ce5dee3e94c5863e5dcdb76.jpg",
-          "percent": 17.7,
+          "percent": 17.8,
           "ts": 1788610034
         },
         {
@@ -556,7 +556,7 @@
           "name": "Big Booty",
           "desc": "Unlock one of the dungeon's large, mysterious chests with a special key.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/c7415e2bf7cbef15558b41c70bb1e306e5682e27.jpg",
-          "percent": 21.5,
+          "percent": 21.6,
           "ts": 1788055651
         },
         {
@@ -580,7 +580,7 @@
           "name": "Tin-Foil Hatter",
           "desc": "Triumph over a martian invasion, when beings from out of this world come to scramble your brains and probe you in uncomfortable places.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/c3e587ad5f2dea6f18e3b1dbda3ae258f70edf9c.jpg",
-          "percent": 24.6,
+          "percent": 24.7,
           "ts": 1787989641
         },
         {
@@ -588,7 +588,7 @@
           "name": "Lihzahrdian Idol",
           "desc": "Defeat Golem, the stone-faced ritualistic idol of the lihzahrd tribe.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/3d8a29010ed3e22203cb4f0d52167c88f9c91a5c.jpg",
-          "percent": 28.5,
+          "percent": 28.6,
           "ts": 1787969177
         },
         {
@@ -612,7 +612,7 @@
           "name": "Going Oldschool",
           "desc": "Bring back the original title screen.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/04998850ce652bde23901e5a4a5838d03d88c725.jpg",
-          "percent": 10.9,
+          "percent": 11,
           "ts": 1787912064
         },
         {
@@ -644,7 +644,7 @@
           "name": "The Great Southern Plantkill",
           "desc": "Defeat Plantera, the overgrown monstrosity of the jungle's depths.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/4b52e1dd35f600a9f82f7958abe2a467d68351e7.jpg",
-          "percent": 29.5,
+          "percent": 29.6,
           "ts": 1787828178
         },
         {
@@ -668,7 +668,7 @@
           "name": "Drax Attax",
           "desc": "Craft a drax or pickaxe axe using hallowed bars, and the souls of the three mechanical bosses.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/d3955ec8610cc6a7229866780451467ab0e5c5a2.jpg",
-          "percent": 22.8,
+          "percent": 22.9,
           "ts": 1787798393
         },
         {
@@ -772,7 +772,7 @@
           "name": "Fortune Favors the Bould",
           "desc": "Discover a friendly boulder.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/60f21cf3ca3149c7c61d15dd1042d7a0ad71cfbc.jpg",
-          "percent": 7.7,
+          "percent": 7.8,
           "ts": 1787382486
         },
         {
@@ -860,7 +860,7 @@
           "name": "Worm Fodder",
           "desc": "Defeat the Eater of Worlds, a massive worm whom dwells in the corruption.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/624b8391794e2f02f067295d634d648d6cb0e4a9.jpg",
-          "percent": 35.1,
+          "percent": 35.2,
           "ts": 1787195505
         },
         {
@@ -908,7 +908,7 @@
           "name": "Watch Your Step!",
           "desc": "Become a victim to a nasty underground trap.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/280b95017555560b63ea0a44dbdb3a38e86cd7cd.jpg",
-          "percent": 58.9,
+          "percent": 59,
           "ts": 1787028266
         },
         {
@@ -932,7 +932,7 @@
           "name": "Feeling Petty",
           "desc": "Deliver headpats to the town pet.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/89ae5fc62de83ed0c5b472dba2434a2f91940bd1.jpg",
-          "percent": 32.6,
+          "percent": 32.7,
           "ts": 1786965943
         },
         {
@@ -1020,7 +1020,7 @@
           "name": "Hey! Listen!",
           "desc": "Encounter a fairy.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/98424268ca1fe5748753b891affa4c20c4ab5147.jpg",
-          "percent": 45.7,
+          "percent": 45.8,
           "ts": 1786782635
         },
         {
@@ -1108,7 +1108,7 @@
           "name": "Benched",
           "desc": "Craft your first work bench.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/e76f23d7116ce2a3ddb73611a58207094f2fed35.jpg",
-          "percent": 63.6,
+          "percent": 63.7,
           "ts": 1785843368
         },
         {
@@ -1228,7 +1228,7 @@
           "name": "民族企业",
           "desc": "在你公司总部所在国家内至少拥有1个大型车库",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/227300/9dd702488f81a73f43e5e4c999e540ad292cae17.jpg",
-          "percent": 26.6,
+          "percent": 26.7,
           "ts": 1773310732
         },
         {
@@ -1308,7 +1308,7 @@
           "name": "Coolrunning",
           "desc": "Defeat 10 Troll Pathfinders while they're treading on ice.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/bd0340789a6d9b82b8c39548ad46a7f8798bb4bc.jpg",
-          "percent": 30.6,
+          "percent": 30.7,
           "ts": 1794050763
         },
         {
@@ -1324,7 +1324,7 @@
           "name": "Orcs must die",
           "desc": "Defeat Gul'Thak and its minions.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/58bb1f3abc9fe72511af6c50748d2a4f3f583656.jpg",
-          "percent": 37.5,
+          "percent": 37.6,
           "ts": 1793798427
         },
         {
@@ -1332,7 +1332,7 @@
           "name": "I'am the law",
           "desc": "Do not let The Kingpin escape.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/ab6a955d722f4469dd078015e3e1f436077edd18.jpg",
-          "percent": 31.4,
+          "percent": 31.5,
           "ts": 1793707517
         },
         {
@@ -1340,7 +1340,7 @@
           "name": "Entangled",
           "desc": "Hold 500 or more enemies with Wrath of the Forest.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/b991d77c006dacf30ce428935ae078a613e3314b.jpg",
-          "percent": 44.7,
+          "percent": 44.8,
           "ts": 1793355173
         },
         {
@@ -1348,7 +1348,7 @@
           "name": "Arachnophobia",
           "desc": "Defeat Sarelgaz and its minions.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/c384b484ce229bb8e9e6d4ecfbc3634de47fe87c.jpg",
-          "percent": 32.9,
+          "percent": 33,
           "ts": 1793279110
         },
         {
@@ -1356,7 +1356,7 @@
           "name": "Elementalist",
           "desc": "Summon 5 rock elementals in any one stage.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/f8fe3ef5a578154b61aea11033987270e40271f2.jpg",
-          "percent": 20.4,
+          "percent": 20.5,
           "ts": 1793278827
         },
         {
@@ -1380,7 +1380,7 @@
           "name": "Superstar",
           "desc": "Earn 45 stars.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/3efaf50ce1b05c6aa14ad3d07a810e5da1d4dab9.jpg",
-          "percent": 37.7,
+          "percent": 37.8,
           "ts": 1792819263
         },
         {
@@ -1388,7 +1388,7 @@
           "name": "Rocketeer",
           "desc": "Shoot 100 missiles.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/9fb206c795fd51910692884bf05dbf5fe7f5d101.jpg",
-          "percent": 31.6,
+          "percent": 31.7,
           "ts": 1792818947
         },
         {
@@ -1404,7 +1404,7 @@
           "name": "Great Defender",
           "desc": "Complete the campaign.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/891b60bda9108ded465713a61ac900fc3c0cd3f6.jpg",
-          "percent": 52.1,
+          "percent": 52.2,
           "ts": 1792289838
         },
         {
@@ -1412,7 +1412,7 @@
           "name": "This is the end",
           "desc": "Defeat Vez'nan.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/1f1f5b2952ceaa5bd60115c86e9f835286e0f89a.jpg",
-          "percent": 54.2,
+          "percent": 54.3,
           "ts": 1792289825
         },
         {
@@ -1420,7 +1420,7 @@
           "name": "We dine in hell!",
           "desc": "Have your soldiers survive the explosion of 300 demons.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/923051d3767523798418b2e3798557d25d738e2a.jpg",
-          "percent": 52.1,
+          "percent": 52.2,
           "ts": 1792211292
         },
         {
@@ -1436,7 +1436,7 @@
           "name": "Energy Network",
           "desc": "Build 4 Tesla towers in any stage.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/9d4107ad32a78ad41ad87aec36ed086d4765b2c0.jpg",
-          "percent": 37.5,
+          "percent": 37.6,
           "ts": 1791986543
         },
         {
@@ -1460,7 +1460,7 @@
           "name": "Terminator",
           "desc": "Kill 10.000 enemies.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/71c68c1935b562113b504db14ba52ecd45f830ec.jpg",
-          "percent": 50.7,
+          "percent": 50.8,
           "ts": 1791985108
         },
         {
@@ -1492,7 +1492,7 @@
           "name": "Die Hard",
           "desc": "Have your soldiers regenerate a total of 50.000 life.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/4065991aeca0e29706ba457f678f63726ae2f31c.jpg",
-          "percent": 62.2,
+          "percent": 62.3,
           "ts": 1791806481
         },
         {
@@ -1516,7 +1516,7 @@
           "name": "Cannon Fodder",
           "desc": "Send 1.000 soldiers to their deaths.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/63bfcbad3edbc9d2e95ed913c589a7be72c1e6e8.jpg",
-          "percent": 62.9,
+          "percent": 63,
           "ts": 1791803223
         },
         {
@@ -1580,7 +1580,7 @@
           "name": "Daring",
           "desc": "Call 10 waves early.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/8ff8b78e23394e330d9749e73ddd21aca41e09a7.jpg",
-          "percent": 78.5,
+          "percent": 78.6,
           "ts": 1791714126
         },
         {
@@ -1803,7 +1803,7 @@
           "name": "Gungeon Acolyte",
           "desc": "Complete the Tutorial",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/311690/702142e5e40f298ae00141ede1fd1c807967a54d.jpg",
-          "percent": 84.4,
+          "percent": 84.3,
           "ts": 1742308018
         }
       ]
@@ -2147,7 +2147,7 @@
           "name": "这么熟练",
           "desc": "使用25张不同的创意工坊壁纸",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/431960/4f48b4262e14e6b25f09d7df1e00392b8c65d0f2.jpg",
-          "percent": 68.7,
+          "percent": 68.8,
           "ts": 1641914486
         },
         {
@@ -2187,7 +2187,7 @@
           "name": "阻挡去路的巨影",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/502500/70e61c557b4976ce0cc54051205d3cb865dd0f7d.jpg",
-          "percent": 63.8,
+          "percent": 63.9,
           "ts": 1765255504
         },
         {
@@ -2195,7 +2195,7 @@
           "name": "无情的\"飞鸟\"",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/502500/5f3370e39512a415febb5d892e3f01ff2b4ea763.jpg",
-          "percent": 70.3,
+          "percent": 70.4,
           "ts": 1765184312
         },
         {
@@ -2507,7 +2507,7 @@
           "name": "第八奇迹",
           "desc": "第一次到达灯塔！",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/5ff4a5f487f57aed679949f05c10372729b0b54a.jpg",
-          "percent": 14.8,
+          "percent": 14.7,
           "ts": 1743159703
         },
         {
@@ -2619,7 +2619,7 @@
           "name": "也没什么难的嘛，对不对？",
           "desc": "成功完成挑战区域。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/35b87d295d5d5557bc2082896c825660f3b46ede.jpg",
-          "percent": 48.1,
+          "percent": 48.2,
           "ts": 1742876881
         },
         {
@@ -2739,7 +2739,7 @@
           "name": "挫骨扬灰",
           "desc": "初次到达藏骨堂。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/467a17f28c8b630c619c8d4047104966e4d9bc63.jpg",
-          "percent": 52.3,
+          "percent": 52.4,
           "ts": 1742554704
         },
         {
@@ -2867,7 +2867,7 @@
           "name": "永存者",
           "desc": "获得其他所有成就。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/646570/e503b760dbcd72030f7a0fced686fadce853c4de.jpg",
-          "percent": 2.7,
+          "percent": 2.8,
           "ts": 1775385205
         },
         {
@@ -3059,7 +3059,7 @@
           "name": "岿然不动",
           "desc": "在战斗中拥有99点或以上格挡。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/646570/694e604130d436208873a3b7e6dee68ef31eef99.jpg",
-          "percent": 38.2,
+          "percent": 38.3,
           "ts": 1744896820
         },
         {
@@ -3091,7 +3091,7 @@
           "name": "来打我啊",
           "desc": "不出攻击牌赢得一场战斗。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/646570/950f9fbce0b382bd310b0820cce777426e8ea473.jpg",
-          "percent": 53.9,
+          "percent": 54,
           "ts": 1744612883
         },
         {
@@ -3115,7 +3115,7 @@
           "name": "强大",
           "desc": "在战斗中拥有10项或以上强化效果。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/646570/12b2e276618623ca16f3fb7dd4f2d1b2687641c7.jpg",
-          "percent": 32.7,
+          "percent": 32.8,
           "ts": 1744612883
         },
         {
@@ -3155,7 +3155,7 @@
           "name": "机械人偶",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/646570/05775d810fc3b0c51bd0b7b2f8c7e4de8a9895a3.jpg",
-          "percent": 65.7,
+          "percent": 65.8,
           "ts": 1744612883
         },
         {
@@ -3459,7 +3459,7 @@
           "name": "Р",
           "desc": "Р",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/196533d19d9a4536dcb277e4dde037e2d5921974.jpg",
-          "percent": 17.3,
+          "percent": 17.4,
           "ts": 1760104737
         },
         {
@@ -3547,7 +3547,7 @@
           "name": "Ш",
           "desc": "Ш",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/6c364c53da24c0c0835bdba760560430a12aa457.jpg",
-          "percent": 21.5,
+          "percent": 21.6,
           "ts": 1759482246
         },
         {
@@ -3587,7 +3587,7 @@
           "name": "У",
           "desc": "У",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/e8a9e370047f4c23e83815fcdc90f06610c7ac83.jpg",
-          "percent": 23.3,
+          "percent": 23.4,
           "ts": 1759404963
         },
         {
@@ -3619,7 +3619,7 @@
           "name": "9",
           "desc": "9",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/3df9d3f7a9968e9dedecf349931a54c93acc0f5e.jpg",
-          "percent": 25.8,
+          "percent": 25.9,
           "ts": 1759388606
         },
         {
@@ -4243,7 +4243,7 @@
           "name": "女巫交易",
           "desc": "吃掉苹果，领取女巫奖赏",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/769560/34598329275491bc911b48dc09468e69428d3d7f.jpg",
-          "percent": 46.5,
+          "percent": 46.4,
           "ts": 1727940197
         },
         {
@@ -4515,7 +4515,7 @@
           "name": "一条蛇的召唤",
           "desc": "我们都被光吸引。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/990630/16573b0df59d21d228a7d991c6b45ee24c002d24.jpg",
-          "percent": 27.6,
+          "percent": 27.5,
           "ts": 1775480917
         },
         {
@@ -4531,7 +4531,7 @@
           "name": "厨师的觉醒",
           "desc": "激起潜在的饥饿……",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/990630/903a284999ffb5b147e52587e73a68681ec35694.jpg",
-          "percent": 36,
+          "percent": 35.9,
           "ts": 1775371148
         },
         {
@@ -4555,7 +4555,7 @@
           "name": "烟与雾",
           "desc": "在盘旋的雾中，篝火变成了灰烬……",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/990630/43d272d17259e581e85738ed7dcb02c62b5b669f.jpg",
-          "percent": 35.3,
+          "percent": 35.2,
           "ts": 1775135656
         },
         {
@@ -4563,7 +4563,7 @@
           "name": "第一个篝火",
           "desc": "森林篝火闪烁着重生了……",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/990630/e2464725c2b85d58b995fe2840e387d8109feeda.jpg",
-          "percent": 46.5,
+          "percent": 46.4,
           "ts": 1774708352
         },
         {
@@ -4755,7 +4755,7 @@
           "name": "飞天科迪",
           "desc": "向星星发射。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1426210/602ee8c20ef1d17c7e4428a85b3cbcbc78843df4.jpg",
-          "percent": 43.4,
+          "percent": 43.3,
           "ts": 1755401245
         }
       ]
@@ -4827,7 +4827,7 @@
           "name": "天衣无缝",
           "desc": "完成任务“天衣无缝”。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1579380/6374fa841129beb0829ca45dc22875284abc72db.jpg",
-          "percent": 53.7,
+          "percent": 53.6,
           "ts": 1776154852
         },
         {
@@ -4835,7 +4835,7 @@
           "name": "百步穿杨",
           "desc": "使用琢磨的狙击枪杀死10名距离他25米以上的敌人。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1579380/49b1f57d6ed0a017250504733e4f2a4453008579.jpg",
-          "percent": 34.8,
+          "percent": 34.7,
           "ts": 1776058999
         },
         {
@@ -4955,7 +4955,7 @@
           "name": "一刀两命",
           "desc": "在一局游戏中三次使用无限的剑锋杀死2名守卫。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1579380/b993f357a8aa8dab52d6cf312ca4f4098eaaff96.jpg",
-          "percent": 60.4,
+          "percent": 60.3,
           "ts": 1775646348
         },
         {
@@ -4987,7 +4987,7 @@
           "name": "传说的开始",
           "desc": "第一次抓到了帕鲁",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1623730/6832ae260dca45c56b64f9144bddb7ecb961e607.jpg",
-          "percent": 92.4,
+          "percent": 92.5,
           "ts": 1774880480
         },
         {
@@ -4995,7 +4995,7 @@
           "name": "帕鲁工作研究实习生",
           "desc": "完成10种帕鲁工作研究",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1623730/2c4f240cfc43182301fbfdb8e55da274f9d70ac1.jpg",
-          "percent": 23.2,
+          "percent": 23.3,
           "ts": 1774879850
         }
       ]
@@ -5163,7 +5163,7 @@
           "name": "厨师 - 深渊",
           "desc": "使用厨师在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/382f3971424f19d7de1b413be057c6de1847fc55.jpg",
-          "percent": 17.1,
+          "percent": 13.4,
           "ts": 1776685255
         },
         {
@@ -5171,7 +5171,7 @@
           "name": "水手 - 深渊",
           "desc": "使用水手在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/f937518bf13d5c03c2d0f6ed12966c7a8dd274f3.jpg",
-          "percent": 23.2,
+          "percent": 18.3,
           "ts": 1776669314
         },
         {
@@ -5179,7 +5179,7 @@
           "name": "多面手 - 深渊",
           "desc": "使用多面手在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/9ab485785e99a9629440da2e39c7b75b98401ee1.jpg",
-          "percent": 21.9,
+          "percent": 17.2,
           "ts": 1776667539
         },
         {
@@ -5187,7 +5187,7 @@
           "name": "异变体 - 深渊",
           "desc": "使用异变体在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/98d7a41e5b9dba43606a57b4972f687f28be6c46.jpg",
-          "percent": 22.3,
+          "percent": 17.6,
           "ts": 1776660408
         },
         {
@@ -5195,7 +5195,7 @@
           "name": "食人魔 - 深渊",
           "desc": "使用食人魔在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/f01f741f2c4c8bb45218320e791bb4ba8c41daba.jpg",
-          "percent": 19.7,
+          "percent": 15.5,
           "ts": 1776596701
         },
         {
@@ -5203,7 +5203,7 @@
           "name": "工程师 - 深渊",
           "desc": "使用工程师在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/54c2281c619f3e1c4c31301184e91ed26351c45a.jpg",
-          "percent": 24.1,
+          "percent": 19,
           "ts": 1776576541
         },
         {
@@ -5211,7 +5211,7 @@
           "name": "学徒 - 深渊",
           "desc": "使用学徒在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/df8f65b24e4e89457e0dadb005a2a3f413deb6f4.jpg",
-          "percent": 17.2,
+          "percent": 13.6,
           "ts": 1776511058
         },
         {
@@ -5219,7 +5219,7 @@
           "name": "巫妖 - 深渊",
           "desc": "使用巫妖在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/eeb92984c974475cc5fa18568c4d9f344ac5a8bf.jpg",
-          "percent": 20.3,
+          "percent": 16,
           "ts": 1776488700
         },
         {
@@ -5227,7 +5227,7 @@
           "name": "渔夫 - 深渊",
           "desc": "使用渔夫在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/3139e7aed08fbac222c2e5384d4aa5187b7e9e6c.jpg",
-          "percent": 16.5,
+          "percent": 13,
           "ts": 1776428663
         },
         {
@@ -5235,7 +5235,7 @@
           "name": "好奇之人 - 深渊",
           "desc": "使用好奇之人在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/4b4c4c97436fb7f958b11aed78d7733df2014337.jpg",
-          "percent": 18.1,
+          "percent": 14.2,
           "ts": 1776393002
         },
         {
@@ -5243,7 +5243,7 @@
           "name": "幽灵 - 深渊",
           "desc": "使用幽灵在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/62aaef5f976abe94e1de22adee7e05aab88c8aef.jpg",
-          "percent": 21.6,
+          "percent": 17,
           "ts": 1776329925
         },
         {
@@ -5251,7 +5251,7 @@
           "name": "和平主义者 - 深渊",
           "desc": "使用和平主义者在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/87486cc426d30c0a77530873ef28542bc75fe970.jpg",
-          "percent": 18.4,
+          "percent": 14.5,
           "ts": 1776322207
         },
         {
@@ -5259,7 +5259,7 @@
           "name": "企业家 - 深渊",
           "desc": "使用企业家在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/d98b138abbd426af01ec97ce6212817a55bcd724.jpg",
-          "percent": 18.7,
+          "percent": 14.8,
           "ts": 1776255849
         },
         {
@@ -5267,7 +5267,7 @@
           "name": "魔像 - 深渊",
           "desc": "使用魔像在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/12d08dc89bdb7ae3f4166eb1c62086658a5352c9.jpg",
-          "percent": 18.4,
+          "percent": 14.5,
           "ts": 1776168130
         },
         {
@@ -5275,7 +5275,7 @@
           "name": "独臂 - 深渊",
           "desc": "使用独臂在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/23d9fb12eeaef1f9179dd6fe0783255126d47755.jpg",
-          "percent": 19.7,
+          "percent": 15.5,
           "ts": 1776140607
         },
         {
@@ -5283,7 +5283,7 @@
           "name": "暴食 - 深渊",
           "desc": "使用暴食在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/dae19053ec92e22a380cf3244f38707b7fe8766c.jpg",
-          "percent": 17.6,
+          "percent": 13.8,
           "ts": 1776076360
         },
         {
@@ -5291,7 +5291,7 @@
           "name": "恶魔 - 深渊",
           "desc": "使用恶魔在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/9afae46a8ad3fe2f2edce059a7bf6e21a6a21051.jpg",
-          "percent": 22.1,
+          "percent": 17.4,
           "ts": 1776052614
         },
         {
@@ -5299,7 +5299,7 @@
           "name": "杰克 - 深渊",
           "desc": "使用杰克在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/2a0b28b8c4f0bb04fe532413608598175e1d5e5e.jpg",
-          "percent": 17.9,
+          "percent": 14.1,
           "ts": 1775987679
         },
         {
@@ -5307,7 +5307,7 @@
           "name": "神秘生物 - 深渊",
           "desc": "使用神秘生物在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/074e10ee709de1f2e38dd3706599f3daa65b46cc.jpg",
-          "percent": 15.7,
+          "percent": 12.4,
           "ts": 1775915603
         },
         {
@@ -5315,7 +5315,7 @@
           "name": "士兵 - 深渊",
           "desc": "使用士兵在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/58c5cfab85da299277842f7c0333d3bf1b2b47f7.jpg",
-          "percent": 20.1,
+          "percent": 15.9,
           "ts": 1775888307
         },
         {
@@ -5323,7 +5323,7 @@
           "name": "博学家 - 深渊",
           "desc": "使用博学家在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/b035fc719becdf4c296b87f5d307ef028264b129.jpg",
-          "percent": 18,
+          "percent": 14.1,
           "ts": 1775747102
         },
         {
@@ -5331,7 +5331,7 @@
           "name": "幸运星 - 深渊",
           "desc": "使用幸运星在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/280fa4e73cb24b5bd970c4b699ddd3bd80e3cd57.jpg",
-          "percent": 25.5,
+          "percent": 20.1,
           "ts": 1775636730
         },
         {
@@ -5339,7 +5339,7 @@
           "name": "农夫 - 深渊",
           "desc": "使用农夫在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/067360002645b72e8a00b3485516c04b87918dd0.jpg",
-          "percent": 19.6,
+          "percent": 15.4,
           "ts": 1775558908
         },
         {
@@ -5347,7 +5347,7 @@
           "name": "猎人 - 深渊",
           "desc": "使用猎人在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/14c934ff00884d42f4aa0dbe254d3fbf4606a3ee.jpg",
-          "percent": 20.5,
+          "percent": 16.1,
           "ts": 1775553490
         },
         {
@@ -5355,7 +5355,7 @@
           "name": "飞毛腿 - 深渊",
           "desc": "使用飞毛腿在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/18caec5a796b67eef6e7aca9b0c4e58bc215d85b.jpg",
-          "percent": 18,
+          "percent": 14.2,
           "ts": 1775473989
         },
         {
@@ -5363,7 +5363,7 @@
           "name": "网络主播 - 深渊",
           "desc": "使用网络主播在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/20832d9ad3449378f071c2666f4e3898c1484b39.jpg",
-          "percent": 18.4,
+          "percent": 14.5,
           "ts": 1775449240
         },
         {
@@ -5371,7 +5371,7 @@
           "name": "海盗 - 深渊",
           "desc": "使用海盗在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/6044e36df998f1b81d8ee6e685ca87d94a02ef9b.jpg",
-          "percent": 20.6,
+          "percent": 16.3,
           "ts": 1775396222
         },
         {
@@ -5379,7 +5379,7 @@
           "name": "流浪汉 - 深渊",
           "desc": "使用流浪汉在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/99e2a750de7f27ac547f8ee655a580706ce06207.jpg",
-          "percent": 16.3,
+          "percent": 12.8,
           "ts": 1775385063
         },
         {
@@ -5387,7 +5387,7 @@
           "name": "建造者 - 深渊",
           "desc": "使用建造者在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/0b5afa36b7e94c8480db095c3b9802a36088aa8d.jpg",
-          "percent": 22.2,
+          "percent": 17.5,
           "ts": 1775380546
         },
         {
@@ -5395,7 +5395,7 @@
           "name": "叛徒 - 深渊",
           "desc": "使用叛徒在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/51426851152396cb663af0cb7e6bc41f875aff6a.jpg",
-          "percent": 19,
+          "percent": 15,
           "ts": 1775361494
         },
         {
@@ -5403,7 +5403,7 @@
           "name": "军火商 - 深渊",
           "desc": "使用军火商在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/335808ad75387c7598f208352ee7c67aa612f9b8.jpg",
-          "percent": 15.1,
+          "percent": 11.9,
           "ts": 1775311402
         },
         {
@@ -5411,7 +5411,7 @@
           "name": "国王 - 深渊",
           "desc": "使用国王在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/2c3916df1be34267ceca7584d71434402bf23106.jpg",
-          "percent": 22.1,
+          "percent": 17.5,
           "ts": 1775279048
         },
         {
@@ -5419,7 +5419,7 @@
           "name": "宝宝 - 深渊",
           "desc": "使用宝宝在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/1f6c8250c4c26fe2658de832b685e363e0c2aaf3.jpg",
-          "percent": 21.7,
+          "percent": 17.1,
           "ts": 1775222508
         },
         {
@@ -5427,7 +5427,7 @@
           "name": "生物 - 深渊",
           "desc": "使用生物在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/a25d05b2c4c64e78b0f7bd0e34391970ec640c2e.jpg",
-          "percent": 28.2,
+          "percent": 22.2,
           "ts": 1775207735
         },
         {
@@ -5435,7 +5435,7 @@
           "name": "吸血鬼 - 深渊",
           "desc": "使用吸血鬼在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/a90d21595ab74e7323cc38fbb108a56db664d4d6.jpg",
-          "percent": 17.2,
+          "percent": 13.5,
           "ts": 1775191497
         },
         {
@@ -5443,7 +5443,7 @@
           "name": "受虐狂 - 深渊",
           "desc": "使用受虐狂在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/e7499ff90dde5bb1d888adb8b2ad29252021c3f0.jpg",
-          "percent": 19,
+          "percent": 14.9,
           "ts": 1775134837
         },
         {
@@ -5451,7 +5451,7 @@
           "name": "赛博格 - 深渊",
           "desc": "使用赛博格在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/127468169daef0af02a6f3494a273b113c0c89ca.jpg",
-          "percent": 18.8,
+          "percent": 14.8,
           "ts": 1775116768
         },
         {
@@ -5459,7 +5459,7 @@
           "name": "角斗士 - 深渊",
           "desc": "使用角斗士在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/0317f27c4a4010a2d13b7eb4b42a69e1b9d96299.jpg",
-          "percent": 17,
+          "percent": 13.4,
           "ts": 1775018759
         },
         {
@@ -5467,7 +5467,7 @@
           "name": "野人 - 深渊",
           "desc": "使用野人在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/c5685b8f5f174b590bcb021d5dce3ac50a87c82f.jpg",
-          "percent": 17.2,
+          "percent": 13.5,
           "ts": 1774954154
         },
         {
@@ -5475,7 +5475,7 @@
           "name": "节俭者 - 深渊",
           "desc": "使用节俭者在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/c2761c358d09cd07400940262d626a2f422fed4d.jpg",
-          "percent": 17.6,
+          "percent": 13.8,
           "ts": 1774929452
         },
         {
@@ -5483,7 +5483,7 @@
           "name": "船长 - 深渊",
           "desc": "使用船长在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/f0d0578d03203005fe51880de5e54e2fe32a9132.jpg",
-          "percent": 17.3,
+          "percent": 13.6,
           "ts": 1774843080
         },
         {
@@ -5491,7 +5491,7 @@
           "name": "科技法师 - 深渊",
           "desc": "使用科技法师在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/861a6c0d792d36f7c5c5504593af623ece9e034c.jpg",
-          "percent": 20.6,
+          "percent": 16.2,
           "ts": 1774763685
         },
         {
@@ -5499,7 +5499,7 @@
           "name": "病人 - 深渊",
           "desc": "使用病人在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/c151c6dfea42b7c49c11555c4d0e9a8d170124e0.jpg",
-          "percent": 17.1,
+          "percent": 13.4,
           "ts": 1774758267
         },
         {
@@ -5507,7 +5507,7 @@
           "name": "探险家 - 深渊",
           "desc": "使用探险家在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/8cdb7c72e7c1ab60bf3401854b3063173de9f8ab.jpg",
-          "percent": 18.9,
+          "percent": 14.9,
           "ts": 1774696238
         },
         {
@@ -5515,7 +5515,7 @@
           "name": "技工 - 深渊",
           "desc": "使用技工在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/0c86ae6ca6712f3b2ef0371b7772e8f9c25d196b.jpg",
-          "percent": 18.6,
+          "percent": 14.6,
           "ts": 1774671746
         },
         {
@@ -5523,7 +5523,7 @@
           "name": "老叟 - 深渊",
           "desc": "使用老叟在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/e5eda9de9306604bcff639c5e884c90f9fe52a7a.jpg",
-          "percent": 19.4,
+          "percent": 15.3,
           "ts": 1774597864
         },
         {
@@ -5531,7 +5531,7 @@
           "name": "公牛 - 深渊",
           "desc": "使用公牛在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/757fc8f0b4c157d08d38e11615c65f57005d7fb3.jpg",
-          "percent": 25.2,
+          "percent": 19.9,
           "ts": 1774586660
         },
         {
@@ -5539,7 +5539,7 @@
           "name": "浪漫之人 - 深渊",
           "desc": "使用浪漫之人在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/fe7526e4a7d9ce9621b327bda05c16a50f54994a.jpg",
-          "percent": 15.7,
+          "percent": 12.4,
           "ts": 1774497825
         },
         {
@@ -5547,7 +5547,7 @@
           "name": "骑士 - 深渊",
           "desc": "使用骑士在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/912d247d5454177b8325f9ab7728026616be8e1a.jpg",
-          "percent": 20.4,
+          "percent": 16.1,
           "ts": 1774436671
         },
         {
@@ -5555,7 +5555,7 @@
           "name": "大嗓门 - 深渊",
           "desc": "使用大嗓门在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/f9f990cabfe046b7ccd3639d6e058b4b615c653e.jpg",
-          "percent": 23.7,
+          "percent": 18.7,
           "ts": 1774324279
         },
         {
@@ -5563,7 +5563,7 @@
           "name": "医生 - 深渊",
           "desc": "使用医生在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/4c6e870221b8cbef58d16ea19692dc8e4481f129.jpg",
-          "percent": 21.1,
+          "percent": 16.6,
           "ts": 1774259837
         },
         {
@@ -5571,7 +5571,7 @@
           "name": "大壮 - 深渊",
           "desc": "使用大壮在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/36a129883baac159f7fb3fe255898dc1ca90dbce.jpg",
-          "percent": 20.1,
+          "percent": 15.8,
           "ts": 1774239205
         },
         {
@@ -5579,7 +5579,7 @@
           "name": "法师 - 深渊",
           "desc": "使用法师在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/7c137f698df724b83640368cd9b073782f1ba2ac.jpg",
-          "percent": 25.6,
+          "percent": 20.2,
           "ts": 1774175385
         },
         {
@@ -5587,7 +5587,7 @@
           "name": "游侠 - 深渊",
           "desc": "使用游侠在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/7868803e77b2aa456ff4ca07029fd2e071e81077.jpg",
-          "percent": 25.2,
+          "percent": 19.9,
           "ts": 1774153398
         },
         {
@@ -5595,7 +5595,7 @@
           "name": "驯兽师",
           "desc": "使用驯兽师赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/b9ab40c4cc8fe1db74d1bedb9b6db10dc9988828.jpg",
-          "percent": 6.3,
+          "percent": 6.4,
           "ts": 1774075275
         },
         {
@@ -5603,7 +5603,7 @@
           "name": "浪漫之人 - 碰撞区域",
           "desc": "使用浪漫之人在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/82eff09ea36640623c5d69d08d24c06a37378cc2.jpg",
-          "percent": 20.1,
+          "percent": 15.9,
           "ts": 1774073321
         },
         {
@@ -5611,7 +5611,7 @@
           "name": "潜水员 - 深渊",
           "desc": "使用潜水员在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/bf0f4414371101130ad536d26c0f540a10ea3871.jpg",
-          "percent": 19.3,
+          "percent": 15.2,
           "ts": 1774002778
         },
         {
@@ -5619,7 +5619,7 @@
           "name": "徒步旅行者 - 深渊",
           "desc": "使用徒步旅行者在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/ce7e3d2daa040430c77ec85794af0a7c63f4b2b4.jpg",
-          "percent": 18.9,
+          "percent": 14.9,
           "ts": 1773900713
         },
         {
@@ -5627,7 +5627,7 @@
           "name": "匪徒 - 深渊",
           "desc": "使用匪徒在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/adbadebe122475fba253b14b845c371041b48549.jpg",
-          "percent": 17.5,
+          "percent": 13.8,
           "ts": 1773899082
         },
         {
@@ -5635,7 +5635,7 @@
           "name": "狂人 - 深渊",
           "desc": "使用狂人在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/bdb94853fe1cd68554fbfa593e385b72504b6d56.jpg",
-          "percent": 22.1,
+          "percent": 17.4,
           "ts": 1773738237
         },
         {
@@ -5643,7 +5643,7 @@
           "name": "全能者 - 深渊",
           "desc": "使用全能者在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/348e7713e009ec5163736ee28119fcea502350e8.jpg",
-          "percent": 25.2,
+          "percent": 19.9,
           "ts": 1773721113
         },
         {
@@ -5651,7 +5651,7 @@
           "name": "食人魔 - 碰撞区域",
           "desc": "使用食人魔在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/9d7caaac179eae1d420ac621d0a5c12885e7f09c.jpg",
-          "percent": 24,
+          "percent": 19,
           "ts": 1773554301
         },
         {
@@ -5659,7 +5659,7 @@
           "name": "海盗 - 碰撞区域",
           "desc": "使用海盗在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/4d65b6a2d3cc24d9af0cd6471b3ef442e70f27e6.jpg",
-          "percent": 25.3,
+          "percent": 20,
           "ts": 1773549416
         },
         {
@@ -5667,7 +5667,7 @@
           "name": "徒步旅行者 - 碰撞区域",
           "desc": "使用徒步旅行者在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/31623561e2fcd6078fb5e449365043f02d9f2931.jpg",
-          "percent": 21.9,
+          "percent": 17.3,
           "ts": 1773490441
         },
         {
@@ -5675,7 +5675,7 @@
           "name": "潜水员 - 碰撞区域",
           "desc": "使用潜水员在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/ffbdcbfb46e1a04ef762bf22410d442baf807862.jpg",
-          "percent": 22.5,
+          "percent": 17.8,
           "ts": 1773476885
         },
         {
@@ -5683,7 +5683,7 @@
           "name": "匪徒 - 碰撞区域",
           "desc": "使用匪徒在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/20c399c9377fa1cc1126821a9a113f25a9ca30c7.jpg",
-          "percent": 21.4,
+          "percent": 16.9,
           "ts": 1773466031
         },
         {
@@ -5691,7 +5691,7 @@
           "name": "矮人 - 深渊",
           "desc": "使用矮人在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/c9c58f55df7f9bf67e0736ac5e694ff435cecaa0.jpg",
-          "percent": 15.7,
+          "percent": 12.4,
           "ts": 1773301863
         },
         {
@@ -5699,7 +5699,7 @@
           "name": "矮人 - 碰撞区域",
           "desc": "使用矮人在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/49d28589d3906103e6f9f7704a302c851ed641ae.jpg",
-          "percent": 20.5,
+          "percent": 16.2,
           "ts": 1773289196
         },
         {
@@ -5707,7 +5707,7 @@
           "name": "德鲁伊 - 深渊",
           "desc": "使用德鲁伊在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/f2a5a9fc91b8a0ed6a4919994e2685bc0f7caad1.jpg",
-          "percent": 20.4,
+          "percent": 16,
           "ts": 1773216498
         },
         {
@@ -5715,7 +5715,7 @@
           "name": "德鲁伊 - 碰撞区域",
           "desc": "使用德鲁伊在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/e550ec7db1b7d2bea7637cdc531942308b21c3d2.jpg",
-          "percent": 24.1,
+          "percent": 19.1,
           "ts": 1773150479
         },
         {
@@ -5723,7 +5723,7 @@
           "name": "厨师 - 碰撞区域",
           "desc": "使用厨师在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/d060c106f5cd81e96af3bc4e1cea7c2b6359427f.jpg",
-          "percent": 21,
+          "percent": 16.6,
           "ts": 1769873645
         },
         {
@@ -5731,7 +5731,7 @@
           "name": "生物 - 碰撞区域",
           "desc": "使用生物在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/7021ae1d9acd60427e6841a2261689c6a50477e5.jpg",
-          "percent": 33.8,
+          "percent": 26.7,
           "ts": 1769785389
         },
         {
@@ -5739,7 +5739,7 @@
           "name": "船长 - 碰撞区域",
           "desc": "使用船长在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/c4b20ba81b8c45b869af57f2d7c4c64f089c89f9.jpg",
-          "percent": 21.7,
+          "percent": 17.1,
           "ts": 1769676413
         },
         {
@@ -5747,7 +5747,7 @@
           "name": "建造者 - 碰撞区域",
           "desc": "使用建造者在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/db736589042f209b43bed9f436c6d5c34071f568.jpg",
-          "percent": 30.2,
+          "percent": 23.9,
           "ts": 1769600884
         },
         {
@@ -5755,7 +5755,7 @@
           "name": "好奇之人 - 碰撞区域",
           "desc": "使用好奇之人在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/e9a44ee4716194ff7299bad456739e1c86bd1caa.jpg",
-          "percent": 23.3,
+          "percent": 18.4,
           "ts": 1769599188
         },
         {
@@ -5763,7 +5763,7 @@
           "name": "水手 - 碰撞区域",
           "desc": "使用水手在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/8471337fb970be03ef0fff4e81e2882c569808e3.jpg",
-          "percent": 28.8,
+          "percent": 22.8,
           "ts": 1769491153
         },
         {
@@ -5803,7 +5803,7 @@
           "name": "神秘生物 - 碰撞区域",
           "desc": "使用神秘生物在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/53d03b27f461e2835182316c87ef50a695e3da88.jpg",
-          "percent": 11,
+          "percent": 10.9,
           "ts": 1769139469
         },
         {
@@ -5811,7 +5811,7 @@
           "name": "军火商 - 碰撞区域",
           "desc": "使用军火商在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/00548dd46e6a5f7f70dd002de23f2a433aebef0d.jpg",
-          "percent": 11.9,
+          "percent": 11.8,
           "ts": 1769082461
         },
         {
@@ -5819,7 +5819,7 @@
           "name": "森林",
           "desc": "以不少于10棵存活的树木完成一次敌袭",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/39a5fb94672f65990e4e0118dcc9b1be03612085.jpg",
-          "percent": 19.7,
+          "percent": 19.6,
           "ts": 1769060677
         },
         {
@@ -5827,7 +5827,7 @@
           "name": "回收",
           "desc": "在比赛期间回收12把武器",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/9792e957f4c175b01253718d4d610613c3869a39.jpg",
-          "percent": 28.6,
+          "percent": 28.4,
           "ts": 1769060454
         },
         {
@@ -5835,7 +5835,7 @@
           "name": "恶魔 - 碰撞区域",
           "desc": "使用恶魔在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/c1869cfdf506347f02058e5b59e286a59e2e1422.jpg",
-          "percent": 17.3,
+          "percent": 17.1,
           "ts": 1769058603
         },
         {
@@ -5843,7 +5843,7 @@
           "name": "骑士 - 碰撞区域",
           "desc": "使用骑士在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/4b7097cb9dbd947e23136fed6b558af3dcbbbe7b.jpg",
-          "percent": 19.9,
+          "percent": 19.7,
           "ts": 1769055928
         },
         {
@@ -5851,7 +5851,7 @@
           "name": "士兵 - 碰撞区域",
           "desc": "使用士兵在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/d3d2c1416b9dde571c31372a234f9dda287fb472.jpg",
-          "percent": 21.8,
+          "percent": 21.7,
           "ts": 1768988872
         },
         {
@@ -5859,7 +5859,7 @@
           "name": "公牛 - 碰撞区域",
           "desc": "使用公牛在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/ae021d7ac176c173db7f69c23e3ca58be1c6269c.jpg",
-          "percent": 29.6,
+          "percent": 29.4,
           "ts": 1768911693
         },
         {
@@ -5867,7 +5867,7 @@
           "name": "独臂 - 碰撞区域",
           "desc": "使用独臂在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/8321b46efb8b74a832190f39f8d628253b86cefd.jpg",
-          "percent": 22.1,
+          "percent": 21.9,
           "ts": 1768819778
         },
         {
@@ -5875,7 +5875,7 @@
           "name": "叛徒 - 碰撞区域",
           "desc": "使用叛徒在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/8a7262160df8a7d72235febd7b232798314312d2.jpg",
-          "percent": 16.2,
+          "percent": 16.1,
           "ts": 1768796456
         },
         {
@@ -5883,7 +5883,7 @@
           "name": "国王 - 碰撞区域",
           "desc": "使用国王在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/2372760e6e3b633da4111876330ae14f2db80b6a.jpg",
-          "percent": 23.3,
+          "percent": 23.2,
           "ts": 1768734839
         },
         {
@@ -5891,7 +5891,7 @@
           "name": "魔像 - 碰撞区域",
           "desc": "使用魔像在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/5699dfca592afb6f8f4a04f1d0c63bea74cca9df.jpg",
-          "percent": 14.2,
+          "percent": 14.1,
           "ts": 1768710526
         },
         {
@@ -5899,7 +5899,7 @@
           "name": "受虐狂 - 碰撞区域",
           "desc": "使用受虐狂在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/8e98a965ff13fc0f6815adff505de06ff78407a8.jpg",
-          "percent": 19.3,
+          "percent": 19.1,
           "ts": 1768653637
         },
         {
@@ -5907,7 +5907,7 @@
           "name": "渔夫 - 碰撞区域",
           "desc": "使用渔夫在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/20fb9e5db8738aed05bc7a4393f537ab255a8926.jpg",
-          "percent": 13,
+          "percent": 12.9,
           "ts": 1768560105
         },
         {
@@ -5915,7 +5915,7 @@
           "name": "巫妖 - 碰撞区域",
           "desc": "使用巫妖在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/97c1b8aec66937de49642b67a846ce5181f47b58.jpg",
-          "percent": 20.7,
+          "percent": 20.6,
           "ts": 1768466554
         },
         {
@@ -5923,7 +5923,7 @@
           "name": "杰克 - 碰撞区域",
           "desc": "使用杰克在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/d85d051322c2803a00423e8827baca23fae341ab.jpg",
-          "percent": 13,
+          "percent": 12.9,
           "ts": 1768278888
         },
         {
@@ -5931,7 +5931,7 @@
           "name": "工程师 - 碰撞区域",
           "desc": "使用工程师在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/f3ab4a3062e904f288dccdcc989724f42f9b3883.jpg",
-          "percent": 32.8,
+          "percent": 32.5,
           "ts": 1768209795
         },
         {
@@ -5939,7 +5939,7 @@
           "name": "暴食 - 碰撞区域",
           "desc": "使用暴食在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/9f06ca5de2afa7c121bcb9a264bdeeee7a136c0f.jpg",
-          "percent": 15.5,
+          "percent": 15.4,
           "ts": 1768143500
         },
         {
@@ -5947,7 +5947,7 @@
           "name": "赛博格 - 碰撞区域",
           "desc": "使用赛博格在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/d7b31cd675c843a865fca1f5206d87a579b7360d.jpg",
-          "percent": 20.6,
+          "percent": 20.5,
           "ts": 1768122848
         },
         {
@@ -5955,7 +5955,7 @@
           "name": "网络主播 - 碰撞区域",
           "desc": "使用网络主播在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/d1732e9a08b44f37dc033c57dcca33e735447d2b.jpg",
-          "percent": 14.2,
+          "percent": 14,
           "ts": 1768031273
         },
         {
@@ -5963,7 +5963,7 @@
           "name": "工业化",
           "desc": "同时在地图上拥有5炮塔",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/036c7cb80c10d0e0662f60a9673dd14c481e8dd1.jpg",
-          "percent": 66.1,
+          "percent": 65.9,
           "ts": 1768027733
         },
         {
@@ -5971,7 +5971,7 @@
           "name": "技工 - 碰撞区域",
           "desc": "使用技工在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/e5f20b5c0bec67bbd20621a9187e541f2b8a5b37.jpg",
-          "percent": 17.8,
+          "percent": 17.7,
           "ts": 1767947511
         },
         {
@@ -5979,7 +5979,7 @@
           "name": "企业家 - 碰撞区域",
           "desc": "使用企业家在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/91e9bbf60b63180f3002dbfbb684d68b6c9ef7f4.jpg",
-          "percent": 15.5,
+          "percent": 15.3,
           "ts": 1767876921
         },
         {
@@ -5987,7 +5987,7 @@
           "name": "医生 - 碰撞区域",
           "desc": "使用医生在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/c8830ba89c87777f4a3d807e6cbb72fda91da34b.jpg",
-          "percent": 23.9,
+          "percent": 23.7,
           "ts": 1767778078
         },
         {
@@ -5995,7 +5995,7 @@
           "name": "异变体 - 碰撞区域",
           "desc": "使用异变体在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/3bbe01b7a73cb0dd7596d7e6e2ceb656fdb98c47.jpg",
-          "percent": 24.4,
+          "percent": 24.2,
           "ts": 1767605541
         },
         {
@@ -6011,7 +6011,7 @@
           "name": "飞毛腿 - 碰撞区域",
           "desc": "使用飞毛腿在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/0f08b7f1e52bc67976967dad807aa1b5a39b001e.jpg",
-          "percent": 16.5,
+          "percent": 16.3,
           "ts": 1767534484
         },
         {
@@ -6019,7 +6019,7 @@
           "name": "农夫 - 碰撞区域",
           "desc": "使用农夫在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/8922449e756e173b87f00b5e96ad7fb3113a672c.jpg",
-          "percent": 16.8,
+          "percent": 16.7,
           "ts": 1767516824
         },
         {
@@ -6027,7 +6027,7 @@
           "name": "幽灵 - 碰撞区域",
           "desc": "使用幽灵在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/c2f38ae68b35fd9e74da69ed44aaf62155c5bb91.jpg",
-          "percent": 26.5,
+          "percent": 26.3,
           "ts": 1767258884
         },
         {
@@ -6035,7 +6035,7 @@
           "name": "病人 - 碰撞区域",
           "desc": "使用病人在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/f79bc108428d6a80ab929fc7dc36a6c31969113b.jpg",
-          "percent": 16.2,
+          "percent": 16.1,
           "ts": 1767256518
         },
         {
@@ -6043,7 +6043,7 @@
           "name": "节俭者 - 碰撞区域",
           "desc": "使用节俭者在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/040a52e395b8fee12e33e3134cfda6aa0a063adb.jpg",
-          "percent": 17.9,
+          "percent": 17.8,
           "ts": 1767176797
         },
         {
@@ -6051,7 +6051,7 @@
           "name": "囤积者",
           "desc": "持有3000材料",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/88df9ce2be65c04bd4fb8b0df103f921e03e7429.jpg",
-          "percent": 36.5,
+          "percent": 36.3,
           "ts": 1767156273
         },
         {
@@ -6059,7 +6059,7 @@
           "name": "学徒 - 碰撞区域",
           "desc": "使用学徒在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/592c89eda683293359346d9bc5d1a1af66944001.jpg",
-          "percent": 15.5,
+          "percent": 15.3,
           "ts": 1766995813
         },
         {
@@ -6067,7 +6067,7 @@
           "name": "和平主义者 - 碰撞区域",
           "desc": "使用和平主义者在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/af7292d5d270767c43eb422f9c5d9edd5e75e28e.jpg",
-          "percent": 21.1,
+          "percent": 20.9,
           "ts": 1766902275
         },
         {
@@ -6075,7 +6075,7 @@
           "name": "不可阻挡之力",
           "desc": "使用近战攻击击中至少25个敌人",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/b1e6b688acba2c931beee99290078173d848f0e5.jpg",
-          "percent": 61.9,
+          "percent": 49.1,
           "ts": 1766901925
         },
         {
@@ -6083,7 +6083,7 @@
           "name": "野人 - 碰撞区域",
           "desc": "使用野人在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/2bc52ed4f99255f29d57072d4db11712dacbe548.jpg",
-          "percent": 18.5,
+          "percent": 18.3,
           "ts": 1766825894
         },
         {
@@ -6091,7 +6091,7 @@
           "name": "角斗士 - 碰撞区域",
           "desc": "使用角斗士在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/d57befbadaa84a7f0f6e0e4b283a368a21eb2a32.jpg",
-          "percent": 17.8,
+          "percent": 17.7,
           "ts": 1766761052
         },
         {
@@ -6099,7 +6099,7 @@
           "name": "实验",
           "desc": "同时拥有6个不同的武器",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/a897188f49e06e54ca4aeb234602513a9153a2f0.jpg",
-          "percent": 46.1,
+          "percent": 46.5,
           "ts": 1766760443
         },
         {
@@ -6107,7 +6107,7 @@
           "name": "探险家 - 碰撞区域",
           "desc": "使用探险家在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/51bea9355a83efc6b25b2648c74dffbaa7a599b2.jpg",
-          "percent": 18.7,
+          "percent": 18.5,
           "ts": 1766649640
         },
         {
@@ -6115,7 +6115,7 @@
           "name": "未被腐蚀",
           "desc": "以0诅咒完成一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/e39751bab7def49ed79282a17a54d7f2291b6b7a.jpg",
-          "percent": 51.2,
+          "percent": 41,
           "ts": 1766649640
         },
         {
@@ -6123,7 +6123,7 @@
           "name": "大嗓门 - 碰撞区域",
           "desc": "使用大嗓门在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/3d7776136898b8087e30d804b6dbb51c332e6db5.jpg",
-          "percent": 26.1,
+          "percent": 25.9,
           "ts": 1766557029
         },
         {
@@ -6131,7 +6131,7 @@
           "name": "博学家 - 碰撞区域",
           "desc": "使用博学家在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/2495a1b0364938317a787ee83cba029d73a7e7aa.jpg",
-          "percent": 19.3,
+          "percent": 19.2,
           "ts": 1766543469
         },
         {
@@ -6139,7 +6139,7 @@
           "name": "猎人 - 碰撞区域",
           "desc": "使用猎人在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/31075098375cf2c16dc610ebe47ba239a1ca52be.jpg",
-          "percent": 17.3,
+          "percent": 17.1,
           "ts": 1766493204
         },
         {
@@ -6147,7 +6147,7 @@
           "name": "幸运星 - 碰撞区域",
           "desc": "使用幸运星在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/13a43028492a46988c77891f34bee39e85382bb6.jpg",
-          "percent": 27.3,
+          "percent": 27.1,
           "ts": 1766457000
         },
         {
@@ -6155,7 +6155,7 @@
           "name": "草药师",
           "desc": "到第20波袭击结束时收集250个消耗品",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/f2a182cab2f75225386f8b03a2f7a7aca40d9fd2.jpg",
-          "percent": 74.3,
+          "percent": 59.7,
           "ts": 1766415006
         },
         {
@@ -6163,7 +6163,7 @@
           "name": "大壮 - 碰撞区域",
           "desc": "使用大壮在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/c9800266d2ede1023085894b8fe5060b5878ef7e.jpg",
-          "percent": 21.5,
+          "percent": 21.3,
           "ts": 1766409275
         },
         {
@@ -6171,7 +6171,7 @@
           "name": "烧烤活动",
           "desc": "同时让至少25个敌人处于燃烧状态",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/90b1f525f31f59aefca6d7adfa36781fd9d82099.jpg",
-          "percent": 19.4,
+          "percent": 65.3,
           "ts": 1766371336
         },
         {
@@ -6179,7 +6179,7 @@
           "name": "谨慎",
           "desc": "击杀距离你超过700范围的1000个敌人",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/16df32f14160c50de41802664cc65a595c479a55.jpg",
-          "percent": 95.3,
+          "percent": 76.2,
           "ts": 1766371336
         },
         {
@@ -6187,7 +6187,7 @@
           "name": "鲁莽",
           "desc": "以1生命值完成一次敌袭",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/cb52cef4a070741b4e9659a6aba8aae753773b99.jpg",
-          "percent": 40.3,
+          "percent": 40.1,
           "ts": 1766203487
         },
         {
@@ -6195,7 +6195,7 @@
           "name": "老叟 - 碰撞区域",
           "desc": "使用老叟在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/85c83c60e36e333514e4ab30002f2fec06c6eba0.jpg",
-          "percent": 22.8,
+          "percent": 22.6,
           "ts": 1766155720
         },
         {
@@ -6203,7 +6203,7 @@
           "name": "减速",
           "desc": "达到-20%速度",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/13c1c123d00bfad8206847a0f2b838e9bd838680.jpg",
-          "percent": 40.3,
+          "percent": 40.1,
           "ts": 1766154767
         },
         {
@@ -6211,7 +6211,7 @@
           "name": "魔法与机械",
           "desc": "达到10元素伤害的同时获得3个构筑物",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/885d493e3ce09f35b0c647f5ab66f0eda2ad1b11.jpg",
-          "percent": 39,
+          "percent": 39.2,
           "ts": 1766154665
         },
         {
@@ -6219,7 +6219,7 @@
           "name": "臭脚",
           "desc": "总计行走20000步",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/d1316b38489701daf44fd3d750085305859e57d2.jpg",
-          "percent": 81.7,
+          "percent": 65.2,
           "ts": 1766154315
         },
         {
@@ -6227,7 +6227,7 @@
           "name": "多面手 - 碰撞区域",
           "desc": "使用多面手在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/826703a137b6b7713b26d4cb6b08c3c814040b33.jpg",
-          "percent": 27.7,
+          "percent": 27.5,
           "ts": 1766144372
         },
         {
@@ -6235,7 +6235,7 @@
           "name": "烟花",
           "desc": "使用单次爆炸击杀15名敌人",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/4bc64756f01bdce3e81f16d8415df7ab1ccf2084.jpg",
-          "percent": 57.8,
+          "percent": 57.5,
           "ts": 1766133787
         },
         {
@@ -6243,7 +6243,7 @@
           "name": "完美眼力",
           "desc": "达到300范围",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/2a0717ada7db265529946cff8b13fd3ad9e5fcb4.jpg",
-          "percent": 44.4,
+          "percent": 44.3,
           "ts": 1766133556
         },
         {
@@ -6251,7 +6251,7 @@
           "name": "过度杀戮",
           "desc": "单次攻击对敌人造成1000伤害",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/4da1da5be36d3dcb7cbb90d4dd24619e8775cafb.jpg",
-          "percent": 86.3,
+          "percent": 69.2,
           "ts": 1765969879
         },
         {
@@ -6259,7 +6259,7 @@
           "name": "饮血者",
           "desc": "达到40%生命窃取",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/10f2cb964ddc4a1406f2bd04c26dc2a96fc7368f.jpg",
-          "percent": 26.7,
+          "percent": 26.8,
           "ts": 1765969844
         },
         {
@@ -6267,7 +6267,7 @@
           "name": "强劲的",
           "desc": "达到100最大生命值",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/aafedcd7001f5150218925a485844e2b041089a3.jpg",
-          "percent": 58.7,
+          "percent": 58.5,
           "ts": 1765969836
         },
         {
@@ -6275,7 +6275,7 @@
           "name": "倒霉",
           "desc": "在单个商店中刷新10次",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/694683372c031ee6445bac8bec7768bf34e57090.jpg",
-          "percent": 79.9,
+          "percent": 63.7,
           "ts": 1765969645
         },
         {
@@ -6283,7 +6283,7 @@
           "name": "盲目贪婪",
           "desc": "达到100%拾取范围",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/60705eb8f220f2da61c175779bbcde92d2000579.jpg",
-          "percent": 21,
+          "percent": 71.2,
           "ts": 1765968857
         },
         {
@@ -6291,7 +6291,7 @@
           "name": "斗士 - 深渊",
           "desc": "使用斗士在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/5d66be926cf5a09a3dc1eaefb95562970b1270d9.jpg",
-          "percent": 24.3,
+          "percent": 19.1,
           "ts": 1765960681
         },
         {
@@ -6299,7 +6299,7 @@
           "name": "法师 - 碰撞区域",
           "desc": "使用法师在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/9ddb9b80995b714b453ae515f520f6432958c4db.jpg",
-          "percent": 31,
+          "percent": 30.8,
           "ts": 1765953888
         },
         {
@@ -6307,7 +6307,7 @@
           "name": "游侠 - 碰撞区域",
           "desc": "使用游侠在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/c44b18c334c3978f5f95b9e93e86810c371bb813.jpg",
-          "percent": 38.3,
+          "percent": 38,
           "ts": 1765875302
         },
         {
@@ -6315,7 +6315,7 @@
           "name": "濒死",
           "desc": "达到-5生命再生",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/7fa5e6afe61c1a0e79c978c16b09e7f0672e8ad8.jpg",
-          "percent": 53.9,
+          "percent": 54.3,
           "ts": 1765874649
         },
         {
@@ -6323,7 +6323,7 @@
           "name": "药物",
           "desc": "在一次敌袭中恢复200生命值",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/d224fd35c23e67b99eb92e3448bfa7671b568869.jpg",
-          "percent": 61.8,
+          "percent": 61.6,
           "ts": 1765865741
         },
         {
@@ -6331,7 +6331,7 @@
           "name": "危险5",
           "desc": "在危险5中赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/0080e6e8a4bc0122e58422372d019a7c949f6e8f.jpg",
-          "percent": 36.7,
+          "percent": 36.4,
           "ts": 1765537441
         },
         {
@@ -6339,7 +6339,7 @@
           "name": "农业",
           "desc": "达到200收获",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/403d49a26b6e3469983070f96a8a2daace96799c.jpg",
-          "percent": 46.5,
+          "percent": 46.3,
           "ts": 1765509097
         },
         {
@@ -6347,7 +6347,7 @@
           "name": "快速",
           "desc": "达到50%速度",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/c518313a7b2f96de9d3806a2efdb9754a80e4a82.jpg",
-          "percent": 44.2,
+          "percent": 44,
           "ts": 1765508981
         },
         {
@@ -6355,7 +6355,7 @@
           "name": "危险4",
           "desc": "在危险4中赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/07c13d9a69b3bc4befd2d8a3443d6d222813f354.jpg",
-          "percent": 42.5,
+          "percent": 42.2,
           "ts": 1761393870
         },
         {
@@ -6363,7 +6363,7 @@
           "name": "危险3",
           "desc": "在危险3中赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/79868f35217f77d3b1707ef8159d17cf293a60c7.jpg",
-          "percent": 48.8,
+          "percent": 48.6,
           "ts": 1759048702
         },
         {
@@ -6371,7 +6371,7 @@
           "name": "危险2",
           "desc": "在危险2中赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/f1402a4648bcb88755b5f205bab44f6e2bde02ad.jpg",
-          "percent": 54.8,
+          "percent": 54.5,
           "ts": 1759037149
         },
         {
@@ -6379,7 +6379,7 @@
           "name": "斗士 - 碰撞区域",
           "desc": "使用斗士在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/80428a1b4e279722db954ca69a8dd0bbf1e73e0b.jpg",
-          "percent": 31.3,
+          "percent": 31.1,
           "ts": 1759031919
         },
         {
@@ -6387,7 +6387,7 @@
           "name": "幻觉",
           "desc": "达到60%闪避",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/784c42678d9ebca5274c408026e074eb4a39cfe8.jpg",
-          "percent": 56.7,
+          "percent": 56.4,
           "ts": 1759031225
         },
         {
@@ -6395,7 +6395,7 @@
           "name": "采集者5",
           "desc": "搜集20000材料",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/5a6009548d75340b0276b75a2c4faf76d757a58b.jpg",
-          "percent": 65.5,
+          "percent": 65.2,
           "ts": 1759030545
         },
         {
@@ -6403,7 +6403,7 @@
           "name": "生还者5",
           "desc": "击杀20000名敌人",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/27a9be454703c52dc7a98bddc7d8c4a49e643340.jpg",
-          "percent": 70.1,
+          "percent": 69.8,
           "ts": 1758978599
         },
         {
@@ -6411,7 +6411,7 @@
           "name": "全能者 - 碰撞区域",
           "desc": "使用全能者在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/64641273e7e9418b11765a609dbc59f452298e4a.jpg",
-          "percent": 36.7,
+          "percent": 36.6,
           "ts": 1758961085
         },
         {
@@ -6427,7 +6427,7 @@
           "name": "高级科技",
           "desc": "达到10远程伤害的同时获得3个构筑物",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/c8cfa983daba6e69d10272674e2a8121924239a1.jpg",
-          "percent": 56.5,
+          "percent": 56.4,
           "ts": 1758961048
         },
         {
@@ -6435,7 +6435,7 @@
           "name": "采集者4",
           "desc": "搜集10000材料",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/5a6009548d75340b0276b75a2c4faf76d757a58b.jpg",
-          "percent": 73.9,
+          "percent": 73.7,
           "ts": 1758960638
         },
         {
@@ -6443,7 +6443,7 @@
           "name": "生还者4",
           "desc": "击杀10000名敌人",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/27a9be454703c52dc7a98bddc7d8c4a49e643340.jpg",
-          "percent": 77.7,
+          "percent": 77.5,
           "ts": 1758959421
         },
         {
@@ -6451,7 +6451,7 @@
           "name": "危险1",
           "desc": "在危险1中赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/af550cdb800b54d1b7043052c2901851e0a10996.jpg",
-          "percent": 61,
+          "percent": 60.8,
           "ts": 1758959421
         },
         {
@@ -6459,7 +6459,7 @@
           "name": "采集者3",
           "desc": "搜集5000材料",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/5a6009548d75340b0276b75a2c4faf76d757a58b.jpg",
-          "percent": 80.5,
+          "percent": 80.4,
           "ts": 1758959421
         },
         {
@@ -6467,7 +6467,7 @@
           "name": "危险0",
           "desc": "在危险0中赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/c4f994ce0471cb82eedbcc9915db9d23658d54ce.jpg",
-          "percent": 73,
+          "percent": 72.8,
           "ts": 1758947664
         },
         {
@@ -6475,7 +6475,7 @@
           "name": "伐木工",
           "desc": "消灭50棵树木",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/8b4ee07972f4c5c550efde55536dd2c489ec533b.jpg",
-          "percent": 85.4,
+          "percent": 85.3,
           "ts": 1758947664
         },
         {
@@ -6483,7 +6483,7 @@
           "name": "狂人 - 碰撞区域",
           "desc": "使用狂人在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/742b00832bf1fff0f996e10b8c021c91a34deaab.jpg",
-          "percent": 26.7,
+          "percent": 26.5,
           "ts": 1758947664
         },
         {
@@ -6491,7 +6491,7 @@
           "name": "生还者3",
           "desc": "击杀5000名敌人",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/27a9be454703c52dc7a98bddc7d8c4a49e643340.jpg",
-          "percent": 84.3,
+          "percent": 84.1,
           "ts": 1758947546
         },
         {
@@ -6499,7 +6499,7 @@
           "name": "清道夫",
           "desc": "在比赛期间获得10个不同的I级别的物品",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/e21b25485c503c224ca790483fe4d92bd1612c19.jpg",
-          "percent": 75.6,
+          "percent": 75.7,
           "ts": 1758947464
         },
         {
@@ -6507,7 +6507,7 @@
           "name": "采集者2",
           "desc": "搜集2000材料",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/5a6009548d75340b0276b75a2c4faf76d757a58b.jpg",
-          "percent": 87.9,
+          "percent": 87.8,
           "ts": 1758947098
         },
         {
@@ -6515,7 +6515,7 @@
           "name": "受骗",
           "desc": "在比赛期间获得2个诱饵",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/d26901759da4f00e35287435d6df8508e9010bfe.jpg",
-          "percent": 46.1,
+          "percent": 45.9,
           "ts": 1758946911
         },
         {
@@ -6539,7 +6539,7 @@
           "name": "生还者2",
           "desc": "击杀2000名敌人",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/27a9be454703c52dc7a98bddc7d8c4a49e643340.jpg",
-          "percent": 90.6,
+          "percent": 90.5,
           "ts": 1758946690
         },
         {
@@ -6555,7 +6555,7 @@
           "name": "采集者1",
           "desc": "搜集300材料",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/5a6009548d75340b0276b75a2c4faf76d757a58b.jpg",
-          "percent": 95,
+          "percent": 94.9,
           "ts": 1758946136
         },
         {
@@ -6571,7 +6571,7 @@
           "name": "新手",
           "desc": "首次阵亡",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/ac20c0c1ebd29ab81976921ff53506e044db2944.jpg",
-          "percent": 92.9,
+          "percent": 92.8,
           "ts": 1758946019
         }
       ]
@@ -6635,7 +6635,7 @@
           "name": "模块化",
           "desc": "解锁伤害模块二型。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/3167020/7f9fbdcfead9ffc6524df529049b4bc504cbc468.jpg",
-          "percent": 8.6,
+          "percent": 8.7,
           "ts": 1764234979
         },
         {
@@ -6747,7 +6747,7 @@
           "name": "金牌狙击手",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/3167020/bc8348ceaf859f52e8639312282f0c9d343c47c5.jpg",
-          "percent": 17.9,
+          "percent": 18,
           "ts": 1763521249
         },
         {
@@ -6755,7 +6755,7 @@
           "name": "综合有氧",
           "desc": "进行综合有氧锻炼。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/3167020/50ec41946b715a766616443c2e62fd0766dda319.jpg",
-          "percent": 19.3,
+          "percent": 19.4,
           "ts": 1763458295
         },
         {
@@ -6779,7 +6779,7 @@
           "name": "八方来财",
           "desc": "将黑市升级到最高。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/3167020/de4ac2ef3915c6497e6f14fa094b79baa83bf683.jpg",
-          "percent": 27.1,
+          "percent": 27.2,
           "ts": 1763218374
         },
         {
@@ -6923,7 +6923,7 @@
           "name": "仓库区",
           "desc": "抵达仓库区。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/3167020/825c2811eb46116624d15525c1a03aa3291113c2.jpg",
-          "percent": 59.6,
+          "percent": 59.5,
           "ts": 1762698089
         },
         {
