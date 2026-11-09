@@ -27,7 +27,7 @@ const leftFns = deadFns.filter((f) => new RegExp('\\b' + f + '\\b').test(js));
 ok('A1 浮层相关函数已全部删除', leftFns.length === 0, leftFns);
 ok('A2 源码无 cal-overlay / cal-day / state.cal 残留',
   !/cal-overlay|cal-day|cal-panel|state\.cal\b/.test(js) && !/cal-overlay/.test(html) && !/\.cal-(overlay|panel|backdrop|games|step)\s*[\{,]/.test(css));
-ok('A3 版本参数 CSS 137 / APP 122', html.includes('style.css?v=139') && html.includes('app.js?v=124'),
+ok('A3 版本参数 CSS 137 / APP 122', html.includes('style.css?v=139') && html.includes('app.js?v=125'),
   { css: (html.match(/style\.css\?v=(\d+)/) || [])[1], app: (html.match(/app\.js\?v=(\d+)/) || [])[1] });
 
 /* ---------- B 运行时 ---------- */

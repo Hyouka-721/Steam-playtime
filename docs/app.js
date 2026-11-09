@@ -518,11 +518,30 @@
      ⚠️ 与旧「两个月并排日历」是完全不同的 DOM（.hx-*）：旧套件里断言 .hc / .heat-mb /
         .heat-nav / .hm-title 的会失效 —— 第 111 轮起由 verify111 守新契约。 */
 
-  /** 某天的总分钟数；返回 null = 那天还没有数据
+  /** 某天的总分钟数；返回 null = 那天没有记录
       （第 115 轮：删除「下钻单个游戏」后不再有「某款游戏那天玩了多久」的口径） */
   function minutesOn(date) {
     const day = state.days.get(date);
     return day ? day.total_minutes ?? 0 : null;
+  }
+
+  /* ---------- 统计口径（第 116 轮，用户：自 10.13 起缺数据的日子一律按 0 分钟补齐） ----------
+     范围 = [meta.tracking_since, meta.last_snapshot_date]：
+       · 范围内缺记录 → 明确按 0 分钟处理（.l0 灰点，可点，气泡「游玩时长：0 min」，当日列表「这天没有游玩记录」）
+       · 范围外（开始统计之前 / 最新快照之后还没到的日子）→ 仍是 .lna「尚未记录」，不可点
+     这样点阵里每个已统计日期都有确定的分钟数，口径统一，不会出现「空白格」被误读成漏采。 */
+  function hxScope() {
+    const since = state.meta?.tracking_since;
+    const last = state.meta?.last_snapshot_date ?? state.allDates[state.allDates.length - 1];
+    return since && last ? { since, last } : null;
+  }
+
+  /** 统计用分钟数：范围内缺记录补 0，范围外返回 null（未采集） */
+  function hxMinutes(date) {
+    const v = minutesOn(date);
+    if (v !== null) return v;
+    const sc = hxScope();
+    return sc && date >= sc.since && date <= sc.last ? 0 : null;
   }
 
   /** 可选年份：首份数据年 ~ 最新数据年，外加今年 */
@@ -556,7 +575,7 @@
     const root = $('hx-root');
     if (!tip || !root || !cell) return;
     const ds = cell.dataset.date;
-    const min = minutesOn(ds);
+    const min = hxMinutes(ds);
     tip.innerHTML =
       `<b>${hxDateLabel(ds)}</b><span>${min === null ? '尚未记录' : `游玩时长：${hm(min)}`}</span>`;
     tip.hidden = false;
@@ -607,7 +626,7 @@
             `</div>`
           );
         }).join('')
-      : `<p class="hx-none">${day ? '这天没有游玩记录。' : '这天还没有采集到数据。'}</p>`;
+      : `<p class="hx-none">${day || hxMinutes(ds) !== null ? '这天没有游玩记录。' : '这天还没有采集到数据。'}</p>`;
 
     box.innerHTML =
       `<div class="hx-day-head">` +
@@ -673,7 +692,7 @@
     let peak = 0, active = 0, sum = 0, tracked = 0;
     for (let i = 0; i < daysInYear; i++) {
       const ds = addDaysStr(jan1, i);
-      const min = minutesOn(ds);
+      const min = hxMinutes(ds);
       if (min !== null) {
         tracked++;
         if (min > 0) { active++; sum += min; if (min > peak) peak = min; }
@@ -1422,7 +1441,7 @@
       const pickDay = (cell) => {
         if (!cell || !cell.dataset.date) return false;
         const ds = cell.dataset.date;
-        if (minutesOn(ds) === null) return false;
+        if (hxMinutes(ds) === null) return false;
         state.drill.sel = state.drill.sel === ds ? null : ds;  // 同一天再点 = 收起
         renderDrill();
         /* 第 113 轮（用户：点开当天后「上方元素会跳一下很突兀」）：

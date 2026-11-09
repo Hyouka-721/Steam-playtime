@@ -165,7 +165,7 @@ for (const [name, txt] of [['app.js', srcApp], ['index.html', srcHtml], ['style.
   const hits = BANNED.filter((k) => txt.toLowerCase().includes(k.toLowerCase()));
   ok(`0.1 ${name} 无回看态残留关键词`, hits.length === 0, hits);
 }
-ok('0.2 index.html 引用 app\.js\?v=124', srcHtml.includes('app\.js\?v=124'), (srcHtml.match(/app\.js\?v=\d+/) || [])[0]);
+ok('0.2 index.html 引用 app\.js\?v=125', srcHtml.includes('app\.js\?v=125'), (srcHtml.match(/app\.js\?v=\d+/) || [])[0]);
 // 第 87 轮：一级月历层已删 → backToCalMonth / renderCalGrid / stepMonth 都不该再存在，
 // 而「开/关/渲染/步进当日明细」这一组必须还在。
 ok('0.3 app.js 保留当日明细浮层核心函数，且已无一级月历函数',
