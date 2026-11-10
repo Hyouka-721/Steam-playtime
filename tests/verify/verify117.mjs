@@ -23,13 +23,13 @@ const ok = (n, c, x) => { c ? (pass++, console.log('PASS ', n, x === undefined ?
 const css = fs.readFileSync(ROOT + 'docs/style.css', 'utf8');
 const js = fs.readFileSync(ROOT + 'docs/app.js', 'utf8');
 const html = fs.readFileSync(ROOT + 'docs/index.html', 'utf8');
-ok('A1 版本参数 CSS 140 / APP 126', html.includes('style.css?v=140') && html.includes('app.js?v=126'),
+ok('A1 版本参数 CSS 141 / APP 127', html.includes('style.css?v=141') && html.includes('app.js?v=127'),
   { css: (html.match(/style\.css\?v=(\d+)/) || [])[1], app: (html.match(/app\.js\?v=(\d+)/) || [])[1] });
-ok('A2 行距 4 → 8 且行高走变量',
-  /\.rank-list\s*\{[^}]*gap:\s*8px/.test(css) && /\.rank-item\s*\{[\s\S]{0,2000}min-height:\s*var\(--rank-row-h/.test(css));
+ok('A2 行距 4 → 6 且行高走变量',
+  /\.rank-list\s*\{[^}]*gap:\s*6px/.test(css) && /\.rank-item\s*\{[\s\S]{0,2000}min-height:\s*var\(--rank-row-h/.test(css));
 ok('A3 骨架行也吃同一行高（换真行不跳）', /\.sk-row\s*\{[\s\S]{0,400}min-height:\s*var\(--rank-row-h/.test(css));
 ok('A4 app.js 有 fitRankRows 与参数表，并在初始化 / 切视图 / resize 三处调用',
-  /function fitRankRows\(\)/.test(js) && /const RANK_FIT = \{ rows: 8, gap: 8/.test(js) &&
+  /function fitRankRows\(\)/.test(js) && /const RANK_FIT = \{ rows: 8, gap: 6/.test(js) &&
   (js.match(/fitRankRows\(\)/g) || []).length >= 4);
 
 /* ---------- B 运行时 ---------- */
@@ -68,8 +68,8 @@ async function measure(w, h) {
 const a = await measure(1440, 1080);
 ok('B1 1440×1080：首屏恰好 8 整行、没有半截行',
   a.m.full === 8 && a.m.partial === 0 && a.m.var !== '', a.m);
-ok('B2 行高落在观感带内（74~105px）、行距 = 8px',
-  a.m.rowH >= 74 && a.m.rowH <= 105 && a.m.gap === '8px', { rowH: a.m.rowH, gap: a.m.gap });
+ok('B2 行高落在观感带内（74~105px）、行距 = 6px',
+  a.m.rowH >= 74 && a.m.rowH <= 105 && a.m.gap === '6px', { rowH: a.m.rowH, gap: a.m.gap });
 ok('B3 首屏 CLS 仍为 0', a.m.cls < 0.01, a.m.cls);
 
 /* 切走再回来：行高仍生效、仍是整行 */

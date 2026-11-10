@@ -41,7 +41,7 @@
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=140">
+<link rel="stylesheet" href="style.css?v=141">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -263,7 +263,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
-<script src="app.js?v=126" onerror="__appFail()"></script>
+<script src="app.js?v=127" onerror="__appFail()"></script>
 <!-- 第 93 轮：背景流星（纯装饰、不参与首屏渲染）降到最低下载优先级，且**排在 app.js
      之后** —— 只写 fetchpriority="low" 时浏览器仍会先于 app.js 发起 fx.js 的请求
      （标签在文档里更靠前），实测请求顺序是 fx.js → app.js。调换位置后才真正让路。

@@ -27,7 +27,7 @@ const ok = (name, cond, extra) => {
 /* ---------- A 源码契约 ---------- */
 const cssV = (html.match(/style\.css\?v=(\d+)/) || [])[1];
 const appV = (html.match(/app\.js\?v=(\d+)/) || [])[1];
-ok('A1 版本参数 CSS 137 / APP 122', cssV === '140' && appV === '126', { css: cssV, app: appV });
+ok('A1 版本参数 CSS 137 / APP 122', cssV === '141' && appV === '127', { css: cssV, app: appV });
 
 const themesBlock = (js.match(/const THEMES = \[([\s\S]*?)\];/) || [])[1] || '';
 const themeIds = [...themesBlock.matchAll(/id:\s*'([^']+)'/g)].map((m) => m[1]);

@@ -132,7 +132,7 @@ await page.waitForTimeout(800);
 // ---------- 0. 版本与结构 ----------
 const v = await page.evaluate(() =>
   [...document.querySelectorAll('script[src]')].map((s) => s.getAttribute('src')).find((s) => s.includes('app.js')));
-ok('0.1 app.js 版本号已 bump 到 ?v=105', v === 'app\.js\?v=126', v);
+ok('0.1 app.js 版本号已 bump 到 ?v=105', v === 'app\.js\?v=127', v);
 
 await openDrill();
 const head = await page.evaluate(() => {

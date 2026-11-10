@@ -549,9 +549,9 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    「面板顶 → 首行顶 = 37px」写死的断言。（第 87 轮删掉那枚日历图标后，
    这个空档已没有任何元素占用，若日后想收紧版面，改这里即可。） */
 /* 第 117 轮（用户：首屏要完整露出 8 款、不能切出第 9 款的边）：
-   行距 4 → 8，行高由 app.js 的 fitRankRows() 按视口反解后写进 --rank-row-h，
-   让折线永远落在「行与行之间」。窄屏（≤860）是两行式布局，不参与这套算法。 */
-.rank-list { display: flex; flex-direction: column; gap: 8px; padding-top: 18px; }
+   行距 4 → 8，随后按用户要求回退到 **6**；行高由 app.js 的 fitRankRows() 按视口反解后
+   写进 --rank-row-h，让折线永远落在「行与行之间」。窄屏（≤860）是两行式布局，不参与这套算法。 */
+.rank-list { display: flex; flex-direction: column; gap: 6px; padding-top: 18px; }
 
 /* ---- 骨架屏（2026-10-18 首屏优化）----
    数据未到位时占住真实内容的形状，让等待有"进度感"而不是一张空白框。

@@ -27,7 +27,7 @@ const hm = (m) => {
 /* ---------- A 静态 ---------- */
 const js = fs.readFileSync(ROOT + 'docs/app.js', 'utf8');
 const html = fs.readFileSync(ROOT + 'docs/index.html', 'utf8');
-ok('A1 版本参数 CSS 139 / APP 125', html.includes('style.css?v=140') && html.includes('app.js?v=126'),
+ok('A1 版本参数 CSS 139 / APP 125', html.includes('style.css?v=141') && html.includes('app.js?v=127'),
   { css: (html.match(/style\.css\?v=(\d+)/) || [])[1], app: (html.match(/app\.js\?v=(\d+)/) || [])[1] });
 ok('A2 口径助手 hxScope / hxMinutes 就位，年视图与气泡都走它',
   /function hxScope\(\)/.test(js) && /function hxMinutes\(date\)/.test(js) &&
