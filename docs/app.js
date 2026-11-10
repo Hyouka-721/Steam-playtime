@@ -473,6 +473,48 @@
     box.innerHTML = html;
     observeCapsules(box); // 登记新渲染出的胶囊图（视口临近才真正下载）
     if (idle.length) bindIdleToggle(idle.length);
+    fitRankRows();
+  }
+
+  /* ---------- 首屏「恰好 N 款」：按视口反解榜单行高 ----------
+     第 117 轮（用户：第 9 款的海报会露出边缘，要首屏完整展示 8 款、不出现第 9 款的碎片）：
+     不写死行高，而是「让折线落在行与行之间」——
+       ① 先试 8 行：行高 = (折线可用高度 − 7×行距) / 8；
+       ② 行高落在观感带 [74, 100] 内 → 就是 8 行；
+       ③ 屏幕偏高（8 行会胖到 >100）→ 多放几行，别让行高继续涨；
+       ④ 屏幕偏矮（8 行会压到 <74）→ 少放几行，保证不切出半行。
+     结果：任何视口高度下首屏都是**整行**，1380×~1080 这一档正好 8 款。 */
+  /* ⚠️ pad 必须 ≤ gap：这样「最后一行底 + gap」才会落到折线以下，
+     否则下一行会从折线上冒出一条几像素的边（正是用户截图里的问题）。 */
+  const RANK_FIT = { rows: 8, gap: 8, min: 74, max: 100, pad: 6 };
+
+  function fitRankRows() {
+    const list = $('lt-list');
+    if (!list || !list.querySelector('.rank-item, .sk-row')) return;
+    /* 窄屏是「序号+封面占前两列、进度条换行」的两行式布局，撑高会散架 → 不参与 */
+    if (window.matchMedia('(max-width: 860px)').matches || state.view !== 'lifetime') {
+      list.style.removeProperty('--rank-row-h');
+      return;
+    }
+    /* 度量基准必须是**第一行**的顶边：.rank-list 自己还有 18px 的 padding-top，
+       拿容器顶边当基准会多算 18px，最后一行就被折线切掉一条边。 */
+    const first = list.querySelector('.rank-item, .sk-row').getBoundingClientRect();
+    /* 用文档坐标算，滚动到哪儿都不影响结果 */
+    const topDoc = first.top + window.scrollY;
+    const avail = window.innerHeight - topDoc - RANK_FIT.pad;
+    if (!(avail > 0)) return;
+    const { rows, gap, min, max } = RANK_FIT;
+    let n = rows;
+    let h = (avail - (n - 1) * gap) / n;
+    if (h > max) {
+      n = Math.max(rows, Math.round((avail + gap) / (max + gap)));
+      h = (avail - (n - 1) * gap) / n;
+    } else if (h < min) {
+      n = Math.max(3, Math.floor((avail + gap) / (min + gap)));
+      h = (avail - (n - 1) * gap) / n;
+    }
+    if (!(h > 0)) return;
+    list.style.setProperty('--rank-row-h', `${h.toFixed(1)}px`);
   }
 
   /** 折叠区标题点击 / 回车均可展开与收起 */
@@ -1393,6 +1435,7 @@
       }
       if (v === 'timeline') renderTimeline();
       if (v === 'data') renderReport();
+      if (v === 'lifetime') fitRankRows();
       syncHash();
     };
     // #11 视图过渡：支持的浏览器用 View Transitions，不支持的（或用户要求减少动效）直接切
@@ -1480,6 +1523,7 @@
     window.addEventListener('resize', () => {
       clearTimeout(hxResizeT);
       hxResizeT = setTimeout(() => {
+        fitRankRows();
         const geo = $('hx-root')?.dataset.geo;
         if (!geo) return;
         const [c, s] = geo.split('|').map(Number);
@@ -1555,6 +1599,7 @@
       // 先把骨架铺上（同步执行，早于任何网络请求）：用户立刻看到"内容正在来"，
       // 而不是一张全是「—」的空白卡片
       paintSkeletons();
+      fitRankRows();   // 骨架期先按视口定好行高，换真行时零跳动
       // 主题已由 <head> 内联脚本按 localStorage 决定（默认 cream），这里只同步站标提示文案
       syncThemeUi();
       if (!(await load())) return;

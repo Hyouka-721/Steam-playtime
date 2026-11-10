@@ -548,7 +548,10 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    **刻意保留同值**：首行位置与行高都按它算，改小会让整榜上移、连带影响那些按
    「面板顶 → 首行顶 = 37px」写死的断言。（第 87 轮删掉那枚日历图标后，
    这个空档已没有任何元素占用，若日后想收紧版面，改这里即可。） */
-.rank-list { display: flex; flex-direction: column; gap: 4px; padding-top: 18px; }
+/* 第 117 轮（用户：首屏要完整露出 8 款、不能切出第 9 款的边）：
+   行距 4 → 8，行高由 app.js 的 fitRankRows() 按视口反解后写进 --rank-row-h，
+   让折线永远落在「行与行之间」。窄屏（≤860）是两行式布局，不参与这套算法。 */
+.rank-list { display: flex; flex-direction: column; gap: 8px; padding-top: 18px; }
 
 /* ---- 骨架屏（2026-10-18 首屏优化）----
    数据未到位时占住真实内容的形状，让等待有"进度感"而不是一张空白框。
@@ -557,6 +560,8 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .sk-row {
   display: grid; grid-template-columns: 44px 130px minmax(150px, 260px) minmax(140px, 1fr) 150px 110px;
   gap: 14px; align-items: center; padding: 7px 12px;
+  /* 骨架也吃同一个行高，数据到位换真行时零跳动（CLS 红线 0.000） */
+  min-height: var(--rank-row-h, 0px);
 }
 .sk-block {
   background: linear-gradient(90deg, var(--track) 0%, var(--sunken) 40%, var(--track) 80%);
@@ -603,6 +608,8 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
      这套模板与下方 .sk-row 骨架必须逐字一致。 */
   grid-template-columns: 44px 130px minmax(150px, 260px) minmax(140px, 1fr) 150px 110px;
   gap: 14px; align-items: center;
+  /* 行高下限由 fitRankRows() 按视口写入；没写时退回内容高度（0 = 不设下限） */
+  min-height: var(--rank-row-h, 0px);
   padding: 7px 12px; border-radius: 9px; background: transparent; border: 1px solid transparent;
   position: relative;
   transition: background .15s, border-color .15s;
