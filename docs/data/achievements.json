@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "ready": true,
-  "generated_at": "2026-11-08T19:50:55.818Z",
-  "snapshot_date": "2026-11-08",
+  "generated_at": "2026-11-09T23:49:37.881Z",
+  "snapshot_date": "2026-11-09",
   "stats": {
     "unlocked": 846,
     "total": 2504,
@@ -2507,7 +2507,7 @@
           "name": "第八奇迹",
           "desc": "第一次到达灯塔！",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/5ff4a5f487f57aed679949f05c10372729b0b54a.jpg",
-          "percent": 14.7,
+          "percent": 14.8,
           "ts": 1743159703
         },
         {
@@ -2595,7 +2595,7 @@
           "name": "长得真快！",
           "desc": "让抱腿兽进化",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/05a9742a3958d845b7c4fdcfd0bc5f19d8948c77.jpg",
-          "percent": 18.9,
+          "percent": 19,
           "ts": 1742915546
         },
         {
@@ -2603,7 +2603,7 @@
           "name": "一目了然",
           "desc": "打败肿胀眼魔！",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/4cb400b0bf054143ee448dab50eb3cf587de5e9d.jpg",
-          "percent": 38.6,
+          "percent": 38.7,
           "ts": 1742877489
         },
         {
@@ -2611,7 +2611,7 @@
           "name": "就连老鼠也不愿来……",
           "desc": "初次到达作呕地窖。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/a54a7fca1bffa9b34f3eeb39a8a77a144ed6df52.jpg",
-          "percent": 38.6,
+          "percent": 38.7,
           "ts": 1742877244
         },
         {
@@ -2675,7 +2675,7 @@
           "name": "王国的末路",
           "desc": "打败国王之手！",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/1c9a2666a9da0fbf94f2a58359f89d427a185dc9.jpg",
-          "percent": 40.3,
+          "percent": 40.4,
           "ts": 1742614762
         },
         {
