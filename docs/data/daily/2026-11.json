@@ -3,7 +3,7 @@
   "month": "2026-11",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-11-09T23:49:37.877Z",
+  "generated_at": "2026-11-10T21:22:43.891Z",
   "days": {
     "2026-11-01": {
       "total_minutes": 264,
@@ -154,6 +154,27 @@
           "appid": "105600",
           "name": "泰拉瑞亚",
           "minutes": 1,
+          "is_new": false
+        }
+      ]
+    },
+    "2026-11-10": {
+      "total_minutes": 131,
+      "span_days": 1,
+      "confidence": "high",
+      "source": "auto",
+      "flags": [],
+      "games": [
+        {
+          "appid": "105600",
+          "name": "泰拉瑞亚",
+          "minutes": 88,
+          "is_new": false
+        },
+        {
+          "appid": "246420",
+          "name": "王国保卫战",
+          "minutes": 43,
           "is_new": false
         }
       ]
