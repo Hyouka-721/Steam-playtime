@@ -1,6 +1,6 @@
 /* online117.mjs — 第 117 轮上线复验：首页榜单首屏整行显示
-   断言：线上 140/126 且 css/js 字节（LF 归一）与本地全等 · 线上 app.js 含 fitRankRows / RANK_FIT ·
-        行距 8px · 1440×1080 恰好 8 整行、0 条被切开的行 · 1440×1200 / 1280×1080 / 1920×800 同样 0 切开 ·
+   断言：线上 141/127 且 css/js 字节（LF 归一）与本地全等 · 线上 app.js 含 fitRankRows / RANK_FIT ·
+        行距 6px · 1440×1080 恰好 8 整行、0 条被切开的行 · 1440×1200 / 1280×1080 / 1920×800 同样 0 切开 ·
         切到别的栏目再回来仍成立 · CLS 仍 0 · 390 不参与且无溢出 · 零 JS 异常
    用法：node tests/online/online117.mjs */
 import { createRequire } from 'module';
@@ -63,27 +63,27 @@ const fp = await main.page.evaluate(async () => {
   const g = async (u) => (await fetch(u, { cache: 'reload' })).text();
   const [html, css, app] = await Promise.all([
     g('index.html?cb=' + Date.now()),
-    g('style.css?v=140'),
-    g('app.js?v=126'),
+    g('style.css?v=141'),
+    g('app.js?v=127'),
   ]);
   return {
     cssTag: (html.match(/style\.css\?v=\d+/) || [])[0],
     jsTag: (html.match(/app\.js\?v=\d+/) || [])[0],
     css, app,
-    hasFit: /function fitRankRows\(\)/.test(app) && /const RANK_FIT = \{ rows: 8, gap: 8/.test(app),
-    gap8: /\.rank-list\s*\{[^}]*gap:\s*8px/.test(css),
+    hasFit: /function fitRankRows\(\)/.test(app) && /const RANK_FIT = \{ rows: 8, gap: 6/.test(app),
+    gap8: /\.rank-list\s*\{[^}]*gap:\s*6px/.test(css),
   };
 });
-ok('A1 线上版本 140 / 126', fp.cssTag === 'style.css?v=140' && fp.jsTag === 'app.js?v=126', { css: fp.cssTag, js: fp.jsTag });
+ok('A1 线上版本 141 / 127', fp.cssTag === 'style.css?v=141' && fp.jsTag === 'app.js?v=127', { css: fp.cssTag, js: fp.jsTag });
 ok('A2 线上 style.css 字节与本地全等', md5(fp.css) === md5(fs.readFileSync(LOCAL + 'style.css', 'utf8')), { online: md5(fp.css).slice(0, 12) });
 ok('A3 线上 app.js 字节与本地全等', md5(fp.app) === md5(fs.readFileSync(LOCAL + 'app.js', 'utf8')), { online: md5(fp.app).slice(0, 12) });
-ok('A4 线上有 fitRankRows / RANK_FIT，CSS 行距 8px', fp.hasFit && fp.gap8, { fit: fp.hasFit, gap: fp.gap8 });
+ok('A4 线上有 fitRankRows / RANK_FIT，CSS 行距 6px', fp.hasFit && fp.gap8, { fit: fp.hasFit, gap: fp.gap8 });
 
 /* ---------- B 1440×1080：恰好 8 整行 ---------- */
 const g1 = await geo(main.page);
 ok('B1 1440×1080：首屏恰好 8 整行、0 条被切开的行',
   g1.full === 8 && g1.partial === 0 && g1.var !== '', g1);
-ok('B2 行高在 74~105px 且行距 8px', g1.rowH >= 74 && g1.rowH <= 105 && g1.gap === '8px', { rowH: g1.rowH, gap: g1.gap });
+ok('B2 行高在 74~105px 且行距 6px', g1.rowH >= 74 && g1.rowH <= 105 && g1.gap === '6px', { rowH: g1.rowH, gap: g1.gap });
 ok('B3 首屏 CLS 仍为 0', g1.cls < 0.01, g1.cls);
 
 /* 切走再回来 */
