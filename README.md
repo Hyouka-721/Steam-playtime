@@ -2,8 +2,6 @@
 
 通过 GitHub Actions 每日定时抓取 Steam 快照，差分计算每日游戏时长，发布到 GitHub Pages。
 
-**在线地址**：<https://hyouka-721.github.io/steam-playtime/>
-
 ## 原理（重要）
 
 Steam Web API **没有「某天玩了多久」这个接口**，只提供 `playtime_forever`（累计总分钟数）与 `playtime_2weeks`（滚动两周分钟数，且是条件字段，仅近期玩过的游戏才返回）。因此每日时长只能由**每日快照 + 差分**得出：
