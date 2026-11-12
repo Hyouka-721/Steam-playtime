@@ -2,7 +2,7 @@
 
 通过 GitHub Actions 每日定时抓取 Steam 快照，差分计算每日游戏时长，发布到 GitHub Pages。
 
-**在线地址**：<https://hyouka-721.github.io/Steam-playtime/>
+**在线地址**：<https://hyouka-721.github.io/steam-playtime/>
 
 ## 原理（重要）
 
