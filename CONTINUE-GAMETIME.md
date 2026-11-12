@@ -11,7 +11,6 @@
 
 一个**零构建**的纯静态站点（没有打包器、没有 npm build 产物），托管在 GitHub Pages：
 
-- 线上：<https://hyouka-721.github.io/Steam-playtime/>
 - 仓库：`Hyouka-721/Steam-playtime`，本地 `C:\Users\33329\WorkBuddy\2026-10-13-18-17-49\steam-playtime`
 - 发布根 = `docs/` 目录本身（**改 `docs/` 里的文件就等于改线上**）
 - 数据每天由 GitHub Actions（UTC 15:30 = 北京 23:30）抓 Steam → 差分 → 生成 `docs/data/*` 并提交
