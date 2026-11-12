@@ -2,17 +2,17 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-11-11T22:05:51.525Z",
-  "generated_at_local": "2026-11-12",
+  "generated_at": "2026-11-12T21:52:48.618Z",
+  "generated_at_local": "2026-11-13",
   "tracking_since": "2026-10-13",
-  "last_snapshot_date": "2026-11-11",
+  "last_snapshot_date": "2026-11-12",
   "steamid_hash": "a8474caf",
   "months": [
     "2026-10",
     "2026-11"
   ],
   "ach_stats": {
-    "unlocked": 846,
+    "unlocked": 847,
     "total": 2504,
     "pct": 33.8,
     "games": 31
@@ -27,17 +27,17 @@
     "990630"
   ],
   "stats": {
-    "lifetime_minutes": 84879,
-    "lifetime_hours": 1414.7,
+    "lifetime_minutes": 84928,
+    "lifetime_hours": 1415.5,
     "owned_games": 53,
     "lifetime_played_games": 38,
-    "total_minutes": 3155,
-    "total_hours": 52.6,
-    "tracked_days": 29,
-    "active_days": 28,
-    "current_streak": 21,
-    "longest_streak": 21,
-    "week_minutes": 263,
+    "total_minutes": 3204,
+    "total_hours": 53.4,
+    "tracked_days": 30,
+    "active_days": 29,
+    "current_streak": 22,
+    "longest_streak": 22,
+    "week_minutes": 312,
     "played_games": 6,
     "best_day": {
       "date": "2026-11-08",
@@ -65,9 +65,9 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "total_minutes": 1148,
+      "total_minutes": 1196,
       "first_day": "2026-10-13",
-      "last_day": "2026-11-11"
+      "last_day": "2026-11-12"
     },
     "431960": {
       "appid": "431960",
@@ -89,9 +89,9 @@
       "appid": "3009140",
       "name": "Salt Player",
       "img_icon_url": "a2a0483be79a4082e0b50abccb3b67c979d3a457",
-      "total_minutes": 8,
+      "total_minutes": 9,
       "first_day": "2026-10-19",
-      "last_day": "2026-10-26"
+      "last_day": "2026-11-12"
     }
   },
   "games_lifetime": {
@@ -127,8 +127,8 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "lifetime_minutes": 1368,
-      "last_played": "2026-11-11"
+      "lifetime_minutes": 1416,
+      "last_played": "2026-11-12"
     },
     "250900": {
       "appid": "250900",
@@ -449,8 +449,8 @@
       "appid": "3009140",
       "name": "Salt Player",
       "img_icon_url": "a2a0483be79a4082e0b50abccb3b67c979d3a457",
-      "lifetime_minutes": 865,
-      "last_played": "2026-10-29"
+      "lifetime_minutes": 866,
+      "last_played": "2026-11-12"
     },
     "3167020": {
       "appid": "3167020",
