@@ -2,19 +2,19 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-11-12T21:52:48.618Z",
-  "generated_at_local": "2026-11-13",
+  "generated_at": "2026-11-13T21:29:03.683Z",
+  "generated_at_local": "2026-11-14",
   "tracking_since": "2026-10-13",
-  "last_snapshot_date": "2026-11-12",
+  "last_snapshot_date": "2026-11-13",
   "steamid_hash": "a8474caf",
   "months": [
     "2026-10",
     "2026-11"
   ],
   "ach_stats": {
-    "unlocked": 847,
+    "unlocked": 853,
     "total": 2504,
-    "pct": 33.8,
+    "pct": 34.1,
     "games": 31
   },
   "ach_perfect": [
@@ -27,17 +27,17 @@
     "990630"
   ],
   "stats": {
-    "lifetime_minutes": 84928,
-    "lifetime_hours": 1415.5,
+    "lifetime_minutes": 85031,
+    "lifetime_hours": 1417.2,
     "owned_games": 53,
     "lifetime_played_games": 38,
-    "total_minutes": 3204,
-    "total_hours": 53.4,
-    "tracked_days": 30,
-    "active_days": 29,
-    "current_streak": 22,
-    "longest_streak": 22,
-    "week_minutes": 312,
+    "total_minutes": 3307,
+    "total_hours": 55.1,
+    "tracked_days": 31,
+    "active_days": 30,
+    "current_streak": 23,
+    "longest_streak": 23,
+    "week_minutes": 415,
     "played_games": 6,
     "best_day": {
       "date": "2026-11-08",
@@ -57,25 +57,25 @@
       "appid": "227300",
       "name": "欧洲卡车模拟2",
       "img_icon_url": "adc18a4fc9adc0330144b76d61cbda68bb2394a0",
-      "total_minutes": 208,
+      "total_minutes": 250,
       "first_day": "2026-10-13",
-      "last_day": "2026-11-11"
+      "last_day": "2026-11-13"
     },
     "246420": {
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "total_minutes": 1196,
+      "total_minutes": 1251,
       "first_day": "2026-10-13",
-      "last_day": "2026-11-12"
+      "last_day": "2026-11-13"
     },
     "431960": {
       "appid": "431960",
       "name": "Wallpaper Engine",
       "img_icon_url": "72edaed9d748c6cf7397ffb1c83f0b837b9ebd9d",
-      "total_minutes": 9,
+      "total_minutes": 15,
       "first_day": "2026-10-18",
-      "last_day": "2026-10-28"
+      "last_day": "2026-11-13"
     },
     "646570": {
       "appid": "646570",
@@ -120,15 +120,15 @@
       "appid": "227300",
       "name": "欧洲卡车模拟2",
       "img_icon_url": "adc18a4fc9adc0330144b76d61cbda68bb2394a0",
-      "lifetime_minutes": 8005,
-      "last_played": "2026-11-11"
+      "lifetime_minutes": 8047,
+      "last_played": "2026-11-13"
     },
     "246420": {
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "lifetime_minutes": 1416,
-      "last_played": "2026-11-12"
+      "lifetime_minutes": 1471,
+      "last_played": "2026-11-13"
     },
     "250900": {
       "appid": "250900",
@@ -232,8 +232,8 @@
       "appid": "431960",
       "name": "Wallpaper Engine",
       "img_icon_url": "72edaed9d748c6cf7397ffb1c83f0b837b9ebd9d",
-      "lifetime_minutes": 3562,
-      "last_played": "2026-10-28"
+      "lifetime_minutes": 3568,
+      "last_played": "2026-11-13"
     },
     "489830": {
       "appid": "489830",
