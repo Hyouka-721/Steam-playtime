@@ -74,6 +74,12 @@ page.on('response', (res) => {
     shardHits.push(u.split('/data/watch/')[1].split('?')[0]);
   }
 });
+/* 🔴 B8 要给一个假 Token：submitAdd 的守卫顺序是「空片名 → Token → 重名」，
+ *    线上浏览器没有 Token 时第一步就 return 了，重名检查压根跑不到（会假红成「按钮没变」）。
+ *    Token 只是本地 localStorage，不会真的发出去；api.github.com 已被 abort 兜底。 */
+await page.addInitScript(() => {
+  try { localStorage.setItem('watch-gh-token', 'ghp_fake_for_online_verify'); } catch (e) {}
+});
 await page.goto(SITE + 'watch.html?t=' + TS, { waitUntil: 'load' });
 await page.waitForFunction(() => document.querySelectorAll('#w-grid .poster').length > 20, null, { timeout: 30000 }).catch(() => {});
 await page.waitForTimeout(900);
@@ -195,7 +201,7 @@ const dup = await page.evaluate(() => ({
 ok('B8 A9 重名第一次提交被拦下：提示含已有记录 + 观影日期，按钮变「确认重复添加」，0 次写入请求',
   /库里已有记录/.test(dup.msg) && /阿甘正传/.test(dup.msg) && /观影于/.test(dup.msg) &&
   dup.btn.trim() === '确认重复添加' && dup.open && apiCalls.length === 0,
-  `api=${apiCalls.length} btn=${dup.btn.trim()}`);
+  `api=${apiCalls.length} btn=${dup.btn.trim()} msg=${dup.msg.slice(0, 40)}`);
 ok('B9 全程零 JS 异常', errs.length === 0, errs.slice(0, 3).join(' | '));
 await ctx.close();
 
