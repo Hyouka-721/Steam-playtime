@@ -50,8 +50,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=34 / watch.js?v=23',
-  /watch\.css\?v=34/.test(html) && /watch\.js\?v=23/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=35 / watch.js?v=24',
+  /watch\.css\?v=35/.test(html) && /watch\.js\?v=24/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 头部：副标题与「统计年份」label 的 DOM 已删，select 补 aria-label 保住可访问名称',
@@ -66,10 +66,10 @@ const spanOf = (k) => {
   const m = css.match(new RegExp('\\.st-panel\\[data-panel="' + k + '"\\]\\s*\\{\\s*grid-column:\\s*span\\s*(\\d+)'));
   return m ? Number(m[1]) : 0;
 };
-ok('A4 面板 12 栅格不对称：月度 8 / 逐年 8 / 类型 4 / 标签 4 / 评分区间 12（第 95 轮起 8 + 国别 4）',
+ok('A4 面板 12 栅格不对称：月度 8 / 逐年 8 / 类型 4 / 标签 4 / 评分区间 6 + 国别 6（第 97 轮改饼图后等分）',
   /\.st-panels\s*\{[\s\S]*?grid-template-columns:\s*repeat\(12,/.test(css) &&
   spanOf('months') === 8 && spanOf('years') === 8 && spanOf('kinds') === 4 &&
-  spanOf('tags') === 4 && spanOf('buckets') === 8 && spanOf('country') === 4,
+  spanOf('tags') === 4 && spanOf('buckets') === 6 && spanOf('country') === 6,
   `months=${spanOf('months')} kinds=${spanOf('kinds')} buckets=${spanOf('buckets')} country=${spanOf('country')}`);
 
 ok('A5 🔴 860 块里有面板跨度复位（否则容器 1 列 + 子项 span 8 会横向溢出）',
@@ -129,10 +129,11 @@ const probe = () => page.evaluate(() => {
       return e ? getComputedStyle(e).backgroundImage : ''; })(),
     kindBgs: [...document.querySelectorAll('[data-panel="kinds"] .st-row-track i')]
       .map((e) => getComputedStyle(e).backgroundImage),
-    tickContent: (() => { const e = document.querySelector('[data-panel="buckets"] .st-row-track');
+    tickContent: (() => { const e = document.querySelector('[data-panel="kinds"] .st-row-track');
       return e ? getComputedStyle(e, '::after').content : ''; })(),
     boxMonths: box('[data-panel="months"]'), boxKinds: box('[data-panel="kinds"]'),
     boxBuckets: box('[data-panel="buckets"]'), boxPanels: box('.st-panels'),
+    boxCountry: box('[data-panel="country"]'),
     ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
   };
 });
@@ -161,12 +162,14 @@ ok('B5 内容齐备：12 月柱 / 逐年柱=9 / 类型 3 行 / 区间 5 行 / �
   r.chips > 0 && r.chips <= 8 && r.top === 5,
   `月=${r.barsMonth} 年=${r.barsYear} 类型=${r.rowsKind} 区间=${r.rowsBucket} chips=${r.chips}`);
 
-ok('B6 美观 #4 版式真的不对称：每行都是 8 + 4（三行等高排布）',
+ok('B6 美观 #4 版式：前两行 8 + 4，第三行两个饼图 6 + 6 等分且同行',
   Math.abs(r.boxMonths.w / r.boxPanels.w - 8 / 12) < 0.03 &&
   Math.abs(r.boxKinds.w / r.boxPanels.w - 4 / 12) < 0.03 &&
-  Math.abs(r.boxBuckets.w / r.boxPanels.w - 8 / 12) < 0.03 &&
+  Math.abs(r.boxBuckets.w / r.boxPanels.w - 6 / 12) < 0.03 &&
+  Math.abs(r.boxCountry.w / r.boxPanels.w - 6 / 12) < 0.03 &&
+  r.boxCountry.t === r.boxBuckets.t &&
   r.boxMonths.t === r.boxKinds.t,
-  `容器 ${r.boxPanels.w} / 月度 ${r.boxMonths.w} / 类型 ${r.boxKinds.w} / 区间 ${r.boxBuckets.w}`);
+  `容器 ${r.boxPanels.w} / 月度 ${r.boxMonths.w} / 类型 ${r.boxKinds.w} / 区间 ${r.boxBuckets.w} / 国别 ${r.boxCountry.w}@${r.boxCountry.t}`);
 
 ok('B7 美观 #2 基线：.st-plot 有 1px 下边线（柱子落地，不再是飘着）',
   r.baseline === '1px', `border-bottom=${r.baseline}`);
@@ -176,7 +179,7 @@ ok('B8 美观 #5 柱渐变反转：顶端半透明、底端实色',
   /^linear-gradient\(rgba\(232, 176, 75, 0\.5\), rgb\(232, 176, 75\)\)$/.test(r.barBg),
   r.barBg.slice(0, 70));
 
-ok('B9 美观 #6 刻度：评分区间的轨道确实有 ::after 刻度层',
+ok('B9 美观 #6 刻度：类型构成的横条轨道有 ::after 刻度层（评分区间改饼图后已无轨道）',
   r.tickContent !== 'none' && r.tickContent !== '', `content=${r.tickContent}`);
 
 ok('B10 美观 #7 类型三档明度：电影 / 剧集 / 番剧三条底色互不相同',

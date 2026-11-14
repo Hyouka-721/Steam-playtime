@@ -960,6 +960,9 @@ select.w-input { cursor: pointer; }
   .w-stats .st-top-item { grid-template-columns: 18px 32px minmax(0, 1fr) 40px; gap: 8px; }
   .w-stats .st-top-img { width: 32px; height: 44px; }
   .w-stats .st-top-meta { display: none; }
+  /* 第 97 轮：390 下两个饼图改竖排（饼在上居中、图例整宽），否则 168 的饼把图例挤成两字一行 */
+  .w-stats .st-pie { flex-direction: column; align-items: stretch; gap: 14px; }
+  .w-stats .st-pie-chart { width: 132px; height: 132px; align-self: center; }
 }
 
 /* ================= 第 91 轮 A4：观影统计 / 年报 =================
@@ -1036,8 +1039,8 @@ select.w-input { cursor: pointer; }
 .st-panel[data-panel="years"] { grid-column: span 8; }
 .st-panel[data-panel="kinds"] { grid-column: span 4; }
 .st-panel[data-panel="tags"] { grid-column: span 4; }
-.st-panel[data-panel="buckets"] { grid-column: span 8; }
-.st-panel[data-panel="country"] { grid-column: span 4; }   /* 第 95 轮：第三行也凑成 8 + 4 */
+.st-panel[data-panel="buckets"] { grid-column: span 6; }
+.st-panel[data-panel="country"] { grid-column: span 6; }   /* 第 97 轮：与评分区间两饼等分 */
 .st-panel {
   padding: 16px 18px 18px; min-width: 0;
   background: var(--card-bg);
@@ -1087,6 +1090,22 @@ select.w-input { cursor: pointer; }
 }
 .st-row-track i { display: block; height: 100%; background: linear-gradient(90deg, rgba(232, 176, 75, .45), var(--accent)); border-radius: var(--r-pill); }
 .st-row-v { color: var(--text-strong); text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---- 第 97 轮：评分区间 / 国别构成改饼图 ----
+   片与片之间留 1.1° 的缝、靠面板底色透出来当分隔，不描边 ——
+   --card-bg 是 linear-gradient，拿不到可用的纯色，描出来是花的。
+   图例复用 .st-row 家族（.st-row--pie 只换列模板），旧套件数 .st-row 的判据不用动。
+   ⚠️ 图例必须限宽（max-width: 320px）：铺满式 flex 会把「片名」和「数量」一左一右拉开
+      300px，读起来像表格断了 —— 第 96 轮 Top5 踩过同一个坑。 */
+.st-pie { display: flex; align-items: center; justify-content: center; gap: clamp(16px, 2vw, 28px); min-width: 0; }
+.st-pie-chart { flex: 0 0 auto; display: block; width: clamp(150px, 16vw, 240px); height: clamp(150px, 16vw, 240px); }
+.st-pie-slice { stroke: none; }
+.st-rows--pie { flex: 0 1 auto; min-width: 0; max-width: 320px; gap: 9px; }
+.st-row--pie { grid-template-columns: 9px minmax(0, 1fr) 34px 46px; gap: 8px; }
+.st-row-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-faint); }
+.st-row-pct { font-size: 11px; color: var(--text-faint); text-align: right; font-variant-numeric: tabular-nums; }
+.st-row--pie.is-zero { opacity: .38; }
+
 /* 美观 #7：电影 / 剧集 / 番剧三档明度，否则三条全同金色、看不出区分 */
 .st-panel[data-panel="kinds"] .st-row:nth-child(1) .st-row-track i { background: linear-gradient(90deg, rgba(232, 176, 75, .45), var(--accent)); }
 .st-panel[data-panel="kinds"] .st-row:nth-child(2) .st-row-track i { background: linear-gradient(90deg, rgba(232, 176, 75, .16), rgba(232, 176, 75, .58)); }

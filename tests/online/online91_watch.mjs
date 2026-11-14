@@ -4,7 +4,7 @@
  *    等用户说「上线」→ fetch/merge → push → Pages 指纹轮询命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=34 / watch.js?v=23；线上 css/js/watch.json 字节
+ *   ① 指纹：watch.html 引用 watch.css?v=35 / watch.js?v=24；线上 css/js/watch.json 字节
  *      md5 与本地全等（CRLF 归一）；**分片真的上线了** —— manifest + 年片与本地逐字节一致，
  *      且 manifest 的 updated_at / total 能与线上主文件对账（对得上才说明线上走的是分片路径）
  *   ② 1440 运行时：A4 年报四卡数字全部由本地数据推导比对、年份下拉切换、返回列表还原；
@@ -97,12 +97,12 @@ await page.waitForTimeout(900);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹（含分片是否真的上线） ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=34 / watch.js?v=23',
-  /watch\.css\?v=34/.test(html) && /watch\.js\?v=23/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=35 / watch.js?v=24',
+  /watch\.css\?v=35/.test(html) && /watch\.js\?v=24/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=34&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=23&t=' + TS);
+const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=35&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=24&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等（年报几乎全在 CSS，必须一起上线）',
   md5txt(liveCss) === md5txt(localCss), `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等',

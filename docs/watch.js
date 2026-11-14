@@ -305,6 +305,58 @@
       '</div>';
     }).join('') + '</div>';
   }
+  /* ---------- 第 97 轮：评分区间 / 国别构成改饼图 ----------
+     用户要求「改成饼图」。纯 SVG 手绘，零依赖、零请求。
+     ① 片与片之间留 1.1° 的缝，靠面板底色透出来当分隔 —— 不描边（--card-bg 是渐变，
+        拿不到一个可用的纯色，描出来是花的）；
+     ② 0 值的档位不画片（画不出面积），但图例照列 —— 口径不能因为视觉实现而丢档；
+     ③ 图例复用 .st-row 家族、只换列模板（.st-row--pie），旧套件数 .st-row 的判据不用动。 */
+  var BUCKET_COLORS = ['rgba(232,176,75,.24)', 'rgba(232,176,75,.42)', 'rgba(232,176,75,.60)',
+                       'rgba(232,176,75,.78)', '#e8b04b'];   /* 分段是有序的：评分越高越亮 */
+  var COUNTRY_COLORS = ['#e8b04b', '#d98f5c', '#cf7a6a', '#b87fae',
+                        '#8a8fcb', '#6d9cc0', '#5aa79b', '#93a862'];   /* 国别无序，给 8 个可辨色 */
+  function stPie(pairs, ariaLabel) {
+    var total = 0;
+    pairs.forEach(function (p) { if (p.v > 0) total += p.v; });
+    if (!total) return '';
+    var live = pairs.filter(function (p) { return p.v > 0; });
+    var cx = 50, cy = 50, r = 46;
+    function pt(deg) {
+      var rad = deg * Math.PI / 180;
+      return (cx + r * Math.cos(rad)).toFixed(2) + ' ' + (cy + r * Math.sin(rad)).toFixed(2);
+    }
+    var slices;
+    if (live.length === 1) {
+      /* 只剩一档时画整圆：留缝会多出一个缺口，看着像掉了一块 */
+      slices = '<circle class="st-pie-slice" cx="50" cy="50" r="46" fill="' + live[0].c + '">' +
+        '<title>' + esc(live[0].k) + ' ' + live[0].v + '</title></circle>';
+    } else {
+      var ang = -90, gap = 1.1;
+      slices = live.map(function (p) {
+        var sweep = p.v / total * 360;
+        var a0 = ang + gap / 2, a1 = ang + sweep - gap / 2;
+        ang += sweep;
+        if (a1 - a0 < 0.5) a1 = a0 + 0.5;   /* 极小的片也留一丝可见面积 */
+        return '<path class="st-pie-slice" d="M ' + cx + ' ' + cy + ' L ' + pt(a0) +
+          ' A ' + r + ' ' + r + ' 0 ' + (a1 - a0 > 180 ? 1 : 0) + ' 1 ' + pt(a1) + ' Z" fill="' +
+          p.c + '"><title>' + esc(p.k) + ' ' + p.v + '</title></path>';
+      }).join('');
+    }
+    var legend = pairs.map(function (p) {
+      var pct = p.v / total * 100;
+      return '<div class="st-row st-row--pie' + (p.v ? '' : ' is-zero') + '">' +
+        '<i class="st-row-dot" style="background:' + p.c + '"></i>' +
+        '<span class="st-row-k">' + esc(p.k) + '</span>' +
+        '<span class="st-row-v">' + p.v + '</span>' +
+        '<span class="st-row-pct">' + pct.toFixed(1) + '%</span>' +
+      '</div>';
+    }).join('');
+    return '<div class="st-pie">' +
+      '<svg class="st-pie-chart" viewBox="0 0 100 100" role="img" aria-label="' + esc(ariaLabel) + '">' +
+        slices + '</svg>' +
+      '<div class="st-rows st-rows--pie">' + legend + '</div>' +
+    '</div>';
+  }
   function renderStats() {
     if (!statsEl) return;
     var years = statYears();
@@ -337,6 +389,7 @@
       var r = Number(it.rating);
       buckets[r < 6 ? 0 : r < 7 ? 1 : r < 8 ? 2 : r < 9 ? 3 : 4].v++;
     });
+    BUCKET_COLORS.forEach(function (c, i) { if (buckets[i]) buckets[i].c = c; });
     var tagMap = {};
     items.forEach(function (it) {
       (Array.isArray(it.tags) ? it.tags : []).forEach(function (t) { tagMap[t] = (tagMap[t] || 0) + 1; });
@@ -354,6 +407,7 @@
     });
     var countries = Object.keys(countryMap).map(function (k) { return { k: k, v: countryMap[k] }; })
       .sort(function (a, b) { return b.v - a.v || a.k.localeCompare(b.k); }).slice(0, 8);
+    COUNTRY_COLORS.forEach(function (c, i) { if (countries[i]) countries[i].c = c; });
     var noCountry = items.filter(function (it) {
       return !(Array.isArray(it.countries) && it.countries.length);
     }).length;
@@ -415,7 +469,8 @@
     }).join('') + '</div>';
     /* 每个面板都挂 data-panel：套件按面板取数（[data-panel="months"] .st-bar），
        以后再加面板就不用改旧判据了。⚠️ DOM 顺序决定栅格自动排布：
-       月度(8) + 类型(4) 一行、逐年(8) + 标签(4) 一行、评分区间(12) 独占一行。 */
+       月度(8) + 类型(4) 一行、逐年(8) + 标签(4) 一行、
+       评分区间(6) + 国别(6) 一行（第 97 轮两个饼图等分，各自近方形才放得下）。 */
     var panels = '<div class="st-panels">' +
       '<section class="st-panel" data-panel="months"><h3>月度分布</h3>' + stBars(months, monthMax) + '</section>' +
       '<section class="st-panel" data-panel="kinds"><h3>类型构成</h3>' + stRows(kinds) + '</section>' +
@@ -427,11 +482,12 @@
           return '<span class="st-chip">' + esc(t.k) + '<i>' + t.v + '</i></span>';
         }).join('') + '</div>' : '<p class="st-empty">这个范围内还没有标签</p>') +
       '</section>' +
-      '<section class="st-panel" data-panel="buckets"><h3>评分区间</h3>' + stRows(buckets) + '</section>' +
+      '<section class="st-panel" data-panel="buckets"><h3>评分区间</h3>' +
+        (stPie(buckets, '评分区间饼图') || '<p class="st-empty">这个范围内还没有评分记录</p>') + '</section>' +
       '<section class="st-panel" data-panel="country"><h3>国别构成' +
         (noCountry ? '<span class="st-hint">' + noCountry + ' 部待补</span>' : '') + '</h3>' +
         (countries.length
-          ? stRows(countries) + '<p class="st-note">按国别累计：合拍片会在各出品国各计一次，合计可超过记录总数</p>'
+          ? stPie(countries, '国别构成饼图') + '<p class="st-note">按国别累计：合拍片会在各出品国各计一次，合计可超过记录总数</p>'
           : '<p class="st-empty">还没有国别数据 —— 点右下角 + 或编辑任意条目即可填写</p>') +
       '</section>' +
     '</div>';
