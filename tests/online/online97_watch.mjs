@@ -4,7 +4,7 @@
  *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=35）命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹 —— watch.css?v=35 / watch.js?v=25、css/js 字节 md5 与本地全等、
+ *   ① 指纹 —— watch.css?v=35 / watch.js?v=27、css/js 字节 md5 与本地全等、
  *      线上 JS 里确有 stPie 且两个面板都走它、线上 CSS 里跨度是 6+6、
  *      图例有 max-width（否则片名与数量会被一左一右拉开）
  *   ② 1920 —— 两个饼都画出来（片数 = 非零档位数）、图例行数与首行按**线上数据现算**
@@ -49,12 +49,12 @@ await p0.waitForFunction(() => document.querySelectorAll('#w-grid .poster').leng
 await p0.waitForTimeout(800);
 
 const html = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=35 / watch.js?v=25',
-  /watch\.css\?v=35/.test(html) && /watch\.js\?v=25/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=35 / watch.js?v=27',
+  /watch\.css\?v=35/.test(html) && /watch\.js\?v=27/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=35&t=' + TS);
-const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=25&t=' + TS);
+const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=27&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等', md5txt(liveJs) === md5txt(localJs),
@@ -83,16 +83,26 @@ ok('A7 线上色板是重做后的 10 色（唯一、含站点金 #E8B04B，不�
   LIVE_COLORS.length === 10 && new Set(LIVE_COLORS).size === 10 && LIVE_COLORS[0] === '#E8B04B',
   LIVE_COLORS.join(' '));
 
-/* 线上真数据：按面板同一口径现算（只取前 8 个国别，分母就是这 8 个的合计） */
+/* 第 97 轮第三段：线上 JS 得真有「<10 部折成其他」这套逻辑，否则只是换了配色 */
+const liveOther = ((/var OTHER_COLOR = '(#[0-9A-Fa-f]{6})'/.exec(liveJsNC) || [, ''])[1] || '').toUpperCase();
+const liveMin = Number((/var COUNTRY_MIN = (\d+);/.exec(liveJsNC) || [, 0])[1]);
+ok('A8 线上真有长尾合并：COUNTRY_MIN = 10 + 独立的中性灰 ' + liveOther + '（不在国别彩色里）',
+  liveMin === 10 && /^#[0-9A-F]{6}$/.test(liveOther) && !LIVE_COLORS.includes(liveOther),
+  `阈值 ${liveMin} / 其他 ${liveOther}`);
+
+/* 线上真数据：按面板同一口径现算（≥10 部的逐项 + 其余合并成「其他」，分母是这些项的合计） */
 const LIVE = JSON.parse(await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'data/watch.json?t=' + TS));
 const RATED = LIVE.items.filter((it) => Number(it.rating) > 0);
 const BK = [0, 0, 0, 0, 0];
 RATED.forEach((it) => { const r = Number(it.rating); BK[r < 6 ? 0 : r < 7 ? 1 : r < 8 ? 2 : r < 9 ? 3 : 4]++; });
 const CNT = {};
 LIVE.items.forEach((it) => (it.countries || []).forEach((c) => { CNT[c] = (CNT[c] || 0) + 1; }));
-const RANK = Object.keys(CNT).sort((a, b) => CNT[b] - CNT[a] || a.localeCompare(b)).slice(0, 8);
+const RANK_ALL = Object.keys(CNT).sort((a, b) => CNT[b] - CNT[a] || a.localeCompare(b));
+const RANK = RANK_ALL.filter((k) => CNT[k] >= 10).slice(0, 8);
+const C_MINOR = RANK_ALL.filter((k) => !RANK.includes(k)).reduce((s, k) => s + CNT[k], 0);
+const C_ROWS = RANK.length ? RANK.length + (C_MINOR ? 1 : 0) : Math.min(8, RANK_ALL.length);
 const B_LIVE = BK.filter((v) => v > 0).length;
-const C_LIVE = RANK.filter((k) => CNT[k] > 0).length;
+const C_LIVE = C_ROWS;      /* 线上数据每个国别都 > 0，「其他」也只在合计 > 0 时才加，片数 = 行数 */
 await ctx0.close();
 
 /* ---------- ② 1920 ---------- */
@@ -132,9 +142,11 @@ const sumPct = (a) => a.reduce((s, x) => s + parseFloat(x), 0);
 ok('B1 两个饼都画出来了：评分区间 ' + B_LIVE + ' 片 / 国别 ' + C_LIVE + ' 片（= 线上非零档位数）',
   r.b.pieces === B_LIVE && r.c.pieces === C_LIVE, `实际 ${r.b.pieces} / ${r.c.pieces}`);
 
-ok('B2 图例行数 5 / 8，首行与线上数据排序一致（' + RANK[0] + ' ' + CNT[RANK[0]] + '）',
-  r.b.rows === 5 && r.c.rows === 8 && r.c.keys[0] === RANK[0] && r.c.vs[0] === String(CNT[RANK[0]]),
-  `区间 ${r.b.rows} 行 / 国别 ${r.c.rows} 行 首行 ${r.c.keys[0]} ${r.c.vs[0]}`);
+ok('B2 图例行数 5 / ' + C_ROWS + '（' + RANK.length + ' 个 ≥10 部 + 「其他」），首行与线上数据排序一致（' +
+  RANK[0] + ' ' + CNT[RANK[0]] + '）、末行是「其他」',
+  r.b.rows === 5 && r.c.rows === C_ROWS && r.c.keys[0] === RANK[0] && r.c.vs[0] === String(CNT[RANK[0]]) &&
+  (C_MINOR ? (r.c.keys[C_ROWS - 1] === '其他' && r.c.vs[C_ROWS - 1] === String(C_MINOR)) : true),
+  `区间 ${r.b.rows} 行 / 国别 ${r.c.rows} 行：${r.c.keys.map((k, i) => k + '=' + r.c.vs[i]).join('/')}`);
 
 ok('B3 百分比合计约 100%（饼的分母是面板里那些片，不是全库）',
   Math.abs(sumPct(r.b.pcts) - 100) < 0.35 && Math.abs(sumPct(r.c.pcts) - 100) < 0.35 &&

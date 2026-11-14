@@ -4,7 +4,7 @@
  *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=35）命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹：watch.css?v=35 / watch.js?v=25、css/js 字节 md5 与本地全等、
+ *   ① 指纹：watch.css?v=35 / watch.js?v=27、css/js 字节 md5 与本地全等、
  *      线上 JS 里规范名确实是「中国大陆」（不是「中国」）、线上 HTML 的 #w-stats-btn 带 hidden
  *   ② 1920：`.w-stats` 与 `.w-main` 同宽铺满（不再是 1180 居中）、左轨对齐、国别面板出真数据
  *      （行数/首行按**线上数据现算**，CI 每晚可能推新快照）、Top5 两列、六卡齐、零溢出
@@ -49,12 +49,12 @@ await p0.waitForFunction(() => document.querySelectorAll('#w-grid .poster').leng
 await p0.waitForTimeout(800);
 
 const html = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=35 / watch.js?v=25',
-  /watch\.css\?v=35/.test(html) && /watch\.js\?v=25/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=35 / watch.js?v=27',
+  /watch\.css\?v=35/.test(html) && /watch\.js\?v=27/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=35&t=' + TS);
-const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=25&t=' + TS);
+const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=27&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等', md5txt(liveJs) === md5txt(localJs),
@@ -121,8 +121,13 @@ ok('B2 年报与海报网格同一条左轨（不再是 margin:auto 居中）',
   Math.abs((r.stLeft - r.mainLeft) - 28) <= 1, `年报 left ${r.stLeft} / main left ${r.mainLeft}`);
 
 const first = r.cRows[0] || {};
-ok('B3 国别面板出真数据：' + Math.min(8, LRANK.length) + ' 行、首行 ' + LRANK[0] + '=' + LCNT[LRANK[0]] + '、无待补无空态',
-  r.cRows.length === Math.min(8, LRANK.length) && first.k === LRANK[0] &&
+/* 第 97 轮改判：面板把「<10 部」的国别折成一行「其他」，行数不再是 min(8, 国别数)。
+   —— 不是调阈值：合并规则本身由 verify97 A14/A15/B3/B11/C4 与 online97 B2 守着。 */
+const L96MAJ = LRANK.filter((c) => LCNT[c] >= 10).slice(0, 8);
+const L96MIN = LRANK.filter((c) => !L96MAJ.includes(c)).reduce((s, c) => s + LCNT[c], 0);
+const L96ROWS = L96MAJ.length ? L96MAJ.length + (L96MIN ? 1 : 0) : Math.min(8, LRANK.length);
+ok('B3 国别面板出真数据：' + L96ROWS + ' 行、首行 ' + LRANK[0] + '=' + LCNT[LRANK[0]] + '、无待补无空态',
+  r.cRows.length === L96ROWS && first.k === LRANK[0] &&
   first.v === String(LCNT[LRANK[0]]) &&
   r.cHint === (LNO ? LNO + ' 部待补' : '') && r.cEmpty === 0,
   r.cRows.map((x) => x.k + '=' + x.v).join('/') + ` | 提示「${r.cHint}」`);

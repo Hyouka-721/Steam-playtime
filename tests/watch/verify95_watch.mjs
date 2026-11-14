@@ -37,8 +37,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=35 / watch.js?v=25',
-  /watch\.css\?v=35/.test(html) && /watch\.js\?v=25/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=35 / watch.js?v=27',
+  /watch\.css\?v=35/.test(html) && /watch\.js\?v=27/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const cInput = (html.match(/<input[^>]*id="add-country"[^>]*>/) || [''])[0];
@@ -102,16 +102,21 @@ const r0 = await page.evaluate(() => {
 });
 /* 第 96 轮改判：数据已把 124 条国别全部补齐，所以真实数据不再是空态。
    判据从「空态 + N 部待补」改成「出真行、首行=实际最多的那个国别、待补 0」。
-   —— 这不是调阈值：空态分支由下面的造数用例（B3 的 1 部待补）继续守着。 */
+   —— 这不是调阈值：空态分支由下面的造数用例（B3 的 1 部待补）继续守着。
+   第 97 轮再改判一次：面板把「<10 部」的国别折成一行「其他」，所以行数不再是 min(8, 国别数)。
+   —— 也不是调阈值：合并规则本身由 verify97 A14/A15/B3/B11/C4 守，这里只跟真实数据对账。 */
 const R95 = {};
 data.items.forEach((it) => (it.countries || []).forEach((c) => { R95[c] = (R95[c] || 0) + 1; }));
 const R95K = Object.keys(R95).sort((a, b) => R95[b] - R95[a] || a.localeCompare(b));
+const R95MAJ = R95K.filter((c) => R95[c] >= 10).slice(0, 8);
+const R95MIN = R95K.filter((c) => !R95MAJ.includes(c)).reduce((s, c) => s + R95[c], 0);
+const R95EXP = R95MAJ.length ? R95MAJ.length + (R95MIN ? 1 : 0) : Math.min(8, R95K.length);
 const R95NO = data.items.filter((it) => !(Array.isArray(it.countries) && it.countries.length)).length;
 const R95ROW = r0.rows > 0 ? r0.rows : 0;
 const R95FIRST = R95K[0];
-ok('B1 真实数据已补齐国别：面板出 ' + Math.min(8, R95K.length) + ' 行、首行 ' + R95FIRST +
+ok('B1 真实数据已补齐国别：面板出 ' + R95EXP + ' 行、首行 ' + R95FIRST +
   '=' + R95[R95FIRST] + '、无待补、无空态',
-  R95ROW === Math.min(8, R95K.length) && r0.first === R95FIRST && r0.firstV === String(R95[R95FIRST]) &&
+  R95ROW === R95EXP && r0.first === R95FIRST && r0.firstV === String(R95[R95FIRST]) &&
   R95NO === 0 && r0.hint === '' && r0.empty === '',
   `行=${R95ROW} 首行=${r0.first}/${r0.firstV} 提示「${r0.hint}」空态=${r0.empty ? '有' : '无'} 待补=${R95NO}`);
 await ctx.close();

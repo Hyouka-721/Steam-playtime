@@ -35,7 +35,11 @@ data.items.forEach((it) => (it.countries || []).forEach((c) => { CNT[c] = (CNT[c
 const RANK = Object.keys(CNT).sort((a, b) => CNT[b] - CNT[a] || a.localeCompare(b));
 const TOP = RANK[0];
 const TOPN = CNT[TOP];
-const ROWS_EXPECT = Math.min(8, RANK.length);
+/* 第 97 轮：国别面板口径改成「≥10 部逐项 + 其余合并成『其他』」，
+   行数不再等于 min(8, 国别数)；没有国别够 10 部时退回前 8 名（verify97 A15/C4 守着那条）。 */
+const CMAJOR96 = RANK.filter((c) => CNT[c] >= 10).slice(0, 8);
+const CMINOR96 = RANK.filter((c) => !CMAJOR96.includes(c)).reduce((s, c) => s + CNT[c], 0);
+const ROWS_EXPECT = CMINOR96 ? CMAJOR96.length + 1 : Math.min(8, RANK.length);
 const NO_COUNTRY = data.items.filter((it) => !(Array.isArray(it.countries) && it.countries.length)).length;
 const YEARS = new Set(data.items.map((x) => String(x.watched_at || '').slice(0, 4))).size;
 
@@ -54,8 +58,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=35 / watch.js?v=25（CSS 改限宽、JS 改国别规范名，两个都要 bump）',
-  /watch\.css\?v=35/.test(html) && /watch\.js\?v=25/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=35 / watch.js?v=27（CSS 改限宽、JS 改国别规范名，两个都要 bump）',
+  /watch\.css\?v=35/.test(html) && /watch\.js\?v=27/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const statsBlock = (/(^|\n)\.w-stats \{[^}]*\}/.exec(css) || [''])[0];

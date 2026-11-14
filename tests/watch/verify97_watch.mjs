@@ -1,6 +1,8 @@
 /* 第 97 轮 watch 侧回归：评分区间 + 国别构成改成饼图
  *
  * 用户原话：「评分区间与国别构成改成饼图」
+ *         →「饼图当前使用的颜色种类过少，数据项之间缺乏足够的视觉区分度…兼顾色盲友好」
+ *         →「评分区间的颜色差异不够大，国别的饼图少于 10 的国家合并为其他」
  *
  * 做法（都在 docs/watch.js / watch.css 里，零依赖、零请求）：
  *   ① 新增 `stPie(pairs, ariaLabel)`：纯 SVG 手绘扇形，`<path d="M cx cy L … A … Z">`；
@@ -11,10 +13,13 @@
  *   ③ 图例复用 .st-row 家族、只换列模板（.st-row--pie），所以旧套件数 .st-row /
  *      .st-row-k / .st-row-v 的判据一个字都不用改。
  *   ④ 面板跨度 8+4 → 6+6：饼要近方形才放得下，两个饼同行等分。
+ *   ⑤ 配色重做：国别 10 色、评分区间有序五档（判据见 A10~A13，都是量化指标不是看着像）。
+ *   ⑥ 长尾合并：<10 部的国别折成「其他」（中性灰），样本不足阈值时退回前 8 名（A14/A15、C4）。
  *
  * ⚠️ 年报按钮只在时间轴视图出现（第 93 轮契约），所以每次都要先点头像再点年报。
  * ⚠️ 图例必须限宽（max-width: 320px）：铺满式 flex 会把「片名」和「数量」一左一右
  *    拉开 300px，读起来像表格断了 —— 第 96 轮 Top5 踩过同一个坑。
+ * ⚠️ 饼的分母是**面板实际画出来的那几项**之和，不是全部国别合计（第 97 轮第一版错在这里）。
  */
 import { createRequire } from 'module';
 import fs from 'fs';
@@ -43,10 +48,18 @@ RATED.forEach((it) => {
 const CNT = {};
 data.items.forEach((it) => (it.countries || []).forEach((c) => { CNT[c] = (CNT[c] || 0) + 1; }));
 const CRANK = Object.keys(CNT).sort((a, b) => CNT[b] - CNT[a] || a.localeCompare(b));
-/* 面板只画前 8 名，饼的分母就是**这 8 个**的合计（不是全部国别）—— 判据必须同口径 */
-const CSHOWN = CRANK.slice(0, 8);
-const CSUM = CSHOWN.reduce((s, k) => s + CNT[k], 0);
-const CLIVE = CSHOWN.filter((k) => CNT[k] > 0).length;
+/* 第 97 轮第三段（用户：「国别的饼图少于 10 的国家合并为其他」）改了口径：
+   面板 = 前 8 个「≥10 部」的国别 + 一行「其他」（装下全部长尾）。
+   ⚠️ 分母是**面板实际画出来的那几项**之和，不是全部国别的合计 —— 这两者不相等，
+   第一版就错在这里，国别扇形角度全崩。 */
+const CMIN = 10;
+const CMAJOR = CRANK.filter((k) => CNT[k] >= CMIN).slice(0, 8);
+const MINOR_SUM = CRANK.filter((k) => !CMAJOR.includes(k)).reduce((s, k) => s + CNT[k], 0);
+const CSHOWN = CMAJOR.map((k) => [k, CNT[k]]).concat(MINOR_SUM ? [['其他', MINOR_SUM]] : []);
+const CSUM = CSHOWN.reduce((s, x) => s + x[1], 0);
+const CSV = CSHOWN.map((x) => x[1]).filter((v) => v > 0);
+const CLIVE = CSV.length;
+const OTHER_RGB = 'rgb(140, 140, 170)';   /* #8C8CAA */
 const BZERO = BUCKETS.filter((v) => v === 0).length;
 
 /* ---------- 配色体检工具（第 97 轮追加）----------
@@ -107,8 +120,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=35 / watch.js?v=25（CSS 与 JS 都改了，两个都要 bump）',
-  /watch\.css\?v=35/.test(html) && /watch\.js\?v=25/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=35 / watch.js?v=27（CSS 与 JS 都改了，两个都要 bump）',
+  /watch\.css\?v=35/.test(html) && /watch\.js\?v=27/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 JS 有 stPie + 两套色板；评分区间与国别都走它（stPie(buckets) / stPie(countries)）',
@@ -173,6 +186,24 @@ ok('A13 评分区间五档是有序色阶：L* 单调递增，且相邻档三视
   mono && adjMin >= 8,
   `L* ${bL.map((x) => x.toFixed(1)).join(' < ')} / 相邻 ΔE min ${adjMin.toFixed(1)}`);
 
+/* ---- 第三段：国别长尾合并「其他」 ---- */
+const otherHex = ((/var OTHER_COLOR = '(#[0-9A-Fa-f]{6})'/.exec(js) || [, ''])[1] || '').toUpperCase();
+const countryMin = Number((/var COUNTRY_MIN = (\d+);/.exec(js) || [, 0])[1]);
+const otherScore = otherHex
+  ? Math.min(...COUNTRY_PAL.slice(0, 5).map((h) => pairScore(hex2rgb(otherHex), hex2rgb(h)))) : -1;
+const otherCon = otherHex ? contrast(hex2rgb(otherHex), hex2rgb(BG_HEX)) : -1;
+ok('A14 长尾合并：COUNTRY_MIN = 10 + 独立的中性灰 OTHER_COLOR（不占用国别彩色，与前 5 色 ΔE ≥ 15）',
+  countryMin === 10 && /^#[0-9A-F]{6}$/.test(otherHex) && otherScore >= 15 && otherCon >= 3 &&
+  !COUNTRY_PAL.includes(otherHex),
+  `阈值 ${countryMin} / 其他 ${otherHex} / 三视图 ΔE min ${otherScore.toFixed(1)} / 对底 ${otherCon.toFixed(2)}`);
+
+/* 兜底：样本还小（一个 ≥10 部的都没有）时不能把整张饼涂成一块灰，要退回「前 8 名」老口径 */
+ok('A15 分流写全了：有 ≥10 部的走「major + 其他」，一个都没有时退回前 8 名；脚注只在真有其他时补那句话',
+  /var majors = countryAll\.filter\(function \(p\) \{ return p\.v >= COUNTRY_MIN; \}\)/.test(js) &&
+  /countries = countryAll\.slice\(0, 8\);/.test(js) &&
+  /少于 ' \+ COUNTRY_MIN \+ ' 部的国别（/.test(js) &&
+  /hasOther \?/.test(js));
+
 
 /* ---------------- B 1920 运行时 ---------------- */
 console.log('== B 1920 运行时 ==');
@@ -219,6 +250,7 @@ const probe = () => page.evaluate(() => {
       vs: rows.map((x) => x.querySelector('.st-row-v').textContent.trim()),
       pcts: rows.map((x) => x.querySelector('.st-row-pct').textContent.trim()),
       dots: rows.map((x) => getComputedStyle(x.querySelector('.st-row-dot')).backgroundColor),
+      note: (sec.querySelector('.st-note') || {}).textContent || '',
       zeros: rows.filter((x) => x.classList.contains('is-zero')).length,
       zeroOpacity: rows.filter((x) => x.classList.contains('is-zero')).map((x) => getComputedStyle(x).opacity),
       nan: /NaN/.test(sec.innerHTML)
@@ -242,10 +274,13 @@ ok('B2 评分区间：5 档全在（4 片还是 5 片取决于有没有 0 值档
   r.b.rows === 5 && r.b.pieces === 5 - BZERO && Math.abs(sumPct(r.b.pcts) - 100) < 0.35,
   `片 ${r.b.pieces}（0 值档 ${BZERO}）/ 行 ${r.b.rows} / 合计 ${sumPct(r.b.pcts).toFixed(1)}%`);
 
-ok('B3 国别：图例 8 行、首行仍是日本、百分比合计约 100%、片数 = 非零国别数',
-  r.c.rows === 8 && r.c.keys[0] === CRANK[0] && r.c.vs[0] === String(CNT[CRANK[0]]) &&
+ok('B3 国别：' + CMAJOR.length + ' 个 ≥' + CMIN + ' 部的国别 + 「其他」= ' + CSHOWN.length +
+  ' 行，首行 ' + CMAJOR[0] + '、末行「其他」=' + MINOR_SUM + '、百分比合计约 100%、片数 = 非零项数',
+  r.c.rows === CSHOWN.length && r.c.keys[0] === CMAJOR[0] && r.c.vs[0] === String(CNT[CMAJOR[0]]) &&
+  (MINOR_SUM ? (r.c.keys[r.c.keys.length - 1] === '其他' &&
+    r.c.vs[r.c.vs.length - 1] === String(MINOR_SUM)) : true) &&
   Math.abs(sumPct(r.c.pcts) - 100) < 0.35 && r.c.pieces === CLIVE,
-  `首行 ${r.c.keys[0]} ${r.c.vs[0]} ${r.c.pcts[0]} / 片 ${r.c.pieces} / 合计 ${sumPct(r.c.pcts).toFixed(1)}%`);
+  `${r.c.keys.map((k, i) => k + '=' + r.c.vs[i]).join('/')} / 片 ${r.c.pieces} / 合计 ${sumPct(r.c.pcts).toFixed(1)}%`);
 
 /* 几何：每片扫过的角度必须是 v/total*360 再各让 0.55°（缝）——这条能抓住「比例算错」 */
 const TOTAL_B = BUCKETS.reduce((a, b) => a + b, 0);
@@ -254,22 +289,23 @@ const bGeo = r.b.sweeps.every((sw, i) => {
   const want = expSweep(liveB[i], TOTAL_B) - (liveB.length > 1 ? 1.1 : 0);
   return Math.abs(sw - want) < 0.35;
 });
-const liveC = CSHOWN.filter((k) => CNT[k] > 0);
-const cGeo = r.c.sweeps.every((sw, i) => Math.abs(sw - (expSweep(CNT[liveC[i]], CSUM) - 1.1)) < 0.35);
+const cGeo = CSV.every((v, i) => Math.abs(r.c.sweeps[i] - (expSweep(v, CSUM) - 1.1)) < 0.35);
 ok('B4 扇形角度与计数成比例（各让 0.55° 的缝），不是画着好看的假图',
   bGeo && cGeo,
-  `区间 ${r.b.sweeps.map((x) => x.toFixed(1)).join('/')} | 国别首片 ${r.c.sweeps[0].toFixed(1)}°`);
+  `区间 ${r.b.sweeps.map((x) => x.toFixed(1)).join('/')} | 国别 ${r.c.sweeps.map((x) => x.toFixed(1)).join('/')}`);
 
-ok('B5 片与图例一一对应：每片 title = 「名称 数量」，图例色点与扇形同色',
+ok('B5 片与图例一一对应：每片 title = 「名称 数量」，图例色点与扇形同色，「其他」用中性灰',
   r.b.titles.every((t) => /^\S+ \d+$/.test(t)) && r.c.titles.every((t) => /^\S+ \d+$/.test(t)) &&
-  r.c.titles[0] === CRANK[0] + ' ' + CNT[CRANK[0]] &&
-  r.c.dots[0] === 'rgb(232, 176, 75)',
-  `首片 ${r.c.titles[0]} / 色 ${r.c.dots[0]}`);
+  r.c.titles[0] === CMAJOR[0] + ' ' + CNT[CMAJOR[0]] &&
+  r.c.dots[0] === 'rgb(232, 176, 75)' &&
+  (!MINOR_SUM || (r.c.dots[r.c.rows - 1] === OTHER_RGB && r.c.fills[r.c.pieces - 1] === otherHex)),
+  `首片 ${r.c.titles[0]} / 色 ${r.c.dots[0]} / 末色 ${r.c.dots[r.c.rows - 1]}`);
 
 ok('B6 真实数据没有 0 值档，is-zero 空态分支不误报；也没有 NaN 漏进 SVG',
   r.b.zeros === 0 && r.c.zeros === 0 && !r.b.nan && !r.c.nan, `is-zero ${r.b.zeros}+${r.c.zeros}`);
 
-ok('B10 渲染后色点两两不同：8 个国别 = 8 种颜色、5 个区间 = 5 种，扇形 fill 也不重复',
+ok('B10 渲染后色点两两不同：' + r.c.rows + ' 行国别 = ' + new Set(r.c.dots).size +
+  ' 种颜色、5 个区间 = ' + new Set(r.b.dots).size + ' 种，扇形 fill 也不重复',
   new Set(r.c.dots).size === r.c.rows && new Set(r.b.dots).size === r.b.rows &&
   new Set(r.c.fills).size === r.c.pieces && new Set(r.b.fills).size === r.b.pieces,
   `国别 ${new Set(r.c.dots).size}/${r.c.rows} · 区间 ${new Set(r.b.dots).size}/${r.b.rows}`);
@@ -284,6 +320,16 @@ ok('B8 饼按 clamp(150,16vw,240) 长到 240（1920），图例限宽 320 没被
   `饼 ${r.b.pie.w}×${r.b.pie.h} / 图例 ${r.b.leg.w}`);
 
 ok('B9 1920 无横向溢出 + 零 JS 异常', r.ov <= 0 && errs.length === 0, `ov=${r.ov} err=${errs.length}`);
+
+/* 合并是「把长尾收起来」，不是「把长尾删掉」——被合并的国别必须在某处还查得到，
+   否则用户会以为那几部片没算进统计里。
+   ⚠️ 写进脚注而不是 `title=` 气泡：① `verify83 A3` 守着「watch.js 里不许写 DOM title」
+   （第 83 轮把原生气泡删净了，不能为这个功能破例）；② 触屏根本没有 hover。 */
+ok('B11 脚注写清合并规则 + 点名列出被合并的国别（合并≠丢信息）',
+  /少于 10 部的国别（/.test(r.c.note) && /）合并为「其他」/.test(r.c.note) &&
+  /按国别累计/.test(r.c.note) &&
+  CRANK.filter((k) => !CMAJOR.includes(k)).every((k) => r.c.note.includes(k)),
+  `脚注「${r.c.note}」`);
 
 /* ---------------- C 造数：只剩一档 / 有 0 值档 ---------------- */
 console.log('== C 造数（单一评分档位） ==');
@@ -320,7 +366,11 @@ const m = await p2.evaluate(() => {
     liveKey: (rows.find((x) => !x.classList.contains('is-zero')) || {}).textContent || '',
     pct: rows.map((x) => x.querySelector('.st-row-pct').textContent.trim()),
     nan: /NaN/.test(sec.innerHTML),
-    svgAttr: sec.querySelector('.st-pie-chart').getAttribute('aria-label')
+    svgAttr: sec.querySelector('.st-pie-chart').getAttribute('aria-label'),
+    /* 样本只有日本 2 部 —— 没有任何国别够 10 部，必须退回「前 8 名」而不是把饼涂成一块灰 */
+    cKeys: [...document.querySelectorAll('[data-panel="country"] .st-row-k')].map((x) => x.textContent.trim()),
+    cNote: (document.querySelector('[data-panel="country"] .st-note') || {}).textContent || '',
+    cSlices: document.querySelectorAll('[data-panel="country"] .st-pie-slice').length
   };
 });
 ok('C1 只剩一档评分时画整圆（<circle>），不是 359.9° 的缺口扇形',
@@ -334,6 +384,13 @@ ok('C2 0 值档位不画片但图例照列（4 行 is-zero，压暗到 0.38，�
 ok('C3 唯一非零档占比 100.0%，且没有 NaN / aria-label 仍在',
   m.pct.filter((t) => t === '100.0%').length === 1 && !m.nan && m.svgAttr === '评分区间饼图',
   `pct=${m.pct.join('/')} label=${m.svgAttr} err=${e2.length}`);
+
+/* 小样本兜底：2 部片、同一个国别（1 个国别 2 部 < 阈值 10），
+   如果无脑合并就会得到「其他 2」一块灰 —— 那面板等于废了。 */
+ok('C4 样本不足 10 部时不合并：国别仍是「日本 2」一整块，脚注也不提「其他」',
+  m.cKeys.join('/') === '日本' && m.cSlices === 1 &&
+  !/其他/.test(m.cNote) && /按国别累计/.test(m.cNote),
+  `行 ${m.cKeys.join('/')} / 片 ${m.cSlices} / 脚注「${m.cNote}」`);
 await c2.close();
 
 /* ---------------- D 1440 ---------------- */

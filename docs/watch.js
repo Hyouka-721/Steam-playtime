@@ -311,20 +311,28 @@
         拿不到一个可用的纯色，描出来是花的）；
      ② 0 值的档位不画片（画不出面积），但图例照列 —— 口径不能因为视觉实现而丢档；
      ③ 图例复用 .st-row 家族、只换列模板（.st-row--pie），旧套件数 .st-row 的判据不用动。 */
-  /* 第 97 轮配色重做（用户：「颜色种类过少，数据项之间缺乏足够的视觉区分度」）。
+  /* 第 97 轮配色重做（用户：「颜色种类过少，数据项之间缺乏足够的视觉区分度」，
+     第二轮追加：「评分区间的颜色差异不够大」）。
      两套色板都在 OKLCH 里设计，再用 Viénot/Brettel 的二色觉矩阵做**红绿色盲模拟**校验
      （ΔE 用 CIE76，三视图 = 正常 / 绿盲 / 红盲取最差值）：
      · 国别是**无序分类**，10 色。实测：正常视觉最小 ΔE 24.8、三视图最小 17.1；
-       面板实际只用前 8 个，那两个数是 26.8 / 26.8；对面板底 #14141a 对比度最低 3.7（≥3）。
+       面板最多用到前 8 个（+「其他」），那两个数是 26.8 / 26.8；对面板底 #14141a 对比度最低 3.7（≥3）。
        约束：每 60° 色相扇区最多两色、且明度必须差 0.16 以上 —— 否则会出现「5 个青色」
        那种数值上合格、肉眼却像同一家的配色。
-     · 评分区间是**有序分段**，5 色沿「紫 → 粉 → 珊瑚 → 金 → 浅柠」走，L* 单调递增
-       （49.2 < 56.4 < 65.3 < 75.3 < 88.0）—— 全色盲也能靠明暗排出高低，这才是有序色阶
+     · 评分区间是**有序分段**，5 色沿「靛 → 青 → 绿 → 金 → 米」走，L* 单调递增
+       （45.0 < 60.8 < 64.8 < 75.3 < 91.3）—— 全色盲也能靠明暗排出高低，这才是有序色阶
        该有的样子；第 4 档钉死站点金 #e8b04b 保持识别度。
-     ⚠️ 改这两个数组时别凭感觉：相邻色的 ΔE 掉到 10 以下就分不开了，`verify97_watch` 会拦。 */
-  var BUCKET_COLORS = ['#7E6BA8', '#B86FA6', '#E8817E', '#E8B04B', '#F2DC8E'];
+       ⚠️ 第一版走的是「紫 → 粉 → 珊瑚 → 金 → 浅柠」，相邻 ΔE 只有 9.7（#7E6BA8 / #B86FA6）——
+       粉和紫既同色相扇区又都是中明度，用户一句「颜色差异不够大」说的就是这个。
+       现版三视图全局最小 ΔE 23.5、**相邻**最小 25.4，对底最低 3.41。
+     · 国别长尾折成的「其他」用中性灰 #8c8caa：它是个**兜底项**，不做成第 11 个彩色，
+       免得跟正经国别抢注意力。对底 5.63，与前 5 色三视图 ΔE 最低 21.9。
+     ⚠️ 改这几个数组时别凭感觉：相邻色的 ΔE 掉到 10 以下就分不开了，`verify97_watch` 会拦。 */
+  var BUCKET_COLORS = ['#5A5FC8', '#2E9EC4', '#4FB06A', '#E8B04B', '#F3E7A8'];
   var COUNTRY_COLORS = ['#E8B04B', '#6769BF', '#78D1C0', '#B4514C', '#A1BDF9',
                         '#985F85', '#B0C888', '#976C00', '#359B75', '#0097BC'];
+  var OTHER_COLOR = '#8C8CAA';
+  var COUNTRY_MIN = 10;   /* 少于 10 部的国别合并成「其他」 */
   function stPie(pairs, ariaLabel) {
     var total = 0;
     pairs.forEach(function (p) { if (p.v > 0) total += p.v; });
@@ -415,9 +423,31 @@
         if (c) countryMap[c] = (countryMap[c] || 0) + 1;
       });
     });
-    var countries = Object.keys(countryMap).map(function (k) { return { k: k, v: countryMap[k] }; })
-      .sort(function (a, b) { return b.v - a.v || a.k.localeCompare(b.k); }).slice(0, 8);
-    countries.forEach(function (p, i) { p.c = COUNTRY_COLORS[i % COUNTRY_COLORS.length]; });
+    /* 第 97 轮：长尾合并。真实数据 10 个国别里有 6 个只有 1~2 部 —— 逐个画片只是一圈 2° 的
+       碎屑，图例还白占 4 行。所以「少于 COUNTRY_MIN 部」的一律折成「其他」一项。
+       🔴 但样本还小的时候（一个 ≥10 部的都没有）不能把整张饼涂成一块灰：那种情况退回
+       「按数量取前 8 名」的老口径，面板才有信息量。 */
+    var countryAll = Object.keys(countryMap).map(function (k) { return { k: k, v: countryMap[k] }; })
+      .sort(function (a, b) { return b.v - a.v || a.k.localeCompare(b.k); });
+    var majors = countryAll.filter(function (p) { return p.v >= COUNTRY_MIN; });
+    var countries, ci = 0, hasOther = false, otherNames = '';
+    if (majors.length) {
+      countries = majors.slice(0, 8);
+      var restVal = 0, restNames = [];
+      countryAll.forEach(function (p) {
+        if (countries.indexOf(p) < 0) { restVal += p.v; restNames.push(p.k); }
+      });
+      if (restVal) {
+        countries.push({ k: '其他', v: restVal, other: true });
+        otherNames = restNames.join('、');
+        hasOther = true;
+      }
+    } else {
+      countries = countryAll.slice(0, 8);
+    }
+    countries.forEach(function (p) {
+      p.c = p.other ? OTHER_COLOR : COUNTRY_COLORS[ci++ % COUNTRY_COLORS.length];
+    });
     var noCountry = items.filter(function (it) {
       return !(Array.isArray(it.countries) && it.countries.length);
     }).length;
@@ -497,7 +527,8 @@
       '<section class="st-panel" data-panel="country"><h3>国别构成' +
         (noCountry ? '<span class="st-hint">' + noCountry + ' 部待补</span>' : '') + '</h3>' +
         (countries.length
-          ? stPie(countries, '国别构成饼图') + '<p class="st-note">按国别累计：合拍片会在各出品国各计一次，合计可超过记录总数</p>'
+          ? stPie(countries, '国别构成饼图') + '<p class="st-note">按国别累计：合拍片会在各出品国各计一次，合计可超过记录总数' +
+            (hasOther ? '；少于 ' + COUNTRY_MIN + ' 部的国别（' + esc(otherNames) + '）合并为「其他」' : '') + '</p>'
           : '<p class="st-empty">还没有国别数据 —— 点右下角 + 或编辑任意条目即可填写</p>') +
       '</section>' +
     '</div>';
