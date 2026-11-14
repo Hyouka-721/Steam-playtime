@@ -151,6 +151,8 @@ const r = await page.evaluate(() => {
   const cards = [...document.querySelectorAll('.st-card')].map((e) => ({
     k: (e.querySelector('.st-k') || e.querySelector('.st-card-k') || {}).textContent || '',
     v: (e.querySelector('.st-v') || e.querySelector('.st-card-v') || {}).textContent || '',
+    /* 第 103 轮改判补 u：峰值月份/观影密度断言用到单位（verify102 同款修复）。 */
+    u: (e.querySelector('.st-u') || {}).textContent || '',
     ...b(e)
   }));
   const btn = document.getElementById('w-stats-btn');
