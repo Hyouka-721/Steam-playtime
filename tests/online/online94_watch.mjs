@@ -6,7 +6,7 @@
  *    单独回滚到第 93 轮（v=30 / v=20）时本脚本会红在 A1，属预期。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=35 / watch.js?v=24；css/js 字节 md5 与本地全等；
+ *   ① 指纹：watch.html 引用 watch.css?v=35 / watch.js?v=25；css/js 字节 md5 与本地全等；
  *      线上 JS 里确实没有 st-sub / st-label、且 select 带 aria-label（版本号只说明引用变了）
  *   ② 1440：6 卡（键名与顺序）、指标与本地推导全等、面板 5+Top5 顺序、
  *      12 月柱 / 逐年柱=9 / 类型 3 行 / 区间 5 行、版式真的是 8/4/12 不对称、无溢出零异常
@@ -61,12 +61,12 @@ await page.waitForTimeout(900);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹 ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=35 / watch.js?v=24',
-  /watch\.css\?v=35/.test(html) && /watch\.js\?v=24/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=35 / watch.js?v=25',
+  /watch\.css\?v=35/.test(html) && /watch\.js\?v=25/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=35&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=24&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=25&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等', md5txt(liveJs) === md5txt(localJs),

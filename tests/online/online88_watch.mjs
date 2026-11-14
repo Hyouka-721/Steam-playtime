@@ -74,9 +74,9 @@ ok('A3 不再拿 img/minion-*.webp 当 favicon（小黄人仍是站内 logo，�
   !/<link rel="icon"[^>]*image\/webp/.test(html) && /minion-[0-9a-f]{8}\.webp/.test(html));
 
 const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=35&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=24&t=' + TS);
-ok('A4 watch.css?v=35 / watch.js?v=24 未变（本轮不 bump —— 换的是文件 URL），且与本地字节全等',
-  /watch\.css\?v=35/.test(html) && /watch\.js\?v=24/.test(html) &&
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=25&t=' + TS);
+ok('A4 watch.css?v=35 / watch.js?v=25 未变（本轮不 bump —— 换的是文件 URL），且与本地字节全等',
+  /watch\.css\?v=35/.test(html) && /watch\.js\?v=25/.test(html) &&
   md5txt(liveCss) === md5txt(localCss) && md5txt(liveJs) === md5txt(localJs),
   `css ${md5txt(liveCss).slice(0, 12)} / js ${md5txt(liveJs).slice(0, 12)}`);
 

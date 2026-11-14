@@ -50,8 +50,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=35 / watch.js?v=24',
-  /watch\.css\?v=35/.test(html) && /watch\.js\?v=24/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=35 / watch.js?v=25',
+  /watch\.css\?v=35/.test(html) && /watch\.js\?v=25/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 头部：副标题与「统计年份」label 的 DOM 已删，select 补 aria-label 保住可访问名称',

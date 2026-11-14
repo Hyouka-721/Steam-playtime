@@ -311,10 +311,20 @@
         拿不到一个可用的纯色，描出来是花的）；
      ② 0 值的档位不画片（画不出面积），但图例照列 —— 口径不能因为视觉实现而丢档；
      ③ 图例复用 .st-row 家族、只换列模板（.st-row--pie），旧套件数 .st-row 的判据不用动。 */
-  var BUCKET_COLORS = ['rgba(232,176,75,.24)', 'rgba(232,176,75,.42)', 'rgba(232,176,75,.60)',
-                       'rgba(232,176,75,.78)', '#e8b04b'];   /* 分段是有序的：评分越高越亮 */
-  var COUNTRY_COLORS = ['#e8b04b', '#d98f5c', '#cf7a6a', '#b87fae',
-                        '#8a8fcb', '#6d9cc0', '#5aa79b', '#93a862'];   /* 国别无序，给 8 个可辨色 */
+  /* 第 97 轮配色重做（用户：「颜色种类过少，数据项之间缺乏足够的视觉区分度」）。
+     两套色板都在 OKLCH 里设计，再用 Viénot/Brettel 的二色觉矩阵做**红绿色盲模拟**校验
+     （ΔE 用 CIE76，三视图 = 正常 / 绿盲 / 红盲取最差值）：
+     · 国别是**无序分类**，10 色。实测：正常视觉最小 ΔE 24.8、三视图最小 17.1；
+       面板实际只用前 8 个，那两个数是 26.8 / 26.8；对面板底 #14141a 对比度最低 3.7（≥3）。
+       约束：每 60° 色相扇区最多两色、且明度必须差 0.16 以上 —— 否则会出现「5 个青色」
+       那种数值上合格、肉眼却像同一家的配色。
+     · 评分区间是**有序分段**，5 色沿「紫 → 粉 → 珊瑚 → 金 → 浅柠」走，L* 单调递增
+       （49.2 < 56.4 < 65.3 < 75.3 < 88.0）—— 全色盲也能靠明暗排出高低，这才是有序色阶
+       该有的样子；第 4 档钉死站点金 #e8b04b 保持识别度。
+     ⚠️ 改这两个数组时别凭感觉：相邻色的 ΔE 掉到 10 以下就分不开了，`verify97_watch` 会拦。 */
+  var BUCKET_COLORS = ['#7E6BA8', '#B86FA6', '#E8817E', '#E8B04B', '#F2DC8E'];
+  var COUNTRY_COLORS = ['#E8B04B', '#6769BF', '#78D1C0', '#B4514C', '#A1BDF9',
+                        '#985F85', '#B0C888', '#976C00', '#359B75', '#0097BC'];
   function stPie(pairs, ariaLabel) {
     var total = 0;
     pairs.forEach(function (p) { if (p.v > 0) total += p.v; });
@@ -407,7 +417,7 @@
     });
     var countries = Object.keys(countryMap).map(function (k) { return { k: k, v: countryMap[k] }; })
       .sort(function (a, b) { return b.v - a.v || a.k.localeCompare(b.k); }).slice(0, 8);
-    COUNTRY_COLORS.forEach(function (c, i) { if (countries[i]) countries[i].c = c; });
+    countries.forEach(function (p, i) { p.c = COUNTRY_COLORS[i % COUNTRY_COLORS.length]; });
     var noCountry = items.filter(function (it) {
       return !(Array.isArray(it.countries) && it.countries.length);
     }).length;

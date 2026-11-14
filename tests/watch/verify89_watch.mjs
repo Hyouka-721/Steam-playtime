@@ -57,8 +57,8 @@ const rule = (sel, scope = css) => {
 
 /* ---------- A 静态契约 ---------- */
 console.log('== A 静态契约 ==');
-ok('A1 watch.html 引用 watch.css?v=35 / watch.js?v=24（第 90 轮改了渲染结构，两条缓存键都 bump）',
-  /watch\.css\?v=35/.test(html) && /watch\.js\?v=24/.test(html));
+ok('A1 watch.html 引用 watch.css?v=35 / watch.js?v=25（第 90 轮改了渲染结构，两条缓存键都 bump）',
+  /watch\.css\?v=35/.test(html) && /watch\.js\?v=25/.test(html));
 
 const sc = rule('.poster-score');
 ok('A2 本体彻底透明：无 background、无 backdrop-filter、无 isolation',

@@ -49,6 +49,56 @@ const CSUM = CSHOWN.reduce((s, k) => s + CNT[k], 0);
 const CLIVE = CSHOWN.filter((k) => CNT[k] > 0).length;
 const BZERO = BUCKETS.filter((v) => v === 0).length;
 
+/* ---------- 配色体检工具（第 97 轮追加）----------
+   用户第二轮要求：「颜色种类过少、缺乏视觉区分度、要色盲友好」——所以判据不能只看
+   「有几个颜色」，得真的算颜色距离，并且**在红绿色盲下再算一遍**。
+   ΔE 用 CIE76（Lab 欧氏距离），色盲模拟用 Viénot/Brettel 1999 的线性 sRGB 矩阵。 */
+const BG_HEX = '#14141a';
+const hex2rgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
+const srgb2lin = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+const lin2srgb = (c) => (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055);
+const relLum = (rgb) => { const [r, g, b] = rgb.map(srgb2lin); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+const contrast = (a, b) => { const [x, y] = [relLum(a), relLum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+const rgb2lab = (rgb) => {
+  const [r, g, b] = rgb.map(srgb2lin);
+  let x = (0.4124564 * r + 0.3575761 * g + 0.1804375 * b) / 0.95047;
+  let y = 0.2126729 * r + 0.7151522 * g + 0.072175 * b;
+  let z = (0.0193339 * r + 0.119192 * g + 0.9503041 * b) / 1.08883;
+  const f = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  [x, y, z] = [f(x), f(y), f(z)];
+  return [116 * y - 16, 500 * (x - y), 200 * (y - z)];
+};
+const dE76 = (a, b) => { const A = rgb2lab(a), B = rgb2lab(b); return Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]); };
+const CVD = {
+  protan: [[0.152286, 1.052583, -0.204868], [0.114503, 0.786281, 0.099216], [-0.003882, -0.048116, 1.051998]],
+  deutan: [[0.367322, 0.860646, -0.227968], [0.280085, 0.672501, 0.047413], [-0.011820, 0.042940, 0.968881]]
+};
+const cvdSim = (rgb, kind) => {
+  if (!kind) return rgb;
+  const M = CVD[kind], lin = rgb.map(srgb2lin);
+  return M.map((row) => lin2srgb(Math.min(1, Math.max(0, row[0] * lin[0] + row[1] * lin[1] + row[2] * lin[2]))));
+};
+const views = (rgb) => [rgb, cvdSim(rgb, 'deutan'), cvdSim(rgb, 'protan')];
+/* 一对颜色的「可辨度」＝ 正常 / 绿盲 / 红盲三种视觉里最差的那个 ΔE */
+const pairScore = (a, b) => {
+  const va = views(a), vb = views(b);
+  return Math.min(dE76(va[0], vb[0]), dE76(va[1], vb[1]), dE76(va[2], vb[2]));
+};
+const minPair = (list, fn) => {
+  let m = Infinity, pair = '';
+  for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+    const s = fn(list[i], list[j]);
+    if (s < m) { m = s; pair = list[i] + '/' + list[j]; }
+  }
+  return [m, pair];
+};
+const grabPalette = (name) => {
+  const m = new RegExp('var ' + name + ' = \\[([\\s\\S]*?)\\];').exec(js);
+  return m ? [...m[1].matchAll(/'(#[0-9A-Fa-f]{6})'/g)].map((x) => x[1]) : [];
+};
+const BUCKET_PAL = grabPalette('BUCKET_COLORS');
+const COUNTRY_PAL = grabPalette('COUNTRY_COLORS');
+
 let pass = 0, fail = 0;
 const ok = (n, c, extra = '') => {
   c ? (pass++, console.log(`PASS ${n}${extra ? '  — ' + extra : ''}`))
@@ -57,8 +107,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=35 / watch.js?v=24（CSS 与 JS 都改了，两个都要 bump）',
-  /watch\.css\?v=35/.test(html) && /watch\.js\?v=24/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=35 / watch.js?v=25（CSS 与 JS 都改了，两个都要 bump）',
+  /watch\.css\?v=35/.test(html) && /watch\.js\?v=25/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 JS 有 stPie + 两套色板；评分区间与国别都走它（stPie(buckets) / stPie(countries)）',
@@ -97,6 +147,32 @@ ok('A8 新规则圆角只用令牌 / 50% / 2px（共 ' + radii.length + ' 处）
 ok('A9 纯 SVG 手绘：没有 canvas、没有引第三方图表库，svg 带 role="img" 与 aria-label',
   !/<canvas/.test(js) && !/chart\.js|d3\.|echarts/i.test(js) &&
   /'<svg class="st-pie-chart" viewBox="0 0 100 100" role="img" aria-label="'/.test(js));
+
+/* ---- 配色：数量 / 唯一性 / 色盲可辨度 / 明度单调 ---- */
+ok('A10 色板规模够用且无重复：评分区间 5 色、国别 10 色，去重后长度不变',
+  BUCKET_PAL.length === 5 && COUNTRY_PAL.length === 10 &&
+  new Set(BUCKET_PAL).size === 5 && new Set(COUNTRY_PAL).size === 10 &&
+  BUCKET_PAL.length === BUCKETS.length && COUNTRY_PAL.length >= 8,
+  `区间 ${BUCKET_PAL.length} 色 / 国别 ${COUNTRY_PAL.length} 色`);
+
+const [cMin, cPair] = minPair(COUNTRY_PAL, (a, b) => pairScore(hex2rgb(a), hex2rgb(b)));
+const [cNorm, cNormPair] = minPair(COUNTRY_PAL, (a, b) => dE76(hex2rgb(a), hex2rgb(b)));
+ok('A11 国别 10 色色盲友好：模拟绿盲/红盲后最小 ΔE ≥ 12（正常视觉 ≥ 18）',
+  cMin >= 12 && cNorm >= 18,
+  `三视图 ${cMin.toFixed(1)} @${cPair} / 正常 ${cNorm.toFixed(1)} @${cNormPair}`);
+
+const cCon = Math.min(...COUNTRY_PAL.map((h) => contrast(hex2rgb(h), hex2rgb(BG_HEX))));
+const bCon = Math.min(...BUCKET_PAL.map((h) => contrast(hex2rgb(h), hex2rgb(BG_HEX))));
+ok('A12 所有扇区色对面板底 #14141a 的对比度 ≥ 3（深底上不会糊成一片）',
+  cCon >= 3 && bCon >= 3, `国别 min ${cCon.toFixed(2)} / 区间 min ${bCon.toFixed(2)}`);
+
+const bL = BUCKET_PAL.map((h) => rgb2lab(hex2rgb(h))[0]);
+const mono = bL.every((v, i) => i === 0 || v > bL[i - 1]);
+const adjMin = Math.min(...BUCKET_PAL.slice(1).map((h, i) => pairScore(hex2rgb(BUCKET_PAL[i]), hex2rgb(h))));
+ok('A13 评分区间五档是有序色阶：L* 单调递增，且相邻档三视图 ΔE ≥ 8（全色盲也能排出高低）',
+  mono && adjMin >= 8,
+  `L* ${bL.map((x) => x.toFixed(1)).join(' < ')} / 相邻 ΔE min ${adjMin.toFixed(1)}`);
+
 
 /* ---------------- B 1920 运行时 ---------------- */
 console.log('== B 1920 运行时 ==');
@@ -192,6 +268,11 @@ ok('B5 片与图例一一对应：每片 title = 「名称 数量」，图例色
 
 ok('B6 真实数据没有 0 值档，is-zero 空态分支不误报；也没有 NaN 漏进 SVG',
   r.b.zeros === 0 && r.c.zeros === 0 && !r.b.nan && !r.c.nan, `is-zero ${r.b.zeros}+${r.c.zeros}`);
+
+ok('B10 渲染后色点两两不同：8 个国别 = 8 种颜色、5 个区间 = 5 种，扇形 fill 也不重复',
+  new Set(r.c.dots).size === r.c.rows && new Set(r.b.dots).size === r.b.rows &&
+  new Set(r.c.fills).size === r.c.pieces && new Set(r.b.fills).size === r.b.pieces,
+  `国别 ${new Set(r.c.dots).size}/${r.c.rows} · 区间 ${new Set(r.b.dots).size}/${r.b.rows}`);
 
 ok('B7 版式：两块面板等宽同行（6+6），饼在左、图例在右，不重叠',
   Math.abs(r.b.sec.w - r.c.sec.w) <= 2 && r.b.sec.t === r.c.sec.t &&

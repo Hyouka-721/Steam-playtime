@@ -4,7 +4,7 @@
  *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=35）命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹 —— watch.css?v=35 / watch.js?v=24、css/js 字节 md5 与本地全等、
+ *   ① 指纹 —— watch.css?v=35 / watch.js?v=25、css/js 字节 md5 与本地全等、
  *      线上 JS 里确有 stPie 且两个面板都走它、线上 CSS 里跨度是 6+6、
  *      图例有 max-width（否则片名与数量会被一左一右拉开）
  *   ② 1920 —— 两个饼都画出来（片数 = 非零档位数）、图例行数与首行按**线上数据现算**
@@ -49,12 +49,12 @@ await p0.waitForFunction(() => document.querySelectorAll('#w-grid .poster').leng
 await p0.waitForTimeout(800);
 
 const html = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=35 / watch.js?v=24',
-  /watch\.css\?v=35/.test(html) && /watch\.js\?v=24/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=35 / watch.js?v=25',
+  /watch\.css\?v=35/.test(html) && /watch\.js\?v=25/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=35&t=' + TS);
-const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=24&t=' + TS);
+const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=25&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等', md5txt(liveJs) === md5txt(localJs),
@@ -75,6 +75,13 @@ ok('A5 线上 CSS 有饼图样式：尺寸 clamp(150,16vw,240) + 图例限宽 32
 ok('A6 线上 CSS 跨度已是 6 + 6（两个饼同行等分）',
   /\.st-panel\[data-panel="buckets"\] \{ grid-column: span 6; \}/.test(liveCssNC) &&
   /\.st-panel\[data-panel="country"\] \{ grid-column: span 6; \}/.test(liveCssNC));
+
+/* 配色：只看「线上 JS 里真的是那 10 个色、且都不重复」，色差校验留给本地 verify97 */
+const livePal = (/var COUNTRY_COLORS = \[([\s\S]*?)\];/.exec(liveJsNC) || [, ''])[1];
+const LIVE_COLORS = [...livePal.matchAll(/'(#[0-9A-Fa-f]{6})'/g)].map((x) => x[1].toUpperCase());
+ok('A7 线上色板是重做后的 10 色（唯一、含站点金 #E8B04B，不再是旧的 8 色）',
+  LIVE_COLORS.length === 10 && new Set(LIVE_COLORS).size === 10 && LIVE_COLORS[0] === '#E8B04B',
+  LIVE_COLORS.join(' '));
 
 /* 线上真数据：按面板同一口径现算（只取前 8 个国别，分母就是这 8 个的合计） */
 const LIVE = JSON.parse(await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'data/watch.json?t=' + TS));
