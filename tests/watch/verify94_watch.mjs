@@ -50,8 +50,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=39 / watch.js?v=31',
-  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=40 / watch.js?v=31',
+  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 头部：副标题与「统计年份」label 的 DOM 已删，select 补 aria-label 保住可访问名称',
@@ -69,16 +69,16 @@ const spanOf = (k) => {
   const m = css.match(new RegExp('\\.st-panel\\[data-panel="' + k + '"\\]\\s*\\{\\s*grid-column:\\s*span\\s*(\\d+)'));
   return m ? Number(m[1]) : 0;
 };
-/* 第 101 轮改判（用户「将月度分布、评分区间、国别构成、逐年趋势按顺序并列同一行」）：
-   删掉两行三卡，改成四块各 span 3、合计正好 12 栏的一行。 */
-ok('A4 面板 12 栅格：四块各占 3 栏（3+3+3+3 = 12），单行铺满不留空档',
+/* 第 101 轮改判＋宽度微调（用户「缩小评分区间和国别构成、增大月度分布和逐年趋势」）：
+   四块改为 4+2+2+4 = 12 栏：柱图宽、饼窄，单行铺满不留空档。 */
+ok('A4 面板 12 栅格：月度/逐年各 4 栏、评分区间/国别各 2 栏（4+2+2+4 = 12），单行铺满不留空档',
   /\.st-panels\s*\{[\s\S]*?grid-template-columns:\s*repeat\(12,/.test(css) &&
-  spanOf('months') === 3 && spanOf('buckets') === 3 &&
-  spanOf('country') === 3 && spanOf('years') === 3,
+  spanOf('months') === 4 && spanOf('buckets') === 2 &&
+  spanOf('country') === 2 && spanOf('years') === 4,
   `months=${spanOf('months')} buckets=${spanOf('buckets')} ` +
   `country=${spanOf('country')} years=${spanOf('years')} / 合计 ${['months','buckets','country','years'].reduce((s,k)=>s+spanOf(k),0)}`);
 
-ok('A5 🔴 860 块里有面板跨度复位（否则容器 1 列 + 子项还 span 3 会横向溢出）',
+ok('A5 🔴 860 块里有面板跨度复位（否则容器 1 列 + 子项还 span 4/2 会横向溢出）',
   /@media \(max-width: 860px\)[\s\S]*?\.w-stats \.st-panel\[data-panel\] \{ grid-column: auto; \}/.test(css));
 
 const m860 = css.match(/@media \(max-width: 860px\)/g) || [];
@@ -174,12 +174,14 @@ ok('B5 内容齐备：12 月柱 / 逐年柱=9 / 区间 5 行 / 年度影视 9 �
   r.chips === 0 && r.top === 9,
   `月=${r.barsMonth} 年=${r.barsYear} 类型=${r.rowsKind} 区间=${r.rowsBucket} chips=${r.chips}`);
 
-/* 第 101 轮改判：四块各 3 栏、等宽、严格并列同一行，年度影视落在下一行。 */
-ok('B6 版式：四卡各 3/12、等宽、严格并列同一行，年度影视落在下一行',
-  ['boxMonths','boxBuckets','boxCountry','boxYears']
-    .every((k) => Math.abs(r[k].w / r.boxPanels.w - 3 / 12) < 0.03) &&
-  Math.max(...['boxMonths','boxBuckets','boxCountry','boxYears'].map((k) => r[k].w)) -
-    Math.min(...['boxMonths','boxBuckets','boxCountry','boxYears'].map((k) => r[k].w)) <= 2 &&
+/* 第 101 轮宽度微调改判：柱图（月度/逐年）各 4/12、饼（区间/国别）各 2/12，同类等宽、严格并列同一行。 */
+ok('B6 版式：柱图各 4/12、饼各 2/12（约 2:1）、严格并列同一行，年度影视落在下一行',
+  Math.abs(r.boxMonths.w / r.boxPanels.w - 4 / 12) < 0.03 &&
+  Math.abs(r.boxYears.w / r.boxPanels.w - 4 / 12) < 0.03 &&
+  Math.abs(r.boxBuckets.w / r.boxPanels.w - 2 / 12) < 0.03 &&
+  Math.abs(r.boxCountry.w / r.boxPanels.w - 2 / 12) < 0.03 &&
+  Math.abs(r.boxMonths.w - r.boxYears.w) <= 2 &&
+  Math.abs(r.boxBuckets.w - r.boxCountry.w) <= 2 &&
   r.boxMonths.t === r.boxBuckets.t && r.boxBuckets.t === r.boxCountry.t &&
   r.boxCountry.t === r.boxYears.t && r.boxMonths.l < r.boxBuckets.l &&
   r.boxBuckets.l < r.boxCountry.l && r.boxCountry.l < r.boxYears.l,

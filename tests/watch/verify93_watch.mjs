@@ -40,8 +40,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=39 / watch.js?v=31',
-  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=40 / watch.js?v=31',
+  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 JS 判据是 !(statsOn || layout === \'timeline\') —— 带 statsOn 才不会被关在年报里',

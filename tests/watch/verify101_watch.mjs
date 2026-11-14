@@ -9,7 +9,7 @@
  * 实现要点：
  *   ① 面板只剩 4 块（months / buckets / country / years），DOM 顺序即用户指定顺序，
  *      各占 3 栏共 12 栏；kinds/tags 的渲染、数据计算、stRows 函数与 CSS 规则整条删净。
- *   ② 每卡只剩 3 栏（1920 约 456px、1440 约 336px），原来的 240px 饼 + 320px 图例横排
+ *   ② 柱图 4 栏（1920 约 612px）、饼卡 2 栏（1920 约 299px，宽度微调），原来的 240px 饼 + 320px 图例横排
  *      一定挤爆 → 饼改按面板宽度 42% 缩放（clamp 96~168px）、图例吃剩余空间，
  *      .st-pie 加 flex-wrap 让 861~1180 区间自动换成「饼在上 / 图例整宽」。
  *   ③ 脚注删掉但**合并规则本身保留**（COUNTRY_MIN / majors 分流 / 「其他」中性灰），
@@ -43,8 +43,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=39 / watch.js?v=31（两个 docs 文件都改了，两条缓存键各 bump）',
-  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=40 / watch.js?v=31（两个 docs 文件都改了，两条缓存键各 bump）',
+  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const pos = ORDER.map((k) => js.indexOf('data-panel="' + k + '"'));
@@ -56,12 +56,12 @@ ok('A2 面板顺序＝月度分布 / 评分区间 / 国别构成 / 逐年趋势�
 
 const spans = ORDER.map((k) => Number((new RegExp(
   '\\.st-panel\\[data-panel="' + k + '"\\]\\s*\\{\\s*grid-column:\\s*span\\s*(\\d+)').exec(css) || [, 0])[1]));
-ok('A3 四卡各占 3 栏、合计正好 12 栏，容器仍是 12 栅格（否则会掉进下一行留空档）',
-  spans.join('/') === '3/3/3/3' && spans.reduce((a, b) => a + b, 0) === 12 &&
+ok('A3 月度/逐年各 4 栏、评分区间/国别各 2 栏（4+2+2+4 = 12），容器仍是 12 栅格（否则会掉进下一行留空档）',
+  spans.join('/') === '4/2/2/4' && spans.reduce((a, b) => a + b, 0) === 12 &&
   /\.st-panels\s*\{[\s\S]*?grid-template-columns:\s*repeat\(12,/.test(css),
   '跨度 ' + spans.join('+') + ' = ' + spans.reduce((a, b) => a + b, 0));
 
-ok('A4 860 块仍全文件唯一，且断点里的跨度复位仍在（1 列容器 + span 3 会横向溢出）',
+ok('A4 860 块仍全文件唯一，且断点里的跨度复位仍在（1 列容器 + span 4/2 会横向溢出）',
   (css.match(/@media \(max-width: 860px\)/g) || []).length === 1 &&
   /\.w-stats \.st-panel\[data-panel\] \{ grid-column: auto; \}/.test(css) &&
   !/\.st-panel\[data-panel="kinds"\]|\.st-panel\[data-panel="tags"\]/.test(css),
@@ -155,10 +155,12 @@ async function measure(page) {
     !r.hasKinds && !r.hasTags && !r.hasNote && !r.noteText,
     r.panels.map((p) => p.k).join(' / '));
 
-  ok('B2 四卡严格并列同一行：top 全等、left 依次递增、宽度差 ≤2px，且合计铺满 12 栏容器',
+  ok('B2 四卡严格并列同一行：top 全等、left 依次递增、柱图≈2×饼卡（4/12 vs 2/12），且合计铺满 12 栏容器',
     r.panels.every((p) => p.t === r.panels[0].t) &&
     r.panels.every((p, i) => i === 0 || p.l > r.panels[i - 1].l) &&
-    Math.max(...r.panels.map((p) => p.w)) - Math.min(...r.panels.map((p) => p.w)) <= 2 &&
+    Math.abs(r.panels[0].w - r.panels[3].w) <= 2 &&
+    Math.abs(r.panels[1].w - r.panels[2].w) <= 2 &&
+    Math.abs(r.panels[0].w / r.panels[1].w - 2) <= 0.1 &&
     r.panels[3].r <= r.panelContainer.r + 1 && r.panels[0].l >= r.panelContainer.l - 1,
     `top=${r.panels.map((p) => p.t).join('/')} 宽=${r.panels.map((p) => p.w).join('/')} 容器=${r.panelContainer.w}`);
 
@@ -196,10 +198,10 @@ for (const [w, label] of [[1440, '1440'], [1000, '1000'], [390, '390']]) {
       r.ov <= 0 && errs.length === 0,
       `top=${r.panels.map((x) => x.t).join('/')} ov=${r.ov} err=${errs.length}`);
   } else {
-    ok(`C${w === 1440 ? '1' : '2'} ${label} 四卡仍同行、饼继续按栏缩小、图例${w === 1000 ? '自动换行到饼下方' : '仍横排'}、零溢出零异常`,
+    ok(`C${w === 1440 ? '1' : '2'} ${label} 四卡仍同行、饼继续按栏缩小、图例自动换行到饼下方、零溢出零异常`,
       r.panels.length === 4 && r.panels.every((x) => x.t === r.panels[0].t) &&
       r.pies.every((x) => x.w <= 168 && x.scroll <= 0) &&
-      (w === 1000 ? r.pies.every((x) => x.below) : r.pies.every((x) => !x.below)) &&
+      r.pies.every((x) => x.below) &&
       r.ov <= 0 && errs.length === 0,
       `宽=${r.panels[0].w} 饼=${r.pies.map((x) => x.w + (x.below ? '↓' : '→')).join('/')} ov=${r.ov} err=${errs.length}`);
   }

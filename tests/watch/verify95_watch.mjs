@@ -38,8 +38,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=39 / watch.js?v=31',
-  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=40 / watch.js?v=31',
+  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const cInput = (html.match(/<input[^>]*id="add-country"[^>]*>/) || [''])[0];
@@ -65,9 +65,9 @@ const spanOf = (k) => {
   const m = css.match(new RegExp('\\.st-panel\\[data-panel="' + k + '"\\]\\s*\\{\\s*grid-column:\\s*span\\s*(\\d+)'));
   return m ? Number(m[1]) : 0;
 };
-/* 第 101 轮改判（四卡一行各 3 栏）：国别与评分区间都从 4 栏改为 3 栏。 */
-ok('A6 国别面板挂 data-panel="country"、占 3 栏；评分区间也占 3 栏（第 101 轮四卡一行）',
-  /data-panel="country"/.test(js) && spanOf('country') === 3 && spanOf('buckets') === 3,
+/* 第 101 轮改判＋宽度微调：国别与评分区间（两块饼）都收窄到 2 栏。 */
+ok('A6 国别面板挂 data-panel="country"、占 2 栏；评分区间也占 2 栏（第 101 轮宽度微调）',
+  /data-panel="country"/.test(js) && spanOf('country') === 2 && spanOf('buckets') === 2,
   `country=${spanOf('country')} buckets=${spanOf('buckets')}`);
 
 ok('A7 🔴 860 块的面板跨度复位仍在（新增面板同样受它保护，否则窄屏横向溢出）',

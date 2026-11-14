@@ -9,7 +9,7 @@
  *   4. 编辑卡片里「国别」与「标签」并列到同一行。
  *
  * ① 版式（第 101 轮已改判）：面板顺序改为 月度/评分区间/国别/逐年/年度影视，
- *    跨度 3+3+3+3 一行四卡，合计 12 栏。
+ *    跨度 4+2+2+4 一行四卡（宽度微调），合计 12 栏。
  * ② 年度影视：YEAR_PICKS 常量（2018~2026 九条）按片名去 ALL 里找海报/评分补全。
  * ③ 表单：排序 label 去掉说明；国别/标签包进同一个 .w-row.w-row-2（≤480 自动回单列）。
  */
@@ -45,18 +45,18 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=39 / watch.js?v=31（CSS 改跨度与年度影视样式、JS 改面板都 bump）',
-  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=40 / watch.js?v=31（CSS 改跨度与年度影视样式、JS 改面板都 bump）',
+  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 /* 第 101 轮：源码里 months / years 为对齐多写了空格，spanOf 正则放宽为 \\s* 容忍无害空白 */
 const spanOf = (k) => Number((new RegExp(
   '\\.st-panel\\[data-panel="' + k + '"\\]\\s*\\{ grid-column: span (\\d+); \\}').exec(css) || [, 0])[1]);
-/* 第 101 轮改判（用户「四卡并列同一行，合理调节宽度」）：两行三卡改成一行四卡，
-   各 3 栏合计 12；kinds / tags 两个面板已删，跨度取不到（0）。 */
-ok('A2 四卡一行跨度：3 / 3 / 3 / 3（月度 / 评分区间 / 国别 / 逐年），且 kinds / tags 已无跨度',
-  spanOf('months') === 3 && spanOf('buckets') === 3 &&
-  spanOf('country') === 3 && spanOf('years') === 3 &&
+/* 第 101 轮改判＋宽度微调（用户「缩小评分区间和国别构成、增大月度分布和逐年趋势」）：
+   一行四卡 4+2+2+4 = 12；kinds / tags 两个面板已删，跨度取不到（0）。 */
+ok('A2 四卡一行跨度：4 / 2 / 2 / 4（月度 / 评分区间 / 国别 / 逐年），且 kinds / tags 已无跨度',
+  spanOf('months') === 4 && spanOf('buckets') === 2 &&
+  spanOf('country') === 2 && spanOf('years') === 4 &&
   spanOf('kinds') === 0 && spanOf('tags') === 0,
   ['months', 'buckets', 'country', 'years', 'kinds', 'tags'].map((k) => k + '=' + spanOf(k)).join(' '));
 

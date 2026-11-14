@@ -6,7 +6,7 @@
  *    单独回滚到第 93 轮（v=30 / v=20）时本脚本会红在 A1，属预期。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=39 / watch.js?v=31；css/js 字节 md5 与本地全等；
+ *   ① 指纹：watch.html 引用 watch.css?v=40 / watch.js?v=31；css/js 字节 md5 与本地全等；
  *      线上 JS 里确实没有 st-sub / st-label、且 select 带 aria-label（版本号只说明引用变了）
  *   ② 1440：6 卡（键名与顺序）、指标与本地推导全等、面板 5+Top5 顺序、
  *      12 月柱 / 逐年柱=9 / 类型 3 行 / 区间 5 行、版式真的是 8/4/12 不对称、无溢出零异常
@@ -61,11 +61,11 @@ await page.waitForTimeout(900);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹 ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=39 / watch.js?v=31',
-  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=40 / watch.js?v=31',
+  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=39&t=' + TS);
+const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=40&t=' + TS);
 const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=31&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
@@ -137,12 +137,14 @@ ok('B5 内容齐备：12 月柱 / 逐年柱=' + YEARS + ' / 区间 5 行 / 年�
   r.chips === 0 && r.top === 9,
   `月=${r.barsMonth} 年=${r.barsYear} 类型=${r.rowsKind} 区间=${r.rowsBucket} chips=${r.chips}`);
 
-/* 第 101 轮改判：四块各 3 栏、等宽、严格并列同一行。 */
-ok('B6 版式：四卡各 3/12、等宽、并列同一行',
-  ['boxMonths','boxBuckets','boxCountry','boxYears']
-    .every((k) => Math.abs(r[k].w / r.boxPanels.w - 3 / 12) < 0.03) &&
-  Math.max(...['boxMonths','boxBuckets','boxCountry','boxYears'].map((k) => r[k].w)) -
-    Math.min(...['boxMonths','boxBuckets','boxCountry','boxYears'].map((k) => r[k].w)) <= 2 &&
+/* 第 101 轮改判＋宽度微调：柱图各 4/12、饼各 2/12，同类等宽、并列同一行。 */
+ok('B6 版式：柱图各 4/12、饼各 2/12（约 2:1）、并列同一行',
+  Math.abs(r.boxMonths.w / r.boxPanels.w - 4 / 12) < 0.03 &&
+  Math.abs(r.boxYears.w / r.boxPanels.w - 4 / 12) < 0.03 &&
+  Math.abs(r.boxBuckets.w / r.boxPanels.w - 2 / 12) < 0.03 &&
+  Math.abs(r.boxCountry.w / r.boxPanels.w - 2 / 12) < 0.03 &&
+  Math.abs(r.boxMonths.w - r.boxYears.w) <= 2 &&
+  Math.abs(r.boxBuckets.w - r.boxCountry.w) <= 2 &&
   r.boxMonths.t === r.boxBuckets.t && r.boxBuckets.t === r.boxCountry.t &&
   r.boxCountry.t === r.boxYears.t,
   `容器 ${r.boxPanels.w} / ${['boxMonths','boxBuckets','boxCountry','boxYears'].map((k)=>k+'='+r[k].w+'@'+r[k].t).join(' ')}`);

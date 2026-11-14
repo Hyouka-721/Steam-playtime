@@ -1023,17 +1023,18 @@ select.w-input { cursor: pointer; }
 
 .st-panels {
   /* 第 101 轮：按用户要求删掉「类型构成 / 高频标签」，改成一行四卡 ——
-     月度分布 / 评分区间 / 国别构成 / 逐年趋势，各占 3 栏共 12 栏。
-     四块都是图表，等宽最整齐：柱状图 12 / 9 根都放得下，两块饼图靠
-     .st-pie-chart 按栏百分比缩放 + 图例收缩 / 自动换行避免横向溢出。
+     月度分布 / 评分区间 / 国别构成 / 逐年趋势。用户追加要求「缩小两块饼、
+     增大两张柱状图」：跨度配成 4 / 2 / 2 / 4，合计仍 12 栏（12 栅格里唯一
+     温和的对称整数解），不会掉行留空档。柱状图 12 / 9 根需要更多横向空间，
+     两块饼靠 .st-pie-chart 按栏百分比缩放 + 图例收缩 / 自动换行避免横向溢出。
      ⚠️ 子项跨度必须配 .w-stats .st-panel[data-panel] 的断点复位，
-        否则 860 以下容器只剩 1 列而子项还 span 3，会撑出横向溢出。 */
+        否则 860 以下容器只剩 1 列而子项还 span 4，会撑出横向溢出。 */
   display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px;
 }
-.st-panel[data-panel="months"]  { grid-column: span 3; }
-.st-panel[data-panel="buckets"] { grid-column: span 3; }
-.st-panel[data-panel="country"] { grid-column: span 3; }
-.st-panel[data-panel="years"]   { grid-column: span 3; }
+.st-panel[data-panel="months"]  { grid-column: span 4; }
+.st-panel[data-panel="buckets"] { grid-column: span 2; }
+.st-panel[data-panel="country"] { grid-column: span 2; }
+.st-panel[data-panel="years"]   { grid-column: span 4; }
 .st-panel {
   padding: 16px 18px 18px; min-width: 0;
   background: var(--card-bg);
@@ -1095,7 +1096,7 @@ select.w-input { cursor: pointer; }
    改成饼按面板宽度的 42% 缩放（上限 168px）、图例吃掉剩余空间，
    并让 .st-pie 在空间不足时自动换行成「饼在上 / 图例整宽」（861~1180 区间）。 */
 .st-pie { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: clamp(10px, 1.2vw, 20px); min-width: 0; }
-.st-pie-chart { flex: 0 0 auto; display: block; width: clamp(96px, 42%, 168px); height: auto; aspect-ratio: 1 / 1; }
+.st-pie-chart { flex: 0 0 auto; display: block; width: clamp(96px, 42%, 168px); max-width: 100%; height: auto; aspect-ratio: 1 / 1; }
 .st-pie-slice { stroke: none; }
 .st-rows--pie { flex: 1 1 auto; min-width: 0; max-width: 320px; gap: 9px; }
 .st-row--pie { grid-template-columns: 9px minmax(0, 1fr) 28px 40px; gap: 6px; }

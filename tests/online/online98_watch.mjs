@@ -1,11 +1,11 @@
 /* 第 98 轮 watch 侧上线复验：国别并进「中国」 · 两块饼换位
  *
  * ⚠️ **本轮尚未上线时不要跑**：线上此刻还是第 96 轮（v=34/v=23，面板顺序是旧的）。
- *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=39）命中后再执行本脚本。
+ *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=40）命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹 —— watch.css?v=39 / watch.js?v=31、css/js 字节 md5 与本地全等、
- *      线上 JS 的别名表已把「中国大陆 / 台湾」收敛到「中国」、线上 CSS 的跨度是 3/3/3/3（第 101 轮）、
+ *   ① 指纹 —— watch.css?v=40 / watch.js?v=31、css/js 字节 md5 与本地全等、
+ *      线上 JS 的别名表已把「中国大陆 / 台湾」收敛到「中国」、线上 CSS 的跨度是 4/2/2/4（第 101 轮宽度微调）、
  *      线上 HTML 没有残留的「中国台湾」
  *   ② 1920 —— 面板顺序 月度/评分区间/国别/逐年（第 101 轮四卡一行）、
  *      国别面板里有「中国」且数值与线上数据现算一致、零溢出
@@ -50,11 +50,11 @@ await p0.waitForFunction(() => document.querySelectorAll('#w-grid .poster').leng
 await p0.waitForTimeout(800);
 
 const html = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=39 / watch.js?v=31',
-  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=40 / watch.js?v=31',
+  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=39&t=' + TS);
+const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=40&t=' + TS);
 const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=31&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
@@ -72,9 +72,9 @@ ok('A4 线上别名表：中国大陆 / 台湾 都收敛到「中国」，且没
 /* 第 101 轮：源码里 months / years 为对齐多写了空格，spanOf 正则放宽为 \\s* 容忍无害空白 */
 const spanOf = (k) => Number((new RegExp(
   '\\.st-panel\\[data-panel="' + k + '"\\]\\s*\\{ grid-column: span (\\d+); \\}').exec(liveCssNC) || [, 0])[1]);
-ok('A5 线上 CSS 跨度 3 / 3 / 3 / 3（第 101 轮一行四卡，合计 12 栏）',
-  spanOf('months') === 3 && spanOf('buckets') === 3 &&
-  spanOf('country') === 3 && spanOf('years') === 3 &&
+ok('A5 线上 CSS 跨度 4 / 2 / 2 / 4（第 101 轮一行四卡＋宽度微调，合计 12 栏）',
+  spanOf('months') === 4 && spanOf('buckets') === 2 &&
+  spanOf('country') === 2 && spanOf('years') === 4 &&
   spanOf('kinds') === 0 && spanOf('tags') === 0,
   ['months', 'buckets', 'country', 'years', 'kinds', 'tags'].map((k) => k + '=' + spanOf(k)).join(' '));
 
@@ -139,9 +139,11 @@ ok('B2 四卡严格并列同一行：top 全等',
   ['months','buckets','country','years'].every((k) => r.boxes[k].t === r.boxes.months.t),
   ['months','buckets','country','years'].map((k) => k + '@' + r.boxes[k].t).join(' '));
 
-ok('B3 跨度落地＝3/3/3/3（占容器比例 ±3%）',
-  ['months', 'buckets', 'country', 'years']
-    .every((k) => Math.abs(r.boxes[k].w / r.panelsW - 3 / 12) < 0.03),
+ok('B3 跨度落地＝4/2/2/4（占容器比例 ±3%），同类等宽',
+  ['months', 'years'].every((k) => Math.abs(r.boxes[k].w / r.panelsW - 4 / 12) < 0.03) &&
+  ['buckets', 'country'].every((k) => Math.abs(r.boxes[k].w / r.panelsW - 2 / 12) < 0.03) &&
+  Math.abs(r.boxes.months.w - r.boxes.years.w) <= 2 &&
+  Math.abs(r.boxes.buckets.w - r.boxes.country.w) <= 2,
   ['months', 'buckets', 'country', 'years'].map((k) => k + '=' + r.boxes[k].w).join(' ') +
   ` / 容器 ${r.panelsW}`);
 

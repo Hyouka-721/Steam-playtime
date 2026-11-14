@@ -120,8 +120,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=39 / watch.js?v=31（CSS 与 JS 都改了，两个都要 bump）',
-  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=40 / watch.js?v=31（CSS 与 JS 都改了，两个都要 bump）',
+  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 JS 有 stPie + 两套色板；评分区间与国别都走它（stPie(buckets) / stPie(countries)）',
@@ -136,10 +136,10 @@ ok('A3 横条渲染已整体删除：stRows 函数与全部调用点都不在，
   /stPie\(buckets/.test(js) && /stPie\(countries/.test(js),
   `stRows( 出现 ${(js.match(/stRows\(/g) || []).length} 次（函数与调用全删）`);
 
-/* 第 101 轮改判：四卡一行，两块饼也各占 3 栏。 */
-ok('A4 两个饼面板各占 3 栏（第 101 轮四卡一行：月度/区间/国别/逐年 并列）',
-  /\.st-panel\[data-panel="buckets"\]\s*\{ grid-column: span 3; \}/.test(css) &&
-  /\.st-panel\[data-panel="country"\]\s*\{ grid-column: span 3; \}/.test(css));
+/* 第 101 轮改判＋宽度微调：四卡一行，两块饼各占 2 栏（柱图 4 栏）。 */
+ok('A4 两个饼面板各占 2 栏（第 101 轮四卡一行＋宽度微调：月度/区间/国别/逐年 并列）',
+  /\.st-panel\[data-panel="buckets"\]\s*\{ grid-column: span 2; \}/.test(css) &&
+  /\.st-panel\[data-panel="country"\]\s*\{ grid-column: span 2; \}/.test(css));
 
 ok('A5 饼图与图例的样式齐备：.st-pie / .st-pie-chart / .st-pie-slice / .st-row--pie / .st-row-pct',
   /\.st-pie \{/.test(css) && /\.st-pie-chart \{/.test(css) && /\.st-pie-slice \{/.test(css) &&
@@ -317,17 +317,17 @@ ok('B10 渲染后色点两两不同：' + r.c.rows + ' 行国别 = ' + new Set(r
   new Set(r.c.fills).size === r.c.pieces && new Set(r.b.fills).size === r.b.pieces,
   `国别 ${new Set(r.c.dots).size}/${r.c.rows} · 区间 ${new Set(r.b.dots).size}/${r.b.rows}`);
 
-/* 第 101 轮起四卡一行（都 3 栏）：两个饼仍等宽、各自饼在左图例在右且不重叠 */
-ok('B7 版式：两个饼面板等宽（都占 3 栏），各自饼在左、图例在右且不重叠',
+/* 第 101 轮宽度微调起四卡一行（两饼都 2 栏）：两个饼仍等宽、各自饼在左图例在右且不重叠 */
+ok('B7 版式：两个饼面板等宽（都占 2 栏），各自饼在左、图例在右且不重叠',
   Math.abs(r.b.sec.w - r.c.sec.w) <= 2 &&
   r.b.pie.r <= r.b.leg.l && r.c.pie.r <= r.c.leg.l,
   `区间 ${r.b.sec.w} / 国别 ${r.c.sec.w} 间距 ${r.b.leg.l - r.b.pie.r}/${r.c.leg.l - r.c.pie.r}`);
 
-/* 第 101 轮改判：四卡一行后每卡只有 3/12 宽（1920 实测 456px），饼改为按栏百分比缩放
-   clamp(96px, 42%, 168px)，1920 落在上限 168；不再写死 vw 派生的 240。 */
-ok('B8 饼按栏缩放：1920 落在 clamp(96,42%,168) 上限 168、保持正方形、图例限宽 320 没被拉开',
+/* 第 101 轮宽度微调改判：饼卡收窄到 2/12（1920 实测 299px），饼按栏百分比缩放
+   clamp(96px, 42%, 168px)，1920 落在 42% ≈ 110；不再写死 vw 派生的 240。 */
+ok('B8 饼按栏缩放：1920 落在 42% ≈ 110、保持正方形、图例限宽 320 没被拉开',
   /width: clamp\(96px, 42%, 168px\)/.test(css) &&
-  Math.round(r.b.pie.w) === 168 && Math.round(r.b.pie.h) === 168 && r.b.leg.w <= 320,
+  Math.round(r.b.pie.w) === 110 && Math.round(r.b.pie.h) === 110 && r.b.leg.w <= 320,
   `饼 ${r.b.pie.w}×${r.b.pie.h} / 图例 ${r.b.leg.w}`);
 
 ok('B9 1920 无横向溢出 + 零 JS 异常', r.ov <= 0 && errs.length === 0, `ov=${r.ov} err=${errs.length}`);
@@ -420,13 +420,13 @@ const d = await dp.evaluate(() => {
   const pie = b('[data-panel="buckets"] .st-pie-chart');
   const leg = b('[data-panel="buckets"] .st-rows--pie');
   const sec = b('[data-panel="buckets"]');
-  return { pieW: Math.round(pie.width), secW: Math.round(sec.width), gap: Math.round(leg.left - pie.right),
+  return { pieW: Math.round(pie.width), secW: Math.round(sec.width), legT: Math.round(leg.top), pieBot: Math.round(pie.bottom),
     legW: Math.round(leg.width), ov: document.documentElement.scrollWidth - document.documentElement.clientWidth };
 });
-/* 第 101 轮改判：1440 每卡 3/12（实测 336px），饼按 42% 缩到约 125，不再按 vw 算 230。 */
-ok('D1 1440 饼按栏缩到 ~125（面板 42%）、仍在面板内、图例不重叠',
-  d.pieW >= 110 && d.pieW <= 145 && d.pieW < d.secW && d.gap > 0 && d.legW <= 320,
-  `饼 ${d.pieW} 面板 ${d.secW} 间距 ${d.gap} 图例 ${d.legW}`);
+/* 第 101 轮宽度微调改判：1440 饼卡 2/12（实测 219px），饼按 42% 缩到 clamp 下限 96，图例换行到饼下方。 */
+ok('D1 1440 饼按栏缩到 96（clamp 下限）、图例自动换行到饼下方且 ≤320',
+  d.pieW >= 90 && d.pieW <= 105 && d.pieW < d.secW && d.legT > d.pieBot && d.legW <= 320,
+  `饼 ${d.pieW} 面板 ${d.secW} 图例顶 ${d.legT} > 饼底 ${d.pieBot} 图例 ${d.legW}`);
 
 ok('D2 1440 无横向溢出 + 零 JS 异常', d.ov <= 0 && derrs.length === 0, `ov=${d.ov} err=${derrs.length}`);
 await dctx.close();

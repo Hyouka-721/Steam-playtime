@@ -4,7 +4,7 @@
  *    等用户说「上线」→ push → Pages 指纹轮询命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=39 / watch.js?v=31；css/js 字节 md5 与本地全等；
+ *   ① 指纹：watch.html 引用 watch.css?v=40 / watch.js?v=31；css/js 字节 md5 与本地全等；
  *      线上 JS 里确实有 COUNTRY_ALIAS / normCountry / data-panel="country"（版本号只说明引用变了）
  *   ② 1440：面板顺序多了 country、国别面板占 4 栏且与类型面板同行、
  *      国别面板内容与「线上真实数据」逐字对齐（还没录国别 = 空态 + N 部待补；录了 = 行数/首位对得上）、
@@ -60,11 +60,11 @@ await page.waitForTimeout(900);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹 ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=39 / watch.js?v=31',
-  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=40 / watch.js?v=31',
+  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=39&t=' + TS);
+const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=40&t=' + TS);
 const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=31&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
@@ -129,10 +129,10 @@ const card = (k) => (r.cards.find((c) => c.k === k) || {}).v;
 ok('B1 面板顺序 月度 / 评分区间 / 国别 / 逐年 / 年度影视（第 101 轮四卡一行）',
   r.panels.join('/') === 'months/buckets/country/years/top', r.panels.join('/'));
 
-/* 第 101 轮改判：四卡一行各 3 栏，这里只断言国别/评分区间都占 3/12、且两者等宽。 */
-ok('B2 国别面板占 3 栏、评分区间占 3 栏，两者等宽',
-  Math.abs(r.boxCountry.w / r.boxPanels.w - 3 / 12) < 0.03 &&
-  Math.abs(r.boxBuckets.w / r.boxPanels.w - 3 / 12) < 0.03 &&
+/* 第 101 轮改判＋宽度微调：国别/评分区间（两块饼）都占 2/12、且两者等宽。 */
+ok('B2 国别面板占 2 栏、评分区间占 2 栏，两者等宽',
+  Math.abs(r.boxCountry.w / r.boxPanels.w - 2 / 12) < 0.03 &&
+  Math.abs(r.boxBuckets.w / r.boxPanels.w - 2 / 12) < 0.03 &&
   Math.abs(r.boxCountry.w - r.boxBuckets.w) <= 2,
   `容器 ${r.boxPanels.w} / 国别 ${r.boxCountry.w}@${r.boxCountry.t} / 区间 ${r.boxBuckets.w}@${r.boxBuckets.t}`);
 

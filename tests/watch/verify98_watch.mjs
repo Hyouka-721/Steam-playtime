@@ -8,7 +8,7 @@
  *    🔴 这是把第 96 轮的口径**反过来了** —— 当时定「中国大陆」是为了跟港澳台并列时不歧义，
  *    用户现在要求合并，所以 `'中国大陆'/'台湾'` 一律映射到「中国」，港澳仍独立。
  * ② 版式（第 101 轮已改判）：DOM 顺序 → 月度 / 评分区间 / 国别 / 逐年 / 年度影视，
- *    跨度 → 3+3+3+3 一行四卡，合计正好 12 栏。
+ *    跨度 → 4+2+2+4 一行四卡（宽度微调），合计正好 12 栏。
  *
  * ⚠️ 年报按钮只在时间轴视图出现（第 93 轮契约），所以每次都要先点头像再点年报。
  * ⚠️ 顺序判据要按 **DOM 里的实际先后**比，不能只比"这个面板存在" —— 挪位置最容易漏测。
@@ -35,7 +35,7 @@ const data = JSON.parse(rd('data/watch.json'));
    国别构成、逐年趋势按顺序并列同一行」）：面板从 6 个减到 4 个，顺序重排为
    months / buckets / country / years，四块各 3 栏，合计正好 12 栏铺满一行。 */
 const ORDER = ['months', 'buckets', 'country', 'years', 'top'];
-const SPAN = { months: 3, buckets: 3, country: 3, years: 3 };
+const SPAN = { months: 4, buckets: 2, country: 2, years: 4 };
 
 /* 与面板同一口径的期望值 */
 const CNT = {};
@@ -53,8 +53,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=39 / watch.js?v=31（CSS 改跨度、JS 改顺序与别名表，都得 bump）',
-  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=40 / watch.js?v=31（CSS 改跨度、JS 改顺序与别名表，都得 bump）',
+  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 /* 顺序：取每个面板标记在 JS 源码里第一次出现的位置，必须严格递增 */
@@ -69,14 +69,14 @@ ok('A2 DOM 顺序 = 月度 / 评分区间 / 国别 / 逐年 / 年度影视（第
 const spanOf = (k) => Number((new RegExp(
   '\\.st-panel\\[data-panel="' + k + '"\\]\\s*\\{ grid-column: span (\\d+); \\}').exec(css) || [, 0])[1]);
 const SPANS = ORDER.filter((k) => k !== 'top').map((k) => spanOf(k));
-ok('A3 跨度按第 101 轮重新配平：3 / 3 / 3 / 3（四块等宽）',
+ok('A3 跨度按第 101 轮宽度微调配平：4 / 2 / 2 / 4（柱图 4 栏、饼 2 栏）',
   ORDER.filter((k) => k !== 'top').every((k) => spanOf(k) === SPAN[k]),
   ORDER.filter((k) => k !== 'top').map((k) => k + '=' + spanOf(k)).join(' '));
 
-/* 第 101 轮：只剩一行，四块 3+3+3+3 正好 12 栏，不会掉进下一行留空档 */
+/* 第 101 轮宽度微调：只剩一行，四块 4+2+2+4 正好 12 栏，不会掉进下一行留空档 */
 const ROWS = [['months', 'buckets', 'country', 'years']];
 const rowSums = ROWS.map((r) => r.reduce((s, k) => s + spanOf(k), 0));
-ok('A4 唯一一行正好 12 栏（3+3+3+3），不会掉进下一行留空档',
+ok('A4 唯一一行正好 12 栏（4+2+2+4），不会掉进下一行留空档',
   rowSums.every((v) => v === 12), `行和 ${rowSums.join('/')}（跨度 ${SPANS.join('/')}）`);
 
 /* ---- 国别口径：大陆 + 台湾 → 中国 ---- */
@@ -155,9 +155,11 @@ ok('B2 四卡严格并列同一行：top 全等、left 依次递增',
   ['months','buckets','country','years'].every((k, i, a) => i === 0 || r.boxes[k].l > r.boxes[a[i-1]].l),
   ['months','buckets','country','years'].map((k) => k + '@' + r.boxes[k].l + '/' + r.boxes[k].t).join(' '));
 
-ok('B3 跨度落地：四块各 3/12（占容器比例 ±3%），等宽',
-  ORDER.filter((k) => k !== 'top')
-    .every((k) => Math.abs(r.boxes[k].w / r.panelsW - 3 / 12) < 0.03),
+ok('B3 跨度落地：柱图各 4/12、饼各 2/12（占容器比例 ±3%），同类等宽',
+  ['months', 'years'].every((k) => Math.abs(r.boxes[k].w / r.panelsW - 4 / 12) < 0.03) &&
+  ['buckets', 'country'].every((k) => Math.abs(r.boxes[k].w / r.panelsW - 2 / 12) < 0.03) &&
+  Math.abs(r.boxes.months.w - r.boxes.years.w) <= 2 &&
+  Math.abs(r.boxes.buckets.w - r.boxes.country.w) <= 2,
   ORDER.filter((k) => k !== 'top')
     .map((k) => k + '=' + r.boxes[k].w + '/' + r.panelsW).join(' '));
 
@@ -204,7 +206,7 @@ const c = await p2.evaluate(() => {
   return {
     order: [...document.querySelectorAll('.st-panel')].map((p) => p.dataset.panel),
     m: b('months'), bk: b('buckets'), y: b('years'), co: b('country'),
-    pieW: Math.round(pie.width), gap: Math.round(leg.left - pie.right),
+    pieW: Math.round(pie.width), legT: Math.round(leg.top), pieBot: Math.round(pie.bottom),
     ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
   };
 });
@@ -213,10 +215,11 @@ ok('C1 1440 顺序与四卡同行关系不变',
   c.m.t === c.bk.t && c.bk.t === c.co.t && c.co.t === c.y.t,
   `${c.m.t}/${c.bk.t}/${c.co.t}/${c.y.t}`);
 
-/* 第 101 轮改判：四卡等宽（不再 5>4），饼按栏 42% 缩到约 125 而非 vw 派生的 230。 */
-ok('C2 1440 四卡等宽、饼按栏缩到 ~125 且图例不重叠',
-  Math.abs(c.m.w - c.bk.w) <= 2 && c.pieW >= 110 && c.pieW <= 145 && c.gap > 0,
-  `月度 ${c.m.w} / 区间 ${c.bk.w} / 饼 ${c.pieW} 间距 ${c.gap}`);
+/* 第 101 轮宽度微调改判：柱图 4/12、饼 2/12（约 2:1），饼按栏缩到 96，图例换行到饼下方。 */
+ok('C2 1440 柱图≈2×饼卡、饼按栏缩到 96、图例换行到饼下方',
+  Math.abs(c.m.w / c.bk.w - 2) <= 0.1 && c.pieW >= 90 && c.pieW <= 105 &&
+  c.legT > c.pieBot,
+  `月度 ${c.m.w} / 区间 ${c.bk.w} / 饼 ${c.pieW} 图例顶 ${c.legT} > 饼底 ${c.pieBot}`);
 
 ok('C3 1440 无横向溢出 + 零 JS 异常', c.ov <= 0 && e2.length === 0, `ov=${c.ov} err=${e2.length}`);
 await c2.close();
