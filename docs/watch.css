@@ -550,6 +550,15 @@ code {
   }
 }
 @media (min-width: 1180px) {
+  /* 第 96 轮：年报铺满后高分 Top5 单行被拉开——这里排成两列（3 + 2）。
+     🔴 用 .w-stats 提一级特异性，才能压住文件末尾的基础 .st-top-list 规则。
+     两列下斑马纹会左右错位，一并关掉。 */
+  .w-stats .st-top-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 24px;
+  }
+  .w-stats .st-top-item:nth-child(odd) { background: none; }
   .tl-body {
     grid-template-columns: 224px 352px minmax(0, 1fr);
     column-gap: 18px;
@@ -977,7 +986,9 @@ select.w-input { cursor: pointer; }
 .w-stats-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .w-stats[hidden] { display: none; }
-.w-stats { max-width: 1180px; margin: 0 auto; }
+/* 第 96 轮：去掉 max-width: 1180px —— 海报网格是满宽的，年报缩在中间一列看着像另一套版式。
+   现在跟 .w-main 同宽铺满；12 栅格与 6 卡的 auto-fit 自己会分配宽度，不需要外层限宽。 */
+.w-stats { width: 100%; }
 .st-head {
   /* 第 94 轮：副标题与「统计年份」label 都删了，头部只剩标题 + 下拉，
      align-items 从 flex-end 改 center（原来靠副标题托底，现在单行要垂直居中） */

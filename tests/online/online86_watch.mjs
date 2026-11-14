@@ -1,5 +1,5 @@
 /* 第 86 轮 watch 侧线上复验：视觉评审第三批 P2+P3
-   对应提交 606d424，预期线上 watch.css?v=32
+   对应提交 606d424，预期线上 watch.css?v=34
 
    ① 内容指纹：线上引用 v24；css/js 与本地 md5 全等；条数从数据推导
    ② 1440：令牌计算值生效、圆角落档、缓动曲线一致、.w-btn 含 filter、表单无英文、0 PUT
@@ -57,13 +57,13 @@ console.log('== A 内容指纹 ==');
   const got = await p.evaluate(async (site) => {
     const get = async (u) => (await fetch(site + u, { cache: 'reload' })).text();
     const [html, css, js, data] = await Promise.all([
-      get('watch.html'), get('watch.css?v=32'), get('watch.js?v=22'), get('data/watch.json'),
+      get('watch.html'), get('watch.css?v=34'), get('watch.js?v=23'), get('data/watch.json'),
     ]);
     return { html, css, js, data };
   }, SITE);
 
-  ok('A1 线上 watch.html 引用 watch.css?v=32 / watch.js?v=22',
-    /watch\.css\?v=32/.test(got.html) && /watch\.js\?v=22/.test(got.html),
+  ok('A1 线上 watch.html 引用 watch.css?v=34 / watch.js?v=23',
+    /watch\.css\?v=34/.test(got.html) && /watch\.js\?v=23/.test(got.html),
     (got.html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
   ok('A2 线上 watch.css 与本地逐字节相同（CRLF 归一后 md5 全等）',
     md5txt(got.css) === md5txt(localCss), md5txt(got.css).slice(0, 12));

@@ -4,7 +4,7 @@
  *    等用户说「上线」→ fetch/merge → push → Pages 指纹轮询命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=32 / watch.js?v=22；线上 css/js 字节 md5
+ *   ① 指纹：watch.html 引用 watch.css?v=34 / watch.js?v=23；线上 css/js 字节 md5
  *      与本地全等（CRLF 归一）；线上 CSS 确实是「静态流入标题行」那一版；
  *      线上 watch.json 与本地全等（条数从 items 推导，不手抄）
  *   ② 1440 全库：DOM 顺序、12px 空格、海报内零评分、日期贴右、★/金色/零背景、
@@ -51,12 +51,12 @@ await page.waitForTimeout(800);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹 ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=32 / watch.js?v=22',
-  /watch\.css\?v=32/.test(html) && /watch\.js\?v=22/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=34 / watch.js?v=23',
+  /watch\.css\?v=34/.test(html) && /watch\.js\?v=23/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=32&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=22&t=' + TS);
+const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=34&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=23&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等（CRLF 归一成 LF 后比）',
   md5txt(liveCss) === md5txt(localCss), `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等（本轮改了 renderGrid，js 必须一起上线）',

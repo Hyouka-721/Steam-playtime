@@ -44,8 +44,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=32 / watch.js?v=22',
-  /watch\.css\?v=32/.test(html) && /watch\.js\?v=22/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=34 / watch.js?v=23',
+  /watch\.css\?v=34/.test(html) && /watch\.js\?v=23/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const relInput = (html.match(/<input[^>]*id="add-release"[^>]*>/) || [''])[0];

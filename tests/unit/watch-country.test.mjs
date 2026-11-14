@@ -42,6 +42,10 @@ test('归一化：常见写法收敛到规范名', () => {
   assert.equal(normCountry('香港'), '中国香港');
   assert.equal(normCountry('台湾'), '中国台湾');
   assert.equal(normCountry('澳门'), '中国澳门');
+  // 第 96 轮：主陆规范名从「中国」改为「中国大陆」—— 与港澳台并列时不产生歧义
+  assert.equal(normCountry('中国'), '中国大陆');
+  assert.equal(normCountry('大陆'), '中国大陆');
+  assert.equal(normCountry('China'), '中国大陆');
   assert.equal(normCountry('日本'), '日本');
   assert.equal(normCountry(''), '');
 });

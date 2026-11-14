@@ -37,8 +37,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=32 / watch.js?v=22',
-  /watch\.css\?v=32/.test(html) && /watch\.js\?v=22/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=34 / watch.js?v=23',
+  /watch\.css\?v=34/.test(html) && /watch\.js\?v=23/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const cInput = (html.match(/<input[^>]*id="add-country"[^>]*>/) || [''])[0];
@@ -88,17 +88,32 @@ await page.waitForTimeout(600);
 
 const r0 = await page.evaluate(() => {
   const sec = document.querySelector('[data-panel="country"]');
+  const rows = sec ? [...sec.querySelectorAll('.st-row')] : [];
+  const first = rows[0];
   return {
     exists: !!sec,
-    rows: sec ? sec.querySelectorAll('.st-row').length : 0,
+    rows: rows.length,
+    first: first ? first.querySelector('.st-row-k').textContent.trim() : '',
+    firstV: first ? first.querySelector('.st-row-v').textContent.trim() : '',
     hint: sec && sec.querySelector('.st-hint') ? sec.querySelector('.st-hint').textContent.trim() : '',
     empty: sec && sec.querySelector('.st-empty') ? sec.querySelector('.st-empty').textContent.trim() : '',
     ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
   };
 });
-ok('B1 真实数据还没有国别：面板出空态说明，标题右侧显示「' + N + ' 部待补」',
-  r0.exists && r0.rows === 0 && r0.hint === N + ' 部待补' && /还没有国别数据/.test(r0.empty),
-  `提示=${r0.hint} 空态=${r0.empty.slice(0, 20)}`);
+/* 第 96 轮改判：数据已把 124 条国别全部补齐，所以真实数据不再是空态。
+   判据从「空态 + N 部待补」改成「出真行、首行=实际最多的那个国别、待补 0」。
+   —— 这不是调阈值：空态分支由下面的造数用例（B3 的 1 部待补）继续守着。 */
+const R95 = {};
+data.items.forEach((it) => (it.countries || []).forEach((c) => { R95[c] = (R95[c] || 0) + 1; }));
+const R95K = Object.keys(R95).sort((a, b) => R95[b] - R95[a] || a.localeCompare(b));
+const R95NO = data.items.filter((it) => !(Array.isArray(it.countries) && it.countries.length)).length;
+const R95ROW = r0.rows > 0 ? r0.rows : 0;
+const R95FIRST = R95K[0];
+ok('B1 真实数据已补齐国别：面板出 ' + Math.min(8, R95K.length) + ' 行、首行 ' + R95FIRST +
+  '=' + R95[R95FIRST] + '、无待补、无空态',
+  R95ROW === Math.min(8, R95K.length) && r0.first === R95FIRST && r0.firstV === String(R95[R95FIRST]) &&
+  R95NO === 0 && r0.hint === '' && r0.empty === '',
+  `行=${R95ROW} 首行=${r0.first}/${r0.firstV} 提示「${r0.hint}」空态=${r0.empty ? '有' : '无'} 待补=${R95NO}`);
 await ctx.close();
 
 /* ---------------- B2 造数：国别构成 + 截断到 8 ---------------- */
