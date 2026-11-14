@@ -366,11 +366,11 @@ function main() {
   const r = spawnSync(process.execPath, [path.join(__dirname, '..', 'build', 'inline-boot.mjs')], { stdio: 'inherit' });
   if (r.status !== 0) log('⚠ inline-boot 失败，首屏将回退到 fetch 取数');
 
-  // 第 93 轮：曾经在这里内联 style.css（脚本现归档在 scripts/legacy/inline-css.mjs），**已回退**。
+  // 第 93 轮：曾经在这里内联 style.css（脚本已于 2026-11-14 清理时删除，见 git 历史），**已回退**。
   // 原因：内联后 HTML 变成 42KB(gzip)，而外链时是 HTML 12.8KB + CSS 29.6KB **两个请求
   // 并行**。总字节几乎相同，但「并行拿两个」比「串行拿一个」更快 —— 线上六次取样中位
   // 全线变差：FCP 976ms（基线 772）、LCP 1736ms（基线 1300）、首行 2379ms（基线 1885）。
-  // 脚本保留在 scripts/legacy/inline-css.mjs 供参考（它本身是对的，只是这个站点的场景不适用：
+  // 该方案本身是对的，只是这个站点的场景不适用（需要时可从 git 历史取回）：
   // 本站 CSS 只有 29KB 且与 HTML 同域，并行成本本来就低）。
   // ⚠️ 若将来 CSS 涨到 100KB+ 或首屏必须靠它压 FCP，可重新评估。
   // const r2 = spawnSync(process.execPath, [path.join(__dirname, '..', 'legacy', 'inline-css.mjs')], { stdio: 'inherit' });

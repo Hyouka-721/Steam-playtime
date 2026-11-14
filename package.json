@@ -8,7 +8,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "node --test scripts/tests/diff.test.mjs scripts/tests/steam.test.mjs",
+    "test": "node --test tests/unit/diff.test.mjs tests/unit/steam.test.mjs",
     "fetch": "node scripts/pipeline/fetch.mjs",
     "diff": "node scripts/pipeline/diff.mjs",
     "build": "node scripts/pipeline/build.mjs",

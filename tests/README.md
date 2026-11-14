@@ -7,14 +7,18 @@
 
 ```
 tests/
-├── verify/          # 本地回归套件（对 http://127.0.0.1:8895 跑）
+├── index/           # 【index 站】本地回归套件（对 127.0.0.1:8895 跑）—— 新对话只关心这个目录
+├── watch/           # 【watch 站】本地回归套件（同上）
+├── retired/         # 已停用的历史套件（断言的功能已被删除，留档不跑、不改判据）
+├── unit/            # 采集/差分算法的单元测试（npm test）
 ├── online/          # 上线后对 https://hyouka-721.github.io/Steam-playtime/ 复验
 └── tools/
     ├── perf-audit.mjs / perf-lazy.mjs / ab-css.mjs   # 常驻性能工具（见 tools/README.md）
-    └── archive/     # 历史一次性脚本：取证截图 / 版本号 bump / 数据合并（留档备查）
+    ├── pages-poll.mjs                                # 推送后轮询 Pages 是否生效
+    └── probes/      # 可复用的取证探针（行高适配 / 多尺寸矩阵 / 像素扫描 / 滚动跳动）
 ```
 
-**新增脚本放哪里**：能对着任意版本反复跑的 → `tools/`；只为某一次操作服务的 → `tools/archive/`。
+**新增脚本放哪里**：能对着任意版本反复跑的 → `tools/`（探针放 `tools/probes/`）；只用一次的（版本号 bump / 取证截图 / 补丁脚本）**随做随删**——git 历史就是归档，不再维护 `archive/` 目录。
 
 ## 运行前提
 
@@ -26,22 +30,28 @@ tests/
   ```
 - 跑单个套件：
   ```
-  C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe tests/verify/verify70.mjs
+  C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe tests/index/verify117.mjs
   ```
-- 跑 watch 侧全部 **30 个活跃套件**（在 bash 里循环）：
+- 跑 **index 侧全部 16 个活跃套件**（改 index 必跑）：
   ```bash
   NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
-  for s in verify6 verify54 verify55 verify56 verify57 verify58 \
-           verify60 verify62 verify63 verify64 verify65 verify66 verify67 verify68 verify69 \
-           verify70 verify72 verify73 verify75 verify78 verify79 verify80 verify82 verify83 \
-           verify84_watch verify85_watch verify86_watch verify87_watch verify89_watch verify90_watch; do
-    echo "== $s =="; "$NODE" tests/verify/$s.mjs 2>&1 | tail -2
+  for s in verify6 verify54 verify82_index verify83_index verify91 verify92 \
+           verify103 verify104 verify105 verify106 verify108 verify111 \
+           verify113 verify115 verify116 verify117; do
+    echo "== $s =="; "$NODE" tests/index/$s.mjs 2>&1 | tail -2
   done
   ```
-  ⚠️ **第 90 轮起 `verify47/48/49` 从活跃循环移除**：它们等的是 index 页 `#recent-list .rank-item`，该榜在 index 线第 103/104 轮已彻底删除，跑起来必然 30s 超时白屏。属跨线停用历史套件，**留档不跑、不改判据也不调阈值**；本轮只改了 `docs/watch.*`，`docs/index.html` / `docs/app.js` 一字未动。
-  ⚠️ **index 侧另一条线单跑**（`verify103/104/105/106/108/111/113/115/116/117/82_index/83_index/91/92`，再加共用的 `verify6/54`）= **16 套件 370 条**，第 117 轮实测 0 FAIL。
-  ⚠️ **`verify47/48/49` 的测试对象已不存在**：它们断言的是「当日明细浮层」（`#cal-overlay` / `#cal-day-*` / `.cal-panel`），该浮层**第 113 轮已按用户要求整段删除**，三个套件保持停用状态（正因如此才不会误报）。
-  ⚠️ **没有 `verify88_watch`**（第 88 轮换图标是扩写 `verify87_watch`，不新起编号）；同理第 87 轮也没有新编号。
+- 跑 **watch 侧活跃套件**（改 `docs/watch.*` 才需要）：
+  ```bash
+  for s in verify55 verify56 verify57 verify58 verify60 verify62 verify63 verify64 verify65 \
+           verify66 verify67 verify68 verify69 verify70 verify72 verify73 verify75 verify78 \
+           verify79 verify80 verify82 verify83 verify84_watch verify85_watch verify86_watch \
+           verify87_watch verify89_watch verify90_watch; do
+    echo "== $s =="; "$NODE" tests/watch/$s.mjs 2>&1 | tail -2
+  done
+  ```
+- 单元测试：`npm test`（`tests/unit/*.test.mjs`，只测采集与差分算法）
+- `tests/retired/` **一律不跑**：`verify47/48/49` 断言的「当日明细浮层」在第 113 轮已整段删除；`verify88/90` 断言的是已被一年点阵取代的旧月历。它们留作历史，**不改判据、不调阈值、不复活**。
 
 ## 套件清单与当前基线（**watch 线**第 90 轮**评分移入标题行 · 已上线，watch 页线上 = 本地**：`watch.css?v=28` / `watch.js?v=17`、**30 套件 907 条 → 906 PASS / 1 已知红**；index 侧第 117 轮：**16 套件 370 条 0 FAIL**（`style.css?v=141` / `app.js?v=127`，行距 6px）—— 两条线轮号各走各的，认文件名后缀 `_watch` / `_index`。推送 `a7ba110..73dbf23` 后 Pages 第 3 次 `?t=` 轮询命中，线上 CSS/JS 字节 md5 与本地全等；**`online90_watch` 16 条 0 FAIL**（一次全绿），发布时 `0 ahead / 0 behind`。⚠️ 本行前半段是 watch 线第 90 轮快照；index 线已推进到第 117 轮，别用它代指全站状态）
 

@@ -13,8 +13,7 @@
      无需 <link rel=preload>（现代浏览器对已发现的 @font-face 自动提升优先级） */
 @font-face {
   font-family: 'Black Rose';
-  src: url('blackrose.woff2') format('woff2'),
-       url('blackrose.woff') format('woff');
+  src: url('blackrose.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: block;
