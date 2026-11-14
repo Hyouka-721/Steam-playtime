@@ -31,8 +31,8 @@ ok('A8 .w-title 有 pointer 光标与 focus-visible 环',
 ok('A9 JS 绑定了标题的 click 与 Enter/空格，并尊重 reduced-motion',
   /getElementById\('w-title'\)/.test(js) && /prefers-reduced-motion/.test(js) &&
   /'Enter' \|\| e\.key === ' '/.test(js));
-ok('A10 版本号 bump：watch.css?v=36 / watch.js?v=28',
-  /watch\.css\?v=36"/.test(html) && /watch\.js\?v=28"/.test(html));
+ok('A10 版本号 bump：watch.css?v=37 / watch.js?v=29',
+  /watch\.css\?v=37"/.test(html) && /watch\.js\?v=29"/.test(html));
 
 /* ================= B 字号与布局实测 ================= */
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });

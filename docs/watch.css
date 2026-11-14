@@ -550,7 +550,7 @@ code {
   }
 }
 @media (min-width: 1180px) {
-  /* 第 96 轮：年报铺满后高分 Top5 单行被拉开——这里排成两列（3 + 2）。
+  /* 第 96 轮：年报铺满后「年度影视」单行被拉开——这里排成两列（9 条 → 5 行）。
      🔴 用 .w-stats 提一级特异性，才能压住文件末尾的基础 .st-top-list 规则。
      两列下斑马纹会左右错位，一并关掉。 */
   .w-stats .st-top-list {
@@ -957,9 +957,8 @@ select.w-input { cursor: pointer; }
   .w-stats .st-plot { gap: 3px; height: 110px; }   /* 第 94 轮：.st-bars 拆成图区与轴区后，尺寸落在两区上 */
   .w-stats .st-axis { gap: 3px; }
   .w-stats .st-bar-lab { font-size: 9px; }
-  .w-stats .st-top-item { grid-template-columns: 18px 32px minmax(0, 1fr) 40px; gap: 8px; }
+  .w-stats .st-top-item { grid-template-columns: 40px 32px minmax(0, 1fr) 40px; gap: 8px; }
   .w-stats .st-top-img { width: 32px; height: 44px; }
-  .w-stats .st-top-meta { display: none; }
   /* 第 97 轮：390 下两个饼图改竖排（饼在上居中、图例整宽），否则 168 的饼把图例挤成两字一行 */
   .w-stats .st-pie { flex-direction: column; align-items: stretch; gap: 14px; }
   .w-stats .st-pie-chart { width: 132px; height: 132px; align-self: center; }
@@ -1031,18 +1030,18 @@ select.w-input { cursor: pointer; }
 
 .st-panels {
   /* 第 94 轮美观 #4：2×2 等分太呆板 → 12 栅格不对称。
-     第 98 轮按用户要求换位后每行都正好 12 栏：
-     月度(6)+评分区间(6) ／ 类型(4)+逐年(8) ／ 国别(6)+标签(6)。
+     第 99 轮按用户要求改「一行三卡」：
+     月度(5)+评分区间(4)+类型(3) ／ 逐年(5)+国别(4)+标签(3)，每行都正好 12 栏。
      ⚠️ 子项跨度必须配 .w-stats .st-panel[data-panel] 的断点复位，
-        否则 860 以下容器只剩 1 列而子项还 span 8，会撑出横向溢出。 */
+        否则 860 以下容器只剩 1 列而子项还 span 5，会撑出横向溢出。 */
   display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px;
 }
-.st-panel[data-panel="months"] { grid-column: span 6; }   /* 第 98 轮：与评分区间饼同行 6+6 */
-.st-panel[data-panel="years"] { grid-column: span 8; }
-.st-panel[data-panel="kinds"] { grid-column: span 4; }
-.st-panel[data-panel="tags"] { grid-column: span 6; }     /* 第 98 轮：与国别饼同行 6+6 */
-.st-panel[data-panel="buckets"] { grid-column: span 6; }
-.st-panel[data-panel="country"] { grid-column: span 6; }
+.st-panel[data-panel="months"] { grid-column: span 5; }   /* 第 99 轮：与评分区间、类型构成同行 5+4+3 */
+.st-panel[data-panel="years"] { grid-column: span 5; }
+.st-panel[data-panel="kinds"] { grid-column: span 3; }
+.st-panel[data-panel="tags"] { grid-column: span 3; }     /* 第 99 轮：与逐年、国别同行 5+4+3 */
+.st-panel[data-panel="buckets"] { grid-column: span 4; }
+.st-panel[data-panel="country"] { grid-column: span 4; }
 .st-panel {
   padding: 16px 18px 18px; min-width: 0;
   background: var(--card-bg);
@@ -1130,12 +1129,11 @@ select.w-input { cursor: pointer; }
 
 .st-top { margin-top: 14px; }
 .st-top-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.st-top-item { display: grid; grid-template-columns: 22px 38px minmax(0, 1fr) 100px 44px; align-items: center; gap: 12px; padding: 6px 8px; border-radius: var(--r-sm); }
+.st-top-item { display: grid; grid-template-columns: 44px 38px minmax(0, 1fr) 44px; align-items: center; gap: 12px; padding: 6px 8px; border-radius: var(--r-sm); }
 .st-top-item:nth-child(odd) { background: rgba(255, 255, 255, .02); }
-.st-top-rank { font-size: 12px; color: var(--text-faint); text-align: center; font-variant-numeric: tabular-nums; }
+.st-top-year { font-size: 12px; color: var(--text-faint); text-align: center; font-variant-numeric: tabular-nums; }
 .st-top-img { width: 38px; height: 52px; object-fit: cover; border-radius: var(--r-sm); background: var(--img-bg); }
 .st-top-name { font-size: 13px; color: var(--text-strong); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.st-top-meta { font-size: 11px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
 .st-top-score { font-size: 13px; font-weight: 600; color: #dcb978; text-align: right; font-variant-numeric: tabular-nums; }
 
 @media (prefers-reduced-motion: reduce) {

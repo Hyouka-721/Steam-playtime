@@ -38,8 +38,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=36 / watch.js?v=28',
-  /watch\.css\?v=36/.test(html) && /watch\.js\?v=28/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=37 / watch.js?v=29',
+  /watch\.css\?v=37/.test(html) && /watch\.js\?v=29/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const cInput = (html.match(/<input[^>]*id="add-country"[^>]*>/) || [''])[0];
@@ -65,8 +65,8 @@ const spanOf = (k) => {
   const m = css.match(new RegExp('\\.st-panel\\[data-panel="' + k + '"\\]\\s*\\{\\s*grid-column:\\s*span\\s*(\\d+)'));
   return m ? Number(m[1]) : 0;
 };
-ok('A6 国别面板挂 data-panel="country"、占 6 栏；评分区间改饼图后也占 6 栏（第 98 轮换位后两者各自与别的面板同行）',
-  /data-panel="country"/.test(js) && spanOf('country') === 6 && spanOf('buckets') === 6,
+ok('A6 国别面板挂 data-panel="country"、占 4 栏；评分区间也占 4 栏（第 99 轮一行三卡，两饼各自夹在中间）',
+  /data-panel="country"/.test(js) && spanOf('country') === 4 && spanOf('buckets') === 4,
   `country=${spanOf('country')} buckets=${spanOf('buckets')}`);
 
 ok('A7 🔴 860 块的面板跨度复位仍在（新增面板同样受它保护，否则窄屏横向溢出）',

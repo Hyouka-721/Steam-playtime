@@ -333,6 +333,19 @@
                         '#985F85', '#B0C888', '#976C00', '#359B75', '#0097BC'];
   var OTHER_COLOR = '#8C8CAA';
   var COUNTRY_MIN = 10;   /* 少于 10 部的国别合并成「其他」 */
+  /* 第 99 轮：年度影视 —— 用户每年钦点一部「年度最佳」，2018~2026 共 9 条。
+     纯编辑清单（不是按评分现算的 Top5），面板里按片名去 ALL 里找海报/评分补全。 */
+  var YEAR_PICKS = [
+    { y: '2026', t: '给阿嬷的情书' },
+    { y: '2025', t: '士兵突击' },
+    { y: '2024', t: '海边的曼彻斯特' },
+    { y: '2023', t: '史前星球' },
+    { y: '2022', t: '是大臣' },
+    { y: '2021', t: '情书' },
+    { y: '2020', t: '冰菓' },
+    { y: '2019', t: '我想吃掉你的胰脏' },
+    { y: '2018', t: '阿甘正传' }
+  ];
   function stPie(pairs, ariaLabel) {
     var total = 0;
     pairs.forEach(function (p) { if (p.v > 0) total += p.v; });
@@ -451,10 +464,13 @@
     var noCountry = items.filter(function (it) {
       return !(Array.isArray(it.countries) && it.countries.length);
     }).length;
-    var top = rated.slice().sort(function (a, b) {
-      return Number(b.rating) - Number(a.rating) ||
-             sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
-    }).slice(0, 5);
+    /* 第 99 轮：高分 Top 5 → 年度影视。用户每年钦点一部（2018~2026 共 9 条），
+       按 YEAR_PICKS 的声明顺序排；在 ALL 里按片名找海报/评分补全（找不到就只显示年份+片名）。 */
+    var picks = YEAR_PICKS.map(function (p) {
+      var hit = null;
+      for (var i = 0; i < ALL.length; i++) { if (ALL[i].title === p.t) { hit = ALL[i]; break; } }
+      return { year: p.y, title: p.t, it: hit };
+    });
 
     /* 第 94 轮：逐年趋势。口径上**不吃年份下拉** —— 选某一年时高亮那根柱子，
        而不是把趋势图缩成孤零零一根；类型筛选照常跟随。 */
@@ -508,10 +524,9 @@
         '<b class="st-v">' + esc(c.v) + '</b><span class="st-u">' + esc(c.u) + '</span></div>';
     }).join('') + '</div>';
     /* 每个面板都挂 data-panel：套件按面板取数（[data-panel="months"] .st-bar），
-       以后再加面板就不用改旧判据了。⚠️ DOM 顺序决定栅格自动排布（第 98 轮按用户要求换位）：
-       月度(6) + 评分区间(6) ／ 类型(4) + 逐年(8) ／ 国别(6) + 标签(6)，每行都正好 12 栏。
-       两个饼各自跟「同类」面板相邻：评分区间挨着月度分布（都是「看法」），
-       国别挨着高频标签（都是「构成类」的收尾）。 */
+       以后再加面板就不用改旧判据了。⚠️ DOM 顺序决定栅格自动排布（第 99 轮按用户要求改「一行三卡」）：
+       月度(5) + 评分区间(4) + 类型(3) ／ 逐年(5) + 国别(4) + 标签(3)，每行都正好 12 栏。
+       评分区间夹在月度分布与类型构成之间、国别夹在逐年趋势与高频标签之间。 */
     var panels = '<div class="st-panels">' +
       '<section class="st-panel" data-panel="months"><h3>月度分布</h3>' + stBars(months, monthMax) + '</section>' +
       '<section class="st-panel" data-panel="buckets"><h3>评分区间</h3>' +
@@ -533,16 +548,17 @@
         }).join('') + '</div>' : '<p class="st-empty">这个范围内还没有标签</p>') +
       '</section>' +
     '</div>';
-    var topHtml = '<section class="st-panel st-top" data-panel="top"><h3>高分 Top 5</h3>' +
-      (top.length ? '<ol class="st-top-list">' + top.map(function (it, i) {
+    var topHtml = '<section class="st-panel st-top" data-panel="top"><h3>年度影视</h3>' +
+      '<ol class="st-top-list">' + picks.map(function (p) {
+        var it = p.it;
         return '<li class="st-top-item">' +
-          '<span class="st-top-rank">' + (i + 1) + '</span>' +
-          '<img class="st-top-img" src="' + esc(it.poster_320 || it.poster || '') + '" alt="" loading="lazy" decoding="async">' +
-          '<span class="st-top-name">' + esc(it.title) + '</span>' +
-          '<span class="st-top-meta">' + esc(String(it.watched_at || '')) + '</span>' +
-          '<span class="st-top-score">' + Number(it.rating).toFixed(1) + '</span>' +
+          '<span class="st-top-year">' + esc(p.year) + '</span>' +
+          (it ? '<img class="st-top-img" src="' + esc(it.poster_320 || it.poster || '') + '" alt="" loading="lazy" decoding="async">'
+              : '<span class="st-top-img"></span>') +
+          '<span class="st-top-name">' + esc(p.title) + '</span>' +
+          '<span class="st-top-score">' + (it && Number(it.rating) > 0 ? Number(it.rating).toFixed(1) : '—') + '</span>' +
         '</li>';
-      }).join('') + '</ol>' : '<p class="st-empty">这个范围内还没有评分记录</p>') +
+      }).join('') + '</ol>' +
     '</section>';
     statsEl.innerHTML = items.length
       ? head + cardHtml + panels + topHtml

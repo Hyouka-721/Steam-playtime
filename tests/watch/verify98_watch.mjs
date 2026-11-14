@@ -8,7 +8,7 @@
  *    🔴 这是把第 96 轮的口径**反过来了** —— 当时定「中国大陆」是为了跟港澳台并列时不歧义，
  *    用户现在要求合并，所以 `'中国大陆'/'台湾'` 一律映射到「中国」，港澳仍独立。
  * ② 版式：DOM 顺序 → 月度 / 评分区间 / 类型 / 逐年 / 国别 / 标签 / Top5，
- *    跨度 → 6+6 / 4+8 / 6+6，**每行都正好 12 栏**（改跨度必须重新配平，否则会掉进下一行）。
+ *    跨度 → 5+4+3 / 5+4+3（第 99 轮改成「一行三卡」），**每行都正好 12 栏**。
  *
  * ⚠️ 年报按钮只在时间轴视图出现（第 93 轮契约），所以每次都要先点头像再点年报。
  * ⚠️ 顺序判据要按 **DOM 里的实际先后**比，不能只比"这个面板存在" —— 挪位置最容易漏测。
@@ -32,7 +32,7 @@ const css = stripCmt(rd('watch.css'));
 const data = JSON.parse(rd('data/watch.json'));
 
 const ORDER = ['months', 'buckets', 'kinds', 'years', 'country', 'tags', 'top'];
-const SPAN = { months: 6, buckets: 6, kinds: 4, years: 8, country: 6, tags: 6 };
+const SPAN = { months: 5, buckets: 4, kinds: 3, years: 5, country: 4, tags: 3 };
 
 /* 与面板同一口径的期望值 */
 const CNT = {};
@@ -50,8 +50,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=36 / watch.js?v=28（CSS 改跨度、JS 改顺序与别名表，都得 bump）',
-  /watch\.css\?v=36/.test(html) && /watch\.js\?v=28/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=37 / watch.js?v=29（CSS 改跨度、JS 改顺序与别名表，都得 bump）',
+  /watch\.css\?v=37/.test(html) && /watch\.js\?v=29/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 /* 顺序：取每个面板标记在 JS 源码里第一次出现的位置，必须严格递增 */
@@ -64,14 +64,14 @@ ok('A2 DOM 顺序 = 月度 / 评分区间 / 类型 / 逐年 / 国别 / 标签 / 
 const spanOf = (k) => Number((new RegExp(
   '\\.st-panel\\[data-panel="' + k + '"\\] \\{ grid-column: span (\\d+); \\}').exec(css) || [, 0])[1]);
 const SPANS = ORDER.filter((k) => k !== 'top').map((k) => spanOf(k));
-ok('A3 跨度按新顺序重新配平：6 / 6 / 4 / 8 / 6 / 6',
+ok('A3 跨度按新顺序重新配平：5 / 4 / 3 / 5 / 4 / 3',
   ORDER.filter((k) => k !== 'top').every((k) => spanOf(k) === SPAN[k]),
   ORDER.filter((k) => k !== 'top').map((k) => k + '=' + spanOf(k)).join(' '));
 
-/* 每行必须正好 12 栏：三行分别是 (months+buckets) (kinds+years) (country+tags) */
-const ROWS = [['months', 'buckets'], ['kinds', 'years'], ['country', 'tags']];
+/* 每行必须正好 12 栏：两行分别是 (months+buckets+kinds) (years+country+tags) */
+const ROWS = [['months', 'buckets', 'kinds'], ['years', 'country', 'tags']];
 const rowSums = ROWS.map((r) => r.reduce((s, k) => s + spanOf(k), 0));
-ok('A4 三行各自正好 12 栏（+6+6 / 4+8 / 6+6），不会掉进下一行留空档',
+ok('A4 两行各自正好 12 栏（5+4+3 / 5+4+3），不会掉进下一行留空档',
   rowSums.every((v) => v === 12), `行和 ${rowSums.join('/')}（跨度 ${SPANS.join('/')}）`);
 
 /* ---- 国别口径：大陆 + 台湾 → 中国 ---- */
@@ -145,14 +145,13 @@ const r = await probe();
 ok('B1 运行时 DOM 顺序与静态一致（月度 / 评分区间 / 类型 / 逐年 / 国别 / 标签 / Top5）',
   r.order.join('/') === 'months/buckets/kinds/years/country/tags/top', r.order.join('/'));
 
-ok('B2 三行真的排出来了：月度与评分区间同行、类型与逐年同行、国别与标签同行，且行间依次下移',
-  r.boxes.months.t === r.boxes.buckets.t &&
-  r.boxes.kinds.t === r.boxes.years.t &&
-  r.boxes.country.t === r.boxes.tags.t &&
-  r.boxes.buckets.t < r.boxes.kinds.t && r.boxes.years.t < r.boxes.country.t,
-  `月度/区间 ${r.boxes.months.t}/${r.boxes.buckets.t} · 类型/逐年 ${r.boxes.kinds.t}/${r.boxes.years.t} · 国别/标签 ${r.boxes.country.t}/${r.boxes.tags.t}`);
+ok('B2 两行真的排出来了：月度/评分区间/类型 同行、逐年/国别/标签 同行，且行间依次下移',
+  r.boxes.months.t === r.boxes.buckets.t && r.boxes.buckets.t === r.boxes.kinds.t &&
+  r.boxes.years.t === r.boxes.country.t && r.boxes.country.t === r.boxes.tags.t &&
+  r.boxes.kinds.t < r.boxes.years.t,
+  `月度/区间/类型 ${r.boxes.months.t}/${r.boxes.buckets.t}/${r.boxes.kinds.t} · 逐年/国别/标签 ${r.boxes.years.t}/${r.boxes.country.t}/${r.boxes.tags.t}`);
 
-ok('B3 跨度落地：6 / 6 / 4 / 8 / 6 / 6（占容器 12 栏的比例 ±3%）',
+ok('B3 跨度落地：5 / 4 / 3 / 5 / 4 / 3（占容器 12 栏的比例 ±3%）',
   ['months', 'buckets', 'kinds', 'years', 'country', 'tags']
     .every((k) => Math.abs(r.boxes[k].w / r.panelsW - SPAN[k] / 12) < 0.03),
   ['months', 'buckets', 'kinds', 'years', 'country', 'tags']
@@ -200,13 +199,13 @@ const c = await p2.evaluate(() => {
     ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
   };
 });
-ok('C1 1440 顺序与行关系不变：月度/区间、类型/逐年、国别/标签 各自同行',
+ok('C1 1440 顺序与行关系不变：月度/区间/类型、逐年/国别/标签 各自同行',
   c.order.join('/') === 'months/buckets/kinds/years/country/tags/top' &&
-  c.m.t === c.bk.t && c.k.t === c.y.t && c.co.t === c.tg.t,
-  `${c.m.t}/${c.bk.t} · ${c.k.t}/${c.y.t} · ${c.co.t}/${c.tg.t}`);
+  c.m.t === c.bk.t && c.bk.t === c.k.t && c.y.t === c.co.t && c.co.t === c.tg.t,
+  `${c.m.t}/${c.bk.t}/${c.k.t} · ${c.y.t}/${c.co.t}/${c.tg.t}`);
 
-ok('C2 1440 月度与评分区间等宽、饼缩到 230 且图例不重叠',
-  Math.abs(c.m.w - c.bk.w) <= 2 && c.pieW === 230 && c.gap > 0,
+ok('C2 1440 月度(5)比评分区间(4)宽、饼缩到 230 且图例不重叠',
+  c.m.w > c.bk.w && c.pieW === 230 && c.gap > 0,
   `月度 ${c.m.w} / 区间 ${c.bk.w} / 饼 ${c.pieW} 间距 ${c.gap}`);
 
 ok('C3 1440 无横向溢出 + 零 JS 异常', c.ov <= 0 && e2.length === 0, `ov=${c.ov} err=${e2.length}`);

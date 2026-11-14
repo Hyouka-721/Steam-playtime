@@ -58,8 +58,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=36 / watch.js?v=28（CSS 改限宽、JS 改国别规范名，两个都要 bump）',
-  /watch\.css\?v=36/.test(html) && /watch\.js\?v=28/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=37 / watch.js?v=29（CSS 改限宽、JS 改国别规范名，两个都要 bump）',
+  /watch\.css\?v=37/.test(html) && /watch\.js\?v=29/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const statsBlock = (/(^|\n)\.w-stats \{[^}]*\}/.exec(css) || [''])[0];
@@ -169,14 +169,14 @@ const browser = await chromium.launch();
     r.cHint === (NO_COUNTRY ? NO_COUNTRY + ' 部待补' : '') && r.cEmpty === 0,
     r.cRows.map((x) => x.k + '=' + x.v).join('/') + ` | 提示「${r.cHint}」`);
 
-  ok('B4 其余面板没被本轮改动带坏：6 卡 / 12 月柱 / 逐年 ' + YEARS + ' 柱 / 类型 3 行 / 区间 5 行 / Top5',
+  ok('B4 其余面板没被本轮改动带坏：6 卡 / 12 月柱 / 逐年 ' + YEARS + ' 柱 / 类型 3 行 / 区间 5 行 / 年度影视 9 条',
     r.cards === 6 && r.barsMonth === 12 && r.barsYear === YEARS &&
-    r.rowsKind === 3 && r.rowsBucket === 5 && r.top === 5,
+    r.rowsKind === 3 && r.rowsBucket === 5 && r.top === 9,
     `卡${r.cards} 月${r.barsMonth} 年${r.barsYear} 类${r.rowsKind} 区间${r.rowsBucket} top${r.top}`);
 
   ok('B5 1920 无横向溢出 + 零 JS 异常', r.ov <= 0 && errs.length === 0, `ov=${r.ov} err=${errs.length}`);
 
-  ok('B6 铺满连带的 Top5 收窄：≥1180 排成两列（1·2 同行、第 3 条换行、单条宽 ≤ 一半）',
+  ok('B6 铺满连带的年度影视收窄：≥1180 排成两列（9 条 → 5 行，1·2 同行、第 3 条换行、单条宽 ≤ 一半）',
     r.topList.cols === 2 && r.topList.sameRow && r.topList.thirdRowGap > 10 &&
     r.topList.itemW <= Math.round(r.stW / 2),
     `列${r.topList.cols} 同行=${r.topList.sameRow} 第三条下移${r.topList.thirdRowGap}px 单条${r.topList.itemW} / 年报${r.stW}`);

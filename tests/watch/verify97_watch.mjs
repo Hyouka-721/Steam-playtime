@@ -12,7 +12,7 @@
  *      实现而丢档。只剩一档时改画 `<circle>`（留缝会多出一个缺口，看着像掉了一块）。
  *   ③ 图例复用 .st-row 家族、只换列模板（.st-row--pie），所以旧套件数 .st-row /
  *      .st-row-k / .st-row-v 的判据一个字都不用改。
- *   ④ 面板跨度 8+4 → 6+6：饼要近方形才放得下，两个饼同行等分。
+ *   ④ 面板跨度 8+4 → 6+6（第 97 轮），第 99 轮又改成 5+4+3 一行三卡：饼要近方形才放得下。
  *   ⑤ 配色重做：国别 10 色、评分区间有序五档（判据见 A10~A13，都是量化指标不是看着像）。
  *   ⑥ 长尾合并：<10 部的国别折成「其他」（中性灰），样本不足阈值时退回前 8 名（A14/A15、C4）。
  *
@@ -120,8 +120,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=36 / watch.js?v=28（CSS 与 JS 都改了，两个都要 bump）',
-  /watch\.css\?v=36/.test(html) && /watch\.js\?v=28/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=37 / watch.js?v=29（CSS 与 JS 都改了，两个都要 bump）',
+  /watch\.css\?v=37/.test(html) && /watch\.js\?v=29/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 JS 有 stPie + 两套色板；评分区间与国别都走它（stPie(buckets) / stPie(countries)）',
@@ -134,9 +134,9 @@ ok('A3 这两个面板不再用横条（stRows 只剩「类型构成」一处调
   /stRows\(kinds\)/.test(js) && (js.match(/stRows\(/g) || []).length === 2,
   `stRows( 出现 ${(js.match(/stRows\(/g) || []).length} 次（1 处定义 + 1 处调用）`);
 
-ok('A4 两个饼面板都占 6 栏（近方形才放得下饼+图例；第 98 轮换位后各与月度/标签同行）',
-  /\.st-panel\[data-panel="buckets"\] \{ grid-column: span 6; \}/.test(css) &&
-  /\.st-panel\[data-panel="country"\] \{ grid-column: span 6; \}/.test(css));
+ok('A4 两个饼面板都占 4 栏（第 99 轮一行三卡：评分区间夹在月度与类型之间、国别夹在逐年与标签之间）',
+  /\.st-panel\[data-panel="buckets"\] \{ grid-column: span 4; \}/.test(css) &&
+  /\.st-panel\[data-panel="country"\] \{ grid-column: span 4; \}/.test(css));
 
 ok('A5 饼图与图例的样式齐备：.st-pie / .st-pie-chart / .st-pie-slice / .st-row--pie / .st-row-pct',
   /\.st-pie \{/.test(css) && /\.st-pie-chart \{/.test(css) && /\.st-pie-slice \{/.test(css) &&
@@ -310,8 +310,8 @@ ok('B10 渲染后色点两两不同：' + r.c.rows + ' 行国别 = ' + new Set(r
   new Set(r.c.fills).size === r.c.pieces && new Set(r.b.fills).size === r.b.pieces,
   `国别 ${new Set(r.c.dots).size}/${r.c.rows} · 区间 ${new Set(r.b.dots).size}/${r.b.rows}`);
 
-/* 第 98 轮起两块饼不再同行（用户要求各自挪到别的位置），所以只断言等宽 + 饼图例不重叠 */
-ok('B7 版式：两个饼面板等宽（都占 6 栏），各自饼在左、图例在右且不重叠',
+/* 第 99 轮起一行三卡：两个饼各自夹在中间，仍等宽（都 4 栏）、饼在左图例在右不重叠 */
+ok('B7 版式：两个饼面板等宽（都占 4 栏），各自饼在左、图例在右且不重叠',
   Math.abs(r.b.sec.w - r.c.sec.w) <= 2 &&
   r.b.pie.r <= r.b.leg.l && r.c.pie.r <= r.c.leg.l,
   `区间 ${r.b.sec.w} / 国别 ${r.c.sec.w} 间距 ${r.b.leg.l - r.b.pie.r}/${r.c.leg.l - r.c.pie.r}`);

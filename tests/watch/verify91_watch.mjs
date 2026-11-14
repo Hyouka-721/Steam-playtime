@@ -44,8 +44,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=36 / watch.js?v=28',
-  /watch\.css\?v=36/.test(html) && /watch\.js\?v=28/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=37 / watch.js?v=29',
+  /watch\.css\?v=37/.test(html) && /watch\.js\?v=29/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const relInput = (html.match(/<input[^>]*id="add-release"[^>]*>/) || [''])[0];
@@ -264,10 +264,10 @@ const MOCK3 = {
     r.statsBtnVisible && r.pressed === 'true' && r.btnText === '返回列表');
   /* 第 94 轮契约演进：4 卡 → 6 卡（+评分中位数 +≥8 分占比）、新增「逐年趋势」面板，
      所以柱/行必须按面板分别计数，旧的「全库 12 柱 / 8 行」已不成立。 */
-  ok('C7 A4 内容齐备：6 卡 / 12 月柱 / 逐年柱=年份数 / 类型 3 行 + 区间 5 行 / 标签 / Top5 / 10 个年份选项',
+  ok('C7 A4 内容齐备：6 卡 / 12 月柱 / 逐年柱=年份数 / 类型 3 行 + 区间 5 行 / 标签 / 年度影视 9 条 / 10 个年份选项',
     r.cards === 6 && r.barsMonth === 12 && r.barsYear === Object.keys(yearCounts).length &&
     r.rowsKind === 3 && r.rowsBucket === 5 && r.chips > 0 && r.chips <= 8 &&
-    r.top === 5 && r.years === 10 && r.v0 === String(N) && /全部年份/.test(r.title),
+    r.top === 9 && r.years === 10 && r.v0 === String(N) && /全部年份/.test(r.title),
     `cards=${r.cards} 月=${r.barsMonth} 年=${r.barsYear} 类型=${r.rowsKind} 区间=${r.rowsBucket} chips=${r.chips} 总数=${r.v0}`);
 
   await page.selectOption('#st-year', '2020');

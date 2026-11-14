@@ -41,7 +41,7 @@ const ok = (n, c, extra = '') => {
 console.log('== A 静态 ==');
 
 ok('A1 版本号 v24（css）/ v16（js，本轮未动）',
-  /watch\.css\?v=36/.test(html) && /watch\.js\?v=28/.test(html),
+  /watch\.css\?v=37/.test(html) && /watch\.js\?v=29/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const NEED_TOKENS = ['--text-soft', '--text-faint', '--well', '--img-bg', '--on-accent', '--danger',
