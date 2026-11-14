@@ -307,8 +307,8 @@
   }
   /* ---------- 第 97 轮：评分区间 / 国别构成改饼图 ----------
      用户要求「改成饼图」。纯 SVG 手绘，零依赖、零请求。
-     ① 片与片之间留 1.1° 的缝，靠面板底色透出来当分隔 —— 不描边（--card-bg 是渐变，
-        拿不到一个可用的纯色，描出来是花的）；
+     ① 第 100 轮：片与片之间不再留缝（原来 1.1° 的缝靠面板底色透出来，用户看到的
+        「黑色分隔区域」就是它）—— 现在首尾相接画满整圆，仍是零描边；
      ② 0 值的档位不画片（画不出面积），但图例照列 —— 口径不能因为视觉实现而丢档；
      ③ 图例复用 .st-row 家族、只换列模板（.st-row--pie），旧套件数 .st-row 的判据不用动。 */
   /* 第 97 轮配色重做（用户：「颜色种类过少，数据项之间缺乏足够的视觉区分度」，
@@ -362,10 +362,10 @@
       slices = '<circle class="st-pie-slice" cx="50" cy="50" r="46" fill="' + live[0].c + '">' +
         '<title>' + esc(live[0].k) + ' ' + live[0].v + '</title></circle>';
     } else {
-      var ang = -90, gap = 1.1;
+      var ang = -90;
       slices = live.map(function (p) {
         var sweep = p.v / total * 360;
-        var a0 = ang + gap / 2, a1 = ang + sweep - gap / 2;
+        var a0 = ang, a1 = ang + sweep;
         ang += sweep;
         if (a1 - a0 < 0.5) a1 = a0 + 0.5;   /* 极小的片也留一丝可见面积 */
         return '<path class="st-pie-slice" d="M ' + cx + ' ' + cy + ' L ' + pt(a0) +
@@ -465,7 +465,9 @@
       return !(Array.isArray(it.countries) && it.countries.length);
     }).length;
     /* 第 99 轮：高分 Top 5 → 年度影视。用户每年钦点一部（2018~2026 共 9 条），
-       按 YEAR_PICKS 的声明顺序排；在 ALL 里按片名找海报/评分补全（找不到就只显示年份+片名）。 */
+       按 YEAR_PICKS 的声明顺序排；在 ALL 里按片名找海报补全。
+       第 100 轮：按用户要求只展示「海报 + 年份」，片名与评分不再渲染，
+       海报尺寸/比例/圆角/边框/阴影与网格视图 .poster-pic 相同。 */
     var picks = YEAR_PICKS.map(function (p) {
       var hit = null;
       for (var i = 0; i < ALL.length; i++) { if (ALL[i].title === p.t) { hit = ALL[i]; break; } }
@@ -552,11 +554,9 @@
       '<ol class="st-top-list">' + picks.map(function (p) {
         var it = p.it;
         return '<li class="st-top-item">' +
-          '<span class="st-top-year">' + esc(p.year) + '</span>' +
           (it ? '<img class="st-top-img" src="' + esc(it.poster_320 || it.poster || '') + '" alt="" loading="lazy" decoding="async">'
               : '<span class="st-top-img"></span>') +
-          '<span class="st-top-name">' + esc(p.title) + '</span>' +
-          '<span class="st-top-score">' + (it && Number(it.rating) > 0 ? Number(it.rating).toFixed(1) : '—') + '</span>' +
+          '<span class="st-top-year">' + esc(p.year) + '</span>' +
         '</li>';
       }).join('') + '</ol>' +
     '</section>';
@@ -1093,7 +1093,7 @@
     resetPreview();
   }
 
-  var FIELD_IDS = ['add-title', 'add-en', 'add-kind', 'add-year', 'add-release',
+  var FIELD_IDS = ['add-title', 'add-en', 'add-kind', 'add-year',
                    'add-watched', 'add-rating', 'add-order', 'add-country', 'add-tags', 'add-note'];
   function setField(id, v) {
     var el = document.getElementById(id);
@@ -1190,24 +1190,9 @@
     if (el) { el.focus(); if (el.select) el.select(); }
   }
 
-  /* 第 91 轮 A3：上映日期
-     与 --watched 不同，release_date 只接受完整 YYYY-MM-DD —— releaseText() 会把它
-     原样显示在时间轴上，粗粒度串（"2026" / "2026-10"）会和「年份」那一栏混淆。
-     留空是合法的：什么也不写，时间轴继续显示 year。 */
-  var RELEASE_ERR = '上映日期请填完整的年-月-日（留空则沿用年份）';
-  function readReleaseField() {
-    var el = document.getElementById('add-release');
-    if (el && el.validity && el.validity.badInput) return { ok: false };
-    var v = fieldVal('add-release');
-    if (!v) return { ok: true, v: '' };
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return { ok: false };
-    return { ok: true, v: v };
-  }
-  function rejectRelease() {
-    setMsg(RELEASE_ERR, 'err');
-    var el = document.getElementById('add-release');
-    if (el) el.focus();
-  }
+  /* 第 100 轮：上映日期录入入口已按用户要求删除（HTML 无 #add-release、FIELD_IDS 不再含它）。
+     releaseText() 对历史数据里 release_date 的兜底读取仍保留 —— 那是第 66 轮的时间轴展示契约，
+     与录入界面无关（现有 124 条数据里 0 条有该字段，行为不变）。 */
   // 片名一改就撤掉上一次的「确认重复添加」，避免用户对着 A 片名确认、却提交了 B 片名
   var titleInputEl = document.getElementById('add-title');
   if (titleInputEl) {
@@ -1231,8 +1216,6 @@
     setField('add-en', it.title_en || '');
     setField('add-kind', (it.kind === 'series' || it.kind === 'anime') ? it.kind : 'movie');
     setField('add-year', it.year || '');
-    // 第 91 轮 A3：上映日期同样只认完整日期，粗粒度旧值留空（保存时也不会被写回）
-    setField('add-release', /^\d{4}-\d{2}-\d{2}$/.test(String(it.release_date || '')) ? it.release_date : '');
     // date 控件只认 YYYY-MM-DD；「2026」「2026-10」这种粗粒度留空，保存时回退原值
     setField('add-watched', /^\d{4}-\d{2}-\d{2}$/.test(String(it.watched_at || '')) ? it.watched_at : '');
     setField('add-rating', it.rating == null ? '' : it.rating);
@@ -1292,10 +1275,6 @@
     // 第 78 轮：排序值校验（非法 → 提示并阻断保存，绝不静默改成默认值）
     var orderRead = readOrderField();
     if (!orderRead.ok) { rejectOrder(); return; }
-    // 第 91 轮 A3：上映日期校验
-    var releaseRead = readReleaseField();
-    if (!releaseRead.ok) { rejectRelease(); return; }
-
     var next = { id: old.id, title: title, kind: kind, watched_at: watched, poster: posterPath };
     if (old.added_at) next.added_at = old.added_at;   // 第 72 轮：编辑只改字段，上传时间保持首次录入
     if (old.poster_w) next.poster_w = old.poster_w;
@@ -1308,8 +1287,6 @@
     });
     if (en) next.title_en = en;
     if (yearRaw) next.year = Number(yearRaw) || yearRaw;
-    // 第 91 轮 A3：留空即删除该字段（时间轴自动回落到 year）
-    if (releaseRead.v) next.release_date = releaseRead.v;
     if (ratingRaw !== '' && !isNaN(Number(ratingRaw))) next.rating = Number(ratingRaw);
     next.order = orderRead.v;   // 第 78 轮：显式落库（留空时写默认 3，便于日后直接从数据读）
     /* 第 95 轮：国别。与 tags 不同 —— 编辑时表单已预填，留空代表用户主动清空，
@@ -1464,10 +1441,6 @@
     // 第 78 轮：新增路径的排序值校验（编辑路径在 submitEdit 里校验，避免重复提示）
     var orderRead = readOrderField();
     if (!orderRead.ok) { rejectOrder(); return; }
-    // 第 91 轮 A3：新增路径的上映日期校验
-    var releaseRead = readReleaseField();
-    if (!releaseRead.ok) { rejectRelease(); return; }
-
     // id 延迟到拿到仓库数据后解析：同 id 同片名 = 更新；同 id 不同片名 = 追 -2/-3 后缀
 
     submitEl.disabled = true;
@@ -1547,8 +1520,6 @@
         variants.forEach(function (v) { item['poster_' + v.w] = v.rel; });
         if (en) item.title_en = en;
         if (yearRaw) item.year = Number(yearRaw) || yearRaw;
-        // 第 91 轮 A3：完整上映日期。留空就不写字段，releaseText() 自动回落 year
-        if (releaseRead.v) item.release_date = releaseRead.v;
         if (ratingRaw !== '' && !isNaN(Number(ratingRaw))) item.rating = Number(ratingRaw);
         item.order = orderRead.v;   // 第 78 轮：排序值（0~5，默认 3）
         /* 第 95 轮：国别。同 id 重录（upd 命中）时若这次没填，沿用已有值 ——

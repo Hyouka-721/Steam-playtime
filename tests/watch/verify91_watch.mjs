@@ -44,24 +44,25 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=37 / watch.js?v=29',
-  /watch\.css\?v=37/.test(html) && /watch\.js\?v=29/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=38 / watch.js?v=30',
+  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const relInput = (html.match(/<input[^>]*id="add-release"[^>]*>/) || [''])[0];
-ok('A2 A3 表单有 #add-release（date）；A4 有 #w-stats / #w-stats-btn；A9 有片名 datalist',
-  /type="date"/.test(relInput) &&
+/* 第 100 轮改判（用户删除「上映日期」功能，非调阈值）：A2 从「有该输入框」改成「入口已删」。
+   ⚠️ 源码注释里写了「删除上映日期」这句话，先剥 HTML 注释再判界面标记。 */
+const htmlNC = html.replace(/<!--[\s\S]*?-->/g, '');
+ok('A2 上映日期入口已删（表单无 #add-release、无「上映日期」字样）；A4 有 #w-stats / #w-stats-btn；A9 有片名 datalist',
+  !/id="add-release"/.test(htmlNC) && !/上映日期/.test(htmlNC) &&
   /id="w-stats"[^>]*hidden/.test(html) &&
   /id="w-stats-btn"[^>]*aria-pressed="false"/.test(html) &&
   /id="w-title-list"/.test(html) && /id="add-title"[^>]*list="w-title-list"/.test(html));
 
-ok('A3 A3 读写闭环：readReleaseField 校验、submitAdd / submitEdit 都落 release_date、releaseText 优先读它',
-  /function readReleaseField\(\)/.test(js) &&
-  /if \(releaseRead\.v\) item\.release_date = releaseRead\.v/.test(js) &&
-  /if \(releaseRead\.v\) next\.release_date = releaseRead\.v/.test(js) &&
-  /setField\('add-release'/.test(js) &&
-  /if \(it\.release_date\) return String\(it\.release_date\)/.test(js) &&
-  /'add-release'/.test(js));
+/* 第 100 轮改判（功能删除）：上映日期录入整条线已删，改守「源码里已无读写残留」。
+   releaseText() 对历史数据 release_date 的兜底读取与 CLI --release 仍保留（A4 / B4 继续守）。 */
+ok('A3 上映日期录入已删干净：无 add-release / readReleaseField / releaseRead / release_date 写入；releaseText 兜底仍在',
+  !/id="add-release"|'add-release'/.test(js) &&
+  !/function readReleaseField|function rejectRelease|releaseRead|next\.release_date|item\.release_date/.test(js) &&
+  /if \(it\.release_date\) return String\(it\.release_date\)/.test(js));
 
 ok('A4 A3 命令行：--release 参数、格式校验、写字段、写盘后重建分片',
   /--release <日期>/.test(addScript) && /--release 需要完整日期/.test(addScript) &&
@@ -313,7 +314,8 @@ const MOCK3 = {
   await ctx.close();
 }
 
-// C10 A3 编辑模式预填 release_date + 时间轴优先显示完整上映日期
+// C10 第 100 轮改判：只守「时间轴 releaseText 仍优先读历史 release_date」；
+// 编辑弹窗的上映日期预填随功能一起删除（用户要求），改判成「弹窗里已无该字段」。
 {
   const withRelease = {
     updated_at: '2001-01-01T00:00:00+08:00',
@@ -336,12 +338,12 @@ const MOCK3 = {
     ((document.querySelector('#w-tl .tl-year') || {}).textContent || '').trim());
   await page.click('#w-tl .tl-item');
   const v = await page.evaluate(() => ({
-    release: (document.getElementById('add-release') || {}).value || '',
-    type: (document.getElementById('add-release') || {}).type || ''
+    hasRelease: !!document.getElementById('add-release'),
+    dialogHasText: (document.querySelector('.w-add-body') || { textContent: '' }).textContent.includes('上映日期')
   }));
-  ok('C10 A3 releaseText 优先读完整上映日期，编辑弹窗预填同一个值',
-    yearText === '2019-07-20' && v.release === '2019-07-20' && v.type === 'date',
-    `tl-year=${yearText} form=${v.release}`);
+  ok('C10 时间轴 releaseText 仍优先读历史 release_date；编辑弹窗已无上映日期字段（第 100 轮删除）',
+    yearText === '2019-07-20' && !v.hasRelease && !v.dialogHasText,
+    `tl-year=${yearText} 表单已删=${!v.hasRelease}`);
   await ctx.close();
 }
 

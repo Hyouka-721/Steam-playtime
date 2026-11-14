@@ -45,8 +45,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=37 / watch.js?v=29（CSS 改跨度与年度影视样式、JS 改面板都 bump）',
-  /watch\.css\?v=37/.test(html) && /watch\.js\?v=29/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=38 / watch.js?v=30（CSS 改跨度与年度影视样式、JS 改面板都 bump）',
+  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const spanOf = (k) => Number((new RegExp(
@@ -70,13 +70,16 @@ ok('A5 排序 label 去掉说明文字（只剩「排序」二字）',
 
 /* 国别与标签必须包进同一个 .w-row.w-row-2（不是各自独立占满一行）：
    从「最近一个 w-row w-row-2 开标签」到「add-tags」之间，只应有一个 </div>（关掉国别那个 .w-field）。 */
+/* 第 100 轮改判：排序 / 国别 / 标签三字段并进同一个 .w-row.w-row-3（第 99 轮的 w-row-2 只装后两个）。
+   从最近一个 w-row-3 开标签到 add-tags 之间应有 2 个 </div>（关掉排序与国别两个 .w-field）。 */
 const ci99 = html.indexOf('id="add-country"');
 const ti99 = html.indexOf('id="add-tags"');
-const rowOpen = html.lastIndexOf('<div class="w-row w-row-2">', ci99);
+const oi99 = html.indexOf('id="add-order"');
+const rowOpen = html.lastIndexOf('<div class="w-row w-row-3">', ci99);
 const seg = html.slice(rowOpen, ti99 + 20);
-ok('A6 国别与标签包进同一个 .w-row.w-row-2（同处一个两列栅格）',
-  rowOpen > 0 && ci99 > rowOpen && ti99 > ci99 && (seg.match(/<\/div>/g) || []).length === 1,
-  'rowOpen@' + rowOpen + ' / country@' + ci99 + ' / tags@' + ti99);
+ok('A6 排序 / 国别 / 标签包进同一个 .w-row.w-row-3（三列栅格）',
+  rowOpen > 0 && oi99 > rowOpen && ci99 > oi99 && ti99 > ci99 && (seg.match(/<\/div>/g) || []).length === 2,
+  'rowOpen@' + rowOpen + ' / order@' + oi99 + ' / country@' + ci99 + ' / tags@' + ti99);
 
 /* ---------------- B 1920 运行时 ---------------- */
 console.log('== B 1920 运行时 ==');
@@ -107,6 +110,8 @@ const r = await page.evaluate(() => {
   }));
   return {
     topTitle: (document.querySelector('.st-top h3') || {}).textContent || '',
+    hasName: !!document.querySelector('.st-top-name'),
+    hasScore: !!document.querySelector('.st-top-score'),
     items,
     months: box('months'), buckets: box('buckets'), kinds: box('kinds'),
     years: box('years'), country: box('country'), tags: box('tags'),
@@ -116,11 +121,13 @@ const r = await page.evaluate(() => {
 
 ok('B1 年度影视标题正确', r.topTitle === '年度影视', r.topTitle);
 
-ok('B2 年度影视 9 条，年份 + 片名逐条正确，且每条有海报与评分',
+/* 第 100 轮改判（用户「仅展示海报和年份，不展示片名和评分」）：不再断言片名/评分文本，
+   改守「9 条年份正确 + 每条有海报 + DOM 里无片名/评分节点」。 */
+ok('B2 年度影视 9 条：年份逐条正确、每条有海报，且没有片名与评分节点',
   r.items.length === 9 &&
-  PICKS.every(([y, t], i) => r.items[i] && r.items[i].year === y && r.items[i].name === t) &&
-  r.items.every((it) => it.hasImg && /^\d+(\.\d+)?$/.test(it.score)),
-  r.items.map((it) => it.year + '·' + it.name + '·' + it.score).join(' / '));
+  PICKS.every(([y], i) => r.items[i] && r.items[i].year === y) &&
+  r.items.every((it) => it.hasImg) && !r.hasName && !r.hasScore,
+  r.items.map((it) => it.year + '·' + (it.hasImg ? '有海报' : '缺海报')).join(' / '));
 
 ok('B3 三卡一行：月度/评分区间/类型 同行、逐年/国别/标签 同行，行间依次下移',
   r.months.t === r.buckets.t && r.buckets.t === r.kinds.t &&
@@ -141,13 +148,16 @@ const f = await page.evaluate(() => {
   return {
     sameRow: Math.abs(c.top - t.top) <= 2 && c.left < t.left,
     cLeft: Math.round(c.left), tLeft: Math.round(t.left),
-    inRow2: !!wrap && wrap.classList.contains('w-row') && wrap.classList.contains('w-row-2'),
+    inRow3: !!wrap && wrap.classList.contains('w-row') && wrap.classList.contains('w-row-3'),
+    cTop2: Math.round(c.top), orderTop: Math.round(document.getElementById('add-order').getBoundingClientRect().top),
     orderHint: !!orderLabel.querySelector('.w-hint'),
     orderText: (orderLabel.textContent || '').trim(),
   };
 });
-ok('B4 国别与标签同行（同一行、左到右相邻），且包在 .w-row.w-row-2 里',
-  f.sameRow && f.inRow2, `国别 left=${f.cLeft} 标签 left=${f.tLeft} inRow2=${f.inRow2}`);
+/* 第 100 轮改判：三字段（排序 / 国别 / 标签）同行，包在 .w-row.w-row-3。 */
+ok('B4 排序 / 国别 / 标签三者同行，且包在 .w-row.w-row-3 里',
+  f.sameRow && f.inRow3 && Math.abs(f.orderTop - f.cTop2) <= 2,
+  `国别 left=${f.cLeft} 标签 left=${f.tLeft} inRow3=${f.inRow3}`);
 
 ok('B5 排序 label 只剩「排序」二字、无说明文字', f.orderText === '排序' && !f.orderHint, `「${f.orderText}」 hint=${f.orderHint}`);
 
@@ -173,7 +183,7 @@ const m = await p2.evaluate(() => {
   const t = document.getElementById('add-tags').getBoundingClientRect();
   return { cTop: Math.round(c.top), tTop: Math.round(t.top), stacked: t.top > c.top + 10 };
 });
-ok('C1 390 国别/标签回单列（w-row-2 在 ≤480 折叠成 1fr，标签跑到国别下面）',
+ok('C1 390 国别/标签回单列（w-row-3 在 ≤480 折叠成 1fr，标签跑到国别下面）',
   m.stacked, `国别 top=${m.cTop} 标签 top=${m.tTop}`);
 
 await p2.click('#w-add-close');   /* 关掉弹窗，否则遮住后面的头像 */

@@ -1,10 +1,10 @@
 /* 第 99 轮 watch 侧上线复验：三卡成行 · 年度影视 · 表单微调
  *
  * ⚠️ **本轮尚未上线时不要跑**：线上此刻还是第 98 轮（v=36/v=28，跨度 6+6/4+8/6+6）。
- *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=37）命中后再执行本脚本。
+ *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=38）命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹 —— watch.css?v=37 / watch.js?v=29、css/js 字节 md5 与本地全等、
+ *   ① 指纹 —— watch.css?v=38 / watch.js?v=30、css/js 字节 md5 与本地全等、
  *      线上 JS 有 YEAR_PICKS 九条（2018~2026 倒序）、面板标题「年度影视」无「高分 Top 5」、
  *      线上 HTML 的排序 label 干净 + 国别/标签包同一个 .w-row.w-row-2
  *   ② 1920 —— 年度影视 9 条逐条年份+片名+海报+评分、三卡一行（月度/评分区间/类型、逐年/国别/标签）、
@@ -55,12 +55,12 @@ await p0.waitForFunction(() => document.querySelectorAll('#w-grid .poster').leng
 await p0.waitForTimeout(800);
 
 const html = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=37 / watch.js?v=29',
-  /watch\.css\?v=37/.test(html) && /watch\.js\?v=29/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=38 / watch.js?v=30',
+  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=37&t=' + TS);
-const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=29&t=' + TS);
+const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=38&t=' + TS);
+const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=30&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等', md5txt(liveJs) === md5txt(localJs),
@@ -77,13 +77,16 @@ ok('A4 线上 JS 有 YEAR_PICKS 九条、2018~2026 倒序、片名逐条正确',
 ok('A5 线上 JS 面板标题「年度影视」、无「高分 Top 5」',
   /<h3>年度影视<\/h3>/.test(liveJsNC) && !/高分 Top 5/.test(liveJsNC));
 
+/* 第 100 轮改判：排序 / 国别 / 标签三字段并进同一个 .w-row.w-row-3。 */
 const ciL = html.indexOf('id="add-country"');
 const tiL = html.indexOf('id="add-tags"');
-const rowOpen = html.lastIndexOf('<div class="w-row w-row-2">', ciL);
-ok('A6 线上 HTML：排序 label 只剩「排序」、国别/标签包同一个 .w-row.w-row-2',
+const oiL = html.indexOf('id="add-order"');
+const rowOpen = html.lastIndexOf('<div class="w-row w-row-3">', ciL);
+ok('A6 线上 HTML：排序 label 只剩「排序」、三字段包同一个 .w-row.w-row-3、无上映日期入口',
   /for="add-order">排序<\/label>/.test(html) && !/for="add-order">排序<span/.test(html) &&
-  rowOpen > 0 && ciL > rowOpen && tiL > ciL && (html.slice(rowOpen, tiL + 20).match(/<\/div>/g) || []).length === 1,
-  'rowOpen@' + rowOpen + ' / country@' + ciL + ' / tags@' + tiL);
+  !/id="add-release"/.test(html) &&
+  rowOpen > 0 && oiL > rowOpen && ciL > oiL && tiL > ciL && (html.slice(rowOpen, tiL + 20).match(/<\/div>/g) || []).length === 2,
+  'rowOpen@' + rowOpen + ' / order@' + oiL + ' / country@' + ciL + ' / tags@' + tiL);
 await ctx0.close();
 
 /* ---------- ② 1920 ---------- */
@@ -114,6 +117,8 @@ const r = await page.evaluate(() => {
   }));
   return {
     topTitle: (document.querySelector('.st-top h3') || {}).textContent || '',
+    hasName: !!document.querySelector('.st-top-name'),
+    hasScore: !!document.querySelector('.st-top-score'),
     items,
     months: box('months'), buckets: box('buckets'), kinds: box('kinds'),
     years: box('years'), country: box('country'), tags: box('tags'),
@@ -123,11 +128,12 @@ const r = await page.evaluate(() => {
 
 ok('B1 年度影视标题正确', r.topTitle === '年度影视', r.topTitle);
 
-ok('B2 年度影视 9 条，年份 + 片名逐条正确，且每条有海报与评分',
+/* 第 100 轮改判（用户「仅展示海报和年份」）：不再断言片名/评分，改守年份+海报+无节点。 */
+ok('B2 年度影视 9 条：年份逐条正确、每条有海报，且没有片名与评分节点',
   r.items.length === 9 &&
-  PICKS.every(([y, t], i) => r.items[i] && r.items[i].year === y && r.items[i].name === t) &&
-  r.items.every((it) => it.hasImg && /^\d+(\.\d+)?$/.test(it.score)),
-  r.items.map((it) => it.year + '·' + it.name + '·' + it.score).join(' / '));
+  PICKS.every(([y], i) => r.items[i] && r.items[i].year === y) &&
+  r.items.every((it) => it.hasImg) && !r.hasName && !r.hasScore,
+  r.items.map((it) => it.year + '·' + (it.hasImg ? '有海报' : '缺海报')).join(' / '));
 
 ok('B3 三卡一行：月度/评分区间/类型 同行、逐年/国别/标签 同行，行间依次下移',
   r.months.t === r.buckets.t && r.buckets.t === r.kinds.t &&
@@ -148,13 +154,16 @@ const f = await page.evaluate(() => {
   return {
     sameRow: Math.abs(c.top - t.top) <= 2 && c.left < t.left,
     cLeft: Math.round(c.left), tLeft: Math.round(t.left),
-    inRow2: !!wrap && wrap.classList.contains('w-row') && wrap.classList.contains('w-row-2'),
+    inRow3: !!wrap && wrap.classList.contains('w-row') && wrap.classList.contains('w-row-3'),
+    cTop2: Math.round(c.top), orderTop: Math.round(document.getElementById('add-order').getBoundingClientRect().top),
     orderHint: !!orderLabel.querySelector('.w-hint'),
     orderText: (orderLabel.textContent || '').trim(),
   };
 });
-ok('B4 国别与标签同行（同一行、左到右相邻），且包在 .w-row.w-row-2 里',
-  f.sameRow && f.inRow2, `国别 left=${f.cLeft} 标签 left=${f.tLeft} inRow2=${f.inRow2}`);
+/* 第 100 轮改判：三字段同行，包在 .w-row.w-row-3。 */
+ok('B4 排序 / 国别 / 标签三者同行，且包在 .w-row.w-row-3 里',
+  f.sameRow && f.inRow3 && Math.abs(f.orderTop - f.cTop2) <= 2,
+  `国别 left=${f.cLeft} 标签 left=${f.tLeft} inRow3=${f.inRow3}`);
 
 ok('B5 排序 label 只剩「排序」二字、无说明文字', f.orderText === '排序' && !f.orderHint, `「${f.orderText}」 hint=${f.orderHint}`);
 
@@ -180,7 +189,7 @@ const m = await p3.evaluate(() => {
   const t = document.getElementById('add-tags').getBoundingClientRect();
   return { cTop: Math.round(c.top), tTop: Math.round(t.top), stacked: t.top > c.top + 10 };
 });
-ok('C1 390 国别/标签回单列（w-row-2 在 ≤480 折叠成 1fr，标签跑到国别下面）',
+ok('C1 390 国别/标签回单列（w-row-3 在 ≤480 折叠成 1fr，标签跑到国别下面）',
   m.stacked, `国别 top=${m.cTop} 标签 top=${m.tTop}`);
 
 await p3.click('#w-add-close');   /* 关掉弹窗，否则遮住后面的头像 */

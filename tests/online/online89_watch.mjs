@@ -1,5 +1,5 @@
 /* 第 89 轮 watch 侧线上复验：评分角标「完全删除背景填充，只保留金色评分数字」
-   （★ 按用户确认保留）。对应提交 70fc2b6 + 82a7ebc + merge，预期线上 watch.css?v=37。
+   （★ 按用户确认保留）。对应提交 70fc2b6 + 82a7ebc + merge，预期线上 watch.css?v=38。
 
    ① 指纹：watch.html 引用 v=26 / v=16；线上 css / js 字节 md5 与本地全等（CRLF→LF）；
             线上 CSS 里不存在 .poster-score::before / ::after；线上 watch.json 与本地全等
@@ -55,11 +55,11 @@ await page.waitForTimeout(800);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹 ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=37 / watch.js?v=29',
-  /watch\.css\?v=37/.test(html) && /watch\.js\?v=29/.test(html));
+ok('A1 线上 watch.html 引用 watch.css?v=38 / watch.js?v=30',
+  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html));
 
-const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=37&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=29&t=' + TS);
+const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=38&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=30&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等（CRLF 归一成 LF 后比）',
   md5txt(liveCss) === md5txt(localCss), `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等（本轮纯 CSS，js 未动）',

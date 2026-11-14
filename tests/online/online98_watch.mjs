@@ -1,10 +1,10 @@
 /* 第 98 轮 watch 侧上线复验：国别并进「中国」 · 两块饼换位
  *
  * ⚠️ **本轮尚未上线时不要跑**：线上此刻还是第 96 轮（v=34/v=23，面板顺序是旧的）。
- *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=37）命中后再执行本脚本。
+ *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=38）命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹 —— watch.css?v=37 / watch.js?v=29、css/js 字节 md5 与本地全等、
+ *   ① 指纹 —— watch.css?v=38 / watch.js?v=30、css/js 字节 md5 与本地全等、
  *      线上 JS 的别名表已把「中国大陆 / 台湾」收敛到「中国」、线上 CSS 的跨度是 5/4/3/5/4/3、
  *      线上 HTML 没有残留的「中国台湾」
  *   ② 1920 —— 面板顺序 月度/评分区间/类型/逐年/国别/标签、两行各三卡、
@@ -49,12 +49,12 @@ await p0.waitForFunction(() => document.querySelectorAll('#w-grid .poster').leng
 await p0.waitForTimeout(800);
 
 const html = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=37 / watch.js?v=29',
-  /watch\.css\?v=37/.test(html) && /watch\.js\?v=29/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=38 / watch.js?v=30',
+  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=37&t=' + TS);
-const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=29&t=' + TS);
+const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=38&t=' + TS);
+const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=30&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等', md5txt(liveJs) === md5txt(localJs),

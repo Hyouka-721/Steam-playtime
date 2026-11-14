@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon-watch-97e35b7b.png">
 <!-- 与游戏站同一套本地花体字，保持品牌一致；preload + font-display:block 消除 FOUT -->
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="watch.css?v=37">
+<link rel="stylesheet" href="watch.css?v=38">
 </head>
 <body>
 
@@ -181,29 +181,20 @@
         </div>
       </div>
 
-      <!-- 第 91 轮 A3：上映日期。releaseText() 从第 66 轮起就优先读它，
-           但表单一直没入口，导致 0/124 条有值。填了以后时间轴用完整日期代替年份，
-           网格视图排版不变（那里只显示片名 / 评分 / 观影日期）。 -->
-      <div class="w-row w-row-2">
-        <div class="w-field">
-          <label class="w-label" for="add-release">上映日期<span class="w-hint">可选，留空沿用年份</span></label>
-          <input class="w-input" type="date" id="add-release">
-        </div>
+      <!-- 第 100 轮：删除「上映日期」字段及其界面（第 91 轮 A3 加的入口）；
+           排序 / 国别 / 标签并到同一行，复用 w-row-3（≤480 自动回单列）。
+           国别与标签 label 的说明文字按用户要求一并删除。 -->
+      <div class="w-row w-row-3">
         <div class="w-field">
           <label class="w-label" for="add-order">排序</label>
           <input class="w-input w-input-order" type="number" id="add-order" min="0" max="5" step="1" inputmode="numeric" placeholder="3">
         </div>
-      </div>
-
-      <!-- 第 95 轮：国别。合拍片可填多个；留空合法（124 条老数据都由用户自己补）
-           第 99 轮：国别与标签并到同一行，复用 w-row-2（≤480 自动回单列）。 -->
-      <div class="w-row w-row-2">
         <div class="w-field">
-          <label class="w-label" for="add-country">国别<span class="w-hint">逗号或顿号分隔，可留空；如 美国, 英国</span></label>
+          <label class="w-label" for="add-country">国别</label>
           <input class="w-input" type="text" id="add-country" placeholder="日本" autocomplete="off">
         </div>
         <div class="w-field">
-          <label class="w-label" for="add-tags">标签<span class="w-hint">逗号或顿号分隔</span></label>
+          <label class="w-label" for="add-tags">标签</label>
           <input class="w-input" type="text" id="add-tags" placeholder="传记, 历史" autocomplete="off">
         </div>
       </div>
@@ -239,7 +230,7 @@
 </dialog>
 
 <div class="w-toast" id="w-toast" role="status" hidden></div>
-<script src="watch.js?v=29"></script>
+<script src="watch.js?v=30"></script>
 <script>
 /* 第 75 轮：注册 Service Worker（docs/sw.js）。
    海报是内容哈希命名的不可变资源，Pages 只给 max-age=600，刷新超 10 分钟就要

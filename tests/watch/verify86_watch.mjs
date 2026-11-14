@@ -41,7 +41,7 @@ const ok = (n, c, extra = '') => {
 console.log('== A 静态 ==');
 
 ok('A1 版本号 v24（css）/ v16（js，本轮未动）',
-  /watch\.css\?v=37/.test(html) && /watch\.js\?v=29/.test(html),
+  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const NEED_TOKENS = ['--text-soft', '--text-faint', '--well', '--img-bg', '--on-accent', '--danger',
@@ -107,8 +107,13 @@ ok('A10 文件选择改成自绘：HTML 有 .w-file-btn 与 .w-file-name，input
   'label+名字+clip+联动');
 
 const tipTxt = (html.match(/id="add-poster-tip">([^<]*)</) || [, ''])[1];
-ok('A11 表单说明文案：标签「逗号或顿号分隔」、海报提示已砍掉技术细节、.w-token-tip 行高 1.55',
-  /逗号或顿号分隔/.test(html) && !/宽 640/.test(tipTxt) && /\.w-token-tip\s*\{[^}]*line-height:\s*1\.55/.test(rulesOnly),
+/* 第 100 轮改判（用户明确要求删掉国别与标签的说明文字，非调阈值）：
+   A11 从「标签有『逗号或顿号分隔』」改成「两处说明小字都已删、label 只留字段名」；
+   海报提示与 .w-token-tip 行高这两条第 86 轮原始契约继续守。 */
+ok('A11 第 100 轮：国别/标签说明文字已删，海报提示仍砍掉技术细节、.w-token-tip 行高 1.55',
+  !/逗号或顿号分隔/.test(html) &&
+  /for="add-country">国别<\/label>/.test(html) && /for="add-tags">标签<\/label>/.test(html) &&
+  !/宽 640/.test(tipTxt) && /\.w-token-tip\s*\{[^}]*line-height:\s*1\.55/.test(rulesOnly),
   tipTxt.slice(0, 40));
 
 ok('A12 第 85 轮守卫仍成立：无半像素字号；第 64 轮时间轴 21 / 18.5 / 19 未被本轮回溯',

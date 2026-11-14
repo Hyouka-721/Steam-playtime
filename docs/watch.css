@@ -550,15 +550,8 @@ code {
   }
 }
 @media (min-width: 1180px) {
-  /* 第 96 轮：年报铺满后「年度影视」单行被拉开——这里排成两列（9 条 → 5 行）。
-     🔴 用 .w-stats 提一级特异性，才能压住文件末尾的基础 .st-top-list 规则。
-     两列下斑马纹会左右错位，一并关掉。 */
-  .w-stats .st-top-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px 24px;
-  }
-  .w-stats .st-top-item:nth-child(odd) { background: none; }
+  /* 第 100 轮：年度影视改成海报网格，列宽由文件末尾 .st-top-list 的
+     auto-fill minmax(234px, 1fr) 统一决定（与 .w-grid 同规格），不再单独排两列。 */
   .tl-body {
     grid-template-columns: 224px 352px minmax(0, 1fr);
     column-gap: 18px;
@@ -864,6 +857,7 @@ select.w-input { cursor: pointer; }
   .w-bar { padding: 18px 18px 4px; }
   .w-main { padding: 14px 18px 84px; }   /* 同上，窄屏加号占底部 66px */
   .w-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 28px 12px; }
+  .w-stats .st-top-list { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 28px 12px; }
   .poster-note { display: none; }       /* 窄屏优先保证海报与标题，短评移入详情不显示 */
   .w-foot {
     /* 第 82 轮：加了「共 N 部影视剧」后三段一行装不下 —— 窄屏改竖排，
@@ -957,8 +951,7 @@ select.w-input { cursor: pointer; }
   .w-stats .st-plot { gap: 3px; height: 110px; }   /* 第 94 轮：.st-bars 拆成图区与轴区后，尺寸落在两区上 */
   .w-stats .st-axis { gap: 3px; }
   .w-stats .st-bar-lab { font-size: 9px; }
-  .w-stats .st-top-item { grid-template-columns: 40px 32px minmax(0, 1fr) 40px; gap: 8px; }
-  .w-stats .st-top-img { width: 32px; height: 44px; }
+  .w-stats .st-top-list { grid-template-columns: repeat(auto-fill, minmax(156px, 1fr)); gap: 24px 10px; }
   /* 第 97 轮：390 下两个饼图改竖排（饼在上居中、图例整宽），否则 168 的饼把图例挤成两字一行 */
   .w-stats .st-pie { flex-direction: column; align-items: stretch; gap: 14px; }
   .w-stats .st-pie-chart { width: 132px; height: 132px; align-self: center; }
@@ -1128,13 +1121,13 @@ select.w-input { cursor: pointer; }
 .st-empty-main { padding: 40px 0; text-align: center; font-size: 13px; }
 
 .st-top { margin-top: 14px; }
-.st-top-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.st-top-item { display: grid; grid-template-columns: 44px 38px minmax(0, 1fr) 44px; align-items: center; gap: 12px; padding: 6px 8px; border-radius: var(--r-sm); }
-.st-top-item:nth-child(odd) { background: rgba(255, 255, 255, .02); }
-.st-top-year { font-size: 12px; color: var(--text-faint); text-align: center; font-variant-numeric: tabular-nums; }
-.st-top-img { width: 38px; height: 52px; object-fit: cover; border-radius: var(--r-sm); background: var(--img-bg); }
-.st-top-name { font-size: 13px; color: var(--text-strong); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.st-top-score { font-size: 13px; font-weight: 600; color: #dcb978; text-align: right; font-variant-numeric: tabular-nums; }
+/* 第 100 轮：年度影视改成与网格视图同规格的海报墙 —— 只展示海报 + 年份，
+   片名与评分按用户要求删掉；列宽与间距三档（234 / 200 / 156）跟 .w-grid 一致。 */
+.st-top-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(234px, 1fr)); gap: 28px 12px; }
+.st-top-item { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+.st-top-img { display: block; width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: var(--r-md); background: var(--img-bg); border: 1px solid var(--card-border); box-shadow: var(--card-shadow); transition: transform var(--t-2) var(--ease), box-shadow var(--t-2) var(--ease), border-color var(--t-2) var(--ease); }
+.st-top-item:hover .st-top-img { transform: translateY(-4px); border-color: var(--accent-line); box-shadow: var(--card-hover-shadow); }
+.st-top-year { font-size: 12px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
 
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; }

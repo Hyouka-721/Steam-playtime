@@ -4,7 +4,7 @@
  *    等用户说「上线」→ fetch/merge → push → Pages 指纹轮询命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=37 / watch.js?v=29；线上 css/js/watch.json 字节
+ *   ① 指纹：watch.html 引用 watch.css?v=38 / watch.js?v=30；线上 css/js/watch.json 字节
  *      md5 与本地全等（CRLF 归一）；**分片真的上线了** —— manifest + 年片与本地逐字节一致，
  *      且 manifest 的 updated_at / total 能与线上主文件对账（对得上才说明线上走的是分片路径）
  *   ② 1440 运行时：A4 年报四卡数字全部由本地数据推导比对、年份下拉切换、返回列表还原；
@@ -97,12 +97,12 @@ await page.waitForTimeout(900);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹（含分片是否真的上线） ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=37 / watch.js?v=29',
-  /watch\.css\?v=37/.test(html) && /watch\.js\?v=29/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=38 / watch.js?v=30',
+  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=37&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=29&t=' + TS);
+const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=38&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=30&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等（年报几乎全在 CSS，必须一起上线）',
   md5txt(liveCss) === md5txt(localCss), `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等',
@@ -211,11 +211,10 @@ ok('B6 A4 返回列表：回到进入年报前的视图（时间轴）、卡片�
 
 /* A9 防重复：只验「被拦住」这一步，绝不点第二次；API 已被 abort，双保险 */
 await page.click('#w-fab');
-const relType = await page.evaluate(() => {
-  const e = document.getElementById('add-release');
-  return e ? e.type : '';
-});
-ok('B7 A3 线上表单有上映日期框且 type=date', relType === 'date', `type=${relType}`);
+/* 第 100 轮改判（用户删除上映日期入口）：从「线上有 date 框」改成「线上已无该字段」。 */
+const relGone = await page.evaluate(() => !document.getElementById('add-release') &&
+  !(document.querySelector('.w-add-body') || { textContent: '' }).textContent.includes('上映日期'));
+ok('B7 线上表单已无上映日期框（第 100 轮按用户要求删除）', relGone, `gone=${relGone}`);
 await page.fill('#add-title', '阿甘正传');
 await page.click('#w-add-submit');
 const dup = await page.evaluate(() => ({

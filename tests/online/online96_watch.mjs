@@ -1,10 +1,10 @@
 /* 第 96 轮 watch 侧上线复验：国别补齐 + 年报宽屏铺满 + 首屏「年报」按钮不闪
  *
  * ⚠️ **本轮尚未上线时不要跑**：线上此刻还是第 95 轮（v=32 / v=22、年报 1180 居中、国别全是空的）。
- *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=37）命中后再执行本脚本。
+ *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=38）命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹：watch.css?v=37 / watch.js?v=29、css/js 字节 md5 与本地全等、
+ *   ① 指纹：watch.css?v=38 / watch.js?v=30、css/js 字节 md5 与本地全等、
  *      线上 JS 里规范名确实是「中国大陆」（不是「中国」）、线上 HTML 的 #w-stats-btn 带 hidden
  *   ② 1920：`.w-stats` 与 `.w-main` 同宽铺满（不再是 1180 居中）、左轨对齐、国别面板出真数据
  *      （行数/首行按**线上数据现算**，CI 每晚可能推新快照）、Top5 两列、六卡齐、零溢出
@@ -49,12 +49,12 @@ await p0.waitForFunction(() => document.querySelectorAll('#w-grid .poster').leng
 await p0.waitForTimeout(800);
 
 const html = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=37 / watch.js?v=29',
-  /watch\.css\?v=37/.test(html) && /watch\.js\?v=29/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=38 / watch.js?v=30',
+  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=37&t=' + TS);
-const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=29&t=' + TS);
+const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=38&t=' + TS);
+const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=30&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等', md5txt(liveJs) === md5txt(localJs),
@@ -62,9 +62,10 @@ ok('A3 线上 watch.js 字节 md5 与本地全等', md5txt(liveJs) === md5txt(lo
 
 /* 第 98 轮改判：规范名从「中国大陆」收回「中国」（大陆与台湾并进），所以 A4 反过来了。
    —— 不是调阈值：归一化规则本身由 `watch-country` 单测逐条守。 */
-ok('A4 线上 JS 里规范名已是「中国」（第 98 轮并进大陆与台湾），且 Top5 两列规则进了 ≥1180 块',
+/* 第 100 轮：年度影视改海报网格，不再有「两列规则」，A4 只守国别名（断言本身不变）。 */
+ok('A4 线上 JS 里规范名已是「中国」（第 98 轮并进大陆与台湾）',
   /'中国':\s*'中国'/.test(liveJs) && /'大陆':\s*'中国'/.test(liveJs) && /'台湾':\s*'中国'/.test(liveJs));
-ok('A5 线上 CSS 里 `.w-stats` 已无限宽，Top5 两列规则在 ≥1180 块内',
+ok('A5 线上 CSS 里 `.w-stats` 已无限宽，年度影视海报网格规则带 `.w-stats` 前缀（860/480 断点内）',
   !/\.w-stats \{[^}]*max-width/.test(liveCss) && /\.w-stats \.st-top-list/.test(liveCss));
 ok('A6 线上 HTML 的 `#w-stats-btn` 初始带 hidden（首屏不闪的前提）',
   /id="w-stats-btn"[^>]*\shidden[\s>]/.test(html));
@@ -138,8 +139,9 @@ ok('B4 类型面板仍是 3 行（《少年派》改剧集后三个 kind 都有�
   r.rowsKind === 3 && Object.keys(LKIND).length === 3,
   `面板 ${r.rowsKind} 行 / 数据 ${JSON.stringify(LKIND)}`);
 
-ok('B5 铺满连带的年度影视收窄：两列、1·2 同行、9 条、单条 ≤ 一半宽',
-  r.topCols === 2 && r.topSameRow && r.top === 9 && r.topItemW <= Math.round(r.stW / 2),
+/* 第 100 轮改判：两列文字列表 → auto-fill 海报网格（1920 实测 7 列）。 */
+ok('B5 第 100 轮：年度影视海报网格 ≥3 列、首两条同行、9 条、单条 ≤ 年报 1/3 宽',
+  r.topCols >= 3 && r.topSameRow && r.top === 9 && r.topItemW <= Math.round(r.stW / 3),
   `列${r.topCols} 同行=${r.topSameRow} 单条${r.topItemW}/${r.stW}`);
 
 ok('B6 六卡齐 + 1920 无横向溢出 + 零 JS 异常',
@@ -217,7 +219,7 @@ console.log('== ④ 390 窄屏 ==');
       ov: document.documentElement.scrollWidth - window.innerWidth
     };
   });
-  ok('D1 390：6 卡 2 列、面板单列、年报与国别面板不越界、Top5 回到单列、无横向溢出',
+  ok('D1 390：6 卡 2 列、面板单列、年报与国别面板不越界、年度影视海报墙回单列、无横向溢出',
     m.cardCols === 2 && m.panelCols === 1 && m.topRows === 1 &&
     m.countryW > 0 && m.stW <= m.vw && m.ov <= 0,
     `卡${m.cardCols} 面板${m.panelCols} Top5列${m.topRows} 年报${m.stW} country${m.countryW} ov=${m.ov}`);

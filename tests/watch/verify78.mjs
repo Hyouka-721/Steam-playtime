@@ -7,7 +7,7 @@
    ⑤ 老数据（全部无 order）列表顺序必须与改动前完全一致
 
    A 静态指纹 / B 表单与校验（GitHub API 全 mock）/ C 排序行为（mock 数据精确比对）
-   ⚠️ 版本号断言：watch.css?v=37 / watch.js?v=29（第 78 轮 bump） */
+   ⚠️ 版本号断言：watch.css?v=38 / watch.js?v=30（第 78 轮 bump） */
 import { createRequire } from 'module';
 import fs from 'fs';
 const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace/');
@@ -37,8 +37,8 @@ ok('A1 编辑表单有「排序」输入，且是 number / min 0 / max 5 / step 
   (html.match(/<input[^>]*id="add-order"[^>]*>/) || [''])[0]);
 ok('A2 排序标签不再挂说明文字（第 99 轮按用户要求删除），label 只剩「排序」二字',
   /for="add-order">排序<\/label>/.test(html) && !/for="add-order">排序<span/.test(html));
-ok('A3 版本号 bump：watch.css?v=37 / watch.js?v=29',
-  /watch\.css\?v=37"/.test(html) && /watch\.js\?v=29"/.test(html));
+ok('A3 版本号 bump：watch.css?v=38 / watch.js?v=30',
+  /watch\.css\?v=38"/.test(html) && /watch\.js\?v=30"/.test(html));
 ok('A4 CSS 给排序输入单独收窄（个位数不必占满整行）',
   /\.w-input\.w-input-order \{ width: 118px; \}/.test(cssNC));
 ok('A5 默认值常量与读取归一化函数就位（ORDER_DEFAULT=3 / orderVal）',

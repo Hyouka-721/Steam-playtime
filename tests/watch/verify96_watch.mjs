@@ -58,8 +58,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=37 / watch.js?v=29（CSS 改限宽、JS 改国别规范名，两个都要 bump）',
-  /watch\.css\?v=37/.test(html) && /watch\.js\?v=29/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=38 / watch.js?v=30（CSS 改限宽、JS 改国别规范名，两个都要 bump）',
+  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const statsBlock = (/(^|\n)\.w-stats \{[^}]*\}/.exec(css) || [''])[0];
@@ -176,10 +176,12 @@ const browser = await chromium.launch();
 
   ok('B5 1920 无横向溢出 + 零 JS 异常', r.ov <= 0 && errs.length === 0, `ov=${r.ov} err=${errs.length}`);
 
-  ok('B6 铺满连带的年度影视收窄：≥1180 排成两列（9 条 → 5 行，1·2 同行、第 3 条换行、单条宽 ≤ 一半）',
-    r.topList.cols === 2 && r.topList.sameRow && r.topList.thirdRowGap > 10 &&
-    r.topList.itemW <= Math.round(r.stW / 2),
-    `列${r.topList.cols} 同行=${r.topList.sameRow} 第三条下移${r.topList.thirdRowGap}px 单条${r.topList.itemW} / 年报${r.stW}`);
+  /* 第 100 轮改判（功能变了，非调阈值）：年度影视从第 96 轮的「两列文字列表」改成
+     「与网格视图同规格的海报墙」，列数由 auto-fill minmax(234px) 决定（1920 实测 7 列）。 */
+  ok('B6 第 100 轮：年度影视是海报网格（≥1180 下 ≥3 列、首两条同行、单条宽 ≤ 年报 1/3）',
+    r.topList.cols >= 3 && r.topList.sameRow &&
+    r.topList.itemW <= Math.round(r.stW / 3),
+    `列${r.topList.cols} 同行=${r.topList.sameRow} 单条${r.topList.itemW} / 年报${r.stW}`);
   await ctx.close();
 }
 

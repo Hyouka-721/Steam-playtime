@@ -61,7 +61,7 @@ ok('A3 watch.js 里没有任何「写 DOM title」的代码（.title= / setAttri
 ok('A4 syncAvatar() 仍同步 aria-label（只是不再写 title）',
   /avatarEl\.setAttribute\('aria-label', timeline \? '切换到网格视图' : '切换到时间轴视图'\)/.test(jsNC));
 
-ok('A5 版本号：watch.css?v=37 / watch.js?v=29', /watch\.css\?v=37"/.test(html) && /watch\.js\?v=29"/.test(html));
+ok('A5 版本号：watch.css?v=38 / watch.js?v=30', /watch\.css\?v=38"/.test(html) && /watch\.js\?v=30"/.test(html));
 
 /* ================= mock ================= */
 const MOCK = {

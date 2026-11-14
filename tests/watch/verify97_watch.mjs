@@ -6,7 +6,7 @@
  *
  * 做法（都在 docs/watch.js / watch.css 里，零依赖、零请求）：
  *   ① 新增 `stPie(pairs, ariaLabel)`：纯 SVG 手绘扇形，`<path d="M cx cy L … A … Z">`；
- *      片与片之间留 1.1° 的缝（靠面板底色透出来当分隔），不描边 —— `--card-bg` 是
+ *      第 100 轮起片间不留缝（原来 1.1° 的缝就是用户看到的黑色分隔），不描边 —— `--card-bg` 是
  *      linear-gradient，拿不到可用的纯色，描出来是花的。
  *   ② 0 值的档位**不画片**（画不出面积），但图例照列并打 `is-zero`：口径不能因为视觉
  *      实现而丢档。只剩一档时改画 `<circle>`（留缝会多出一个缺口，看着像掉了一块）。
@@ -120,8 +120,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=37 / watch.js?v=29（CSS 与 JS 都改了，两个都要 bump）',
-  /watch\.css\?v=37/.test(html) && /watch\.js\?v=29/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=38 / watch.js?v=30（CSS 与 JS 都改了，两个都要 bump）',
+  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 JS 有 stPie + 两套色板；评分区间与国别都走它（stPie(buckets) / stPie(countries)）',
@@ -282,15 +282,16 @@ ok('B3 国别：' + CMAJOR.length + ' 个 ≥' + CMIN + ' 部的国别 + 「其�
   Math.abs(sumPct(r.c.pcts) - 100) < 0.35 && r.c.pieces === CLIVE,
   `${r.c.keys.map((k, i) => k + '=' + r.c.vs[i]).join('/')} / 片 ${r.c.pieces} / 合计 ${sumPct(r.c.pcts).toFixed(1)}%`);
 
-/* 几何：每片扫过的角度必须是 v/total*360 再各让 0.55°（缝）——这条能抓住「比例算错」 */
+/* 第 100 轮改判（用户删掉黑色分隔缝）：每片扫过的角度＝v/total*360，首尾相接无缝，
+   不再各让 1.1°；这条仍能抓住「比例算错」的假图。 */
 const TOTAL_B = BUCKETS.reduce((a, b) => a + b, 0);
 const liveB = BUCKETS.filter((v) => v > 0);
 const bGeo = r.b.sweeps.every((sw, i) => {
-  const want = expSweep(liveB[i], TOTAL_B) - (liveB.length > 1 ? 1.1 : 0);
+  const want = expSweep(liveB[i], TOTAL_B);
   return Math.abs(sw - want) < 0.35;
 });
-const cGeo = CSV.every((v, i) => Math.abs(r.c.sweeps[i] - (expSweep(v, CSUM) - 1.1)) < 0.35);
-ok('B4 扇形角度与计数成比例（各让 0.55° 的缝），不是画着好看的假图',
+const cGeo = CSV.every((v, i) => Math.abs(r.c.sweeps[i] - expSweep(v, CSUM)) < 0.35);
+ok('B4 扇形角度与计数成比例（第 100 轮起片间无缝、首尾相接），不是画着好看的假图',
   bGeo && cGeo,
   `区间 ${r.b.sweeps.map((x) => x.toFixed(1)).join('/')} | 国别 ${r.c.sweeps.map((x) => x.toFixed(1)).join('/')}`);
 
