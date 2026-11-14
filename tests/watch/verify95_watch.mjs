@@ -1,7 +1,8 @@
 /* 第 95 轮 watch 侧回归：国别字段 + 国别面板
  *
  * 数据形态 `countries: ["美国", "英国"]`（数组；合拍片单值会丢信息）。
- * 归一化：别名表把 美 / US / USA 收敛成「美国」，港澳台统一成「中国香港 / 中国澳门 / 中国台湾」。
+ * 归一化：别名表把 美 / US / USA 收敛成「美国」，港澳统一成「中国香港 / 中国澳门」，
+ * 台湾与大陆并进「中国」（第 98 轮口径，见 verify98 A7）。
  * 这份表在网页端是内联副本、在 scripts/watch/country-lib.mjs 是权威值，
  * 两边一致性由 tests/unit/watch-country.test.mjs 守着。
  *
@@ -37,8 +38,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=35 / watch.js?v=27',
-  /watch\.css\?v=35/.test(html) && /watch\.js\?v=27/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=36 / watch.js?v=28',
+  /watch\.css\?v=36/.test(html) && /watch\.js\?v=28/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const cInput = (html.match(/<input[^>]*id="add-country"[^>]*>/) || [''])[0];
@@ -48,9 +49,11 @@ ok('A2 表单有 #add-country（文本框，label for 对得上）',
 ok('A3 FIELD_IDS 含 add-country（否则「打开加号」不会清空上一条留下的国别）',
   /'add-country', 'add-tags'/.test(js));
 
-ok('A4 归一化：别名表里有 美/USA→美国、香港→中国香港、台湾→中国台湾；readCountryField 走它',
+/* 第 98 轮改判：台湾从「中国台湾」并进「中国」（用户要求），所以这里断言的值跟着变 ——
+   归一化规则本身由 `watch-country` 单测逐条守。 */
+ok('A4 归一化：别名表里有 美/USA→美国、香港→中国香港、台湾→中国；readCountryField 走它',
   /'美': '美国'/.test(js) && /'usa': '美国'/.test(js) &&
-  /'香港': '中国香港'/.test(js) && /'台湾': '中国台湾'/.test(js) &&
+  /'香港': '中国香港'/.test(js) && /'台湾': '中国'/.test(js) &&
   /function normCountry\(/.test(js) && /function readCountryField\(/.test(js));
 
 ok('A5 写入链路：新增落 countries；同 id 重录保留旧值；编辑留空即删除',
@@ -62,7 +65,7 @@ const spanOf = (k) => {
   const m = css.match(new RegExp('\\.st-panel\\[data-panel="' + k + '"\\]\\s*\\{\\s*grid-column:\\s*span\\s*(\\d+)'));
   return m ? Number(m[1]) : 0;
 };
-ok('A6 国别面板挂 data-panel="country"、占 6 栏；评分区间改饼图后也占 6 栏（第三行两饼等分）',
+ok('A6 国别面板挂 data-panel="country"、占 6 栏；评分区间改饼图后也占 6 栏（第 98 轮换位后两者各自与别的面板同行）',
   /data-panel="country"/.test(js) && spanOf('country') === 6 && spanOf('buckets') === 6,
   `country=${spanOf('country')} buckets=${spanOf('buckets')}`);
 

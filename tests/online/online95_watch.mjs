@@ -4,7 +4,7 @@
  *    等用户说「上线」→ push → Pages 指纹轮询命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=35 / watch.js?v=27；css/js 字节 md5 与本地全等；
+ *   ① 指纹：watch.html 引用 watch.css?v=36 / watch.js?v=28；css/js 字节 md5 与本地全等；
  *      线上 JS 里确实有 COUNTRY_ALIAS / normCountry / data-panel="country"（版本号只说明引用变了）
  *   ② 1440：面板顺序多了 country、国别面板占 4 栏且与类型面板同行、
  *      国别面板内容与「线上真实数据」逐字对齐（还没录国别 = 空态 + N 部待补；录了 = 行数/首位对得上）、
@@ -60,12 +60,12 @@ await page.waitForTimeout(900);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹 ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=35 / watch.js?v=27',
-  /watch\.css\?v=35/.test(html) && /watch\.js\?v=27/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=36 / watch.js?v=28',
+  /watch\.css\?v=36/.test(html) && /watch\.js\?v=28/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=35&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=27&t=' + TS);
+const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=36&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=28&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等', md5txt(liveJs) === md5txt(localJs),
@@ -126,14 +126,15 @@ const r = await page.evaluate(() => {
 
 const card = (k) => (r.cards.find((c) => c.k === k) || {}).v;
 
-ok('B1 面板顺序 月度 / 类型 / 逐年 / 标签 / 评分区间 / 国别 / Top5',
-  r.panels.join('/') === 'months/kinds/years/tags/buckets/country/top', r.panels.join('/'));
+ok('B1 面板顺序 月度 / 评分区间 / 类型 / 逐年 / 国别 / 标签 / Top5（第 98 轮换位）',
+  r.panels.join('/') === 'months/buckets/kinds/years/country/tags/top', r.panels.join('/'));
 
-ok('B2 国别面板占 6 栏、与评分区间同行（第三行 6+6 两饼等分），类型/标签仍是 4 栏',
+/* 第 98 轮改判：国别饼已挪到「逐年趋势」与「高频标签」之间，不再与评分区间同行 ——
+   所以这里只断言跨度（6 / 4 / 6），行关系交给 verify98_watch 那套专门守。 */
+ok('B2 国别面板占 6 栏、评分区间占 6 栏、类型面板仍是 4 栏',
   Math.abs(r.boxCountry.w / r.boxPanels.w - 6 / 12) < 0.03 &&
   Math.abs(r.boxKinds.w / r.boxPanels.w - 4 / 12) < 0.03 &&
-  Math.abs(r.boxBuckets.w / r.boxPanels.w - 6 / 12) < 0.03 &&
-  r.boxCountry.t === r.boxBuckets.t,
+  Math.abs(r.boxBuckets.w / r.boxPanels.w - 6 / 12) < 0.03,
   `容器 ${r.boxPanels.w} / 国别 ${r.boxCountry.w}@${r.boxCountry.t} / 类型 ${r.boxKinds.w}@${r.boxKinds.t} / 区间 ${r.boxBuckets.w}@${r.boxBuckets.t}`);
 
 ok('B3 国别面板与线上数据对齐：' + (liveHasCountry ? `${liveHasCountry} 条有国别` : `全靠空态 + ${liveNoCountry} 部待补`),

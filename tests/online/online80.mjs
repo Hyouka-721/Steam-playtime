@@ -76,14 +76,14 @@ const fetched = await (async () => {
   return p.evaluate(async (site) => {
     const get = async (u) => (await fetch(site + u, { cache: 'reload' })).text();
     const [html, css, js, sw, data] = await Promise.all([
-      get('watch.html'), get('watch.css?v=35'), get('watch.js?v=27'), get('sw.js'), get('data/watch.json'),
+      get('watch.html'), get('watch.css?v=36'), get('watch.js?v=28'), get('sw.js'), get('data/watch.json'),
     ]);
     return { html, css, js, sw, data };
   }, SITE);
 })();
 
-ok('A1 线上 watch.html 引用 watch.css?v=35 / watch.js?v=27',
-  /watch\.css\?v=35/.test(fetched.html) && /watch\.js\?v=27/.test(fetched.html),
+ok('A1 线上 watch.html 引用 watch.css?v=36 / watch.js?v=28',
+  /watch\.css\?v=36/.test(fetched.html) && /watch\.js\?v=28/.test(fetched.html),
   (fetched.html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 线上 watch.css 与本地逐字节相同（CRLF 归一后 md5 全等）',

@@ -50,8 +50,8 @@ ok('A3 页脚三段顺序：更新于 → 总数 → 回到 Game Time（DOM 顺�
     return i > 0 && j > i && k > j;
   })());
 
-ok('A4 版本号：watch.js?v=27 / watch.css?v=35（js 加计数，css 加窄屏竖排）',
-  /watch\.js\?v=27"/.test(html) && /watch\.css\?v=35"/.test(html));
+ok('A4 版本号：watch.js?v=28 / watch.css?v=36（js 加计数，css 加窄屏竖排）',
+  /watch\.js\?v=28"/.test(html) && /watch\.css\?v=36"/.test(html));
 
 /* ================= mock ================= */
 const MOCK = {

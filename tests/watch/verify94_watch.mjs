@@ -50,8 +50,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=35 / watch.js?v=27',
-  /watch\.css\?v=35/.test(html) && /watch\.js\?v=27/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=36 / watch.js?v=28',
+  /watch\.css\?v=36/.test(html) && /watch\.js\?v=28/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 头部：副标题与「统计年份」label 的 DOM 已删，select 补 aria-label 保住可访问名称',
@@ -66,11 +66,14 @@ const spanOf = (k) => {
   const m = css.match(new RegExp('\\.st-panel\\[data-panel="' + k + '"\\]\\s*\\{\\s*grid-column:\\s*span\\s*(\\d+)'));
   return m ? Number(m[1]) : 0;
 };
-ok('A4 面板 12 栅格不对称：月度 8 / 逐年 8 / 类型 4 / 标签 4 / 评分区间 6 + 国别 6（第 97 轮改饼图后等分）',
+/* 第 98 轮改判：用户把两块饼挪了位置，跨度随之重新配平（否则会掉进下一行留空档）——
+   月度 8→6、标签 4→6，三行成了 6+6 / 4+8 / 6+6。 */
+ok('A4 面板 12 栅格：月度 6 / 评分区间 6 / 类型 4 / 逐年 8 / 国别 6 / 标签 6（每行都满 12 栏）',
   /\.st-panels\s*\{[\s\S]*?grid-template-columns:\s*repeat\(12,/.test(css) &&
-  spanOf('months') === 8 && spanOf('years') === 8 && spanOf('kinds') === 4 &&
-  spanOf('tags') === 4 && spanOf('buckets') === 6 && spanOf('country') === 6,
-  `months=${spanOf('months')} kinds=${spanOf('kinds')} buckets=${spanOf('buckets')} country=${spanOf('country')}`);
+  spanOf('months') === 6 && spanOf('buckets') === 6 && spanOf('kinds') === 4 &&
+  spanOf('years') === 8 && spanOf('country') === 6 && spanOf('tags') === 6,
+  `months=${spanOf('months')} buckets=${spanOf('buckets')} kinds=${spanOf('kinds')} ` +
+  `years=${spanOf('years')} country=${spanOf('country')} tags=${spanOf('tags')}`);
 
 ok('A5 🔴 860 块里有面板跨度复位（否则容器 1 列 + 子项 span 8 会横向溢出）',
   /@media \(max-width: 860px\)[\s\S]*?\.w-stats \.st-panel\[data-panel\] \{ grid-column: auto; \}/.test(css));
@@ -134,6 +137,7 @@ const probe = () => page.evaluate(() => {
     boxMonths: box('[data-panel="months"]'), boxKinds: box('[data-panel="kinds"]'),
     boxBuckets: box('[data-panel="buckets"]'), boxPanels: box('.st-panels'),
     boxCountry: box('[data-panel="country"]'),
+    boxYears: box('[data-panel="years"]'), boxTags: box('[data-panel="tags"]'),
     ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
   };
 });
@@ -154,22 +158,28 @@ ok('B2 六卡数字与本地同口径推导全等',
 ok('B3 头部只剩标题 + 下拉：副标题与「统计年份」字样都不在，aria-label 仍在',
   r.subCount === 0 && r.labelCount === 0 && r.ariaLabel === '统计年份');
 
-ok('B4 面板齐备且顺序为 月度 / 类型 / 逐年 / 标签 / 评分区间 / 国别 / Top5',
-  r.panels.join('/') === 'months/kinds/years/tags/buckets/country/top', r.panels.join('/'));
+/* 第 98 轮改判：用户要求把两块饼挪位 —— 评分区间插到月度分布与类型构成之间，
+   国别插到逐年趋势与高频标签之间。面板顺序与跨度为功能变更，判据必须跟着改。 */
+ok('B4 面板齐备且顺序为 月度 / 评分区间 / 类型 / 逐年 / 国别 / 标签 / Top5',
+  r.panels.join('/') === 'months/buckets/kinds/years/country/tags/top', r.panels.join('/'));
 
 ok('B5 内容齐备：12 月柱 / 逐年柱=9 / 类型 3 行 / 区间 5 行 / 标签 / Top5',
   r.barsMonth === 12 && r.barsYear === YEARS && r.rowsKind === 3 && r.rowsBucket === 5 &&
   r.chips > 0 && r.chips <= 8 && r.top === 5,
   `月=${r.barsMonth} 年=${r.barsYear} 类型=${r.rowsKind} 区间=${r.rowsBucket} chips=${r.chips}`);
 
-ok('B6 美观 #4 版式：前两行 8 + 4，第三行两个饼图 6 + 6 等分且同行',
-  Math.abs(r.boxMonths.w / r.boxPanels.w - 8 / 12) < 0.03 &&
-  Math.abs(r.boxKinds.w / r.boxPanels.w - 4 / 12) < 0.03 &&
+ok('B6 美观 #4 版式：12 栅格每行都满 —— 6+6（月度/区间）、4+8（类型/逐年）、6+6（国别/标签），同行项 top 相同',
+  Math.abs(r.boxMonths.w / r.boxPanels.w - 6 / 12) < 0.03 &&
   Math.abs(r.boxBuckets.w / r.boxPanels.w - 6 / 12) < 0.03 &&
+  Math.abs(r.boxKinds.w / r.boxPanels.w - 4 / 12) < 0.03 &&
+  Math.abs(r.boxYears.w / r.boxPanels.w - 8 / 12) < 0.03 &&
   Math.abs(r.boxCountry.w / r.boxPanels.w - 6 / 12) < 0.03 &&
-  r.boxCountry.t === r.boxBuckets.t &&
-  r.boxMonths.t === r.boxKinds.t,
-  `容器 ${r.boxPanels.w} / 月度 ${r.boxMonths.w} / 类型 ${r.boxKinds.w} / 区间 ${r.boxBuckets.w} / 国别 ${r.boxCountry.w}@${r.boxCountry.t}`);
+  Math.abs(r.boxTags.w / r.boxPanels.w - 6 / 12) < 0.03 &&
+  r.boxMonths.t === r.boxBuckets.t && r.boxKinds.t === r.boxYears.t && r.boxCountry.t === r.boxTags.t &&
+  r.boxBuckets.t < r.boxKinds.t && r.boxYears.t < r.boxCountry.t,
+  `容器 ${r.boxPanels.w} / 月度 ${r.boxMonths.w}@${r.boxMonths.t} 区间 ${r.boxBuckets.w}@${r.boxBuckets.t} ` +
+  `/ 类型 ${r.boxKinds.w}@${r.boxKinds.t} 逐年 ${r.boxYears.w}@${r.boxYears.t} ` +
+  `/ 国别 ${r.boxCountry.w}@${r.boxCountry.t} 标签 ${r.boxTags.w}@${r.boxTags.t}`);
 
 ok('B7 美观 #2 基线：.st-plot 有 1px 下边线（柱子落地，不再是飘着）',
   r.baseline === '1px', `border-bottom=${r.baseline}`);

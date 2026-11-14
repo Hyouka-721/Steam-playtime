@@ -120,8 +120,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=35 / watch.js?v=27（CSS 与 JS 都改了，两个都要 bump）',
-  /watch\.css\?v=35/.test(html) && /watch\.js\?v=27/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=36 / watch.js?v=28（CSS 与 JS 都改了，两个都要 bump）',
+  /watch\.css\?v=36/.test(html) && /watch\.js\?v=28/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 JS 有 stPie + 两套色板；评分区间与国别都走它（stPie(buckets) / stPie(countries)）',
@@ -134,7 +134,7 @@ ok('A3 这两个面板不再用横条（stRows 只剩「类型构成」一处调
   /stRows\(kinds\)/.test(js) && (js.match(/stRows\(/g) || []).length === 2,
   `stRows( 出现 ${(js.match(/stRows\(/g) || []).length} 次（1 处定义 + 1 处调用）`);
 
-ok('A4 跨度 8+4 → 6+6：饼要近方形，两个饼同行等分',
+ok('A4 两个饼面板都占 6 栏（近方形才放得下饼+图例；第 98 轮换位后各与月度/标签同行）',
   /\.st-panel\[data-panel="buckets"\] \{ grid-column: span 6; \}/.test(css) &&
   /\.st-panel\[data-panel="country"\] \{ grid-column: span 6; \}/.test(css));
 
@@ -310,10 +310,11 @@ ok('B10 渲染后色点两两不同：' + r.c.rows + ' 行国别 = ' + new Set(r
   new Set(r.c.fills).size === r.c.pieces && new Set(r.b.fills).size === r.b.pieces,
   `国别 ${new Set(r.c.dots).size}/${r.c.rows} · 区间 ${new Set(r.b.dots).size}/${r.b.rows}`);
 
-ok('B7 版式：两块面板等宽同行（6+6），饼在左、图例在右，不重叠',
-  Math.abs(r.b.sec.w - r.c.sec.w) <= 2 && r.b.sec.t === r.c.sec.t &&
+/* 第 98 轮起两块饼不再同行（用户要求各自挪到别的位置），所以只断言等宽 + 饼图例不重叠 */
+ok('B7 版式：两个饼面板等宽（都占 6 栏），各自饼在左、图例在右且不重叠',
+  Math.abs(r.b.sec.w - r.c.sec.w) <= 2 &&
   r.b.pie.r <= r.b.leg.l && r.c.pie.r <= r.c.leg.l,
-  `区间 ${r.b.sec.w} / 国别 ${r.c.sec.w} 同行=${r.b.sec.t === r.c.sec.t} 间距 ${r.b.leg.l - r.b.pie.r}/${r.c.leg.l - r.c.pie.r}`);
+  `区间 ${r.b.sec.w} / 国别 ${r.c.sec.w} 间距 ${r.b.leg.l - r.b.pie.r}/${r.c.leg.l - r.c.pie.r}`);
 
 ok('B8 饼按 clamp(150,16vw,240) 长到 240（1920），图例限宽 320 没被拉开',
   Math.round(r.b.pie.w) === 240 && Math.round(r.b.pie.h) === 240 && r.b.leg.w <= 320,

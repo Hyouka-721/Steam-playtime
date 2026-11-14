@@ -58,8 +58,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=35 / watch.js?v=27（CSS 改限宽、JS 改国别规范名，两个都要 bump）',
-  /watch\.css\?v=35/.test(html) && /watch\.js\?v=27/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=36 / watch.js?v=28（CSS 改限宽、JS 改国别规范名，两个都要 bump）',
+  /watch\.css\?v=36/.test(html) && /watch\.js\?v=28/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const statsBlock = (/(^|\n)\.w-stats \{[^}]*\}/.exec(css) || [''])[0];
@@ -84,7 +84,7 @@ const shardMissing = [];
 for (const c of RANK) {
   if (!/[\u4e00-\u9fa5]/.test(c)) shardMissing.push('国名非中文：' + c);
 }
-ok('A5 国别写法统一：全是白名单里的中文名（港澳台写成 中国香港/中国澳门/中国台湾）',
+ok('A5 国别写法统一：全是白名单里的中文名（港澳仍写 中国香港/中国澳门；台湾已并进「中国」）',
   shardMissing.length === 0 &&
   !RANK.some((c) => /^(香港|澳门|台湾|内地|大陆|中国内地)$/.test(c)),
   RANK.join('/'));

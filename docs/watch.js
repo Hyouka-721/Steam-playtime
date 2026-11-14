@@ -508,28 +508,29 @@
         '<b class="st-v">' + esc(c.v) + '</b><span class="st-u">' + esc(c.u) + '</span></div>';
     }).join('') + '</div>';
     /* 每个面板都挂 data-panel：套件按面板取数（[data-panel="months"] .st-bar），
-       以后再加面板就不用改旧判据了。⚠️ DOM 顺序决定栅格自动排布：
-       月度(8) + 类型(4) 一行、逐年(8) + 标签(4) 一行、
-       评分区间(6) + 国别(6) 一行（第 97 轮两个饼图等分，各自近方形才放得下）。 */
+       以后再加面板就不用改旧判据了。⚠️ DOM 顺序决定栅格自动排布（第 98 轮按用户要求换位）：
+       月度(6) + 评分区间(6) ／ 类型(4) + 逐年(8) ／ 国别(6) + 标签(6)，每行都正好 12 栏。
+       两个饼各自跟「同类」面板相邻：评分区间挨着月度分布（都是「看法」），
+       国别挨着高频标签（都是「构成类」的收尾）。 */
     var panels = '<div class="st-panels">' +
       '<section class="st-panel" data-panel="months"><h3>月度分布</h3>' + stBars(months, monthMax) + '</section>' +
+      '<section class="st-panel" data-panel="buckets"><h3>评分区间</h3>' +
+        (stPie(buckets, '评分区间饼图') || '<p class="st-empty">这个范围内还没有评分记录</p>') + '</section>' +
       '<section class="st-panel" data-panel="kinds"><h3>类型构成</h3>' + stRows(kinds) + '</section>' +
       '<section class="st-panel" data-panel="years"><h3>逐年趋势</h3>' +
         (yearPairs.length ? stBars(yearPairs, yearMax) : '<p class="st-empty">还没有可统计的年份</p>') +
       '</section>' +
-      '<section class="st-panel" data-panel="tags"><h3>高频标签</h3>' +
-        (tags.length ? '<div class="st-chips">' + tags.map(function (t) {
-          return '<span class="st-chip">' + esc(t.k) + '<i>' + t.v + '</i></span>';
-        }).join('') + '</div>' : '<p class="st-empty">这个范围内还没有标签</p>') +
-      '</section>' +
-      '<section class="st-panel" data-panel="buckets"><h3>评分区间</h3>' +
-        (stPie(buckets, '评分区间饼图') || '<p class="st-empty">这个范围内还没有评分记录</p>') + '</section>' +
       '<section class="st-panel" data-panel="country"><h3>国别构成' +
         (noCountry ? '<span class="st-hint">' + noCountry + ' 部待补</span>' : '') + '</h3>' +
         (countries.length
           ? stPie(countries, '国别构成饼图') + '<p class="st-note">按国别累计：合拍片会在各出品国各计一次，合计可超过记录总数' +
             (hasOther ? '；少于 ' + COUNTRY_MIN + ' 部的国别（' + esc(otherNames) + '）合并为「其他」' : '') + '</p>'
           : '<p class="st-empty">还没有国别数据 —— 点右下角 + 或编辑任意条目即可填写</p>') +
+      '</section>' +
+      '<section class="st-panel" data-panel="tags"><h3>高频标签</h3>' +
+        (tags.length ? '<div class="st-chips">' + tags.map(function (t) {
+          return '<span class="st-chip">' + esc(t.k) + '<i>' + t.v + '</i></span>';
+        }).join('') + '</div>' : '<p class="st-empty">这个范围内还没有标签</p>') +
       '</section>' +
     '</div>';
     var topHtml = '<section class="st-panel st-top" data-panel="top"><h3>高分 Top 5</h3>' +
@@ -1091,13 +1092,14 @@
      数据形态是 countries: ["美国", "英国"]（数组）—— 合拍片单值会丢信息。
      ⚠️ 手填 124 条必然出现「美国 / 美 / US / USA」四种写法，所以这里做**归一化**：
         别名表统一收敛，输出永远只有规范名；同一部里重复的国别去重。
-     ⚠️ 港澳台一律写成「中国香港 / 中国澳门 / 中国台湾」（与站点口径一致）。 */
+     ⚠️ 第 98 轮改口径：大陆与台湾一律并进「中国」（用户：「中国大陆与中国台湾 合并成中国」）。
+        港澳仍是独立规范名「中国香港 / 中国澳门」—— 两地电影产业单列，且现有数据里没有它们。 */
   var COUNTRY_ALIAS = {
-    '中国': '中国大陆', '中国大陆': '中国大陆', '大陆': '中国大陆', '内地': '中国大陆',
-    'cn': '中国大陆', 'china': '中国大陆', 'prc': '中国大陆', 'mainland': '中国大陆',
+    '中国': '中国', '中国大陆': '中国', '大陆': '中国', '内地': '中国',
+    'cn': '中国', 'china': '中国', 'prc': '中国', 'mainland': '中国',
     '中国香港': '中国香港', '香港': '中国香港', '港': '中国香港', 'hk': '中国香港', 'hongkong': '中国香港',
     '中国澳门': '中国澳门', '澳门': '中国澳门', '澳': '中国澳门', 'mo': '中国澳门', 'macau': '中国澳门', 'macao': '中国澳门',
-    '中国台湾': '中国台湾', '台湾': '中国台湾', '台': '中国台湾', 'tw': '中国台湾', 'taiwan': '中国台湾',
+    '中国台湾': '中国', '台湾': '中国', '台': '中国', 'tw': '中国', 'taiwan': '中国',
     '美国': '美国', '美': '美国', 'us': '美国', 'usa': '美国', 'america': '美国', 'unitedstates': '美国',
     '日本': '日本', '日': '日本', 'jp': '日本', 'japan': '日本',
     '韩国': '韩国', '南韩': '韩国', '韩': '韩国', 'kr': '韩国', 'korea': '韩国', 'southkorea': '韩国',

@@ -1030,17 +1030,19 @@ select.w-input { cursor: pointer; }
 .st-u { font-size: 12px; color: var(--text-faint); }
 
 .st-panels {
-  /* 第 94 轮美观 #4：2×2 等分太呆板 → 12 栅格不对称（宽-窄 / 宽-窄 / 通栏）。
+  /* 第 94 轮美观 #4：2×2 等分太呆板 → 12 栅格不对称。
+     第 98 轮按用户要求换位后每行都正好 12 栏：
+     月度(6)+评分区间(6) ／ 类型(4)+逐年(8) ／ 国别(6)+标签(6)。
      ⚠️ 子项跨度必须配 .w-stats .st-panel[data-panel] 的断点复位，
         否则 860 以下容器只剩 1 列而子项还 span 8，会撑出横向溢出。 */
   display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px;
 }
-.st-panel[data-panel="months"] { grid-column: span 8; }
+.st-panel[data-panel="months"] { grid-column: span 6; }   /* 第 98 轮：与评分区间饼同行 6+6 */
 .st-panel[data-panel="years"] { grid-column: span 8; }
 .st-panel[data-panel="kinds"] { grid-column: span 4; }
-.st-panel[data-panel="tags"] { grid-column: span 4; }
+.st-panel[data-panel="tags"] { grid-column: span 6; }     /* 第 98 轮：与国别饼同行 6+6 */
 .st-panel[data-panel="buckets"] { grid-column: span 6; }
-.st-panel[data-panel="country"] { grid-column: span 6; }   /* 第 97 轮：与评分区间两饼等分 */
+.st-panel[data-panel="country"] { grid-column: span 6; }
 .st-panel {
   padding: 16px 18px 18px; min-width: 0;
   background: var(--card-bg);
