@@ -44,8 +44,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=40 / watch.js?v=31',
-  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=41 / watch.js?v=32',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 /* 第 100 轮改判（用户删除「上映日期」功能，非调阈值）：A2 从「有该输入框」改成「入口已删」。
@@ -260,15 +260,16 @@ const MOCK3 = {
     years: document.querySelectorAll('#st-year option').length,
     title: (document.querySelector('.st-title') || {}).textContent || ''
   }));
-  ok('C6 A4 年报展开：三个容器状态正确、按钮 aria-pressed 与文案同步（第 92 轮起右排只收排序按钮、留「返回列表」）',
+  ok('C6 A4 年报展开：三个容器状态正确、按钮 aria-pressed 与文案同步（第 102 轮起两态恒叫「年度报告」）',
     !r.statsHidden && r.gridHidden && r.tlHidden && r.sortWrapVisible && r.sortBtnsHidden &&
-    r.statsBtnVisible && r.pressed === 'true' && r.btnText === '返回列表');
+    r.statsBtnVisible && r.pressed === 'true' && r.btnText === '年度报告');   /* 第 102 轮：两态恒「年度报告」 */
   /* 第 94 轮契约演进：4 卡 → 6 卡（+评分中位数 +≥8 分占比）、新增「逐年趋势」面板，
-     所以柱/行必须按面板分别计数，旧的「全库 12 柱 / 8 行」已不成立。 */
+     所以柱/行必须按面板分别计数，旧的「全库 12 柱 / 8 行」已不成立。
+     第 102 轮改判：删「有评分 / 评分中位数」、加用户指定的三部「最佳」，6 卡 → 7 卡。 */
   /* 第 101 轮改判（用户「删除类型构成和高频标签两个选项卡」）：两个面板连同 stRows 横条
      与 .st-chip 一起删光，所以「类型 3 行 / chips>0」改成「两者均为 0」。其余口径原样守住。 */
-  ok('C7 A4 内容齐备：6 卡 / 12 月柱 / 逐年柱=年份数 / 区间 5 行 / 年度影视 9 条 / 10 个年份选项；类型与标签已删净',
-    r.cards === 6 && r.barsMonth === 12 && r.barsYear === Object.keys(yearCounts).length &&
+  ok('C7 A4 内容齐备：7 卡 / 12 月柱 / 逐年柱=年份数 / 区间 5 行 / 年度影视 9 条 / 10 个年份选项；类型与标签已删净',
+    r.cards === 7 && r.barsMonth === 12 && r.barsYear === Object.keys(yearCounts).length &&
     r.rowsKind === 0 && r.rowsBucket === 5 && r.chips === 0 &&
     r.top === 9 && r.years === 10 && r.v0 === String(N) && /全部年份/.test(r.title),
     `cards=${r.cards} 月=${r.barsMonth} 年=${r.barsYear} 类型=${r.rowsKind} 区间=${r.rowsBucket} chips=${r.chips} 总数=${r.v0}`);

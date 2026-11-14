@@ -58,14 +58,14 @@ await p0.goto(SITE + 'watch.html?t=' + TS, { waitUntil: 'load', timeout: 45000 }
 await p0.waitForFunction(() => document.querySelectorAll('#w-grid .poster').length > 20, null, { timeout: 45000 }).catch(() => {});
 
 const html = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=40&t=' + TS);
-const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=31&t=' + TS);
+const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=41&t=' + TS);
+const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=32&t=' + TS);
 const liveJsNC = stripJsCmt(liveJs);
 const liveCssNC = stripJsCmt(liveCss);
 const htmlNC = html.replace(/<!--[\s\S]*?-->/g, '');
 
-ok('A1 线上 watch.html 引用 watch.css?v=40 / watch.js?v=31',
-  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=41 / watch.js?v=32',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);

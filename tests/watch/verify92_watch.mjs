@@ -40,8 +40,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=40 / watch.js?v=31',
-  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=41 / watch.js?v=32',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 /* 取出两个容器的内容片段，直接看归属 */
@@ -120,7 +120,7 @@ const g = await probe();
    本条判据随功能改判 —— 不是调阈值抹红，而是「三个按钮全在」这个前提本身被推翻了。 */
 ok('B1 网格：左排 4 档不变，右排只剩两个排序按钮，年报按钮收起（hidden + display:none）',
   g.segBtns.length === 4 && g.sortVisible.length === 2 && g.sortAll === 2 &&
-  !g.statsShown && g.statsText === '年报',
+  !g.statsShown && g.statsText === '年度报告',
   `左 ${g.segBtns.join('/')}；右 排序 ${g.sortVisible.join('/')}；年报显示=${g.statsShown}`);
 
 await page.click('#w-avatar');
@@ -130,24 +130,24 @@ const t = await probe();
 ok('B2 时间轴：两个排序按钮真的 hidden 且 computed display:none（修掉「显示着但点了没反应」的死控件）',
   t.sortVisible.length === 0 && t.sortAll === 2,
   `可见排序按钮 ${t.sortVisible.length} / 共 ${t.sortAll}`);
-ok('B3 时间轴：右排容器还在、只剩「年报」，胶囊宽度收缩到年报本身（无残留空胶囊）',
-  t.wrapShown && t.statsShown && t.statsText === '年报' && t.wrapW <= t.statsW + 12,
+ok('B3 时间轴：右排容器还在、只剩「年度报告」按钮，胶囊宽度收缩到按钮本身（无残留空胶囊）',
+  t.wrapShown && t.statsShown && t.statsText === '年度报告' && t.wrapW <= t.statsW + 12,
   `容器 ${t.wrapW}px / 年报 ${t.statsW}px`);
 ok('B4 时间轴：网格仍在（124 张），切视图没把数据搞丢', t.grid === N, `${t.grid}/${N}`);
 
 await page.click('#w-stats-btn');
 await page.waitForTimeout(400);
 const s = await probe();
-ok('B5 年报展开：右排只剩「返回列表」，容器与按钮都还在（能退出来）',
-  s.wrapShown && s.statsShown && s.statsText === '返回列表' && s.sortVisible.length === 0 &&
+ok('B5 年报展开：右排只剩「年度报告」按钮，容器与按钮都还在（能退出来）',
+  s.wrapShown && s.statsShown && s.statsText === '年度报告' && s.sortVisible.length === 0 &&
   s.wrapW <= s.statsW + 12, `${s.statsText} 容器 ${s.wrapW}px`);
 ok('B6 年报视图无横向溢出', s.ov <= 0, `ov=${s.ov}`);
 
 await page.click('#w-stats-btn');
 await page.waitForTimeout(400);
 const back = await probe();
-ok('B7 返回列表：回到打开年报前的那个视图（时间轴），三个按钮与排序态都不丢',
-  back.sortVisible.length === 0 && back.statsText === '年报' && back.tlShown && !back.gridShown &&
+ok('B7 再点按钮返回：回到打开年报前的那个视图（时间轴），三个按钮与排序态都不丢',
+  back.sortVisible.length === 0 && back.statsText === '年度报告' && back.tlShown && !back.gridShown &&
   back.grid === N && !!back.sortOn,
   `排序态=${back.sortOn} 时间轴=${back.tlShown}`);
 
@@ -202,7 +202,7 @@ const mt = await mp.evaluate(() => {
   };
 });
 ok('C2 390 时间轴：第二行只剩「年报」，等分不越界、无横向溢出',
-  mt.shown.length === 1 && mt.shown[0] === '年报' &&
+  mt.shown.length === 1 && mt.shown[0] === '年度报告' &&
   mt.sort.l >= -1 && mt.sort.r <= mt.vw + 1 && mt.ov <= 0,
   `第二行 ${mt.shown.join('/')} ov=${mt.ov}`);
 
@@ -213,8 +213,8 @@ const ms = await mp.evaluate(() => ({
   cols: getComputedStyle(document.querySelector('.st-cards')).gridTemplateColumns.split(' ').length,
   btn: document.getElementById('w-stats-btn').textContent.trim()
 }));
-ok('C3 390 年报：2 列、按钮变「返回列表」、无横向溢出',
-  ms.ov <= 0 && ms.cols === 2 && ms.btn === '返回列表', `cols=${ms.cols} ov=${ms.ov}`);
+ok('C3 390 年报：2 列、按钮恒「年度报告」、无横向溢出',
+  ms.ov <= 0 && ms.cols === 2 && ms.btn === '年度报告', `cols=${ms.cols} ov=${ms.ov}`);
 ok('C4 390 零 JS 异常', merrs.length === 0, merrs.slice(0, 3).join(' | '));
 
 await browser.close();

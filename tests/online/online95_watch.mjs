@@ -4,7 +4,7 @@
  *    等用户说「上线」→ push → Pages 指纹轮询命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=40 / watch.js?v=31；css/js 字节 md5 与本地全等；
+ *   ① 指纹：watch.html 引用 watch.css?v=41 / watch.js?v=32；css/js 字节 md5 与本地全等；
  *      线上 JS 里确实有 COUNTRY_ALIAS / normCountry / data-panel="country"（版本号只说明引用变了）
  *   ② 1440：面板顺序多了 country、国别面板占 4 栏且与类型面板同行、
  *      国别面板内容与「线上真实数据」逐字对齐（还没录国别 = 空态 + N 部待补；录了 = 行数/首位对得上）、
@@ -60,12 +60,12 @@ await page.waitForTimeout(900);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹 ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=40 / watch.js?v=31',
-  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=41 / watch.js?v=32',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=40&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=31&t=' + TS);
+const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=41&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=32&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等', md5txt(liveJs) === md5txt(localJs),
@@ -146,12 +146,14 @@ ok('B3 国别面板与线上数据对齐：' + (liveHasCountry ? `${liveHasCount
        r.cHint === liveNoCountry + ' 部待补'),
   `行 ${r.cRows.length} / 提示「${r.cHint}」/ 空态 ${r.cEmpty ? '有' : '无'} / 脚注 ${r.cNote ? '有' : '无'}`);
 
-ok('B4 六卡没被本轮改坏：键名顺序与数字都对',
-  r.cards.length === 6 &&
-  r.cards.map((c) => c.k).join('/') === '记录总数/有评分/平均评分/评分中位数/≥8 分占比/观影天数' &&
-  card('记录总数') === String(N) && card('有评分') === String(RATED.length) &&
-  card('平均评分') === AVG && card('评分中位数') === MEDIAN && card('≥8 分占比') === HIGHPCT,
-  `${card('平均评分')}/${card('评分中位数')}/${card('≥8 分占比')} vs ${AVG}/${MEDIAN}/${HIGHPCT}`);
+/* 第 102 轮改判：删「有评分 / 评分中位数」、加三部「最佳」，6 卡 → 7 卡。 */
+ok('B4 七卡没被本轮改坏：键名顺序与数字都对（数字四卡 + 最佳三卡）',
+  r.cards.length === 7 &&
+  r.cards.map((c) => c.k).join('/') === '记录总数/平均评分/≥8 分占比/观影天数/最佳电影/最佳剧集/最佳番剧' &&
+  card('记录总数') === String(N) &&
+  card('平均评分') === AVG && card('≥8 分占比') === HIGHPCT &&
+  card('最佳电影') === '情书' && card('最佳剧集') === '是大臣' && card('最佳番剧') === '冰菓',
+  `${card('平均评分')}/${card('≥8 分占比')} vs ${AVG}/${HIGHPCT} · 最佳 ${card('最佳电影')}/${card('最佳剧集')}/${card('最佳番剧')}`);
 
 /* 第 101 轮改判：类型 / 标签面板删净，行数与 chips 归零；其余口径原样守。 */
 ok('B5 其余面板内容齐备：12 月柱 / 逐年柱=' + YEARS + ' / 区间 5 行 / 年度影视 9 条；类型行与标签已删净',

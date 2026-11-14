@@ -1,10 +1,10 @@
 /* 第 97 轮 watch 侧上线复验：评分区间 + 国别构成改饼图
  *
  * ⚠️ **本轮尚未上线时不要跑**：线上此刻还是第 96 轮（评分区间/国别是横条、v=34/v=23）。
- *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=40）命中后再执行本脚本。
+ *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=41）命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹 —— watch.css?v=40 / watch.js?v=31、css/js 字节 md5 与本地全等、
+ *   ① 指纹 —— watch.css?v=41 / watch.js?v=32、css/js 字节 md5 与本地全等、
  *      线上 JS 里确有 stPie 且两个面板都走它、线上 CSS 里两个饼面板各占 6 栏、
  *      图例有 max-width（否则片名与数量会被一左一右拉开）
  *   ② 1920 —— 两个饼都画出来（片数 = 非零档位数）、图例行数与首行按**线上数据现算**
@@ -49,12 +49,12 @@ await p0.waitForFunction(() => document.querySelectorAll('#w-grid .poster').leng
 await p0.waitForTimeout(800);
 
 const html = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=40 / watch.js?v=31',
-  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=41 / watch.js?v=32',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=40&t=' + TS);
-const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=31&t=' + TS);
+const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=41&t=' + TS);
+const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=32&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等', md5txt(liveJs) === md5txt(localJs),

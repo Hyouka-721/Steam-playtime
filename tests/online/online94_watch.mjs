@@ -6,7 +6,7 @@
  *    单独回滚到第 93 轮（v=30 / v=20）时本脚本会红在 A1，属预期。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=40 / watch.js?v=31；css/js 字节 md5 与本地全等；
+ *   ① 指纹：watch.html 引用 watch.css?v=41 / watch.js?v=32；css/js 字节 md5 与本地全等；
  *      线上 JS 里确实没有 st-sub / st-label、且 select 带 aria-label（版本号只说明引用变了）
  *   ② 1440：6 卡（键名与顺序）、指标与本地推导全等、面板 5+Top5 顺序、
  *      12 月柱 / 逐年柱=9 / 类型 3 行 / 区间 5 行、版式真的是 8/4/12 不对称、无溢出零异常
@@ -61,12 +61,12 @@ await page.waitForTimeout(900);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹 ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=40 / watch.js?v=31',
-  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=41 / watch.js?v=32',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=40&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=31&t=' + TS);
+const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=41&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=32&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等', md5txt(liveJs) === md5txt(localJs),
@@ -115,15 +115,17 @@ const probe = () => page.evaluate(() => {
 
 const r = await probe();
 const card = (k) => (r.cards.find((c) => c.k === k) || {}).v;
-ok('B1 六卡，键名与顺序对：记录总数 / 有评分 / 平均评分 / 评分中位数 / ≥8 分占比 / 观影天数',
-  r.cards.length === 6 &&
-  r.cards.map((c) => c.k).join('/') === '记录总数/有评分/平均评分/评分中位数/≥8 分占比/观影天数',
+/* 第 102 轮改判：删「有评分 / 评分中位数」、加三部「最佳」，6 卡 → 7 卡。 */
+ok('B1 七卡，键名与顺序对：记录总数 / 平均评分 / ≥8 分占比 / 观影天数 / 最佳电影 / 最佳剧集 / 最佳番剧',
+  r.cards.length === 7 &&
+  r.cards.map((c) => c.k).join('/') === '记录总数/平均评分/≥8 分占比/观影天数/最佳电影/最佳剧集/最佳番剧',
   r.cards.map((c) => c.k).join('/'));
 
-ok('B2 六卡数字与本地同口径推导全等（平均 / 中位数 / ≥8 占比）',
-  card('记录总数') === String(N) && card('有评分') === String(RATED.length) &&
-  card('平均评分') === AVG && card('评分中位数') === MEDIAN && card('≥8 分占比') === HIGHPCT,
-  `${card('平均评分')}/${card('评分中位数')}/${card('≥8 分占比')} vs ${AVG}/${MEDIAN}/${HIGHPCT}`);
+ok('B2 七卡数字与本地同口径推导全等（数字四卡 + 最佳三卡）',
+  card('记录总数') === String(N) &&
+  card('平均评分') === AVG && card('≥8 分占比') === HIGHPCT &&
+  card('最佳电影') === '情书' && card('最佳剧集') === '是大臣' && card('最佳番剧') === '冰菓',
+  `${card('平均评分')}/${card('≥8 分占比')} vs ${AVG}/${HIGHPCT} · 最佳 ${card('最佳电影')}/${card('最佳剧集')}/${card('最佳番剧')}`);
 
 ok('B3 头部只剩标题 + 下拉：副标题与「统计年份」字样都不在线上页面，aria-label 仍在',
   r.subCount === 0 && r.labelCount === 0 && r.ariaLabel === '统计年份');

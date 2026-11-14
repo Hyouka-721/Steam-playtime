@@ -1,10 +1,10 @@
 /* 第 96 轮 watch 侧上线复验：国别补齐 + 年报宽屏铺满 + 首屏「年报」按钮不闪
  *
  * ⚠️ **本轮尚未上线时不要跑**：线上此刻还是第 95 轮（v=32 / v=22、年报 1180 居中、国别全是空的）。
- *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=40）命中后再执行本脚本。
+ *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=41）命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹：watch.css?v=40 / watch.js?v=31、css/js 字节 md5 与本地全等、
+ *   ① 指纹：watch.css?v=41 / watch.js?v=32、css/js 字节 md5 与本地全等、
  *      线上 JS 里规范名确实是「中国大陆」（不是「中国」）、线上 HTML 的 #w-stats-btn 带 hidden
  *   ② 1920：`.w-stats` 与 `.w-main` 同宽铺满（不再是 1180 居中）、左轨对齐、国别面板出真数据
  *      （行数/首行按**线上数据现算**，CI 每晚可能推新快照）、Top5 两列、六卡齐、零溢出
@@ -49,12 +49,12 @@ await p0.waitForFunction(() => document.querySelectorAll('#w-grid .poster').leng
 await p0.waitForTimeout(800);
 
 const html = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=40 / watch.js?v=31',
-  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=41 / watch.js?v=32',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=40&t=' + TS);
-const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=31&t=' + TS);
+const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=41&t=' + TS);
+const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=32&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等', md5txt(liveJs) === md5txt(localJs),
@@ -136,7 +136,8 @@ ok('B3 国别面板出真数据：' + L96ROWS + ' 行、首行 ' + LRANK[0] + '=
   r.cRows.map((x) => x.k + '=' + x.v).join('/') + ` | 提示「${r.cHint}」`);
 
 /* 第 101 轮改判（用户「删除类型构成选项卡」）：面板连同横条一起删掉，行数应为 0；
-   数据侧的三种 kind 仍在（网格筛选契约没动），继续守。 */
+   数据侧的三种 kind 仍在（网格筛选契约没动），继续守。
+   第 102 轮改判：删「有评分 / 评分中位数」、加三部「最佳」，6 卡 → 7 卡。 */
 ok('B4 类型面板已删净（0 行），但数据里三个 kind 仍齐备',
   r.rowsKind === 0 && Object.keys(LKIND).length === 3,
   `面板 ${r.rowsKind} 行 / 数据 ${JSON.stringify(LKIND)}`);
@@ -146,8 +147,8 @@ ok('B5 第 100 轮：年度影视海报网格 ≥3 列、首两条同行、9 条
   r.topCols >= 3 && r.topSameRow && r.top === 9 && r.topItemW <= Math.round(r.stW / 3),
   `列${r.topCols} 同行=${r.topSameRow} 单条${r.topItemW}/${r.stW}`);
 
-ok('B6 六卡齐 + 1920 无横向溢出 + 零 JS 异常',
-  r.cards === 6 && r.ov <= 0, `卡${r.cards} ov=${r.ov}`);
+ok('B6 七卡齐 + 1920 无横向溢出 + 零 JS 异常',
+  r.cards === 7 && r.ov <= 0, `卡${r.cards} ov=${r.ov}`);
 await ctx0.close();
 
 /* ---------- ③ 首屏「年报」按钮不闪 ---------- */
@@ -221,7 +222,7 @@ console.log('== ④ 390 窄屏 ==');
       ov: document.documentElement.scrollWidth - window.innerWidth
     };
   });
-  ok('D1 390：6 卡 2 列、面板单列、年报与国别面板不越界、年度影视海报墙回单列、无横向溢出',
+  ok('D1 390：7 卡 2 列、面板单列、年报与国别面板不越界、年度影视海报墙回单列、无横向溢出',
     m.cardCols === 2 && m.panelCols === 1 && m.topRows === 1 &&
     m.countryW > 0 && m.stW <= m.vw && m.ov <= 0,
     `卡${m.cardCols} 面板${m.panelCols} Top5列${m.topRows} 年报${m.stW} country${m.countryW} ov=${m.ov}`);

@@ -254,16 +254,17 @@ code {
    ⚠️ 别把它并进 .w-sort-btn 选择器：.w-sort-btn.is-on 被旧套件当成「当前排序」读
    data-sort，年报按钮进来会让 querySelector('.w-sort-btn.is-on') 命错元素。 */
 .w-sort .w-stats-btn {
-  appearance: none; border: 0; background: none;
+  appearance: none; border: 0;
   padding: 6px 18px;
   font: inherit; font-size: 13px;
-  color: var(--text-dim);
+  color: var(--accent); background: var(--accent-wash); font-weight: 600;
   border-radius: var(--r-sm);
   cursor: pointer;
   margin-right: 2px;
   transition: color var(--t-1) var(--ease), background var(--t-1) var(--ease);
 }
-.w-sort .w-stats-btn:hover { color: var(--text); }
+/* 第 102 轮：金底常驻（用户「始终维持黄金色底色」），不再随 is-on 切换 */
+.w-sort .w-stats-btn:hover { color: var(--accent); }
 .w-sort .w-stats-btn.is-on { color: var(--accent); background: var(--accent-wash); font-weight: 600; }
 .w-sort .w-stats-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
@@ -710,7 +711,7 @@ code {
 .w-textarea { resize: vertical; min-height: 58px; }
 select.w-input { cursor: pointer; }
 /* 第 78 轮：排序是 0~5 的个位数，不必占满整行；标签提示另起一行，输入框靠左收窄 */
-.w-input.w-input-order { width: 118px; }
+/* 第 102 轮：删排序输入的 118px 定宽 —— 拉长到与年份一致（铺满 .w-row-3 列宽） */
 
 /* 海报选择 */
 .w-pick { display: flex; gap: 12px; align-items: flex-start; }
@@ -966,14 +967,16 @@ select.w-input { cursor: pointer; }
   appearance: none;
   padding: 7px 16px;
   font: inherit; font-size: 13px;
-  color: var(--text-dim);
-  background: var(--panel);
-  border: 1px solid var(--card-border);
+  color: var(--accent);
+  background: var(--accent-wash);
+  border: 1px solid var(--accent-edge);
   border-radius: var(--r-md);
+  font-weight: 600;
   cursor: pointer;
   transition: color var(--t-1) var(--ease), background var(--t-1) var(--ease), border-color var(--t-1) var(--ease);
 }
-.w-stats-btn:hover { color: var(--text); }
+/* 第 102 轮：金底常驻（用户「始终维持黄金色底色」） */
+.w-stats-btn:hover { color: var(--accent); }
 .w-stats-btn.is-on {
   color: var(--accent); background: var(--accent-wash);
   border-color: var(--accent-edge); font-weight: 600;

@@ -40,8 +40,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=40 / watch.js?v=31',
-  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=41 / watch.js?v=32',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 JS 判据是 !(statsOn || layout === \'timeline\') —— 带 statsOn 才不会被关在年报里',
@@ -97,8 +97,8 @@ await page.click('#w-avatar');
 await page.waitForSelector('#w-tl .tl-item', { timeout: 15000 });
 await page.waitForTimeout(500);
 const t = await probe();
-ok('B2 时间轴：右排有且只有「年报」，两个排序按钮收起',
-  t.statsShown && t.statsText === '年报' && t.sortBtns.length === 0 && t.tlShown && !t.gridShown,
+ok('B2 时间轴：右排有且只有「年度报告」按钮，两个排序按钮收起',
+  t.statsShown && t.statsText === '年度报告' && t.sortBtns.length === 0 && t.tlShown && !t.gridShown,
   `年报=${t.statsShown} 排序可见 ${t.sortBtns.length} 个`);
 
 ok('B3 时间轴：右排胶囊收缩到年报本身（无残留空胶囊）',
@@ -107,16 +107,17 @@ ok('B3 时间轴：右排胶囊收缩到年报本身（无残留空胶囊）',
 await page.click('#w-stats-btn');
 await page.waitForTimeout(400);
 const s = await probe();
-ok('B4 年报展开：右排只剩「返回列表」，两个排序按钮仍收起',
-  s.statsShown && s.statsText === '返回列表' && s.sortBtns.length === 0 && s.stats,
+ok('B4 年报展开：右排只剩「年度报告」按钮，两个排序按钮仍收起',
+  s.statsShown && s.statsText === '年度报告' && s.sortBtns.length === 0 && s.stats,
   `${s.statsText} 排序可见 ${s.sortBtns.length} 个`);
 
-/* ★ 本轮最关键的一条：年报表展开时点头像切回网格，按钮必须变成「返回列表」且仍可见 */
+/* ★ 本轮最关键的一条：年报表展开时点头像切回网格，按钮必须仍可见
+   （第 102 轮起文案恒为「年度报告」，不再随态切换） */
 await page.click('#w-avatar');
 await page.waitForTimeout(400);
 const s2 = await probe();
-ok('B5 年报展开中点头像切网格：「返回列表」仍可见（statsOn 进了判据，不会把人关在年报里）',
-  s2.statsShown && s2.statsText === '返回列表' && s2.stats,
+ok('B5 年报展开中点头像切网格：按钮仍可见（statsOn 进了判据，不会把人关在年报里）',
+  s2.statsShown && s2.statsText === '年度报告' && s2.stats,
   `按钮=${s2.statsText} 可见=${s2.statsShown} 年报态=${s2.stats}`);
 /* 年报展开期间网格 / 时间轴本来就双双被年报占位，所以这里**不能**断言 gridShown。
    「头像点击确实把 layout 切成了 grid」由 B7 正面证明：从年报退出后落在网格而不是时间轴。 */
@@ -129,7 +130,7 @@ await page.waitForTimeout(400);
 const b = await probe();
 ok('B7 从年报返回：回到网格（进入年报前就在网格），年报按钮重新收起',
   b.gridShown && !b.stats && b.sortBtns.length === 2 && b.statsAttrHidden && !b.statsShown &&
-  b.statsText === '年报',
+  b.statsText === '年度报告',
   `grid=${b.gridShown} 年报 visible=${b.statsShown} 右排 ${b.sortBtns.join('/')}`);
 
 ok('B8 1440 全程无横向溢出 + 零 JS 异常', g.ov <= 0 && s.ov <= 0 && errs.length === 0,
@@ -186,7 +187,7 @@ const mt = await mp.evaluate(() => {
   };
 });
 ok('C2 390 时间轴：第二行只剩「年报」，等分不越界、无溢出',
-  mt.btns.length === 1 && mt.btns[0] === '年报' &&
+  mt.btns.length === 1 && mt.btns[0] === '年度报告' &&
   mt.sort.l >= -1 && mt.sort.r <= mt.vw + 1 && mt.ov <= 0,
   `第二行 ${mt.btns.join('/')} ov=${mt.ov}`);
 
@@ -201,8 +202,8 @@ const ms = await mp.evaluate(() => {
     btnShown: vis(document.getElementById('w-stats-btn'))
   };
 });
-ok('C3 390 年报：2 列、按钮变「返回列表」且可见、无横向溢出',
-  ms.ov <= 0 && ms.cols === 2 && ms.btn === '返回列表' && ms.btnShown,
+ok('C3 390 年报：2 列、按钮恒「年度报告」且可见、无横向溢出',
+  ms.ov <= 0 && ms.cols === 2 && ms.btn === '年度报告' && ms.btnShown,
   `cols=${ms.cols} ov=${ms.ov} btn=${ms.btn}`);
 
 ok('C4 390 零 JS 异常', merrs.length === 0, merrs.slice(0, 3).join(' | '));

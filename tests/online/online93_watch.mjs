@@ -4,7 +4,7 @@
  *    等用户说「上线」→ push → Pages 指纹轮询命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=40 / watch.js?v=31；线上 css/js 字节 md5 与本地全等；
+ *   ① 指纹：watch.html 引用 watch.css?v=41 / watch.js?v=32；线上 css/js 字节 md5 与本地全等；
  *      线上 JS 里确实有这轮的判据（`statsBtnEl.hidden = !(statsOn || layout === 'timeline')`）
  *      —— 版本号只说明引用变了，判据在字节里才说明逻辑真的上线
  *   ② 1440：网格 = 年报 **hidden 且 computed display:none**（只看 hidden 属性不够，第 92 轮的
@@ -51,12 +51,12 @@ await page.waitForTimeout(900);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹 ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=40 / watch.js?v=31',
-  /watch\.css\?v=40/.test(html) && /watch\.js\?v=31/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=41 / watch.js?v=32',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=40&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=31&t=' + TS);
+const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=41&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=32&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等（本轮 CSS 未动，等于校验没被别的轮次串版）',
   md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
@@ -99,8 +99,8 @@ await page.click('#w-avatar');
 await page.waitForFunction(() => !document.getElementById('w-tl').hidden, null, { timeout: 15000 });
 await page.waitForTimeout(500);
 const t = await probe();
-ok('B2 时间轴：右排有且只有「年报」，两个排序按钮收起',
-  t.statsShown && t.statsText === '年报' && t.sortVisible.length === 0 && t.tlShown && !t.gridShown,
+ok('B2 时间轴：右排有且只有「年度报告」按钮，两个排序按钮收起',
+  t.statsShown && t.statsText === '年度报告' && t.sortVisible.length === 0 && t.tlShown && !t.gridShown,
   `年报=${t.statsShown} 排序可见 ${t.sortVisible.length} 个`);
 ok('B3 时间轴：右排胶囊收缩到年报本身（无残留空胶囊）',
   t.wrapShown && t.wrapW <= t.statsW + 12, `容器 ${t.wrapW}px / 年报 ${t.statsW}px`);
@@ -108,16 +108,16 @@ ok('B3 时间轴：右排胶囊收缩到年报本身（无残留空胶囊）',
 await page.click('#w-stats-btn');
 await page.waitForTimeout(500);
 const s = await probe();
-ok('B4 年报展开：右排只剩「返回列表」，容器与按钮都在（用户能退出来）',
-  s.wrapShown && s.statsShown && s.statsText === '返回列表' && s.sortVisible.length === 0,
+ok('B4 年报展开：右排只剩「年度报告」按钮，容器与按钮都在（用户能退出来）',
+  s.wrapShown && s.statsShown && s.statsText === '年度报告' && s.sortVisible.length === 0,
   `${s.statsText} 容器 ${s.wrapW}px`);
 
 /* ★ 本轮最关键的一条：年报展开时点头像切网格，「返回列表」必须仍然可见 */
 await page.click('#w-avatar');
 await page.waitForTimeout(500);
 const s2 = await probe();
-ok('B5 年报展开中点头像切网格：「返回列表」仍可见（statsOn 进了判据，不会把人关在年报里）',
-  s2.statsShown && s2.statsText === '返回列表' && s2.ov <= 0,
+ok('B5 年报展开中点头像切网格：按钮仍可见（statsOn 进了判据，不会把人关在年报里；第 102 轮起恒「年度报告」）',
+  s2.statsShown && s2.statsText === '年度报告' && s2.ov <= 0,
   `按钮=${s2.statsText} 可见=${s2.statsShown}`);
 
 await page.click('#w-stats-btn');
@@ -168,7 +168,7 @@ const mt = await mp.evaluate(() => {
   };
 });
 ok('C2 390 时间轴：第二行只剩「年报」，不越界、无溢出',
-  mt.btns.length === 1 && mt.btns[0] === '年报' &&
+  mt.btns.length === 1 && mt.btns[0] === '年度报告' &&
   mt.sort.l >= -1 && mt.sort.r <= mt.vw + 1 && mt.ov <= 0,
   `第二行 ${mt.btns.join('/')} ov=${mt.ov}`);
 ok('C3 390 零 JS 异常', merrs.length === 0, merrs.slice(0, 3).join(' | '));

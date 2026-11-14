@@ -463,29 +463,24 @@
     var yearMax = 1;
     yearPairs.forEach(function (p) { if (p.v > yearMax) yearMax = p.v; });
 
-    /* 中位数与 ≥8 分占比：平均分会被极端值拉偏，中位数一放上去，
-       「平均 vs 中位」差多少本身就是结论。 */
-    var sortedR = rated.map(function (it) { return Number(it.rating); })
-      .sort(function (a, b) { return a - b; });
-    var median = 0;
-    if (sortedR.length) {
-      var mid = Math.floor(sortedR.length / 2);
-      median = sortedR.length % 2
-        ? sortedR[mid] : (sortedR[mid - 1] + sortedR[mid]) / 2;
-    }
+    /* 第 102 轮：评分中位数卡删除，中位数计算随之移除；≥8 分占比保留。 */
     var highCount = rated.filter(function (it) { return Number(it.rating) >= 8; }).length;
     var highPct = rated.length ? highCount / rated.length * 100 : 0;
 
     var opts = '<option value="">全部年份</option>' + years.map(function (y) {
       return '<option value="' + esc(y) + '"' + (statsYear === y ? ' selected' : '') + '>' + esc(y) + ' 年</option>';
     }).join('');
+    /* 第 102 轮：删「有评分」「评分中位数」，加用户指定的三部「最佳」（片名与数据精确对应）。
+       6 卡 → 7 卡，.st-cards 的 auto-fit 栅格自己会排。 */
+    var BEST_PICKS = { movie: '情书', series: '是大臣', anime: '冰菓' };
     var cards = [
       { k: '记录总数', v: String(items.length), u: '部' },
-      { k: '有评分', v: String(rated.length), u: '部' },
       { k: '平均评分', v: rated.length ? avg.toFixed(2) : '—', u: '分' },
-      { k: '评分中位数', v: rated.length ? median.toFixed(2) : '—', u: '分' },
       { k: '≥8 分占比', v: rated.length ? highPct.toFixed(1) : '—', u: '%' },
-      { k: '观影天数', v: String(Object.keys(daySet).length), u: '天' }
+      { k: '观影天数', v: String(Object.keys(daySet).length), u: '天' },
+      { k: '最佳电影', v: BEST_PICKS.movie, u: '' },
+      { k: '最佳剧集', v: BEST_PICKS.series, u: '' },
+      { k: '最佳番剧', v: BEST_PICKS.anime, u: '' }
     ];
     /* 第 94 轮：按用户要求删掉「XX 类型 · 共 N 条记录 · 全部由当前数据现场派生」副标题
        和「统计年份」四个字。⚠️ label 只是视觉删掉 —— select 补 aria-label，
@@ -621,7 +616,7 @@
             若只按 layout 判就会把「返回列表」一起藏掉，人被关在年报里出不来。 */
       statsBtnEl.hidden = !(statsOn || layout === 'timeline');
       statsBtnEl.setAttribute('aria-pressed', statsOn ? 'true' : 'false');
-      statsBtnEl.textContent = statsOn ? '返回列表' : '年报';
+      statsBtnEl.textContent = '年度报告';   /* 第 102 轮：两态统一叫「年度报告」，金底不再随态切换 */
       statsBtnEl.classList.toggle('is-on', statsOn);
     }
 

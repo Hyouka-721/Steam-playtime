@@ -48,14 +48,30 @@ tests/
            verify79 verify80 verify82 verify83 verify84_watch verify85_watch verify86_watch \
            verify87_watch verify89_watch verify90_watch verify91_watch verify92_watch \
            verify93_watch verify94_watch verify95_watch verify96_watch verify97_watch \
-           verify98_watch verify99_watch verify100_watch verify101_watch; do
+           verify98_watch verify99_watch verify100_watch verify101_watch verify102_watch; do
     echo "== $s =="; "$NODE" tests/watch/$s.mjs 2>&1 | tail -2
   done
   ```
 - 单元测试：`npm test`（`tests/unit/*.test.mjs`，只测采集与差分算法）
 - `tests/retired/` **一律不跑**：`verify47/48/49` 断言的「当日明细浮层」在第 113 轮已整段删除；`verify88/90` 断言的是已被一年点阵取代的旧月历。它们留作历史，**不改判据、不调阈值、不复活**。
 
-## 当前基线 · watch 线第 101 轮（✅ 已上线 2026-11-14 19:02）
+## 当前基线 · watch 线第 102 轮（🅛 本地完成 2026-11-14 20:45，待上线）
+
+**版本**：`watch.css?v=41` / `watch.js?v=32`。bump 脚本扫 62 文件（纯文本 + 正则转义两类字面量）、残留 0、跳过所有 `.md`。
+
+**用户需求三条**：① 年报头部卡删「有评分」「评分中位数」两栏，加「最佳电影：情书 / 最佳剧集：是大臣 / 最佳番剧：冰菓」三栏（6 卡 → 7 卡）；② 编辑界面「排序」输入拉长到与年份一致、对齐；③「返回列表」「年报」两态文案统一改成「年度报告」，且始终保持金黄底色。
+
+**实现**：`docs/watch.js` cards 数组改 7 项、删 `sortedR`/`median` 计算、新增 `BEST_PICKS = { movie:'情书', series:'是大臣', anime:'冰菓' }`（🔴 用户指定写死的常量，与数据精确对应，不是按数据推导）、`statsBtnEl.textContent = '年度报告'`（旧三元删除）；`docs/watch.css` 删 `.w-input.w-input-order{width:118px}`（🔴 HTML 类名保留，输入铺满 `.w-row-3` 列宽与年份等宽，1920 实测 171/171/171）、`.w-sort .w-stats-btn` 基础态改金底（`color:var(--accent)` + `background:var(--accent-wash)` + `font-weight:600`，hover 仍 accent）、兜底 `.w-stats-btn` 同步金底；🔴 `.w-seg-btn`/`.w-sort-btn` 幽灵样式一个字没动（旧套件靠 `.w-sort-btn.is-on` 读排序态）。7 卡由 `.st-cards` 的 `auto-fit minmax(160px,1fr)` 自排（1920 单行铺满、390 走 860 块 2 列）。
+
+**新增** `verify102_watch.mjs` **14 条**（静态 6 + 1920 运行时 6 + 390 两；实测 7 卡 124 / 7.70 / 46.0 / 115 / 情书 / 是大臣 / 冰菓，金底 computed `rgba(232,176,75,0.13)`）。
+
+**旧套件改判**（功能变更后的事实重写，理由写进各自 ok 文案，**不是调阈值**）：按钮文案两态恒「年度报告」→ `verify91 C6`、`verify92`（statsText×4 + ms.btn + shown[0] + 标题×4）、`verify93`（×3 组 + 标题×4）、`online91 B2`（🔴 断言行 `st.btnText==='返回列表'` 是改判脚本漏网之鱼，残留 grep 抓出后补改）、`online92/93`（token + B2/B3/B4/B5 标题）；6 卡 → 7 卡 → `verify91 C7`、`verify94 B1/B2/B15`（🔴 取数行 `median:[3]`→`bestMovie:[4]`、`pct:[4]`→`pct:[2]`，7 卡新下标）、`verify96 B4/D1 标题`、`online91 B3`（死变量 `SORTED_R/MID/MEDIAN` 顺手删）、`online94 B1/B2`、`online95 B4`、`online96 B6/D1`；118px 删除 → `verify78 A4`（负向断言 CSS 无规则 + 正向断言 HTML 类名在）。⚠️ **`verify78.mjs` 工作副本是 CRLF**，多行 old 串先 `\n→\r\n` 再匹配（其余 verify9x 是 LF，EOL 别凭约定猜）。
+
+**验收**：全量 **40 套件 1098 条 → 1097 PASS / 1 已知红**（仍是 `verify56 B11` 两页页眉差 1px）；index 侧 16 套件 370 条绿；`npm test` **52 条 0 FAIL**。
+
+**状态**：🅛 **本地完成、未推送**（本轮没收到「上线」指令；`online102_watch.mjs` 主复验套件待上线时新建）。
+
+## 历史基线 · 第 101 轮上线记录（✅ 已上线 2026-11-14 19:02）
 
 **版本**：`watch.css?v=40` / `watch.js?v=31`。第 100 轮 `v=38`/`v=30` → 本轮 bump 到 `v=39`（扫 142 文件、改 61 个、替换 293 处、残留 0、跳过所有 `.md`）；**宽度微调再改一次 CSS → 按「同批再改同文件就再 bump」红线二次 bump 到 `v=40`**（59 文件、纯文本 + 正则转义两类字面量残留 0）。
 
@@ -120,6 +136,7 @@ tests/
 | `verify99_watch` | 第 99 轮 watch 侧：**三卡成行 + 年度影视 + 表单微调** —— ① 静态：`v=37/v=29`、跨度 **5/4/3/5/4/3**（月度/评分区间/类型、逐年/国别/标签）、`YEAR_PICKS` 9 条按 2018~2026 倒序片名逐条正确、面板标题「年度影视」（无「高分 Top 5」）、排序 label 只剩「排序」二字、国别与标签包进同一个 `.w-row.w-row-2` ② 1920：年度影视 9 条逐条年份+片名+海报+评分（找不到显示「—」）、三卡一行（月度/评分区间/类型 同行、逐年/国别/标签 同行，行间依次下移）、国别与标签同行且相邻、排序 label 无说明、零溢出零异常 ③ 390：国别/标签回单列（w-row-2 折叠成 1fr）、年度影视 9 条仍在、零溢出零异常 | 14 |
 | `verify100_watch` | 第 100 轮 watch 侧：**表单精简 + 年度影视海报墙 + 饼图去黑缝** —— ① 静态 7（`v=38/v=30`、剥注释后 HTML 无 `add-release`/「上映日期」、三字段包同一个 `.w-row.w-row-3` 且顺序正确、国别/标签 label 无说明小字、JS 无 `readReleaseField`/`releaseRead`/两处写库残留且 `releaseText` 兜底仍在、年度影视只渲染 `st-top-img`+`st-top-year` 且 CSS 海报规格/三档列宽/860 块唯一、饼图源码无 `gap=1.1` 且 `stroke:none`）② 1920 运行时 6（9 条年份+海报且无片名/评分节点、**海报 `aspectRatio`/`borderRadius`/`borderWidth`/`boxShadow`/`objectFit` 与网格视图 `.poster-pic` 逐项全等且宽度差 ≤20%**、年份在海报下方 9/9、表单三字段同行且无上映日期、饼图相邻片首尾角差 ≤0.02° 且整圆闭合、零溢出零异常）③ 390 运行时 3（三字段回单列依次下移、9 条年份齐全且海报不越界、饼图同样无缝） | 16 |
 | `verify101_watch` | 第 101 轮 watch 侧：**删两面板 + 四卡一行 + 删国别脚注** —— ① 静态 8（剥块注释后：`kinds`/`tags` 面板标记、`stRows`/`st-chip(s)`/`.st-note`、脚注文案「按国别累计 / 少于 10 部 / 合并为「其他」」全部删净；四面板顺序严格 `months/buckets/country/years` 且跨度 `4/2/2/4` 合计 12；🔴 `COUNTRY_MIN`/`k: '其他'`/`OTHER_COLOR` 合流规则仍在；饼宽 `clamp(96px,42%,168px)` + 图例 `max-width:320px`；860 块仍只有 1 个）② 1920 运行时 6（四卡严格并列同一行：top 全等、left 递增、柱图≈2×饼卡（4/12 vs 2/12）、合计铺满 12 栏容器；两个面板与两个 chip 容器都不在 DOM；两块饼与图例不溢出）③ 响应式 3（1440 饼缩到 96 且图例换行 / 1000 图例换行 / 390 回单列且 `ov=0 err=0`） | 17 |
+| `verify102_watch` | 第 102 轮 watch 侧：**年报 7 卡 + 按钮恒「年度报告」金底 + 排序输入等宽** —— ① 静态 6（`v=41/v=32`；cards 数组 7 项整块匹配 + median 删净 + `BEST_PICKS` 三部「最佳」；按钮 `textContent='年度报告'` 恒文案、旧三元/旧文案删净；两处按钮金底 + `.w-seg-btn`/`.w-sort-btn` 幽灵样式不动；118px 定宽删、`w-input-order` 类名保留；860 块唯一 + 按钮圆角走令牌）② 1920 运行时 6（时间轴态按钮恒文案/金底/`aria-pressed=false`；7 卡 label/value 逐项正确（实测 124 / 7.70 / 46.0 / 115 / 情书 / 是大臣 / 冰菓）、旧两卡不在 DOM；七卡同一行 left 递增；年报态金底与时间轴全等、`pressed=true`；`#add-order`≈`#add-year`≈`#add-watched` 等宽 ±2px（171/171/171）；ov=0 err=0）③ 390 运行时 2（七卡回 2 列；按钮恒文案金底） | 14 |
 | `verify117` | 第 117 轮 index 侧：**首屏榜单整行显示** —— 行距 4→8→（按用户要求回退）**6**，行高由 `fitRankRows()` 按「第一行顶边 → 视口底」的可⽤高度反解（`--rank-row-h`）：8 行落在 74~100px 观感带内就用 8 行，屏幕偏高多放、偏矮少放，**折线永远落在行与行之间**；1440×1080 恰好 8 整行 0 切开，1440×1200 / 1280×1080 / 1920×800 / 1088×1000 / 1440×900 全部 0 条被切开的行；`.sk-row` 同吃该变量（CLS 0）；切视图与 resize 后仍成立；390 不参与（两行式布局） | 15 |
 | `verify116` | 第 116 轮 index 侧：**统计口径统一** —— 自 `meta.tracking_since` 到 `meta.last_snapshot_date`，缺数据的日期一律按 **0 分钟**补齐（`.l0` 灰点、`role=button` 可点、气泡「游玩时长：0 min」、当日列表「这天没有游玩记录」），不再出现「未采集」空格；开始统计之前与最新快照之后的未来日期仍是 `.lna`「尚未记录」且不可点；范围天数、合计、峰值从 `meta.stats` 推导比对；365 格 / 7 行 / 64 列不变；390 无溢出；零异常 | 14 |
 | `verify115` | 第 115 轮 index 侧：**把「下钻单个游戏」整条线删干净** —— 累计榜行不再可点（光标非 pointer、点行不切视图不改 hash、连点四行仍停在原处）；页面里没有 `#drill-more` / `#btn-drill-back`，源码没有 `openDrill/closeDrill/renderDrillMore/drill.appid`，CSS 没有 `.drill-more`/`.dm-*`/`.is-drill`/`.btn-back`；勋章墙徽章从 `<button>` 改成 `<div>`（去掉 pointer 与 hover 上浮、提示语不再写「点一枚看趋势」），点它也不再跳转；旧深链 `#/recent/g/<appid>` 只按视图处理落到总览；「最近游玩」总点阵 365 格与点格子展开当日列表不受影响；390 无溢出；零异常。⚠️ 同日被推翻的 `verify114`（下钻只剩详情卡）已删除 | 16 |
