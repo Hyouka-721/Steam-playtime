@@ -1,0 +1,205 @@
+{
+  "year": "2024",
+  "items": [
+    {
+      "id": "2024-12-12-manchester-by-the-sea",
+      "title": "海边的曼彻斯特",
+      "kind": "movie",
+      "watched_at": "2024-12-12",
+      "poster": "img/watch/manchester-by-the-sea-521b167c.webp",
+      "added_at": "2026-10-24T23:17:32+08:00",
+      "poster_w": 640,
+      "poster_h": 948,
+      "poster_320": "img/watch/manchester-by-the-sea-521b167c-320.webp",
+      "poster_480": "img/watch/manchester-by-the-sea-521b167c-480.webp",
+      "title_en": "Manchester by the Sea",
+      "year": 2016,
+      "rating": 9,
+      "tags": [
+        "剧情"
+      ],
+      "order": 2,
+      "note": "遗憾大约占了真实人生的一半长度"
+    },
+    {
+      "id": "2024-12-05-item",
+      "title": "超时空大决战",
+      "kind": "movie",
+      "watched_at": "2024-12-05",
+      "poster": "img/watch/item-4716dc49.webp",
+      "added_at": "2026-10-25T09:46:42+08:00",
+      "poster_w": 600,
+      "poster_h": 900,
+      "poster_320": "img/watch/item-4716dc49-320.webp",
+      "poster_480": "img/watch/item-4716dc49-480.webp",
+      "title_en": "超時空の大決戦",
+      "year": 1999,
+      "rating": 7.5,
+      "tags": [
+        "科幻",
+        "冒险"
+      ],
+      "note": "可惜长大了二十岁"
+    },
+    {
+      "id": "2024-11-27-cyberpunk-edgerunners",
+      "title": "赛博朋克：边缘行者",
+      "kind": "anime",
+      "watched_at": "2024-11-27",
+      "poster": "img/watch/cyberpunk-edgerunners-8d0ae9f0.webp",
+      "added_at": "2026-10-24T23:21:38+08:00",
+      "poster_w": 640,
+      "poster_h": 960,
+      "poster_320": "img/watch/cyberpunk-edgerunners-8d0ae9f0-320.webp",
+      "poster_480": "img/watch/cyberpunk-edgerunners-8d0ae9f0-480.webp",
+      "title_en": "Cyberpunk: Edgerunners",
+      "year": 2022,
+      "rating": 8,
+      "tags": [
+        "动画",
+        "科幻"
+      ],
+      "note": "边缘行者"
+    },
+    {
+      "id": "2024-11-26-item",
+      "title": "风之谷",
+      "kind": "movie",
+      "watched_at": "2024-11-26",
+      "poster": "img/watch/item-82759817.webp",
+      "added_at": "2026-10-24T23:19:41+08:00",
+      "poster_w": 640,
+      "poster_h": 906,
+      "poster_320": "img/watch/item-82759817-320.webp",
+      "poster_480": "img/watch/item-82759817-480.webp",
+      "title_en": "風の谷のナウシカ",
+      "year": 1992,
+      "rating": 6.5,
+      "tags": [
+        "动画",
+        "奇幻"
+      ],
+      "note": "娜乌西卡"
+    },
+    {
+      "id": "2024-11-23-arcane",
+      "title": "英雄联盟：双城之战",
+      "kind": "series",
+      "watched_at": "2024-11-23",
+      "poster": "img/watch/arcane-2e38f6df.webp",
+      "poster_w": 640,
+      "poster_h": 948,
+      "poster_320": "img/watch/arcane-2e38f6df-320.webp",
+      "poster_480": "img/watch/arcane-2e38f6df-480.webp",
+      "title_en": "Arcane",
+      "year": 2021,
+      "rating": 8.5,
+      "tags": [
+        "动画",
+        "科幻"
+      ],
+      "note": "你所讨厌的人或许正是自己",
+      "added_at": "2026-10-24T23:23:27+08:00"
+    },
+    {
+      "id": "2024-11-17-item",
+      "title": "侧耳倾听",
+      "kind": "movie",
+      "watched_at": "2024-11-17",
+      "poster": "img/watch/item-cd76b567.webp",
+      "poster_w": 640,
+      "poster_h": 910,
+      "poster_320": "img/watch/item-cd76b567-320.webp",
+      "poster_480": "img/watch/item-cd76b567-480.webp",
+      "title_en": "耳をすませば",
+      "year": 1995,
+      "rating": 8,
+      "tags": [
+        "动画",
+        "爱情"
+      ],
+      "note": "Country roads take me home",
+      "added_at": "2026-10-24T23:24:59+08:00"
+    },
+    {
+      "id": "2024-11-15-love-death-robots",
+      "title": "爱死亡机器人",
+      "kind": "series",
+      "watched_at": "2024-11-15",
+      "added_at": "2026-10-30T18:47:35+08:00",
+      "poster": "img/watch/love-death-robots-3498f436.webp",
+      "poster_w": 640,
+      "poster_h": 948,
+      "poster_320": "img/watch/love-death-robots-3498f436-320.webp",
+      "poster_480": "img/watch/love-death-robots-3498f436-480.webp",
+      "title_en": "Love, Death & Robots",
+      "year": 2019,
+      "rating": 8,
+      "tags": [
+        "科幻",
+        "动画"
+      ],
+      "note": "需要一点Zima Blue"
+    },
+    {
+      "id": "2024-11-09-item",
+      "title": "铃芽之旅",
+      "kind": "movie",
+      "watched_at": "2024-11-09",
+      "poster": "img/watch/item-782b5b7f.webp",
+      "poster_w": 640,
+      "poster_h": 903,
+      "poster_320": "img/watch/item-782b5b7f-320.webp",
+      "poster_480": "img/watch/item-782b5b7f-480.webp",
+      "title_en": "すずめの戸締まり",
+      "year": 2022,
+      "rating": 6.5,
+      "tags": [
+        "动画",
+        "奇幻"
+      ],
+      "note": "旅途和废墟",
+      "added_at": "2026-10-24T23:34:14+08:00"
+    },
+    {
+      "id": "2024-03-25-the-pig-the-snake-and-the-pigeon",
+      "title": "周处除三害",
+      "kind": "movie",
+      "watched_at": "2024-03-25",
+      "poster": "img/watch/the-pig-the-snake-and-the-pigeon-c1cd154a.webp",
+      "added_at": "2026-10-24T23:36:50+08:00",
+      "poster_w": 640,
+      "poster_h": 960,
+      "poster_320": "img/watch/the-pig-the-snake-and-the-pigeon-c1cd154a-320.webp",
+      "poster_480": "img/watch/the-pig-the-snake-and-the-pigeon-c1cd154a-480.webp",
+      "title_en": "The Pig, the Snake, and the Pigeon",
+      "year": 2023,
+      "rating": 8.5,
+      "tags": [
+        "犯罪",
+        "剧情"
+      ],
+      "note": "他只是做了一件正确的事"
+    },
+    {
+      "id": "2024-03-11-oppenheimer",
+      "title": "奥本海默",
+      "kind": "movie",
+      "watched_at": "2024-03-11",
+      "poster": "img/watch/oppenheimer-04368923.webp",
+      "poster_w": 640,
+      "poster_h": 948,
+      "poster_320": "img/watch/oppenheimer-04368923-320.webp",
+      "poster_480": "img/watch/oppenheimer-04368923-480.webp",
+      "title_en": "Oppenheimer",
+      "year": 2023,
+      "rating": 8,
+      "tags": [
+        "历史",
+        "剧情"
+      ],
+      "note": "我正变成死亡，世界的毁灭者",
+      "added_at": "2026-10-24T23:38:18+08:00"
+    }
+  ]
+}

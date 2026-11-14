@@ -850,6 +850,11 @@ select.w-input { cursor: pointer; }
      另起一个 @media 会把它们要看的那块挤到第二位，断言全落空。 */
   .w-add-foot { flex-wrap: wrap; }
   .w-add-msg { flex: 1 1 100%; }
+  /* 第 91 轮 A4：年报面板在 ≤860 收成两列卡片 / 单列图表。
+     ⚠️ 年报基础样式写在文件末尾（晚于本块），必须加 .w-stats 前缀提高特异性，
+        否则同特异性的基础规则会反过来把断点覆盖掉（实测 390 下卡片退回 4 列）。 */
+  .w-stats .st-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .w-stats .st-panels { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 480px) {
@@ -906,7 +911,119 @@ select.w-input { cursor: pointer; }
   .tl-meta { flex: 1 1 100%; }
   /* 第 65 轮：窄屏英文名可能比正文长（超长原名），让名称块独占一行、内部自行折行 */
   .tl-head { flex: 1 1 100%; }
+  /* 第 91 轮 A4：年报按钮与四个筛选按钮等分同一行（不新增行，海报起点不变）；
+     年报面板在 390 下再收一档，Top5 隐藏日期列 */
+  .w-seg .w-stats-btn { flex: 1; padding: 6px 8px; }
+  .w-stats .st-title { font-size: 19px; }
+  .w-stats .st-cards { gap: 8px; }
+  .w-stats .st-card { padding: 12px; flex-wrap: wrap; }
+  .w-stats .st-v { font-size: 22px; }
+  .w-stats .st-bars { gap: 3px; height: 110px; }
+  .w-stats .st-bar-lab { font-size: 9px; }
+  .w-stats .st-top-item { grid-template-columns: 18px 32px minmax(0, 1fr) 40px; gap: 8px; }
+  .w-stats .st-top-img { width: 32px; height: 44px; }
+  .w-stats .st-top-meta { display: none; }
 }
+
+/* ================= 第 91 轮 A4：观影统计 / 年报 =================
+   全部沿用影院黑已有 token，不引入新主题、不改任何既有选择器的声明。
+   ⚠️ 响应式规则一律合进文件里**既有的** 860 / 480 块：verify84 守着「全文件只有
+   1 个 860 块」，verify90 按「第一个 480 块」取内容，另起 @media 会集体误红。
+   ⚠️ 圆角只能用 verify86 白名单里的 5 档令牌 / 50% / 2px。 */
+.w-stats-btn {
+  appearance: none;
+  padding: 7px 16px;
+  font: inherit; font-size: 13px;
+  color: var(--text-dim);
+  background: var(--panel);
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: color var(--t-1) var(--ease), background var(--t-1) var(--ease), border-color var(--t-1) var(--ease);
+}
+.w-stats-btn:hover { color: var(--text); }
+.w-stats-btn.is-on {
+  color: var(--accent); background: var(--accent-wash);
+  border-color: var(--accent-edge); font-weight: 600;
+}
+.w-stats-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.w-stats[hidden] { display: none; }
+.w-stats { max-width: 1180px; margin: 0 auto; }
+.st-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; margin: 8px 0 22px;
+}
+.st-title { margin: 0; font-size: 22px; font-weight: 600; color: var(--text-strong); }
+.st-sub { margin: 6px 0 0; font-size: 12px; color: var(--text-dim); }
+.st-pick { display: flex; align-items: center; gap: 10px; }
+.st-label { font-size: 12px; color: var(--text-dim); }
+.st-select {
+  appearance: none; padding: 7px 12px;
+  font: inherit; font-size: 13px; color: var(--text-strong);
+  background: var(--well);
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+.st-select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring); }
+
+.st-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+.st-card {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 16px 18px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-md);
+  min-width: 0;
+}
+.st-k { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
+.st-v { margin-left: auto; font-size: 26px; font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; }
+.st-u { font-size: 12px; color: var(--text-faint); }
+
+.st-panels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.st-panel {
+  padding: 16px 18px 18px; min-width: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-md);
+}
+.st-panel h3 { margin: 0 0 16px; font-size: 14px; font-weight: 600; color: var(--text-strong); }
+
+.st-bars { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: end; gap: 6px; height: 132px; }
+.st-bar { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; min-width: 0; }
+.st-bar-num { margin-bottom: 3px; font-size: 10px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.st-bar i { display: block; width: 100%; max-width: 26px; min-height: 2px; background: linear-gradient(180deg, var(--accent), rgba(232, 176, 75, .28)); border-radius: var(--r-sm); }
+.st-bar-lab { margin-top: 6px; font-size: 10px; color: var(--text-dim); white-space: nowrap; }
+
+.st-rows { display: flex; flex-direction: column; gap: 10px; }
+.st-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) 34px; align-items: center; gap: 10px; font-size: 12px; }
+.st-row-k { color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.st-row-track { height: 8px; background: var(--well); border-radius: var(--r-pill); overflow: hidden; }
+.st-row-track i { display: block; height: 100%; background: linear-gradient(90deg, rgba(232, 176, 75, .45), var(--accent)); border-radius: var(--r-pill); }
+.st-row-v { color: var(--text-strong); text-align: right; font-variant-numeric: tabular-nums; }
+
+.st-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.st-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px; font-size: 12px; color: var(--text);
+  background: var(--well);
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-pill);
+}
+.st-chip i { font-style: normal; font-size: 11px; color: var(--accent); font-variant-numeric: tabular-nums; }
+.st-empty { margin: 8px 0 0; font-size: 12px; color: var(--text-faint); }
+.st-empty-main { padding: 40px 0; text-align: center; font-size: 13px; }
+
+.st-top { margin-top: 14px; }
+.st-top-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.st-top-item { display: grid; grid-template-columns: 22px 38px minmax(0, 1fr) 100px 44px; align-items: center; gap: 12px; padding: 6px 8px; border-radius: var(--r-sm); }
+.st-top-item:nth-child(odd) { background: rgba(255, 255, 255, .02); }
+.st-top-rank { font-size: 12px; color: var(--text-faint); text-align: center; font-variant-numeric: tabular-nums; }
+.st-top-img { width: 38px; height: 52px; object-fit: cover; border-radius: var(--r-sm); background: var(--img-bg); }
+.st-top-name { font-size: 13px; color: var(--text-strong); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.st-top-meta { font-size: 11px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.st-top-score { font-size: 13px; font-weight: 600; color: #dcb978; text-align: right; font-variant-numeric: tabular-nums; }
 
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; }

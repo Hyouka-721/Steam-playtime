@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon-watch-97e35b7b.png">
 <!-- 与游戏站同一套本地花体字，保持品牌一致；preload + font-display:block 消除 FOUT -->
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="watch.css?v=28">
+<link rel="stylesheet" href="watch.css?v=29">
 </head>
 <body>
 
@@ -51,6 +51,12 @@
     <button type="button" class="w-seg-btn" data-kind="series" aria-pressed="false">剧集</button>
     <!-- 第 73 轮：新增「番剧」类别（动画剧集），筛选条从三档变四档 -->
     <button type="button" class="w-seg-btn" data-kind="anime" aria-pressed="false">番剧</button>
+    <!-- 第 91 轮 A4：观影统计 / 年报。它是与网格、时间轴并列的第三个**独立开关**，
+         不去动史蒂夫头像的「网格 ⇄ 时间轴」两态（aria-pressed 的布尔契约有旧套件守着）。
+         用独立的 .w-stats-btn，不进 kindBtns 的 .w-seg-btn 选择器。
+         ⚠️ 别给排序条套一层 .w-bar-right：≤480 既有契约要求 .w-seg / .w-sort 各自
+         flex:1 1 100% 撑满两行，多包一层会让首屏多出一行、海报起点从 330 推到 360。 -->
+    <button type="button" class="w-stats-btn" id="w-stats-btn" aria-pressed="false" aria-controls="w-stats">年报</button>
   </div>
   <!-- 第 72 轮：原「共 N 部」计数条改为排序切换（仅网格视图生效，时间轴恒按观影时间倒序）。
        默认「观看时间」= 观影日期倒序，同日按上传时间正序（先上传居前）；
@@ -66,6 +72,8 @@
   <section class="w-grid" id="w-grid" aria-label="海报墙"></section>
   <!-- 时间轴视图 -->
   <section class="w-tl" id="w-tl" aria-label="观影时间轴" hidden></section>
+  <!-- 第 91 轮 A4：纯前端派生统计，不新增任何数据字段；内容由 watch.js 的 renderStats() 填充 -->
+  <section class="w-stats" id="w-stats" aria-label="观影统计与年报" hidden></section>
 
   <!-- 空态：同时充当录入指引，避免用户不知道数据从哪来 -->
   <div class="w-empty" id="w-empty" hidden>
@@ -130,7 +138,10 @@
 
       <div class="w-field">
         <label class="w-label" for="add-title">片名<span class="w-req">必填</span></label>
-        <input class="w-input" type="text" id="add-title" placeholder="奥本海默" autocomplete="off">
+        <!-- 第 91 轮 A9：用原生 datalist 做「已有片名联想」—— 输入时就能看见库里已有的
+             相近片名，从源头减少重复录入；候选由 watch.js 在每次 paint() 后填充。 -->
+        <input class="w-input" type="text" id="add-title" placeholder="奥本海默" autocomplete="off" list="w-title-list">
+        <datalist id="w-title-list"></datalist>
       </div>
 
       <div class="w-row w-row-2">
@@ -163,9 +174,18 @@
         </div>
       </div>
 
-      <div class="w-field">
-        <label class="w-label" for="add-order">排序<span class="w-hint">0~5 的整数，默认 3；观看时间或评分相同时，数值小的排在前</span></label>
-        <input class="w-input w-input-order" type="number" id="add-order" min="0" max="5" step="1" inputmode="numeric" placeholder="3">
+      <!-- 第 91 轮 A3：上映日期。releaseText() 从第 66 轮起就优先读它，
+           但表单一直没入口，导致 0/124 条有值。填了以后时间轴用完整日期代替年份，
+           网格视图排版不变（那里只显示片名 / 评分 / 观影日期）。 -->
+      <div class="w-row w-row-2">
+        <div class="w-field">
+          <label class="w-label" for="add-release">上映日期<span class="w-hint">可选，留空沿用年份</span></label>
+          <input class="w-input" type="date" id="add-release">
+        </div>
+        <div class="w-field">
+          <label class="w-label" for="add-order">排序<span class="w-hint">0~5 的整数，默认 3；观看时间或评分相同时，数值小的排在前</span></label>
+          <input class="w-input w-input-order" type="number" id="add-order" min="0" max="5" step="1" inputmode="numeric" placeholder="3">
+        </div>
       </div>
 
       <div class="w-field">
@@ -204,7 +224,7 @@
 </dialog>
 
 <div class="w-toast" id="w-toast" role="status" hidden></div>
-<script src="watch.js?v=17"></script>
+<script src="watch.js?v=18"></script>
 <script>
 /* 第 75 轮：注册 Service Worker（docs/sw.js）。
    海报是内容哈希命名的不可变资源，Pages 只给 max-age=600，刷新超 10 分钟就要

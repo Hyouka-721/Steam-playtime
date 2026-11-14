@@ -1,0 +1,287 @@
+{
+  "year": "2026",
+  "items": [
+    {
+      "id": "2026-10-31-dear-you",
+      "title": "给阿嬷的情书",
+      "kind": "movie",
+      "watched_at": "2026-10-31",
+      "poster": "img/watch/dear-you-debeb470.webp",
+      "added_at": "2026-10-31T16:17:11+08:00",
+      "poster_w": 640,
+      "poster_h": 960,
+      "poster_320": "img/watch/dear-you-debeb470-320.webp",
+      "poster_480": "img/watch/dear-you-debeb470-480.webp",
+      "title_en": "Dear You",
+      "year": 2026,
+      "rating": 9.9,
+      "order": 2,
+      "note": "江海万里，心中念你，便不觉遥远",
+      "tags": [
+        "剧情",
+        "温情"
+      ]
+    },
+    {
+      "id": "2026-10-24-dead-to-rights",
+      "title": "南京照相馆",
+      "kind": "movie",
+      "watched_at": "2026-10-24",
+      "poster": "img/watch/dead-to-rights-5fbb0d46.webp",
+      "added_at": "2026-10-24T21:41:45+08:00",
+      "poster_w": 640,
+      "poster_h": 960,
+      "poster_320": "img/watch/dead-to-rights-5fbb0d46-320.webp",
+      "poster_480": "img/watch/dead-to-rights-5fbb0d46-480.webp",
+      "title_en": "Dead To Rights",
+      "year": 2025,
+      "rating": 8,
+      "tags": [
+        "剧情",
+        "历史",
+        "战争"
+      ],
+      "note": "靖康耻，犹未雪"
+    },
+    {
+      "id": "2026-10-17-inside-out-2",
+      "title": "头脑特工队2",
+      "kind": "movie",
+      "watched_at": "2026-10-17",
+      "poster": "img/watch/inside-out-2-3d6419ef.webp",
+      "poster_w": 640,
+      "poster_h": 914,
+      "poster_320": "img/watch/inside-out-2-3d6419ef-320.webp",
+      "poster_480": "img/watch/inside-out-2-3d6419ef-480.webp",
+      "title_en": "Inside Out 2",
+      "year": 2024,
+      "rating": 7,
+      "tags": [
+        "动画",
+        "奇幻",
+        "冒险"
+      ],
+      "note": "成长，就是有能力重建破碎的自己",
+      "added_at": "2026-10-24T22:28:04+08:00"
+    },
+    {
+      "id": "2026-09-26-f1-the-movie",
+      "title": "F1：狂飙飞车",
+      "kind": "movie",
+      "watched_at": "2026-09-26",
+      "poster": "img/watch/f1-the-movie-25578d79.webp",
+      "added_at": "2026-10-24T22:54:27+08:00",
+      "poster_w": 640,
+      "poster_h": 800,
+      "poster_320": "img/watch/f1-the-movie-25578d79-320.webp",
+      "poster_480": "img/watch/f1-the-movie-25578d79-480.webp",
+      "title_en": "F1: The Movie",
+      "year": 2025,
+      "rating": 7.5,
+      "tags": [
+        "剧情"
+      ],
+      "note": "赛道即归途"
+    },
+    {
+      "id": "2026-09-06-the-legend-of-hei-2",
+      "title": "罗小黑战记2",
+      "kind": "movie",
+      "watched_at": "2026-09-06",
+      "added_at": "2026-10-25T18:03:02+08:00",
+      "poster": "img/watch/the-legend-of-hei-2-a9974493.webp",
+      "poster_w": 640,
+      "poster_h": 916,
+      "poster_320": "img/watch/the-legend-of-hei-2-a9974493-320.webp",
+      "poster_480": "img/watch/the-legend-of-hei-2-a9974493-480.webp",
+      "title_en": "The Legend of Hei 2",
+      "year": 2025,
+      "rating": 8.5,
+      "tags": [
+        "动画",
+        "奇幻"
+      ],
+      "note": "呦呦鹿鸣，食野之苹"
+    },
+    {
+      "id": "2026-09-05-robot-dreams",
+      "title": "机器人之梦",
+      "kind": "movie",
+      "watched_at": "2026-09-05",
+      "poster": "img/watch/robot-dreams-37fc156f.webp",
+      "added_at": "2026-10-24T22:56:03+08:00",
+      "poster_w": 640,
+      "poster_h": 901,
+      "poster_320": "img/watch/robot-dreams-37fc156f-320.webp",
+      "poster_480": "img/watch/robot-dreams-37fc156f-480.webp",
+      "title_en": "Robot Dreams",
+      "year": 2023,
+      "rating": 7.5,
+      "tags": [
+        "动画",
+        "温情"
+      ],
+      "note": "现在我们都明白如何去爱了"
+    },
+    {
+      "id": "2026-08-15-nobody",
+      "title": "浪浪山小妖怪",
+      "kind": "movie",
+      "watched_at": "2026-08-15",
+      "poster": "img/watch/nobody-8cfc1289.webp",
+      "added_at": "2026-10-24T22:35:12+08:00",
+      "poster_w": 640,
+      "poster_h": 1066,
+      "poster_320": "img/watch/nobody-8cfc1289-320.webp",
+      "poster_480": "img/watch/nobody-8cfc1289-480.webp",
+      "title_en": "Nobody",
+      "year": 2025,
+      "rating": 7.5,
+      "tags": [
+        "动画",
+        "奇幻"
+      ],
+      "note": "未披锦襕袈裟者，亦是菩提树下人"
+    },
+    {
+      "id": "2026-05-19-the-million-pound-note",
+      "title": "百万英镑",
+      "kind": "movie",
+      "watched_at": "2026-05-19",
+      "poster": "img/watch/the-million-pound-note-703e3519.webp",
+      "added_at": "2026-10-24T22:59:35+08:00",
+      "poster_w": 640,
+      "poster_h": 977,
+      "poster_320": "img/watch/the-million-pound-note-703e3519-320.webp",
+      "poster_480": "img/watch/the-million-pound-note-703e3519-480.webp",
+      "title_en": "The Million Pound Note",
+      "year": 1954,
+      "rating": 8,
+      "tags": [
+        "喜剧",
+        "剧情"
+      ],
+      "note": "金钱的象征"
+    },
+    {
+      "id": "2026-05-09-titanic",
+      "title": "泰坦尼克号",
+      "kind": "movie",
+      "watched_at": "2026-05-09",
+      "poster": "img/watch/titanic-a91c0af8.webp",
+      "poster_w": 640,
+      "poster_h": 953,
+      "poster_320": "img/watch/titanic-a91c0af8-320.webp",
+      "poster_480": "img/watch/titanic-a91c0af8-480.webp",
+      "title_en": "Titanic",
+      "year": 1997,
+      "rating": 7.5,
+      "tags": [
+        "爱情",
+        "灾难"
+      ],
+      "note": "我心永恒",
+      "added_at": "2026-10-24T22:36:55+08:00"
+    },
+    {
+      "id": "2026-05-03-avatar",
+      "title": "阿凡达",
+      "kind": "movie",
+      "watched_at": "2026-05-03",
+      "poster": "img/watch/avatar-7f23b0af.webp",
+      "poster_w": 400,
+      "poster_h": 592,
+      "poster_320": "img/watch/avatar-7f23b0af-320.webp",
+      "title_en": "Avatar",
+      "year": 2009,
+      "rating": 6.5,
+      "tags": [
+        "科幻",
+        "冒险"
+      ],
+      "note": "美丽新世界",
+      "added_at": "2026-10-24T22:39:23+08:00"
+    },
+    {
+      "id": "2026-04-15-the-long-season",
+      "title": "漫长的季节",
+      "kind": "series",
+      "watched_at": "2026-04-15",
+      "poster": "img/watch/the-long-season-07d210f8.webp",
+      "added_at": "2026-10-24T23:01:33+08:00",
+      "poster_w": 640,
+      "poster_h": 960,
+      "poster_320": "img/watch/the-long-season-07d210f8-320.webp",
+      "poster_480": "img/watch/the-long-season-07d210f8-480.webp",
+      "title_en": "The Long Season",
+      "year": 2023,
+      "rating": 9,
+      "tags": [
+        "悬疑",
+        "剧情"
+      ],
+      "note": "遥远的事物将被震碎，面前的人们尚不知情"
+    },
+    {
+      "id": "2026-04-07-item",
+      "title": "花束般的恋爱",
+      "kind": "movie",
+      "watched_at": "2026-04-07",
+      "poster": "img/watch/item-684468df.webp",
+      "added_at": "2026-10-24T23:04:06+08:00",
+      "poster_w": 640,
+      "poster_h": 905,
+      "poster_320": "img/watch/item-684468df-320.webp",
+      "poster_480": "img/watch/item-684468df-480.webp",
+      "title_en": "花束みたいな恋をした",
+      "year": 2021,
+      "rating": 8.5,
+      "tags": [
+        "爱情",
+        "剧情"
+      ],
+      "order": 1,
+      "note": "爱情的底色，是成长命题"
+    },
+    {
+      "id": "2026-04-05-the-secret-life-of-walter-mitty",
+      "title": "白日梦想家",
+      "kind": "movie",
+      "watched_at": "2026-04-05",
+      "poster": "img/watch/the-secret-life-of-walter-mitty-a89dc6fc.webp",
+      "added_at": "2026-10-24T22:42:53+08:00",
+      "poster_w": 640,
+      "poster_h": 948,
+      "poster_320": "img/watch/the-secret-life-of-walter-mitty-a89dc6fc-320.webp",
+      "poster_480": "img/watch/the-secret-life-of-walter-mitty-a89dc6fc-480.webp",
+      "title_en": "The Secret Life of Walter Mitty",
+      "year": 2013,
+      "rating": 7,
+      "order": 3,
+      "tags": [
+        "剧情",
+        "温情"
+      ],
+      "note": "To see the world, to find each other"
+    },
+    {
+      "id": "2026-02-14-swords-into-plowshares",
+      "title": "太平年",
+      "kind": "series",
+      "watched_at": "2026-02-14",
+      "poster": "img/watch/swords-into-plowshares-bbd8bfc2.webp",
+      "poster_w": 640,
+      "poster_h": 1138,
+      "poster_320": "img/watch/swords-into-plowshares-bbd8bfc2-320.webp",
+      "poster_480": "img/watch/swords-into-plowshares-bbd8bfc2-480.webp",
+      "title_en": "Swords into Plowshares",
+      "year": 2026,
+      "rating": 8.5,
+      "tags": [
+        "剧情"
+      ],
+      "note": "就算有三千轮日月春秋",
+      "added_at": "2026-10-25T09:53:34+08:00"
+    }
+  ]
+}

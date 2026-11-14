@@ -9,11 +9,19 @@
      网格用 srcset + sizes 按 DPR/栏宽选图；时间轴缩略图直接用 320 变体
    · 默认态改为「网格视图 + 评分序」，且不再跨刷新持久化
      （用户明确要求默认展示网格、默认按评分排序；会话内切换仍生效）
+   第 91 轮（A3 上映日期 / A4 年报 / A8 兼容双轨分片 / A9 防重复）：
+   · A8：data/watch.json 仍是**权威写入源**；data/watch/manifest.json + <年>.json
+     是它的按年投影。首屏优先并行读分片，任一步失败自动回退整份主文件，
+     所以 30 个既有套件、GitHub 网页直接编辑 JSON 的路径都不受影响。
+   · A4：第三个视图「年报」，与史蒂夫的两态切换互不干扰，全部数字由 ALL 派生。
    ============================================================ */
 (function () {
   'use strict';
 
-  var DATA_URL = 'data/watch.json';
+  var DATA_URL = 'data/watch.json';                       // A8：权威主文件（回退源 + 录入写入点）
+  var SHARD_DIR = 'data/watch/';                          // A8：按观影年份切出的投影目录
+  var SHARD_MANIFEST = SHARD_DIR + 'manifest.json';
+  var GH_SHARD_DIR = 'docs/data/watch/';                  // A8：Contents API 里的对应路径
   var KIND_KEY = 'watch-kind';
   // 第 75 轮：LAYOUT_KEY / SORT_KEY 已废弃——视图与排序不写 localStorage，
   // 每次加载都回到默认（网格 + 评分序）。kind（筛选类别）仍持久化。
@@ -33,11 +41,18 @@
   // 第 72 轮：排序切换取代原「共 N 部」计数条（.w-count 已删），只作用于网格视图
   var sortEl = document.getElementById('w-sort');
   var sortBtns = Array.prototype.slice.call(document.querySelectorAll('.w-sort-btn'));
+  // 第 91 轮 A4：年报视图（独立开关，不参与 layout 的 grid|timeline 两态）
+  var statsEl = document.getElementById('w-stats');
+  var statsBtnEl = document.getElementById('w-stats-btn');
+  var titleListEl = document.getElementById('w-title-list');   // 第 91 轮 A9：已有片名联想
 
   var ALL = [];             // 全量数据（已按观影时间倒序，同日按上传时间正序）
   var layout = 'grid';      // 第 75 轮：默认网格视图，不持久化
   var kind = 'all';
   var sort = 'rating';      // 第 75 轮：默认评分序（time|rating），不持久化
+  var statsOn = false;      // 第 91 轮 A4：年报是否展开
+  var statsYear = '';       // 第 91 轮 A4：年报年份（空串 = 全部年份）
+  var dupArmed = false;     // 第 91 轮 A9：重名两段式确认
 
   /* ---------- 工具 ---------- */
   function esc(s) {
@@ -241,6 +256,184 @@
     wireImages(tlEl);
   }
 
+  /* ---------- 第 91 轮 A4：观影统计 / 年报 ----------
+     全部数字都由 ALL 现场派生，不往 watch.json 里加任何字段，也不发额外请求。
+     跟随顶部「类型」筛选，年份下拉决定统计范围（空串 = 全部年份）。 */
+  function statYears() {
+    var set = {};
+    ALL.forEach(function (it) {
+      var m = /^(\d{4})/.exec(String(it.watched_at || ''));
+      if (m) set[m[1]] = 1;
+    });
+    return Object.keys(set).sort().reverse();
+  }
+  function statsScope() {
+    var base = visible();
+    if (!statsYear) return base;
+    return base.filter(function (it) {
+      return String(it.watched_at || '').slice(0, 4) === statsYear;
+    });
+  }
+  function stBars(pairs, max) {
+    var top = max > 0 ? max : 1;
+    return '<div class="st-bars">' + pairs.map(function (p) {
+      return '<div class="st-bar">' +
+        '<span class="st-bar-num">' + (p.v || '') + '</span>' +
+        '<i style="height:' + Math.round(p.v / top * 100) + '%"></i>' +
+        '<span class="st-bar-lab">' + esc(p.k) + '</span>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+  function stRows(pairs) {
+    var max = 0;
+    pairs.forEach(function (p) { if (p.v > max) max = p.v; });
+    var top = max > 0 ? max : 1;
+    return '<div class="st-rows">' + pairs.map(function (p) {
+      return '<div class="st-row">' +
+        '<span class="st-row-k">' + esc(p.k) + '</span>' +
+        '<span class="st-row-track"><i style="width:' + Math.round(p.v / top * 100) + '%"></i></span>' +
+        '<span class="st-row-v">' + p.v + '</span>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+  function renderStats() {
+    if (!statsEl) return;
+    var years = statYears();
+    // 数据变了以后下拉里可能已经没有旧年份 —— 静默回落到「全部年份」
+    if (statsYear && years.indexOf(statsYear) < 0) statsYear = '';
+    var items = statsScope();
+    var rated = items.filter(function (it) { return Number(it.rating) > 0; });
+    var avg = rated.length
+      ? rated.reduce(function (s, it) { return s + Number(it.rating); }, 0) / rated.length : 0;
+    var daySet = {};
+    items.forEach(function (it) { daySet[String(it.watched_at || '')] = 1; });
+
+    var months = [];
+    for (var m = 1; m <= 12; m++) months.push({ k: m + '月', v: 0 });
+    items.forEach(function (it) {
+      var mm = /^\d{4}-(\d{2})-\d{2}$/.exec(String(it.watched_at || ''));
+      if (mm) {
+        var i = parseInt(mm[1], 10) - 1;
+        if (i >= 0 && i < 12) months[i].v++;
+      }
+    });
+    var monthMax = 1;
+    months.forEach(function (p) { if (p.v > monthMax) monthMax = p.v; });
+
+    var kinds = [['movie', '电影'], ['series', '剧集'], ['anime', '番剧']].map(function (p) {
+      return { k: p[1], v: items.filter(function (it) { return (it.kind || 'movie') === p[0]; }).length };
+    });
+    var buckets = [{ k: '<6', v: 0 }, { k: '6~7', v: 0 }, { k: '7~8', v: 0 }, { k: '8~9', v: 0 }, { k: '9~10', v: 0 }];
+    rated.forEach(function (it) {
+      var r = Number(it.rating);
+      buckets[r < 6 ? 0 : r < 7 ? 1 : r < 8 ? 2 : r < 9 ? 3 : 4].v++;
+    });
+    var tagMap = {};
+    items.forEach(function (it) {
+      (Array.isArray(it.tags) ? it.tags : []).forEach(function (t) { tagMap[t] = (tagMap[t] || 0) + 1; });
+    });
+    var tags = Object.keys(tagMap).map(function (k) { return { k: k, v: tagMap[k] }; })
+      .sort(function (a, b) { return b.v - a.v || a.k.localeCompare(b.k); }).slice(0, 8);
+    var top = rated.slice().sort(function (a, b) {
+      return Number(b.rating) - Number(a.rating) ||
+             sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
+    }).slice(0, 5);
+
+    var opts = '<option value="">全部年份</option>' + years.map(function (y) {
+      return '<option value="' + esc(y) + '"' + (statsYear === y ? ' selected' : '') + '>' + esc(y) + ' 年</option>';
+    }).join('');
+    var cards = [
+      { k: '记录总数', v: String(items.length), u: '部' },
+      { k: '有评分', v: String(rated.length), u: '部' },
+      { k: '平均评分', v: rated.length ? avg.toFixed(2) : '—', u: '分' },
+      { k: '观影天数', v: String(Object.keys(daySet).length), u: '天' }
+    ];
+    var head = '<div class="st-head">' +
+      '<div><h2 class="st-title">观影统计' + (statsYear ? ' · ' + esc(statsYear) + ' 年' : ' · 全部年份') + '</h2>' +
+      '<p class="st-sub">' + (kind === 'all' ? '全部类型' : kindLabel(kind)) + ' · 共 ' + items.length +
+      ' 条记录 · 全部由当前数据现场派生</p></div>' +
+      '<div class="st-pick"><label class="st-label" for="st-year">统计年份</label>' +
+      '<select class="st-select" id="st-year">' + opts + '</select></div>' +
+    '</div>';
+    var cardHtml = '<div class="st-cards">' + cards.map(function (c) {
+      return '<div class="st-card"><span class="st-k">' + esc(c.k) + '</span>' +
+        '<b class="st-v">' + esc(c.v) + '</b><span class="st-u">' + esc(c.u) + '</span></div>';
+    }).join('') + '</div>';
+    var panels = '<div class="st-panels">' +
+      '<section class="st-panel"><h3>月度分布</h3>' + stBars(months, monthMax) + '</section>' +
+      '<section class="st-panel"><h3>类型构成</h3>' + stRows(kinds) + '</section>' +
+      '<section class="st-panel"><h3>评分区间</h3>' + stRows(buckets) + '</section>' +
+      '<section class="st-panel"><h3>高频标签</h3>' +
+        (tags.length ? '<div class="st-chips">' + tags.map(function (t) {
+          return '<span class="st-chip">' + esc(t.k) + '<i>' + t.v + '</i></span>';
+        }).join('') + '</div>' : '<p class="st-empty">这个范围内还没有标签</p>') +
+      '</section>' +
+    '</div>';
+    var topHtml = '<section class="st-panel st-top"><h3>高分 Top 5</h3>' +
+      (top.length ? '<ol class="st-top-list">' + top.map(function (it, i) {
+        return '<li class="st-top-item">' +
+          '<span class="st-top-rank">' + (i + 1) + '</span>' +
+          '<img class="st-top-img" src="' + esc(it.poster_320 || it.poster || '') + '" alt="" loading="lazy" decoding="async">' +
+          '<span class="st-top-name">' + esc(it.title) + '</span>' +
+          '<span class="st-top-meta">' + esc(String(it.watched_at || '')) + '</span>' +
+          '<span class="st-top-score">' + Number(it.rating).toFixed(1) + '</span>' +
+        '</li>';
+      }).join('') + '</ol>' : '<p class="st-empty">这个范围内还没有评分记录</p>') +
+    '</section>';
+    statsEl.innerHTML = items.length
+      ? head + cardHtml + panels + topHtml
+      : head + '<p class="st-empty st-empty-main">这个范围内还没有观影记录</p>';
+  }
+
+  /* ---------- 第 91 轮 A9：录入防重复 ----------
+     重看同一部作品是**合法场景**（数据里《河西走廊》就录过两次），所以这里只做
+     「联想 + 提示 + 两段式确认」，绝不硬阻止。归一化只去空白/大小写/常见标点，
+     不做模糊匹配 —— 片名相近但不同的两部作品不该被误报。 */
+  function normTitle(s) {
+    return String(s || '').trim().toLowerCase()
+      .replace(/\s+/g, '')
+      .replace(/[：:·・,，.。!！?？'“”"《》\-—_]/g, '');
+  }
+  /* sameId = 本次录入会命中的 baseId。第 72 轮起「同 id 且同片名」是**更新**，
+     压根不会产生第二条记录，所以不算重复 —— 不豁免会让正常的重录 / 补录被拦住。 */
+  function findDuplicate(title, excludeId, sameId) {
+    var key = normTitle(title);
+    if (!key) return null;
+    for (var i = 0; i < ALL.length; i++) {
+      var it = ALL[i];
+      if (!it || (excludeId && it.id === excludeId) || (sameId && it.id === sameId)) continue;
+      if (normTitle(it.title) === key) return it;
+    }
+    return null;
+  }
+  function syncTitleList() {
+    if (!titleListEl) return;
+    // paint() 每次筛选都会跑，靠条数缓存避免反复重建 124 个 <option>
+    if (titleListEl.getAttribute('data-count') === String(ALL.length)) return;
+    var seen = {}, names = [];
+    ALL.forEach(function (it) {
+      var t = String(it && it.title || '').trim();
+      if (t && !seen[t]) { seen[t] = 1; names.push(t); }
+    });
+    names.sort(function (a, b) { return a.localeCompare(b, 'zh-Hans-CN'); });
+    titleListEl.innerHTML = names.map(function (t) {
+      return '<option value="' + esc(t) + '"></option>';
+    }).join('');
+    titleListEl.setAttribute('data-count', String(ALL.length));
+  }
+  function dupBlock(it, title) {
+    var when = it.watched_at ? '，观影于 ' + it.watched_at : '';
+    var score = Number(it.rating) > 0 ? '，评分 ' + Number(it.rating).toFixed(1) : '';
+    setMsg('《' + title + '》库里已有记录' + when + score +
+      '。重看是允许的 —— 再点一次提交即继续添加；想改那条请关掉弹窗，切到时间轴点它。', 'err');
+    dupArmed = true;
+    if (submitEl) submitEl.textContent = '确认重复添加';
+  }
+  function resetDupArm() {
+    dupArmed = false;
+    if (submitEl) submitEl.textContent = editingId ? '保存修改' : ADD_SUBMIT;
+  }
+
   /* ---------- 总渲染 ---------- */
   /* 第 82 轮：页脚影视剧总数。取 ALL.length（全量），与当前「类型」筛选**无关** ——
      筛到只剩 3 部时也照样报总数，否则这个数字会跟筛选结果混淆。
@@ -251,16 +444,26 @@
 
   function paint() {
     syncCount();
+    syncTitleList();
     var list = visible();
-
-    // 第 72 轮：排序切换只作用于网格视图；时间轴恒按观影时间倒序（月份分组的前提）
-    if (sortEl) sortEl.hidden = layout !== 'grid';
-
     var total = ALL.length;
-    emptyEl.hidden = total > 0;
-    gridEl.hidden = !(layout === 'grid' && total > 0);
-    tlEl.hidden = !(layout === 'timeline' && total > 0);
 
+    // 第 72 轮：排序切换只作用于网格视图；时间轴恒按观影时间倒序（月份分组的前提）。
+    // 第 91 轮 A4：年报展开时排序条也收起来（它只对网格有意义）
+    if (sortEl) sortEl.hidden = statsOn || layout !== 'grid';
+
+    emptyEl.hidden = total > 0;
+    gridEl.hidden = !(!statsOn && layout === 'grid' && total > 0);
+    tlEl.hidden = !(!statsOn && layout === 'timeline' && total > 0);
+    if (statsEl) statsEl.hidden = !statsOn;
+    if (statsBtnEl) {
+      statsBtnEl.setAttribute('aria-pressed', statsOn ? 'true' : 'false');
+      statsBtnEl.textContent = statsOn ? '返回列表' : '年报';
+      statsBtnEl.classList.toggle('is-on', statsOn);
+    }
+
+    // 年报是与网格 / 时间轴并列的第三个视图，有自己的 empty 态
+    if (statsOn) { renderStats(); return; }
     if (total === 0) return;
     // 有数据、但当前类型筛不出东西 —— 给一句话，别留白屏
     if (!list.length) {
@@ -271,6 +474,22 @@
     }
     if (layout === 'grid') renderGrid(ordered(list));
     else renderTimeline(list.slice().sort(cmpTime));
+  }
+
+  // 年报开关与年份下拉（内容每次重绘，所以一律用事件委托）
+  if (statsBtnEl) {
+    statsBtnEl.addEventListener('click', function () {
+      statsOn = !statsOn;
+      paint();
+    });
+  }
+  if (statsEl) {
+    statsEl.addEventListener('change', function (e) {
+      if (e.target && e.target.id === 'st-year') {
+        statsYear = String(e.target.value || '');
+        renderStats();
+      }
+    });
   }
 
   /* ---------- 视图 / 筛选切换（状态持久化） ---------- */
@@ -673,10 +892,15 @@
     if (posterTipEl && posterTipHtml) posterTipEl.innerHTML = posterTipHtml;
     if (deleteBtn) deleteBtn.hidden = true;   // 只有编辑模式才显示删除
     resetDeleteArm();
+    resetDupArm();
+    // 第 91 轮 A9：编辑过一条再点加号，原来的片名/评分会残留在表单里，
+    // 既容易误录、又会让「防重复」提示对着旧片名报。这里统一清空（顺手修掉老问题）。
+    FIELD_IDS.forEach(function (id) { setField(id, ''); });
     resetPreview();
   }
 
-  var FIELD_IDS = ['add-title', 'add-en', 'add-kind', 'add-year', 'add-watched', 'add-rating', 'add-tags', 'add-note'];
+  var FIELD_IDS = ['add-title', 'add-en', 'add-kind', 'add-year', 'add-release',
+                   'add-watched', 'add-rating', 'add-order', 'add-tags', 'add-note'];
   function setField(id, v) {
     var el = document.getElementById(id);
     if (el) el.value = v == null ? '' : String(v);
@@ -708,6 +932,32 @@
     if (el) { el.focus(); if (el.select) el.select(); }
   }
 
+  /* 第 91 轮 A3：上映日期
+     与 --watched 不同，release_date 只接受完整 YYYY-MM-DD —— releaseText() 会把它
+     原样显示在时间轴上，粗粒度串（"2026" / "2026-10"）会和「年份」那一栏混淆。
+     留空是合法的：什么也不写，时间轴继续显示 year。 */
+  var RELEASE_ERR = '上映日期请填完整的年-月-日（留空则沿用年份）';
+  function readReleaseField() {
+    var el = document.getElementById('add-release');
+    if (el && el.validity && el.validity.badInput) return { ok: false };
+    var v = fieldVal('add-release');
+    if (!v) return { ok: true, v: '' };
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return { ok: false };
+    return { ok: true, v: v };
+  }
+  function rejectRelease() {
+    setMsg(RELEASE_ERR, 'err');
+    var el = document.getElementById('add-release');
+    if (el) el.focus();
+  }
+  // 片名一改就撤掉上一次的「确认重复添加」，避免用户对着 A 片名确认、却提交了 B 片名
+  var titleInputEl = document.getElementById('add-title');
+  if (titleInputEl) {
+    titleInputEl.addEventListener('input', function () {
+      if (dupArmed) { resetDupArm(); setMsg(''); }
+    });
+  }
+
   // 打开编辑：预填现有字段 + 展示当前海报（编辑时不换图，避免旧图变孤儿文件）
   function openEdit(it) {
     if (!dlgEl || !it) return;
@@ -723,6 +973,8 @@
     setField('add-en', it.title_en || '');
     setField('add-kind', (it.kind === 'series' || it.kind === 'anime') ? it.kind : 'movie');
     setField('add-year', it.year || '');
+    // 第 91 轮 A3：上映日期同样只认完整日期，粗粒度旧值留空（保存时也不会被写回）
+    setField('add-release', /^\d{4}-\d{2}-\d{2}$/.test(String(it.release_date || '')) ? it.release_date : '');
     // date 控件只认 YYYY-MM-DD；「2026」「2026-10」这种粗粒度留空，保存时回退原值
     setField('add-watched', /^\d{4}-\d{2}-\d{2}$/.test(String(it.watched_at || '')) ? it.watched_at : '');
     setField('add-rating', it.rating == null ? '' : it.rating);
@@ -780,6 +1032,9 @@
     // 第 78 轮：排序值校验（非法 → 提示并阻断保存，绝不静默改成默认值）
     var orderRead = readOrderField();
     if (!orderRead.ok) { rejectOrder(); return; }
+    // 第 91 轮 A3：上映日期校验
+    var releaseRead = readReleaseField();
+    if (!releaseRead.ok) { rejectRelease(); return; }
 
     var next = { id: old.id, title: title, kind: kind, watched_at: watched, poster: posterPath };
     if (old.added_at) next.added_at = old.added_at;   // 第 72 轮：编辑只改字段，上传时间保持首次录入
@@ -793,6 +1048,8 @@
     });
     if (en) next.title_en = en;
     if (yearRaw) next.year = Number(yearRaw) || yearRaw;
+    // 第 91 轮 A3：留空即删除该字段（时间轴自动回落到 year）
+    if (releaseRead.v) next.release_date = releaseRead.v;
     if (ratingRaw !== '' && !isNaN(Number(ratingRaw))) next.rating = Number(ratingRaw);
     next.order = orderRead.v;   // 第 78 轮：显式落库（留空时写默认 3，便于日后直接从数据读）
     if (tagsRaw) next.tags = tagsRaw.split(',').map(function (x) { return x.trim(); }).filter(Boolean);
@@ -822,7 +1079,11 @@
         data.updated_at = localStamp(new Date());
         var text = JSON.stringify(data, null, 2) + '\n';
         return ghPut(DATA_PATH, textToB64(text), 'data(watch): 更新《' + title + '》', cur ? cur.sha : null)
-          .then(function () { return next; });
+          .then(function () {
+            // A8：编辑可能改了观影日期（跨年），新旧两个年份都要重算
+            maybeSyncShards(data, [shardYearOf(old), shardYearOf(next)]);
+            return next;
+          });
       })
       .then(function (item) {
         ALL = ALL.filter(function (x) { return x && x.id !== oldId; });
@@ -873,7 +1134,10 @@
         }
         data.updated_at = localStamp(new Date());
         var text = JSON.stringify(data, null, 2) + '\n';
-        return ghPut(DATA_PATH, textToB64(text), 'data(watch): 删除《' + delTitle + '》', cur.sha);
+        return ghPut(DATA_PATH, textToB64(text), 'data(watch): 删除《' + delTitle + '》', cur.sha)
+          .then(function () {
+            maybeSyncShards(data, [shardYearOf(old)]);
+          });
       })
       .then(function () {
         ALL = ALL.filter(function (x) { return x && x.id !== delId; });
@@ -919,15 +1183,28 @@
     var noteEl = document.getElementById('add-note');
     var note = noteEl ? noteEl.value.trim() : '';
 
+    /* 第 91 轮 A9：重名两段式确认（必须在算出 slug 之后）。
+       · 编辑模式排除自身（只是改个名字不该被自己挡住），但不豁免 baseId
+       · 新增时豁免 baseId 命中的那条「同 id 同片名 = 更新」记录
+       · 重看是合法场景，第一次拦下并说明，第二次直接放行 */
+    var slug = makeSlug(en, title);
+    var baseId = watched + '-' + slug;
+    if (!dupArmed) {
+      var dup = findDuplicate(title, editingId, editingId ? '' : baseId);
+      if (dup) { dupBlock(dup, title); return; }
+    }
+
     // 第 69 轮：编辑模式走另外一条路径（保留原 id 与海报，只改表单字段）
     if (editingId) { submitEdit(); return; }
 
     // 第 78 轮：新增路径的排序值校验（编辑路径在 submitEdit 里校验，避免重复提示）
     var orderRead = readOrderField();
     if (!orderRead.ok) { rejectOrder(); return; }
+    // 第 91 轮 A3：新增路径的上映日期校验
+    var releaseRead = readReleaseField();
+    if (!releaseRead.ok) { rejectRelease(); return; }
 
     // id 延迟到拿到仓库数据后解析：同 id 同片名 = 更新；同 id 不同片名 = 追 -2/-3 后缀
-    var slug = makeSlug(en, title);
 
     submitEl.disabled = true;
     var file = fileEl && fileEl.files && fileEl.files[0];
@@ -1006,6 +1283,8 @@
         variants.forEach(function (v) { item['poster_' + v.w] = v.rel; });
         if (en) item.title_en = en;
         if (yearRaw) item.year = Number(yearRaw) || yearRaw;
+        // 第 91 轮 A3：完整上映日期。留空就不写字段，releaseText() 自动回落 year
+        if (releaseRead.v) item.release_date = releaseRead.v;
         if (ratingRaw !== '' && !isNaN(Number(ratingRaw))) item.rating = Number(ratingRaw);
         item.order = orderRead.v;   // 第 78 轮：排序值（0~5，默认 3）
         if (tagsRaw) item.tags = tagsRaw.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
@@ -1018,7 +1297,10 @@
         data.updated_at = localStamp(new Date());
         var text = JSON.stringify(data, null, 2) + '\n';
         return ghPut(DATA_PATH, textToB64(text), 'data(watch): 添加《' + title + '》', cur ? cur.sha : null)
-          .then(function () { return item; });
+          .then(function () {
+            maybeSyncShards(data, [shardYearOf(item)]);
+            return item;
+          });
       })
       .then(function (item) {
         // 本机立刻可见：海报先用 blob URL 顶着，Pages 生效后刷新即为正式路径
@@ -1035,6 +1317,7 @@
         paint();
         if (formEl) formEl.reset();
         resetPreview();
+        resetDupArm();          // 第 91 轮 A9：别把「确认重复添加」留到下一次打开
         closeAdd();
         toast('已提交 · 约 15~40 秒后全设备生效', 'ok');
       })
@@ -1071,6 +1354,135 @@
   });
   syncTokenState();
 
+  /* ---------- 第 91 轮 A8：兼容双轨分片 ----------
+     watch.json 仍是**权威源**；manifest.json + <年>.json 是它的按年投影，
+     结构由 scripts/watch/shard-lib.mjs 定义，两边必须逐字一致：
+       manifest = { version:1, source:'watch.json', updated_at, total,
+                    years:[{year,file,count}] }        （years 降序）
+       <年>.json = { year, items:[...] }
+     ⚠️ 首屏先并行取主文件 + manifest，只有二者 updated_at 与条数都吻合才启用分片。
+        这条校验不是多余：既保证「有人在 GitHub 网页直接改了 watch.json」时不会读到
+        过期分片，也让既有回归套件用 page.route 注入 MOCK 时自动落回主文件 —— 30 个
+        老套件一个都不用改。分片缺失 / 结构错 / 任一年文件失败，一律回退主文件。 */
+  function shardYearOf(it) {
+    var m = /^(\d{4})/.exec(String(it && it.watched_at || ''));
+    return m ? m[1] : '0000';
+  }
+  function buildShards(data) {
+    var by = {};
+    (data.items || []).forEach(function (it) {
+      var y = shardYearOf(it);
+      (by[y] = by[y] || []).push(it);
+    });
+    var years = Object.keys(by).sort().reverse();
+    return {
+      manifest: {
+        version: 1, source: 'watch.json',
+        updated_at: data.updated_at || '',
+        total: (data.items || []).length,
+        years: years.map(function (y) {
+          return { year: y, file: y + '.json', count: by[y].length };
+        })
+      },
+      chunks: years.map(function (y) { return { year: y, items: by[y] }; })
+    };
+  }
+  function putShardFile(rel, obj, message) {
+    return ghGet(GH_SHARD_DIR + rel).then(function (cur) {
+      var text = JSON.stringify(obj, null, 2) + '\n';
+      return ghPut(GH_SHARD_DIR + rel, textToB64(text), message, cur ? cur.sha : null);
+    });
+  }
+  /* 主文件保存成功后调用：只 PUT 受影响的年份分片 + manifest。
+     best-effort —— 失败只警告，绝不把「已提交」翻成失败（主文件才是权威源）。 */
+  function syncShards(data, changedYears) {
+    var s = buildShards(data);
+    var want = {};
+    (changedYears || []).forEach(function (y) { want[y] = 1; });
+    var jobs = s.chunks.filter(function (c) { return want[c.year]; })
+      .map(function (c) {
+        return putShardFile(c.year + '.json', c, 'data(watch): 同步 ' + c.year + ' 年分片');
+      });
+    // 年份被删空时也要写一个空片，否则 manifest 仍指向旧内容
+    Object.keys(want).forEach(function (y) {
+      if (!s.chunks.some(function (c) { return c.year === y; })) {
+        jobs.push(putShardFile(y + '.json', { year: y, items: [] },
+          'data(watch): 清空 ' + y + ' 年分片'));
+      }
+    });
+    return Promise.all(jobs).then(function () {
+      return putShardFile('manifest.json', s.manifest, 'data(watch): 同步分片清单');
+    });
+  }
+  function shardWarn(e) {
+    console.warn('[watch] 分片同步失败（主文件已保存，请运行 npm run shard 重建）：', e);
+  }
+  /* 分片是仓库文件，只有生产 Pages 上的录入才写回它。
+     本地静态服务 / 回归环境里的分片是 scripts/watch/watch-shard.mjs 生成的磁盘文件，
+     网页根本改不了，发这些请求只会拖慢录入、还会污染既有套件的 API 请求计数。
+     ?syncshards=1 供第 91 轮回归显式开启，用来验证同步链路本身。
+     即使没同步，首屏对账发现 manifest.updated_at 落后也会自动回退整份主文件，
+     用户看到的数据永远是对的。 */
+  function shardsSyncEnabled() {
+    if (/[?&]syncshards=1(?:&|$)/.test(location.search)) return true;
+    return /\.github\.io$/i.test(location.hostname);
+  }
+  function maybeSyncShards(data, years) {
+    if (!shardsSyncEnabled()) return;
+    syncShards(data, years).catch(shardWarn);
+  }
+
+  function readMaster() {
+    return fetch(DATA_URL, { cache: 'no-cache' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (d) {
+        return {
+          items: Array.isArray(d) ? d : (d && d.items) || [],
+          updated_at: (d && d.updated_at) || ''
+        };
+      });
+  }
+  function readShards(master) {
+    return fetch(SHARD_MANIFEST, { cache: 'no-cache' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('manifest HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (mf) {
+        if (!mf || mf.version !== 1 || !Array.isArray(mf.years) || !mf.years.length) {
+          throw new Error('manifest 结构不对');
+        }
+        // 与权威主文件对账：任一不符都说明分片落后（或主文件被别处改过 / 被测试注入）
+        if (mf.updated_at !== master.updated_at || mf.total !== master.items.length) {
+          throw new Error('分片与主文件版本不一致');
+        }
+        return Promise.all(mf.years.map(function (y) {
+          return fetch(SHARD_DIR + y.file, { cache: 'no-cache' }).then(function (r) {
+            if (!r.ok) throw new Error(y.file + ' HTTP ' + r.status);
+            return r.json();
+          });
+        })).then(function (chunks) {
+          var items = [];
+          chunks.forEach(function (c) {
+            if (c && Array.isArray(c.items)) items = items.concat(c.items);
+          });
+          if (items.length !== mf.total) throw new Error('分片条数与清单不符');
+          return { items: items, updated_at: master.updated_at };
+        });
+      });
+  }
+  function loadData() {
+    return readMaster().then(function (master) {
+      return readShards(master).catch(function (err) {
+        console.warn('[watch] 回退整份主文件：', err && err.message);
+        return master;
+      });
+    });
+  }
+
   /* ---------- 启动 ---------- */
   // 第 75 轮：视图/排序用固定默认值（网格 + 评分序），不再读 localStorage；
   // 只有筛选类别 kind 还持久化。遗留的 watch-layout / watch-sort 键不再读取。
@@ -1082,16 +1494,10 @@
 
   // 加了 no-cache：每次向服务器做一次协商（GitHub Pages 会给 304），
   // 改完 json 刷新即见，不必等 CDN 的 10 分钟缓存过期
-  fetch(DATA_URL, { cache: 'no-cache' })
-    .then(function (r) {
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.json();
-    })
-    .then(function (data) {
-      var items = Array.isArray(data) ? data : (data && data.items) || [];
-      ALL = items.slice().sort(cmpTime);
-      var upd = (data && data.updated_at) || '';
-      updatedEl.textContent = upd ? '更新于 ' + String(upd).slice(0, 10) : '';
+  loadData()
+    .then(function (res) {
+      ALL = res.items.slice().sort(cmpTime);
+      updatedEl.textContent = res.updated_at ? '更新于 ' + String(res.updated_at).slice(0, 10) : '';
       paint();
     })
     .catch(function (err) {

@@ -25,6 +25,8 @@ import { fileURLToPath } from 'node:url';
 
 import sharp from 'sharp';
 
+import { rebuildShards } from './shard-lib.mjs';
+
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..', '..');
 const DOCS = path.join(ROOT, 'docs');
@@ -42,6 +44,8 @@ const HELP = `
   --en <英文名>       英文原名，同时用于生成文件名
   --kind <movie|series|anime>   默认 movie（第 73 轮新增 anime 番剧）
   --year <年份>       如 2023
+  --release <日期>    上映日期，只认完整 YYYY-MM-DD（第 91 轮 A3）；留空沿用年份，
+                      时间轴会优先显示它。不传时保留该条目已有的 release_date
   --watched <日期>    观影时间，支持 2026-10-24 / 2026-10 / 2026，默认今天
   --rating <0-10>     评分，可小数
   --order <0-5>       手动排序值（整数，越小越前）；观看时间或评分相同时用它定先后，
@@ -197,6 +201,25 @@ async function main() {
   const prevIdx = data.items.findIndex((it) => it && it.id === id);
   const prev = prevIdx >= 0 ? data.items[prevIdx] : null;
 
+  /* 第 91 轮 A9：同名提醒。与网页端 normTitle() 同一套归一化。
+     重看同一部作品是合法场景（库里《河西走廊》就录过两次），所以**只警告不阻断**；
+     真要改那条请用 --id <已有 id> 精确覆盖，避免产生一条几乎一样的重复记录。 */
+  const normTitle = (s) => String(s || '').trim().toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/[：:·・,，.。!！?？'“”"《》\-—_]/g, '');
+  const dupNames = data.items.filter((it) =>
+    it && it.id !== id && normTitle(it.title) === normTitle(title));
+
+  // 第 91 轮 A3：上映日期只认完整日期，粗粒度串会和「年份」那一栏混淆
+  let releaseDate;
+  if (args.release !== undefined && args.release !== true) {
+    const v = String(args.release).trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) {
+      die(`--release 需要完整日期 YYYY-MM-DD，收到：${args.release}`);
+    }
+    releaseDate = v;
+  }
+
   const width = Math.max(64, Math.min(2400, parseInt(args.width || '640', 10) || 640));
   const quality = Math.max(1, Math.min(100, parseInt(args.quality || '80', 10) || 80));
 
@@ -255,6 +278,9 @@ async function main() {
     ...(titleEn ? { title_en: titleEn } : {}),
     kind,
     ...(args.year ? { year: Number(args.year) || String(args.year) } : (prev && prev.year ? { year: prev.year } : {})),
+    // 第 91 轮 A3：fill 了写完整日期；没填则保留旧值（编辑场景），再没有就不写字段
+    ...(releaseDate ? { release_date: releaseDate }
+      : (prev && prev.release_date ? { release_date: prev.release_date } : {})),
     watched_at: watchedAt,
     ...(rating !== undefined ? { rating } : (prev && prev.rating !== undefined ? { rating: prev.rating } : {})),
     // 第 78 轮：排序值。只在显式给了 --order 或旧条目本来就有时才写字段，
@@ -290,7 +316,14 @@ async function main() {
   console.log(`  标题     ${title}${titleEn ? ' / ' + titleEn : ''}`);
   console.log(`  id       ${id}`);
   console.log(`  观影时间 ${watchedAt}   类型 ${kind}${args.year ? '   年份 ' + args.year : ''}`);
+  if (item.release_date) console.log(`  上映日期 ${item.release_date}`);
   if (rating !== undefined) console.log(`  评分     ${rating}`);
+  if (dupNames.length) {
+    console.log('');
+    console.log(`  ⚠ 库里已有 ${dupNames.length} 条同名记录：` +
+      dupNames.map((x) => `${x.title}（${x.id}）`).join('、'));
+    console.log('    重看是允许的，本次仍会新增；若其实想改那条，请加 --id <上面的 id> 重跑。');
+  }
   console.log(`  排序     ${item.order === undefined ? ORDER_DEFAULT + '（默认，未落库）' : item.order}`);
   console.log(`  海报     ${relPoster}  (${outMeta.width}×${outMeta.height})`);
   if (variants.length) {
@@ -335,8 +368,16 @@ async function main() {
   for (const v of variants) fs.writeFileSync(path.join(POSTER_DIR, v.name), v.bytes);
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2) + '\n', 'utf8');
 
+  // 第 91 轮 A8：主文件写完立刻重建按年分片（幂等，内容没变就不写盘）
+  const shards = rebuildShards(data);
+
   console.log('\n已写入。下一步：');
-  const files = [`docs/img/watch/${fileName}`, ...variants.map((v) => `docs/img/watch/${v.name}`), 'docs/data/watch.json'];
+  const shardFiles = ['docs/data/watch/manifest.json',
+    ...shards.years.map((y) => 'docs/data/watch/' + y.file)];
+  const files = [`docs/img/watch/${fileName}`, ...variants.map((v) => `docs/img/watch/${v.name}`),
+    'docs/data/watch.json', ...shardFiles];
+  console.log(`  分片     ${shards.years.length} 个年份 / 重建 ${shards.written.length} 个文件` +
+    (shards.removed.length ? ` / 清理 ${shards.removed.length} 个` : ''));
   console.log(`  git add ${files.join(' ')}`);
   console.log(`  git commit -m "watch: add ${title}"`);
   console.log('');

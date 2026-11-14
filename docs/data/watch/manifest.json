@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "source": "watch.json",
+  "updated_at": "2026-11-14T11:02:53+08:00",
+  "total": 124,
+  "years": [
+    {
+      "year": "2026",
+      "file": "2026.json",
+      "count": 14
+    },
+    {
+      "year": "2025",
+      "file": "2025.json",
+      "count": 5
+    },
+    {
+      "year": "2024",
+      "file": "2024.json",
+      "count": 10
+    },
+    {
+      "year": "2023",
+      "file": "2023.json",
+      "count": 8
+    },
+    {
+      "year": "2022",
+      "file": "2022.json",
+      "count": 13
+    },
+    {
+      "year": "2021",
+      "file": "2021.json",
+      "count": 18
+    },
+    {
+      "year": "2020",
+      "file": "2020.json",
+      "count": 40
+    },
+    {
+      "year": "2019",
+      "file": "2019.json",
+      "count": 13
+    },
+    {
+      "year": "2018",
+      "file": "2018.json",
+      "count": 3
+    }
+  ]
+}

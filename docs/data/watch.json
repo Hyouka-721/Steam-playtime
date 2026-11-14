@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-07T09:08:40+08:00",
+  "updated_at": "2026-11-14T11:02:53+08:00",
   "items": [
     {
       "id": "2026-10-31-dear-you",
@@ -16,7 +16,11 @@
       "year": 2026,
       "rating": 9.9,
       "order": 2,
-      "note": "江海万里，心中念你，便不觉遥远"
+      "note": "江海万里，心中念你，便不觉遥远",
+      "tags": [
+        "剧情",
+        "温情"
+      ]
     },
     {
       "id": "2026-10-24-dead-to-rights",
@@ -719,7 +723,12 @@
       "year": 2023,
       "rating": 8,
       "order": 3,
-      "note": "共情反派，是因为真正受害者的缺席"
+      "note": "共情反派，是因为真正受害者的缺席",
+      "tags": [
+        "剧情",
+        "犯罪",
+        "悬疑"
+      ]
     },
     {
       "id": "2023-01-29-the-wandering-earth",
@@ -756,7 +765,12 @@
       "year": 2019,
       "rating": 5.5,
       "order": 3,
-      "note": "The Thunder"
+      "note": "The Thunder",
+      "tags": [
+        "剧情",
+        "犯罪",
+        "悬疑"
+      ]
     },
     {
       "id": "2022-09-14-yes-minister",
@@ -2429,7 +2443,13 @@
       "year": 2019,
       "rating": 7,
       "order": 3,
-      "note": "少年时代"
+      "note": "少年时代",
+      "title_en": "Growing Pain",
+      "tags": [
+        "剧情",
+        "喜剧",
+        "温情"
+      ]
     },
     {
       "id": "2018-07-27-forrest-gump",
@@ -2446,7 +2466,12 @@
       "year": 1994,
       "rating": 8,
       "order": 3,
-      "note": "Run Forrest Run"
+      "note": "Run Forrest Run",
+      "tags": [
+        "剧情",
+        "爱情",
+        "温情"
+      ]
     },
     {
       "id": "2018-02-27-gravity",
@@ -2463,7 +2488,12 @@
       "year": 2013,
       "rating": 7,
       "order": 3,
-      "note": "我们的征途是星辰大海"
+      "note": "我们的征途是星辰大海",
+      "tags": [
+        "科幻",
+        "灾难",
+        "冒险"
+      ]
     },
     {
       "id": "2018-02-25-pacific-rim",
@@ -2480,7 +2510,12 @@
       "year": 2013,
       "rating": 7.5,
       "order": 3,
-      "note": "重燃少年机甲梦"
+      "note": "重燃少年机甲梦",
+      "tags": [
+        "科幻",
+        "冒险",
+        "奇幻"
+      ]
     }
   ]
 }

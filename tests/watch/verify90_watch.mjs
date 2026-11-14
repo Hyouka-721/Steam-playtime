@@ -45,8 +45,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------- A 静态契约 ---------- */
 console.log('== A 静态契约 ==');
-ok('A1 watch.html 引用 watch.css?v=28 / watch.js?v=17（同时改了样式与渲染，两条都 bump）',
-  /watch\.css\?v=28/.test(html) && /watch\.js\?v=17/.test(html),
+ok('A1 watch.html 引用 watch.css?v=29 / watch.js?v=18（同时改了样式与渲染，两条都 bump）',
+  /watch\.css\?v=29/.test(html) && /watch\.js\?v=18/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const gStart = js.indexOf('function renderGrid(');
