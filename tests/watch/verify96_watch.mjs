@@ -90,6 +90,16 @@ ok('A6 分片与主文件对账通过（manifest 的 total / updated_at 跟主�
   manifest.total === N && manifest.updated_at === data.updated_at,
   `total=${manifest.total} / ${manifest.updated_at}`);
 
+/* 《少年派》(2019) 是剧集不是电影，原来 kind 标成 movie —— 本轮一并修正。
+   kind 只有三个合法值，改错会让类型面板多出一行或让筛选档位对不上。 */
+const KIND_CNT = {};
+data.items.forEach((it) => { KIND_CNT[it.kind] = (KIND_CNT[it.kind] || 0) + 1; });
+const young = data.items.find((it) => it.title === '少年派') || {};
+ok('A7 kind 只有 movie / series / anime 三值；《少年派》已从 movie 改成 series',
+  data.items.every((it) => ['movie', 'series', 'anime'].includes(it.kind)) &&
+  young.kind === 'series' && Object.keys(KIND_CNT).length === 3,
+  `少年派=${young.kind} / 分布 ${JSON.stringify(KIND_CNT)}`);
+
 /* ---------------- B 1920 宽屏：铺满 + 国别 ---------------- */
 console.log('== B 1920 宽屏 ==');
 const browser = await chromium.launch();
