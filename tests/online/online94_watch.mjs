@@ -1,10 +1,12 @@
 /* 第 94 轮 watch 侧上线复验：年报维度扩容 + 头部精简 + 图表美观
  *
- * ⚠️ **本轮尚未上线时不要跑**：线上此刻仍是第 93 轮（v=30 / v=20，4 卡、有副标题）。
- *    等用户说「上线」→ push → Pages 指纹轮询命中后再执行本脚本。
+ * ⚠️ 版本号已随第 95 轮 bump 到 v=32 / v=22 —— 第 94、95 轮是**同一批推送**，
+ *    两轮的线上复验都在这一批之后跑（`online94_watch` 与 `online95_watch` 互补：
+ *    前者守 6 卡与造型，后者守国别面板）。
+ *    单独回滚到第 93 轮（v=30 / v=20）时本脚本会红在 A1，属预期。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=31 / watch.js?v=21；css/js 字节 md5 与本地全等；
+ *   ① 指纹：watch.html 引用 watch.css?v=32 / watch.js?v=22；css/js 字节 md5 与本地全等；
  *      线上 JS 里确实没有 st-sub / st-label、且 select 带 aria-label（版本号只说明引用变了）
  *   ② 1440：6 卡（键名与顺序）、指标与本地推导全等、面板 5+Top5 顺序、
  *      12 月柱 / 逐年柱=9 / 类型 3 行 / 区间 5 行、版式真的是 8/4/12 不对称、无溢出零异常
@@ -59,12 +61,12 @@ await page.waitForTimeout(900);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹 ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=31 / watch.js?v=21',
-  /watch\.css\?v=31/.test(html) && /watch\.js\?v=21/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=32 / watch.js?v=22',
+  /watch\.css\?v=32/.test(html) && /watch\.js\?v=22/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=31&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=21&t=' + TS);
+const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=32&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=22&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等', md5txt(liveJs) === md5txt(localJs),
@@ -101,7 +103,7 @@ const probe = () => page.evaluate(() => {
     ariaLabel: (document.getElementById('st-year') || {}).getAttribute
       ? document.getElementById('st-year').getAttribute('aria-label') : '',
     boxMonths: box('[data-panel="months"]'), boxKinds: box('[data-panel="kinds"]'),
-    boxBuckets: box('[data-panel="buckets"]'),
+    boxBuckets: box('[data-panel="buckets"]'), boxPanels: box('.st-panels'),
     ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
   };
 });
@@ -121,18 +123,19 @@ ok('B2 六卡数字与本地同口径推导全等（平均 / 中位数 / ≥8 �
 ok('B3 头部只剩标题 + 下拉：副标题与「统计年份」字样都不在线上页面，aria-label 仍在',
   r.subCount === 0 && r.labelCount === 0 && r.ariaLabel === '统计年份');
 
-ok('B4 面板顺序 月度 / 类型 / 逐年 / 标签 / 评分区间 / Top5',
-  r.panels.join('/') === 'months/kinds/years/tags/buckets/top', r.panels.join('/'));
+ok('B4 面板顺序 月度 / 类型 / 逐年 / 标签 / 评分区间 / 国别 / Top5',
+  r.panels.join('/') === 'months/kinds/years/tags/buckets/country/top', r.panels.join('/'));
 
 ok('B5 内容齐备：12 月柱 / 逐年柱=' + YEARS + ' / 类型 3 行 / 区间 5 行 / 标签 / Top5',
   r.barsMonth === 12 && r.barsYear === YEARS && r.rowsKind === 3 && r.rowsBucket === 5 &&
   r.chips > 0 && r.chips <= 8 && r.top === 5,
   `月=${r.barsMonth} 年=${r.barsYear} 类型=${r.rowsKind} 区间=${r.rowsBucket} chips=${r.chips}`);
 
-ok('B6 版式真的是不对称栅格：月度 ≈ 2/3、类型 ≈ 1/3、评分区间通栏',
-  Math.abs(r.boxMonths.w / r.boxBuckets.w - 8 / 12) < 0.03 &&
-  Math.abs(r.boxKinds.w / r.boxBuckets.w - 4 / 12) < 0.03 && r.boxMonths.t === r.boxKinds.t,
-  `月度 ${r.boxMonths.w} / 类型 ${r.boxKinds.w} / 通栏 ${r.boxBuckets.w}`);
+ok('B6 版式真的是不对称栅格：每行 8 + 4（三行等高）',
+  Math.abs(r.boxMonths.w / r.boxPanels.w - 8 / 12) < 0.03 &&
+  Math.abs(r.boxKinds.w / r.boxPanels.w - 4 / 12) < 0.03 &&
+  Math.abs(r.boxBuckets.w / r.boxPanels.w - 8 / 12) < 0.03 && r.boxMonths.t === r.boxKinds.t,
+  `容器 ${r.boxPanels.w} / 月度 ${r.boxMonths.w} / 类型 ${r.boxKinds.w} / 区间 ${r.boxBuckets.w}`);
 
 ok('B7 1440 无横向溢出 + 零 JS 异常', r.ov <= 0 && errs.length === 0, `ov=${r.ov} err=${errs.length}`);
 await ctx.close();

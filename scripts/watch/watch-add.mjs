@@ -24,6 +24,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import sharp from 'sharp';
+import { parseCountries } from './country-lib.mjs';
 
 import { rebuildShards } from './shard-lib.mjs';
 
@@ -50,6 +51,8 @@ const HELP = `
   --rating <0-10>     评分，可小数
   --order <0-5>       手动排序值（整数，越小越前）；观看时间或评分相同时用它定先后，
                       默认 3（第 78 轮）
+  --country <a,b>     国别，逗号或顿号分隔，可多个（第 95 轮）；会自动归一化
+                      （美/US/USA → 美国，香港 → 中国香港）。不传时保留该条目已有值
   --tags <a,b,c>      逗号分隔
   --note <感想>       一两句短评
   --id <自定义 id>    默认 <watched>-<slug>，指定它可精确覆盖某条
@@ -210,6 +213,10 @@ async function main() {
   const dupNames = data.items.filter((it) =>
     it && it.id !== id && normTitle(it.title) === normTitle(title));
 
+  // 第 95 轮：国别。与 --release 同套路 —— 显式传了才覆盖，不传保留旧值
+  const countries = args.country !== undefined && args.country !== true
+    ? parseCountries(args.country) : null;
+
   // 第 91 轮 A3：上映日期只认完整日期，粗粒度串会和「年份」那一栏混淆
   let releaseDate;
   if (args.release !== undefined && args.release !== true) {
@@ -293,6 +300,9 @@ async function main() {
     ...(variants.length
       ? Object.fromEntries(variants.map((v) => [`poster_${v.w}`, v.rel]))
       : {}),
+    // 第 95 轮：国别数组（空数组视为「没填」，沿用旧值）
+    ...(countries && countries.length ? { countries }
+      : (prev && prev.countries ? { countries: prev.countries } : {})),
     ...(args.tags && args.tags !== true
       ? { tags: String(args.tags).split(',').map((s) => s.trim()).filter(Boolean) }
       : (prev && prev.tags ? { tags: prev.tags } : {})),

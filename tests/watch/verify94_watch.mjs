@@ -50,8 +50,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=31 / watch.js?v=21',
-  /watch\.css\?v=31/.test(html) && /watch\.js\?v=21/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=32 / watch.js?v=22',
+  /watch\.css\?v=32/.test(html) && /watch\.js\?v=22/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 头部：副标题与「统计年份」label 的 DOM 已删，select 补 aria-label 保住可访问名称',
@@ -66,11 +66,11 @@ const spanOf = (k) => {
   const m = css.match(new RegExp('\\.st-panel\\[data-panel="' + k + '"\\]\\s*\\{\\s*grid-column:\\s*span\\s*(\\d+)'));
   return m ? Number(m[1]) : 0;
 };
-ok('A4 面板 12 栅格不对称：月度 8 / 逐年 8 / 类型 4 / 标签 4 / 评分区间 12（通栏）',
+ok('A4 面板 12 栅格不对称：月度 8 / 逐年 8 / 类型 4 / 标签 4 / 评分区间 12（第 95 轮起 8 + 国别 4）',
   /\.st-panels\s*\{[\s\S]*?grid-template-columns:\s*repeat\(12,/.test(css) &&
   spanOf('months') === 8 && spanOf('years') === 8 && spanOf('kinds') === 4 &&
-  spanOf('tags') === 4 && spanOf('buckets') === 12,
-  `months=${spanOf('months')} kinds=${spanOf('kinds')} buckets=${spanOf('buckets')}`);
+  spanOf('tags') === 4 && spanOf('buckets') === 8 && spanOf('country') === 4,
+  `months=${spanOf('months')} kinds=${spanOf('kinds')} buckets=${spanOf('buckets')} country=${spanOf('country')}`);
 
 ok('A5 🔴 860 块里有面板跨度复位（否则容器 1 列 + 子项 span 8 会横向溢出）',
   /@media \(max-width: 860px\)[\s\S]*?\.w-stats \.st-panel\[data-panel\] \{ grid-column: auto; \}/.test(css));
@@ -132,7 +132,7 @@ const probe = () => page.evaluate(() => {
     tickContent: (() => { const e = document.querySelector('[data-panel="buckets"] .st-row-track');
       return e ? getComputedStyle(e, '::after').content : ''; })(),
     boxMonths: box('[data-panel="months"]'), boxKinds: box('[data-panel="kinds"]'),
-    boxBuckets: box('[data-panel="buckets"]'),
+    boxBuckets: box('[data-panel="buckets"]'), boxPanels: box('.st-panels'),
     ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
   };
 });
@@ -153,19 +153,20 @@ ok('B2 六卡数字与本地同口径推导全等',
 ok('B3 头部只剩标题 + 下拉：副标题与「统计年份」字样都不在，aria-label 仍在',
   r.subCount === 0 && r.labelCount === 0 && r.ariaLabel === '统计年份');
 
-ok('B4 面板齐备且顺序为 月度 / 类型 / 逐年 / 标签 / 评分区间 / Top5',
-  r.panels.join('/') === 'months/kinds/years/tags/buckets/top', r.panels.join('/'));
+ok('B4 面板齐备且顺序为 月度 / 类型 / 逐年 / 标签 / 评分区间 / 国别 / Top5',
+  r.panels.join('/') === 'months/kinds/years/tags/buckets/country/top', r.panels.join('/'));
 
 ok('B5 内容齐备：12 月柱 / 逐年柱=9 / 类型 3 行 / 区间 5 行 / 标签 / Top5',
   r.barsMonth === 12 && r.barsYear === YEARS && r.rowsKind === 3 && r.rowsBucket === 5 &&
   r.chips > 0 && r.chips <= 8 && r.top === 5,
   `月=${r.barsMonth} 年=${r.barsYear} 类型=${r.rowsKind} 区间=${r.rowsBucket} chips=${r.chips}`);
 
-ok('B6 美观 #4 版式真的不对称：月度宽 ≈ 2/3、类型 ≈ 1/3、评分区间通栏',
-  Math.abs(r.boxMonths.w / r.boxBuckets.w - 8 / 12) < 0.03 &&
-  Math.abs(r.boxKinds.w / r.boxBuckets.w - 4 / 12) < 0.03 &&
+ok('B6 美观 #4 版式真的不对称：每行都是 8 + 4（三行等高排布）',
+  Math.abs(r.boxMonths.w / r.boxPanels.w - 8 / 12) < 0.03 &&
+  Math.abs(r.boxKinds.w / r.boxPanels.w - 4 / 12) < 0.03 &&
+  Math.abs(r.boxBuckets.w / r.boxPanels.w - 8 / 12) < 0.03 &&
   r.boxMonths.t === r.boxKinds.t,
-  `月度 ${r.boxMonths.w} / 类型 ${r.boxKinds.w} / 通栏 ${r.boxBuckets.w}`);
+  `容器 ${r.boxPanels.w} / 月度 ${r.boxMonths.w} / 类型 ${r.boxKinds.w} / 区间 ${r.boxBuckets.w}`);
 
 ok('B7 美观 #2 基线：.st-plot 有 1px 下边线（柱子落地，不再是飘着）',
   r.baseline === '1px', `border-bottom=${r.baseline}`);

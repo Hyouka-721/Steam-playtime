@@ -343,6 +343,20 @@
     });
     var tags = Object.keys(tagMap).map(function (k) { return { k: k, v: tagMap[k] }; })
       .sort(function (a, b) { return b.v - a.v || a.k.localeCompare(b.k); }).slice(0, 8);
+
+    /* 第 95 轮：国别构成。按国别累计（合拍片在各出品国各计一次，合计可超总数），
+       没填的条目单独计数，用来提示「还有多少部待补」。 */
+    var countryMap = {};
+    items.forEach(function (it) {
+      (Array.isArray(it.countries) ? it.countries : []).forEach(function (c) {
+        if (c) countryMap[c] = (countryMap[c] || 0) + 1;
+      });
+    });
+    var countries = Object.keys(countryMap).map(function (k) { return { k: k, v: countryMap[k] }; })
+      .sort(function (a, b) { return b.v - a.v || a.k.localeCompare(b.k); }).slice(0, 8);
+    var noCountry = items.filter(function (it) {
+      return !(Array.isArray(it.countries) && it.countries.length);
+    }).length;
     var top = rated.slice().sort(function (a, b) {
       return Number(b.rating) - Number(a.rating) ||
              sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
@@ -414,6 +428,12 @@
         }).join('') + '</div>' : '<p class="st-empty">这个范围内还没有标签</p>') +
       '</section>' +
       '<section class="st-panel" data-panel="buckets"><h3>评分区间</h3>' + stRows(buckets) + '</section>' +
+      '<section class="st-panel" data-panel="country"><h3>国别构成' +
+        (noCountry ? '<span class="st-hint">' + noCountry + ' 部待补</span>' : '') + '</h3>' +
+        (countries.length
+          ? stRows(countries) + '<p class="st-note">按国别累计：合拍片会在各出品国各计一次，合计可超过记录总数</p>'
+          : '<p class="st-empty">还没有国别数据 —— 点右下角 + 或编辑任意条目即可填写</p>') +
+      '</section>' +
     '</div>';
     var topHtml = '<section class="st-panel st-top" data-panel="top"><h3>高分 Top 5</h3>' +
       (top.length ? '<ol class="st-top-list">' + top.map(function (it, i) {
@@ -960,7 +980,7 @@
   }
 
   var FIELD_IDS = ['add-title', 'add-en', 'add-kind', 'add-year', 'add-release',
-                   'add-watched', 'add-rating', 'add-order', 'add-tags', 'add-note'];
+                   'add-watched', 'add-rating', 'add-order', 'add-country', 'add-tags', 'add-note'];
   function setField(id, v) {
     var el = document.getElementById(id);
     if (el) el.value = v == null ? '' : String(v);
@@ -968,6 +988,68 @@
   function fieldVal(id) {
     var el = document.getElementById(id);
     return el ? String(el.value == null ? '' : el.value).trim() : '';
+  }
+
+  /* 第 95 轮：国别
+     数据形态是 countries: ["美国", "英国"]（数组）—— 合拍片单值会丢信息。
+     ⚠️ 手填 124 条必然出现「美国 / 美 / US / USA」四种写法，所以这里做**归一化**：
+        别名表统一收敛，输出永远只有规范名；同一部里重复的国别去重。
+     ⚠️ 港澳台一律写成「中国香港 / 中国澳门 / 中国台湾」（与站点口径一致）。 */
+  var COUNTRY_ALIAS = {
+    '中国': '中国', '中国大陆': '中国', '大陆': '中国', 'cn': '中国', 'china': '中国', 'prc': '中国',
+    '中国香港': '中国香港', '香港': '中国香港', '港': '中国香港', 'hk': '中国香港', 'hongkong': '中国香港',
+    '中国澳门': '中国澳门', '澳门': '中国澳门', '澳': '中国澳门', 'mo': '中国澳门', 'macau': '中国澳门', 'macao': '中国澳门',
+    '中国台湾': '中国台湾', '台湾': '中国台湾', '台': '中国台湾', 'tw': '中国台湾', 'taiwan': '中国台湾',
+    '美国': '美国', '美': '美国', 'us': '美国', 'usa': '美国', 'america': '美国', 'unitedstates': '美国',
+    '日本': '日本', '日': '日本', 'jp': '日本', 'japan': '日本',
+    '韩国': '韩国', '南韩': '韩国', '韩': '韩国', 'kr': '韩国', 'korea': '韩国', 'southkorea': '韩国',
+    '英国': '英国', '英': '英国', 'uk': '英国', 'gb': '英国', 'britain': '英国', 'england': '英国',
+    '法国': '法国', '法': '法国', 'fr': '法国', 'france': '法国',
+    '德国': '德国', '德': '德国', 'de': '德国', 'germany': '德国',
+    '意大利': '意大利', '意': '意大利', 'it': '意大利', 'italy': '意大利',
+    '西班牙': '西班牙', '西': '西班牙', 'es': '西班牙', 'spain': '西班牙',
+    '葡萄牙': '葡萄牙', 'pt': '葡萄牙', 'portugal': '葡萄牙',
+    '加拿大': '加拿大', '加': '加拿大', 'ca': '加拿大', 'canada': '加拿大',
+    '澳大利亚': '澳大利亚', '澳洲': '澳大利亚', 'au': '澳大利亚', 'australia': '澳大利亚',
+    '新西兰': '新西兰', 'nz': '新西兰', 'newzealand': '新西兰',
+    '俄罗斯': '俄罗斯', '俄国': '俄罗斯', '俄': '俄罗斯', 'ru': '俄罗斯', 'russia': '俄罗斯',
+    '印度': '印度', '印': '印度', 'in': '印度', 'india': '印度',
+    '泰国': '泰国', '泰': '泰国', 'th': '泰国', 'thailand': '泰国',
+    '爱尔兰': '爱尔兰', 'ie': '爱尔兰', 'ireland': '爱尔兰',
+    '瑞典': '瑞典', 'se': '瑞典', 'sweden': '瑞典',
+    '丹麦': '丹麦', 'dk': '丹麦', 'denmark': '丹麦',
+    '挪威': '挪威', 'no': '挪威', 'norway': '挪威',
+    '芬兰': '芬兰', 'fi': '芬兰', 'finland': '芬兰',
+    '荷兰': '荷兰', 'nl': '荷兰', 'netherlands': '荷兰',
+    '比利时': '比利时', 'be': '比利时', 'belgium': '比利时',
+    '瑞士': '瑞士', 'ch': '瑞士', 'switzerland': '瑞士',
+    '奥地利': '奥地利', 'at': '奥地利', 'austria': '奥地利',
+    '波兰': '波兰', 'pl': '波兰', 'poland': '波兰',
+    '捷克': '捷克', 'cz': '捷克', 'czech': '捷克',
+    '土耳其': '土耳其', 'tr': '土耳其', 'turkey': '土耳其',
+    '巴西': '巴西', 'br': '巴西', 'brazil': '巴西',
+    '墨西哥': '墨西哥', 'mx': '墨西哥', 'mexico': '墨西哥',
+    '阿根廷': '阿根廷', 'ar': '阿根廷', 'argentina': '阿根廷',
+    '南非': '南非', 'za': '南非', 'southafrica': '南非'
+  };
+  function normCountry(s) {
+    var raw = String(s == null ? '' : s).trim().replace(/\s+/g, '');
+    if (!raw) return '';
+    return COUNTRY_ALIAS[raw.toLowerCase()] || raw;   // 表里没有的原样保留（别把生僻国名吞掉）
+  }
+  /* 分隔符：中英文逗号 / 顿号 / 分号 / 斜杠 / 竖线与空白都算 */
+  function readCountryField() {
+    var raw = fieldVal('add-country');
+    if (!raw) return { v: [] };
+    var out = [], seen = {};
+    raw.split(/[,，、;；\/|\s]+/).forEach(function (part) {
+      var c = normCountry(part);
+      if (c && !seen[c]) { seen[c] = 1; out.push(c); }
+    });
+    return { v: out };
+  }
+  function countryText(it) {
+    return Array.isArray(it.countries) ? it.countries.join(', ') : '';
   }
 
   /* 第 78 轮：读「排序」输入框
@@ -1040,6 +1122,7 @@
     setField('add-rating', it.rating == null ? '' : it.rating);
     // 第 78 轮：排序值预填 —— 老数据没有 order 字段，这里直接显示默认值 3
     setField('add-order', orderVal(it));
+    setField('add-country', countryText(it));
     setField('add-tags', Array.isArray(it.tags) ? it.tags.join(', ') : '');
     setField('add-note', it.note || '');
 
@@ -1089,6 +1172,7 @@
     var ratingRaw = fieldVal('add-rating');
     var tagsRaw = fieldVal('add-tags');
     var note = fieldVal('add-note');
+    var countryRead = readCountryField();   // 第 95 轮：国别（归一化 + 去重）
     // 第 78 轮：排序值校验（非法 → 提示并阻断保存，绝不静默改成默认值）
     var orderRead = readOrderField();
     if (!orderRead.ok) { rejectOrder(); return; }
@@ -1112,6 +1196,9 @@
     if (releaseRead.v) next.release_date = releaseRead.v;
     if (ratingRaw !== '' && !isNaN(Number(ratingRaw))) next.rating = Number(ratingRaw);
     next.order = orderRead.v;   // 第 78 轮：显式落库（留空时写默认 3，便于日后直接从数据读）
+    /* 第 95 轮：国别。与 tags 不同 —— 编辑时表单已预填，留空代表用户主动清空，
+       所以**显式不写**该字段（对象逐字段重建，不写即删除）。 */
+    if (countryRead.v.length) next.countries = countryRead.v;
     if (tagsRaw) next.tags = tagsRaw.split(',').map(function (x) { return x.trim(); }).filter(Boolean);
     if (note) next.note = note;
 
@@ -1242,6 +1329,7 @@
     var tagsRaw = tagsEl ? tagsEl.value.trim() : '';
     var noteEl = document.getElementById('add-note');
     var note = noteEl ? noteEl.value.trim() : '';
+    var countryAdd = readCountryField();   // 第 95 轮：国别（在链式请求前读，避免上传期间表单被改）
 
     /* 第 91 轮 A9：重名两段式确认（必须在算出 slug 之后）。
        · 编辑模式排除自身（只是改个名字不该被自己挡住），但不豁免 baseId
@@ -1347,6 +1435,10 @@
         if (releaseRead.v) item.release_date = releaseRead.v;
         if (ratingRaw !== '' && !isNaN(Number(ratingRaw))) item.rating = Number(ratingRaw);
         item.order = orderRead.v;   // 第 78 轮：排序值（0~5，默认 3）
+        /* 第 95 轮：国别。同 id 重录（upd 命中）时若这次没填，沿用已有值 ——
+           「+」录入不会预填，用户不该因为重录把国别弄丢。 */
+        if (countryAdd.v.length) item.countries = countryAdd.v;
+        else if (upd && Array.isArray(upd.countries) && upd.countries.length) item.countries = upd.countries;
         if (tagsRaw) item.tags = tagsRaw.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
         if (note) item.note = note;
 
