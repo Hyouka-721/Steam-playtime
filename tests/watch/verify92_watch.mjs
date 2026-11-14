@@ -40,8 +40,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=30 / watch.js?v=19',
-  /watch\.css\?v=30/.test(html) && /watch\.js\?v=19/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=30 / watch.js?v=20',
+  /watch\.css\?v=30/.test(html) && /watch\.js\?v=20/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 /* 取出两个容器的内容片段，直接看归属 */
@@ -116,10 +116,12 @@ const probe = () => page.evaluate(() => {
 });
 
 const g = await probe();
-ok('B1 网格：左排 4 档不变，右排三个按钮全在（年报在最左）',
+/* 第 93 轮契约：年报按钮只在时间轴出现，网格右排只剩两个排序按钮。
+   本条判据随功能改判 —— 不是调阈值抹红，而是「三个按钮全在」这个前提本身被推翻了。 */
+ok('B1 网格：左排 4 档不变，右排只剩两个排序按钮，年报按钮收起（hidden + display:none）',
   g.segBtns.length === 4 && g.sortVisible.length === 2 && g.sortAll === 2 &&
-  g.statsShown && g.statsText === '年报' && g.statsLeft < g.sortFirstLeft,
-  `左 ${g.segBtns.join('/')}；右 年报@${g.statsLeft} 排序@${g.sortFirstLeft}`);
+  !g.statsShown && g.statsText === '年报',
+  `左 ${g.segBtns.join('/')}；右 排序 ${g.sortVisible.join('/')}；年报显示=${g.statsShown}`);
 
 await page.click('#w-avatar');
 await page.waitForSelector('#w-tl .tl-item', { timeout: 15000 });

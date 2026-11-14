@@ -4,7 +4,7 @@
  *    等用户说「上线」→ fetch/merge → push → Pages 指纹轮询命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=30 / watch.js?v=19；线上 css/js/watch.json 字节
+ *   ① 指纹：watch.html 引用 watch.css?v=30 / watch.js?v=20；线上 css/js/watch.json 字节
  *      md5 与本地全等（CRLF 归一）；**分片真的上线了** —— manifest + 年片与本地逐字节一致，
  *      且 manifest 的 updated_at / total 能与线上主文件对账（对得上才说明线上走的是分片路径）
  *   ② 1440 运行时：A4 年报四卡数字全部由本地数据推导比对、年份下拉切换、返回列表还原；
@@ -87,12 +87,12 @@ await page.waitForTimeout(900);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹（含分片是否真的上线） ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=30 / watch.js?v=19',
-  /watch\.css\?v=30/.test(html) && /watch\.js\?v=19/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=30 / watch.js?v=20',
+  /watch\.css\?v=30/.test(html) && /watch\.js\?v=20/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=30&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=19&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=20&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等（年报几乎全在 CSS，必须一起上线）',
   md5txt(liveCss) === md5txt(localCss), `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等',
@@ -131,6 +131,9 @@ ok('B1 A8 线上首屏卡片数 = 本地条数，且确实走了分片（manifes
   localMf.years.every((y) => shardHits.includes(y.file)) && shardHits.length >= localMf.years.length + 1,
   `卡片 ${n0}/${N} 分片命中 ${shardHits.length} 个`);
 
+/* 第 93 轮：年报按钮只在时间轴出现，线上也要先点头像 */
+await page.click('#w-avatar');
+await page.waitForFunction(() => !document.getElementById('w-tl').hidden, null, { timeout: 20000 });
 await page.click('#w-stats-btn');
 const st = await page.evaluate(() => {
   const cards = [...document.querySelectorAll('.st-card')].map((c) => ({
@@ -179,13 +182,16 @@ await page.click('#w-stats-btn');
 const back = await page.evaluate(() => ({
   hidden: document.getElementById('w-stats').hidden,
   gridHidden: document.getElementById('w-grid').hidden,
+  tlHidden: document.getElementById('w-tl').hidden,
   n: document.querySelectorAll('#w-grid .poster').length,
   pressed: document.getElementById('w-stats-btn').getAttribute('aria-pressed'),
   ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
 }));
-ok('B6 A4 返回列表：网格完全还原、卡片数与 aria-pressed 都对、无横向溢出',
-  back.hidden && !back.gridHidden && back.n === N && back.pressed === 'false' && back.ov <= 0,
-  `卡片 ${back.n} ov=${back.ov}`);
+/* 第 93 轮：年报只从时间轴进，返回落点也是时间轴（判据随功能改判） */
+ok('B6 A4 返回列表：回到进入年报前的视图（时间轴）、卡片数与 aria-pressed 都对、无横向溢出',
+  back.hidden && back.gridHidden && !back.tlHidden && back.n === N &&
+  back.pressed === 'false' && back.ov <= 0,
+  `卡片 ${back.n} tl=${back.tlHidden} ov=${back.ov}`);
 
 /* A9 防重复：只验「被拦住」这一步，绝不点第二次；API 已被 abort，双保险 */
 await page.click('#w-fab');
@@ -233,6 +239,8 @@ ok('C1 390 首张海报起点 ≤330（年报按钮没把排序条挤到第三�
   m0.firstTop > 0 && m0.firstTop <= 330 && m0.seg.l >= -1 && m0.seg.r <= m0.vw + 1 &&
   m0.sort.l >= -1 && m0.sort.r <= m0.vw + 1 && m0.sort.t >= m0.seg.b - 1 && m0.ov <= 0,
   `海报起点 ${m0.firstTop} ov=${m0.ov}`);
+await mp.click('#w-avatar');
+await mp.waitForFunction(() => !document.getElementById('w-tl').hidden, null, { timeout: 20000 });
 await mp.click('#w-stats-btn');
 const m1 = await mp.evaluate(() => ({
   ov: document.documentElement.scrollWidth - window.innerWidth,

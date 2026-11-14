@@ -467,6 +467,10 @@
     tlEl.hidden = !(!statsOn && layout === 'timeline' && total > 0);
     if (statsEl) statsEl.hidden = !statsOn;
     if (statsBtnEl) {
+      /* 第 93 轮：年报按钮只在**时间轴**出现，网格视图的右排只留两个排序按钮。
+         ⚠️ 判据必须带 statsOn —— 年报表展开时用户仍可能点史蒂夫头像切回网格，
+            若只按 layout 判就会把「返回列表」一起藏掉，人被关在年报里出不来。 */
+      statsBtnEl.hidden = !(statsOn || layout === 'timeline');
       statsBtnEl.setAttribute('aria-pressed', statsOn ? 'true' : 'false');
       statsBtnEl.textContent = statsOn ? '返回列表' : '年报';
       statsBtnEl.classList.toggle('is-on', statsOn);

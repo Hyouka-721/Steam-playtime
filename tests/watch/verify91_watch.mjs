@@ -44,8 +44,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=30 / watch.js?v=19',
-  /watch\.css\?v=30/.test(html) && /watch\.js\?v=19/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=30 / watch.js?v=20',
+  /watch\.css\?v=30/.test(html) && /watch\.js\?v=20/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const relInput = (html.match(/<input[^>]*id="add-release"[^>]*>/) || [''])[0];
@@ -232,6 +232,9 @@ const MOCK3 = {
   const { ctx, page } = await newPage();
   await page.goto(BASE + 'watch.html', { waitUntil: 'load' });
   await page.waitForSelector('#w-grid .poster', { timeout: 12000 });
+  /* 第 93 轮：年报按钮只在时间轴出现，进年报前必须先点头像切视图 */
+  await page.click('#w-avatar');
+  await page.waitForSelector('#w-tl .tl-item', { timeout: 12000 });
   await page.click('#w-stats-btn');
   const r = await page.evaluate(() => ({
     statsHidden: document.getElementById('w-stats').hidden,
@@ -275,11 +278,32 @@ const MOCK3 = {
   const back = await page.evaluate(() => ({
     statsHidden: document.getElementById('w-stats').hidden,
     gridHidden: document.getElementById('w-grid').hidden,
+    tlHidden: document.getElementById('w-tl').hidden,
     n: document.querySelectorAll('#w-grid .poster').length,
-    pressed: document.getElementById('w-stats-btn').getAttribute('aria-pressed')
+    pressed: document.getElementById('w-stats-btn').getAttribute('aria-pressed'),
+    statsBtnShown: (() => {
+      const b = document.getElementById('w-stats-btn');
+      return !!b && !b.hidden && getComputedStyle(b).display !== 'none';
+    })()
   }));
-  ok('C9 A4 再点返回列表：完全还原网格、卡片数与 aria-pressed 都对',
-    back.statsHidden && !back.gridHidden && back.n === N && back.pressed === 'false');
+  /* 第 93 轮契约演进：年报按钮只在时间轴出现，所以「从年报返回」的落点是时间轴而非网格。
+     判据随功能改判（不是调阈值抹红）：返回后应当在时间轴、年报按钮仍在。 */
+  ok('C9 A4 再点返回列表：回到进入年报前的视图（时间轴）、卡片数与 aria-pressed 都对',
+    back.statsHidden && back.gridHidden && !back.tlHidden && back.n === N &&
+    back.pressed === 'false' && back.statsBtnShown,
+    `grid=${back.gridHidden} tl=${back.tlHidden} n=${back.n}`);
+
+  await page.click('#w-avatar');
+  await page.waitForFunction(() => !document.getElementById('w-grid').hidden, null, { timeout: 12000 });
+  const back2 = await page.evaluate(() => ({
+    n: document.querySelectorAll('#w-grid .poster').length,
+    statsBtnShown: (() => {
+      const b = document.getElementById('w-stats-btn');
+      return !!b && !b.hidden && getComputedStyle(b).display !== 'none';
+    })()
+  }));
+  ok('C9b A4 回到网格：年报按钮重新收起、卡片一张不少',
+    back2.n === N && !back2.statsBtnShown, `n=${back2.n} 年报显示=${back2.statsBtnShown}`);
   await ctx.close();
 }
 
@@ -406,6 +430,9 @@ console.log('== D 390 窄屏 ==');
   await page.waitForSelector('#w-grid .poster', { timeout: 12000 });
   const gridOverflow = await page.evaluate(() =>
     document.documentElement.scrollWidth - window.innerWidth);
+  /* 第 93 轮：390 网格下年报按钮不可见，先切时间轴 */
+  await page.click('#w-avatar');
+  await page.waitForFunction(() => !document.getElementById('w-tl').hidden, null, { timeout: 12000 });
   await page.click('#w-stats-btn');
   const r = await page.evaluate(() => ({
     overflow: document.documentElement.scrollWidth - window.innerWidth,
