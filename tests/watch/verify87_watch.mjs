@@ -162,8 +162,8 @@ ok('A12 生成器 scripts/media/watch-icons.mjs 在，SET 里是这六个基名 
 
 /* A13 本次只动图标，样式与脚本版本不该被顺带改掉 */
 const cssRaw = fs.readFileSync(DOCS + 'watch.css', 'utf8');
-ok('A13 仍引用 watch.css?v=30（本轮没碰样式）',
-  /watch\.css\?v=30/.test(html) && cssRaw.length > 30000,
+ok('A13 仍引用 watch.css?v=31（本轮没碰样式）',
+  /watch\.css\?v=31/.test(html) && cssRaw.length > 30000,
   (html.match(/watch\.css\?v=\d+/) || [])[0]);
 
 /* ================= B 运行时（1440） ================= */

@@ -274,15 +274,24 @@
       return String(it.watched_at || '').slice(0, 4) === statsYear;
     });
   }
+  /* 第 94 轮：柱状图拆成「图区 + 轴区」两行 —— 原来刻度标签和柱子挤在同一列里，
+     基线只能画在标签下面（视觉上柱子是飘的）。拆开后 .st-plot 的 border-bottom
+     就是一条真正的基线，轴区用同一套 grid 轨道对齐，标签一个不差。
+     empty 柱给 is-empty（美观 #3）：0 条不再是「看不见」，而是 3px 灰桩 = 这个月没看。 */
   function stBars(pairs, max) {
     var top = max > 0 ? max : 1;
-    return '<div class="st-bars">' + pairs.map(function (p) {
-      return '<div class="st-bar">' +
-        '<span class="st-bar-num">' + (p.v || '') + '</span>' +
-        '<i style="height:' + Math.round(p.v / top * 100) + '%"></i>' +
-        '<span class="st-bar-lab">' + esc(p.k) + '</span>' +
-      '</div>';
-    }).join('') + '</div>';
+    return '<div class="st-bars">' +
+      '<div class="st-plot">' + pairs.map(function (p) {
+        return '<div class="st-bar">' +
+          '<span class="st-bar-num">' + (p.v || '') + '</span>' +
+          '<i' + (p.v ? '' : ' class="is-empty"') +
+            ' style="height:' + (p.v ? Math.round(p.v / top * 100) : 0) + '%"></i>' +
+        '</div>';
+      }).join('') + '</div>' +
+      '<div class="st-axis">' + pairs.map(function (p) {
+        return '<span class="st-bar-lab' + (p.on ? ' is-on' : '') + '">' + esc(p.k) + '</span>';
+      }).join('') + '</div>' +
+    '</div>';
   }
   function stRows(pairs) {
     var max = 0;
@@ -339,6 +348,33 @@
              sortKey(b.watched_at).localeCompare(sortKey(a.watched_at));
     }).slice(0, 5);
 
+    /* 第 94 轮：逐年趋势。口径上**不吃年份下拉** —— 选某一年时高亮那根柱子，
+       而不是把趋势图缩成孤零零一根；类型筛选照常跟随。 */
+    var trendItems = visible();
+    var yMap = {};
+    trendItems.forEach(function (it) {
+      var ym = /^(\d{4})/.exec(String(it.watched_at || ''));
+      if (ym) yMap[ym[1]] = (yMap[ym[1]] || 0) + 1;
+    });
+    var yearPairs = Object.keys(yMap).sort().map(function (y) {
+      return { k: y, v: yMap[y], on: statsYear === y };
+    });
+    var yearMax = 1;
+    yearPairs.forEach(function (p) { if (p.v > yearMax) yearMax = p.v; });
+
+    /* 中位数与 ≥8 分占比：平均分会被极端值拉偏，中位数一放上去，
+       「平均 vs 中位」差多少本身就是结论。 */
+    var sortedR = rated.map(function (it) { return Number(it.rating); })
+      .sort(function (a, b) { return a - b; });
+    var median = 0;
+    if (sortedR.length) {
+      var mid = Math.floor(sortedR.length / 2);
+      median = sortedR.length % 2
+        ? sortedR[mid] : (sortedR[mid - 1] + sortedR[mid]) / 2;
+    }
+    var highCount = rated.filter(function (it) { return Number(it.rating) >= 8; }).length;
+    var highPct = rated.length ? highCount / rated.length * 100 : 0;
+
     var opts = '<option value="">全部年份</option>' + years.map(function (y) {
       return '<option value="' + esc(y) + '"' + (statsYear === y ? ' selected' : '') + '>' + esc(y) + ' 年</option>';
     }).join('');
@@ -346,30 +382,40 @@
       { k: '记录总数', v: String(items.length), u: '部' },
       { k: '有评分', v: String(rated.length), u: '部' },
       { k: '平均评分', v: rated.length ? avg.toFixed(2) : '—', u: '分' },
+      { k: '评分中位数', v: rated.length ? median.toFixed(2) : '—', u: '分' },
+      { k: '≥8 分占比', v: rated.length ? highPct.toFixed(1) : '—', u: '%' },
       { k: '观影天数', v: String(Object.keys(daySet).length), u: '天' }
     ];
+    /* 第 94 轮：按用户要求删掉「XX 类型 · 共 N 条记录 · 全部由当前数据现场派生」副标题
+       和「统计年份」四个字。⚠️ label 只是视觉删掉 —— select 补 aria-label，
+       否则屏幕阅读器只剩「全部年份 组合框」，等于把可访问名称一起删了。 */
     var head = '<div class="st-head">' +
-      '<div><h2 class="st-title">观影统计' + (statsYear ? ' · ' + esc(statsYear) + ' 年' : ' · 全部年份') + '</h2>' +
-      '<p class="st-sub">' + (kind === 'all' ? '全部类型' : kindLabel(kind)) + ' · 共 ' + items.length +
-      ' 条记录 · 全部由当前数据现场派生</p></div>' +
-      '<div class="st-pick"><label class="st-label" for="st-year">统计年份</label>' +
-      '<select class="st-select" id="st-year">' + opts + '</select></div>' +
+      '<h2 class="st-title">观影统计' + (statsYear ? ' · ' + esc(statsYear) + ' 年' : ' · 全部年份') + '</h2>' +
+      '<div class="st-pick">' +
+        '<select class="st-select" id="st-year" aria-label="统计年份">' + opts + '</select>' +
+      '</div>' +
     '</div>';
     var cardHtml = '<div class="st-cards">' + cards.map(function (c) {
       return '<div class="st-card"><span class="st-k">' + esc(c.k) + '</span>' +
         '<b class="st-v">' + esc(c.v) + '</b><span class="st-u">' + esc(c.u) + '</span></div>';
     }).join('') + '</div>';
+    /* 每个面板都挂 data-panel：套件按面板取数（[data-panel="months"] .st-bar），
+       以后再加面板就不用改旧判据了。⚠️ DOM 顺序决定栅格自动排布：
+       月度(8) + 类型(4) 一行、逐年(8) + 标签(4) 一行、评分区间(12) 独占一行。 */
     var panels = '<div class="st-panels">' +
-      '<section class="st-panel"><h3>月度分布</h3>' + stBars(months, monthMax) + '</section>' +
-      '<section class="st-panel"><h3>类型构成</h3>' + stRows(kinds) + '</section>' +
-      '<section class="st-panel"><h3>评分区间</h3>' + stRows(buckets) + '</section>' +
-      '<section class="st-panel"><h3>高频标签</h3>' +
+      '<section class="st-panel" data-panel="months"><h3>月度分布</h3>' + stBars(months, monthMax) + '</section>' +
+      '<section class="st-panel" data-panel="kinds"><h3>类型构成</h3>' + stRows(kinds) + '</section>' +
+      '<section class="st-panel" data-panel="years"><h3>逐年趋势</h3>' +
+        (yearPairs.length ? stBars(yearPairs, yearMax) : '<p class="st-empty">还没有可统计的年份</p>') +
+      '</section>' +
+      '<section class="st-panel" data-panel="tags"><h3>高频标签</h3>' +
         (tags.length ? '<div class="st-chips">' + tags.map(function (t) {
           return '<span class="st-chip">' + esc(t.k) + '<i>' + t.v + '</i></span>';
         }).join('') + '</div>' : '<p class="st-empty">这个范围内还没有标签</p>') +
       '</section>' +
+      '<section class="st-panel" data-panel="buckets"><h3>评分区间</h3>' + stRows(buckets) + '</section>' +
     '</div>';
-    var topHtml = '<section class="st-panel st-top"><h3>高分 Top 5</h3>' +
+    var topHtml = '<section class="st-panel st-top" data-panel="top"><h3>高分 Top 5</h3>' +
       (top.length ? '<ol class="st-top-list">' + top.map(function (it, i) {
         return '<li class="st-top-item">' +
           '<span class="st-top-rank">' + (i + 1) + '</span>' +

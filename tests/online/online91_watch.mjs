@@ -4,7 +4,7 @@
  *    等用户说「上线」→ fetch/merge → push → Pages 指纹轮询命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=30 / watch.js?v=20；线上 css/js/watch.json 字节
+ *   ① 指纹：watch.html 引用 watch.css?v=31 / watch.js?v=21；线上 css/js/watch.json 字节
  *      md5 与本地全等（CRLF 归一）；**分片真的上线了** —— manifest + 年片与本地逐字节一致，
  *      且 manifest 的 updated_at / total 能与线上主文件对账（对得上才说明线上走的是分片路径）
  *   ② 1440 运行时：A4 年报四卡数字全部由本地数据推导比对、年份下拉切换、返回列表还原；
@@ -47,6 +47,16 @@ const yearCount = {};
 ITEMS.forEach((x) => { const y = String(x.watched_at || '').slice(0, 4); yearCount[y] = (yearCount[y] || 0) + 1; });
 const YEAR_OPT = Object.keys(yearCount).length + 1;                  // + 「全部年份」
 const P2020 = String(yearCount['2020'] || 0);
+/* 第 94 轮新增两卡：评分中位数、≥8 分占比，按同一口径本地推导 */
+const SORTED_R = RATED.map((x) => Number(x.rating)).sort((a, b) => a - b);
+const MID = Math.floor(SORTED_R.length / 2);
+const MEDIAN = SORTED_R.length
+  ? (SORTED_R.length % 2 ? SORTED_R[MID] : (SORTED_R[MID - 1] + SORTED_R[MID]) / 2).toFixed(2)
+  : '—';
+const HIGHPCT = RATED.length
+  ? (RATED.filter((x) => Number(x.rating) >= 8).length / RATED.length * 100).toFixed(1)
+  : '—';
+const YEAR_BARS = Object.keys(yearCount).length;   // 逐年趋势的柱子数 = 有记录的年份数
 
 let pass = 0, fail = 0;
 const ok = (n, c, extra = '') => {
@@ -87,12 +97,12 @@ await page.waitForTimeout(900);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹（含分片是否真的上线） ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=30 / watch.js?v=20',
-  /watch\.css\?v=30/.test(html) && /watch\.js\?v=20/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=31 / watch.js?v=21',
+  /watch\.css\?v=31/.test(html) && /watch\.js\?v=21/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=30&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=20&t=' + TS);
+const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=31&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=21&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等（年报几乎全在 CSS，必须一起上线）',
   md5txt(liveCss) === md5txt(localCss), `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等',
@@ -150,8 +160,12 @@ const st = await page.evaluate(() => {
     sortBtnsHidden: [...document.querySelectorAll('#w-sort .w-sort-btn')].every((b) => b.hidden && getComputedStyle(b).display === 'none'),
     pressed: document.getElementById('w-stats-btn').getAttribute('aria-pressed'),
     btnText: document.getElementById('w-stats-btn').textContent.trim(),
-    cards, bars: document.querySelectorAll('.st-bar').length,
-    rows: document.querySelectorAll('.st-row').length,
+    /* 第 94 轮：按面板取数（月度 / 逐年 分开，类型 / 区间 分开） */
+    cards,
+    barsMonth: document.querySelectorAll('[data-panel="months"] .st-bar').length,
+    barsYear: document.querySelectorAll('[data-panel="years"] .st-bar').length,
+    rowsKind: document.querySelectorAll('[data-panel="kinds"] .st-row').length,
+    rowsBucket: document.querySelectorAll('[data-panel="buckets"] .st-row').length,
     chips: document.querySelectorAll('.st-chip').length,
     top: document.querySelectorAll('.st-top-item').length,
     years: document.querySelectorAll('#st-year option').length,
@@ -162,14 +176,16 @@ ok('B2 A4 年报展开：年报占位、网格/时间轴收起、右排只留「
   !st.hidden && st.gridHidden && st.tlHidden && st.sortWrapShown && st.sortBtnsHidden &&
   st.pressed === 'true' && st.btnText === '返回列表');
 const card = (k) => (st.cards.find((c) => c.k === k) || {}).v;
-ok('B3 A4 四卡数字与本地数据推导全等（记录总数 / 有评分 / 平均评分 / 观影天数）',
-  st.cards.length === 4 && card('记录总数') === String(N) && card('有评分') === String(RATED.length) &&
-  card('平均评分') === AVG && card('观影天数') === String(DAYS),
-  `${card('记录总数')}/${card('有评分')}/${card('平均评分')}/${card('观影天数')} vs ${N}/${RATED.length}/${AVG}/${DAYS}`);
-ok('B4 A4 面板齐备：12 月柱 / 8 行评分区间 / 标签 1~8 / 高分 Top5 / 年份选项数对',
-  st.bars === 12 && st.rows === 8 && st.chips > 0 && st.chips <= 8 && st.top === 5 &&
+ok('B3 A4 六卡数字与本地数据推导全等（记录总数 / 有评分 / 平均评分 / 中位数 / ≥8 占比 / 观影天数）',
+  st.cards.length === 6 && card('记录总数') === String(N) && card('有评分') === String(RATED.length) &&
+  card('平均评分') === AVG && card('评分中位数') === MEDIAN &&
+  card('≥8 分占比') === HIGHPCT && card('观影天数') === String(DAYS),
+  `${card('平均评分')}/${card('评分中位数')}/${card('≥8 分占比')} vs ${AVG}/${MEDIAN}/${HIGHPCT}`);
+ok('B4 A4 面板齐备：12 月柱 / 逐年柱=年份数 / 类型 3 行 + 区间 5 行 / 标签 1~8 / Top5 / 年份选项数对',
+  st.barsMonth === 12 && st.barsYear === YEAR_BARS && st.rowsKind === 3 && st.rowsBucket === 5 &&
+  st.chips > 0 && st.chips <= 8 && st.top === 5 &&
   st.years === YEAR_OPT && /全部年份/.test(st.title),
-  `bars=${st.bars} rows=${st.rows} chips=${st.chips} top=${st.top} years=${st.years}`);
+  `月=${st.barsMonth} 年=${st.barsYear} 类型=${st.rowsKind} 区间=${st.rowsBucket} chips=${st.chips} top=${st.top}`);
 await page.selectOption('#st-year', '2020');
 const st20 = await page.evaluate(() => ({
   v: (document.querySelector('.st-card .st-v') || {}).textContent || '',

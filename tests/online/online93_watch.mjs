@@ -4,7 +4,7 @@
  *    等用户说「上线」→ push → Pages 指纹轮询命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=30 / watch.js?v=20；线上 css/js 字节 md5 与本地全等；
+ *   ① 指纹：watch.html 引用 watch.css?v=31 / watch.js?v=21；线上 css/js 字节 md5 与本地全等；
  *      线上 JS 里确实有这轮的判据（`statsBtnEl.hidden = !(statsOn || layout === 'timeline')`）
  *      —— 版本号只说明引用变了，判据在字节里才说明逻辑真的上线
  *   ② 1440：网格 = 年报 **hidden 且 computed display:none**（只看 hidden 属性不够，第 92 轮的
@@ -51,12 +51,12 @@ await page.waitForTimeout(900);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹 ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=30 / watch.js?v=20',
-  /watch\.css\?v=30/.test(html) && /watch\.js\?v=20/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=31 / watch.js?v=21',
+  /watch\.css\?v=31/.test(html) && /watch\.js\?v=21/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=30&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=20&t=' + TS);
+const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=31&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=21&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等（本轮 CSS 未动，等于校验没被别的轮次串版）',
   md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);

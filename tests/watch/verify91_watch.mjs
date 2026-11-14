@@ -44,8 +44,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=30 / watch.js?v=20',
-  /watch\.css\?v=30/.test(html) && /watch\.js\?v=20/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=31 / watch.js?v=21',
+  /watch\.css\?v=31/.test(html) && /watch\.js\?v=21/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const relInput = (html.match(/<input[^>]*id="add-release"[^>]*>/) || [''])[0];
@@ -249,8 +249,11 @@ const MOCK3 = {
     btnText: document.getElementById('w-stats-btn').textContent.trim(),
     cards: document.querySelectorAll('.st-card').length,
     v0: (document.querySelector('.st-card .st-v') || {}).textContent || '',
-    bars: document.querySelectorAll('.st-bar').length,
-    rows: document.querySelectorAll('.st-row').length,
+    /* 第 94 轮：柱/行分属不同面板，改成按 data-panel 取数 —— 以后再加面板不用动这条 */
+    barsMonth: document.querySelectorAll('[data-panel="months"] .st-bar').length,
+    barsYear: document.querySelectorAll('[data-panel="years"] .st-bar').length,
+    rowsKind: document.querySelectorAll('[data-panel="kinds"] .st-row').length,
+    rowsBucket: document.querySelectorAll('[data-panel="buckets"] .st-row').length,
     chips: document.querySelectorAll('.st-chip').length,
     top: document.querySelectorAll('.st-top-item').length,
     years: document.querySelectorAll('#st-year option').length,
@@ -259,10 +262,13 @@ const MOCK3 = {
   ok('C6 A4 年报展开：三个容器状态正确、按钮 aria-pressed 与文案同步（第 92 轮起右排只收排序按钮、留「返回列表」）',
     !r.statsHidden && r.gridHidden && r.tlHidden && r.sortWrapVisible && r.sortBtnsHidden &&
     r.statsBtnVisible && r.pressed === 'true' && r.btnText === '返回列表');
-  ok('C7 A4 内容齐备：4 卡 / 12 月柱 / 8 横行 / 标签 / Top5 / 10 个年份选项',
-    r.cards === 4 && r.bars === 12 && r.rows === 8 && r.chips > 0 && r.chips <= 8 &&
+  /* 第 94 轮契约演进：4 卡 → 6 卡（+评分中位数 +≥8 分占比）、新增「逐年趋势」面板，
+     所以柱/行必须按面板分别计数，旧的「全库 12 柱 / 8 行」已不成立。 */
+  ok('C7 A4 内容齐备：6 卡 / 12 月柱 / 逐年柱=年份数 / 类型 3 行 + 区间 5 行 / 标签 / Top5 / 10 个年份选项',
+    r.cards === 6 && r.barsMonth === 12 && r.barsYear === Object.keys(yearCounts).length &&
+    r.rowsKind === 3 && r.rowsBucket === 5 && r.chips > 0 && r.chips <= 8 &&
     r.top === 5 && r.years === 10 && r.v0 === String(N) && /全部年份/.test(r.title),
-    `cards=${r.cards} bars=${r.bars} rows=${r.rows} chips=${r.chips} top=${r.top} years=${r.years} 总数=${r.v0}`);
+    `cards=${r.cards} 月=${r.barsMonth} 年=${r.barsYear} 类型=${r.rowsKind} 区间=${r.rowsBucket} chips=${r.chips} 总数=${r.v0}`);
 
   await page.selectOption('#st-year', '2020');
   const r2 = await page.evaluate(() => ({
