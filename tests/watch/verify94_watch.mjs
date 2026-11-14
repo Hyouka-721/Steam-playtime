@@ -50,8 +50,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=41 / watch.js?v=32',
-  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=41 / watch.js?v=33',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=33/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 头部：副标题与「统计年份」label 的 DOM 已删，select 补 aria-label 保住可访问名称',
@@ -149,18 +149,19 @@ const probe = () => page.evaluate(() => {
 
 const r = await probe();
 const card = (k) => (r.cards.find((c) => c.k === k) || {}).v;
-/* 第 102 轮改判：删「有评分 / 评分中位数」、加用户指定的三部「最佳」，6 卡 → 7 卡。 */
-ok('B1 七张卡，键名与顺序：记录总数 / 平均评分 / ≥8 分占比 / 观影天数 / 最佳电影 / 最佳剧集 / 最佳番剧',
-  r.cards.length === 7 &&
-  r.cards.map((c) => c.k).join('/') === '记录总数/平均评分/≥8 分占比/观影天数/最佳电影/最佳剧集/最佳番剧',
+/* 第 103 轮改判：删三部「最佳」、加「观影密度 / 峰值月份」，7 卡 → 6 卡。 */
+ok('B1 六张卡，键名与顺序：记录总数 / 平均评分 / ≥8 分占比 / 观影天数 / 观影密度 / 峰值月份',
+  r.cards.length === 6 &&
+  r.cards.map((c) => c.k).join('/') === '记录总数/平均评分/≥8 分占比/观影天数/观影密度/峰值月份',
   r.cards.map((c) => c.k).join('/'));
 
-ok('B2 七卡数字与本地同口径推导全等（数字四卡 + 最佳三卡）',
+/* 第 103 轮改判：密度 3.6% / 峰值月份 7月·16 部与 docs/data/watch.json 全库推导同值（口径见 watch.js）。 */
+ok('B2 六卡数字与本地同口径推导全等（数字四卡 + 密度 + 峰值月份）',
   card('记录总数') === String(N) &&
   card('平均评分') === AVG &&
   card('≥8 分占比') === HIGHPCT && card('观影天数') === String(DAYS) &&
-  card('最佳电影') === '情书' && card('最佳剧集') === '是大臣' && card('最佳番剧') === '冰菓',
-  `${card('平均评分')}/${card('≥8 分占比')}/${card('观影天数')} vs ${AVG}/${HIGHPCT}/${DAYS} · 最佳 ${card('最佳电影')}/${card('最佳剧集')}/${card('最佳番剧')}`);
+  card('观影密度') === '3.6' && card('峰值月份') === '7月',
+  `${card('平均评分')}/${card('≥8 分占比')}/${card('观影天数')} vs ${AVG}/${HIGHPCT}/${DAYS} · 密度 ${card('观影密度')}% 峰值 ${card('峰值月份')}`);
 
 ok('B3 头部只剩标题 + 下拉：副标题与「统计年份」字样都不在，aria-label 仍在',
   r.subCount === 0 && r.labelCount === 0 && r.ariaLabel === '统计年份');
@@ -258,17 +259,18 @@ const m = await p2.evaluate(() => {
     numText: empties.length ? empties[0].querySelector('.st-bar-num').textContent.trim() : '',
     yearsBars: document.querySelectorAll('[data-panel="years"] .st-bar').length,
     cards: document.querySelectorAll('.st-card').length,
-    bestMovie: (document.querySelectorAll('.st-card .st-v')[4] || {}).textContent || '',
+    density: (document.querySelectorAll('.st-card .st-v')[4] || {}).textContent || '',
     pct: (document.querySelectorAll('.st-card .st-v')[2] || {}).textContent || ''
   };
 });
 ok('B14 空值灰桩：12 根柱里 11 根 is-empty、灰桩高 3px、数字位留空（「这个月没看」也是信息）',
   m.total === 12 && m.empties === 11 && m.stubH === '3px' && m.numText === '',
   `柱 ${m.total} 空 ${m.empties} 高 ${m.stubH}`);
-/* 第 102 轮改判：6 卡 → 7 卡（删中位数、加三部「最佳」），中位数断言换成最佳电影卡。 */
-ok('B15 小样本退化正常：1 个年份 1 根柱、7 卡仍在、最佳电影=情书、≥8 占比 66.7%',
-  m.yearsBars === 1 && m.cards === 7 && m.bestMovie === '情书' && m.pct === '66.7',
-  `年柱 ${m.yearsBars} 最佳电影 ${m.bestMovie} 占比 ${m.pct} err=${e2.length}`);
+/* 第 103 轮改判：7 卡 → 6 卡（删三部「最佳」），取数 [4] 现在是「观影密度」卡
+   （小样本造数场景只断卡在且有值，不锁数值——跨度口径随造数日期变化）。 */
+ok('B15 小样本退化正常：1 个年份 1 根柱、6 卡仍在、密度卡有值、≥8 占比 66.7%',
+  m.yearsBars === 1 && m.cards === 6 && m.density !== '' && m.pct === '66.7',
+  `年柱 ${m.yearsBars} 密度 ${m.density} 占比 ${m.pct} err=${e2.length}`);
 await c2.close();
 
 /* ---------------- C 390 窄屏 ---------------- */

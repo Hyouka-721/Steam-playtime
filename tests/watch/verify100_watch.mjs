@@ -42,8 +42,8 @@ const angDiff = (a, b) => { const d = Math.abs(a - b) % 360; return d > 180 ? 36
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=41 / watch.js?v=32（三个 docs 文件都改了，两条缓存键各 bump）',
-  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=41 / watch.js?v=33（三个 docs 文件都改了，两条缓存键各 bump）',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=33/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 /* ⚠️ 源码注释里写了「删除上映日期」这句话，静态判据必须先剥 HTML 注释再判界面标记；

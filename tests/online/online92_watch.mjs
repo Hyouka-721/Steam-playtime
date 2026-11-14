@@ -4,7 +4,7 @@
  *    等用户说「上线」→ push → Pages 指纹轮询命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=41 / watch.js?v=32；线上 css/js 字节 md5 与本地全等；
+ *   ① 指纹：watch.html 引用 watch.css?v=41 / watch.js?v=33；线上 css/js 字节 md5 与本地全等；
  *      线上 CSS 里确实有这轮的两条硬证据（`.w-sort .w-stats-btn` 并入胶囊 + `.w-sort [hidden]` 兜底）
  *   ② 1440：网格 = 左排 4 档 + 右排 3 个（年报在最左）；时间轴 = 右排只剩年报，两个排序按钮
  *      **computed display:none**（这才是「死控件已修」的硬证据，只看 hidden 属性不够）；
@@ -49,12 +49,12 @@ await page.waitForTimeout(900);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹 ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=41 / watch.js?v=32',
-  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=41 / watch.js?v=33',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=33/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=41&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=32&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=33&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等（js 也改了 paint，必须一起上线）',

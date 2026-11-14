@@ -58,8 +58,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=41 / watch.js?v=32（CSS 改限宽、JS 改国别规范名，两个都要 bump）',
-  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=41 / watch.js?v=33（CSS 改限宽、JS 改国别规范名，两个都要 bump）',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=33/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const statsBlock = (/(^|\n)\.w-stats \{[^}]*\}/.exec(css) || [''])[0];
@@ -170,9 +170,9 @@ const browser = await chromium.launch();
     r.cRows.map((x) => x.k + '=' + x.v).join('/') + ` | 提示「${r.cHint}」`);
 
   /* 第 101 轮改判（用户「删除类型构成选项卡」）：类型面板连同横条一起删除，3 行改为 0 行。 */
-  /* 第 102 轮改判：删「有评分 / 评分中位数」、加三部「最佳」，6 卡 → 7 卡。 */
-  ok('B4 其余面板没被本轮改动带坏：7 卡 / 12 月柱 / 逐年 ' + YEARS + ' 柱 / 区间 5 行 / 年度影视 9 条；类型行已删净',
-    r.cards === 7 && r.barsMonth === 12 && r.barsYear === YEARS &&
+  /* 第 103 轮改判：删三部「最佳」、加「观影密度 / 峰值月份」，7 卡 → 6 卡。 */
+  ok('B4 其余面板没被本轮改动带坏：6 卡 / 12 月柱 / 逐年 ' + YEARS + ' 柱 / 区间 5 行 / 年度影视 9 条；类型行已删净',
+    r.cards === 6 && r.barsMonth === 12 && r.barsYear === YEARS &&
     r.rowsKind === 0 && r.rowsBucket === 5 && r.top === 9,
     `卡${r.cards} 月${r.barsMonth} 年${r.barsYear} 类${r.rowsKind} 区间${r.rowsBucket} top${r.top}`);
 
@@ -267,7 +267,7 @@ console.log('== D 390 窄屏 ==');
       ov: document.documentElement.scrollWidth - window.innerWidth
     };
   });
-  ok('D1 390：7 卡 2 列、面板单列、年报不越界、无横向溢出',
+  ok('D1 390：6 卡 2 列、面板单列、年报不越界、无横向溢出',
     m.cardCols === 2 && m.panelCols === 1 && m.countryW > 0 && m.countryW <= m.vw &&
     m.stW <= m.vw && m.ov <= 0,
     `卡${m.cardCols} 面板${m.panelCols} 年报${m.stW} country${m.countryW} ov=${m.ov}`);

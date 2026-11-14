@@ -4,7 +4,7 @@
  *    等用户说「上线」→ fetch/merge → push → Pages 指纹轮询命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=41 / watch.js?v=32；线上 css/js/watch.json 字节
+ *   ① 指纹：watch.html 引用 watch.css?v=41 / watch.js?v=33；线上 css/js/watch.json 字节
  *      md5 与本地全等（CRLF 归一）；**分片真的上线了** —— manifest + 年片与本地逐字节一致，
  *      且 manifest 的 updated_at / total 能与线上主文件对账（对得上才说明线上走的是分片路径）
  *   ② 1440 运行时：A4 年报四卡数字全部由本地数据推导比对、年份下拉切换、返回列表还原；
@@ -93,12 +93,12 @@ await page.waitForTimeout(900);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹（含分片是否真的上线） ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=41 / watch.js?v=32',
-  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=41 / watch.js?v=33',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=33/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=41&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=32&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=33&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等（年报几乎全在 CSS，必须一起上线）',
   md5txt(liveCss) === md5txt(localCss), `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等',
@@ -172,12 +172,12 @@ ok('B2 A4 年报展开：年报占位、网格/时间轴收起、右排只留「
   !st.hidden && st.gridHidden && st.tlHidden && st.sortWrapShown && st.sortBtnsHidden &&
   st.pressed === 'true' && st.btnText === '年度报告');   /* 第 102 轮：两态恒「年度报告」 */
 const card = (k) => (st.cards.find((c) => c.k === k) || {}).v;
-/* 第 102 轮改判：删「有评分 / 评分中位数」、加用户指定的三部「最佳」，6 卡 → 7 卡。 */
-ok('B3 A4 七卡与本地数据推导全等（数字四卡 + 最佳三卡）',
-  st.cards.length === 7 && card('记录总数') === String(N) &&
+/* 第 103 轮改判：删三部「最佳」、加「观影密度 / 峰值月份」，7 卡 → 6 卡。 */
+ok('B3 A4 六卡与本地数据推导全等（数字四卡 + 密度 + 峰值月份）',
+  st.cards.length === 6 && card('记录总数') === String(N) &&
   card('平均评分') === AVG && card('≥8 分占比') === HIGHPCT && card('观影天数') === String(DAYS) &&
-  card('最佳电影') === '情书' && card('最佳剧集') === '是大臣' && card('最佳番剧') === '冰菓',
-  `${card('平均评分')}/${card('≥8 分占比')} vs ${AVG}/${HIGHPCT} · 最佳 ${card('最佳电影')}/${card('最佳剧集')}/${card('最佳番剧')}`);
+  card('观影密度') === '3.6' && card('峰值月份') === '7月',
+  `${card('平均评分')}/${card('≥8 分占比')} vs ${AVG}/${HIGHPCT} · 密度 ${card('观影密度')}% 峰值 ${card('峰值月份')}`);
 /* 第 101 轮改判：类型 / 标签面板删净 → 行数与 chips 归零；
    另把第 99 轮「高分 Top5 → 年度影视 9 条」的历史事实一并对齐（原先 5 条早已不成立）。 */
 ok('B4 A4 面板齐备：12 月柱 / 逐年柱=年份数 / 区间 5 行 / 年度影视 9 条 / 年份选项数对；类型与标签已删净',

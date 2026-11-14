@@ -53,8 +53,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=41 / watch.js?v=32（CSS 改跨度、JS 改顺序与别名表，都得 bump）',
-  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=41 / watch.js?v=33（CSS 改跨度、JS 改顺序与别名表，都得 bump）',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=33/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 /* 顺序：取每个面板标记在 JS 源码里第一次出现的位置，必须严格递增 */

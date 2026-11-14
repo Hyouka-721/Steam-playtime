@@ -77,8 +77,8 @@ ok('A5 .tl-item 顶对齐写在**既有的** 860 块里，且全文件只有 1 �
 ok('A6 ≤480 块 .tl-note 带 text-wrap:pretty',
   /text-wrap:\s*pretty/.test(rule(b480, '.tl-note')));
 
-ok('A7 版本号 watch.css?v=41 / watch.js?v=32',
-  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html));
+ok('A7 版本号 watch.css?v=41 / watch.js?v=33',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=33/.test(html));
 
 console.log('\n== B 运行时 390px ==');
 

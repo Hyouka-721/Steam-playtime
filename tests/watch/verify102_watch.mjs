@@ -1,5 +1,6 @@
 /* 第 102 轮 watch 侧：删「有评分 / 评分中位数」两卡 + 加「最佳电影 / 最佳剧集 / 最佳番剧」三卡
    + 年报按钮两态统一「年度报告」且金底常驻 + 编辑表单排序输入拉长到与年份一致
+   ⚠️ 第 103 轮改判：三部「最佳」已删（加「观影密度 / 峰值月份」），本套件卡断言按 6 卡口径改写
  *
  * 用户原话：
  *   1. 删除有评分、评分中位数两栏，加入最佳电影：情书，最佳剧集：是大臣，最佳番剧：冰菓三栏。
@@ -41,16 +42,22 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态 ---------------- */
 console.log('== A 静态 ==');
-ok('A1 版本 watch.css?v=41 / watch.js?v=32',
-  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
+ok('A1 版本 watch.css?v=41 / watch.js?v=33',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=33/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-ok('A2 卡片 7 项：删「有评分」「评分中位数」，加最佳电影/剧集/番剧（情书 / 是大臣 / 冰菓），median 计算删净',
+/* 第 103 轮改判（用户「删除最佳三栏，上线观影密度卡、峰值月份」）：7 卡 → 6 卡，
+   BEST_PICKS 删净，密度 = 有记录天数 ÷ 首末条跨度，峰值月份与月度分布面板同口径。 */
+ok('A2 卡片 6 项：三部「最佳」与 BEST_PICKS 删净，密度/峰值计算就位，median 计算删净',
   !/var sortedR|var median|median\.toFixed/.test(jsNC) &&
   !/\{ k: '有评分'|\{ k: '评分中位数'/.test(jsNC) &&
-  /var BEST_PICKS = \{ movie: '情书', series: '是大臣', anime: '冰菓' \};/.test(jsNC) &&
-  /var cards = \[\n      \{ k: '记录总数'[\s\S]*?\{ k: '最佳番剧', v: BEST_PICKS\.anime, u: '' \}\n    \];/.test(jsNC),
-  'cards 数组整块按 7 项新序匹配');
+  !/BEST_PICKS|k: '最佳电影'|k: '最佳剧集'|k: '最佳番剧'/.test(jsNC) &&
+  /var dayList = Object\.keys\(daySet\)\.sort\(\);/.test(jsNC) &&
+  /var density = dayList\.length && spanDays \? dayList\.length \/ spanDays \* 100 : 0;/.test(jsNC) &&
+  /var topMonthK = '—';/.test(jsNC) && /var topMonthN = 0;/.test(jsNC) &&
+  /months\.forEach\(function \(p\) \{ if \(p\.v > topMonthN\) \{ topMonthN = p\.v; topMonthK = p\.k; \} \}\);/.test(jsNC) &&
+  /var cards = \[\n      \{ k: '记录总数'[\s\S]*?\{ k: '峰值月份', v: topMonthN \? topMonthK : '—', u: topMonthN \? topMonthN \+ ' 部' : '' \}\n    \];/.test(jsNC),
+  'cards 数组整块按 6 项新序匹配');
 
 ok('A3 按钮两态统一「年度报告」：textContent 恒值，不再有 statsOn 三元换文案',
   /statsBtnEl\.textContent = '年度报告';/.test(jsNC) &&
@@ -112,6 +119,7 @@ const r = await page.evaluate(() => {
   const cards = [...document.querySelectorAll('.st-cards .st-card')].map((e) => ({
     k: (e.querySelector('.st-k') || {}).textContent || '',
     v: (e.querySelector('.st-v') || {}).textContent || '',
+    u: (e.querySelector('.st-u') || {}).textContent || '',
     ...b(e)
   }));
   const btn = document.getElementById('w-stats-btn');
@@ -124,13 +132,15 @@ const r = await page.evaluate(() => {
   };
 });
 
-ok('B2 年报展开：7 张卡、label 顺序正确、最佳三卡 value = 情书 / 是大臣 / 冰菓；「有评分」「评分中位数」不在 DOM',
-  r.cards.length === 7 &&
-  r.cards.map((c) => c.k).join('/') === '记录总数/平均评分/≥8 分占比/观影天数/最佳电影/最佳剧集/最佳番剧' &&
-  r.cards[4].v === '情书' && r.cards[5].v === '是大臣' && r.cards[6].v === '冰菓' && !r.hasOld,
+/* 第 103 轮改判：删三部「最佳」、加「观影密度 / 峰值月份」，7 卡 → 6 卡。 */
+ok('B2 年报展开：6 张卡、label 顺序正确、密度 3.6% 峰值月份 7月·16 部；「有评分」「评分中位数」与三部「最佳」都不在 DOM',
+  r.cards.length === 6 &&
+  r.cards.map((c) => c.k).join('/') === '记录总数/平均评分/≥8 分占比/观影天数/观影密度/峰值月份' &&
+  r.cards[4].v === '3.6' && r.cards[4].u === '%' &&
+  r.cards[5].v === '7月' && r.cards[5].u === '16 部' && !r.hasOld,
   r.cards.map((c) => c.k + '=' + c.v).join(' / '));
 
-ok('B3 1920 七卡同一行（auto-fit 铺满、left 依次递增）',
+ok('B3 1920 六卡同一行（auto-fit 铺满、left 依次递增）',
   r.cards.every((c) => c.t === r.cards[0].t) &&
   r.cards.every((c, i) => i === 0 || c.l > r.cards[i - 1].l),
   'top=' + r.cards.map((c) => c.t).join('/'));
@@ -184,8 +194,9 @@ const m = await p2.evaluate(() => {
     ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
   };
 });
-ok('C1 390 七卡回 2 列（860 块 repeat(2)）、旧两卡不在、最佳三卡齐全',
-  m.cols === 2 && m.cards === 7 && m.labels.join('/') === '记录总数/平均评分/≥8 分占比/观影天数/最佳电影/最佳剧集/最佳番剧',
+/* 第 103 轮改判：7 卡 → 6 卡（2 列 × 3 行），三部「最佳」不在、密度与峰值月份在。 */
+ok('C1 390 六卡回 2 列（860 块 repeat(2)，2 列 × 3 行）、旧两卡与三部「最佳」不在',
+  m.cols === 2 && m.cards === 6 && m.labels.join('/') === '记录总数/平均评分/≥8 分占比/观影天数/观影密度/峰值月份',
   `列=${m.cols} 卡=${m.cards}`);
 ok('C2 390 按钮仍「年度报告」金底、无横向溢出 + 零 JS 异常',
   m.btnText === '年度报告' && m.btnBg === tl.bg && m.ov <= 0 && e2.length === 0,

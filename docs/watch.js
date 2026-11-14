@@ -470,17 +470,23 @@
     var opts = '<option value="">全部年份</option>' + years.map(function (y) {
       return '<option value="' + esc(y) + '"' + (statsYear === y ? ' selected' : '') + '>' + esc(y) + ' 年</option>';
     }).join('');
-    /* 第 102 轮：删「有评分」「评分中位数」，加用户指定的三部「最佳」（片名与数据精确对应）。
-       6 卡 → 7 卡，.st-cards 的 auto-fit 栅格自己会排。 */
-    var BEST_PICKS = { movie: '情书', series: '是大臣', anime: '冰菓' };
+    /* 第 103 轮：删三部「最佳」（用户要求），加「观影密度」「峰值月份」，7 卡 → 6 卡。
+       密度 = 有记录天数 ÷ 首末条跨度天数（含首尾）；峰值月份与月度分布面板同口径
+       （跨年合并的「几月」），并列时取排在前面的月份。auto-fit 栅格自己会排。 */
+    var dayList = Object.keys(daySet).sort();
+    var spanDays = dayList.length
+      ? Math.round((new Date(dayList[dayList.length - 1]) - new Date(dayList[0])) / 86400000) + 1 : 0;
+    var density = dayList.length && spanDays ? dayList.length / spanDays * 100 : 0;
+    var topMonthK = '—';
+    var topMonthN = 0;
+    months.forEach(function (p) { if (p.v > topMonthN) { topMonthN = p.v; topMonthK = p.k; } });
     var cards = [
       { k: '记录总数', v: String(items.length), u: '部' },
       { k: '平均评分', v: rated.length ? avg.toFixed(2) : '—', u: '分' },
       { k: '≥8 分占比', v: rated.length ? highPct.toFixed(1) : '—', u: '%' },
       { k: '观影天数', v: String(Object.keys(daySet).length), u: '天' },
-      { k: '最佳电影', v: BEST_PICKS.movie, u: '' },
-      { k: '最佳剧集', v: BEST_PICKS.series, u: '' },
-      { k: '最佳番剧', v: BEST_PICKS.anime, u: '' }
+      { k: '观影密度', v: dayList.length ? density.toFixed(1) : '—', u: '%' },
+      { k: '峰值月份', v: topMonthN ? topMonthK : '—', u: topMonthN ? topMonthN + ' 部' : '' }
     ];
     /* 第 94 轮：按用户要求删掉「XX 类型 · 共 N 条记录 · 全部由当前数据现场派生」副标题
        和「统计年份」四个字。⚠️ label 只是视觉删掉 —— select 补 aria-label，

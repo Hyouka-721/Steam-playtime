@@ -7,7 +7,7 @@
    ⑤ 老数据（全部无 order）列表顺序必须与改动前完全一致
 
    A 静态指纹 / B 表单与校验（GitHub API 全 mock）/ C 排序行为（mock 数据精确比对）
-   ⚠️ 版本号断言：watch.css?v=41 / watch.js?v=32（第 78 轮 bump） */
+   ⚠️ 版本号断言：watch.css?v=41 / watch.js?v=33（第 78 轮 bump） */
 import { createRequire } from 'module';
 import fs from 'fs';
 const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace/');
@@ -37,8 +37,8 @@ ok('A1 编辑表单有「排序」输入，且是 number / min 0 / max 5 / step 
   (html.match(/<input[^>]*id="add-order"[^>]*>/) || [''])[0]);
 ok('A2 排序标签不再挂说明文字（第 99 轮按用户要求删除），label 只剩「排序」二字',
   /for="add-order">排序<\/label>/.test(html) && !/for="add-order">排序<span/.test(html));
-ok('A3 版本号 bump：watch.css?v=41 / watch.js?v=32',
-  /watch\.css\?v=41"/.test(html) && /watch\.js\?v=32"/.test(html));
+ok('A3 版本号 bump：watch.css?v=41 / watch.js?v=33',
+  /watch\.css\?v=41"/.test(html) && /watch\.js\?v=33"/.test(html));
 /* 第 102 轮改判（用户「排序的格子拉长到与年份一致，对齐」）：118px 定宽删除，输入铺满 .w-row-3 列宽。 */
 ok('A4 排序输入的 118px 定宽已删（与年份等宽），w-input-order 类名保留',
   !/\.w-input\.w-input-order \{/.test(cssNC) && /class="w-input w-input-order"/.test(html));

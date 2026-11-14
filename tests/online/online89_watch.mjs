@@ -55,11 +55,11 @@ await page.waitForTimeout(800);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹 ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=41 / watch.js?v=32',
-  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html));
+ok('A1 线上 watch.html 引用 watch.css?v=41 / watch.js?v=33',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=33/.test(html));
 
 const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=41&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=32&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=33&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等（CRLF 归一成 LF 后比）',
   md5txt(liveCss) === md5txt(localCss), `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等（本轮纯 CSS，js 未动）',

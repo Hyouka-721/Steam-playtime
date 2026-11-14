@@ -57,13 +57,13 @@ console.log('== A 内容指纹 ==');
   const got = await p.evaluate(async (site) => {
     const get = async (u) => (await fetch(site + u, { cache: 'reload' })).text();
     const [html, css, js, data] = await Promise.all([
-      get('watch.html'), get('watch.css?v=41'), get('watch.js?v=32'), get('data/watch.json'),
+      get('watch.html'), get('watch.css?v=41'), get('watch.js?v=33'), get('data/watch.json'),
     ]);
     return { html, css, js, data };
   }, SITE);
 
-  ok('A1 线上 watch.html 引用 watch.css?v=41 / watch.js?v=32',
-    /watch\.css\?v=41/.test(got.html) && /watch\.js\?v=32/.test(got.html),
+  ok('A1 线上 watch.html 引用 watch.css?v=41 / watch.js?v=33',
+    /watch\.css\?v=41/.test(got.html) && /watch\.js\?v=33/.test(got.html),
     (got.html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
   ok('A2 线上 watch.css 与本地逐字节相同（CRLF 归一后 md5 全等）',
     md5txt(got.css) === md5txt(localCss), md5txt(got.css).slice(0, 12));

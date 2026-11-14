@@ -1,4 +1,5 @@
 /* 第 102 轮 watch 侧上线复验：年报 7 卡 · 按钮恒「年度报告」金底 · 排序输入等宽
+ * ⚠️ 第 103 轮改判：三部「最佳」已删（加「观影密度 / 峰值月份」），卡断言按 6 卡口径改写
  *
  * 用户原话（三条）：
  *   1. 删除「有评分」「评分中位数」两栏，加入最佳电影：情书、最佳剧集：是大臣、最佳番剧：冰菓三栏。
@@ -55,13 +56,13 @@ await p0.waitForFunction(() => document.querySelectorAll('#w-grid .poster').leng
 
 const html = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
 const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=41&t=' + TS);
-const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=32&t=' + TS);
+const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=33&t=' + TS);
 const liveJsNC = stripJsCmt(liveJs);
 const liveCssNC = stripJsCmt(liveCss);
 const htmlNC = html.replace(/<!--[\s\S]*?-->/g, '');
 
-ok('A1 线上 watch.html 引用 watch.css?v=41 / watch.js?v=32',
-  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=41 / watch.js?v=33',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=33/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 ok('A2 线上 watch.css 字节 md5 与本地全等（EOL 归一）', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
@@ -70,10 +71,14 @@ ok('A3 线上 watch.js 字节 md5 与本地全等（EOL 归一）', md5txt(liveJ
 ok('A4 线上 watch.html 字节 md5 与本地全等（EOL 归一）', md5txt(html) === md5txt(localHtml),
   `${md5txt(html).slice(0, 12)} / ${md5txt(localHtml).slice(0, 12)}`);
 
-/* 第 102 轮硬证据 1：线上 JS 有三部「最佳」常量与 7 卡，中位数计算删净。 */
-ok('A5 线上 JS：BEST_PICKS 三部「最佳」在、cards 数组 7 项（含最佳三卡）、median/sortedR 计算删净、「有评分」「评分中位数」卡删净',
-  /var BEST_PICKS = \{ movie: '情书', series: '是大臣', anime: '冰菓' \};/.test(liveJsNC) &&
-  /k: '最佳电影'/.test(liveJsNC) && /k: '最佳剧集'/.test(liveJsNC) && /k: '最佳番剧'/.test(liveJsNC) &&
+/* 第 103 轮改判（用户「删最佳三栏、上线密度与峰值月份」）：线上 JS 应为 6 卡版，
+   BEST_PICKS 与三部「最佳」删净，密度/峰值计算就位。 */
+ok('A5 线上 JS：BEST_PICKS 与三部「最佳」删净、cards 数组 6 项（密度/峰值在）、median/sortedR 计算删净、「有评分」「评分中位数」卡删净',
+  !/BEST_PICKS|k: '最佳电影'|k: '最佳剧集'|k: '最佳番剧'/.test(liveJsNC) &&
+  /var dayList = Object\.keys\(daySet\)\.sort\(\);/.test(liveJsNC) &&
+  /var density = dayList\.length && spanDays \? dayList\.length \/ spanDays \* 100 : 0;/.test(liveJsNC) &&
+  /\{ k: '观影密度', v: dayList\.length \? density\.toFixed\(1\) : '—', u: '%' \}/.test(liveJsNC) &&
+  /\{ k: '峰值月份', v: topMonthN \? topMonthK : '—', u: topMonthN \? topMonthN \+ ' 部' : '' \}/.test(liveJsNC) &&
   (liveJsNC.match(/\{ k: '记录总数', v: String\(items\.length\)/g) || []).length === 1 &&
   !/k: '有评分'/.test(liveJsNC) && !/k: '评分中位数'/.test(liveJsNC) &&
   !/var sortedR|var median|\.median\b/.test(liveJsNC));
@@ -159,15 +164,17 @@ const r = await page.evaluate(() => {
   };
 });
 
-ok('B3 年报 7 卡：键名顺序与数值逐项正确（124 / 7.70 / 46.0 / 115 / 情书 / 是大臣 / 冰菓），旧「有评分」「评分中位数」不在 DOM',
-  r.cards.length === 7 &&
-  r.cards.map((c) => c.k).join('/') === '记录总数/平均评分/≥8 分占比/观影天数/最佳电影/最佳剧集/最佳番剧' &&
+/* 第 103 轮改判：删三部「最佳」、加「观影密度 / 峰值月份」，7 卡 → 6 卡。 */
+ok('B3 年报 6 卡：键名顺序与数值逐项正确（124 / 7.70 / 46.0 / 115 / 3.6% / 7月·16 部），旧「有评分」「评分中位数」与三部「最佳」不在 DOM',
+  r.cards.length === 6 &&
+  r.cards.map((c) => c.k).join('/') === '记录总数/平均评分/≥8 分占比/观影天数/观影密度/峰值月份' &&
   r.cards[0].v === '124' && r.cards[1].v === '7.70' && r.cards[2].v === '46.0' &&
-  r.cards[3].v === '115' && r.cards[4].v === '情书' && r.cards[5].v === '是大臣' && r.cards[6].v === '冰菓' &&
+  r.cards[3].v === '115' && r.cards[4].v === '3.6' && r.cards[4].u === '%' &&
+  r.cards[5].v === '7月' && r.cards[5].u === '16 部' &&
   !r.hasRated && !r.hasMedian,
   r.cards.map((c) => `${c.k}=${c.v}`).join(' '));
 
-ok('B4 七卡严格并列同一行：top 全等、left 依次递增',
+ok('B4 六卡严格并列同一行：top 全等、left 依次递增',
   r.cards.every((c) => c.t === r.cards[0].t) &&
   r.cards.every((c, i) => i === 0 || c.l > r.cards[i - 1].l),
   `top=${r.cards.map((c) => c.t).join('/')} left=${r.cards.map((c) => c.l).join('/')}`);
@@ -210,8 +217,9 @@ const m2 = await p2.evaluate(() => {
     ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
   };
 });
-ok('C1 390 七卡回 2 列（860 块 repeat(2)，2 列 × 4 行）、按钮仍恒「年度报告」金底',
-  m2.cardN === 7 && m2.cardCols === 2 && m2.cardRows === 4 &&
+/* 第 103 轮改判：7 卡 → 6 卡（2 列 × 3 行）。 */
+ok('C1 390 六卡回 2 列（860 块 repeat(2)，2 列 × 3 行）、按钮仍恒「年度报告」金底',
+  m2.cardN === 6 && m2.cardCols === 2 && m2.cardRows === 3 &&
   m2.btn.text === '年度报告' && m2.btn.bg === 'rgba(232, 176, 75, 0.13)',
   `卡=${m2.cardN} 列=${m2.cardCols} 行=${m2.cardRows} text=${m2.btn.text} bg=${m2.btn.bg}`);
 ok('C2 390 无横向溢出 + 零 JS 异常（时间轴按钮 hidden 由 HTML 起步，无首屏「年报」闪烁）',

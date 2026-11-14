@@ -45,8 +45,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=41 / watch.js?v=32（CSS 改跨度与年度影视样式、JS 改面板都 bump）',
-  /watch\.css\?v=41/.test(html) && /watch\.js\?v=32/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=41 / watch.js?v=33（CSS 改跨度与年度影视样式、JS 改面板都 bump）',
+  /watch\.css\?v=41/.test(html) && /watch\.js\?v=33/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 /* 第 101 轮：源码里 months / years 为对齐多写了空格，spanOf 正则放宽为 \\s* 容忍无害空白 */
