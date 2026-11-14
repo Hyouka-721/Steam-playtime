@@ -4,7 +4,7 @@
  *    等用户说「上线」→ fetch/merge → push → Pages 指纹轮询命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=38 / watch.js?v=30；线上 css/js/watch.json 字节
+ *   ① 指纹：watch.html 引用 watch.css?v=39 / watch.js?v=31；线上 css/js/watch.json 字节
  *      md5 与本地全等（CRLF 归一）；**分片真的上线了** —— manifest + 年片与本地逐字节一致，
  *      且 manifest 的 updated_at / total 能与线上主文件对账（对得上才说明线上走的是分片路径）
  *   ② 1440 运行时：A4 年报四卡数字全部由本地数据推导比对、年份下拉切换、返回列表还原；
@@ -97,12 +97,12 @@ await page.waitForTimeout(900);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹（含分片是否真的上线） ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=38 / watch.js?v=30',
-  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=39 / watch.js?v=31',
+  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=38&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=30&t=' + TS);
+const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=39&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=31&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等（年报几乎全在 CSS，必须一起上线）',
   md5txt(liveCss) === md5txt(localCss), `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等',
@@ -181,9 +181,11 @@ ok('B3 A4 六卡数字与本地数据推导全等（记录总数 / 有评分 / �
   card('平均评分') === AVG && card('评分中位数') === MEDIAN &&
   card('≥8 分占比') === HIGHPCT && card('观影天数') === String(DAYS),
   `${card('平均评分')}/${card('评分中位数')}/${card('≥8 分占比')} vs ${AVG}/${MEDIAN}/${HIGHPCT}`);
-ok('B4 A4 面板齐备：12 月柱 / 逐年柱=年份数 / 类型 3 行 + 区间 5 行 / 标签 1~8 / Top5 / 年份选项数对',
-  st.barsMonth === 12 && st.barsYear === YEAR_BARS && st.rowsKind === 3 && st.rowsBucket === 5 &&
-  st.chips > 0 && st.chips <= 8 && st.top === 5 &&
+/* 第 101 轮改判：类型 / 标签面板删净 → 行数与 chips 归零；
+   另把第 99 轮「高分 Top5 → 年度影视 9 条」的历史事实一并对齐（原先 5 条早已不成立）。 */
+ok('B4 A4 面板齐备：12 月柱 / 逐年柱=年份数 / 区间 5 行 / 年度影视 9 条 / 年份选项数对；类型与标签已删净',
+  st.barsMonth === 12 && st.barsYear === YEAR_BARS && st.rowsKind === 0 && st.rowsBucket === 5 &&
+  st.chips === 0 && st.top === 9 &&
   st.years === YEAR_OPT && /全部年份/.test(st.title),
   `月=${st.barsMonth} 年=${st.barsYear} 类型=${st.rowsKind} 区间=${st.rowsBucket} chips=${st.chips} top=${st.top}`);
 await page.selectOption('#st-year', '2020');

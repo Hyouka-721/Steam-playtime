@@ -293,18 +293,6 @@
       }).join('') + '</div>' +
     '</div>';
   }
-  function stRows(pairs) {
-    var max = 0;
-    pairs.forEach(function (p) { if (p.v > max) max = p.v; });
-    var top = max > 0 ? max : 1;
-    return '<div class="st-rows">' + pairs.map(function (p) {
-      return '<div class="st-row">' +
-        '<span class="st-row-k">' + esc(p.k) + '</span>' +
-        '<span class="st-row-track"><i style="width:' + Math.round(p.v / top * 100) + '%"></i></span>' +
-        '<span class="st-row-v">' + p.v + '</span>' +
-      '</div>';
-    }).join('') + '</div>';
-  }
   /* ---------- 第 97 轮：评分区间 / 国别构成改饼图 ----------
      用户要求「改成饼图」。纯 SVG 手绘，零依赖、零请求。
      ① 第 100 轮：片与片之间不再留缝（原来 1.1° 的缝靠面板底色透出来，用户看到的
@@ -412,21 +400,12 @@
     var monthMax = 1;
     months.forEach(function (p) { if (p.v > monthMax) monthMax = p.v; });
 
-    var kinds = [['movie', '电影'], ['series', '剧集'], ['anime', '番剧']].map(function (p) {
-      return { k: p[1], v: items.filter(function (it) { return (it.kind || 'movie') === p[0]; }).length };
-    });
     var buckets = [{ k: '<6', v: 0 }, { k: '6~7', v: 0 }, { k: '7~8', v: 0 }, { k: '8~9', v: 0 }, { k: '9~10', v: 0 }];
     rated.forEach(function (it) {
       var r = Number(it.rating);
       buckets[r < 6 ? 0 : r < 7 ? 1 : r < 8 ? 2 : r < 9 ? 3 : 4].v++;
     });
     BUCKET_COLORS.forEach(function (c, i) { if (buckets[i]) buckets[i].c = c; });
-    var tagMap = {};
-    items.forEach(function (it) {
-      (Array.isArray(it.tags) ? it.tags : []).forEach(function (t) { tagMap[t] = (tagMap[t] || 0) + 1; });
-    });
-    var tags = Object.keys(tagMap).map(function (k) { return { k: k, v: tagMap[k] }; })
-      .sort(function (a, b) { return b.v - a.v || a.k.localeCompare(b.k); }).slice(0, 8);
 
     /* 第 95 轮：国别构成。按国别累计（合拍片在各出品国各计一次，合计可超总数），
        没填的条目单独计数，用来提示「还有多少部待补」。 */
@@ -443,18 +422,14 @@
     var countryAll = Object.keys(countryMap).map(function (k) { return { k: k, v: countryMap[k] }; })
       .sort(function (a, b) { return b.v - a.v || a.k.localeCompare(b.k); });
     var majors = countryAll.filter(function (p) { return p.v >= COUNTRY_MIN; });
-    var countries, ci = 0, hasOther = false, otherNames = '';
+    var countries, ci = 0;
     if (majors.length) {
       countries = majors.slice(0, 8);
-      var restVal = 0, restNames = [];
+      var restVal = 0;
       countryAll.forEach(function (p) {
-        if (countries.indexOf(p) < 0) { restVal += p.v; restNames.push(p.k); }
+        if (countries.indexOf(p) < 0) restVal += p.v;
       });
-      if (restVal) {
-        countries.push({ k: '其他', v: restVal, other: true });
-        otherNames = restNames.join('、');
-        hasOther = true;
-      }
+      if (restVal) countries.push({ k: '其他', v: restVal, other: true });
     } else {
       countries = countryAll.slice(0, 8);
     }
@@ -526,28 +501,22 @@
         '<b class="st-v">' + esc(c.v) + '</b><span class="st-u">' + esc(c.u) + '</span></div>';
     }).join('') + '</div>';
     /* 每个面板都挂 data-panel：套件按面板取数（[data-panel="months"] .st-bar），
-       以后再加面板就不用改旧判据了。⚠️ DOM 顺序决定栅格自动排布（第 99 轮按用户要求改「一行三卡」）：
-       月度(5) + 评分区间(4) + 类型(3) ／ 逐年(5) + 国别(4) + 标签(3)，每行都正好 12 栏。
-       评分区间夹在月度分布与类型构成之间、国别夹在逐年趋势与高频标签之间。 */
+       以后再加面板就不用改旧判据了。⚠️ DOM 顺序决定栅格自动排布：
+       第 101 轮按用户要求删掉「类型构成 / 高频标签」，改成一行四卡 ——
+       月度分布 / 评分区间 / 国别构成 / 逐年趋势，各占 3 栏共 12 栏。
+       国别构成的说明脚注也按用户要求删掉（合并规则本身不变）。 */
     var panels = '<div class="st-panels">' +
       '<section class="st-panel" data-panel="months"><h3>月度分布</h3>' + stBars(months, monthMax) + '</section>' +
       '<section class="st-panel" data-panel="buckets"><h3>评分区间</h3>' +
         (stPie(buckets, '评分区间饼图') || '<p class="st-empty">这个范围内还没有评分记录</p>') + '</section>' +
-      '<section class="st-panel" data-panel="kinds"><h3>类型构成</h3>' + stRows(kinds) + '</section>' +
-      '<section class="st-panel" data-panel="years"><h3>逐年趋势</h3>' +
-        (yearPairs.length ? stBars(yearPairs, yearMax) : '<p class="st-empty">还没有可统计的年份</p>') +
-      '</section>' +
       '<section class="st-panel" data-panel="country"><h3>国别构成' +
         (noCountry ? '<span class="st-hint">' + noCountry + ' 部待补</span>' : '') + '</h3>' +
         (countries.length
-          ? stPie(countries, '国别构成饼图') + '<p class="st-note">按国别累计：合拍片会在各出品国各计一次，合计可超过记录总数' +
-            (hasOther ? '；少于 ' + COUNTRY_MIN + ' 部的国别（' + esc(otherNames) + '）合并为「其他」' : '') + '</p>'
+          ? stPie(countries, '国别构成饼图')
           : '<p class="st-empty">还没有国别数据 —— 点右下角 + 或编辑任意条目即可填写</p>') +
       '</section>' +
-      '<section class="st-panel" data-panel="tags"><h3>高频标签</h3>' +
-        (tags.length ? '<div class="st-chips">' + tags.map(function (t) {
-          return '<span class="st-chip">' + esc(t.k) + '<i>' + t.v + '</i></span>';
-        }).join('') + '</div>' : '<p class="st-empty">这个范围内还没有标签</p>') +
+      '<section class="st-panel" data-panel="years"><h3>逐年趋势</h3>' +
+        (yearPairs.length ? stBars(yearPairs, yearMax) : '<p class="st-empty">还没有可统计的年份</p>') +
       '</section>' +
     '</div>';
     var topHtml = '<section class="st-panel st-top" data-panel="top"><h3>年度影视</h3>' +

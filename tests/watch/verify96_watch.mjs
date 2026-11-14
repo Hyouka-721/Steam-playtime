@@ -58,8 +58,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=38 / watch.js?v=30（CSS 改限宽、JS 改国别规范名，两个都要 bump）',
-  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=39 / watch.js?v=31（CSS 改限宽、JS 改国别规范名，两个都要 bump）',
+  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const statsBlock = (/(^|\n)\.w-stats \{[^}]*\}/.exec(css) || [''])[0];
@@ -169,9 +169,10 @@ const browser = await chromium.launch();
     r.cHint === (NO_COUNTRY ? NO_COUNTRY + ' 部待补' : '') && r.cEmpty === 0,
     r.cRows.map((x) => x.k + '=' + x.v).join('/') + ` | 提示「${r.cHint}」`);
 
-  ok('B4 其余面板没被本轮改动带坏：6 卡 / 12 月柱 / 逐年 ' + YEARS + ' 柱 / 类型 3 行 / 区间 5 行 / 年度影视 9 条',
+  /* 第 101 轮改判（用户「删除类型构成选项卡」）：类型面板连同横条一起删除，3 行改为 0 行。 */
+  ok('B4 其余面板没被本轮改动带坏：6 卡 / 12 月柱 / 逐年 ' + YEARS + ' 柱 / 区间 5 行 / 年度影视 9 条；类型行已删净',
     r.cards === 6 && r.barsMonth === 12 && r.barsYear === YEARS &&
-    r.rowsKind === 3 && r.rowsBucket === 5 && r.top === 9,
+    r.rowsKind === 0 && r.rowsBucket === 5 && r.top === 9,
     `卡${r.cards} 月${r.barsMonth} 年${r.barsYear} 类${r.rowsKind} 区间${r.rowsBucket} top${r.top}`);
 
   ok('B5 1920 无横向溢出 + 零 JS 异常', r.ov <= 0 && errs.length === 0, `ov=${r.ov} err=${errs.length}`);

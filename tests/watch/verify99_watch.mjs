@@ -8,8 +8,8 @@
  *   3. 删除编辑卡片里「排序」的说明文字（0~5 的整数，默认 3……）。
  *   4. 编辑卡片里「国别」与「标签」并列到同一行。
  *
- * ① 版式：面板顺序不变（月度/评分区间/类型/逐年/国别/标签/Top），跨度重新配平成
- *    5+4+3 / 5+4+3 —— 柱状图要宽、饼图近方、列表最窄，每行正好 12 栏。
+ * ① 版式（第 101 轮已改判）：面板顺序改为 月度/评分区间/国别/逐年/年度影视，
+ *    跨度 3+3+3+3 一行四卡，合计 12 栏。
  * ② 年度影视：YEAR_PICKS 常量（2018~2026 九条）按片名去 ALL 里找海报/评分补全。
  * ③ 表单：排序 label 去掉说明；国别/标签包进同一个 .w-row.w-row-2（≤480 自动回单列）。
  */
@@ -45,16 +45,20 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=38 / watch.js?v=30（CSS 改跨度与年度影视样式、JS 改面板都 bump）',
-  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=39 / watch.js?v=31（CSS 改跨度与年度影视样式、JS 改面板都 bump）',
+  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
+/* 第 101 轮：源码里 months / years 为对齐多写了空格，spanOf 正则放宽为 \\s* 容忍无害空白 */
 const spanOf = (k) => Number((new RegExp(
-  '\\.st-panel\\[data-panel="' + k + '"\\] \\{ grid-column: span (\\d+); \\}').exec(css) || [, 0])[1]);
-ok('A2 三卡一行跨度：5 / 4 / 3 / 5 / 4 / 3（月度/评分区间/类型、逐年/国别/标签）',
-  spanOf('months') === 5 && spanOf('buckets') === 4 && spanOf('kinds') === 3 &&
-  spanOf('years') === 5 && spanOf('country') === 4 && spanOf('tags') === 3,
-  ['months', 'buckets', 'kinds', 'years', 'country', 'tags'].map((k) => k + '=' + spanOf(k)).join(' '));
+  '\\.st-panel\\[data-panel="' + k + '"\\]\\s*\\{ grid-column: span (\\d+); \\}').exec(css) || [, 0])[1]);
+/* 第 101 轮改判（用户「四卡并列同一行，合理调节宽度」）：两行三卡改成一行四卡，
+   各 3 栏合计 12；kinds / tags 两个面板已删，跨度取不到（0）。 */
+ok('A2 四卡一行跨度：3 / 3 / 3 / 3（月度 / 评分区间 / 国别 / 逐年），且 kinds / tags 已无跨度',
+  spanOf('months') === 3 && spanOf('buckets') === 3 &&
+  spanOf('country') === 3 && spanOf('years') === 3 &&
+  spanOf('kinds') === 0 && spanOf('tags') === 0,
+  ['months', 'buckets', 'country', 'years', 'kinds', 'tags'].map((k) => k + '=' + spanOf(k)).join(' '));
 
 ok('A3 YEAR_PICKS 常量：9 条、按 2018~2026 倒序、片名逐条正确',
   /var YEAR_PICKS = \[/.test(js) &&
@@ -97,8 +101,10 @@ await page.waitForSelector('.st-panel[data-panel="buckets"] svg.st-pie-chart', {
 await page.waitForTimeout(700);
 
 const r = await page.evaluate(() => {
+  /* 第 101 轮：四卡一行，历史几何取数 null-safe，避免访问已删面板抛异常 */
   const box = (k) => {
     const e = document.querySelector('.st-panel[data-panel="' + k + '"]');
+    if (!e) return null;
     const x = e.getBoundingClientRect();
     return { w: Math.round(x.width), t: Math.round(x.top) };
   };
@@ -113,8 +119,8 @@ const r = await page.evaluate(() => {
     hasName: !!document.querySelector('.st-top-name'),
     hasScore: !!document.querySelector('.st-top-score'),
     items,
-    months: box('months'), buckets: box('buckets'), kinds: box('kinds'),
-    years: box('years'), country: box('country'), tags: box('tags'),
+    months: box('months'), buckets: box('buckets'),
+    country: box('country'), years: box('years'),
     ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
   };
 });
@@ -129,10 +135,9 @@ ok('B2 年度影视 9 条：年份逐条正确、每条有海报，且没有片�
   r.items.every((it) => it.hasImg) && !r.hasName && !r.hasScore,
   r.items.map((it) => it.year + '·' + (it.hasImg ? '有海报' : '缺海报')).join(' / '));
 
-ok('B3 三卡一行：月度/评分区间/类型 同行、逐年/国别/标签 同行，行间依次下移',
-  r.months.t === r.buckets.t && r.buckets.t === r.kinds.t &&
-  r.years.t === r.country.t && r.country.t === r.tags.t && r.kinds.t < r.years.t,
-  `${r.months.t}/${r.buckets.t}/${r.kinds.t} · ${r.years.t}/${r.country.t}/${r.tags.t}`);
+ok('B3 四卡一行：月度 / 评分区间 / 国别 / 逐年 top 全等',
+  r.months.t === r.buckets.t && r.buckets.t === r.country.t && r.country.t === r.years.t,
+  `${r.months.t}/${r.buckets.t}/${r.country.t}/${r.years.t}`);
 
 /* 表单：打开「添加」弹窗，量国别/标签是否同行、排序 label 是否干净 */
 await page.click('#w-fab');

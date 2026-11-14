@@ -1,13 +1,13 @@
 /* 第 99 轮 watch 侧上线复验：三卡成行 · 年度影视 · 表单微调
  *
  * ⚠️ **本轮尚未上线时不要跑**：线上此刻还是第 98 轮（v=36/v=28，跨度 6+6/4+8/6+6）。
- *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=38）命中后再执行本脚本。
+ *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=39）命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹 —— watch.css?v=38 / watch.js?v=30、css/js 字节 md5 与本地全等、
+ *   ① 指纹 —— watch.css?v=39 / watch.js?v=31、css/js 字节 md5 与本地全等、
  *      线上 JS 有 YEAR_PICKS 九条（2018~2026 倒序）、面板标题「年度影视」无「高分 Top 5」、
  *      线上 HTML 的排序 label 干净 + 国别/标签包同一个 .w-row.w-row-2
- *   ② 1920 —— 年度影视 9 条逐条年份+片名+海报+评分、三卡一行（月度/评分区间/类型、逐年/国别/标签）、
+ *   ② 1920 —— 年度影视 9 条逐条年份+片名+海报+评分、四卡一行（第 101 轮：月度/评分区间/国别/逐年）、
  *      表单里国别与标签同行且排序 label 只剩「排序」、零溢出零异常
  *   ③ 390 —— 国别/标签回单列、年度影视 9 条仍在、零溢出零异常
  *
@@ -55,12 +55,12 @@ await p0.waitForFunction(() => document.querySelectorAll('#w-grid .poster').leng
 await p0.waitForTimeout(800);
 
 const html = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=38 / watch.js?v=30',
-  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=39 / watch.js?v=31',
+  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=38&t=' + TS);
-const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=30&t=' + TS);
+const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=39&t=' + TS);
+const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=31&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等', md5txt(liveJs) === md5txt(localJs),
@@ -104,8 +104,10 @@ await page.waitForSelector('.st-panel[data-panel="buckets"] svg.st-pie-chart', {
 await page.waitForTimeout(800);
 
 const r = await page.evaluate(() => {
+  /* 第 101 轮：面板删到 4 个，历史几何取数 null-safe */
   const box = (k) => {
     const e = document.querySelector('.st-panel[data-panel="' + k + '"]');
+    if (!e) return null;
     const x = e.getBoundingClientRect();
     return { w: Math.round(x.width), t: Math.round(x.top) };
   };
@@ -120,8 +122,8 @@ const r = await page.evaluate(() => {
     hasName: !!document.querySelector('.st-top-name'),
     hasScore: !!document.querySelector('.st-top-score'),
     items,
-    months: box('months'), buckets: box('buckets'), kinds: box('kinds'),
-    years: box('years'), country: box('country'), tags: box('tags'),
+    months: box('months'), buckets: box('buckets'),
+    country: box('country'), years: box('years'),
     ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
   };
 });
@@ -135,10 +137,11 @@ ok('B2 年度影视 9 条：年份逐条正确、每条有海报，且没有片�
   r.items.every((it) => it.hasImg) && !r.hasName && !r.hasScore,
   r.items.map((it) => it.year + '·' + (it.hasImg ? '有海报' : '缺海报')).join(' / '));
 
-ok('B3 三卡一行：月度/评分区间/类型 同行、逐年/国别/标签 同行，行间依次下移',
-  r.months.t === r.buckets.t && r.buckets.t === r.kinds.t &&
-  r.years.t === r.country.t && r.country.t === r.tags.t && r.kinds.t < r.years.t,
-  `${r.months.t}/${r.buckets.t}/${r.kinds.t} · ${r.years.t}/${r.country.t}/${r.tags.t}`);
+/* 第 101 轮改判：四块并列同一行。 */
+ok('B3 四卡一行：月度 / 评分区间 / 国别 / 逐年 top 全等',
+  r.months.t === r.buckets.t && r.buckets.t === r.country.t &&
+  r.country.t === r.years.t,
+  `${r.months.t}/${r.buckets.t}/${r.country.t}/${r.years.t}`);
 
 /* 表单：打开「添加」弹窗，量国别/标签是否同行、排序 label 是否干净 */
 await page.click('#w-fab');

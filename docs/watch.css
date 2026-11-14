@@ -1022,19 +1022,18 @@ select.w-input { cursor: pointer; }
 .st-u { font-size: 12px; color: var(--text-faint); }
 
 .st-panels {
-  /* 第 94 轮美观 #4：2×2 等分太呆板 → 12 栅格不对称。
-     第 99 轮按用户要求改「一行三卡」：
-     月度(5)+评分区间(4)+类型(3) ／ 逐年(5)+国别(4)+标签(3)，每行都正好 12 栏。
+  /* 第 101 轮：按用户要求删掉「类型构成 / 高频标签」，改成一行四卡 ——
+     月度分布 / 评分区间 / 国别构成 / 逐年趋势，各占 3 栏共 12 栏。
+     四块都是图表，等宽最整齐：柱状图 12 / 9 根都放得下，两块饼图靠
+     .st-pie-chart 按栏百分比缩放 + 图例收缩 / 自动换行避免横向溢出。
      ⚠️ 子项跨度必须配 .w-stats .st-panel[data-panel] 的断点复位，
-        否则 860 以下容器只剩 1 列而子项还 span 5，会撑出横向溢出。 */
+        否则 860 以下容器只剩 1 列而子项还 span 3，会撑出横向溢出。 */
   display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px;
 }
-.st-panel[data-panel="months"] { grid-column: span 5; }   /* 第 99 轮：与评分区间、类型构成同行 5+4+3 */
-.st-panel[data-panel="years"] { grid-column: span 5; }
-.st-panel[data-panel="kinds"] { grid-column: span 3; }
-.st-panel[data-panel="tags"] { grid-column: span 3; }     /* 第 99 轮：与逐年、国别同行 5+4+3 */
-.st-panel[data-panel="buckets"] { grid-column: span 4; }
-.st-panel[data-panel="country"] { grid-column: span 4; }
+.st-panel[data-panel="months"]  { grid-column: span 3; }
+.st-panel[data-panel="buckets"] { grid-column: span 3; }
+.st-panel[data-panel="country"] { grid-column: span 3; }
+.st-panel[data-panel="years"]   { grid-column: span 3; }
 .st-panel {
   padding: 16px 18px 18px; min-width: 0;
   background: var(--card-bg);
@@ -1091,33 +1090,23 @@ select.w-input { cursor: pointer; }
    图例复用 .st-row 家族（.st-row--pie 只换列模板），旧套件数 .st-row 的判据不用动。
    ⚠️ 图例必须限宽（max-width: 320px）：铺满式 flex 会把「片名」和「数量」一左一右拉开
       300px，读起来像表格断了 —— 第 96 轮 Top5 踩过同一个坑。 */
-.st-pie { display: flex; align-items: center; justify-content: center; gap: clamp(16px, 2vw, 28px); min-width: 0; }
-.st-pie-chart { flex: 0 0 auto; display: block; width: clamp(150px, 16vw, 240px); height: clamp(150px, 16vw, 240px); }
+/* 第 101 轮：四卡同行后每卡只有 3 栏（1920 实测约 455px、1440 约 335px），
+   原来 clamp(150px,16vw,240px) 的饼 + 320px 图例横排一定挤爆 ——
+   改成饼按面板宽度的 42% 缩放（上限 168px）、图例吃掉剩余空间，
+   并让 .st-pie 在空间不足时自动换行成「饼在上 / 图例整宽」（861~1180 区间）。 */
+.st-pie { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: clamp(10px, 1.2vw, 20px); min-width: 0; }
+.st-pie-chart { flex: 0 0 auto; display: block; width: clamp(96px, 42%, 168px); height: auto; aspect-ratio: 1 / 1; }
 .st-pie-slice { stroke: none; }
-.st-rows--pie { flex: 0 1 auto; min-width: 0; max-width: 320px; gap: 9px; }
-.st-row--pie { grid-template-columns: 9px minmax(0, 1fr) 34px 46px; gap: 8px; }
+.st-rows--pie { flex: 1 1 auto; min-width: 0; max-width: 320px; gap: 9px; }
+.st-row--pie { grid-template-columns: 9px minmax(0, 1fr) 28px 40px; gap: 6px; }
 .st-row-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-faint); }
 .st-row-pct { font-size: 11px; color: var(--text-faint); text-align: right; font-variant-numeric: tabular-nums; }
 .st-row--pie.is-zero { opacity: .38; }
 
-/* 美观 #7：电影 / 剧集 / 番剧三档明度，否则三条全同金色、看不出区分 */
-.st-panel[data-panel="kinds"] .st-row:nth-child(1) .st-row-track i { background: linear-gradient(90deg, rgba(232, 176, 75, .45), var(--accent)); }
-.st-panel[data-panel="kinds"] .st-row:nth-child(2) .st-row-track i { background: linear-gradient(90deg, rgba(232, 176, 75, .16), rgba(232, 176, 75, .58)); }
-.st-panel[data-panel="kinds"] .st-row:nth-child(3) .st-row-track i { background: linear-gradient(90deg, rgba(255, 255, 255, .14), rgba(255, 255, 255, .42)); }
-
-.st-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.st-chip {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 5px 10px; font-size: 12px; color: var(--text);
-  background: var(--well);
-  border: 1px solid var(--card-border);
-  border-radius: var(--r-pill);
-}
-.st-chip i { font-style: normal; font-size: 11px; color: var(--accent); font-variant-numeric: tabular-nums; }
 .st-empty { margin: 8px 0 0; font-size: 12px; color: var(--text-faint); }
-/* 第 95 轮：面板标题右侧的计数提示（「N 部待补」）与脚注 */
+/* 第 95 轮：面板标题右侧的计数提示（「N 部待补」）。
+   第 101 轮：按用户要求删掉国别构成的说明脚注，.st-note 样式一并删除。 */
 .st-hint { margin-left: 8px; font-size: 11px; font-weight: 400; color: var(--text-faint); }
-.st-note { margin: 12px 0 0; font-size: 11px; line-height: 1.6; color: var(--text-faint); }
 .st-empty-main { padding: 40px 0; text-align: center; font-size: 13px; }
 
 .st-top { margin-top: 14px; }

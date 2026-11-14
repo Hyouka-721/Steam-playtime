@@ -12,7 +12,7 @@
  *      CSS 海报网格规格 + 无片名/评分样式、HTML 剥注释后无上映日期入口与两处说明文字、
  *      YEAR_PICKS 九条齐全
  *   ② 1920 运行时 7 —— 9 条年份+海报且无片名/评分、海报 computed 规格与网格视图逐项全等、
- *      年份在海报下方、表单三字段同行且无上映日期、饼图相邻片首尾角差 ≤0.02°、三卡成行、零溢出零异常
+ *      年份在海报下方、表单三字段同行且无上映日期、饼图相邻片首尾角差 ≤0.02°、四卡成行（第 101 轮）、零溢出零异常
  *   ③ 390 运行时 3 —— 三字段回单列、9 条年份齐全且海报不越界、饼图同样无缝
  *
  * ⚠️ 线上字节一律在页内 fetch 回传（Node 直连 github.io 不通），统一 --no-proxy-server。
@@ -58,14 +58,14 @@ await p0.goto(SITE + 'watch.html?t=' + TS, { waitUntil: 'load', timeout: 45000 }
 await p0.waitForFunction(() => document.querySelectorAll('#w-grid .poster').length > 20, null, { timeout: 45000 }).catch(() => {});
 
 const html = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=38&t=' + TS);
-const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=30&t=' + TS);
+const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=39&t=' + TS);
+const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=31&t=' + TS);
 const liveJsNC = stripJsCmt(liveJs);
 const liveCssNC = stripJsCmt(liveCss);
 const htmlNC = html.replace(/<!--[\s\S]*?-->/g, '');
 
-ok('A1 线上 watch.html 引用 watch.css?v=38 / watch.js?v=30',
-  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=39 / watch.js?v=31',
+  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
@@ -136,8 +136,10 @@ await page.waitForSelector('.st-panel[data-panel="buckets"] svg.st-pie-chart', {
 await page.waitForTimeout(900);
 
 const r = await page.evaluate(() => {
+  /* 第 101 轮：面板删到 4 个，历史几何取数 null-safe */
   const box = (k) => {
     const e = document.querySelector('.st-panel[data-panel="' + k + '"]');
+    if (!e) return null;
     const x = e.getBoundingClientRect();
     return { w: Math.round(x.width), t: Math.round(x.top) };
   };
@@ -171,8 +173,8 @@ const r = await page.evaluate(() => {
     hasName: !!document.querySelector('.st-top-name'),
     hasScore: !!document.querySelector('.st-top-score'),
     segs, stroke: paths[0] ? getComputedStyle(paths[0]).stroke : '',
-    months: box('months'), buckets: box('buckets'), kinds: box('kinds'),
-    years: box('years'), country: box('country'), tags: box('tags'),
+    months: box('months'), buckets: box('buckets'),
+    country: box('country'), years: box('years'),
     ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
   };
 });
@@ -223,10 +225,11 @@ ok('B5 饼图片间无缝：相邻片首尾角严格相接（≤0.02°）、整�
   seamsOk && r.stroke === 'none',
   `片${r.segs.length} 角度=${r.segs.map((s) => s && s.a0.toFixed(1) + '→' + s.a1.toFixed(1)).join(' ')} stroke=${r.stroke}`);
 
-ok('B6 三卡成行未回退：月度/评分区间/类型 同行、逐年/国别/标签 同行',
-  r.months.t === r.buckets.t && r.buckets.t === r.kinds.t &&
-  r.years.t === r.country.t && r.country.t === r.tags.t && r.kinds.t < r.years.t,
-  `${r.months.t}/${r.buckets.t}/${r.kinds.t} · ${r.years.t}/${r.country.t}/${r.tags.t}`);
+/* 第 101 轮改判（用户「删除类型构成和高频标签，四块并列同一行」）：两行三卡换成一行四卡。 */
+ok('B6 四卡成行未回退：月度 / 评分区间 / 国别 / 逐年 top 全等',
+  r.months.t === r.buckets.t && r.buckets.t === r.country.t &&
+  r.country.t === r.years.t,
+  `${r.months.t}/${r.buckets.t}/${r.country.t}/${r.years.t}`);
 
 ok('B7 1920 无横向溢出 + 零 JS 异常', r.ov <= 0 && errs.length === 0, `ov=${r.ov} err=${errs.length}`);
 await ctx.close();

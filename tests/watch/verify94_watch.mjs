@@ -50,32 +50,35 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=38 / watch.js?v=30',
-  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=39 / watch.js?v=31',
+  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 头部：副标题与「统计年份」label 的 DOM 已删，select 补 aria-label 保住可访问名称',
   !/st-sub/.test(js) && !/st-label/.test(js) && !/st-sub/.test(html) && !/st-label/.test(html) &&
   /id="st-year" aria-label="统计年份"/.test(js));
 
-ok('A3 每个面板都挂 data-panel（months / kinds / years / tags / buckets / top）',
-  ['months', 'kinds', 'years', 'tags', 'buckets', 'top']
-    .every((k) => new RegExp('data-panel="' + k + '"').test(js)));
+/* 第 101 轮改判（用户「删除类型构成和高频标签两个选项卡」）：面板从 6 个减到 4 个，
+   顺序 月度 / 评分区间 / 国别 / 逐年，另加下方年度影视；kinds / tags 连标记一起消失。 */
+ok('A3 每个面板都挂 data-panel（months / buckets / country / years / top），且 kinds / tags 已删净',
+  ['months', 'buckets', 'country', 'years', 'top']
+    .every((k) => new RegExp('data-panel="' + k + '"').test(js)) &&
+  !/data-panel="kinds"/.test(js) && !/data-panel="tags"/.test(js));
 
 const spanOf = (k) => {
   const m = css.match(new RegExp('\\.st-panel\\[data-panel="' + k + '"\\]\\s*\\{\\s*grid-column:\\s*span\\s*(\\d+)'));
   return m ? Number(m[1]) : 0;
 };
-/* 第 99 轮改判：用户要求改成「一行三卡」—— 月度/评分区间/类型 同行、逐年/国别/标签 同行。
-   跨度重新配平 5+4+3 / 5+4+3（柱状图要宽、饼图近方、列表最窄）。 */
-ok('A4 面板 12 栅格：月度 5 / 评分区间 4 / 类型 3 / 逐年 5 / 国别 4 / 标签 3（每行都满 12 栏）',
+/* 第 101 轮改判（用户「将月度分布、评分区间、国别构成、逐年趋势按顺序并列同一行」）：
+   删掉两行三卡，改成四块各 span 3、合计正好 12 栏的一行。 */
+ok('A4 面板 12 栅格：四块各占 3 栏（3+3+3+3 = 12），单行铺满不留空档',
   /\.st-panels\s*\{[\s\S]*?grid-template-columns:\s*repeat\(12,/.test(css) &&
-  spanOf('months') === 5 && spanOf('buckets') === 4 && spanOf('kinds') === 3 &&
-  spanOf('years') === 5 && spanOf('country') === 4 && spanOf('tags') === 3,
-  `months=${spanOf('months')} buckets=${spanOf('buckets')} kinds=${spanOf('kinds')} ` +
-  `years=${spanOf('years')} country=${spanOf('country')} tags=${spanOf('tags')}`);
+  spanOf('months') === 3 && spanOf('buckets') === 3 &&
+  spanOf('country') === 3 && spanOf('years') === 3,
+  `months=${spanOf('months')} buckets=${spanOf('buckets')} ` +
+  `country=${spanOf('country')} years=${spanOf('years')} / 合计 ${['months','buckets','country','years'].reduce((s,k)=>s+spanOf(k),0)}`);
 
-ok('A5 🔴 860 块里有面板跨度复位（否则容器 1 列 + 子项还 span 5 会横向溢出）',
+ok('A5 🔴 860 块里有面板跨度复位（否则容器 1 列 + 子项还 span 3 会横向溢出）',
   /@media \(max-width: 860px\)[\s\S]*?\.w-stats \.st-panel\[data-panel\] \{ grid-column: auto; \}/.test(css));
 
 const m860 = css.match(/@media \(max-width: 860px\)/g) || [];
@@ -108,7 +111,8 @@ await page.waitForTimeout(700);
 
 const probe = () => page.evaluate(() => {
   const q = (s) => document.querySelectorAll(s).length;
-  const box = (s) => { const e = document.querySelector(s); const b = e.getBoundingClientRect();
+  /* 第 101 轮：面板删到 4 个，历史几何取数一律 null-safe，避免访问已删节点直接抛异常 */
+  const box = (s) => { const e = document.querySelector(s); if (!e) return null; const b = e.getBoundingClientRect();
     return { l: Math.round(b.left), w: Math.round(b.width), t: Math.round(b.top) }; };
   return {
     cards: [...document.querySelectorAll('.st-card')].map((c) => ({
@@ -130,14 +134,15 @@ const probe = () => page.evaluate(() => {
       return e ? getComputedStyle(e).borderBottomWidth : ''; })(),
     barBg: (() => { const e = document.querySelector('[data-panel="months"] .st-bar i');
       return e ? getComputedStyle(e).backgroundImage : ''; })(),
+    /* 第 101 轮：类型/标签面板已删，轨道与 chip 都应为 0；几何只需四块 + 容器 */
+    tracks: document.querySelectorAll('.st-row-track').length,
     kindBgs: [...document.querySelectorAll('[data-panel="kinds"] .st-row-track i')]
       .map((e) => getComputedStyle(e).backgroundImage),
     tickContent: (() => { const e = document.querySelector('[data-panel="kinds"] .st-row-track');
       return e ? getComputedStyle(e, '::after').content : ''; })(),
-    boxMonths: box('[data-panel="months"]'), boxKinds: box('[data-panel="kinds"]'),
-    boxBuckets: box('[data-panel="buckets"]'), boxPanels: box('.st-panels'),
-    boxCountry: box('[data-panel="country"]'),
-    boxYears: box('[data-panel="years"]'), boxTags: box('[data-panel="tags"]'),
+    boxMonths: box('[data-panel="months"]'), boxBuckets: box('[data-panel="buckets"]'),
+    boxPanels: box('.st-panels'), boxCountry: box('[data-panel="country"]'),
+    boxYears: box('[data-panel="years"]'),
     ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
   };
 });
@@ -158,28 +163,27 @@ ok('B2 六卡数字与本地同口径推导全等',
 ok('B3 头部只剩标题 + 下拉：副标题与「统计年份」字样都不在，aria-label 仍在',
   r.subCount === 0 && r.labelCount === 0 && r.ariaLabel === '统计年份');
 
-/* 第 98 轮改判：用户要求把两块饼挪位 —— 评分区间插到月度分布与类型构成之间，
-   国别插到逐年趋势与高频标签之间。面板顺序与跨度为功能变更，判据必须跟着改。 */
-ok('B4 面板齐备且顺序为 月度 / 评分区间 / 类型 / 逐年 / 国别 / 标签 / Top5',
-  r.panels.join('/') === 'months/buckets/kinds/years/country/tags/top', r.panels.join('/'));
+/* 第 101 轮改判：用户删掉类型 / 标签两块，并把剩下四块按顺序并进同一行，
+   所以面板顺序从「月度/区间/类型/逐年/国别/标签/Top」变成「月度/区间/国别/逐年/年度影视」。 */
+ok('B4 面板齐备且顺序为 月度 / 评分区间 / 国别 / 逐年 / 年度影视（第 101 轮四卡一行）',
+  r.panels.join('/') === 'months/buckets/country/years/top', r.panels.join('/'));
 
-ok('B5 内容齐备：12 月柱 / 逐年柱=9 / 类型 3 行 / 区间 5 行 / 标签 / 年度影视 9 条',
-  r.barsMonth === 12 && r.barsYear === YEARS && r.rowsKind === 3 && r.rowsBucket === 5 &&
-  r.chips > 0 && r.chips <= 8 && r.top === 9,
+/* 第 101 轮改判：类型 3 行 / 标签 chips 随面板删除归零；其余内容口径原样守。 */
+ok('B5 内容齐备：12 月柱 / 逐年柱=9 / 区间 5 行 / 年度影视 9 条；类型行与标签 chip 已删净',
+  r.barsMonth === 12 && r.barsYear === YEARS && r.rowsKind === 0 && r.rowsBucket === 5 &&
+  r.chips === 0 && r.top === 9,
   `月=${r.barsMonth} 年=${r.barsYear} 类型=${r.rowsKind} 区间=${r.rowsBucket} chips=${r.chips}`);
 
-ok('B6 美观 #4 版式：12 栅格每行都满 —— 5+4+3（月度/区间/类型）、5+4+3（逐年/国别/标签），同行项 top 相同',
-  Math.abs(r.boxMonths.w / r.boxPanels.w - 5 / 12) < 0.03 &&
-  Math.abs(r.boxBuckets.w / r.boxPanels.w - 4 / 12) < 0.03 &&
-  Math.abs(r.boxKinds.w / r.boxPanels.w - 3 / 12) < 0.03 &&
-  Math.abs(r.boxYears.w / r.boxPanels.w - 5 / 12) < 0.03 &&
-  Math.abs(r.boxCountry.w / r.boxPanels.w - 4 / 12) < 0.03 &&
-  Math.abs(r.boxTags.w / r.boxPanels.w - 3 / 12) < 0.03 &&
-  r.boxMonths.t === r.boxBuckets.t && r.boxBuckets.t === r.boxKinds.t &&
-  r.boxYears.t === r.boxCountry.t && r.boxCountry.t === r.boxTags.t &&
-  r.boxKinds.t < r.boxYears.t,
-  `容器 ${r.boxPanels.w} / 月度 ${r.boxMonths.w}@${r.boxMonths.t} 区间 ${r.boxBuckets.w}@${r.boxBuckets.t} 类型 ${r.boxKinds.w}@${r.boxKinds.t} ` +
-  `/ 逐年 ${r.boxYears.w}@${r.boxYears.t} 国别 ${r.boxCountry.w}@${r.boxCountry.t} 标签 ${r.boxTags.w}@${r.boxTags.t}`);
+/* 第 101 轮改判：四块各 3 栏、等宽、严格并列同一行，年度影视落在下一行。 */
+ok('B6 版式：四卡各 3/12、等宽、严格并列同一行，年度影视落在下一行',
+  ['boxMonths','boxBuckets','boxCountry','boxYears']
+    .every((k) => Math.abs(r[k].w / r.boxPanels.w - 3 / 12) < 0.03) &&
+  Math.max(...['boxMonths','boxBuckets','boxCountry','boxYears'].map((k) => r[k].w)) -
+    Math.min(...['boxMonths','boxBuckets','boxCountry','boxYears'].map((k) => r[k].w)) <= 2 &&
+  r.boxMonths.t === r.boxBuckets.t && r.boxBuckets.t === r.boxCountry.t &&
+  r.boxCountry.t === r.boxYears.t && r.boxMonths.l < r.boxBuckets.l &&
+  r.boxBuckets.l < r.boxCountry.l && r.boxCountry.l < r.boxYears.l,
+  `容器 ${r.boxPanels.w} / ${['boxMonths','boxBuckets','boxCountry','boxYears'].map((k)=>k+'='+r[k].w+'@'+r[k].t+'/'+r[k].l).join(' ')}`);
 
 ok('B7 美观 #2 基线：.st-plot 有 1px 下边线（柱子落地，不再是飘着）',
   r.baseline === '1px', `border-bottom=${r.baseline}`);
@@ -189,11 +193,16 @@ ok('B8 美观 #5 柱渐变反转：顶端半透明、底端实色',
   /^linear-gradient\(rgba\(232, 176, 75, 0\.5\), rgb\(232, 176, 75\)\)$/.test(r.barBg),
   r.barBg.slice(0, 70));
 
-ok('B9 美观 #6 刻度：类型构成的横条轨道有 ::after 刻度层（评分区间改饼图后已无轨道）',
-  r.tickContent !== 'none' && r.tickContent !== '', `content=${r.tickContent}`);
+/* 第 101 轮改判：横条轨道随「类型构成 / 高频标签」一起删光，CSS 里的 ::after 刻度规则
+   由 A8 静态守着（历史样式留档），运行时不该再有任何轨道节点。 */
+ok('B9 刻度规则仍留在 CSS（A8），但运行时已无横条轨道节点（两面板删净）',
+  r.tracks === 0 && r.kindBgs.length === 0 && r.tickContent === '',
+  `轨道 ${r.tracks} / 类型底色 ${r.kindBgs.length} / 刻度 ${r.tickContent}`);
 
-ok('B10 美观 #7 类型三档明度：电影 / 剧集 / 番剧三条底色互不相同',
-  r.kindBgs.length === 3 && new Set(r.kindBgs).size === 3, `${new Set(r.kindBgs).size} 种`);
+/* 第 101 轮改判：类型三档明度样式随「类型构成」面板删除，改成守「明度规则已删」。 */
+ok('B10 类型三档明度规则已随面板删除（CSS 里不再有 [data-panel="kinds"] 覆盖）',
+  !/\[data-panel="kinds"\]/.test(css) && r.kindBgs.length === 0,
+  `CSS 命中 ${(/\[data-panel="kinds"\]/.test(css) ? 1 : 0)} / 运行时底色 ${r.kindBgs.length} 条`);
 
 ok('B11 美观 #3 当前数据没有 0 条月份，空值灰桩不误报（is-empty 只给真正的 0）',
   r.emptyBars === 0, `is-empty ${r.emptyBars} 根`);

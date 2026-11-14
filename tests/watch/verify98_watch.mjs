@@ -7,8 +7,8 @@
  *    归一化表同步（`docs/watch.js` 内联 + `scripts/watch/country-lib.mjs` 权威值）。
  *    🔴 这是把第 96 轮的口径**反过来了** —— 当时定「中国大陆」是为了跟港澳台并列时不歧义，
  *    用户现在要求合并，所以 `'中国大陆'/'台湾'` 一律映射到「中国」，港澳仍独立。
- * ② 版式：DOM 顺序 → 月度 / 评分区间 / 类型 / 逐年 / 国别 / 标签 / Top5，
- *    跨度 → 5+4+3 / 5+4+3（第 99 轮改成「一行三卡」），**每行都正好 12 栏**。
+ * ② 版式（第 101 轮已改判）：DOM 顺序 → 月度 / 评分区间 / 国别 / 逐年 / 年度影视，
+ *    跨度 → 3+3+3+3 一行四卡，合计正好 12 栏。
  *
  * ⚠️ 年报按钮只在时间轴视图出现（第 93 轮契约），所以每次都要先点头像再点年报。
  * ⚠️ 顺序判据要按 **DOM 里的实际先后**比，不能只比"这个面板存在" —— 挪位置最容易漏测。
@@ -31,8 +31,11 @@ const js = stripCmt(rd('watch.js'));
 const css = stripCmt(rd('watch.css'));
 const data = JSON.parse(rd('data/watch.json'));
 
-const ORDER = ['months', 'buckets', 'kinds', 'years', 'country', 'tags', 'top'];
-const SPAN = { months: 5, buckets: 4, kinds: 3, years: 5, country: 4, tags: 3 };
+/* 第 101 轮改判（用户「删除类型构成和高频标签两个选项卡；将月度分布、评分区间、
+   国别构成、逐年趋势按顺序并列同一行」）：面板从 6 个减到 4 个，顺序重排为
+   months / buckets / country / years，四块各 3 栏，合计正好 12 栏铺满一行。 */
+const ORDER = ['months', 'buckets', 'country', 'years', 'top'];
+const SPAN = { months: 3, buckets: 3, country: 3, years: 3 };
 
 /* 与面板同一口径的期望值 */
 const CNT = {};
@@ -50,28 +53,30 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=38 / watch.js?v=30（CSS 改跨度、JS 改顺序与别名表，都得 bump）',
-  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=39 / watch.js?v=31（CSS 改跨度、JS 改顺序与别名表，都得 bump）',
+  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 /* 顺序：取每个面板标记在 JS 源码里第一次出现的位置，必须严格递增 */
 const posOf = (k) => js.indexOf('data-panel="' + k + '"');
 const POS = ORDER.map((k) => ({ k, p: posOf(k) }));
 const orderOk = POS.every((x) => x.p > 0) && POS.every((x, i) => i === 0 || x.p > POS[i - 1].p);
-ok('A2 DOM 顺序 = 月度 / 评分区间 / 类型 / 逐年 / 国别 / 标签 / Top5（第 98 轮换位）',
-  orderOk, POS.map((x) => x.k + '@' + x.p).join(' '));
+ok('A2 DOM 顺序 = 月度 / 评分区间 / 国别 / 逐年 / 年度影视（第 101 轮四卡一行）',
+  orderOk && !/data-panel="(kinds|tags)"/.test(js), POS.map((x) => x.k + '@' + x.p).join(' '));
 
+/* 第 101 轮：源码里 months / years 为对齐多写了空格，spanOf 正则放宽为 \\s* 容忍无害空白
+   （verify94/95 早就是这个写法）；不改 CSS 对齐，也不放宽数值判据。 */
 const spanOf = (k) => Number((new RegExp(
-  '\\.st-panel\\[data-panel="' + k + '"\\] \\{ grid-column: span (\\d+); \\}').exec(css) || [, 0])[1]);
+  '\\.st-panel\\[data-panel="' + k + '"\\]\\s*\\{ grid-column: span (\\d+); \\}').exec(css) || [, 0])[1]);
 const SPANS = ORDER.filter((k) => k !== 'top').map((k) => spanOf(k));
-ok('A3 跨度按新顺序重新配平：5 / 4 / 3 / 5 / 4 / 3',
+ok('A3 跨度按第 101 轮重新配平：3 / 3 / 3 / 3（四块等宽）',
   ORDER.filter((k) => k !== 'top').every((k) => spanOf(k) === SPAN[k]),
   ORDER.filter((k) => k !== 'top').map((k) => k + '=' + spanOf(k)).join(' '));
 
-/* 每行必须正好 12 栏：两行分别是 (months+buckets+kinds) (years+country+tags) */
-const ROWS = [['months', 'buckets', 'kinds'], ['years', 'country', 'tags']];
+/* 第 101 轮：只剩一行，四块 3+3+3+3 正好 12 栏，不会掉进下一行留空档 */
+const ROWS = [['months', 'buckets', 'country', 'years']];
 const rowSums = ROWS.map((r) => r.reduce((s, k) => s + spanOf(k), 0));
-ok('A4 两行各自正好 12 栏（5+4+3 / 5+4+3），不会掉进下一行留空档',
+ok('A4 唯一一行正好 12 栏（3+3+3+3），不会掉进下一行留空档',
   rowSums.every((v) => v === 12), `行和 ${rowSums.join('/')}（跨度 ${SPANS.join('/')}）`);
 
 /* ---- 国别口径：大陆 + 台湾 → 中国 ---- */
@@ -142,19 +147,18 @@ const probe = () => page.evaluate(() => {
 });
 
 const r = await probe();
-ok('B1 运行时 DOM 顺序与静态一致（月度 / 评分区间 / 类型 / 逐年 / 国别 / 标签 / Top5）',
-  r.order.join('/') === 'months/buckets/kinds/years/country/tags/top', r.order.join('/'));
+ok('B1 运行时 DOM 顺序与静态一致（月度 / 评分区间 / 国别 / 逐年 / 年度影视）',
+  r.order.join('/') === ORDER.join('/'), r.order.join('/'));
 
-ok('B2 两行真的排出来了：月度/评分区间/类型 同行、逐年/国别/标签 同行，且行间依次下移',
-  r.boxes.months.t === r.boxes.buckets.t && r.boxes.buckets.t === r.boxes.kinds.t &&
-  r.boxes.years.t === r.boxes.country.t && r.boxes.country.t === r.boxes.tags.t &&
-  r.boxes.kinds.t < r.boxes.years.t,
-  `月度/区间/类型 ${r.boxes.months.t}/${r.boxes.buckets.t}/${r.boxes.kinds.t} · 逐年/国别/标签 ${r.boxes.years.t}/${r.boxes.country.t}/${r.boxes.tags.t}`);
+ok('B2 四卡严格并列同一行：top 全等、left 依次递增',
+  ['months','buckets','country','years'].every((k) => r.boxes[k].t === r.boxes.months.t) &&
+  ['months','buckets','country','years'].every((k, i, a) => i === 0 || r.boxes[k].l > r.boxes[a[i-1]].l),
+  ['months','buckets','country','years'].map((k) => k + '@' + r.boxes[k].l + '/' + r.boxes[k].t).join(' '));
 
-ok('B3 跨度落地：5 / 4 / 3 / 5 / 4 / 3（占容器 12 栏的比例 ±3%）',
-  ['months', 'buckets', 'kinds', 'years', 'country', 'tags']
-    .every((k) => Math.abs(r.boxes[k].w / r.panelsW - SPAN[k] / 12) < 0.03),
-  ['months', 'buckets', 'kinds', 'years', 'country', 'tags']
+ok('B3 跨度落地：四块各 3/12（占容器比例 ±3%），等宽',
+  ORDER.filter((k) => k !== 'top')
+    .every((k) => Math.abs(r.boxes[k].w / r.panelsW - 3 / 12) < 0.03),
+  ORDER.filter((k) => k !== 'top')
     .map((k) => k + '=' + r.boxes[k].w + '/' + r.panelsW).join(' '));
 
 ok('B4 换位没把内容弄丢：月度 12 柱、评分区间 5 片、国别 ' + r.cSlices + ' 片、零 NaN',
@@ -168,9 +172,12 @@ ok('B5 国别面板：' + ROWS_EXPECT + ' 行、首行 ' + CMAJOR[0] + '、含�
   !r.cRows.some((k) => k === '中国大陆' || k === '中国台湾'),
   r.cRows.map((k, i) => k + '=' + r.cVs[i]).join('/'));
 
-ok('B6 脚注点名的长尾里已经不出现「中国大陆 / 中国台湾」',
-  /少于 10 部的国别（/.test(r.cNote) && !/中国大陆|中国台湾/.test(r.cNote),
-  `脚注「${r.cNote}」`);
+/* 第 101 轮改判（用户「删除国别构成的说明文字」）：脚注整条删掉，
+   改守「说明文字不存在 + 图例里不出现旧国别名」，长尾仍合并成「其他」。 */
+ok('B6 国别说明脚注已删净，且图例里不出现「中国大陆 / 中国台湾」',
+  r.cNote === '' && !/按国别累计|可超过记录总数|少于 10 部/.test(r.cNote) &&
+  !/中国大陆|中国台湾/.test(r.cRows.join('/')),
+  `脚注「${r.cNote}」 图例 ${r.cRows.join('/')}`);
 
 ok('B7 1920 无横向溢出 + 零 JS 异常', r.ov <= 0 && errs.length === 0, `ov=${r.ov} err=${errs.length}`);
 await ctx.close();
@@ -188,24 +195,27 @@ await p2.waitForSelector('#w-tl .tl-item', { timeout: 20000 });
 await p2.click('#w-stats-btn');
 await p2.waitForTimeout(700);
 const c = await p2.evaluate(() => {
-  const b = (k) => { const e = document.querySelector('.st-panel[data-panel="' + k + '"]'); const x = e.getBoundingClientRect();
+  /* 第 101 轮：面板删到 4 个，历史几何取数 null-safe */
+  const b = (k) => { const e = document.querySelector('.st-panel[data-panel="' + k + '"]'); if (!e) return null;
+    const x = e.getBoundingClientRect();
     return { w: Math.round(x.width), t: Math.round(x.top) }; };
   const pie = document.querySelector('[data-panel="buckets"] .st-pie-chart').getBoundingClientRect();
   const leg = document.querySelector('[data-panel="buckets"] .st-rows--pie').getBoundingClientRect();
   return {
     order: [...document.querySelectorAll('.st-panel')].map((p) => p.dataset.panel),
-    m: b('months'), bk: b('buckets'), k: b('kinds'), y: b('years'), co: b('country'), tg: b('tags'),
+    m: b('months'), bk: b('buckets'), y: b('years'), co: b('country'),
     pieW: Math.round(pie.width), gap: Math.round(leg.left - pie.right),
     ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
   };
 });
-ok('C1 1440 顺序与行关系不变：月度/区间/类型、逐年/国别/标签 各自同行',
-  c.order.join('/') === 'months/buckets/kinds/years/country/tags/top' &&
-  c.m.t === c.bk.t && c.bk.t === c.k.t && c.y.t === c.co.t && c.co.t === c.tg.t,
-  `${c.m.t}/${c.bk.t}/${c.k.t} · ${c.y.t}/${c.co.t}/${c.tg.t}`);
+ok('C1 1440 顺序与四卡同行关系不变',
+  c.order.join('/') === ORDER.join('/') &&
+  c.m.t === c.bk.t && c.bk.t === c.co.t && c.co.t === c.y.t,
+  `${c.m.t}/${c.bk.t}/${c.co.t}/${c.y.t}`);
 
-ok('C2 1440 月度(5)比评分区间(4)宽、饼缩到 230 且图例不重叠',
-  c.m.w > c.bk.w && c.pieW === 230 && c.gap > 0,
+/* 第 101 轮改判：四卡等宽（不再 5>4），饼按栏 42% 缩到约 125 而非 vw 派生的 230。 */
+ok('C2 1440 四卡等宽、饼按栏缩到 ~125 且图例不重叠',
+  Math.abs(c.m.w - c.bk.w) <= 2 && c.pieW >= 110 && c.pieW <= 145 && c.gap > 0,
   `月度 ${c.m.w} / 区间 ${c.bk.w} / 饼 ${c.pieW} 间距 ${c.gap}`);
 
 ok('C3 1440 无横向溢出 + 零 JS 异常', c.ov <= 0 && e2.length === 0, `ov=${c.ov} err=${e2.length}`);
@@ -224,7 +234,7 @@ await p3.waitForSelector('#w-tl .tl-item', { timeout: 20000 });
 await p3.click('#w-stats-btn');
 await p3.waitForTimeout(800);
 const d = await p3.evaluate(() => {
-  const names = ['months', 'buckets', 'kinds', 'years', 'country', 'tags'];
+  const names = ['months', 'buckets', 'country', 'years'];
   const bs = names.map((k) => {
     const e = document.querySelector('.st-panel[data-panel="' + k + '"]');
     const x = e.getBoundingClientRect();
@@ -238,7 +248,7 @@ const d = await p3.evaluate(() => {
   };
 });
 ok('D1 390 面板回到单列：每块都占满宽且依次下移（顺序不变）',
-  d.order.join('/') === 'months/buckets/kinds/years/country/tags/top' &&
+  d.order.join('/') === ORDER.join('/') &&
   d.bs.every((x) => x.w >= d.secW - 8) &&
   d.bs.every((x, i) => i === 0 || x.t > d.bs[i - 1].t),
   d.bs.map((x) => x.k + '=' + x.w + '@' + x.t).join(' '));

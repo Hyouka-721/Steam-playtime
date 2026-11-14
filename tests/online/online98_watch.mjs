@@ -1,13 +1,13 @@
 /* 第 98 轮 watch 侧上线复验：国别并进「中国」 · 两块饼换位
  *
  * ⚠️ **本轮尚未上线时不要跑**：线上此刻还是第 96 轮（v=34/v=23，面板顺序是旧的）。
- *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=38）命中后再执行本脚本。
+ *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=39）命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹 —— watch.css?v=38 / watch.js?v=30、css/js 字节 md5 与本地全等、
- *      线上 JS 的别名表已把「中国大陆 / 台湾」收敛到「中国」、线上 CSS 的跨度是 5/4/3/5/4/3、
+ *   ① 指纹 —— watch.css?v=39 / watch.js?v=31、css/js 字节 md5 与本地全等、
+ *      线上 JS 的别名表已把「中国大陆 / 台湾」收敛到「中国」、线上 CSS 的跨度是 3/3/3/3（第 101 轮）、
  *      线上 HTML 没有残留的「中国台湾」
- *   ② 1920 —— 面板顺序 月度/评分区间/类型/逐年/国别/标签、两行各三卡、
+ *   ② 1920 —— 面板顺序 月度/评分区间/国别/逐年（第 101 轮四卡一行）、
  *      国别面板里有「中国」且数值与线上数据现算一致、零溢出
  *   ③ 390 —— 回到单列、顺序不变
  *
@@ -37,7 +37,8 @@ const ok = (n, c, extra = '') => {
     : (fail++, console.log(`FAIL ${n}  — ${extra}`));
 };
 
-const ORDER = 'months/buckets/kinds/years/country/tags/top';
+/* 第 101 轮改判（用户「删除类型构成和高频标签；四块按顺序并列同一行」）。 */
+const ORDER = 'months/buckets/country/years/top';
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });
 
 /* ---------- ① 指纹 ---------- */
@@ -49,12 +50,12 @@ await p0.waitForFunction(() => document.querySelectorAll('#w-grid .poster').leng
 await p0.waitForTimeout(800);
 
 const html = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=38 / watch.js?v=30',
-  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=39 / watch.js?v=31',
+  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=38&t=' + TS);
-const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=30&t=' + TS);
+const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=39&t=' + TS);
+const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=31&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等', md5txt(liveJs) === md5txt(localJs),
@@ -68,17 +69,20 @@ ok('A4 线上别名表：中国大陆 / 台湾 都收敛到「中国」，且没
   /'台湾': '中国'/.test(liveJsNC) && !/'中国大陆': '中国大陆'/.test(liveJsNC),
   (liveJsNC.match(/'中国(大陆|台湾)'\s*:\s*'[^']*'/g) || []).join(' '));
 
+/* 第 101 轮：源码里 months / years 为对齐多写了空格，spanOf 正则放宽为 \\s* 容忍无害空白 */
 const spanOf = (k) => Number((new RegExp(
-  '\\.st-panel\\[data-panel="' + k + '"\\] \\{ grid-column: span (\\d+); \\}').exec(liveCssNC) || [, 0])[1]);
-ok('A5 线上 CSS 跨度 5 / 4 / 3 / 5 / 4 / 3（两行各 12 栏）',
-  spanOf('months') === 5 && spanOf('buckets') === 4 && spanOf('kinds') === 3 &&
-  spanOf('years') === 5 && spanOf('country') === 4 && spanOf('tags') === 3,
-  ['months', 'buckets', 'kinds', 'years', 'country', 'tags'].map((k) => k + '=' + spanOf(k)).join(' '));
+  '\\.st-panel\\[data-panel="' + k + '"\\]\\s*\\{ grid-column: span (\\d+); \\}').exec(liveCssNC) || [, 0])[1]);
+ok('A5 线上 CSS 跨度 3 / 3 / 3 / 3（第 101 轮一行四卡，合计 12 栏）',
+  spanOf('months') === 3 && spanOf('buckets') === 3 &&
+  spanOf('country') === 3 && spanOf('years') === 3 &&
+  spanOf('kinds') === 0 && spanOf('tags') === 0,
+  ['months', 'buckets', 'country', 'years', 'kinds', 'tags'].map((k) => k + '=' + spanOf(k)).join(' '));
 
 const posOf = (k) => liveJsNC.indexOf('data-panel="' + k + '"');
-const LIVE_POS = ['months', 'buckets', 'kinds', 'years', 'country', 'tags', 'top'].map(posOf);
-ok('A6 线上 JS 的面板顺序就是 月度/评分区间/类型/逐年/国别/标签/Top5',
-  LIVE_POS.every((p) => p > 0) && LIVE_POS.every((p, i) => i === 0 || p > LIVE_POS[i - 1]),
+const LIVE_POS = ['months', 'buckets', 'country', 'years', 'top'].map(posOf);
+ok('A6 线上 JS 的面板顺序就是 月度/评分区间/国别/逐年/年度影视，且 kinds/tags 已删净',
+  LIVE_POS.every((p) => p > 0) && LIVE_POS.every((p, i) => i === 0 || p > LIVE_POS[i - 1]) &&
+  !/data-panel="(kinds|tags)"/.test(liveJsNC),
   LIVE_POS.join(' '));
 
 /* ---------- 线上数据现算 ---------- */
@@ -118,7 +122,7 @@ const r = await page.evaluate(() => {
     const x = e.getBoundingClientRect();
     return { w: Math.round(x.width), t: Math.round(x.top) };
   };
-  const names = ['months', 'buckets', 'kinds', 'years', 'country', 'tags'];
+  const names = ['months', 'buckets', 'country', 'years'];
   return {
     order: [...document.querySelectorAll('.st-panel')].map((p) => p.dataset.panel),
     panelsW: Math.round(document.querySelector('.st-panels').getBoundingClientRect().width),
@@ -131,16 +135,14 @@ const r = await page.evaluate(() => {
 
 ok('B1 面板顺序：' + ORDER, r.order.join('/') === ORDER, r.order.join('/'));
 
-ok('B2 两行排布正确：月度/评分区间/类型、逐年/国别/标签 各自同行且依次下移',
-  r.boxes.months.t === r.boxes.buckets.t && r.boxes.buckets.t === r.boxes.kinds.t &&
-  r.boxes.years.t === r.boxes.country.t && r.boxes.country.t === r.boxes.tags.t &&
-  r.boxes.kinds.t < r.boxes.years.t,
-  `${r.boxes.months.t}/${r.boxes.buckets.t}/${r.boxes.kinds.t} · ${r.boxes.years.t}/${r.boxes.country.t}/${r.boxes.tags.t}`);
+ok('B2 四卡严格并列同一行：top 全等',
+  ['months','buckets','country','years'].every((k) => r.boxes[k].t === r.boxes.months.t),
+  ['months','buckets','country','years'].map((k) => k + '@' + r.boxes[k].t).join(' '));
 
-ok('B3 跨度落地＝5/4/3/5/4/3（占容器比例 ±3%）',
-  [['months', 5], ['buckets', 4], ['kinds', 3], ['years', 5], ['country', 4], ['tags', 3]]
-    .every(([k, s]) => Math.abs(r.boxes[k].w / r.panelsW - s / 12) < 0.03),
-  ['months', 'buckets', 'kinds', 'years', 'country', 'tags'].map((k) => k + '=' + r.boxes[k].w).join(' ') +
+ok('B3 跨度落地＝3/3/3/3（占容器比例 ±3%）',
+  ['months', 'buckets', 'country', 'years']
+    .every((k) => Math.abs(r.boxes[k].w / r.panelsW - 3 / 12) < 0.03),
+  ['months', 'buckets', 'country', 'years'].map((k) => k + '=' + r.boxes[k].w).join(' ') +
   ` / 容器 ${r.panelsW}`);
 
 ok('B4 国别面板：' + ROWS_EXPECT + ' 行、首行 ' + CMAJOR[0] + '、含「中国」' + (CNT['中国'] || 0),
@@ -165,7 +167,7 @@ await p3.waitForSelector('#w-tl .tl-item', { timeout: 30000 });
 await p3.click('#w-stats-btn');
 await p3.waitForTimeout(900);
 const d = await p3.evaluate(() => {
-  const names = ['months', 'buckets', 'kinds', 'years', 'country', 'tags'];
+  const names = ['months', 'buckets', 'country', 'years'];
   return {
     order: [...document.querySelectorAll('.st-panel')].map((p) => p.dataset.panel),
     bs: names.map((k) => {

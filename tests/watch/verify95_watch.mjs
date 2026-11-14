@@ -7,7 +7,7 @@
  * 两边一致性由 tests/unit/watch-country.test.mjs 守着。
  *
  * 口径要点：
- *   · 国别按「各出品国各计一次」累计 —— 合拍片会让合计超过记录总数，面板带脚注说明
+ *   · 国别按「各出品国各计一次」累计 —— 合拍片会让合计超过记录总数（第 101 轮起脚注说明已删，规则保留）
  *   · 没填国别的条目单独计数，在标题右侧显示「N 部待补」
  *   · 编辑时表单已预填，清空 = 用户主动清除 → 字段被删掉
  *   · 「+」录入不预填，所以同 id 重录若没填国别，沿用已有值（别让重录把国别弄丢）
@@ -38,8 +38,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=38 / watch.js?v=30',
-  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=39 / watch.js?v=31',
+  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const cInput = (html.match(/<input[^>]*id="add-country"[^>]*>/) || [''])[0];
@@ -65,8 +65,9 @@ const spanOf = (k) => {
   const m = css.match(new RegExp('\\.st-panel\\[data-panel="' + k + '"\\]\\s*\\{\\s*grid-column:\\s*span\\s*(\\d+)'));
   return m ? Number(m[1]) : 0;
 };
-ok('A6 国别面板挂 data-panel="country"、占 4 栏；评分区间也占 4 栏（第 99 轮一行三卡，两饼各自夹在中间）',
-  /data-panel="country"/.test(js) && spanOf('country') === 4 && spanOf('buckets') === 4,
+/* 第 101 轮改判（四卡一行各 3 栏）：国别与评分区间都从 4 栏改为 3 栏。 */
+ok('A6 国别面板挂 data-panel="country"、占 3 栏；评分区间也占 3 栏（第 101 轮四卡一行）',
+  /data-panel="country"/.test(js) && spanOf('country') === 3 && spanOf('buckets') === 3,
   `country=${spanOf('country')} buckets=${spanOf('buckets')}`);
 
 ok('A7 🔴 860 块的面板跨度复位仍在（新增面板同样受它保护，否则窄屏横向溢出）',
@@ -171,6 +172,7 @@ console.log('== B2 造数：国别构成 ==');
       })),
       hint: sec.querySelector('.st-hint') ? sec.querySelector('.st-hint').textContent.trim() : '',
       note: sec.querySelector('.st-note') ? sec.querySelector('.st-note').textContent.trim() : '',
+      text: sec.textContent,
       ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
     };
   });
@@ -179,9 +181,12 @@ console.log('== B2 造数：国别构成 ==');
   ok('B2 国别构成：按数量倒序、只显示前 8 行；美国 6 部（5+合拍）、英国 2 部（1+合拍）',
     r.rows.length === 8 && top.k === '美国' && top.v === '6' && uk.v === '2',
     r.rows.map((x) => x.k + '=' + x.v).join('/'));
-  ok('B3 标题提示「1 部待补」，脚注说明「按国别累计、合计可超总数」',
-    r.hint === '1 部待补' && /按国别累计/.test(r.note) && /可超过记录总数/.test(r.note),
-    `提示=${r.hint}`);
+  /* 第 101 轮改判（用户「删除国别构成的说明文字」）：脚注整条删除，标题提示仍在；
+     长尾合并规则本身没删（第 97 轮契约），由 verify101 静态守着。 */
+  ok('B3 标题提示「1 部待补」仍在，国别说明文字与脚注已删净',
+    r.hint === '1 部待补' && r.note === '' &&
+    !/按国别累计|可超过记录总数|少于 10 部|合拍片/.test(r.text),
+    `提示=${r.hint} 脚注「${r.note}」`);
   ok('B4 造数场景无横向溢出 + 零 JS 异常', r.ov <= 0 && e2.length === 0, `ov=${r.ov} err=${e2.length}`);
   await c2.close();
 }

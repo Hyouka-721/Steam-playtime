@@ -1,10 +1,10 @@
 /* 第 97 轮 watch 侧上线复验：评分区间 + 国别构成改饼图
  *
  * ⚠️ **本轮尚未上线时不要跑**：线上此刻还是第 96 轮（评分区间/国别是横条、v=34/v=23）。
- *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=38）命中后再执行本脚本。
+ *    等「上线」→ push → Pages 指纹轮询（等 watch.css?v=39）命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹 —— watch.css?v=38 / watch.js?v=30、css/js 字节 md5 与本地全等、
+ *   ① 指纹 —— watch.css?v=39 / watch.js?v=31、css/js 字节 md5 与本地全等、
  *      线上 JS 里确有 stPie 且两个面板都走它、线上 CSS 里两个饼面板各占 6 栏、
  *      图例有 max-width（否则片名与数量会被一左一右拉开）
  *   ② 1920 —— 两个饼都画出来（片数 = 非零档位数）、图例行数与首行按**线上数据现算**
@@ -49,12 +49,12 @@ await p0.waitForFunction(() => document.querySelectorAll('#w-grid .poster').leng
 await p0.waitForTimeout(800);
 
 const html = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=38 / watch.js?v=30',
-  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=39 / watch.js?v=31',
+  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=38&t=' + TS);
-const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=30&t=' + TS);
+const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=39&t=' + TS);
+const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=31&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等', md5txt(liveJs) === md5txt(localJs),
@@ -68,13 +68,14 @@ ok('A4 线上 JS 真有 stPie，且评分区间与国别都走它（不是只把
   /stPie\(countries, '国别构成饼图'\)/.test(liveJsNC) &&
   !/stRows\(buckets\)/.test(liveJsNC) && !/stRows\(countries\)/.test(liveJsNC));
 
-ok('A5 线上 CSS 有饼图样式：尺寸 clamp(150,16vw,240) + 图例限宽 320',
-  /\.st-pie-chart \{[^}]*clamp\(150px, 16vw, 240px\)/.test(liveCssNC) &&
+/* 第 101 轮改判：四卡一行后每卡只有 3/12 宽，饼改为按栏百分比 clamp(96px,42%,168px)。 */
+ok('A5 线上 CSS 有饼图样式：尺寸 clamp(96px,42%,168px) 按栏缩放 + 图例限宽 320',
+  /\.st-pie-chart \{[^}]*clamp\(96px, 42%, 168px\)/.test(liveCssNC) &&
   /\.st-rows--pie \{[^}]*max-width: 320px/.test(liveCssNC));
 
-ok('A6 线上 CSS 里两个饼面板都占 4 栏（第 99 轮一行三卡，行关系由 online99 守）',
-  /\.st-panel\[data-panel="buckets"\] \{ grid-column: span 4; \}/.test(liveCssNC) &&
-  /\.st-panel\[data-panel="country"\] \{ grid-column: span 4; \}/.test(liveCssNC));
+ok('A6 线上 CSS 里两个饼面板各占 3 栏（第 101 轮四卡一行）',
+  /\.st-panel\[data-panel="buckets"\]\s*\{ grid-column: span 3; \}/.test(liveCssNC) &&
+  /\.st-panel\[data-panel="country"\]\s*\{ grid-column: span 3; \}/.test(liveCssNC));
 
 /* 配色：只看「线上 JS 里真的是那 10 个色、且都不重复」，色差校验留给本地 verify97 */
 const livePal = (/var COUNTRY_COLORS = \[([\s\S]*?)\];/.exec(liveJsNC) || [, ''])[1];
@@ -153,14 +154,15 @@ ok('B3 百分比合计约 100%（饼的分母是面板里那些片，不是全�
   !r.b.nan && !r.c.nan,
   `区间 ${sumPct(r.b.pcts).toFixed(1)}% / 国别 ${sumPct(r.c.pcts).toFixed(1)}%`);
 
-/* 第 99 轮起一行三卡：两个饼各自夹在中间，仍等宽（都 4 栏）、饼在左图例在右不重叠 */
-ok('B4 版式：两面板等宽（都 4 栏），饼在左图例在右且不重叠',
+/* 第 101 轮起四卡一行（都 3 栏）：两个饼仍等宽、饼在左图例在右且不重叠 */
+ok('B4 版式：两面板等宽（都 3 栏），饼在左图例在右且不重叠',
   Math.abs(r.b.sec.w - r.c.sec.w) <= 2 &&
   r.b.pie.r <= r.b.leg.l && r.c.pie.r <= r.c.leg.l,
   `${r.b.sec.w}/${r.c.sec.w} 高 ${r.b.sec.h}/${r.c.sec.h}`);
 
-ok('B5 饼 240（clamp 上限）、图例 ≤320 没被拉开',
-  Math.round(r.b.pie.w) === 240 && r.b.leg.w <= 320 && r.c.leg.w <= 320,
+/* 第 101 轮改判：1920 落在 clamp(96,42%,168) 上限 168，不再是 240。 */
+ok('B5 饼 168（clamp 上限）、图例 ≤320 没被拉开',
+  Math.round(r.b.pie.w) === 168 && r.b.leg.w <= 320 && r.c.leg.w <= 320,
   `饼 ${r.b.pie.w} 图例 ${r.b.leg.w}/${r.c.leg.w}`);
 
 ok('B6 1920 无横向溢出 + 零 JS 异常', r.ov <= 0 && errs.length === 0, `ov=${r.ov} err=${errs.length}`);

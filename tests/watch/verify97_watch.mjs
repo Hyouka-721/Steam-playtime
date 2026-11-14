@@ -120,8 +120,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=38 / watch.js?v=30（CSS 与 JS 都改了，两个都要 bump）',
-  /watch\.css\?v=38/.test(html) && /watch\.js\?v=30/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=39 / watch.js?v=31（CSS 与 JS 都改了，两个都要 bump）',
+  /watch\.css\?v=39/.test(html) && /watch\.js\?v=31/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 JS 有 stPie + 两套色板；评分区间与国别都走它（stPie(buckets) / stPie(countries)）',
@@ -129,14 +129,17 @@ ok('A2 JS 有 stPie + 两套色板；评分区间与国别都走它（stPie(buck
   /var COUNTRY_COLORS = \[/.test(js) &&
   /stPie\(buckets, '评分区间饼图'\)/.test(js) && /stPie\(countries, '国别构成饼图'\)/.test(js));
 
-ok('A3 这两个面板不再用横条（stRows 只剩「类型构成」一处调用），改的是呈现不是删功能',
-  !/stRows\(buckets\)/.test(js) && !/stRows\(countries\)/.test(js) &&
-  /stRows\(kinds\)/.test(js) && (js.match(/stRows\(/g) || []).length === 2,
-  `stRows( 出现 ${(js.match(/stRows\(/g) || []).length} 次（1 处定义 + 1 处调用）`);
+/* 第 101 轮改判（用户「删除类型构成和高频标签两个选项卡」）：stRows 最后一个调用点
+   （类型构成）随之删光，函数定义也一并移除 —— 年报里只剩两块饼，没有任何横条。 */
+ok('A3 横条渲染已整体删除：stRows 函数与全部调用点都不在，两个饼仍走 stPie',
+  !/stRows\(/.test(js) && !/function stRows\(/.test(js) &&
+  /stPie\(buckets/.test(js) && /stPie\(countries/.test(js),
+  `stRows( 出现 ${(js.match(/stRows\(/g) || []).length} 次（函数与调用全删）`);
 
-ok('A4 两个饼面板都占 4 栏（第 99 轮一行三卡：评分区间夹在月度与类型之间、国别夹在逐年与标签之间）',
-  /\.st-panel\[data-panel="buckets"\] \{ grid-column: span 4; \}/.test(css) &&
-  /\.st-panel\[data-panel="country"\] \{ grid-column: span 4; \}/.test(css));
+/* 第 101 轮改判：四卡一行，两块饼也各占 3 栏。 */
+ok('A4 两个饼面板各占 3 栏（第 101 轮四卡一行：月度/区间/国别/逐年 并列）',
+  /\.st-panel\[data-panel="buckets"\]\s*\{ grid-column: span 3; \}/.test(css) &&
+  /\.st-panel\[data-panel="country"\]\s*\{ grid-column: span 3; \}/.test(css));
 
 ok('A5 饼图与图例的样式齐备：.st-pie / .st-pie-chart / .st-pie-slice / .st-row--pie / .st-row-pct',
   /\.st-pie \{/.test(css) && /\.st-pie-chart \{/.test(css) && /\.st-pie-slice \{/.test(css) &&
@@ -198,11 +201,14 @@ ok('A14 长尾合并：COUNTRY_MIN = 10 + 独立的中性灰 OTHER_COLOR（不�
   `阈值 ${countryMin} / 其他 ${otherHex} / 三视图 ΔE min ${otherScore.toFixed(1)} / 对底 ${otherCon.toFixed(2)}`);
 
 /* 兜底：样本还小（一个 ≥10 部的都没有）时不能把整张饼涂成一块灰，要退回「前 8 名」老口径 */
-ok('A15 分流写全了：有 ≥10 部的走「major + 其他」，一个都没有时退回前 8 名；脚注只在真有其他时补那句话',
+/* 第 101 轮改判（用户「删除国别构成的说明文字」）：只删脚注文案与 hasOther 分支，
+   长尾合并规则本身保留 —— 少于 10 部仍折进「其他」，样本不足仍退回前 8 名。 */
+ok('A15 分流仍在（≥10 部走 major+其他、一个都没有退回前 8 名），但脚注文案与 hasOther 已删',
   /var majors = countryAll\.filter\(function \(p\) \{ return p\.v >= COUNTRY_MIN; \}\)/.test(js) &&
   /countries = countryAll\.slice\(0, 8\);/.test(js) &&
-  /少于 ' \+ COUNTRY_MIN \+ ' 部的国别（/.test(js) &&
-  /hasOther \?/.test(js));
+  /k: '其他', v: restVal, other: true/.test(js) &&
+  !/hasOther/.test(js) && !/st-note/.test(js) &&
+  !/按国别累计|可超过记录总数|少于 ' \+ COUNTRY_MIN/.test(js));
 
 
 /* ---------------- B 1920 运行时 ---------------- */
@@ -311,27 +317,28 @@ ok('B10 渲染后色点两两不同：' + r.c.rows + ' 行国别 = ' + new Set(r
   new Set(r.c.fills).size === r.c.pieces && new Set(r.b.fills).size === r.b.pieces,
   `国别 ${new Set(r.c.dots).size}/${r.c.rows} · 区间 ${new Set(r.b.dots).size}/${r.b.rows}`);
 
-/* 第 99 轮起一行三卡：两个饼各自夹在中间，仍等宽（都 4 栏）、饼在左图例在右不重叠 */
-ok('B7 版式：两个饼面板等宽（都占 4 栏），各自饼在左、图例在右且不重叠',
+/* 第 101 轮起四卡一行（都 3 栏）：两个饼仍等宽、各自饼在左图例在右且不重叠 */
+ok('B7 版式：两个饼面板等宽（都占 3 栏），各自饼在左、图例在右且不重叠',
   Math.abs(r.b.sec.w - r.c.sec.w) <= 2 &&
   r.b.pie.r <= r.b.leg.l && r.c.pie.r <= r.c.leg.l,
   `区间 ${r.b.sec.w} / 国别 ${r.c.sec.w} 间距 ${r.b.leg.l - r.b.pie.r}/${r.c.leg.l - r.c.pie.r}`);
 
-ok('B8 饼按 clamp(150,16vw,240) 长到 240（1920），图例限宽 320 没被拉开',
-  Math.round(r.b.pie.w) === 240 && Math.round(r.b.pie.h) === 240 && r.b.leg.w <= 320,
+/* 第 101 轮改判：四卡一行后每卡只有 3/12 宽（1920 实测 456px），饼改为按栏百分比缩放
+   clamp(96px, 42%, 168px)，1920 落在上限 168；不再写死 vw 派生的 240。 */
+ok('B8 饼按栏缩放：1920 落在 clamp(96,42%,168) 上限 168、保持正方形、图例限宽 320 没被拉开',
+  /width: clamp\(96px, 42%, 168px\)/.test(css) &&
+  Math.round(r.b.pie.w) === 168 && Math.round(r.b.pie.h) === 168 && r.b.leg.w <= 320,
   `饼 ${r.b.pie.w}×${r.b.pie.h} / 图例 ${r.b.leg.w}`);
 
 ok('B9 1920 无横向溢出 + 零 JS 异常', r.ov <= 0 && errs.length === 0, `ov=${r.ov} err=${errs.length}`);
 
-/* 合并是「把长尾收起来」，不是「把长尾删掉」——被合并的国别必须在某处还查得到，
-   否则用户会以为那几部片没算进统计里。
-   ⚠️ 写进脚注而不是 `title=` 气泡：① `verify83 A3` 守着「watch.js 里不许写 DOM title」
-   （第 83 轮把原生气泡删净了，不能为这个功能破例）；② 触屏根本没有 hover。 */
-ok('B11 脚注写清合并规则 + 点名列出被合并的国别（合并≠丢信息）',
-  /少于 10 部的国别（/.test(r.c.note) && /）合并为「其他」/.test(r.c.note) &&
-  /按国别累计/.test(r.c.note) &&
-  CRANK.filter((k) => !CMAJOR.includes(k)).every((k) => r.c.note.includes(k)),
-  `脚注「${r.c.note}」`);
+/* 第 101 轮改判（用户明确要求删除国别构成的说明文字）：脚注整条删除，
+   只保留合并结果本身 —— 图例末行「其他」及其计数。删的是说明，不是规则。 */
+ok('B11 国别说明脚注已删净，长尾合并结果仍在图例末行「其他」（删的是说明，不是规则）',
+  r.c.note === '' && MINOR_SUM > 0 &&
+  r.c.keys[r.c.keys.length - 1] === '其他' &&
+  r.c.vs[r.c.vs.length - 1] === String(MINOR_SUM),
+  `脚注「${r.c.note}」 末行 ${r.c.keys[r.c.keys.length-1]}=${r.c.vs[r.c.vs.length-1]}`);
 
 /* ---------------- C 造数：只剩一档 / 有 0 值档 ---------------- */
 console.log('== C 造数（单一评分档位） ==');
@@ -389,9 +396,10 @@ ok('C3 唯一非零档占比 100.0%，且没有 NaN / aria-label 仍在',
 
 /* 小样本兜底：2 部片、同一个国别（1 个国别 2 部 < 阈值 10），
    如果无脑合并就会得到「其他 2」一块灰 —— 那面板等于废了。 */
-ok('C4 样本不足 10 部时不合并：国别仍是「日本 2」一整块，脚注也不提「其他」',
+/* 第 101 轮改判：脚注删除后，改用「图例里不出现其他 + 脚注文本为空」守同一条兜底语义。 */
+ok('C4 样本不足 10 部时不合并：国别仍是「日本 2」一整块，图例与脚注都不出现「其他」',
   m.cKeys.join('/') === '日本' && m.cSlices === 1 &&
-  !/其他/.test(m.cNote) && /按国别累计/.test(m.cNote),
+  !/其他/.test(m.cKeys.join('/')) && m.cNote === '',
   `行 ${m.cKeys.join('/')} / 片 ${m.cSlices} / 脚注「${m.cNote}」`);
 await c2.close();
 
@@ -415,8 +423,9 @@ const d = await dp.evaluate(() => {
   return { pieW: Math.round(pie.width), secW: Math.round(sec.width), gap: Math.round(leg.left - pie.right),
     legW: Math.round(leg.width), ov: document.documentElement.scrollWidth - document.documentElement.clientWidth };
 });
-ok('D1 1440 饼随 vw 缩到 230、仍在面板内、图例不重叠',
-  d.pieW === 230 && d.pieW < d.secW && d.gap > 0 && d.legW <= 320,
+/* 第 101 轮改判：1440 每卡 3/12（实测 336px），饼按 42% 缩到约 125，不再按 vw 算 230。 */
+ok('D1 1440 饼按栏缩到 ~125（面板 42%）、仍在面板内、图例不重叠',
+  d.pieW >= 110 && d.pieW <= 145 && d.pieW < d.secW && d.gap > 0 && d.legW <= 320,
   `饼 ${d.pieW} 面板 ${d.secW} 间距 ${d.gap} 图例 ${d.legW}`);
 
 ok('D2 1440 无横向溢出 + 零 JS 异常', d.ov <= 0 && derrs.length === 0, `ov=${d.ov} err=${derrs.length}`);
