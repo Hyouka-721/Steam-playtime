@@ -449,8 +449,18 @@
     var total = ALL.length;
 
     // 第 72 轮：排序切换只作用于网格视图；时间轴恒按观影时间倒序（月份分组的前提）。
-    // 第 91 轮 A4：年报展开时排序条也收起来（它只对网格有意义）
-    if (sortEl) sortEl.hidden = statsOn || layout !== 'grid';
+    // 第 92 轮：右排胶囊改成「年报 / 返回列表 + 两个排序按钮」共用，容器本身永不隐藏
+    //（否则年报展开时按钮跟着容器一起消失，用户退不出来）。只把两个排序按钮按
+    //「网格 且 非年报」隐藏 —— 它们本来也只在网格里有意义。
+    // ⚠️ 这里必须用 hidden 属性 + CSS 的 .w-sort [hidden]{display:none} 兜底：
+    //   .w-sort-btn 自己写了 display 相关样式时，[hidden] 的 UA 样式会被盖掉（第 91 轮
+    //   就踩过这个坑：JS 设了 hidden、按钮照样显示，成了一个点了没反应的死控件）。
+    if (sortEl) {
+      var sortBtns = sortEl.querySelectorAll('.w-sort-btn');
+      for (var sbi = 0; sbi < sortBtns.length; sbi++) {
+        sortBtns[sbi].hidden = statsOn || layout !== 'grid';
+      }
+    }
 
     emptyEl.hidden = total > 0;
     gridEl.hidden = !(!statsOn && layout === 'grid' && total > 0);

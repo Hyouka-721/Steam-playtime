@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon-watch-97e35b7b.png">
 <!-- 与游戏站同一套本地花体字，保持品牌一致；preload + font-display:block 消除 FOUT -->
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="watch.css?v=29">
+<link rel="stylesheet" href="watch.css?v=30">
 </head>
 <body>
 
@@ -51,17 +51,24 @@
     <button type="button" class="w-seg-btn" data-kind="series" aria-pressed="false">剧集</button>
     <!-- 第 73 轮：新增「番剧」类别（动画剧集），筛选条从三档变四档 -->
     <button type="button" class="w-seg-btn" data-kind="anime" aria-pressed="false">番剧</button>
-    <!-- 第 91 轮 A4：观影统计 / 年报。它是与网格、时间轴并列的第三个**独立开关**，
-         不去动史蒂夫头像的「网格 ⇄ 时间轴」两态（aria-pressed 的布尔契约有旧套件守着）。
-         用独立的 .w-stats-btn，不进 kindBtns 的 .w-seg-btn 选择器。
-         ⚠️ 别给排序条套一层 .w-bar-right：≤480 既有契约要求 .w-seg / .w-sort 各自
-         flex:1 1 100% 撑满两行，多包一层会让首屏多出一行、海报起点从 330 推到 360。 -->
-    <button type="button" class="w-stats-btn" id="w-stats-btn" aria-pressed="false" aria-controls="w-stats">年报</button>
   </div>
   <!-- 第 72 轮：原「共 N 部」计数条改为排序切换（仅网格视图生效，时间轴恒按观影时间倒序）。
        默认「观看时间」= 观影日期倒序，同日按上传时间正序（先上传居前）；
-       「评分」= 高评分在前，无评分沉底。选择记 localStorage('watch-sort')。 -->
-  <div class="w-sort" id="w-sort" role="group" aria-label="网格排序方式">
+       「评分」= 高评分在前，无评分沉底。选择记 localStorage('watch-sort')。
+
+       第 92 轮：年报按钮从 .w-seg（左排）搬进这条右排胶囊，左排回到 4 个类型档位。
+       - 网格视图：年报 + 观看时间 + 评分（三个并排）
+       - 时间轴视图：只剩「年报」（两个排序按钮 hidden —— 排序本来就只对网格生效）
+       - 年报展开：只剩「返回列表」（同一个按钮换文案，否则用户没法退出）
+       所以右排容器本身**永不隐藏**，只隐藏里面的 .w-sort-btn。
+
+       第 91 轮 A4：年报是与网格、时间轴并列的第三个**独立开关**，不去动史蒂夫头像的
+       「网格 ⇄ 时间轴」两态（aria-pressed 的布尔契约有旧套件守着）；用独立的
+       .w-stats-btn，不进 kindBtns 的 .w-seg-btn、也不进 sortBtns 的 .w-sort-btn 选择器。
+       ⚠️ 别给这两排再套一层 .w-bar-right：≤480 既有契约要求 .w-seg / .w-sort 各自
+       flex:1 1 100% 撑满两行，多包一层会让首屏多出一行、海报起点从 330 推到 360。 -->
+  <div class="w-sort" id="w-sort" role="group" aria-label="视图与排序">
+    <button type="button" class="w-stats-btn" id="w-stats-btn" aria-pressed="false" aria-controls="w-stats">年报</button>
     <button type="button" class="w-sort-btn is-on" data-sort="time" aria-pressed="true">观看时间</button>
     <button type="button" class="w-sort-btn" data-sort="rating" aria-pressed="false">评分</button>
   </div>
@@ -224,7 +231,7 @@
 </dialog>
 
 <div class="w-toast" id="w-toast" role="status" hidden></div>
-<script src="watch.js?v=18"></script>
+<script src="watch.js?v=19"></script>
 <script>
 /* 第 75 轮：注册 Service Worker（docs/sw.js）。
    海报是内容哈希命名的不可变资源，Pages 只给 max-age=600，刷新超 10 分钟就要

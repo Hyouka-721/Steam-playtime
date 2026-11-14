@@ -4,7 +4,7 @@
  *    等用户说「上线」→ fetch/merge → push → Pages 指纹轮询命中后再执行本脚本。
  *
  * 复验口径：
- *   ① 指纹：watch.html 引用 watch.css?v=29 / watch.js?v=18；线上 css/js/watch.json 字节
+ *   ① 指纹：watch.html 引用 watch.css?v=30 / watch.js?v=19；线上 css/js/watch.json 字节
  *      md5 与本地全等（CRLF 归一）；**分片真的上线了** —— manifest + 年片与本地逐字节一致，
  *      且 manifest 的 updated_at / total 能与线上主文件对账（对得上才说明线上走的是分片路径）
  *   ② 1440 运行时：A4 年报四卡数字全部由本地数据推导比对、年份下拉切换、返回列表还原；
@@ -87,12 +87,12 @@ await page.waitForTimeout(900);
 /* ---------- ① 内容指纹 ---------- */
 console.log('== ① 内容指纹（含分片是否真的上线） ==');
 const html = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-ok('A1 线上 watch.html 引用 watch.css?v=29 / watch.js?v=18',
-  /watch\.css\?v=29/.test(html) && /watch\.js\?v=18/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=30 / watch.js?v=19',
+  /watch\.css\?v=30/.test(html) && /watch\.js\?v=19/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
-const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=29&t=' + TS);
-const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=18&t=' + TS);
+const liveCss = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=30&t=' + TS);
+const liveJs = await page.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=19&t=' + TS);
 ok('A2 线上 watch.css 字节 md5 与本地全等（年报几乎全在 CSS，必须一起上线）',
   md5txt(liveCss) === md5txt(localCss), `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);
 ok('A3 线上 watch.js 字节 md5 与本地全等',
@@ -141,7 +141,10 @@ const st = await page.evaluate(() => {
     hidden: document.getElementById('w-stats').hidden,
     gridHidden: document.getElementById('w-grid').hidden,
     tlHidden: document.getElementById('w-tl').hidden,
-    sortHidden: document.getElementById('w-sort').hidden,
+    /* 第 92 轮起：年报按钮住进 #w-sort，容器必须留着（否则「返回列表」跟着消失），
+       真正收起来的是两个 .w-sort-btn。 */
+    sortWrapShown: (() => { const b = document.getElementById('w-sort'); return !!b && !b.hidden && getComputedStyle(b).display !== 'none'; })(),
+    sortBtnsHidden: [...document.querySelectorAll('#w-sort .w-sort-btn')].every((b) => b.hidden && getComputedStyle(b).display === 'none'),
     pressed: document.getElementById('w-stats-btn').getAttribute('aria-pressed'),
     btnText: document.getElementById('w-stats-btn').textContent.trim(),
     cards, bars: document.querySelectorAll('.st-bar').length,
@@ -152,8 +155,8 @@ const st = await page.evaluate(() => {
     title: (document.querySelector('.st-title') || {}).textContent || ''
   };
 });
-ok('B2 A4 年报展开：年报占位、网格/时间轴/排序条都收、按钮 aria-pressed 与文案同步',
-  !st.hidden && st.gridHidden && st.tlHidden && st.sortHidden &&
+ok('B2 A4 年报展开：年报占位、网格/时间轴收起、右排只留「返回列表」、按钮 aria-pressed 与文案同步',
+  !st.hidden && st.gridHidden && st.tlHidden && st.sortWrapShown && st.sortBtnsHidden &&
   st.pressed === 'true' && st.btnText === '返回列表');
 const card = (k) => (st.cards.find((c) => c.k === k) || {}).v;
 ok('B3 A4 四卡数字与本地数据推导全等（记录总数 / 有评分 / 平均评分 / 观影天数）',

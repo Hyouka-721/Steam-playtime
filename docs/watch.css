@@ -249,6 +249,29 @@ code {
 .w-sort-btn.is-on { color: var(--accent); background: var(--accent-wash); font-weight: 600; }
 .w-sort-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+/* 第 92 轮：年报按钮搬进右排胶囊后，外观完全并入同一条 —— 去掉自成一块的
+   底色与描边，尺寸对齐 .w-sort-btn（padding 6px 18px / 13px / 圆角 r-sm）。
+   ⚠️ 别把它并进 .w-sort-btn 选择器：.w-sort-btn.is-on 被旧套件当成「当前排序」读
+   data-sort，年报按钮进来会让 querySelector('.w-sort-btn.is-on') 命错元素。 */
+.w-sort .w-stats-btn {
+  appearance: none; border: 0; background: none;
+  padding: 6px 18px;
+  font: inherit; font-size: 13px;
+  color: var(--text-dim);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  margin-right: 2px;
+  transition: color var(--t-1) var(--ease), background var(--t-1) var(--ease);
+}
+.w-sort .w-stats-btn:hover { color: var(--text); }
+.w-sort .w-stats-btn.is-on { color: var(--accent); background: var(--accent-wash); font-weight: 600; }
+.w-sort .w-stats-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* 🔴 [hidden] 兜底：.w-sort-btn / .w-stats-btn 自己写了 appearance/背景等，
+   单靠 [hidden] 的 UA 样式在部分情况下会被盖掉 —— 第 91 轮就是这样漏出一个
+   「显示着但点了没反应」的死排序条。显式写死，别再让它回潮。 */
+.w-sort [hidden] { display: none; }
+
 /* 筛选后空结果（有数据、但当前「类型」档位没有匹配） */
 .w-none {
   margin: 44px 0;
@@ -911,9 +934,10 @@ select.w-input { cursor: pointer; }
   .tl-meta { flex: 1 1 100%; }
   /* 第 65 轮：窄屏英文名可能比正文长（超长原名），让名称块独占一行、内部自行折行 */
   .tl-head { flex: 1 1 100%; }
-  /* 第 91 轮 A4：年报按钮与四个筛选按钮等分同一行（不新增行，海报起点不变）；
+  /* 第 91 轮 A4：年报按钮与筛选按钮等分同一行（不新增行，海报起点不变）；
+     第 92 轮：它搬到右排胶囊里，跟着 .w-sort 那一行走（3 等分），左排回到 4 档；
      年报面板在 390 下再收一档，Top5 隐藏日期列 */
-  .w-seg .w-stats-btn { flex: 1; padding: 6px 8px; }
+  .w-sort .w-stats-btn { flex: 1; padding: 6px 8px; margin-right: 0; }
   .w-stats .st-title { font-size: 19px; }
   .w-stats .st-cards { gap: 8px; }
   .w-stats .st-card { padding: 12px; flex-wrap: wrap; }

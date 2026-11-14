@@ -67,8 +67,8 @@ ok('A1 页眉是 My Watch List、<title> 站名仍是 Watch List（两处分工�
 ok('A2 「共 N 部」计数条已删，换成 #w-sort 两按钮（默认观看时间）',
   !/w-count/.test(html) && /id="w-sort"/.test(html) &&
   /data-sort="time"[^>]*aria-pressed="true"/.test(html) && /data-sort="rating"[^>]*aria-pressed="false"/.test(html));
-ok('A3 版本号 bump：watch.css?v=29 / watch.js?v=18',
-  /watch\.css\?v=29"/.test(html) && /watch\.js\?v=18"/.test(html));
+ok('A3 版本号 bump：watch.css?v=30 / watch.js?v=19',
+  /watch\.css\?v=30"/.test(html) && /watch\.js\?v=19"/.test(html));
 ok('A4 玉子两部并存：id 不同、同日、按上传时间正序',
   (() => {
     const a = data.items.find((x) => x.title === '玉子爱情故事');
@@ -173,12 +173,20 @@ console.log('\n== C 时间轴 ==');
   await p.waitForFunction(() => document.querySelectorAll('#w-tl .tl-item').length > 0, null, { timeout: 25000 });
   await p.waitForTimeout(500);
   const r = await p.evaluate(() => ({
-    sortHidden: document.getElementById('w-sort').hidden,
+    /* 第 92 轮契约演进：右排胶囊现在同时装「年报 / 返回列表」，容器本身永不隐藏，
+       所以判据从「#w-sort 整条隐藏」改成「两个排序按钮隐藏、容器还在」。 */
+    sortHidden: [...document.querySelectorAll('#w-sort .w-sort-btn')].every((b) => b.hidden) &&
+      getComputedStyle(document.querySelector('#w-sort .w-sort-btn')).display === 'none',
+    statsBtnVisible: (() => {
+      const b = document.getElementById('w-stats-btn');
+      return !!b && !b.hidden && getComputedStyle(b).display !== 'none';
+    })(),
     dates: [...document.querySelectorAll('#w-tl .tl-date')].map((x) => x.textContent.trim()),
   }));
   const keys = r.dates.map(sortKey);
   const nonIncreasing = keys.every((v, i) => i === 0 || keys[i - 1] >= v);
-  ok('C1 时间轴视图下排序切换隐藏', r.sortHidden === true, `hidden=${r.sortHidden}`);
+  ok('C1 时间轴视图下两个排序按钮隐藏（右排只剩「年报」）', r.sortHidden === true && r.statsBtnVisible === true,
+    `排序按钮隐藏=${r.sortHidden} 年报可见=${r.statsBtnVisible}`);
   ok('C2 即使全局是评分序，时间轴仍按观影时间倒序', nonIncreasing && r.dates.length === N,
     `${r.dates.length} 条，首 ${r.dates[0]} 尾 ${r.dates[r.dates.length - 1]}`);
   await p.screenshot({ path: OUT + 'C2_时间轴_排序隐藏_1440.png' });

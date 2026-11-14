@@ -44,8 +44,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=29 / watch.js?v=18',
-  /watch\.css\?v=29/.test(html) && /watch\.js\?v=18/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=30 / watch.js?v=19',
+  /watch\.css\?v=30/.test(html) && /watch\.js\?v=19/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const relInput = (html.match(/<input[^>]*id="add-release"[^>]*>/) || [''])[0];
@@ -237,7 +237,11 @@ const MOCK3 = {
     statsHidden: document.getElementById('w-stats').hidden,
     gridHidden: document.getElementById('w-grid').hidden,
     tlHidden: document.getElementById('w-tl').hidden,
-    sortHidden: document.getElementById('w-sort').hidden,
+    /* 第 92 轮契约演进：年报按钮搬进 #w-sort，容器要留着（否则「返回列表」跟着消失），
+       收起来的是两个排序按钮。容器可见性单列一项守着。 */
+    sortWrapVisible: (() => { const b = document.getElementById('w-sort'); return !!b && !b.hidden && getComputedStyle(b).display !== 'none'; })(),
+    sortBtnsHidden: [...document.querySelectorAll('#w-sort .w-sort-btn')].every((b) => b.hidden && getComputedStyle(b).display === 'none'),
+    statsBtnVisible: getComputedStyle(document.getElementById('w-stats-btn')).display !== 'none',
     pressed: document.getElementById('w-stats-btn').getAttribute('aria-pressed'),
     btnText: document.getElementById('w-stats-btn').textContent.trim(),
     cards: document.querySelectorAll('.st-card').length,
@@ -249,9 +253,9 @@ const MOCK3 = {
     years: document.querySelectorAll('#st-year option').length,
     title: (document.querySelector('.st-title') || {}).textContent || ''
   }));
-  ok('C6 A4 年报展开：三个容器状态正确、按钮 aria-pressed 与文案同步',
-    !r.statsHidden && r.gridHidden && r.tlHidden && r.sortHidden &&
-    r.pressed === 'true' && r.btnText === '返回列表');
+  ok('C6 A4 年报展开：三个容器状态正确、按钮 aria-pressed 与文案同步（第 92 轮起右排只收排序按钮、留「返回列表」）',
+    !r.statsHidden && r.gridHidden && r.tlHidden && r.sortWrapVisible && r.sortBtnsHidden &&
+    r.statsBtnVisible && r.pressed === 'true' && r.btnText === '返回列表');
   ok('C7 A4 内容齐备：4 卡 / 12 月柱 / 8 横行 / 标签 / Top5 / 10 个年份选项',
     r.cards === 4 && r.bars === 12 && r.rows === 8 && r.chips > 0 && r.chips <= 8 &&
     r.top === 5 && r.years === 10 && r.v0 === String(N) && /全部年份/.test(r.title),
