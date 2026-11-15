@@ -8,13 +8,14 @@
  *   ① 静态 —— BEST_PICKS 常量与三张最佳卡删净；密度 = 有记录天数 ÷ 首末条跨度天数
  *      （含首尾）；峰值月份与月度分布面板**同口径**（跨年合并的「几月」），并列取排在前面的
  *      月份；版本只 bump watch.js（css 未动 → 仍 v=41）
- *   ② 1920 运行时 —— 6 卡数值逐项对（124 / 7.70 / 46.0 / 115 / 3.6 / 7月·16 部）、
+ *   ② 1920 运行时 —— 6 卡数值逐项对（第 107 轮起改为与 data/watch.json 现算值比对，不再钉快照数字）、
  *      六卡同一行、旧三最佳不在 DOM
  *   ③ 390 —— 6 卡回 2 列（2 列 × 3 行）、零溢出零异常
  */
 import { createRequire } from 'module';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { expectStats } from '../tools/expect-stats.mjs';
 
 const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace/');
 const { chromium } = require('playwright');
@@ -23,6 +24,8 @@ const rd = (p) => fs.readFileSync(ROOT + 'docs/' + p, 'utf8');
 const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '').replace(/\r\n/g, '\n');
 
 const html = rd('watch.html'), js = rd('watch.js');
+/* 第 107 轮：6 卡数字不再钉死快照值（124 / 46.0 / 115 / 3.6 …），改为从本地数据按同一口径现算。 */
+const EXP = expectStats(ROOT + 'docs/data/watch.json');
 const jsNC = strip(js);
 
 let pass = 0, fail = 0;
@@ -93,12 +96,12 @@ const r = await page.evaluate(() => {
   };
 });
 
-ok('B1 年报 6 卡：键名顺序与数值逐项正确（124 / 7.70 / 46.0 / 115 / 3.6% / 7月·16 部），三部「最佳」不在 DOM',
+ok('B1 年报 6 卡：键名顺序与数值逐项正确（与全库推导同值：' + EXP.summary + '），三部「最佳」不在 DOM',
   r.cards.length === 6 &&
   r.cards.map((c) => c.k).join('/') === '记录总数/平均评分/≥8 分占比/观影天数/观影密度/峰值月份' &&
-  r.cards[0].v === '124' && r.cards[1].v === '7.70' && r.cards[2].v === '46.0' &&
-  r.cards[3].v === '115' && r.cards[4].v === '3.6' && r.cards[4].u === '%' &&
-  r.cards[5].v === '7月' && r.cards[5].u === '16 部' && !r.hasBest,
+  r.cards[0].v === EXP.total && r.cards[1].v === EXP.avg && r.cards[2].v === EXP.highPct &&
+  r.cards[3].v === EXP.days && r.cards[4].v === EXP.density && r.cards[4].u === '%' &&
+  r.cards[5].v === EXP.peakK && r.cards[5].u === EXP.peakV && !r.hasBest,
   r.cards.map((c) => `${c.k}=${c.v}${c.u}`).join(' '));
 
 ok('B2 峰值月份卡与月度分布面板同数：卡上「16 部」= 面板柱图最大值',
@@ -145,9 +148,10 @@ const m2 = await p2.evaluate(() => {
     ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
   };
 });
-ok('C1 390 六卡回 2 列（2 列 × 3 行）、三最佳不在、新两卡在',
+ok('C1 390 六卡回 2 列（2 列 × 3 行）、三最佳不在、新两卡在（数字按全库现算）',
   m2.cardN === 6 && m2.cols === 2 && m2.distinctRows === 3 &&
-  !m2.kv.some((s) => /最佳/.test(s)) && m2.kv.includes('观影密度=3.6') && m2.kv.includes('峰值月份=7月'),
+  !m2.kv.some((s) => /最佳/.test(s)) &&
+  m2.kv.includes('观影密度=' + EXP.density) && m2.kv.includes('峰值月份=' + EXP.peakK),
   `卡=${m2.cardN} 列=${m2.cols} 行=${m2.distinctRows} ${m2.kv.join(' ')}`);
 ok('C2 390 无横向溢出 + 零 JS 异常', m2.ov <= 0 && e2.length === 0, `ov=${m2.ov} err=${e2.length}`);
 await c2.close();

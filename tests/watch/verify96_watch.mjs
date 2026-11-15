@@ -74,7 +74,7 @@ ok('A3 HTML 里 `#w-stats-btn` 初始就带 hidden（首屏不闪的根因修复
 const badCanon = [];
 data.items.forEach((it) => (it.countries || []).forEach((c) => { if (!isCanon(c)) badCanon.push(it.title + ':' + c); }));
 ok('A4 数据：' + N + ' 条全部有非空 countries，且每个值都是归一化不动点（落库的是规范名不是别名）',
-  N === 124 && NO_COUNTRY === 0 &&
+  N >= 124 && NO_COUNTRY === 0 &&   /* 第 107 轮：改为「不少于当年基线」—— 用户加片不该让国别契约变红 */
   data.items.every((it) => Array.isArray(it.countries) && it.countries.length > 0) &&
   badCanon.length === 0,
   `待补 ${NO_COUNTRY} 条 / 国别 ${RANK.length} 种 / 非规范 ${badCanon.length} 处` +

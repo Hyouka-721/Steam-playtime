@@ -244,11 +244,12 @@ ok('B1 歌单 section 在「年度影视」下方（几何 top 更大）、标�
   r.songsBox.t > r.topBox.t && /年度歌单/.test(r.heading),
   `年度影视 top=${r.topBox.t} 年度歌单 top=${r.songsBox.t}`);
 
-ok('B2 真实数据 ' + groups.length + ' 组 × 10 首 = ' + realTotal + ' 条、年份倒序、data-count=' + realTotal + '、每组标题带年份与首数',
+ok('B2 真实数据 ' + groups.length + ' 组 × 10 首 = ' + realTotal + ' 条、年份倒序、data-count=' + realTotal + '、每组标题只有「YYYY 年」（第 107 轮用户要求删掉首数文案）',
   Number(r.count) === realTotal && r.domGroups.length === groups.length &&
   r.domGroups.map((g) => g.year).join(',') === groups.map((g) => g.year).join(',') &&
-  r.domGroups.every((g) => g.items.length === 10 && g.label.includes(g.year) && /10 首/.test(g.label)),
-  r.domGroups.map((g) => `${g.year}:${g.items.length}`).join(' '));
+  /* 第 107 轮：判据从「标题必须含 10 首」反转为「标题不得含 首」 */
+  r.domGroups.every((g) => g.items.length === 10 && g.label.includes(g.year) && !/首/.test(g.label)),
+  r.domGroups.map((g) => `${g.year}:${g.items.length}:${g.label}`).join(' '));
 
 ok('B3 每首三要素齐备：歌名/歌手非空、序号 1~10 递增、桌面 10 列铺满',
   r.domGroups.every((g) => g.cols === 10 && g.items.every((it, i) =>

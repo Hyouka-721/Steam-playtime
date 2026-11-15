@@ -9,7 +9,7 @@
  *      （EOL 归一）、线上 JS 6 卡证据（BEST_PICKS 与三部「最佳」删净、密度/峰值计算就位）、
  *      按钮恒「年度报告」金底与 118px 删除（第 102 轮契约延续）
  *   ② 1920 运行时 6 —— 编辑弹窗等宽、时间轴/年报按钮恒文案恒金底、6 卡数值逐项对
- *      （124 / 7.70 / 46.0 / 115 / 3.6% / 7月·16 部）、六卡一行、零溢出零异常
+ *      （第 107 轮起与本地 watch.json 现算值比对，不再钉快照数字）、六卡一行、零溢出零异常
  *   ③ 390 运行时 2 —— 六卡回 2 列（2 列 × 3 行）、零溢出零异常
  *
  * ⚠️ 线上字节一律在页内 fetch 回传，统一 --no-proxy-server。⚠️ 全程只读（打开弹窗量宽度
@@ -19,6 +19,7 @@ import { createRequire } from 'module';
 import fs from 'fs';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
+import { expectStats } from '../tools/expect-stats.mjs';
 
 const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace/');
 const { chromium } = require('playwright');
@@ -33,6 +34,8 @@ const stripJsCmt = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '');
 const stripLineCmt = (s) => s.replace(/\/\/[^\n]*/g, '');
 
 const localHtml = rd('watch.html'), localCss = rd('watch.css'), localJs = rd('watch.js');
+/* 第 107 轮：6 卡期望值改为从本地数据现算（用户加片不再与代码无关地假红）。 */
+const EXP = expectStats(ROOT + 'docs/data/watch.json');
 
 let pass = 0, fail = 0;
 const ok = (n, c, extra = '') => {
@@ -152,15 +155,15 @@ const r = await page.evaluate(() => {
   };
 });
 
-ok('B3 年报 6 卡：键名顺序与数值逐项正确（124 / 7.70 / 46.0 / 115 / 3.6% / 7月·16 部），三部「最佳」不在 DOM',
+ok('B3 年报 6 卡：键名顺序与数值逐项正确（与本地全库推导同值：' + EXP.summary + '），三部「最佳」不在 DOM',
   r.cards.length === 6 &&
   r.cards.map((c) => c.k).join('/') === '记录总数/平均评分/≥8 分占比/观影天数/观影密度/峰值月份' &&
-  r.cards[0].v === '124' && r.cards[1].v === '7.70' && r.cards[2].v === '46.0' &&
-  r.cards[3].v === '115' && r.cards[4].v === '3.6' && r.cards[4].u === '%' &&
-  r.cards[5].v === '7月' && r.cards[5].u === '16 部' && !r.hasBest,
+  r.cards[0].v === EXP.total && r.cards[1].v === EXP.avg && r.cards[2].v === EXP.highPct &&
+  r.cards[3].v === EXP.days && r.cards[4].v === EXP.density && r.cards[4].u === '%' &&
+  r.cards[5].v === EXP.peakK && r.cards[5].u === EXP.peakV && !r.hasBest,
   r.cards.map((c) => `${c.k}=${c.v}${c.u}`).join(' '));
 
-ok('B4 峰值月份卡与月度分布面板同数：卡上「16 部」= 面板柱图最大值',
+ok('B4 峰值月份卡与月度分布面板同数：卡上「' + EXP.peakV + '」= 面板柱图最大值',
   r.cards[5].u === r.monthTop + ' 部', `面板最大=${r.monthTop}`);
 
 ok('B5 六卡严格并列同一行 + 年报按钮恒「年度报告」金底、aria-pressed=true',
@@ -198,7 +201,8 @@ const m2 = await p2.evaluate(() => {
 });
 ok('C1 390 六卡回 2 列（2 列 × 3 行）、三部「最佳」不在、新两卡在',
   m2.cardN === 6 && m2.cols === 2 && m2.distinctRows === 3 &&
-  !m2.kv.some((s) => /最佳/.test(s)) && m2.kv.includes('观影密度=3.6') && m2.kv.includes('峰值月份=7月'),
+  !m2.kv.some((s) => /最佳/.test(s)) &&
+  m2.kv.includes('观影密度=' + EXP.density) && m2.kv.includes('峰值月份=' + EXP.peakK),
   `卡=${m2.cardN} 列=${m2.cols} 行=${m2.distinctRows} ${m2.kv.join(' ')}`);
 ok('C2 390 无横向溢出 + 零 JS 异常', m2.ov <= 0 && e2.length === 0, `ov=${m2.ov} err=${e2.length}`);
 await c2.close();

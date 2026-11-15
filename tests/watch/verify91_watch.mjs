@@ -114,10 +114,10 @@ const noTags = data.items.filter((x) => !Array.isArray(x.tags) || !x.tags.length
 ok('B1 A5 title_en / tags 已补齐到全覆盖',
   noEn.length === 0 && noTags.length === 0,
   `noEn=${noEn.length} noTags=${noTags.length}`);
-ok('B2 A5 补的标签都在既有 14 词词表内',
+ok('B2 A5 补的标签都在既有词表内（第 107 轮起 15 词，含用户新增的「音乐」）',
   (() => {
     const known = new Set(['剧情', '历史', '战争', '动画', '奇幻', '冒险', '温情',
-      '喜剧', '爱情', '灾难', '科幻', '悬疑', '犯罪', '纪录']);
+      '喜剧', '爱情', '灾难', '科幻', '悬疑', '犯罪', '纪录', '音乐']);
     return data.items.every((x) => (x.tags || []).every((t) => known.has(t)));
   })());
 const narrow = data.items.filter((x) => !x.poster_480);
@@ -179,7 +179,8 @@ const MOCK3 = {
     opts: document.querySelectorAll('#w-title-list option').length
   }));
   ok('C1 分片可用时首屏仍是网格 + 全库卡片，页脚时间戳来自主文件',
-    r.n === N && !r.gridHidden && r.statsHidden && /2026-11-14/.test(r.updated) &&
+    /* 第 107 轮：页脚时间戳不再钉死某一天（用户随时会加片）→ 与本地 watch.json 的 updated_at 比日期 */
+    r.n === N && !r.gridHidden && r.statsHidden && r.updated.indexOf(String(data.updated_at || '').slice(0, 10)) >= 0 &&
     r.total === '共 ' + N + ' 部影视剧', `卡片 ${r.n} / ${r.total} / ${r.updated}`);
   ok('C2 A9 片名联想 datalist 填满且不重复',
     r.opts === N, `${r.opts} 个 option`);

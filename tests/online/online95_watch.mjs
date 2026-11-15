@@ -17,11 +17,14 @@
 import { createRequire } from 'module';
 import fs from 'fs';
 import crypto from 'crypto';
+import { expectStats } from '../tools/expect-stats.mjs';
 const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace/');
 const { chromium } = require('playwright');
 
 const SITE = 'https://hyouka-721.github.io/Steam-playtime/';
 const ROOT = 'C:/Users/33329/WorkBuddy/2026-10-13-18-17-49/steam-playtime/docs/';
+/* 第 107 轮：密度 / 峰值月份不再写死，按同一口径从本地数据现算。 */
+const EXP = expectStats(ROOT + 'data/watch.json');
 const TS = Date.now();
 const md5 = (b) => crypto.createHash('md5').update(b).digest('hex');
 const norm = (s) => String(s).replace(/\r\n/g, '\n');
@@ -152,7 +155,7 @@ ok('B4 六卡没被本轮改坏：键名顺序与数字都对（数字四卡 + �
   r.cards.map((c) => c.k).join('/') === '记录总数/平均评分/≥8 分占比/观影天数/观影密度/峰值月份' &&
   card('记录总数') === String(N) &&
   card('平均评分') === AVG && card('≥8 分占比') === HIGHPCT &&
-  card('观影密度') === '3.6' && card('峰值月份') === '7月',
+  card('观影密度') === EXP.density && card('峰值月份') === EXP.peakK,
   `${card('平均评分')}/${card('≥8 分占比')} vs ${AVG}/${HIGHPCT} · 密度 ${card('观影密度')}% 峰值 ${card('峰值月份')}`);
 
 /* 第 101 轮改判：类型 / 标签面板删净，行数与 chips 归零；其余口径原样守。 */

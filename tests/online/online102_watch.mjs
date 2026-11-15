@@ -22,6 +22,7 @@ import { createRequire } from 'module';
 import fs from 'fs';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
+import { expectStats } from '../tools/expect-stats.mjs';
 
 const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace/');
 const { chromium } = require('playwright');
@@ -38,6 +39,8 @@ const stripJsCmt = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '');
 const localHtml = rd('watch.html');
 const localCss = rd('watch.css');
 const localJs = rd('watch.js');
+/* 第 107 轮：6 卡期望值改为从本地数据现算（用户加片不再与代码无关地假红）。 */
+const EXP = expectStats(ROOT + 'docs/data/watch.json');
 
 let pass = 0, fail = 0;
 const ok = (n, c, extra = '') => {
@@ -166,13 +169,14 @@ const r = await page.evaluate(() => {
   };
 });
 
-/* 第 103 轮改判：删三部「最佳」、加「观影密度 / 峰值月份」，7 卡 → 6 卡。 */
-ok('B3 年报 6 卡：键名顺序与数值逐项正确（124 / 7.70 / 46.0 / 115 / 3.6% / 7月·16 部），旧「有评分」「评分中位数」与三部「最佳」不在 DOM',
+/* 第 103 轮改判：删三部「最佳」、加「观影密度 / 峰值月份」，7 卡 → 6 卡。
+   第 107 轮：数字改为从本地数据现算（EXP），不再钉死 124 / 46.0 / 115 / 3.6 / 7月。 */
+ok('B3 年报 6 卡：键名顺序与数值逐项正确（与本地全库推导同值：' + EXP.summary + '），旧「有评分」「评分中位数」与三部「最佳」不在 DOM',
   r.cards.length === 6 &&
   r.cards.map((c) => c.k).join('/') === '记录总数/平均评分/≥8 分占比/观影天数/观影密度/峰值月份' &&
-  r.cards[0].v === '124' && r.cards[1].v === '7.70' && r.cards[2].v === '46.0' &&
-  r.cards[3].v === '115' && r.cards[4].v === '3.6' && r.cards[4].u === '%' &&
-  r.cards[5].v === '7月' && r.cards[5].u === '16 部' &&
+  r.cards[0].v === EXP.total && r.cards[1].v === EXP.avg && r.cards[2].v === EXP.highPct &&
+  r.cards[3].v === EXP.days && r.cards[4].v === EXP.density && r.cards[4].u === '%' &&
+  r.cards[5].v === EXP.peakK && r.cards[5].u === EXP.peakV &&
   !r.hasRated && !r.hasMedian,
   r.cards.map((c) => `${c.k}=${c.v}`).join(' '));
 

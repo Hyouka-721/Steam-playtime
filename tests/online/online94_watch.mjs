@@ -18,11 +18,14 @@
 import { createRequire } from 'module';
 import fs from 'fs';
 import crypto from 'crypto';
+import { expectStats } from '../tools/expect-stats.mjs';
 const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace/');
 const { chromium } = require('playwright');
 
 const SITE = 'https://hyouka-721.github.io/Steam-playtime/';
 const ROOT = 'C:/Users/33329/WorkBuddy/2026-10-13-18-17-49/steam-playtime/docs/';
+/* 第 107 轮：密度 / 峰值月份不再写死，按同一口径从本地数据现算。 */
+const EXP = expectStats(ROOT + 'data/watch.json');
 const TS = Date.now();
 const md5 = (b) => crypto.createHash('md5').update(b).digest('hex');
 const norm = (s) => String(s).replace(/\r\n/g, '\n');
@@ -121,11 +124,11 @@ ok('B1 六卡，键名与顺序对：记录总数 / 平均评分 / ≥8 分占�
   r.cards.map((c) => c.k).join('/') === '记录总数/平均评分/≥8 分占比/观影天数/观影密度/峰值月份',
   r.cards.map((c) => c.k).join('/'));
 
-/* 第 103 轮改判：密度 3.6% / 峰值月份 7月·16 部与全库推导同值。 */
+/* 第 103 轮改判：密度 / 峰值月份与全库推导同值；第 107 轮起改为现算（EXP），不再写死数字。 */
 ok('B2 六卡数字与本地同口径推导全等（数字四卡 + 密度 + 峰值月份）',
   card('记录总数') === String(N) &&
   card('平均评分') === AVG && card('≥8 分占比') === HIGHPCT &&
-  card('观影密度') === '3.6' && card('峰值月份') === '7月',
+  card('观影密度') === EXP.density && card('峰值月份') === EXP.peakK,
   `${card('平均评分')}/${card('≥8 分占比')} vs ${AVG}/${HIGHPCT} · 密度 ${card('观影密度')}% 峰值 ${card('峰值月份')}`);
 
 ok('B3 头部只剩标题 + 下拉：副标题与「统计年份」字样都不在线上页面，aria-label 仍在',

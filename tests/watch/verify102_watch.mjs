@@ -21,6 +21,7 @@
 import { createRequire } from 'module';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { expectStats } from '../tools/expect-stats.mjs';
 
 const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace/');
 const { chromium } = require('playwright');
@@ -33,6 +34,8 @@ const strip = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\r\n/g, '\n');
 const jsNC = strip(rd('watch.js'));
 const cssNC = strip(rd('watch.css'));
 const html = rd('watch.html');
+/* 第 107 轮：密度 / 峰值月份不再写死，按同一口径从本地数据现算（用户加片不再假红）。 */
+const EXP = expectStats(ROOT + 'docs/data/watch.json');
 
 let pass = 0, fail = 0;
 const ok = (n, c, extra = '') => {
@@ -132,13 +135,14 @@ const r = await page.evaluate(() => {
   };
 });
 
-/* 第 103 轮改判：删三部「最佳」、加「观影密度 / 峰值月份」，7 卡 → 6 卡。 */
-ok('B2 年报展开：6 张卡、label 顺序正确、密度 3.6% 峰值月份 7月·16 部；「有评分」「评分中位数」与三部「最佳」都不在 DOM',
+/* 第 103 轮改判：删三部「最佳」、加「观影密度 / 峰值月份」，7 卡 → 6 卡。
+   第 107 轮：密度与峰值月份改为从本地数据现算（EXP），不再钉死 3.6% / 7月·16 部。 */
+ok('B2 年报展开：6 张卡、label 顺序正确、密度与峰值月份与全库推导一致；「有评分」「评分中位数」与三部「最佳」都不在 DOM',
   r.cards.length === 6 &&
   r.cards.map((c) => c.k).join('/') === '记录总数/平均评分/≥8 分占比/观影天数/观影密度/峰值月份' &&
-  r.cards[4].v === '3.6' && r.cards[4].u === '%' &&
-  r.cards[5].v === '7月' && r.cards[5].u === '16 部' && !r.hasOld,
-  r.cards.map((c) => c.k + '=' + c.v).join(' / '));
+  r.cards[4].v === EXP.density && r.cards[4].u === '%' &&
+  r.cards[5].v === EXP.peakK && r.cards[5].u === EXP.peakV && !r.hasOld,
+  r.cards.map((c) => c.k + '=' + c.v).join(' / ') + ` （期望 密度 ${EXP.density}% / 峰值 ${EXP.peakK}·${EXP.peakV}）`);
 
 ok('B3 1920 六卡同一行（auto-fit 铺满、left 依次递增）',
   r.cards.every((c) => c.t === r.cards[0].t) &&

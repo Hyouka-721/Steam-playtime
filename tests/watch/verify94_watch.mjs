@@ -15,6 +15,7 @@
  */
 import { createRequire } from 'module';
 import fs from 'fs';
+import { expectStats } from '../tools/expect-stats.mjs';
 
 const require = createRequire('C:/Users/33329/.workbuddy/binaries/node/workspace/');
 const { chromium } = require('playwright');
@@ -41,6 +42,9 @@ const MEDIAN = (SR.length % 2 ? SR[MID] : (SR[MID - 1] + SR[MID]) / 2).toFixed(2
 const HIGHPCT = (RATED.filter((r) => r >= 8).length / RATED.length * 100).toFixed(1);
 const DAYS = new Set(data.items.map((x) => String(x.watched_at || '').slice(0, 10))).size;
 const YEARS = new Set(data.items.map((x) => String(x.watched_at || '').slice(0, 4))).size;
+/* 第 107 轮：密度 / 峰值月份原来写死 3.6 / 7月，用户每加一部片就会与代码无关地变红 →
+   改为用 tests/tools/expect-stats.mjs 按同一口径现算（含首尾跨度、跨年合并月份）。 */
+const EXP = expectStats(DOCS + 'data/watch.json');
 
 let pass = 0, fail = 0;
 const ok = (n, c, extra = '') => {
@@ -155,13 +159,13 @@ ok('B1 六张卡，键名与顺序：记录总数 / 平均评分 / ≥8 分占�
   r.cards.map((c) => c.k).join('/') === '记录总数/平均评分/≥8 分占比/观影天数/观影密度/峰值月份',
   r.cards.map((c) => c.k).join('/'));
 
-/* 第 103 轮改判：密度 3.6% / 峰值月份 7月·16 部与 docs/data/watch.json 全库推导同值（口径见 watch.js）。 */
+/* 第 103 轮改判：密度 / 峰值月份与全库推导同值（口径见 watch.js）；第 107 轮起改为现算，不再写死数字。 */
 ok('B2 六卡数字与本地同口径推导全等（数字四卡 + 密度 + 峰值月份）',
   card('记录总数') === String(N) &&
   card('平均评分') === AVG &&
   card('≥8 分占比') === HIGHPCT && card('观影天数') === String(DAYS) &&
-  card('观影密度') === '3.6' && card('峰值月份') === '7月',
-  `${card('平均评分')}/${card('≥8 分占比')}/${card('观影天数')} vs ${AVG}/${HIGHPCT}/${DAYS} · 密度 ${card('观影密度')}% 峰值 ${card('峰值月份')}`);
+  card('观影密度') === EXP.density && card('峰值月份') === EXP.peakK,
+  `${card('平均评分')}/${card('≥8 分占比')}/${card('观影天数')} vs ${AVG}/${HIGHPCT}/${DAYS} · 密度 ${card('观影密度')}% vs ${EXP.density}% 峰值 ${card('峰值月份')} vs ${EXP.peakK}`);
 
 ok('B3 头部只剩标题 + 下拉：副标题与「统计年份」字样都不在，aria-label 仍在',
   r.subCount === 0 && r.labelCount === 0 && r.ariaLabel === '统计年份');

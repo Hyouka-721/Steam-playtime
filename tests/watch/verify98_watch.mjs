@@ -85,8 +85,8 @@ const badItems = [];
 data.items.forEach((it) => {
   (it.countries || []).forEach((c) => { if (OLD_NAMES.includes(c)) badItems.push(it.title + ':' + c); });
 });
-ok('A5 数据：124 条里已无「中国大陆 / 中国台湾」，全部并进「中国」',
-  data.items.length === 124 && badItems.length === 0 &&
+ok('A5 数据：' + data.items.length + ' 条里已无「中国大陆 / 中国台湾」，全部并进「中国」（第 107 轮起条数改为下界 ≥124）',
+  data.items.length >= 124 && badItems.length === 0 &&
   data.items.every((it) => Array.isArray(it.countries) && it.countries.length > 0),
   `残留 ${badItems.length} 处${badItems.length ? '：' + badItems.slice(0, 4).join(', ') : ''} / 国别 ${RANK.length} 种`);
 
