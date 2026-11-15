@@ -2,14 +2,16 @@
  *
  * 用户原话：「为年度报告的年度影视栏目下面添加一个年度歌单的功能，涵盖歌曲的封面、
  * 歌曲名称、歌手，稍后我会录入每年的10首歌曲」；随后录入 2018~2025 共 8 年 80 首，
- * 并分 3 批定夺歌手 / 改名 / 补录 25 张桌面封面（39 条有图），第 4 批确认 4 个待确认
- * 歌名「都采用现有的」。本轮上线 = 框架 + 真实数据 + 封面素材一起发。
+ * 并分 6 批定夺歌手 / 改名 / 重排 / 补录 3 批桌面封面，第 4 批确认 4 个待确认歌名
+ * 「都采用现有的」，第 6 批用户拍板「to/To 采用 to」并补录第三批封面。
+ * 🔴 第 6 批改判：封面数不再写死 39，一律由本地 songs.json 现算 withCover
+ *    （第 3 / 5 / 6 批分别是 39 → 60 → 79 条，判据随事实更新，不调阈值）。
  *
  * 复验口径：
  *   ① 内容指纹 9 —— HTML 引用 v=42/v=34；css/js/html/songs.json 线上字节 md5 与本地全等
  *      （EOL 归一）；线上 JS 的独立加载 / 归一化 / 年份筛选 / 封面兜底链路；线上 CSS 三档
  *      栅格；线上封面素材抽查 5 张（200 + 字节数与本地一致）
- *   ② 1920 运行时 9 —— 歌单位置、8 组 × 10 首 / 年份倒序、三要素逐项、39 张封面全加载、
+ *   ② 1920 运行时 9 —— 歌单位置、8 组 × 10 首 / 年份倒序、三要素逐项、封面按本地现算全加载、
  *      线上 DOM 与本地 songs.json 逐字段全等、下拉筛选、六卡与按钮契约延续、零溢出零异常
  *   ③ 390 运行时 2 —— 两列、80 首、零溢出零异常
  *
@@ -103,11 +105,11 @@ ok('A7 线上 CSS：10 / 5 / 2 列三档齐备、860 与 480 断点各 1 个、�
   /\.st-song-cover \{[^}]*aspect-ratio: 1 \/ 1;/.test(liveCssNC),
   '860/480 各 1 个');
 
-ok('A8 线上 data/songs.json 字节 md5 与本地全等，且为 8 组 × 10 首 = 80 条（39 条带封面）',
+ok('A8 线上 data/songs.json 字节 md5 与本地全等，且为 8 组 × 10 首 = 80 条；第 6 批改判：带封面数由本地 songs.json 现算（第 3/5/6 批 39→60→79，不再写死 39）',
   md5txt(liveSongs) === md5txt(localSongs) &&
   (() => { try { const j = JSON.parse(liveSongs); return j.years.length === 8 &&
     j.years.every((g) => g.songs.length === 10) &&
-    j.years.reduce((n, g) => n + g.songs.filter((s) => s.cover).length, 0) === 39; } catch { return false; } })(),
+    j.years.reduce((n, g) => n + g.songs.filter((s) => s.cover).length, 0) === withCover; } catch { return false; } })(),
   `${md5txt(liveSongs).slice(0, 12)} / ${md5txt(localSongs).slice(0, 12)}`);
 
 const sample = coverUrls.slice(0, 5);
@@ -201,7 +203,7 @@ ok('B3 每首三要素齐备：歌名/歌手非空、序号 1~10 递增、桌面
     it.idx === String(i + 1) && it.t.trim() && it.a.trim())),
   `列=${r.domGroups[0].cols} 首条=${r.domGroups[0].items[0].t}/${r.domGroups[0].items[0].a}`);
 
-ok('B4 39 张封面全部加载成功、0 破图、其余 41 条显示 ♪ 占位',
+ok('B4 第 6 批改判：封面按本地 songs.json 现算 withCover 条全部加载、0 破图、其余显示 ♪ 占位',
   r.imgs === withCover && r.loaded === withCover && r.broken === 0 &&
   r.domGroups.reduce((n, g) => n + g.items.filter((i) => i.c).length, 0) === withCover,
   `img=${r.imgs} loaded=${r.loaded} broken=${r.broken} 占位=${realTotal - withCover}`);
@@ -214,7 +216,7 @@ const actual = r.domGroups.map((g) => ({
   year: g.year,
   items: g.items.map((i) => [i.t, i.a, i.c])
 }));
-ok('B5 线上 DOM 与本地 songs.json 逐项全等（歌名 / 歌手 / 有无封面，含第 1~3 批改名与 Title Case）',
+ok('B5 线上 DOM 与本地 songs.json 逐项全等（歌名 / 歌手 / 有无封面，含第 1~6 批改名；第 6 批用户定稿小写 to 是 Title Case 唯一例外）',
   JSON.stringify(actual) === JSON.stringify(expected),
   `${actual.length} 组 / ${actual.reduce((n, g) => n + g.items.length, 0)} 条`);
 

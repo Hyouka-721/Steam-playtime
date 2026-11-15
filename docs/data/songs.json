@@ -1,7 +1,7 @@
 {
   "updated_at": "2026-11-15",
   "schema": "years[].year = 年份(YYYY)；years[].songs[] = 该年歌单，每项 title = 歌曲名称、artist = 歌手、cover = 封面（img/songs/ 下的相对路径或完整 http(s) URL，留空则显示音符占位）。按年份倒序排列，每年 10 首。",
-  "note": "2026-11-15 用户录入 2018~2025 共 8 年 80 首歌名；同日第 1 批三处改名并联网补全歌手、第 2 批定夺歌手与英文 Title Case、第 3 批改「寂寞烟火」歌手并补录桌面第一批封面、第 4 批把 4 个待确认歌名定稿；第 5 批按用户指定重排 2025 / 2024 两组顺序、把 2023#6「寂寞烟火」替换为「送你礼物」，并补录桌面第二批 17 张封面。artist 与 cover 一律按最终歌名从映射表覆盖；未提供的封面留空显示音符占位，见归档目录「文档/年度歌单_歌手与改名核对清单.md」。",
+  "note": "2026-11-15 用户录入 2018~2025 共 8 年 80 首歌名；同日第 1 批三处改名并联网补全歌手、第 2 批定夺歌手与英文 Title Case、第 3 批改「寂寞烟火」歌手并补录桌面第一批封面、第 4 批把 4 个待确认歌名定稿；第 5 批重排 2025 / 2024、把 2023#6「寂寞烟火」替换为「送你礼物」并补录桌面第二批 17 张封面；第 6 批用户拍板「to/To 采用 to」（歌名定稿为小写 to，作为 Title Case 唯一显式例外），并补录桌面第三批 17 张封面。artist 与 cover 一律按最终歌名从映射表覆盖；未提供的封面留空显示音符占位，见归档目录「文档/年度歌单_歌手与改名核对清单.md」。",
   "years": [
     {
       "year": "2025",
@@ -32,7 +32,7 @@
           "cover": "img/songs/乐园游梦记.jpg?v=631da458"
         },
         {
-          "title": "I Really Want To Stay At Your House",
+          "title": "I Really Want to Stay At Your House",
           "artist": "Rosa Walton",
           "cover": "img/songs/I really want to stay at your house.jpg?v=6c8d3d04"
         },
@@ -77,7 +77,7 @@
           "cover": "img/songs/森林.jpg?v=915a8b0b"
         },
         {
-          "title": "I Really Want To Stay At Your House",
+          "title": "I Really Want to Stay At Your House",
           "artist": "Rosa Walton",
           "cover": "img/songs/I really want to stay at your house.jpg?v=6c8d3d04"
         },
@@ -329,7 +329,7 @@
         {
           "title": "如常",
           "artist": "房东的猫",
-          "cover": ""
+          "cover": "img/songs/如常.jpg?v=c4cd77a2"
         }
       ]
     },
@@ -339,7 +339,7 @@
         {
           "title": "云烟成雨",
           "artist": "房东的猫",
-          "cover": ""
+          "cover": "img/songs/云烟成雨.jpg?v=f5b1caa4"
         },
         {
           "title": "心做",
@@ -349,17 +349,17 @@
         {
           "title": "归去来兮",
           "artist": "花粥",
-          "cover": ""
+          "cover": "img/songs/归去来兮.jpg?v=444a76d6"
         },
         {
           "title": "晚安喵",
           "artist": "艾索",
-          "cover": ""
+          "cover": "img/songs/晚安喵.jpg?v=175ffeba"
         },
         {
           "title": "如常",
           "artist": "房东的猫",
-          "cover": ""
+          "cover": "img/songs/如常.jpg?v=c4cd77a2"
         },
         {
           "title": "故梦",
@@ -369,22 +369,22 @@
         {
           "title": "至此",
           "artist": "房东的猫",
-          "cover": ""
+          "cover": "img/songs/至此-Single-2000.jpg?v=df31703e"
         },
         {
           "title": "何须问",
           "artist": "银临",
-          "cover": ""
+          "cover": "img/songs/何须问.jpg?v=333fc3ad"
         },
         {
           "title": "蝴蝶之夏",
           "artist": "房东的猫",
-          "cover": ""
+          "cover": "img/songs/蝴蝶之夏.jpg?v=51976adb"
         },
         {
           "title": "オレンジ",
           "artist": "7!!",
-          "cover": ""
+          "cover": "img/songs/オレンジ-Single-2000.jpg?v=f74470d3"
         }
       ]
     },
@@ -394,52 +394,52 @@
         {
           "title": "南下",
           "artist": "徐海俏",
-          "cover": ""
+          "cover": "img/songs/南下.jpg?v=f276776e"
         },
         {
           "title": "明天你好",
           "artist": "牛奶咖啡",
-          "cover": ""
+          "cover": "img/songs/明天你好.jpg?v=fd4156e3"
         },
         {
           "title": "追光者",
           "artist": "岑宁儿",
-          "cover": ""
+          "cover": "img/songs/追光者.jpg?v=a54e5b43"
         },
         {
           "title": "盗将行",
           "artist": "花粥 / 马雨阳",
-          "cover": ""
+          "cover": "img/songs/盜將行-Single-2000.jpg?v=e412e8a2"
         },
         {
           "title": "起风了",
           "artist": "买辣椒也用券",
-          "cover": ""
+          "cover": "img/songs/起風了-Single-2000.jpg?v=98894ab4"
         },
         {
           "title": "Stay With Me",
           "artist": "朴灿烈/Punch",
-          "cover": ""
+          "cover": "img/songs/Stay With Me.jpg?v=b8741610"
         },
         {
           "title": "云烟成雨",
           "artist": "房东的猫",
-          "cover": ""
+          "cover": "img/songs/云烟成雨.jpg?v=f5b1caa4"
         },
         {
           "title": "旅行的意义",
           "artist": "陈绮贞",
-          "cover": ""
+          "cover": "img/songs/旅行的意义.jpg?v=2f97ee9b"
         },
         {
           "title": "童话镇",
           "artist": "陈一发儿",
-          "cover": ""
+          "cover": "img/songs/童話鎮-EP-2000.jpg?v=6aabe0b3"
         },
         {
           "title": "无问",
           "artist": "毛不易",
-          "cover": ""
+          "cover": "img/songs/無問(電影《無問西東》宣傳曲)-Single-2000.jpg?v=46795120"
         }
       ]
     }
