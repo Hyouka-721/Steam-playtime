@@ -14,16 +14,16 @@
       "poster_480": "img/watch/dear-you-debeb470-480.webp",
       "title_en": "Dear You",
       "year": 2026,
-      "rating": 9.9,
+      "rating": 9.5,
       "order": 2,
-      "note": "江海万里，心中念你，便不觉遥远",
+      "countries": [
+        "中国"
+      ],
       "tags": [
         "剧情",
         "温情"
       ],
-      "countries": [
-        "中国"
-      ]
+      "note": "江海万里，心中念你，便不觉遥远"
     },
     {
       "id": "2026-10-24-dead-to-rights",
