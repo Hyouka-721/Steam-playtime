@@ -1,11 +1,16 @@
 {
   "updated_at": "2026-11-15",
   "schema": "years[].year = 年份(YYYY)；years[].songs[] = 该年歌单，每项 title = 歌曲名称、artist = 歌手、cover = 封面（img/songs/ 下的相对路径或完整 http(s) URL，留空则显示音符占位）。按年份倒序排列，每年 10 首。",
-  "note": "2026-11-15 用户录入 2018~2025 共 8 年 80 首歌名；同日按用户第 1 批要求三处改名并联网补全歌手，第 2 批定夺歌手、改日文原名、把英文歌名统一为每个词首字母大写，第 3 批改「寂寞烟火」歌手并补录桌面第一批歌曲封面。artist 已按用户定夺全量覆盖；未提供的封面仍留空、显示音符占位，见归档目录「文档/封面补录清单.md」与「文档/年度歌单_歌手与改名核对清单.md」。",
+  "note": "2026-11-15 用户录入 2018~2025 共 8 年 80 首歌名；同日第 1 批三处改名并联网补全歌手、第 2 批定夺歌手与英文 Title Case、第 3 批改「寂寞烟火」歌手并补录桌面第一批封面、第 4 批把 4 个待确认歌名定稿；第 5 批按用户指定重排 2025 / 2024 两组顺序、把 2023#6「寂寞烟火」替换为「送你礼物」，并补录桌面第二批 17 张封面。artist 与 cover 一律按最终歌名从映射表覆盖；未提供的封面留空显示音符占位，见归档目录「文档/年度歌单_歌手与改名核对清单.md」。",
   "years": [
     {
       "year": "2025",
       "songs": [
+        {
+          "title": "新月的摇篮曲",
+          "artist": "HOYO-MiX",
+          "cover": "img/songs/新月的摇篮曲.jpg?v=9fde7006"
+        },
         {
           "title": "凝固的浪花",
           "artist": "HOYO-MiX",
@@ -17,19 +22,24 @@
           "cover": "img/songs/借.jpg?v=1d8dd2f9"
         },
         {
-          "title": "新月的摇篮曲",
-          "artist": "HOYO-MiX",
-          "cover": "img/songs/新月的摇篮曲.jpg?v=9fde7006"
-        },
-        {
           "title": "王招君",
           "artist": "任素汐",
           "cover": "img/songs/王招君.jpg?v=29514435"
         },
         {
+          "title": "乐园游梦记",
+          "artist": "于梓贝",
+          "cover": "img/songs/乐园游梦记.jpg?v=631da458"
+        },
+        {
           "title": "I Really Want To Stay At Your House",
           "artist": "Rosa Walton",
           "cover": "img/songs/I really want to stay at your house.jpg?v=6c8d3d04"
+        },
+        {
+          "title": "送你礼物",
+          "artist": "屋顶月光",
+          "cover": "img/songs/送你礼物.jpg?v=87c81be0"
         },
         {
           "title": "Nothing's Missing",
@@ -42,19 +52,9 @@
           "cover": "img/songs/restored.jpg?v=ac580dad"
         },
         {
-          "title": "乐园游梦记",
-          "artist": "于梓贝",
-          "cover": "img/songs/乐园游梦记.jpg?v=631da458"
-        },
-        {
           "title": "丁达尔的梦",
           "artist": "Youzee Music",
           "cover": "img/songs/丁达尔的梦.jpg?v=24ed51ad"
-        },
-        {
-          "title": "送你礼物",
-          "artist": "屋顶月光",
-          "cover": "img/songs/送你礼物.jpg?v=87c81be0"
         }
       ]
     },
@@ -67,16 +67,6 @@
           "cover": "img/songs/送你礼物.jpg?v=87c81be0"
         },
         {
-          "title": "I Really Want To Stay At Your House",
-          "artist": "Rosa Walton",
-          "cover": "img/songs/I really want to stay at your house.jpg?v=6c8d3d04"
-        },
-        {
-          "title": "戒网",
-          "artist": "村西 / 王馨悦",
-          "cover": "img/songs/戒网.jpg?v=2d45a702"
-        },
-        {
           "title": "Dacapo",
           "artist": "车子玉 (HOYO-MiX)",
           "cover": "img/songs/Dacapo.jpg?v=0a6237cb"
@@ -87,9 +77,14 @@
           "cover": "img/songs/森林.jpg?v=915a8b0b"
         },
         {
-          "title": "可能否",
-          "artist": "木小雅",
-          "cover": "img/songs/可能否.jpg?v=4bc70f86"
+          "title": "I Really Want To Stay At Your House",
+          "artist": "Rosa Walton",
+          "cover": "img/songs/I really want to stay at your house.jpg?v=6c8d3d04"
+        },
+        {
+          "title": "戒网",
+          "artist": "村西 / 王馨悦",
+          "cover": "img/songs/戒网.jpg?v=2d45a702"
         },
         {
           "title": "幻化成风",
@@ -100,6 +95,11 @@
           "title": "铃芽",
           "artist": "十明",
           "cover": "img/songs/铃芽.jpg?v=e5c13761"
+        },
+        {
+          "title": "可能否",
+          "artist": "木小雅",
+          "cover": "img/songs/可能否.jpg?v=4bc70f86"
         },
         {
           "title": "最重要的大事",
@@ -142,9 +142,9 @@
           "cover": "img/songs/Forever Friends.jpg?v=e14dd936"
         },
         {
-          "title": "寂寞烟火",
-          "artist": "王贰浪",
-          "cover": "img/songs/寂寞煙火-2000.jpg?v=f4c658a5"
+          "title": "送你礼物",
+          "artist": "屋顶月光",
+          "cover": "img/songs/送你礼物.jpg?v=87c81be0"
         },
         {
           "title": "戒网",
@@ -194,27 +194,27 @@
         {
           "title": "未料的密谋 Unpredicted Conspiracy",
           "artist": "HOYO-MiX",
-          "cover": ""
+          "cover": "img/songs/未料的密谋.jpg?v=2cb3ac49"
         },
         {
           "title": "His Smile",
           "artist": "麗美 (REMEDIOS)",
-          "cover": "img/songs/情書-電影原聲帶-2000.jpg?v=6b6d4416"
+          "cover": "img/songs/His Smile.jpg?v=6b6d4416"
         },
         {
           "title": "永远同在",
           "artist": "周深",
-          "cover": ""
+          "cover": "img/songs/永远同在.jpg?v=d9e63afe"
         },
         {
           "title": "花上的亡灵",
           "artist": "ヨルシカ",
-          "cover": ""
+          "cover": "img/songs/花上的亡灵.jpg?v=d589bfa2"
         },
         {
           "title": "演员",
           "artist": "薛之谦",
-          "cover": ""
+          "cover": "img/songs/演员.jpg?v=901f6d6a"
         },
         {
           "title": "Forever Friends",
@@ -234,7 +234,7 @@
         {
           "title": "花上的亡灵",
           "artist": "ヨルシカ",
-          "cover": ""
+          "cover": "img/songs/花上的亡灵.jpg?v=d589bfa2"
         },
         {
           "title": "恋のうた",
@@ -244,7 +244,7 @@
         {
           "title": "打上花火",
           "artist": "DAOKO × 米津玄師",
-          "cover": ""
+          "cover": "img/songs/打上花火.jpg?v=e14dd936"
         },
         {
           "title": "Forever Friends",
@@ -254,27 +254,27 @@
         {
           "title": "恋音と雨空",
           "artist": "AAA",
-          "cover": ""
+          "cover": "img/songs/恋音と雨空.jpg?v=187e4df5"
         },
         {
           "title": "111004",
           "artist": "宮内優里",
-          "cover": ""
+          "cover": "img/songs/111004.jpg?v=39fd1190"
         },
         {
           "title": "Lemon",
           "artist": "米津玄師",
-          "cover": ""
+          "cover": "img/songs/Lemon.jpg?v=03aa0bbc"
         },
         {
           "title": "团子大家族",
           "artist": "茶太",
-          "cover": ""
+          "cover": "img/songs/团子大家族.jpg?v=90ab3677"
         },
         {
           "title": "让风告诉你",
           "artist": "ChiliChill",
-          "cover": ""
+          "cover": "img/songs/让风告诉你.jpg?v=a1a203d9"
         }
       ]
     },
@@ -284,22 +284,22 @@
         {
           "title": "亲爱的旅人啊",
           "artist": "周深",
-          "cover": ""
+          "cover": "img/songs/亲爱的旅人啊.jpg?v=27de18d3"
         },
         {
           "title": "恋音と雨空",
           "artist": "AAA",
-          "cover": ""
+          "cover": "img/songs/恋音と雨空.jpg?v=187e4df5"
         },
         {
           "title": "永远同在",
           "artist": "周深",
-          "cover": ""
+          "cover": "img/songs/永远同在.jpg?v=d9e63afe"
         },
         {
           "title": "心做",
           "artist": "双笙",
-          "cover": ""
+          "cover": "img/songs/心做.jpg?v=97ea9011"
         },
         {
           "title": "Forever Friends",
@@ -309,22 +309,22 @@
         {
           "title": "故梦",
           "artist": "双笙",
-          "cover": ""
+          "cover": "img/songs/故梦.jpg?v=5e620bc6"
         },
         {
           "title": "水一亦寒",
           "artist": "水一亦寒",
-          "cover": ""
+          "cover": "img/songs/水一亦寒.webp?v=23440ddb"
         },
         {
           "title": "涅槃",
           "artist": "Cailin Russo / Chrissy Costanza",
-          "cover": ""
+          "cover": "img/songs/涅槃.jpg?v=63f3422b"
         },
         {
           "title": "寻",
           "artist": "双笙",
-          "cover": ""
+          "cover": "img/songs/寻.jpg?v=df07ac5a"
         },
         {
           "title": "如常",
@@ -344,7 +344,7 @@
         {
           "title": "心做",
           "artist": "双笙",
-          "cover": ""
+          "cover": "img/songs/心做.jpg?v=97ea9011"
         },
         {
           "title": "归去来兮",
@@ -364,7 +364,7 @@
         {
           "title": "故梦",
           "artist": "双笙",
-          "cover": ""
+          "cover": "img/songs/故梦.jpg?v=5e620bc6"
         },
         {
           "title": "至此",
