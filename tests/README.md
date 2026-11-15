@@ -48,14 +48,33 @@ tests/
            verify79 verify80 verify82 verify83 verify84_watch verify85_watch verify86_watch \
            verify87_watch verify89_watch verify90_watch verify91_watch verify92_watch \
            verify93_watch verify94_watch verify95_watch verify96_watch verify97_watch \
-           verify98_watch verify99_watch verify100_watch verify101_watch verify102_watch verify103_watch; do
+           verify98_watch verify99_watch verify100_watch verify101_watch verify102_watch verify103_watch verify104_watch; do
     echo "== $s =="; "$NODE" tests/watch/$s.mjs 2>&1 | tail -2
   done
   ```
 - 单元测试：`npm test`（`tests/unit/*.test.mjs`，只测采集与差分算法）
 - `tests/retired/` **一律不跑**：`verify47/48/49` 断言的「当日明细浮层」在第 113 轮已整段删除；`verify88/90` 断言的是已被一年点阵取代的旧月历。它们留作历史，**不改判据、不调阈值、不复活**。
 
-## 当前基线 · watch 线第 103 轮（✅ 已上线 2026-11-14）
+## 当前基线 · watch 线第 104 轮（本地完成，**待上线**）
+
+**版本**：`watch.css?v=42` / `watch.js?v=34`（css + js 都改，两个都 bump）。bump 扫 66 文件：纯文本 197 处（`watch.css?v=41` 104 + `watch.js?v=33` 93）+ 正则转义 120 处（63 + 57）+ `v=41/v=33` 简写 1 处，残留 0、跳过所有 `.md`。
+
+**用户需求**：「为年度报告的年度影视栏目下面添加一个年度歌单的功能，涵盖歌曲的封面、歌曲名称、歌手，稍后我会录入每年的10首歌曲」。经确认：① 用户稍后把清单发到对话 → 我写进独立数据文件；② 封面随清单给图片或链接（本地 `img/songs/` 相对路径或完整 URL）。
+
+**实现**：
+- 新增 `docs/data/songs.json`（`updated_at` + `schema` + `years` 数组）。结构：`years: [{ year: '2026', songs: [{ title, artist, cover }] }]`，按年份倒序、每年 10 首。🔴 **本轮 `years: []` —— 不编造任何歌曲**，页面走空态「歌单还没录入 —— 每年 10 首，封面 / 歌曲名称 / 歌手，稍后补上」。
+- `watch.js`：`SONGS_URL` / `SONGS` 全局；`songCoverUrl()` 挡 `javascript:`/`vbscript:`/协议相对 URL；`normalizeSongs()` 校验 4 位年份、过滤空标题、按年倒序；`loadSongs()` 用 `fetch(url + '?t=' + Date.now(), {cache:'no-store'})`（⚠️ `sw.js` 只管 `watch.json` / `meta` / `achievements`，`songs.json` 走原生 HTTP 缓存 —— 用户录入后必须刷新即见，所以不吃缓存；失败只 `console.warn`，观影页照常可用）；数据晚到时若年报已展开则补一次 `renderStats()`。
+- **年份联动**：`statsYear` 有值只看该年，全部年份按倒序展示所有分组；`songsHtml` 挂在 `head + cardHtml + panels + topHtml` 之后（无观影记录的空分支也带上），DOM 上位于「年度影视」下方。
+- **封面兜底**：`<img>` 的 `error` 不冒泡 → 在 `statsEl` 上用**捕获阶段委托**，失败图加 `is-broken` + `display:none`，露出 `.st-song-cover::before` 的「♪」占位；留空/伪协议不生成 `<img>`。
+- `watch.css`：`.st-songs` **自带卡片外观、不复用 `.st-panel` 类** —— 🔴 旧套件（`verify94 B4` / `verify98 B1/C1/D1`）按 `.st-panel` 遍历「统计面板顺序」，多一块就会红；自带样式后旧契约零改判。列宽三档 **10 / 5 / 2**（桌面每年 10 首正好一行、860 块 5 列、480 块 2 列，响应式规则一律带 `.w-stats` 前缀压过文件末尾的基础规则，且合进既有 860/480 块、不新增断点）；封面 1:1 + 令牌圆角 + 歌名/歌手单行省略号。
+
+**新增** `verify104_watch.mjs` **17 条**（静态 6 + 1920 造数 7 + 390 两 + 真实数据 2）。造数只存在于 `page.route('**/data/songs.json*')`，不写盘、不碰真实数据；覆盖三要素逐项、年份倒序、封面四种分支（正常 / 失效 / 留空 / 伪协议）、下拉筛选、旧四面板不受影响、10 列与 2 列布局、零溢出零异常。⚠️ **D 段判据随真实数据自适应**：本轮 `years` 为空验空态，用户录入后自动改为验分组与总数 —— 前后都不需要改判据。
+
+**验收**：本地全量 **42 套件 1128 条 → 1127 PASS / 1 已知红**（仍是 `verify56 B11` 两页页眉差 1px）；`npm test` **52 条 0 FAIL**；旧套件零改判（`verify94 26/26`、`verify98 20/20` 全绿）。线上复验套件 `online104_watch` 待上线时新建。
+
+**状态**：本地完成，**未上线**（本轮没收到「上线/推送」指令，不动远端）。⚠️ 线上仍是第 103 轮（`v=41/v=33`），线上主复验暂仍用 `online103_watch`；`tests/online/` 里的版本号已被本轮 bump 同步到 `v=42/v=34`，**推送前不要拿它们当线上快照跑**。待用户发来每年 10 首清单与封面后：把图片放进 `docs/img/songs/`、按 schema 写进 `docs/data/songs.json`、重跑 `verify104_watch`（D 段会自动改验真实数据），再按指令上线。
+
+## 历史基线 · 第 103 轮上线记录（✅ 已上线 2026-11-14）
 
 **版本**：`watch.css?v=41`（**未动**）/ `watch.js?v=33`。bump 只扫 JS：57 文件、纯文本 96 处 + 正则转义 55 处、残留 0、跳过所有 `.md`。
 
@@ -154,6 +173,7 @@ tests/
 | `verify101_watch` | 第 101 轮 watch 侧：**删两面板 + 四卡一行 + 删国别脚注** —— ① 静态 8（剥块注释后：`kinds`/`tags` 面板标记、`stRows`/`st-chip(s)`/`.st-note`、脚注文案「按国别累计 / 少于 10 部 / 合并为「其他」」全部删净；四面板顺序严格 `months/buckets/country/years` 且跨度 `4/2/2/4` 合计 12；🔴 `COUNTRY_MIN`/`k: '其他'`/`OTHER_COLOR` 合流规则仍在；饼宽 `clamp(96px,42%,168px)` + 图例 `max-width:320px`；860 块仍只有 1 个）② 1920 运行时 6（四卡严格并列同一行：top 全等、left 递增、柱图≈2×饼卡（4/12 vs 2/12）、合计铺满 12 栏容器；两个面板与两个 chip 容器都不在 DOM；两块饼与图例不溢出）③ 响应式 3（1440 饼缩到 96 且图例换行 / 1000 图例换行 / 390 回单列且 `ov=0 err=0`） | 17 |
 | `verify102_watch` | 第 102 轮 watch 侧：**年报 7 卡 + 按钮恒「年度报告」金底 + 排序输入等宽** —— ① 静态 6（`v=41/v=32`；cards 数组 7 项整块匹配 + median 删净 + `BEST_PICKS` 三部「最佳」；按钮 `textContent='年度报告'` 恒文案、旧三元/旧文案删净；两处按钮金底 + `.w-seg-btn`/`.w-sort-btn` 幽灵样式不动；118px 定宽删、`w-input-order` 类名保留；860 块唯一 + 按钮圆角走令牌）② 1920 运行时 6（时间轴态按钮恒文案/金底/`aria-pressed=false`；7 卡 label/value 逐项正确（实测 124 / 7.70 / 46.0 / 115 / 情书 / 是大臣 / 冰菓）、旧两卡不在 DOM；七卡同一行 left 递增；年报态金底与时间轴全等、`pressed=true`；`#add-order`≈`#add-year`≈`#add-watched` 等宽 ±2px（171/171/171）；ov=0 err=0）③ 390 运行时 2（七卡回 2 列；按钮恒文案金底） | 14 |
 | `verify103_watch` | 第 103 轮 watch 侧：**年报 6 卡（删三部「最佳」+ 加「观影密度」「峰值月份」）** —— ① 静态 6（`v=41/v=33`；cards 数组 6 项整块匹配 + `BEST_PICKS` 与三部「最佳」删净 + median/sortedR 删净；密度计算 `dayList/spanDays/density` 与峰值 `topMonthK/topMonthN` + `months.forEach` max 就位；860 块唯一；按钮/118px 契约延续）② 1920 运行时 5（6 卡数值逐项正确 124 / 7.70 / 46.0 / 115 / 3.6% / 7月·16 部、三部「最佳」不在 DOM；**峰值卡「16 部」= 月度面板柱图 max**（同口径对账）；六卡严格并列一行；按钮恒「年度报告」金底 `pressed=true`；ov=0 err=0）③ 390 运行时 2（六卡回 2 列 × 3 行；ov=0 err=0） | 13 |
+| `verify104_watch` | 第 104 轮 watch 侧：**年度影视下方新增「年度歌单」**（封面 / 歌曲名称 / 歌手，数据独立在 `data/songs.json`，本轮尚未录入） —— ① 静态 6（`v=42/v=34`；数据文件结构合法且带 schema；`no-store` 加载 / 归一化 / 年份筛选 / 封面兜底委托；歌单在「年度影视」之后、不挂 `data-panel`、不借 `.st-panel` 类、不进 `.st-panels`；CSS 10/5/2 列三档且 860/480 块各唯一；封面 1:1 + ♪ 占位 + 歌名/歌手省略号 + 圆角只用令牌）② 1920 造数 7（位置在年度影视下方、两分组按年份倒序各 10 首、三要素逐项正确、封面四分支、失败图 `is-broken` 隐藏露占位、年份下拉筛选与旧四面板不受影响、10 列 ov=0 err=0）③ 390 造数 2（2 列、20 首都在、零溢出零异常）④ 真实数据 2（**判据自适应**：本轮空则验空态不编造，录入后自动验分组与总数） | 17 |
 | `verify117` | 第 117 轮 index 侧：**首屏榜单整行显示** —— 行距 4→8→（按用户要求回退）**6**，行高由 `fitRankRows()` 按「第一行顶边 → 视口底」的可⽤高度反解（`--rank-row-h`）：8 行落在 74~100px 观感带内就用 8 行，屏幕偏高多放、偏矮少放，**折线永远落在行与行之间**；1440×1080 恰好 8 整行 0 切开，1440×1200 / 1280×1080 / 1920×800 / 1088×1000 / 1440×900 全部 0 条被切开的行；`.sk-row` 同吃该变量（CLS 0）；切视图与 resize 后仍成立；390 不参与（两行式布局） | 15 |
 | `verify116` | 第 116 轮 index 侧：**统计口径统一** —— 自 `meta.tracking_since` 到 `meta.last_snapshot_date`，缺数据的日期一律按 **0 分钟**补齐（`.l0` 灰点、`role=button` 可点、气泡「游玩时长：0 min」、当日列表「这天没有游玩记录」），不再出现「未采集」空格；开始统计之前与最新快照之后的未来日期仍是 `.lna`「尚未记录」且不可点；范围天数、合计、峰值从 `meta.stats` 推导比对；365 格 / 7 行 / 64 列不变；390 无溢出；零异常 | 14 |
 | `verify115` | 第 115 轮 index 侧：**把「下钻单个游戏」整条线删干净** —— 累计榜行不再可点（光标非 pointer、点行不切视图不改 hash、连点四行仍停在原处）；页面里没有 `#drill-more` / `#btn-drill-back`，源码没有 `openDrill/closeDrill/renderDrillMore/drill.appid`，CSS 没有 `.drill-more`/`.dm-*`/`.is-drill`/`.btn-back`；勋章墙徽章从 `<button>` 改成 `<div>`（去掉 pointer 与 hover 上浮、提示语不再写「点一枚看趋势」），点它也不再跳转；旧深链 `#/recent/g/<appid>` 只按视图处理落到总览；「最近游玩」总点阵 365 格与点格子展开当日列表不受影响；390 无溢出；零异常。⚠️ 同日被推翻的 `verify114`（下钻只剩详情卡）已删除 | 16 |

@@ -53,6 +53,10 @@
   var statsOn = false;      // 第 91 轮 A4：年报是否展开
   var statsYear = '';       // 第 91 轮 A4：年报年份（空串 = 全部年份）
   var dupArmed = false;     // 第 91 轮 A9：重名两段式确认
+  /* 第 104 轮：年度歌单。数据与观影记录相互独立，放在 data/songs.json；
+     用户稍后按年份录入（每年 10 首），页面不编造任何歌曲。 */
+  var SONGS_URL = 'data/songs.json';
+  var SONGS = [];           // normalizeSongs 之后的年份分组（按年份倒序）
 
   /* ---------- 工具 ---------- */
   function esc(s) {
@@ -530,9 +534,35 @@
         '</li>';
       }).join('') + '</ol>' +
     '</section>';
+    /* 第 104 轮：年度歌单 —— 放在「年度影视」下方，与 .st-panels 的四块统计无关
+       （旧套件数的是 .st-panels .st-panel，这里单独成 section，不挂 data-panel）。
+       跟随年份下拉：选某年只看该年，全部年份按年份倒序展示所有分组。 */
+    var songGroups = statsYear
+      ? SONGS.filter(function (g) { return g.year === statsYear; })
+      : SONGS;
+    var songTotal = songGroups.reduce(function (n, g) { return n + g.songs.length; }, 0);
+    var songsHtml = '<section class="st-songs" data-songs="annual" data-count="' + songTotal + '">' +
+      '<h3>年度歌单<span class="st-hint">每年 10 首</span></h3>' +
+      (songGroups.length
+        ? songGroups.map(function (g) {
+            return '<div class="st-song-year" data-year="' + esc(g.year) + '">' +
+              '<h4 class="st-song-year-k">' + esc(g.year) + ' 年 <span class="st-song-year-n">' + g.songs.length + ' 首</span></h4>' +
+              '<ol class="st-song-list">' + g.songs.map(function (s, i) {
+                return '<li class="st-song" data-index="' + (i + 1) + '">' +
+                  '<span class="st-song-cover">' +
+                    (s.cover ? '<img class="st-song-img" src="' + esc(s.cover) + '" alt="' + esc(s.title) + ' 封面" loading="lazy" decoding="async">' : '') +
+                  '</span>' +
+                  '<span class="st-song-title">' + esc(s.title) + '</span>' +
+                  '<span class="st-song-artist">' + esc(s.artist) + '</span>' +
+                '</li>';
+              }).join('') + '</ol>' +
+            '</div>';
+          }).join('')
+        : '<p class="st-empty st-songs-empty">' + (statsYear ? esc(statsYear) + ' 年的歌单还没录入' : '歌单还没录入 —— 每年 10 首，封面 / 歌曲名称 / 歌手，稍后补上') + '</p>') +
+      '</section>';
     statsEl.innerHTML = items.length
-      ? head + cardHtml + panels + topHtml
-      : head + '<p class="st-empty st-empty-main">这个范围内还没有观影记录</p>';
+      ? head + cardHtml + panels + topHtml + songsHtml
+      : head + '<p class="st-empty st-empty-main">这个范围内还没有观影记录</p>' + songsHtml;
   }
 
   /* ---------- 第 91 轮 A9：录入防重复 ----------
@@ -654,6 +684,18 @@
         renderStats();
       }
     });
+  }
+
+  /* 第 104 轮：封面加载失败 → 隐藏破图、露出 .st-song-cover 的音符占位。
+     image 的 error 不冒泡，必须捕获阶段监听；用委托，年报重绘后不用重新绑定。 */
+  if (statsEl) {
+    statsEl.addEventListener('error', function (e) {
+      var t = e.target;
+      if (t && t.classList && t.classList.contains('st-song-img')) {
+        t.classList.add('is-broken');
+        t.style.display = 'none';
+      }
+    }, true);
   }
 
   /* ---------- 视图 / 筛选切换（状态持久化） ---------- */
@@ -1641,6 +1683,45 @@
     syncShards(data, years).catch(shardWarn);
   }
 
+  /* ---------- 第 104 轮：年度歌单数据 ----------
+     独立 JSON（不走分片、不进 SW）：歌单和观影记录不是一份数据，用户稍后手工录入，
+     刷新即见 —— 所以 no-store，别吃 Pages 的 10 分钟缓存。
+     结构：{ years: [ { year: '2026', songs: [ { title, artist, cover } ] } ] }
+     cover 可以是 img/songs/ 下的相对路径，也可以是完整 URL；留空或加载失败都露音符占位。 */
+  function songCoverUrl(u) {
+    var s = String(u || '').trim();
+    if (!s || /^(?:javascript|vbscript):/i.test(s) || /^\/\//.test(s)) return '';
+    return s;
+  }
+  function normalizeSongs(data) {
+    var raw = data && Array.isArray(data.years) ? data.years : [];
+    return raw.map(function (g) {
+      var y = String((g && g.year) || '').trim();
+      var list = (g && Array.isArray(g.songs)) ? g.songs : [];
+      return {
+        year: y,
+        songs: list.filter(function (s) { return s && String(s.title || '').trim(); })
+          .map(function (s) {
+            return {
+              title: String(s.title || '').trim(),
+              artist: String(s.artist || '').trim(),
+              cover: songCoverUrl(s.cover)
+            };
+          })
+      };
+    }).filter(function (g) { return /^\d{4}$/.test(g.year) && g.songs.length; })
+      .sort(function (a, b) { return b.year.localeCompare(a.year); });
+  }
+  function loadSongs() {
+    return fetch(SONGS_URL + '?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        SONGS = normalizeSongs(d);
+        if (statsOn) renderStats();   // 数据晚到时补一次重绘，不用用户切视图
+      })
+      .catch(function (err) { console.warn('[watch] 年度歌单未加载：', err && err.message); });
+  }
+
   function readMaster() {
     return fetch(DATA_URL, { cache: 'no-cache' })
       .then(function (r) {
@@ -1703,6 +1784,9 @@
 
   // 加了 no-cache：每次向服务器做一次协商（GitHub Pages 会给 304），
   // 改完 json 刷新即见，不必等 CDN 的 10 分钟缓存过期
+  // 第 104 轮：歌单是独立数据，不阻塞首屏（失败只留空态，观影页照常能用）
+  loadSongs();
+
   loadData()
     .then(function (res) {
       ALL = res.items.slice().sort(cmpTime);

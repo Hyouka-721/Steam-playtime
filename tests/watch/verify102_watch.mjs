@@ -42,8 +42,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态 ---------------- */
 console.log('== A 静态 ==');
-ok('A1 版本 watch.css?v=41 / watch.js?v=33',
-  /watch\.css\?v=41/.test(html) && /watch\.js\?v=33/.test(html),
+ok('A1 版本 watch.css?v=42 / watch.js?v=34',
+  /watch\.css\?v=42/.test(html) && /watch\.js\?v=34/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 /* 第 103 轮改判（用户「删除最佳三栏，上线观影密度卡、峰值月份」）：7 卡 → 6 卡，

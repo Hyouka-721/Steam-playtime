@@ -5,7 +5,7 @@
  *   2. 删除最佳电影：情书，最佳剧集：是大臣，最佳番剧：冰菓三栏。
  *
  * 复验口径：
- *   ① 指纹 8 —— HTML 引用 v=41/v=33（css 未动仍 41）、css/js/html 字节 md5 与本地全等
+ *   ① 指纹 8 —— HTML 引用 v=42/v=34（css 未动仍 41）、css/js/html 字节 md5 与本地全等
  *      （EOL 归一）、线上 JS 6 卡证据（BEST_PICKS 与三部「最佳」删净、密度/峰值计算就位）、
  *      按钮恒「年度报告」金底与 118px 删除（第 102 轮契约延续）
  *   ② 1920 运行时 6 —— 编辑弹窗等宽、时间轴/年报按钮恒文案恒金底、6 卡数值逐项对
@@ -50,13 +50,13 @@ await p0.goto(SITE + 'watch.html?t=' + TS, { waitUntil: 'load', timeout: 45000 }
 await p0.waitForFunction(() => document.querySelectorAll('#w-grid .poster').length > 20, null, { timeout: 45000 }).catch(() => {});
 
 const html = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.html?t=' + TS);
-const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=41&t=' + TS);
-const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=33&t=' + TS);
+const liveCss = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.css?v=42&t=' + TS);
+const liveJs = await p0.evaluate(async (u) => (await fetch(u, { cache: 'reload' })).text(), SITE + 'watch.js?v=34&t=' + TS);
 const liveJsNC = stripLineCmt(stripJsCmt(liveJs));
 const htmlNC = html.replace(/<!--[\s\S]*?-->/g, '');
 
-ok('A1 线上 watch.html 引用 watch.css?v=41（css 未动）/ watch.js?v=33',
-  /watch\.css\?v=41/.test(html) && /watch\.js\?v=33/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=42（css 未动）/ watch.js?v=34',
+  /watch\.css\?v=42/.test(html) && /watch\.js\?v=34/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 ok('A2 线上 watch.css 字节 md5 与本地全等（EOL 归一）', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);

@@ -859,6 +859,7 @@ select.w-input { cursor: pointer; }
   .w-main { padding: 14px 18px 84px; }   /* 同上，窄屏加号占底部 66px */
   .w-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 28px 12px; }
   .w-stats .st-top-list { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 28px 12px; }
+  .w-stats .st-song-list { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px 10px; }
   .poster-note { display: none; }       /* 窄屏优先保证海报与标题，短评移入详情不显示 */
   .w-foot {
     /* 第 82 轮：加了「共 N 部影视剧」后三段一行装不下 —— 窄屏改竖排，
@@ -953,6 +954,7 @@ select.w-input { cursor: pointer; }
   .w-stats .st-axis { gap: 3px; }
   .w-stats .st-bar-lab { font-size: 9px; }
   .w-stats .st-top-list { grid-template-columns: repeat(auto-fill, minmax(156px, 1fr)); gap: 24px 10px; }
+  .w-stats .st-song-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 10px; }
   /* 第 97 轮：390 下两个饼图改竖排（饼在上居中、图例整宽），否则 168 的饼把图例挤成两字一行 */
   .w-stats .st-pie { flex-direction: column; align-items: stretch; gap: 14px; }
   .w-stats .st-pie-chart { width: 132px; height: 132px; align-self: center; }
@@ -1121,6 +1123,32 @@ select.w-input { cursor: pointer; }
 .st-top-img { display: block; width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: var(--r-md); background: var(--img-bg); border: 1px solid var(--card-border); box-shadow: var(--card-shadow); transition: transform var(--t-2) var(--ease), box-shadow var(--t-2) var(--ease), border-color var(--t-2) var(--ease); }
 .st-top-item:hover .st-top-img { transform: translateY(-4px); border-color: var(--accent-line); box-shadow: var(--card-hover-shadow); }
 .st-top-year { font-size: 12px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+
+/* 第 104 轮：年度歌单 —— 封面 / 歌曲名称 / 歌手，每年 10 首正好一行。
+   与「年度影视」同级的独立 section，不进 .st-panels 的 12 栏栅格。 */
+/* 第 104 轮：歌单是独立栏目，不复用 .st-panel 类 —— 旧套件按 .st-panel 遍历
+   「统计面板顺序」（月度/区间/国别/逐年/年度影视），多一块会破坏既有契约。
+   所以卡片外观照抄一份，DOM 上互不干扰。 */
+.st-songs {
+  margin-top: 14px; padding: 16px 18px 18px; min-width: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-md);
+  transition: border-color var(--t-1) var(--ease);
+}
+.st-songs:hover { border-color: rgba(232, 176, 75, .3); }
+.st-songs h3 { margin: 0 0 16px; font-size: 14px; font-weight: 600; color: var(--text-strong); }
+.st-song-year + .st-song-year { margin-top: 22px; }
+.st-song-year-k { margin: 0 0 12px; font-size: 12px; font-weight: 600; color: var(--text-strong); font-variant-numeric: tabular-nums; }
+.st-song-year-n { font-weight: 400; color: var(--text-faint); }
+.st-song-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 18px 10px; }
+.st-song { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.st-song-cover { position: relative; display: block; width: 100%; aspect-ratio: 1 / 1; border-radius: var(--r-md); background: linear-gradient(145deg, rgba(232, 176, 75, .12), rgba(103, 105, 191, .16)), var(--img-bg); border: 1px solid var(--card-border); overflow: hidden; }
+.st-song-cover::before { content: "♪"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 26px; color: var(--accent); opacity: .55; }
+.st-song-img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; border-radius: var(--r-md); transition: transform var(--t-2) var(--ease); }
+.st-song:hover .st-song-img { transform: scale(1.04); }
+.st-song-title { font-size: 12px; font-weight: 600; color: var(--text-strong); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.st-song-artist { font-size: 11px; color: var(--text-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; }

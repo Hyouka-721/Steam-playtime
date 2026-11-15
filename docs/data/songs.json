@@ -1,0 +1,5 @@
+{
+  "updated_at": "2026-11-15",
+  "schema": "years[].year = 年份(YYYY)；years[].songs[] = 该年歌单，每项 title = 歌曲名称、artist = 歌手、cover = 封面（img/songs/ 下的相对路径或完整 http(s) URL，留空则显示音符占位）。按年份倒序排列，每年 10 首。",
+  "years": []
+}
