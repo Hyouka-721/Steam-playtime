@@ -1,7 +1,7 @@
 {
   "updated_at": "2026-11-15",
   "schema": "years[].year = 年份(YYYY)；years[].songs[] = 该年歌单，每项 title = 歌曲名称、artist = 歌手、cover = 封面（img/songs/ 下的相对路径或完整 http(s) URL，留空则显示音符占位）。按年份倒序排列，每年 10 首。",
-  "note": "2026-11-15 用户录入 2018~2025 共 8 年 80 首歌名；同日按用户要求执行三处改名并联网补全歌手。artist 留空的条目为同名曲过多／未查到唯一出处，见归档目录「文档/年度歌单_歌手与改名核对清单.md」的待确认清单，未编造。cover 仍全部留空，页面显示音符占位。",
+  "note": "2026-11-15 用户录入 2018~2025 共 8 年 80 首歌名；同日按用户第 1 批要求三处改名并联网补全歌手，再按第 2 批要求定夺歌手、改日文原名、把英文歌名统一为每个词首字母大写。artist 已按用户定夺全量覆盖，未定夺的条目见归档目录「文档/年度歌单_歌手与改名核对清单.md」第四节。cover 仍全部留空，页面显示音符占位。",
   "years": [
     {
       "year": "2025",
@@ -27,18 +27,18 @@
           "cover": ""
         },
         {
-          "title": "I really want to stay at your house",
+          "title": "I Really Want To Stay At Your House",
           "artist": "Rosa Walton",
           "cover": ""
         },
         {
           "title": "Nothing's Missing",
-          "artist": "SMiLE.dk",
+          "artist": "By The Coast",
           "cover": ""
         },
         {
-          "title": "restored",
-          "artist": "",
+          "title": "Restored",
+          "artist": "Sød Ven",
           "cover": ""
         },
         {
@@ -53,7 +53,7 @@
         },
         {
           "title": "送你礼物",
-          "artist": "",
+          "artist": "屋顶月光",
           "cover": ""
         }
       ]
@@ -63,11 +63,11 @@
       "songs": [
         {
           "title": "送你礼物",
-          "artist": "",
+          "artist": "屋顶月光",
           "cover": ""
         },
         {
-          "title": "I really want to stay at your house",
+          "title": "I Really Want To Stay At Your House",
           "artist": "Rosa Walton",
           "cover": ""
         },
@@ -77,13 +77,13 @@
           "cover": ""
         },
         {
-          "title": "dacapo",
+          "title": "Dacapo",
           "artist": "车子玉 (HOYO-MiX)",
           "cover": ""
         },
         {
           "title": "森林",
-          "artist": "Mr.",
+          "artist": "屋顶月光",
           "cover": ""
         },
         {
@@ -107,8 +107,8 @@
           "cover": ""
         },
         {
-          "title": "foreverfriends",
-          "artist": "REMEDIOS",
+          "title": "Forever Friends",
+          "artist": "DAOKO",
           "cover": ""
         }
       ]
@@ -137,8 +137,8 @@
           "cover": ""
         },
         {
-          "title": "foreverfriends",
-          "artist": "REMEDIOS",
+          "title": "Forever Friends",
+          "artist": "DAOKO",
           "cover": ""
         },
         {
@@ -158,12 +158,12 @@
         },
         {
           "title": "森林",
-          "artist": "Mr.",
+          "artist": "屋顶月光",
           "cover": ""
         },
         {
           "title": "独角",
-          "artist": "",
+          "artist": "UnicornPhantom",
           "cover": ""
         }
       ]
@@ -183,11 +183,11 @@
         },
         {
           "title": "独角",
-          "artist": "",
+          "artist": "UnicornPhantom",
           "cover": ""
         },
         {
-          "title": "The Last Days of Our youth",
+          "title": "The Last Days Of Our Youth",
           "artist": "REMEDIOS",
           "cover": ""
         },
@@ -197,13 +197,13 @@
           "cover": ""
         },
         {
-          "title": "His smile",
+          "title": "His Smile",
           "artist": "麗美 (REMEDIOS)",
           "cover": ""
         },
         {
           "title": "永远同在",
-          "artist": "木村弓",
+          "artist": "周深",
           "cover": ""
         },
         {
@@ -217,8 +217,8 @@
           "cover": ""
         },
         {
-          "title": "foreverfriends",
-          "artist": "REMEDIOS",
+          "title": "Forever Friends",
+          "artist": "DAOKO",
           "cover": ""
         }
       ]
@@ -247,12 +247,12 @@
           "cover": ""
         },
         {
-          "title": "foreverfriends",
-          "artist": "REMEDIOS",
+          "title": "Forever Friends",
+          "artist": "DAOKO",
           "cover": ""
         },
         {
-          "title": "恋音的雨空",
+          "title": "恋音と雨空",
           "artist": "AAA",
           "cover": ""
         },
@@ -262,7 +262,7 @@
           "cover": ""
         },
         {
-          "title": "lemon",
+          "title": "Lemon",
           "artist": "米津玄師",
           "cover": ""
         },
@@ -287,33 +287,33 @@
           "cover": ""
         },
         {
-          "title": "恋音的雨空",
+          "title": "恋音と雨空",
           "artist": "AAA",
           "cover": ""
         },
         {
           "title": "永远同在",
-          "artist": "木村弓",
+          "artist": "周深",
           "cover": ""
         },
         {
           "title": "心做",
-          "artist": "GUMI（蝶々P）",
+          "artist": "双笙",
           "cover": ""
         },
         {
-          "title": "foreverfriends",
-          "artist": "REMEDIOS",
+          "title": "Forever Friends",
+          "artist": "DAOKO",
           "cover": ""
         },
         {
           "title": "故梦",
-          "artist": "橙翼",
+          "artist": "双笙",
           "cover": ""
         },
         {
           "title": "水一亦寒",
-          "artist": "萧忆情Alex",
+          "artist": "水一亦寒",
           "cover": ""
         },
         {
@@ -323,7 +323,7 @@
         },
         {
           "title": "寻",
-          "artist": "",
+          "artist": "双笙",
           "cover": ""
         },
         {
@@ -343,7 +343,7 @@
         },
         {
           "title": "心做",
-          "artist": "GUMI（蝶々P）",
+          "artist": "双笙",
           "cover": ""
         },
         {
@@ -363,7 +363,7 @@
         },
         {
           "title": "故梦",
-          "artist": "橙翼",
+          "artist": "双笙",
           "cover": ""
         },
         {
@@ -417,8 +417,8 @@
           "cover": ""
         },
         {
-          "title": "Stay with me",
-          "artist": "",
+          "title": "Stay With Me",
+          "artist": "朴灿烈/Punch",
           "cover": ""
         },
         {
