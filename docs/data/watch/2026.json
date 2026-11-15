@@ -131,16 +131,17 @@
       "poster_480": "img/watch/robot-dreams-37fc156f-480.webp",
       "title_en": "Robot Dreams",
       "year": 2023,
-      "rating": 7.5,
+      "rating": 8,
+      "order": 3,
+      "countries": [
+        "西班牙",
+        "法国"
+      ],
       "tags": [
         "动画",
         "温情"
       ],
-      "note": "现在我们都明白如何去爱了",
-      "countries": [
-        "西班牙",
-        "法国"
-      ]
+      "note": "现在我们都明白如何去爱了"
     },
     {
       "id": "2026-08-15-nobody",
