@@ -2,6 +2,31 @@
   "year": "2022",
   "items": [
     {
+      "id": "2022-12-26-soul",
+      "title": "心灵奇旅",
+      "kind": "movie",
+      "watched_at": "2022-12-26",
+      "poster": "img/watch/soul-c656a52b.webp",
+      "added_at": "2026-11-15T18:32:12+08:00",
+      "poster_w": 640,
+      "poster_h": 800,
+      "poster_320": "img/watch/soul-c656a52b-320.webp",
+      "poster_480": "img/watch/soul-c656a52b-480.webp",
+      "title_en": "Soul",
+      "year": 2020,
+      "rating": 8,
+      "order": 3,
+      "countries": [
+        "美国"
+      ],
+      "tags": [
+        "动画",
+        "音乐",
+        "奇幻"
+      ],
+      "note": "不是有所成就才算活着"
+    },
+    {
       "id": "2022-11-09-the-thunder",
       "title": "破冰行动",
       "kind": "series",
