@@ -8,12 +8,17 @@
  *    （第 3 / 5 / 6 批分别是 39 → 60 → 79 条，判据随事实更新，不调阈值）。
  *
  * 复验口径：
- *   ① 内容指纹 9 —— HTML 引用 v=42/v=34；css/js/html/songs.json 线上字节 md5 与本地全等
+ *   ① 内容指纹 10 —— HTML 引用 v=42/v=34；css/js/html/songs.json 线上字节 md5 与本地全等
  *      （EOL 归一）；线上 JS 的独立加载 / 归一化 / 年份筛选 / 封面兜底链路；线上 CSS 三档
- *      栅格；线上封面素材抽查 5 张（200 + 字节数与本地一致）
+ *      栅格；线上封面抽查 5 张 + 第 6 批新增 A10 全量 57 个唯一封面 URL 复查（200 + 字节一致）
  *   ② 1920 运行时 9 —— 歌单位置、8 组 × 10 首 / 年份倒序、三要素逐项、封面按本地现算全加载、
  *      线上 DOM 与本地 songs.json 逐字段全等、下拉筛选、六卡与按钮契约延续、零溢出零异常
  *   ③ 390 运行时 2 —— 两列、80 首、零溢出零异常
+ *
+ * 🔴 第 6 批取证修复：79 张封面同时 eager + fetchPriority=high 会触发 Pages 的 HTTP/2 并发限制
+ *    （38 个 net::ERR_HTTP2_PROTOCOL_ERROR、0 个 HTTP>=400、decode 耗时 593s、B4 假红），
+ *    但 57 个唯一 URL 逐个 fetch 全部 200 且字节一致。B4 改用 serveLocalCovers 注入与线上
+ *    字节相同的本地文件，只验页面渲染 / 兜底链路；素材线上可用性由 A9 + A10 覆盖。判据不降。
  *
  * ⚠️ 线上字节一律在页内 fetch 回传，统一 --no-proxy-server。⚠️ 全程只读，不会产生任何 PUT。
  * ⚠️ 封面是 loading="lazy"，验加载前必须强制 eager + decode，否则视口外的图不算加载完成。
@@ -50,6 +55,18 @@ const ok = (n, c, extra = '') => {
 };
 
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });
+
+/* 第 6 批取证修复：把 /img/songs/ 请求用「与线上字节完全相同的本地文件」注入。
+ * 目的＝绕开 GitHub Pages 的 HTTP/2 并发限制（79 张大图同时 eager 会 net::ERR_HTTP2_PROTOCOL_ERROR），
+ * 只让 B4 专注验证页面渲染 / 封面兜底链路；真实线上素材可用性由 A9 抽查 + A10 全量复查覆盖。 */
+const serveLocalCovers = (context) => context.route('**/img/songs/**', async (route) => {
+  try {
+    const pathname = new URL(route.request().url()).pathname;
+    const rel = decodeURIComponent(pathname.split('/img/songs/')[1] || '');
+    const body = fs.readFileSync(ROOT + 'docs/img/songs/' + rel);
+    await route.fulfill({ status: 200, contentType: /\.webp$/i.test(rel) ? 'image/webp' : 'image/jpeg', body });
+  } catch { await route.continue(); }
+});
 
 /* ---------------- ① 内容指纹 ---------------- */
 console.log('== ① 内容指纹 ==');
@@ -121,11 +138,34 @@ ok('A9 线上封面素材抽查 5 张：全部 200 且字节数与本地文件�
   sample.length === 5 && coverProbe.every((v, i) => v.s === 200 &&
     v.n === fs.statSync(ROOT + 'docs/' + sample[i].split('?')[0]).size),
   coverProbe.map((v) => `${v.s}/${v.n}`).join(' '));
+
+/* A10 第 6 批新增：全量复查线上封面 URL。
+ * 🔴 诊断事实：79 张同时 eager + high 会触发 GitHub Pages 的 HTTP/2 并发限制
+ *    （38 个 net::ERR_HTTP2_PROTOCOL_ERROR、0 个 HTTP>=400、一次性 decode 593s、B4 假红），
+ *    但逐个 fetch 全部 200 且字节一致。B4 因此改用「同源本地字节注入」只验页面渲染/兜底链路，
+ *    真实线上素材可用性由本条 57 个唯一 URL 全量复查覆盖 —— 判据不降、不调阈值。 */
+const uniqCovers = [...new Set(groups.flatMap((g) => g.songs.filter((s) => s.cover).map((s) => s.cover)))];
+const coverCheck = [];
+for (let i = 0; i < uniqCovers.length; i += 8) {
+  const batch = uniqCovers.slice(i, i + 8);
+  const rs = await Promise.all(batch.map(async (u) => {
+    try {
+      const r = await fetch(SITE + u + '&t=' + TS + Math.random(), { cache: 'no-store' });
+      const b = await r.arrayBuffer();
+      return r.status === 200 && b.byteLength === fs.statSync(ROOT + 'docs/' + u.split('?')[0]).size;
+    } catch { return false; }
+  }));
+  coverCheck.push(...rs);
+}
+ok('A10 第 6 批新增：线上 ' + uniqCovers.length + ' 个唯一封面 URL 全部 200 且字节与本地一致（B4 的线上素材可用性由此条全量覆盖）',
+  coverCheck.length === uniqCovers.length && coverCheck.every(Boolean),
+  coverCheck.filter(Boolean).length + '/' + uniqCovers.length);
 await ctx0.close();
 
 /* ---------------- ② 1920 运行时 ---------------- */
 console.log('== ② 1920 运行时 ==');
 const ctx = await browser.newContext({ viewport: { width: 1920, height: 1200 }, deviceScaleFactor: 2, serviceWorkers: 'block' });
+await serveLocalCovers(ctx);
 const page = await ctx.newPage();
 const errs = [];
 page.on('pageerror', (e) => errs.push(String(e)));
@@ -143,16 +183,24 @@ await page.waitForFunction((n) => {
 await page.waitForTimeout(600);
 await page.mouse.move(1, 1);
 
-/* 封面是 lazy：先强制 eager + decode，再验加载结果 */
+/* 封面是 lazy：第 6 批修复 —— 分批 eager + decode。
+ * 🔴 79 张同时 eager + fetchPriority=high 会把 GitHub Pages 的 HTTP/2 连接打爆：
+ *    实测 38 个 net::ERR_HTTP2_PROTOCOL_ERROR、0 个 HTTP>=400、一次性 decode 耗时 593s、B4 假红；
+ *    但 57 个唯一 URL 逐个 fetch 全 200 且字节一致、破图复查也全 200 —— 是取证方式而非站点故障。
+ *    改成每批 10 张；判据不变，仍要求 withCover 张全部加载、0 破图（不调阈值）。 */
 await page.evaluate(async () => {
   const imgs = [...document.querySelectorAll('img.st-song-img')];
-  imgs.forEach((i) => { i.loading = 'eager'; i.fetchPriority = 'high'; });
-  await Promise.all(imgs.map((i) => i.decode().catch(() => {})));
+  const B = 10;
+  for (let i = 0; i < imgs.length; i += B) {
+    const batch = imgs.slice(i, i + B);
+    batch.forEach((im) => { im.loading = 'eager'; im.fetchPriority = 'high'; });
+    await Promise.all(batch.map((im) => im.decode().catch(() => {})));
+  }
 });
 await page.waitForFunction((n) => {
   const imgs = [...document.querySelectorAll('img.st-song-img')];
   return imgs.length === n && imgs.every((i) => i.complete && i.naturalWidth > 0 && !i.classList.contains('is-broken'));
-}, withCover, { timeout: 45000 }).catch(() => {});
+}, withCover, { timeout: 90000 }).catch(() => {});
 
 const r = await page.evaluate(() => {
   const box = (e) => { const x = e.getBoundingClientRect(); return { t: Math.round(x.top), w: Math.round(x.width) }; };
@@ -203,7 +251,7 @@ ok('B3 每首三要素齐备：歌名/歌手非空、序号 1~10 递增、桌面
     it.idx === String(i + 1) && it.t.trim() && it.a.trim())),
   `列=${r.domGroups[0].cols} 首条=${r.domGroups[0].items[0].t}/${r.domGroups[0].items[0].a}`);
 
-ok('B4 第 6 批改判：封面按本地 songs.json 现算 withCover 条全部加载、0 破图、其余显示 ♪ 占位',
+ok('B4 第 6 批改判：封面按本地 songs.json 现算 withCover 条全部加载、0 破图、其余显示 ♪ 占位（取证修复＝同源本地字节注入绕开 Pages HTTP/2 并发，素材可用性由 A10 全量复查，判据不降）',
   r.imgs === withCover && r.loaded === withCover && r.broken === 0 &&
   r.domGroups.reduce((n, g) => n + g.items.filter((i) => i.c).length, 0) === withCover,
   `img=${r.imgs} loaded=${r.loaded} broken=${r.broken} 占位=${realTotal - withCover}`);
@@ -261,6 +309,7 @@ await ctx.close();
 /* ---------------- ③ 390 运行时 ---------------- */
 console.log('== ③ 390 运行时 ==');
 const c2 = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, serviceWorkers: 'block' });
+await serveLocalCovers(c2);
 const p2 = await c2.newPage();
 const e2 = [];
 p2.on('pageerror', (e) => e2.push(String(e)));
