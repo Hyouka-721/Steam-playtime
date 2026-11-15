@@ -2,18 +2,22 @@
  *
  * 用户原话：「为年度报告的年度影视栏目下面添加一个年度歌单的功能，涵盖歌曲的封面、
  * 歌曲名称、歌手，稍后我会录入每年的10首歌曲」；随后录入 2018~2025 共 8 年 80 首，
- * 并分 6 批定夺歌手 / 改名 / 重排 / 补录 3 批桌面封面，第 4 批确认 4 个待确认歌名
- * 「都采用现有的」，第 6 批用户拍板「to/To 采用 to」并补录第三批封面。
+ * 并分 7 批定夺歌手 / 改名 / 重排 / 补录 4 批封面，第 4 批确认 4 个待确认歌名
+ * 「都采用现有的」，第 6 批用户拍板「to/To 采用 to」并补录第三批封面，
+ * 第 7 批重排 2023 / 2022 / 2018、两处替换为「铃芽」、「未料的密谋」去英文副名，
+ * 并补 2026 年 10 首 → 共 9 年 90 首 / 90 张封面。
  * 🔴 第 6 批改判：封面数不再写死 39，一律由本地 songs.json 现算 withCover
- *    （第 3 / 5 / 6 批分别是 39 → 60 → 79 条，判据随事实更新，不调阈值）。
+ *    （第 3 / 5 / 6 / 7 批分别是 39 → 60 → 79 → 90 条，判据随事实更新，不调阈值）。
+ * 🔴 第 7 批改判：A8 的「8 组」也改成由本地现算 groups.length，B2 / B6 / C1 文案同步；
+ *    判据本身不变（组数、每组 10 首、data-count、两列、零溢出），只是不再写死组数。
  *
  * 复验口径：
  *   ① 内容指纹 10 —— HTML 引用 v=42/v=34；css/js/html/songs.json 线上字节 md5 与本地全等
  *      （EOL 归一）；线上 JS 的独立加载 / 归一化 / 年份筛选 / 封面兜底链路；线上 CSS 三档
- *      栅格；线上封面抽查 5 张 + 第 6 批新增 A10 全量 57 个唯一封面 URL 复查（200 + 字节一致）
- *   ② 1920 运行时 9 —— 歌单位置、8 组 × 10 首 / 年份倒序、三要素逐项、封面按本地现算全加载、
+ *      栅格；线上封面抽查 5 张 + 第 6 批新增 A10 全量唯一封面 URL 复查（200 + 字节一致）
+ *   ② 1920 运行时 9 —— 歌单位置、组数 × 10 首 / 年份倒序、三要素逐项、封面按本地现算全加载、
  *      线上 DOM 与本地 songs.json 逐字段全等、下拉筛选、六卡与按钮契约延续、零溢出零异常
- *   ③ 390 运行时 2 —— 两列、80 首、零溢出零异常
+ *   ③ 390 运行时 2 —— 两列、全部歌曲都在、零溢出零异常
  *
  * 🔴 第 6 批取证修复：79 张封面同时 eager + fetchPriority=high 会触发 Pages 的 HTTP/2 并发限制
  *    （38 个 net::ERR_HTTP2_PROTOCOL_ERROR、0 个 HTTP>=400、decode 耗时 593s、B4 假红），
@@ -122,9 +126,9 @@ ok('A7 线上 CSS：10 / 5 / 2 列三档齐备、860 与 480 断点各 1 个、�
   /\.st-song-cover \{[^}]*aspect-ratio: 1 \/ 1;/.test(liveCssNC),
   '860/480 各 1 个');
 
-ok('A8 线上 data/songs.json 字节 md5 与本地全等，且为 8 组 × 10 首 = 80 条；第 6 批改判：带封面数由本地 songs.json 现算（第 3/5/6 批 39→60→79，不再写死 39）',
+ok('A8 线上 data/songs.json 字节 md5 与本地全等，组数与每组 10 首由本地现算；第 6 批改判：带封面数由本地 songs.json 现算（第 3/5/6 批 39→60→79，不再写死 39）；第 7 批同样把组数 8 改成现算（新增 2026 年后为 9 组 × 10 首 = 90 条）',
   md5txt(liveSongs) === md5txt(localSongs) &&
-  (() => { try { const j = JSON.parse(liveSongs); return j.years.length === 8 &&
+  (() => { try { const j = JSON.parse(liveSongs); return j.years.length === groups.length &&
     j.years.every((g) => g.songs.length === 10) &&
     j.years.reduce((n, g) => n + g.songs.filter((s) => s.cover).length, 0) === withCover; } catch { return false; } })(),
   `${md5txt(liveSongs).slice(0, 12)} / ${md5txt(localSongs).slice(0, 12)}`);
@@ -240,7 +244,7 @@ ok('B1 歌单 section 在「年度影视」下方（几何 top 更大）、标�
   r.songsBox.t > r.topBox.t && /年度歌单/.test(r.heading),
   `年度影视 top=${r.topBox.t} 年度歌单 top=${r.songsBox.t}`);
 
-ok('B2 真实数据 8 组 × 10 首 = 80 条、年份倒序、data-count=80、每组标题带年份与首数',
+ok('B2 真实数据 ' + groups.length + ' 组 × 10 首 = ' + realTotal + ' 条、年份倒序、data-count=' + realTotal + '、每组标题带年份与首数',
   Number(r.count) === realTotal && r.domGroups.length === groups.length &&
   r.domGroups.map((g) => g.year).join(',') === groups.map((g) => g.year).join(',') &&
   r.domGroups.every((g) => g.items.length === 10 && g.label.includes(g.year) && /10 首/.test(g.label)),
@@ -291,7 +295,7 @@ const filterOk = await (async () => {
     r.panels.join('/') === 'months/buckets/country/years';
   } catch (err) { return false; }
 })();
-ok('B6 年份下拉筛选：选 ' + yearPick + ' 只剩 1 组 10 首、回「全部年份」恢复 8 组；旧四面板始终不受影响',
+ok('B6 年份下拉筛选：选 ' + yearPick + ' 只剩 1 组 10 首、回「全部年份」恢复 ' + groups.length + ' 组；旧四面板始终不受影响',
   filterOk, `pick=${yearPick} panels=${r.panels.join('/')}`);
 
 ok('B7 第 103 轮契约延续：年报仍 6 卡且键名顺序不变、三部「最佳」不在 DOM',
@@ -330,7 +334,7 @@ const m2 = await p2.evaluate(() => ({
   groups: document.querySelectorAll('.st-song-year').length,
   ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
 }));
-ok('C1 390 歌单回 2 列、8 组 80 首都在、无横向溢出',
+ok('C1 390 歌单回 2 列、' + groups.length + ' 组 ' + realTotal + ' 首都在、无横向溢出',
   m2.cols === 2 && m2.songs === realTotal && m2.groups === groups.length && m2.ov <= 0,
   `列=${m2.cols} 首数=${m2.songs} 组=${m2.groups} ov=${m2.ov}`);
 ok('C2 390 零 JS 异常', e2.length === 0, `err=${e2.length}`);

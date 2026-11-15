@@ -1,8 +1,63 @@
 {
   "updated_at": "2026-11-15",
   "schema": "years[].year = 年份(YYYY)；years[].songs[] = 该年歌单，每项 title = 歌曲名称、artist = 歌手、cover = 封面（img/songs/ 下的相对路径或完整 http(s) URL，留空则显示音符占位）。按年份倒序排列，每年 10 首。",
-  "note": "2026-11-15 用户录入 2018~2025 共 8 年 80 首歌名；同日第 1 批三处改名并联网补全歌手、第 2 批定夺歌手与英文 Title Case、第 3 批改「寂寞烟火」歌手并补录桌面第一批封面、第 4 批把 4 个待确认歌名定稿；第 5 批重排 2025 / 2024、把 2023#6「寂寞烟火」替换为「送你礼物」并补录桌面第二批 17 张封面；第 6 批用户拍板「to/To 采用 to」（歌名定稿为小写 to，作为 Title Case 唯一显式例外），并补录桌面第三批 17 张封面。artist 与 cover 一律按最终歌名从映射表覆盖；未提供的封面留空显示音符占位，见归档目录「文档/年度歌单_歌手与改名核对清单.md」。",
+  "note": "2026-11-15 用户录入 2018~2025 共 8 年 80 首歌名；同日第 1 批三处改名并联网补全歌手、第 2 批定夺歌手与英文 Title Case、第 3 批改「寂寞烟火」歌手并补录桌面第一批封面、第 4 批把 4 个待确认歌名定稿；第 5 批重排 2025 / 2024、把 2023#6「寂寞烟火」替换为「送你礼物」并补录桌面第二批 17 张封面；第 6 批用户拍板「to/To 采用 to」（歌名定稿为小写 to，作为 Title Case 唯一显式例外），并补录桌面第三批 17 张封面；第 7 批按用户清单重排 2023 / 2022 / 2018，2023#8「恋のうた」与 2022#4「The Last Days Of Our Youth」均替换为「铃芽」，「未料的密谋 Unpredicted Conspiracy」简化为「未料的密谋」，新增 2026 年 10 首并补录下载目录 9 张封面（新月的摇篮曲跨年共用）。artist 与 cover 一律按最终歌名从映射表覆盖；未提供的封面留空显示音符占位，见归档目录「文档/年度歌单_歌手与改名核对清单.md」。",
   "years": [
+    {
+      "year": "2026",
+      "songs": [
+        {
+          "title": "夕颜",
+          "artist": "能登麻美子",
+          "cover": "img/songs/夕颜.webp?v=e251c172"
+        },
+        {
+          "title": "野孩子",
+          "artist": "于梓贝",
+          "cover": "img/songs/野孩子.jpg?v=003f4046"
+        },
+        {
+          "title": "敬太平",
+          "artist": "陈雪燃",
+          "cover": "img/songs/敬太平.jpg?v=f23473b3"
+        },
+        {
+          "title": "人间烟火",
+          "artist": "程响",
+          "cover": "img/songs/人间烟火.jpg?v=ee317210"
+        },
+        {
+          "title": "遇见",
+          "artist": "孙燕姿",
+          "cover": "img/songs/遇见.jpg?v=bdd03c4a"
+        },
+        {
+          "title": "和宇宙的温柔关联",
+          "artist": "房东的猫",
+          "cover": "img/songs/和宇宙的温柔关联.jpg?v=94a16fb9"
+        },
+        {
+          "title": "一程山路",
+          "artist": "毛不易",
+          "cover": "img/songs/一程山路.jpg?v=f3d130c9"
+        },
+        {
+          "title": "一生有你",
+          "artist": "水木年华",
+          "cover": "img/songs/一生有你-EP-2000.jpg?v=8e7978b7"
+        },
+        {
+          "title": "小步舞曲",
+          "artist": "陈绮贞",
+          "cover": "img/songs/小步舞曲.jpg?v=02d96f3e"
+        },
+        {
+          "title": "新月的摇篮曲",
+          "artist": "HOYO-MiX",
+          "cover": "img/songs/新月的摇篮曲.jpg?v=9fde7006"
+        }
+      ]
+    },
     {
       "year": "2025",
       "songs": [
@@ -117,19 +172,9 @@
       "year": "2023",
       "songs": [
         {
-          "title": "昔时遥忆",
-          "artist": "HOYO-MiX",
-          "cover": "img/songs/昔时遥忆.jpg?v=937e4d1e"
-        },
-        {
-          "title": "幻化成风",
-          "artist": "辻亚弥乃",
-          "cover": "img/songs/幻化成风.jpg?v=d4ed57f4"
-        },
-        {
-          "title": "星灯晕染之街",
-          "artist": "HOYO-MiX",
-          "cover": "img/songs/星灯晕染之街.jpg?v=911485d8"
+          "title": "送你礼物",
+          "artist": "屋顶月光",
+          "cover": "img/songs/送你礼物.jpg?v=87c81be0"
         },
         {
           "title": "踏上旅途",
@@ -137,24 +182,9 @@
           "cover": "img/songs/踏上旅途.jpg?v=07a5da1f"
         },
         {
-          "title": "Forever Friends",
-          "artist": "DAOKO",
-          "cover": "img/songs/Forever Friends.jpg?v=e14dd936"
-        },
-        {
-          "title": "送你礼物",
-          "artist": "屋顶月光",
-          "cover": "img/songs/送你礼物.jpg?v=87c81be0"
-        },
-        {
-          "title": "戒网",
-          "artist": "村西 / 王馨悦",
-          "cover": "img/songs/戒网.jpg?v=2d45a702"
-        },
-        {
-          "title": "恋のうた",
-          "artist": "鬼头明里",
-          "cover": "img/songs/恋のうた-Single-2000.jpg?v=81a656e4"
+          "title": "幻化成风",
+          "artist": "辻亚弥乃",
+          "cover": "img/songs/幻化成风.jpg?v=d4ed57f4"
         },
         {
           "title": "森林",
@@ -162,9 +192,34 @@
           "cover": "img/songs/森林.jpg?v=915a8b0b"
         },
         {
+          "title": "戒网",
+          "artist": "村西 / 王馨悦",
+          "cover": "img/songs/戒网.jpg?v=2d45a702"
+        },
+        {
+          "title": "铃芽",
+          "artist": "十明",
+          "cover": "img/songs/铃芽.jpg?v=e5c13761"
+        },
+        {
           "title": "独角",
           "artist": "UnicornPhantom",
           "cover": "img/songs/独角.jpg?v=a4373427"
+        },
+        {
+          "title": "Forever Friends",
+          "artist": "DAOKO",
+          "cover": "img/songs/Forever Friends.jpg?v=e14dd936"
+        },
+        {
+          "title": "星灯晕染之街",
+          "artist": "HOYO-MiX",
+          "cover": "img/songs/星灯晕染之街.jpg?v=911485d8"
+        },
+        {
+          "title": "昔时遥忆",
+          "artist": "HOYO-MiX",
+          "cover": "img/songs/昔时遥忆.jpg?v=937e4d1e"
         }
       ]
     },
@@ -177,24 +232,14 @@
           "cover": "img/songs/幻化成风.jpg?v=d4ed57f4"
         },
         {
+          "title": "铃芽",
+          "artist": "十明",
+          "cover": "img/songs/铃芽.jpg?v=e5c13761"
+        },
+        {
           "title": "戒网",
           "artist": "村西 / 王馨悦",
           "cover": "img/songs/戒网.jpg?v=2d45a702"
-        },
-        {
-          "title": "独角",
-          "artist": "UnicornPhantom",
-          "cover": "img/songs/独角.jpg?v=a4373427"
-        },
-        {
-          "title": "The Last Days Of Our Youth",
-          "artist": "REMEDIOS",
-          "cover": ""
-        },
-        {
-          "title": "未料的密谋 Unpredicted Conspiracy",
-          "artist": "HOYO-MiX",
-          "cover": "img/songs/未料的密谋.jpg?v=2cb3ac49"
         },
         {
           "title": "His Smile",
@@ -207,9 +252,19 @@
           "cover": "img/songs/永远同在.jpg?v=d9e63afe"
         },
         {
+          "title": "独角",
+          "artist": "UnicornPhantom",
+          "cover": "img/songs/独角.jpg?v=a4373427"
+        },
+        {
           "title": "花上的亡灵",
           "artist": "ヨルシカ",
           "cover": "img/songs/花上的亡灵.jpg?v=d589bfa2"
+        },
+        {
+          "title": "Forever Friends",
+          "artist": "DAOKO",
+          "cover": "img/songs/Forever Friends.jpg?v=e14dd936"
         },
         {
           "title": "演员",
@@ -217,9 +272,9 @@
           "cover": "img/songs/演员.jpg?v=901f6d6a"
         },
         {
-          "title": "Forever Friends",
-          "artist": "DAOKO",
-          "cover": "img/songs/Forever Friends.jpg?v=e14dd936"
+          "title": "未料的密谋",
+          "artist": "HOYO-MiX",
+          "cover": "img/songs/未料的密谋.jpg?v=2cb3ac49"
         }
       ]
     },
@@ -392,34 +447,9 @@
       "year": "2018",
       "songs": [
         {
-          "title": "南下",
-          "artist": "徐海俏",
-          "cover": "img/songs/南下.jpg?v=f276776e"
-        },
-        {
-          "title": "明天你好",
-          "artist": "牛奶咖啡",
-          "cover": "img/songs/明天你好.jpg?v=fd4156e3"
-        },
-        {
           "title": "追光者",
           "artist": "岑宁儿",
           "cover": "img/songs/追光者.jpg?v=a54e5b43"
-        },
-        {
-          "title": "盗将行",
-          "artist": "花粥 / 马雨阳",
-          "cover": "img/songs/盜將行-Single-2000.jpg?v=e412e8a2"
-        },
-        {
-          "title": "起风了",
-          "artist": "买辣椒也用券",
-          "cover": "img/songs/起風了-Single-2000.jpg?v=98894ab4"
-        },
-        {
-          "title": "Stay With Me",
-          "artist": "朴灿烈/Punch",
-          "cover": "img/songs/Stay With Me.jpg?v=b8741610"
         },
         {
           "title": "云烟成雨",
@@ -427,9 +457,9 @@
           "cover": "img/songs/云烟成雨.jpg?v=f5b1caa4"
         },
         {
-          "title": "旅行的意义",
-          "artist": "陈绮贞",
-          "cover": "img/songs/旅行的意义.jpg?v=2f97ee9b"
+          "title": "南下",
+          "artist": "徐海俏",
+          "cover": "img/songs/南下.jpg?v=f276776e"
         },
         {
           "title": "童话镇",
@@ -437,9 +467,34 @@
           "cover": "img/songs/童話鎮-EP-2000.jpg?v=6aabe0b3"
         },
         {
+          "title": "起风了",
+          "artist": "买辣椒也用券",
+          "cover": "img/songs/起風了-Single-2000.jpg?v=98894ab4"
+        },
+        {
+          "title": "盗将行",
+          "artist": "花粥 / 马雨阳",
+          "cover": "img/songs/盜將行-Single-2000.jpg?v=e412e8a2"
+        },
+        {
+          "title": "明天你好",
+          "artist": "牛奶咖啡",
+          "cover": "img/songs/明天你好.jpg?v=fd4156e3"
+        },
+        {
+          "title": "Stay With Me",
+          "artist": "朴灿烈/Punch",
+          "cover": "img/songs/Stay With Me.jpg?v=b8741610"
+        },
+        {
           "title": "无问",
           "artist": "毛不易",
           "cover": "img/songs/無問(電影《無問西東》宣傳曲)-Single-2000.jpg?v=46795120"
+        },
+        {
+          "title": "旅行的意义",
+          "artist": "陈绮贞",
+          "cover": "img/songs/旅行的意义.jpg?v=2f97ee9b"
         }
       ]
     }
