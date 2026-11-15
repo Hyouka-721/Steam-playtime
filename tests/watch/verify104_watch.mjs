@@ -11,8 +11,8 @@
  *   ② 1920 造数 7 —— page.route 注入两个年份各 10 首，验三要素逐项、年份倒序、
  *      封面成功/失败/留空/伪协议四种分支、下拉筛选、旧四面板不受影响、零溢出零异常
  *   ③ 390 造数 2 —— 两列与零溢出
- *   ④ 真实数据 2 —— 判据随 songs.json 自适应：本轮为空则验空态（不编造歌曲），
- *      用户录入后自动改为验分组与总数，前后都不用改判据
+ *   ④ 真实数据 2 —— 判据随 songs.json 自适应（空数据验空态 / 已录入验分组与总数），
+ *      并等异步加载的 data-count 追上真实总数再断言，避免读到首帧瞬时空态
  *
  * ⚠️ 造数只存在于 page.route 里，不写盘、不编造站内真实歌曲。全程只读、0 PUT。
  */
@@ -246,11 +246,23 @@ ok('C1 390 歌单回 2 列、20 首都在、无横向溢出',
   c.cols === 2 && c.songs === 20 && c.ov === 0, `列=${c.cols} 首数=${c.songs} ov=${c.ov}`);
 ok('C2 390 零 JS 异常', errs.length === 0, `err=${errs.length}`);
 
-/* ================= D 真实空数据 ================= */
-console.log('== D 真实空数据 ==');
+/* ================= D 真实数据 ================= */
+console.log('== D 真实数据 ==');
+/* 判据随真实数据自适应：years 为空 → 验空态；用户录入后 → 验真实分组与总数。
+   前后都不需要改判据，也不为跑绿调阈值。 */
+const realYears = songsJson.years.filter((g) => /^\d{4}$/.test(String(g.year || '')) && g.songs.length);
+const realTotal = realYears.reduce((n, g) => n + g.songs.filter((s) => s && String(s.title || '').trim()).length, 0);
 const p2 = await ctx.newPage();
 attach(p2);
 await openStats(p2);
+/* 🔴 songs.json 是独立异步加载的，年报首帧可能还是空数组 —— 有数据时必须等
+   data-count 追上真实总数再断言，否则会读到「数据回来前」的瞬时空态而假红。 */
+if (realTotal) {
+  await p2.waitForFunction((n) => {
+    const e = document.querySelector('[data-songs="annual"]');
+    return e && Number(e.getAttribute('data-count')) === n;
+  }, realTotal, { timeout: 25000 });
+}
 const d = await p2.evaluate(() => {
   const e = document.querySelector('[data-songs="annual"]');
   return {
@@ -262,16 +274,12 @@ const d = await p2.evaluate(() => {
     ov: document.documentElement.scrollWidth - document.documentElement.clientWidth
   };
 });
-/* 判据随真实数据自适应：本轮 years 为空 → 验空态；用户录入后 → 验真实分组与总数。
-   前后都不需要改判据，也不为跑绿调阈值。 */
-const realYears = songsJson.years.filter((g) => /^\d{4}$/.test(String(g.year || '')) && g.songs.length);
-const realTotal = realYears.reduce((n, g) => n + g.songs.filter((s) => s && String(s.title || '').trim()).length, 0);
-ok(`D1 真实 songs.json 与页面一致（${realYears.length ? '已录入，验分组与总数' : '本轮尚未录入，不编造歌曲 → 验空态'}）`,
+ok(`D1 真实 songs.json 与页面一致（${realYears.length ? '已录入，验分组与总数' : '尚未录入，不编造歌曲 → 验空态'}）`,
   realYears.length
     ? (String(d.count) === String(realTotal) && d.songs === realTotal && d.groups === realYears.length && !d.empty)
     : (d.count === '0' && d.songs === 0 && d.empty && /歌单还没录入/.test(d.text) && /10 首/.test(d.text)),
   `count=${d.count} songs=${d.songs} groups=${d.groups} text=${d.text.slice(0, 30)}`);
-ok('D2 空态零 JS 异常、无横向溢出', errs.length === 0 && d.ov === 0, `err=${errs.length} ov=${d.ov}`);
+ok('D2 真实数据态零 JS 异常、无横向溢出', errs.length === 0 && d.ov === 0, `err=${errs.length} ov=${d.ov}`);
 
 await browser.close();
 console.log(`\n第 104 轮（年度歌单）：${pass} PASS / ${fail} FAIL`);

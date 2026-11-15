@@ -1,5 +1,447 @@
 {
   "updated_at": "2026-11-15",
   "schema": "years[].year = 年份(YYYY)；years[].songs[] = 该年歌单，每项 title = 歌曲名称、artist = 歌手、cover = 封面（img/songs/ 下的相对路径或完整 http(s) URL，留空则显示音符占位）。按年份倒序排列，每年 10 首。",
-  "years": []
+  "note": "2026-11-15 用户录入 2018~2025 共 8 个年份、每年 10 首歌名；歌手与封面尚未提供，暂留空，不编造。",
+  "years": [
+    {
+      "year": "2025",
+      "songs": [
+        {
+          "title": "凝固的浪花",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "借",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "新月的摇篮曲",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "王招君",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "I really want to stay at your house",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "Nothing smissing",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "restored",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "乐园游梦记",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "丁达尔的梦",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "送你礼物",
+          "artist": "",
+          "cover": ""
+        }
+      ]
+    },
+    {
+      "year": "2024",
+      "songs": [
+        {
+          "title": "送你礼物",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "I really want stay at your house",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "戒网",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "dacapo",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "森林",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "可能否",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "幻化成风",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "铃芽",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "最重要的大事",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "foreverfriends",
+          "artist": "",
+          "cover": ""
+        }
+      ]
+    },
+    {
+      "year": "2023",
+      "songs": [
+        {
+          "title": "昔时遥忆",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "幻化成风",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "星灯晕染之街",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "踏上旅途",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "foreverfriends",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "寂寞烟火",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "戒网",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "恋のうた",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "森林",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "独角",
+          "artist": "",
+          "cover": ""
+        }
+      ]
+    },
+    {
+      "year": "2022",
+      "songs": [
+        {
+          "title": "幻化成风",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "戒网",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "独角",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "The Last Days of Our youth",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "unpredicted  conspriacy",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "His smile",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "永远同在",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "花上的亡灵",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "演员",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "foreverfriends",
+          "artist": "",
+          "cover": ""
+        }
+      ]
+    },
+    {
+      "year": "2021",
+      "songs": [
+        {
+          "title": "幻化成风",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "花上的亡灵",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "恋のうた",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "打上花火",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "foreverfriends",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "恋音的雨空",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "111004",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "lemon",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "团子大家族",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "让风告诉你",
+          "artist": "",
+          "cover": ""
+        }
+      ]
+    },
+    {
+      "year": "2020",
+      "songs": [
+        {
+          "title": "亲爱的旅人啊",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "恋音的雨空",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "永远同在",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "心做",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "foreverfriends",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "故梦",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "水一亦寒",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "涅槃",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "寻",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "如常",
+          "artist": "",
+          "cover": ""
+        }
+      ]
+    },
+    {
+      "year": "2019",
+      "songs": [
+        {
+          "title": "云烟成雨",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "心做",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "归去来兮",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "晚安喵",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "如常",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "故梦",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "至此",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "何须问",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "蝴蝶之夏",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "オレンジ",
+          "artist": "",
+          "cover": ""
+        }
+      ]
+    },
+    {
+      "year": "2018",
+      "songs": [
+        {
+          "title": "南下",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "明天你好",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "追光者",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "盗将行",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "起风了",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "Stay with me",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "云烟成雨",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "旅行的意义",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "童话镇",
+          "artist": "",
+          "cover": ""
+        },
+        {
+          "title": "无问",
+          "artist": "",
+          "cover": ""
+        }
+      ]
+    }
+  ]
 }
