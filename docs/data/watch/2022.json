@@ -2,6 +2,34 @@
   "year": "2022",
   "items": [
     {
+      "id": "2022-12-26-soul",
+      "title": "心灵奇旅",
+      "kind": "movie",
+      "watched_at": "2022-12-26",
+      "added_at": "2026-11-15T18:32:12+08:00",
+      "poster": "blob:https://hyouka-721.github.io/424633b6-e25c-49fe-a761-e920cff3418f",
+      "poster_w": 640,
+      "poster_h": 800,
+      "poster_320": "blob:https://hyouka-721.github.io/837f4e5f-ddcd-4a2e-a2e4-95fed4ff37c9",
+      "poster_480": "blob:https://hyouka-721.github.io/31462021-f070-4253-882a-1864911a339b",
+      "title_en": "Soul",
+      "year": 2020,
+      "rating": 7.5,
+      "order": 3,
+      "countries": [
+        "美国"
+      ],
+      "tags": [
+        "动画",
+        "音乐",
+        "奇幻"
+      ],
+      "note": "不是有所成就才算活着",
+      "__posterPath": "img/watch/soul-c656a52b.webp",
+      "__poster320Path": "img/watch/soul-c656a52b-320.webp",
+      "__poster480Path": "img/watch/soul-c656a52b-480.webp"
+    },
+    {
       "id": "2022-11-09-the-thunder",
       "title": "破冰行动",
       "kind": "series",
