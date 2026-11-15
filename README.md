@@ -25,13 +25,23 @@ Steam Web API **没有「某天玩了多久」这个接口**，只提供 `playti
 - `data/snapshots/YYYY-MM-DD.json`：原始快照，永久保留，永不覆盖（除非 `FORCE`）。
 - `data/daily/YYYY-MM.json`：差分产物。
 - `docs/data/meta.json`：汇总统计、游戏索引与采集健康度；**不含完整 steamid**，只有 `steamid_hash`。
-- `docs/data/watch.json`：观影记录（`watch.html` 的唯一数据源），`items` 按 `watched_at` 倒序，同一天按 `added_at` 正序（先上传的居前）。
+- `docs/data/watch.json`：观影记录（`watch.html` 的唯一数据源），`items` 按 `watched_at` 倒序，同一天按 `added_at` 正序（先上传的居前）；`docs/data/watch/YYYY.json` 是按年分片，由 `npm run shard` 从主文件重建。
+- `docs/data/songs.json`：年度歌单（`years[].songs[{title, artist, cover}]`），`cover` 指向 `docs/img/songs/t/` 下的 480×480 WebP 缩略图，留空则显示音符占位。
+- `assets/songs/`：歌单封面**原图**（不发布、页面不引用），只用于重新生成缩略图；`docs/img/songs/t/` 里每张缩略图都必须在它那儿能找到同名原图。
 
 ## 观影记录页
 
 `watch.html` 是完全独立的观影记录页，自带影院黑主题，不加载 index 的资源。页眉右上角可切换「网格 / 时间轴」；网格视图支持按观看时间（默认）或评分排序，选择记在本机浏览器里，刷新不丢。
 
 添加记录有三种方式：网页右下角 **+** 表单（直接调 GitHub API 提交海报 + `watch.json`，首次需配一次 [GitHub Token](<https://github.com/settings/personal-access-tokens/new?name=Steam-playtime+watch&description=Watch+list+upload&contents=write&expires_in=none&target_name=Hyouka-721>)，只存本机 `localStorage`）、`node scripts/watch/watch-add.mjs`（压成 WebP → 按内容哈希命名 → 去重合并 `watch.json` → 按观影时间倒序重排），或直接在 GitHub 网页编辑 `docs/data/watch.json`。`docs/` 下的改动必须推送才会生效，约 15~40 秒后随 Pages 更新。
+
+## 开发文档
+
+- `开发文档/CONTINUE-GAMETIME.md` —— index 站（游戏时长）交接提示词：用法、目录地图、数据契约、发布纪律
+- `开发文档/CONTINUE-WATCH.md` —— 观影页（含年度报告与年度歌单）交接提示词：口径、封面链路、套件体系、SOP
+- `开发文档/目录结构.md` —— 全仓地图、哪些目录能动哪些不能动、历次清理记录
+
+新开一个对话时把对应那份**全文**粘进去即可无缝续做，不需要再解释项目。
 
 ## 已知限制
 

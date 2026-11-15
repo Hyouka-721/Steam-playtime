@@ -54,8 +54,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=43 / watch.js?v=35',
-  /watch\.css\?v=43/.test(html) && /watch\.js\?v=35/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=44 / watch.js?v=35',
+  /watch\.css\?v=44/.test(html) && /watch\.js\?v=35/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 头部：副标题与「统计年份」label 的 DOM 已删，select 补 aria-label 保住可访问名称',
@@ -96,8 +96,12 @@ ok('A7 新规则圆角只用令牌 / 50% / 2px（共 ' + radii.length + ' 处）
     v.split(/\s+/).every((x) => /^var\(--r-(xs|sm|md|lg|pill)\)$/.test(x) || x === '50%' || x === '2px')),
   radii.join(' / '));
 
-ok('A8 美观 #6 刻度层：.st-row-track::after 用 25% 背景尺寸画三道刻度',
-  /\.st-row-track::after[\s\S]*?background-size:\s*25% 100%/.test(css));
+/* 第 108 轮改判（原判据：守 .st-row-track::after 的「25% 100%」刻度规则必须存在）：
+   第 101 轮把「类型构成 / 高频标签」两个面板删掉后，轨道已经没有任何模板再渲染它，
+   B9 也一直断言运行时轨道数为 0 —— 那段样式是纯死码，本轮从 watch.css 删净（12 行），
+   判据因此反转为「CSS 里必须再也找不到 .st-row-track 家族」，防它被谁整块粘回来。 */
+ok('A8 死码已清：.st-row-track 家族（轨道 / ::after 刻度 / i 填充）在 watch.css 里删净',
+  !/st-row-track/.test(css));
 
 /* ---------------- B 1440 运行时 ---------------- */
 console.log('== B 1440 运行时 ==');
@@ -202,9 +206,10 @@ ok('B8 美观 #5 柱渐变反转：顶端半透明、底端实色',
   /^linear-gradient\(rgba\(232, 176, 75, 0\.5\), rgb\(232, 176, 75\)\)$/.test(r.barBg),
   r.barBg.slice(0, 70));
 
-/* 第 101 轮改判：横条轨道随「类型构成 / 高频标签」一起删光，CSS 里的 ::after 刻度规则
-   由 A8 静态守着（历史样式留档），运行时不该再有任何轨道节点。 */
-ok('B9 刻度规则仍留在 CSS（A8），但运行时已无横条轨道节点（两面板删净）',
+/* 第 101 轮改判：横条轨道随「类型构成 / 高频标签」一起删光。
+   第 108 轮补：当初 A8 还留着「刻度规则在 CSS 里留档」，本轮 CSS 死码清完，A8 已反转为守「删净」，
+   所以这里只剩运行时这一半 —— 两面板删净后不该再有任何轨道节点。 */
+ok('B9 运行时已无横条轨道节点（两面板删净；CSS 侧由 A8 守着「连样式也没有」）',
   r.tracks === 0 && r.kindBgs.length === 0 && r.tickContent === '',
   `轨道 ${r.tracks} / 类型底色 ${r.kindBgs.length} / 刻度 ${r.tickContent}`);
 

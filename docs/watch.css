@@ -1076,18 +1076,10 @@ select.w-input { cursor: pointer; }
 .st-rows { display: flex; flex-direction: column; gap: 10px; }
 .st-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) 34px; align-items: center; gap: 10px; font-size: 12px; }
 .st-row-k { color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.st-row-track {
-  /* 美观 #6：五根横条长度接近时读不出相对量 → 叠 25% 刻度，
-     改成「带刻度的跑道」，差值一眼能看出来 */
-  position: relative; height: 8px; background: var(--well);
-  border-radius: var(--r-pill); overflow: hidden;
-}
-.st-row-track::after {
-  content: ''; position: absolute; inset: 0; pointer-events: none;
-  background-image: linear-gradient(90deg, var(--card-border) 1px, transparent 1px);
-  background-size: 25% 100%; opacity: .55;
-}
-.st-row-track i { display: block; height: 100%; background: linear-gradient(90deg, rgba(232, 176, 75, .45), var(--accent)); border-radius: var(--r-pill); }
+/* 第 108 轮清理：删掉 .st-row-track / ::after / i 三族（12 行）。
+   第 101 轮把「类型 / 标签」两个面板删掉后，轨道就没有任何模板再渲染它了 ——
+   watch.js 里搜不到 st-row-track、verify94 B7 也早已断言运行时轨道数为 0，
+   只剩下这段「美观 #6 刻度跑道」的样式在空转。判据同步反转为「CSS 里必须没有它」。 */
 .st-row-v { color: var(--text-strong); text-align: right; font-variant-numeric: tabular-nums; }
 
 /* ---- 第 97 轮：评分区间 / 国别构成改饼图 ----

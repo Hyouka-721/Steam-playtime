@@ -3,7 +3,7 @@
 > **用法**：新开一个对话，把本文件**全文**粘进去即可无缝续做，不需要再解释项目。
 > **范围**：只研究 `docs/index.html`（Steam 游戏时长统计界面）及其采集管线。
 > **明确排除**：`docs/watch.html` 观影列表及其 `watch.*` / `docs/data/watch.json` / `docs/img/watch/` / `scripts/watch/` / `tests/watch/` —— 本文件不涉及，也不要改。
-> **最后同步**：2026-11-14（index 侧第 117b 轮 + 一次全仓清理重组）
+> **最后同步**：2026-11-15（第 108 轮：文件从仓库根移到 `开发文档/`，目录地图同步；index 侧内容仍是第 117b 轮）
 
 ---
 
@@ -41,7 +41,7 @@
 
 ---
 
-## 三、目录地图（2026-11-14 清理后）
+## 三、目录地图（2026-11-15 第 108 轮清理后）
 
 ```
 steam-playtime/
@@ -49,10 +49,12 @@ steam-playtime/
 │   ├── index.html             含内联 __BOOT 数据块 + 首屏主题白名单（勿手改内联区）
 │   ├── app.js                 全部逻辑（渲染 / 视图 / 主题 / 点阵 / 榜单行高）
 │   ├── style.css              全部样式 + 两套主题变量
+│   ├── watch.html / watch.js / watch.css   观影侧（见 CONTINUE-WATCH.md，本文件不涉及）
 │   ├── fx.js                  装饰层（流星），低优先级加载
 │   ├── sw.js / manifest.webmanifest / blackrose.woff2
 │   ├── data/                  线上数据（build 产物，勿手改）
 │   └── img/                   图标、游戏胶囊、头像；img/watch/ 属观影页
+├── assets/songs/              观影页 72 张封面原图（源素材，不发布、不引用，只作回滚）
 ├── scripts/                   采集侧
 │   ├── pipeline/              fetch / diff / localize / build / backfill-percent
 │   ├── build/inline-boot.mjs  内联首屏数据
@@ -61,14 +63,18 @@ steam-playtime/
 │   └── watch/                 观影页录入（不涉及）
 ├── data/                      原始快照 snapshots/ + daily/ + achievements/ + overrides/ + manual/
 ├── tests/
-│   ├── index/                 【本文件关心】16 个活跃套件 + README（逐个套件守什么）
+│   ├── index/                 【本文件关心】活跃套件 + README（逐个套件守什么）
 │   ├── watch/                 观影页套件（不涉及）
 │   ├── retired/               已停用的历史套件（不跑、不改判据）
-│   ├── unit/                  采集/差分单元测试（npm test，35 用例）
+│   ├── unit/                  采集/差分单元测试（npm test）
 │   ├── online/                上线后线上复验
 │   └── tools/                 常驻工具 + probes/（可复用探针）
+├── 开发文档/                  交接提示词 + 目录结构说明（不发布）
+│   ├── CONTINUE-GAMETIME.md   本文件（index 侧）
+│   ├── CONTINUE-WATCH.md      watch 侧交接提示词
+│   └── 目录结构.md            全仓地图 + 各目录职责 + 清理记录
 ├── README.md                  部署 / Secrets / 数据 schema
-└── CONTINUE-GAMETIME.md       本文件
+└── .github/workflows/daily.yml  夜间采集
 ```
 
 🔴 脚本靠 `path.resolve(__dirname,'..','..')` 找仓库根：**再挪层级必须同步改 + `package.json` 的 5 条 + `.github/workflows/daily.yml` 的 4 条**，否则夜间 CI 静默失败。验证 = 实跑 `node scripts/pipeline/build.mjs`，产物只应差 `generated_at`。

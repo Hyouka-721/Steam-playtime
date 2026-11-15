@@ -116,8 +116,12 @@ test('A7 前端 buildShards 与共享库保持同一套契约', () => {
 });
 
 /* ---------- A5：数据质量守卫 ---------- */
+/* 第 108 轮：词表 14 → 15，补「音乐」。
+   ⚠️ 这是第 107 轮漏改的一处 —— 当时 `verify80` / `verify91` 的词表已跟着数据补到 15，
+   唯独这里的单测还钉着 14，用户在《心灵奇旅》上标「音乐」后 `npm test` 直接红。
+   判据本身没放松（仍是「所有标签都在已知词表内」），只是词表跟上真实用法。 */
 const KNOWN_TAGS = new Set(['剧情', '历史', '战争', '动画', '奇幻', '冒险', '温情',
-  '喜剧', '爱情', '灾难', '科幻', '悬疑', '犯罪', '纪录']);
+  '喜剧', '爱情', '灾难', '科幻', '悬疑', '犯罪', '纪录', '音乐']);
 
 test('B1 title_en / tags 全覆盖（第 91 轮 A5 已补齐）', () => {
   const d = readMaster(DATA_FILE);
@@ -127,7 +131,7 @@ test('B1 title_en / tags 全覆盖（第 91 轮 A5 已补齐）', () => {
   assert.deepEqual(noTags, [], '缺标签：' + noTags.join(','));
 });
 
-test('B2 所有标签都在既有 14 词词表内（补数据时没引入新词）', () => {
+test('B2 所有标签都在既有 15 词词表内（补数据时没引入新词；第 108 轮补「音乐」）', () => {
   const d = readMaster(DATA_FILE);
   const bad = [];
   d.items.forEach((x) => (x.tags || []).forEach((t) => { if (!KNOWN_TAGS.has(t)) bad.push(x.title + ':' + t); }));

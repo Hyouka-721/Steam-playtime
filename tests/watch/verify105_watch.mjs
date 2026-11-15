@@ -84,14 +84,18 @@ ok('A5 映射表 cv 全部指向缩略图，cf 仍保留原始文件名（可追
   `${mapCv.length} 项`);
 
 /* ⚠️ cf 记的是「来源目录里的原始文件名」，第 7 批的 `一程山路 (1).jpg` 入库时去掉了「 (1)」，
-   所以不能直接拿 cf 去根目录找；改为按 basename 匹配：缩略图 t/<base>.webp 必须有对应的根目录原图。 */
-const rootFiles = fs.readdirSync(ROOT + 'docs/img/songs', { withFileTypes: true })
+   所以不能直接拿 cf 去根目录找；改为按 basename 匹配：缩略图 t/<base>.webp 必须有对应的原图。
+   第 108 轮：72 张原图（36 MB）整体搬到仓库根 `assets/songs/`（源素材与发布产物分离，Pages 部署体积 -36 MB），
+   发布根 docs/ 里只剩 t/ 的 66 张缩略图。判据不变，只换原图根路径。 */
+const ORIG_DIR = ROOT + 'assets/songs';
+const rootFiles = fs.readdirSync(ORIG_DIR, { withFileTypes: true })
   .filter((d) => d.isFile() && /\.(jpe?g|png|webp)$/i.test(d.name))
   .map((d) => d.name.replace(/\.[^.]+$/, ''));
 const thumbBases = rels.map((r) => r.replace(/^img\/songs\/t\//, '').replace(/\.[^.]+$/, ''));
 const origMissing = thumbBases.filter((b) => !rootFiles.includes(b));
-ok('A6 原图一张没删（回滚素材完整）：每张缩略图在 docs/img/songs/ 根目录都有同名原图',
-  origMissing.length === 0, `缩略图 ${thumbBases.length} 张 / 缺原图 ${origMissing.length}${origMissing.length ? '：' + origMissing.join('、') : ''}`);
+ok('A6 原图一张没删（回滚素材完整）：每张缩略图在 assets/songs/ 都有同名原图，且 docs/ 里不再残留原图',
+  origMissing.length === 0 && fs.readdirSync(ROOT + 'docs/img/songs', { withFileTypes: true }).every((d) => d.isDirectory()),
+  `缩略图 ${thumbBases.length} 张 / 缺原图 ${origMissing.length}${origMissing.length ? '：' + origMissing.join('、') : ''}`);
 
 ok('A7 提速前提没被改掉：<img> 仍带 loading="lazy" 与 decoding="async"、class 仍是 st-song-img',
   /loading="lazy" decoding="async"/.test(js) && /class="st-song-img"/.test(js));
