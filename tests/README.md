@@ -48,7 +48,8 @@ tests/
            verify79 verify80 verify82 verify83 verify84_watch verify85_watch verify86_watch \
            verify87_watch verify89_watch verify90_watch verify91_watch verify92_watch \
            verify93_watch verify94_watch verify95_watch verify96_watch verify97_watch \
-           verify98_watch verify99_watch verify100_watch verify101_watch verify102_watch verify103_watch verify104_watch; do
+           verify98_watch verify99_watch verify100_watch verify101_watch verify102_watch verify103_watch verify104_watch \
+           verify105_watch verify107_watch; do
     echo "== $s =="; "$NODE" tests/watch/$s.mjs 2>&1 | tail -2
   done
   ```

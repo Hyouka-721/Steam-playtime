@@ -61,7 +61,7 @@ ok('A4 字体族与字重也与首页一致（Black Rose / normal）', (() => {
   const wt = (t) => (t.match(/font-weight:\s*([^;]+);/) || [])[1];
   return fam(w) === fam(s) && wt(w) === wt(s);
 })());
-ok('A5 版本号 bump：watch.css?v=42', /watch\.css\?v=42"/.test(html));
+ok('A5 版本号 bump：watch.css?v=43', /watch\.css\?v=43"/.test(html));
 
 /* ================= B 浏览器：十一档实测 ================= */
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });

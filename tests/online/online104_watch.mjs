@@ -12,7 +12,7 @@
  *    判据本身不变（组数、每组 10 首、data-count、两列、零溢出），只是不再写死组数。
  *
  * 复验口径：
- *   ① 内容指纹 10 —— HTML 引用 v=42/v=34；css/js/html/songs.json 线上字节 md5 与本地全等
+ *   ① 内容指纹 10 —— HTML 引用 v=43/v=35；css/js/html/songs.json 线上字节 md5 与本地全等
  *      （EOL 归一）；线上 JS 的独立加载 / 归一化 / 年份筛选 / 封面兜底链路；线上 CSS 三档
  *      栅格；线上封面抽查 5 张 + 第 6 批新增 A10 全量唯一封面 URL 复查（200 + 字节一致）
  *   ② 1920 运行时 9 —— 歌单位置、组数 × 10 首 / 年份倒序、三要素逐项、封面按本地现算全加载、
@@ -81,15 +81,15 @@ await p0.waitForFunction(() => document.querySelectorAll('#w-grid .poster').leng
 
 const fetchText = async (u) => p0.evaluate(async (x) => (await fetch(x, { cache: 'reload' })).text(), u);
 const html = await fetchText(SITE + 'watch.html?t=' + TS);
-const liveCss = await fetchText(SITE + 'watch.css?v=42&t=' + TS);
-const liveJs = await fetchText(SITE + 'watch.js?v=34&t=' + TS);
+const liveCss = await fetchText(SITE + 'watch.css?v=43&t=' + TS);
+const liveJs = await fetchText(SITE + 'watch.js?v=35&t=' + TS);
 const liveSongs = await fetchText(SITE + 'data/songs.json?t=' + TS);
 const liveJsNC = stripLineCmt(stripJsCmt(liveJs));
 const htmlNC = html.replace(/<!--[\s\S]*?-->/g, '');
 const liveCssNC = stripJsCmt(liveCss);
 
-ok('A1 线上 watch.html 引用 watch.css?v=42 / watch.js?v=34',
-  /watch\.css\?v=42/.test(html) && /watch\.js\?v=34/.test(html),
+ok('A1 线上 watch.html 引用 watch.css?v=43 / watch.js?v=35',
+  /watch\.css\?v=43/.test(html) && /watch\.js\?v=35/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 ok('A2 线上 watch.css 字节 md5 与本地全等（EOL 归一）', md5txt(liveCss) === md5txt(localCss),
   `${md5txt(liveCss).slice(0, 12)} / ${md5txt(localCss).slice(0, 12)}`);

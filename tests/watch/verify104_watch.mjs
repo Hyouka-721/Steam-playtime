@@ -39,8 +39,8 @@ const ok = (n, c, extra = '') => {
 
 /* ================= A 静态 ================= */
 console.log('== A 静态 ==');
-ok('A1 watch.html 引用 watch.css?v=42 / watch.js?v=34（本轮 css+js 都改，两个都 bump）',
-  /watch\.css\?v=42"/.test(html) && /watch\.js\?v=34"/.test(html),
+ok('A1 watch.html 引用 watch.css?v=43 / watch.js?v=35（本轮 css+js 都改，两个都 bump）',
+  /watch\.css\?v=43"/.test(html) && /watch\.js\?v=35"/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const yearShapeOk = songsJson.years.every((g) =>
@@ -178,11 +178,12 @@ ok('B1 歌单 section 在「年度影视」下方（DOM 之后且几何 top 更�
   r.songsBox.t > r.topBox.t && /年度歌单/.test(r.heading) && !r.empty,
   `年度影视 top=${r.topBox.t} 年度歌单 top=${r.songsBox.t}`);
 
-ok('B2 造数两个年份按倒序渲染，每组 10 首、标题带年份与首数，data-count=20',
+ok('B2 造数两个年份按倒序渲染，每组 10 首、标题只有「年份 + 年」不再带首数，data-count=20',
   r.count === '20' && r.groups.length === 2 &&
   r.groups[0].year === '2026' && r.groups[1].year === '2025' &&
-  r.groups.every((g) => g.items.length === 10 && g.label.includes(g.year) && /10 首/.test(g.label)),
-  r.groups.map((g) => `${g.year}:${g.items.length}`).join(' '));
+  /* 第 107 轮：用户要求去掉「10 首」这类文案 → 标题只留年份；判据从「必须含 10 首」改为「必须不含 首」 */
+  r.groups.every((g) => g.items.length === 10 && g.label.includes(g.year) && !/首/.test(g.label)),
+  r.groups.map((g) => `${g.year}:${g.items.length}:${g.label}`).join(' '));
 
 ok('B3 每首三要素逐项正确：封面节点 + 歌曲名称 + 歌手，序号 1~10 递增',
   r.groups[0].items.every((it, i) => it.idx === String(i + 1) && it.title && it.artist) &&
@@ -277,7 +278,7 @@ const d = await p2.evaluate(() => {
 ok(`D1 真实 songs.json 与页面一致（${realYears.length ? '已录入，验分组与总数' : '尚未录入，不编造歌曲 → 验空态'}）`,
   realYears.length
     ? (String(d.count) === String(realTotal) && d.songs === realTotal && d.groups === realYears.length && !d.empty)
-    : (d.count === '0' && d.songs === 0 && d.empty && /歌单还没录入/.test(d.text) && /10 首/.test(d.text)),
+    : (d.count === '0' && d.songs === 0 && d.empty && /歌单还没录入/.test(d.text) && !/10 首/.test(d.text)),
   `count=${d.count} songs=${d.songs} groups=${d.groups} text=${d.text.slice(0, 30)}`);
 ok('D2 真实数据态零 JS 异常、无横向溢出', errs.length === 0 && d.ov === 0, `err=${errs.length} ov=${d.ov}`);
 

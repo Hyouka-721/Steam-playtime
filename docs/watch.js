@@ -542,11 +542,11 @@
       : SONGS;
     var songTotal = songGroups.reduce(function (n, g) { return n + g.songs.length; }, 0);
     var songsHtml = '<section class="st-songs" data-songs="annual" data-count="' + songTotal + '">' +
-      '<h3>年度歌单<span class="st-hint">每年 10 首</span></h3>' +
+      '<h3>年度歌单</h3>' +
       (songGroups.length
         ? songGroups.map(function (g) {
             return '<div class="st-song-year" data-year="' + esc(g.year) + '">' +
-              '<h4 class="st-song-year-k">' + esc(g.year) + ' 年 <span class="st-song-year-n">' + g.songs.length + ' 首</span></h4>' +
+              '<h4 class="st-song-year-k">' + esc(g.year) + ' 年</h4>' +
               '<ol class="st-song-list">' + g.songs.map(function (s, i) {
                 return '<li class="st-song" data-index="' + (i + 1) + '">' +
                   '<span class="st-song-cover">' +
@@ -558,7 +558,7 @@
               }).join('') + '</ol>' +
             '</div>';
           }).join('')
-        : '<p class="st-empty st-songs-empty">' + (statsYear ? esc(statsYear) + ' 年的歌单还没录入' : '歌单还没录入 —— 每年 10 首，封面 / 歌曲名称 / 歌手，稍后补上') + '</p>') +
+        : '<p class="st-empty st-songs-empty">' + (statsYear ? esc(statsYear) + ' 年的歌单还没录入' : '歌单还没录入 —— 封面 / 歌曲名称 / 歌手，稍后补上') + '</p>') +
       '</section>';
     statsEl.innerHTML = items.length
       ? head + cardHtml + panels + topHtml + songsHtml

@@ -57,13 +57,13 @@ await gotoRetry(SITE + 'watch.html');
 const fetched = await p.evaluate(async (site) => {
   const get = async (u) => (await fetch(site + u, { cache: 'reload' })).text();
   const [html, css, js, data] = await Promise.all([
-    get('watch.html'), get('watch.css?v=42'), get('watch.js?v=34'), get('data/watch.json'),
+    get('watch.html'), get('watch.css?v=43'), get('watch.js?v=35'), get('data/watch.json'),
   ]);
   return { html, css, js, data };
 }, SITE);
 
-ok('A1 线上 watch.html 引用 watch.css?v=42 / watch.js?v=34',
-  /watch\.css\?v=42/.test(fetched.html) && /watch\.js\?v=34/.test(fetched.html),
+ok('A1 线上 watch.html 引用 watch.css?v=43 / watch.js?v=35',
+  /watch\.css\?v=43/.test(fetched.html) && /watch\.js\?v=35/.test(fetched.html),
   (fetched.html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 线上 watch.css 与本地逐字节相同（CRLF 归一后 md5 全等）',

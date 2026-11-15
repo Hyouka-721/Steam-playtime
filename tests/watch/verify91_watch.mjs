@@ -44,8 +44,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=42 / watch.js?v=34',
-  /watch\.css\?v=42/.test(html) && /watch\.js\?v=34/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=43 / watch.js?v=35',
+  /watch\.css\?v=43/.test(html) && /watch\.js\?v=35/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 /* 第 100 轮改判（用户删除「上映日期」功能，非调阈值）：A2 从「有该输入框」改成「入口已删」。
