@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-15T18:32:12+08:00",
+  "updated_at": "2026-11-15T18:32:32+08:00",
   "items": [
     {
       "id": "2026-10-31-dear-you",
@@ -874,15 +874,15 @@
       "title": "心灵奇旅",
       "kind": "movie",
       "watched_at": "2022-12-26",
-      "added_at": "2026-11-15T18:32:12+08:00",
       "poster": "img/watch/soul-c656a52b.webp",
+      "added_at": "2026-11-15T18:32:12+08:00",
       "poster_w": 640,
       "poster_h": 800,
       "poster_320": "img/watch/soul-c656a52b-320.webp",
       "poster_480": "img/watch/soul-c656a52b-480.webp",
       "title_en": "Soul",
       "year": 2020,
-      "rating": 7.5,
+      "rating": 8,
       "order": 3,
       "countries": [
         "美国"
