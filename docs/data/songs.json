@@ -287,6 +287,11 @@
           "cover": "img/songs/t/幻化成风.webp?v=54acde36"
         },
         {
+          "title": "Moon Halo",
+          "artist": "HOYO-MiX",
+          "cover": "img/songs/t/Moon Halo.webp?v=c604f78f"
+        },
+        {
           "title": "花上的亡灵",
           "artist": "ヨルシカ",
           "cover": "img/songs/t/花上的亡灵.webp?v=0868abc0"
@@ -295,11 +300,6 @@
           "title": "恋のうた",
           "artist": "鬼头明里",
           "cover": "img/songs/t/恋のうた-Single-2000.webp?v=89840f91"
-        },
-        {
-          "title": "打上花火",
-          "artist": "DAOKO × 米津玄師",
-          "cover": "img/songs/t/打上花火.webp?v=d51d7c21"
         },
         {
           "title": "Forever Friends",
@@ -312,6 +312,11 @@
           "cover": "img/songs/t/恋音と雨空.webp?v=b658b2a2"
         },
         {
+          "title": "打上花火",
+          "artist": "DAOKO / 米津玄師",
+          "cover": "img/songs/t/打上花火.webp?v=d51d7c21"
+        },
+        {
           "title": "111004",
           "artist": "宮内優里",
           "cover": "img/songs/t/111004.webp?v=680a128d"
@@ -320,11 +325,6 @@
           "title": "Lemon",
           "artist": "米津玄師",
           "cover": "img/songs/t/Lemon.webp?v=7ec8631c"
-        },
-        {
-          "title": "团子大家族",
-          "artist": "茶太",
-          "cover": "img/songs/t/团子大家族.webp?v=f2ba2018"
         },
         {
           "title": "让风告诉你",
@@ -372,14 +372,14 @@
           "cover": "img/songs/t/水一亦寒.webp?v=7d29dd82"
         },
         {
-          "title": "涅槃",
-          "artist": "Cailin Russo / Chrissy Costanza",
-          "cover": "img/songs/t/涅槃.webp?v=698f1015"
+          "title": "闪光的回忆",
+          "artist": "逃跑计划",
+          "cover": "img/songs/t/闪光的回忆.webp?v=4c231408"
         },
         {
           "title": "寻",
           "artist": "双笙",
-          "cover": "img/songs/t/寻.webp?v=42016714"
+          "cover": "img/songs/t/寻.webp?v=e55fb41f"
         },
         {
           "title": "如常",
@@ -402,9 +402,9 @@
           "cover": "img/songs/t/心做.webp?v=7a591233"
         },
         {
-          "title": "归去来兮",
-          "artist": "花粥",
-          "cover": "img/songs/t/归去来兮.webp?v=65989229"
+          "title": "何须问",
+          "artist": "银临",
+          "cover": "img/songs/t/何须问.webp?v=20a6c240"
         },
         {
           "title": "晚安喵",
@@ -427,9 +427,9 @@
           "cover": "img/songs/t/至此-Single-2000.webp?v=dd2a14aa"
         },
         {
-          "title": "何须问",
-          "artist": "银临",
-          "cover": "img/songs/t/何须问.webp?v=20a6c240"
+          "title": "归去来兮",
+          "artist": "花粥",
+          "cover": "img/songs/t/归去来兮.webp?v=65989229"
         },
         {
           "title": "蝴蝶之夏",
@@ -437,9 +437,9 @@
           "cover": "img/songs/t/蝴蝶之夏.webp?v=435c7507"
         },
         {
-          "title": "オレンジ",
-          "artist": "7!!",
-          "cover": "img/songs/t/オレンジ-Single-2000.webp?v=46d3f9de"
+          "title": "昨日青空",
+          "artist": "尤长靖",
+          "cover": "img/songs/t/昨日青空.webp?v=81528059"
         }
       ]
     },

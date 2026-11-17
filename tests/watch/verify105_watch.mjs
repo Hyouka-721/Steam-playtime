@@ -27,7 +27,8 @@ const sharp = require('sharp');
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const SITE = 'http://127.0.0.1:8895/';
 
-const MAP_FILE = 'C:/Users/33329/Documents/Misc/对话成果/2026-11-15_watch第104轮_年度歌单框架/文档/歌名_歌手映射.json';
+/* 2026-11-17：原第 104 轮归档已整合进 Steam游戏时长站，映射表改指维护工具新家 */
+const MAP_FILE = 'C:/Users/33329/Documents/Misc/对话成果/Steam游戏时长站/维护工具/歌名_歌手映射.json';
 const songsJson = JSON.parse(fs.readFileSync(ROOT + 'docs/data/songs.json', 'utf8'));
 const js = fs.readFileSync(ROOT + 'docs/watch.js', 'utf8');
 const all = songsJson.years.flatMap((g) => g.songs);
