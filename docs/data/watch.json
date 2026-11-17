@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-15T18:41:42+08:00",
+  "updated_at": "2026-11-16T18:39:01+08:00",
   "items": [
     {
       "id": "2026-10-31-dear-you",
@@ -14,16 +14,16 @@
       "poster_480": "img/watch/dear-you-debeb470-480.webp",
       "title_en": "Dear You",
       "year": 2026,
-      "rating": 9.9,
+      "rating": 9.5,
       "order": 2,
-      "note": "江海万里，心中念你，便不觉遥远",
+      "countries": [
+        "中国"
+      ],
       "tags": [
         "剧情",
         "温情"
       ],
-      "countries": [
-        "中国"
-      ]
+      "note": "江海万里，心中念你，便不觉遥远"
     },
     {
       "id": "2026-10-24-dead-to-rights",
@@ -412,16 +412,16 @@
       "title_en": "Heidi",
       "year": 2015,
       "rating": 8.5,
+      "order": 2,
+      "countries": [
+        "德国",
+        "瑞士"
+      ],
       "tags": [
         "剧情",
         "温情"
       ],
-      "order": 2,
-      "note": "生命的单纯和美好",
-      "countries": [
-        "德国",
-        "瑞士"
-      ]
+      "note": "阿尔卑斯山上的少女"
     },
     {
       "id": "2025-03-30-three-billboards-outside-ebbing-missouri",
@@ -570,6 +570,7 @@
       "kind": "movie",
       "watched_at": "2024-11-17",
       "poster": "img/watch/item-cd76b567.webp",
+      "added_at": "2026-10-24T23:24:59+08:00",
       "poster_w": 640,
       "poster_h": 910,
       "poster_320": "img/watch/item-cd76b567-320.webp",
@@ -577,15 +578,15 @@
       "title_en": "耳をすませば",
       "year": 1995,
       "rating": 8,
+      "order": 3,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "动画",
         "爱情"
       ],
-      "note": "Country roads take me home",
-      "added_at": "2026-10-24T23:24:59+08:00",
-      "countries": [
-        "日本"
-      ]
+      "note": "Country Roads, Take Me Home"
     },
     {
       "id": "2024-11-15-love-death-robots",
@@ -890,7 +891,6 @@
       ],
       "tags": [
         "动画",
-        "音乐",
         "奇幻"
       ],
       "note": "不是有所成就才算活着"

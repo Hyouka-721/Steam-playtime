@@ -124,6 +124,7 @@
       "kind": "movie",
       "watched_at": "2024-11-17",
       "poster": "img/watch/item-cd76b567.webp",
+      "added_at": "2026-10-24T23:24:59+08:00",
       "poster_w": 640,
       "poster_h": 910,
       "poster_320": "img/watch/item-cd76b567-320.webp",
@@ -131,15 +132,15 @@
       "title_en": "耳をすませば",
       "year": 1995,
       "rating": 8,
+      "order": 3,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "动画",
         "爱情"
       ],
-      "note": "Country roads take me home",
-      "added_at": "2026-10-24T23:24:59+08:00",
-      "countries": [
-        "日本"
-      ]
+      "note": "Country Roads, Take Me Home"
     },
     {
       "id": "2024-11-15-love-death-robots",
