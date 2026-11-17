@@ -351,7 +351,11 @@ console.log('\n== 实体数据（tags 保留，只是不再有筛选 UI）==');
     oldOnes.length > 0 && oldNoTag.length === 0, oldNoTag.map((x) => x.title).slice(0, 5).join('、'));
 
   /* 13 个预设词 + 「灾难」（用户在网页端自己加的，2026-10-30 合并远端时保留，不要静默丢掉用户的输入） */
-  /* 第 107 轮：用户新增《心灵奇旅》用了「音乐」→ 词表从 14 扩到 15（数据不动，口径跟上用户实际用法）。 */
+  /* 第 107 轮：用户新增《心灵奇旅》用了「音乐」→ 词表从 14 扩到 15（数据不动，口径跟上用户实际用法）。
+     🔴 第 111 轮：merge 远端录片数据后，用户把《心灵奇旅》的标签从
+     ["动画","音乐","奇幻"] 改成 ["动画","奇幻"]，实际词表回落到 14。
+     「音乐」仍保留在 ALLOW（用户下次再用不算越界），但不再要求 15 词「全部出现」——
+     那是数据快照，不是契约；契约只管「不越界」。 */
   const ALLOW = ['剧情', '爱情', '犯罪', '悬疑', '科幻', '奇幻', '动画', '历史', '战争', '温情', '喜剧', '冒险', '纪录', '灾难', '音乐'];
   const used = new Set();
   let bad = [];
@@ -360,8 +364,8 @@ console.log('\n== 实体数据（tags 保留，只是不再有筛选 UI）==');
     if (ALLOW.indexOf(t) < 0) bad.push(x.title + ':' + t);
   }));
   const nanjing = data.items.find((x) => x.title === '南京照相馆');
-  ok(`E2 词表收敛为 ${ALLOW.length} 个预设值、无越界词；南京照相馆的合串已拆成 3 个`,
-    bad.length === 0 && used.size === ALLOW.length && ALLOW.every((t) => used.has(t)) &&
+  ok(`E2 词表无越界词（允许 ${ALLOW.length} 个含「音乐」；第111轮远端删了《心灵奇旅》的「音乐」故不要求全出现，现用 ${used.size} 个）；南京照相馆的合串已拆成 3 个`,
+    bad.length === 0 && used.size > 0 && used.size <= ALLOW.length &&
     !!nanjing && Array.isArray(nanjing.tags) && nanjing.tags.length === 3,
     `实有 ${used.size} 个：${[...used].join('/')}${bad.length ? '｜越界 ' + bad.join(',') : ''}`);
 }
