@@ -1153,7 +1153,8 @@
           })
           .join('');
         /* 第 118 轮（用户）：周日期下方补该周总游玩时间。
-           格式沿用时间轴角标同一把 hoursShort（2.7h / 45min），不另起口径。 */
+           格式沿用时间轴角标同一把 hoursShort（2.7h / 45min），不另起口径。
+           第 119 轮（用户）：删掉「合计」前缀，左列只留时长，字体跟年份同一套。 */
         const weekTotal = list.reduce((a, g) => a + (g.minutes ?? 0), 0);
         const ms = (w.milestones ?? [])
           .map((m) => `<div class="tl-milestone">游戏时长突破 <b>${hoursShort(m)}</b></div>`)
@@ -1162,7 +1163,7 @@
           <div class="tl-left">
             ${showMonth ? `<div class="tl-month">${month}</div>` : '<div class="tl-month tl-month-ph"></div>'}
             <div class="tl-week">${range}</div>
-            <div class="tl-week-total">合计 ${hoursShort(weekTotal)}</div>
+            <div class="tl-week-total">${hoursShort(weekTotal)}</div>
           </div>
           <div class="tl-node"><span class="tl-dot"></span></div>
           <div class="tl-body">

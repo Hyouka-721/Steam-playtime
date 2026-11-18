@@ -1152,8 +1152,15 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    现在往回收 0.5px —— 时间轴左列这行日期比里程碑正文（14px）只大 0.5，
    与「正文 14 / 数字 16」的两档关系更顺。 */
 .tl-week { font-size: 14.5px; color: var(--text-faint); margin-top: 2px; font-variant-numeric: tabular-nums; }
-/* 第 118 轮：周日期下方补该周总时长，沿用时间轴角标那把 hoursShort 的写法 */
-.tl-week-total { margin-top: 3px; font-size: 12.5px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+/* 第 118 轮：周日期下方补该周总时长，沿用时间轴角标那把 hoursShort 的写法。
+   第 119 轮（用户）：去掉「合计」字样，放大加粗、字体与年份 .tl-month 完全一致
+   —— 同族 / 同号 / 同字重 / 同字距 / 同色，只保留 tabular-nums 让数字对齐。 */
+.tl-week-total {
+  margin-top: 3px;
+  font-size: 24px; font-weight: 700; color: var(--text-strong); line-height: 1.2;
+  font-family: 'Black Rose', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  letter-spacing: 1px; font-variant-numeric: tabular-nums;
+}
 /* 中列：时间轴主线 + 周节点圆点 */
 .tl-node { position: relative; height: 100%; min-height: 70px; }
 .tl-node::before {
@@ -1318,6 +1325,8 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .ach-date { font-size: 12px; }
   .tl-item { grid-template-columns: 78px 30px 1fr; }
   .tl-month { font-size: 19px; }
+  /* 第 119 轮：时长跟随年份一起缩到 19px，窄屏仍与 .tl-month 同款同号 */
+  .tl-week-total { font-size: 19px; }
   .tl-month-ph { min-height: 23px; }
   .tl-node { min-height: 56px; }
   .tl-dot { top: 10px; width: 9px; height: 9px; }

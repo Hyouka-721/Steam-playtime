@@ -3,7 +3,7 @@
 > **用法**：新开一个对话，把本文件**全文**粘进去即可无缝续做，不需要再解释项目。
 > **范围**：只研究 `docs/index.html`（Steam 游戏时长统计界面）及其采集管线。
 > **明确排除**：`docs/watch.html` 观影列表及其 `watch.*` / `docs/data/watch.json` / `docs/img/watch/` / `scripts/watch/` / `tests/watch/` —— 本文件不涉及，也不要改。
-> **最后同步**：2026-11-15（第 108 轮：文件从仓库根移到 `开发文档/`，目录地图同步；index 侧内容仍是第 117b 轮）
+> **最后同步**：2026-11-18（第 119 轮：周时长删「合计」+ 与年份同字体，`style.css?v=144` / `app.js?v=129`）
 
 ---
 
@@ -34,7 +34,7 @@
 
 ### 🔴 发布纪律
 
-1. **改哪个文件 bump 哪条版本号**：`style.css?v=NN` / `app.js?v=NN` / `fx.js?v=NN` 三条独立（当前 `142 / 127 / 19`）。同批次再改同文件就再 bump 一次。
+1. **改哪个文件 bump 哪条版本号**：`style.css?v=NN` / `app.js?v=NN` / `fx.js?v=NN` 三条独立（当前 `144 / 129 / 19`）。同批次再改同文件就再 bump 一次。
 2. bump 要覆盖多种字面量：`style.css?v=NN`、正则转义 `style\.css\?v=NN`、裸串 `cssV === 'NN'` / `appV === 'NN'` / `CSS_V` / `APP_V`。**只改 docs + tests/index + tests/tools/pages-poll，不碰 tests/online 历史与 tests/retired**。
 3. **没收到「推送」指令就不推**；推送前 `git fetch`，落后就 `git merge origin/main`（**禁 rebase、禁 --force**）。
 4. `docs/` 就是线上，不放临时文件 / 草稿 / `.bak`。
@@ -152,6 +152,12 @@ steam-playtime/
 🔴 度量基准**必须是第一行顶边**，不能用容器顶边（`.rank-list` 有 18px `padding-top`）。
 窄屏 ≤860 不参与（两行式布局），移除该变量。
 
+### 时间轴周合计 / 热力图详情切换（第 118 轮）
+
+- 时间轴每周 `.tl-week` 下方新增 `.tl-week-total`：`${hoursShort(weekTotal)}`（第 119 轮删「合计」）。**格式必须走 `hoursShort`**（与胶囊角标同一把尺），周总时长由 `w.games` 现算，含 `meta.timeline_extra` 补录周；左列 116px（≤860 78px）要放得下；第 119 轮起字体与 `.tl-month` 完全一致（桌面 24px / 窄屏 19px、700、Black Rose），`verify82 A2` 还守着「app.js 不许写 DOM `title`」，别为了说明文字加 `title=`。
+- 热力图 `#hx-day`：`renderHxDay()` 先同步替换内容，再用 `Element.animate` 做 **220ms 容器高度 old→new 过渡 + 列表淡入上移 5px**；`prefers-reduced-motion` 时直接显示终态。`.hx-day` 加 `overflow:hidden` 裁掉过渡期溢出。
+- 高度动画只解决「行数变化导致整块突然抽高/塌陷」，不改变取数：头部日期、每行游戏和时长仍全是 `state.days` 现算；旧套件 `verify103/111/113/115/116` 的点击→展开与 Esc 收起契约不变。
+
 ### 排行榜行（第 99~102 轮定稿）
 
 `44px / 130px / minmax(150,260) / minmax(140,1fr) / 150px / 110px`；进度条不能写裸 `1fr`、日期必须固定 110px；`.rank-bar` 左右 `-30/-20` 负边距，`.rank-name` 补 `padding-right:22px`；≤860 负边距清零。
@@ -170,13 +176,13 @@ cinema 专属规则必须带 `[data-theme="cinema"]` 前缀（切回 cream 时 `
 
 ---
 
-## 七、当前状态（2026-11-14）
+## 七、当前状态（2026-11-18）
 
 | 项 | 值 |
 |---|---|
-| 版本 | 本地 `style.css?v=142` / `app.js?v=127` / `fx.js?v=19`；线上 `141 / 127 / 19`（本轮清理只动了 CSS 并删了字体兜底，**未推送**） |
-| 本地回归 | index 侧 **16 套件 370 条 0 FAIL**（`tests/index/`）；单元测试 **35 条 0 FAIL** |
-| 线上复验 | 最新 `online117` 13 条 0 FAIL（141/127 时跑的） |
+| 版本 | 本地 `style.css?v=144` / `app.js?v=129` / `fx.js?v=19`（第 119 轮改字体后未推） |
+| 本地回归 | index 侧 **18 套件 410 条 0 FAIL**（含新 `verify119` 19 条）；两线全量 **62 套件 1560 条 → 1559/1**（唯一红 `verify56 B11`）；`npm test` **52 条 0 FAIL** |
+| 线上复验 | `online119` 待上线后新建；`online118` **14/0**（指纹 3 + 时间轴 5 + 热力图 5 + 零异常）；`online104_watch` **21/0**；线上回归 9 套件 **143/0**；旧 `online117` 钉 `v=141` 会假红，按惯例不动 |
 | 性能红线 | 二次访问 FCP ≤100ms / 滚动 >50ms 帧 = 0 / **CLS = 0.000** |
 | 数据规模 | 以 `docs/data/meta.json` 为准，别写死数字 |
 
@@ -184,6 +190,7 @@ cinema 专属规则必须带 `[data-theme="cinema"]` 前缀（切回 cream 时 `
 
 1. `verify56` B11（watch 侧）「两页页眉高度相同」差 1px：index 的 `.site-header` 第 97 轮加了 `border-bottom:0`，watch 的 `.w-header` 一直是 1px。**不许减 1px 抹平**，要修就统一其中一侧。
 2. 线上套件（`tests/online/`）各自钉着当时上线的指纹，**不会跟着 bump**，复跑旧套件会因版本号不符而红，属预期。
+3. 线上用 `PerformanceObserver({buffered:true})` 量 CLS 会抓到首屏榜单行 74→82.9px 的历史偏移 **0.024**（发生在点击前，非第 118 轮引入）；只看详情切换区间（`buffered:false`）的非输入 CLS = 0，本地同口径也是 0。别把首屏旧账算到新动画头上，也别为它改判据。
 
 ---
 
@@ -202,7 +209,7 @@ cd docs && C:/Users/33329/.workbuddy/binaries/python/envs/default/Scripts/python
 NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
 for s in verify6 verify54 verify82_index verify83_index verify91 verify92 \
          verify103 verify104 verify105 verify106 verify108 verify111 \
-         verify113 verify115 verify116 verify117; do
+         verify113 verify115 verify116 verify117 verify118; do
   echo "== $s =="; "$NODE" tests/index/$s.mjs 2>&1 | tail -2
 done
 

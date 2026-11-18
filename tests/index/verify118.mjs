@@ -26,12 +26,14 @@ const js = fs.readFileSync(ROOT + 'docs/app.js', 'utf8');
 const css = fs.readFileSync(ROOT + 'docs/style.css', 'utf8');
 const vCss = (html.match(/style\.css\?v=(\d+)/) || [])[1];
 const vApp = (html.match(/app\.js\?v=(\d+)/) || [])[1];
-ok('A1 版本号已 bump 到 CSS 143 / APP 128', vCss === '143' && vApp === '128', { css: vCss, app: vApp });
-ok('A2 周合计走 hoursShort，与角标同一口径',
-  /class="tl-week-total"[^>]*>\s*合计 \$\{hoursShort\(weekTotal\)\}/.test(js) &&
+ok('A1 版本号已 bump（第 119 轮 CSS 144 / APP 129；第 118 轮文案改判跟随）',
+  vCss === '144' && vApp === '129', { css: vCss, app: vApp });
+/* 第 119 轮用户要求删「合计」字样，左列只留时长；口径仍是 hoursShort，故改判而非调阈值。 */
+ok('A2 周时长走 hoursShort、与角标同口径（第119轮删「合计」前缀）',
+  /class="tl-week-total">\$\{hoursShort\(weekTotal\)\}/.test(js) &&
+  !/class="tl-week-total">合计/.test(js) &&
   /const weekTotal = list\.reduce\(/.test(js));
-ok('A3 样式新增周合计行，日期行本身没动',
-  /\.tl-week-total\s*\{[^}]*font-size:\s*12\.5px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')) &&
+ok('A3 样式仍守日期行 14.5px（第119轮时长行改为与年份同款字体，具体由 verify119 守）',
   /\.tl-week\s*\{[^}]*font-size:\s*14\.5px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')));
 ok('A4 详情切换有高度过渡 + 列表淡入，且尊重减少动效',
   /const oldH = box\.hidden \? 0 : box\.getBoundingClientRect\(\)\.height/.test(js) &&
@@ -125,16 +127,18 @@ const tl = await page.evaluate(() => [...document.querySelectorAll('#timeline .t
     badges: [...it.querySelectorAll('.tl-badge')].map((b) => b.textContent.trim()),
   };
 }));
-ok('B1 每一周都有周合计文字', tl.length > 0 && tl.every((x) => /^合计 \d+(?:\.\d+)?(?:h|min)$/.test(x.total)),
+/* 第 119 轮用户删「合计」字样：判据去掉前缀，只守时长格式；理由写进 ok 文案。 */
+ok('B1 每周都有周时长文字（第119轮删「合计」前缀，仅留时长）',
+  tl.length > 0 && tl.every((x) => /^\d+(?:\.\d+)?(?:h|min)$/.test(x.total) && !/合计/.test(x.total)),
   { weeks: tl.length, first: tl[0]?.total });
 const badTotal = [];
 for (const x of tl) {
   const w = weekAgg.get(([...weekAgg.keys()].find((k) => rangeOf(k) === x.week)) ?? '');
-  const want = w ? `合计 ${hoursShort(w.total)}` : null;
+  const want = w ? hoursShort(w.total) : null;
   if (want !== x.total) badTotal.push({ week: x.week, got: x.total, want });
 }
-ok('B2 周合计与每日数据现算全等（含补录周）', badTotal.length === 0, badTotal.slice(0, 3));
-ok('B3 合计行在周日期下方、文字没越出左列',
+ok('B2 周时长与每日数据现算全等（含补录周）', badTotal.length === 0, badTotal.slice(0, 3));
+ok('B3 时长行在周日期下方、文字没越出左列',
   tl.every((x) => x.top >= x.weekBottom && x.textW <= x.leftW + 0.5),
   { overflow: tl.filter((x) => x.textW > x.leftW + 0.5).length });
 for (const w of [1440, 1280, 1088, 900, 390]) {
