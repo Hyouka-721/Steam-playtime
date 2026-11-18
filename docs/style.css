@@ -1152,6 +1152,8 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    现在往回收 0.5px —— 时间轴左列这行日期比里程碑正文（14px）只大 0.5，
    与「正文 14 / 数字 16」的两档关系更顺。 */
 .tl-week { font-size: 14.5px; color: var(--text-faint); margin-top: 2px; font-variant-numeric: tabular-nums; }
+/* 第 118 轮：周日期下方补该周总时长，沿用时间轴角标那把 hoursShort 的写法 */
+.tl-week-total { margin-top: 3px; font-size: 12.5px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
 /* 中列：时间轴主线 + 周节点圆点 */
 .tl-node { position: relative; height: 100%; min-height: 70px; }
 .tl-node::before {
@@ -1514,7 +1516,7 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .hx-tip span { color: rgba(245, 245, 248, .74); }
 
 /* 点击某天 → 点阵下方的当日明细 */
-.hx-day { margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: var(--panel-hi); border: 1px solid var(--border); }
+.hx-day { margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: var(--panel-hi); border: 1px solid var(--border); overflow: hidden; }
 .hx-day-head { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
 .hx-day-head b { font-size: 15px; color: var(--text-strong); letter-spacing: .2px; }
 .hx-dow-tag { padding: 2px 7px; border-radius: 6px; background: var(--sunken); font-size: 12px; color: var(--text-dim); }

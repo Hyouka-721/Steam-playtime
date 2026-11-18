@@ -645,6 +645,9 @@
   function renderHxDay() {
     const box = $('hx-day');
     if (!box) return;
+    /* 第 118 轮（用户：切换日期时详情要平滑且布局稳定）：先记住旧高度，
+       内容同步替换后再把容器高度从旧值过渡到新值，避免行数变化时整块突然抽高/塌陷。 */
+    const oldH = box.hidden ? 0 : box.getBoundingClientRect().height;
     const ds = state.drill.sel;
     if (!ds) { box.hidden = true; box.innerHTML = ''; return; }
 
@@ -685,6 +688,27 @@
     /* 胶囊图走「占位 GIF + 观察器临近视口才赋 src」的懒加载（与主页榜单同一套），
        新插入的行必须重新挂一次，否则永远是透明占位块。 */
     observeCapsules(box);
+
+    /* 切日期动画：内容上面已经同步换好，这里只补视觉过渡。
+       - 容器高度 old→new 做 220ms 过渡，行数不同也不会瞬间弹动；
+       - 列表淡入并上移 5px，让「换了日期」看得出来但不闪。
+       尊重 prefers-reduced-motion；老浏览器没有 animate 时直接显示终态。 */
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || typeof box.animate !== 'function') return;
+    const newH = box.getBoundingClientRect().height;
+    if (oldH > 0 && Math.abs(newH - oldH) > 1) {
+      box.animate(
+        [{ height: `${oldH.toFixed(1)}px` }, { height: `${newH.toFixed(1)}px` }],
+        { duration: 220, easing: 'cubic-bezier(.2,.7,.3,1)' },
+      );
+    }
+    const listEl = box.querySelector('.hx-day-list');
+    if (listEl && typeof listEl.animate === 'function') {
+      listEl.animate(
+        [{ opacity: 0, transform: 'translateY(5px)' }, { opacity: 1, transform: 'none' }],
+        { duration: 220, easing: 'ease-out' },
+      );
+    }
   }
 
   /* ---------- 点阵几何：铺满面板宽度 + 月份之间留额外间隙 ----------
@@ -1128,6 +1152,9 @@
             return cap(g, cls);
           })
           .join('');
+        /* 第 118 轮（用户）：周日期下方补该周总游玩时间。
+           格式沿用时间轴角标同一把 hoursShort（2.7h / 45min），不另起口径。 */
+        const weekTotal = list.reduce((a, g) => a + (g.minutes ?? 0), 0);
         const ms = (w.milestones ?? [])
           .map((m) => `<div class="tl-milestone">游戏时长突破 <b>${hoursShort(m)}</b></div>`)
           .join('');
@@ -1135,6 +1162,7 @@
           <div class="tl-left">
             ${showMonth ? `<div class="tl-month">${month}</div>` : '<div class="tl-month tl-month-ph"></div>'}
             <div class="tl-week">${range}</div>
+            <div class="tl-week-total">合计 ${hoursShort(weekTotal)}</div>
           </div>
           <div class="tl-node"><span class="tl-dot"></span></div>
           <div class="tl-body">
