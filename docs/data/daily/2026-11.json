@@ -3,7 +3,7 @@
   "month": "2026-11",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-11-16T23:47:45.563Z",
+  "generated_at": "2026-11-17T23:02:30.819Z",
   "days": {
     "2026-11-01": {
       "total_minutes": 264,
@@ -313,6 +313,27 @@
           "appid": "246420",
           "name": "王国保卫战",
           "minutes": 41,
+          "is_new": false
+        }
+      ]
+    },
+    "2026-11-17": {
+      "total_minutes": 111,
+      "span_days": 1,
+      "confidence": "high",
+      "source": "auto",
+      "flags": [],
+      "games": [
+        {
+          "appid": "227300",
+          "name": "欧洲卡车模拟2",
+          "minutes": 85,
+          "is_new": false
+        },
+        {
+          "appid": "246420",
+          "name": "王国保卫战",
+          "minutes": 26,
           "is_new": false
         }
       ]
