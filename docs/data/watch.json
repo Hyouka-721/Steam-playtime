@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-16T18:39:01+08:00",
+  "updated_at": "2026-11-18T19:15:15+08:00",
   "items": [
     {
       "id": "2026-10-31-dear-you",
@@ -1739,6 +1739,7 @@
       "kind": "anime",
       "watched_at": "2020-12-06",
       "poster": "img/watch/item-b0b5d4df.webp",
+      "added_at": "2026-10-25T13:48:09+08:00",
       "poster_w": 640,
       "poster_h": 960,
       "poster_320": "img/watch/item-b0b5d4df-320.webp",
@@ -1746,15 +1747,15 @@
       "title_en": "けいおん!",
       "year": 2009,
       "rating": 9.9,
+      "order": 3,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "动画",
         "喜剧"
       ],
-      "note": "K-ON!!!",
-      "added_at": "2026-10-25T13:48:09+08:00",
-      "countries": [
-        "日本"
-      ]
+      "note": "不是很精彩呢!"
     },
     {
       "id": "2020-12-01-the-truman-show",
