@@ -1,0 +1,60 @@
+/* ============================================================================
+   雨滴氛围层 · rain.css   v=1
+   与 rain.js 配套，供 index.html / watch.html 两页共用。
+   🔴 独立新文件：不并入 style.css / watch.css，避免动到已上线版本号。
+   ============================================================================ */
+
+/* 全屏 fixed 装饰层：不占布局、不拦点击，CLS = 0。
+   z-index 6 —— 高于内容(0/2)，低于页眉(10)、FAB(40)、toast(50)、弹层(60)，
+   与既有 #fx-canvas(20) 同属氛围层但不抢事件。 */
+#rain-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 6;
+  pointer-events: none;
+}
+
+/* 着色器输出的是白色高光水滴（深色底最佳，watch 页 cinema 原样显示）。
+   浅色 cream 主题翻相为暗色水痕，保证在暖阳米底上依然看得见。 */
+[data-theme="cream"] #rain-canvas { filter: invert(1); }
+
+/* 右上角开关：复用两页都有的选择器语义，配色/圆角走主题变量。 */
+.rain-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 11px;
+  font-size: 13px;
+  line-height: 1.5;
+  font-family: inherit;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid var(--border);
+  --r-pill: 999px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .18s, border-color .18s, background .18s;
+}
+.rain-toggle:hover:not(:disabled) { color: var(--accent); border-color: var(--accent); }
+.rain-toggle[aria-pressed="true"] { color: var(--accent); }
+.rain-toggle:disabled { opacity: .45; cursor: not-allowed; }
+.rain-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* 首页页脚已有 .fx-switch；雨滴开关贴在其后，用同样的间距节奏。
+   watch 页脚是 .w-foot（flex wrap），直接作为一项流入即可。 */
+.site-footer .rain-toggle { margin-left: 8px; }
+.w-foot .rain-toggle { margin-left: auto; }
+
+@media (max-width: 860px) {
+  .site-footer .rain-toggle { margin-left: 0; }
+  .w-foot .rain-toggle { margin-left: 0; }
+}
+
+@media print {
+  #rain-canvas { display: none; }
+  .rain-toggle { display: none; }
+}

@@ -38,7 +38,7 @@ tests/
   NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
   for s in verify6 verify54 verify82_index verify83_index verify91 verify92 \
            verify103 verify104 verify105 verify106 verify108 verify111 \
-           verify113 verify115 verify116 verify117; do
+           verify113 verify115 verify116 verify117 verify118 verify119 verify120; do
     echo "== $s =="; "$NODE" tests/index/$s.mjs 2>&1 | tail -2
   done
   ```
@@ -50,7 +50,7 @@ tests/
            verify87_watch verify89_watch verify90_watch verify91_watch verify92_watch \
            verify93_watch verify94_watch verify95_watch verify96_watch verify97_watch \
            verify98_watch verify99_watch verify100_watch verify101_watch verify102_watch verify103_watch verify104_watch \
-           verify105_watch verify107_watch; do
+           verify105_watch verify107_watch verify120_watch; do
     echo "== $s =="; "$NODE" tests/watch/$s.mjs 2>&1 | tail -2
   done
   ```
@@ -336,6 +336,9 @@ tests/
 | `verify117` | 第 117 轮 index 侧：**首屏榜单整行显示** —— 行距 4→8→（按用户要求回退）**6**，行高由 `fitRankRows()` 按「第一行顶边 → 视口底」的可⽤高度反解（`--rank-row-h`）：8 行落在 74~100px 观感带内就用 8 行，屏幕偏高多放、偏矮少放，**折线永远落在行与行之间**；1440×1080 恰好 8 整行 0 切开，1440×1200 / 1280×1080 / 1920×800 / 1088×1000 / 1440×900 全部 0 条被切开的行；`.sk-row` 同吃该变量（CLS 0）；切视图与 resize 后仍成立；390 不参与（两行式布局） | 15 |
 | `verify118` | 第 118 轮 index 侧：**时间轴周合计 + 热力图详情平滑切换** —— ① 静态：`v=143/v=128`（**第 119 轮随 bump 到 144/129**）、`.tl-week-total` 用 `hoursShort(weekTotal)`（与角标同口径）、日期行 14.5px 与合计行 12.5px 各自独立（**第 119 轮用户删「合计」并把字体改成与年份同款 24/19px，本条断言已改判、具体字体由 verify119 守**）、`renderHxDay` 同时用 `box.animate` 做高度过渡与 `listEl.animate` 做淡入上移且守 `prefers-reduced-motion`、`.hx-day` 裁切换期的溢出 ② 时间轴：60 周**逐周**与本地 daily + `timeline_extra` 现算全等，时长行在日期下方且不越出左列，1440/1280/1088/900/390 零溢出 ③ 热力图：点第一天头部/每行时长与数据一致；换第二天时**内容同步替换**（不残留旧日期），切换瞬间容器高度仍从旧值起步且 `scrollY` 不变，动画结束后高度稳定、行数不变、零溢出；减少动效上下文直接显示终态且内容照常更新；Esc 收起与零 JS 异常照旧 | 21 |
 | `verify119` | 第 119 轮 index 侧：**周时长删「合计」+ 与年份同字体** —— ① 静态 5（版本 144/129；源码不再输出「合计」前缀；`.tl-week-total` 与 `.tl-month` 的 font-family/size/weight/letter-spacing/color/line-height 六项声明逐项一致，桌面 24px/700 Black Rose；≤860 窄屏同步缩到 19px；日期行仍 14.5px）② 运行时 3（60 周时长只含数字+单位、与 daily + `timeline_extra` 现算全等、仍在日期下方）③ 五档宽度各 2 条：时长与年份 computed 六项全等、文字不越出左列且零横向溢出（390 左列 78px 下文字宽 40.2px）；零 JS 异常 | 19 |
+| `verify120` | 第 120 轮 index 侧：**雨滴氛围层**（移植 Salt Player 插件 spw-playback-rain 1.0.4 的湿玻璃雨滴着色器） —— ① 静态 9（两页以 `rain.css?v=1`/`rain.js?v=1` 引入且不动已上线 css144/app129/fx19；着色器 `os2NoiseWithDerivatives`+`raindropSurface`+static/rolling 两滴+specular/uLightAngle/uDensity 齐全；默认档 speed0.6/density0.32/角度π÷3 且网页适配降亮度×0.5、alpha×0.26；canvas 与开关在 DOM 且无 `title`；rain.css fixed/inset0/pointer-events:none/z6/cream 翻相/打印隐藏；圆角走 `var(--r-pill)` 白名单；860 块唯一；状态键 `rain.enabled` 默认开、reduced-motion 强制关）② 运行时 10（WebGL 就绪默认开出帧、采样非透明像素 >0 且 GL 无错、画布 fixed 不拦点击且 0.55× 降分辨率、按钮初态开；关→停帧清屏+localStorage=0、再开写 1、刷新沿用；五档宽度零溢出）③ CLS 0（开关切换）/ reduced-motion 强制关按钮禁用无绘制 / 零 JS 异常 | 24 |
+| `verify120_watch` | 第 120 轮 watch 侧：**同一份雨滴层** —— ① 静态 4（watch 也以 v=1 引入且不动 css44/js35；canvas 在 body 首位、开关在 `.w-foot` 无 `title`；watch 恒 cinema 不套浅色翻相；共用同一 rain.js 默认档）② 运行时 11（WebGL 就绪出帧无错、采样出水滴、cinema 不翻相且海报墙 125 张未受影响；关→停帧清屏 localStorage=0、刷新持久化；雨滴层不拦点击→史蒂夫切时间轴仍生效；五档零溢出）③ CLS 0 / reduced-motion 强制关 / 零 JS 异常 | 18 |
+
 | `verify116` | 第 116 轮 index 侧：**统计口径统一** —— 自 `meta.tracking_since` 到 `meta.last_snapshot_date`，缺数据的日期一律按 **0 分钟**补齐（`.l0` 灰点、`role=button` 可点、气泡「游玩时长：0 min」、当日列表「这天没有游玩记录」），不再出现「未采集」空格；开始统计之前与最新快照之后的未来日期仍是 `.lna`「尚未记录」且不可点；范围天数、合计、峰值从 `meta.stats` 推导比对；365 格 / 7 行 / 64 列不变；390 无溢出；零异常 | 14 |
 | `verify115` | 第 115 轮 index 侧：**把「下钻单个游戏」整条线删干净** —— 累计榜行不再可点（光标非 pointer、点行不切视图不改 hash、连点四行仍停在原处）；页面里没有 `#drill-more` / `#btn-drill-back`，源码没有 `openDrill/closeDrill/renderDrillMore/drill.appid`，CSS 没有 `.drill-more`/`.dm-*`/`.is-drill`/`.btn-back`；勋章墙徽章从 `<button>` 改成 `<div>`（去掉 pointer 与 hover 上浮、提示语不再写「点一枚看趋势」），点它也不再跳转；旧深链 `#/recent/g/<appid>` 只按视图处理落到总览；「最近游玩」总点阵 365 格与点格子展开当日列表不受影响；390 无溢出；零异常。⚠️ 同日被推翻的 `verify114`（下钻只剩详情卡）已删除 | 16 |
 | `verify113` | 第 113 轮 index 侧：**删死码**（`#cal-overlay` 浮层 + `openDayDetail/closeCal/stepCalDay/openCalDay/renderCalDay/calDayGames/calDayRange/syncCalDayNav/setDayStatus/setCalBusy/markHeatSel/onCalKey` 13 个函数 + `state.cal` + 129 行 `.cal-*` 样式；源码/DOM/CSS 三层都得干净）+ **点阵行距 = 列距 × 0.5**（实测 4.09 / 8.17，行间距 16.66 < 列间距 20.73；7 行 × 64 列 / 365 格 / `fill` 仍 1.000）+ **点开当天不再整页跳**（1440×900 与 1440×700 两种视口下 `scrollY` 都不变；原来无脑 `scrollIntoView({block:'nearest'})` 会滚 200~300px）+ **年视图删掉「期内合计 / 有记录」两张卡**（`#drill-more` 为空），下钻游戏的「占终身时长 + 期段」照旧 + 390 无溢出 + 零异常 | 15 |
@@ -391,6 +394,15 @@ tests/
 `tools/merge*.py`：`watch.json` 在 rebase 时与远端冲突 → 用「远端为基底 + 重放本地改动」一键合并。⚠️ 第 72 轮起同日记录的 tie-break 从「id 倒序」改为「added_at 正序（先上传居前）」——合并器若按老规则重排，存储顺序会与渲染顺序不一致（页面加载时会用 cmpTime 重排兜底，不影响功能，但 diff 会难看）；要同步就照 `cmpTime` 抄。⚠️ 第 77 轮 `merge77_rebase.py` 是**另一种形态**：当本地对数据的改动只有「某一条的几个字段」时，它不重排、不重序列化，直接在远端文本里**原地换值**，其余行逐字节沿用远端（体积最小、diff 最干净，适合「换海报」这类单点改动）。
 
 `tools/merge80_rebase.mjs`（第 80 轮，Node，**结构化**而非文本级）：本地给 119 条批量补 `tags`，远端同时被网页端改了 10 条（其中 **5 条用户自己填了 tags**）→ 以远端为基底**重建每个条目**（沿用远端键顺序，把 `tags` 插在 `rating` 之后）。三条规则：① 条目已有 tags 就**不覆盖**（用户输入优先，只把 `剧情，历史，战争` 这类合串拆开）；② 没有才用本地映射补（先 id 后 title）；③ 除 tags 外一切字段逐字沿用远端。脚本自带自检（条数/id 顺序不变、除 tags 外逐字段与远端相同、无合串残留、无缺失），不通过直接退出。⚠️ 序列化必须 `JSON.stringify(data, null, 2)` —— 文件顶层缩进是 2，字段看着是 6 空格是层级叠加的结果，写成 6 会让每行都多缩进。
+
+### 补记 12 · 第 120 轮：雨滴氛围层（两页共用，2026-11-19）
+- **来源拆解**：Steam Workshop item 3823930317 —— \`plugin-com.aoritian.playbackrain-1.0.4.spmod\`（Salt Player for Windows 插件，GPL-3.0）。文件头 \`PK\x03\x04\x14\x00\` 即 ZIP，内含 32 个 Kotlin/Java \`.class\` + \`.json\`，**无 png/mp4/shader 素材** —— 雨滴是 Skia \`RuntimeEffect\` 片元着色器逐像素算出的湿玻璃高度场（OS2 噪声 + static/rolling 两层水滴 + 镜面高光），由 \`lib/asm-9.8.jar\` 插桩宿主渲染。原始算法来自 BetterLyrics / shadertoy \`ltffzl\`。
+- **网页移植**：把 Skia GLSL（\`float2/half4/float3x3/main(fragCoord)\`）转写成 WebGL ES（\`vec2/vec4/mat3/main()+gl_FragCoord\`），放进独立 \`docs/rain.js\` / \`docs/rain.css\` 两页共用。🔴 **不动任何已上线版本号**（css144 / app129 / fx19 / css44 / js35 全部原样），只新增 \`?v=1\` 资源，故历史套件零改判。默认档来自插件 \`preference_config.json\`：speed60 / size100 / density40 / lightAngle60° / shadow0。
+- **视觉适配**：原插件把高光画在深色歌词背景上，本站两页信息密度高 —— 把 shader 最终亮度 ×0.5、alpha ×0.26，避免白条盖字；cream 浅色主题用 CSS \`filter:invert(1)\` 翻成暗色水痕，cinema（watch 页恒深色）原样。canvas 渲染分辨率取 0.55× 再 CSS 放大、30 fps 封顶，降低片元开销。
+- **开关**：\`#rain-toggle\` 写 \`localStorage[rain.enabled]\`（插件同名键），默认开；关则停帧清屏；reduced-motion 强制关且禁用按钮。canvas fixed / pointer-events:none / z-index 6，切换 CLS=0。
+- **套件**：\`verify120\`（index 24 条）/ \`verify120_watch\`（watch 18 条）各守静态契约 + WebGL 出帧 + 采样非透明像素 + 开关持久化 + 五档零溢出 + CLS 0 + reduced-motion。🔴 套件 A7 抓到过一次真实红线违规：\`border-radius:999px\` 裸值 → 改 \`var(--r-pill)\` 局部变量。
+- **判据未动、只修等待**：\`verify120_watch\` B6（史蒂夫切时间轴）曾偶发假红，现象是 grid/tl 同时 hidden + \`aria-pressed=true\` —— 真实原因是刷新后固定 450 ms 时海报墙 fetch 还没到（数据为空，两视图都隐藏），不是雨滴拦点击。改为 \`waitForFunction(() => #w-grid img > 100)\` 等数据就绪再断言，**判据与阈值一个没改**。并发跑全量时更容易触发，属等待不足而非功能缺陷。
+- **装饰层不许抢首屏 / 抢交互**（全量回归抓出的两条真实回归，均不改旧判据）：① 初版 \`defer\` 引入 \`rain.js\` 会拖住 DOMContentLoaded，index 700px 下骨架屏晚 300+ ms 退场，固定宽度骨架行短暂撑出 143px 横向滚动 —— \`verify55\`/`verify58\` B[700] 连红。改成 **async 引入 + 骨架未退场时轮询等 120ms 再初始化 WebGL**（最多 3s 兜底；watch 无骨架立即启动），复跑 \`verify55\` 40/40、\`verify58\` 23/23×3。② 持续 WebGL 绘制让 \`verify118\` B9「点击热力图当天后详情容器高度必须从旧值起步」的同步读数晚了一帧（190→156），连跑 3/3 红；改为 **30fps 封顶 + 0.55× 渲染 + pointerdown/click/keydown 后 300ms 让路**，4/4 全绿。旧套件断言与阈值一字未动，只让装饰层给主交互让路。
 
 ## 踩过的坑（脚本层面）
 

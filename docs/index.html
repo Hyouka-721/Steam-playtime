@@ -42,6 +42,7 @@
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
 <link rel="stylesheet" href="style.css?v=144">
+<link rel="stylesheet" href="rain.css?v=1">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -64,6 +65,7 @@
 
 <!-- 背景氛围层（流星）：全屏 fixed + pointer-events:none，不拦截任何点击与输入 -->
 <canvas id="fx-canvas" aria-hidden="true"></canvas>
+<canvas id="rain-canvas" aria-hidden="true"></canvas>
 
 <header class="site-header">
   <div class="brand">
@@ -250,6 +252,7 @@
       <button type="button" data-fx="meteor" aria-pressed="false">流星</button>
     </span>
   </span>
+  <button type="button" class="rain-toggle" id="rain-toggle" aria-pressed="true" aria-label="切换雨滴效果">雨滴 开</button>
 </footer>
 
 <!-- fx.js 自己绑定页脚的氛围开关（#fx-seg），app.js 不再参与特效状态；
@@ -270,5 +273,7 @@ if ('serviceWorker' in navigator) {
      fx.js 是独立 IIFE，只读 localStorage 与 CSS 变量，不依赖 app.js，
      所以「执行时机从 app.js 之前挪到之后」不会影响它。 -->
 <script src="fx.js?v=19" defer fetchpriority="low"></script>
+<!-- 雨滴是装饰层：async 而不是 defer，避免拖住 DOMContentLoaded 让首屏榜单骨架屏晚渲染 -->
+<script src="rain.js?v=1" async fetchpriority="low"></script>
 </body>
 </html>
