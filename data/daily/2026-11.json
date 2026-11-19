@@ -3,7 +3,7 @@
   "month": "2026-11",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-11-17T23:02:30.699Z",
+  "generated_at": "2026-11-18T22:39:22.747Z",
   "days": {
     "2026-11-01": {
       "total_minutes": 264,
@@ -334,6 +334,27 @@
           "appid": "246420",
           "name": "Kingdom Rush",
           "minutes": 26,
+          "is_new": false
+        }
+      ]
+    },
+    "2026-11-18": {
+      "total_minutes": 181,
+      "span_days": 1,
+      "confidence": "high",
+      "source": "auto",
+      "flags": [],
+      "games": [
+        {
+          "appid": "227300",
+          "name": "Euro Truck Simulator 2",
+          "minutes": 91,
+          "is_new": false
+        },
+        {
+          "appid": "246420",
+          "name": "Kingdom Rush",
+          "minutes": 90,
           "is_new": false
         }
       ]
