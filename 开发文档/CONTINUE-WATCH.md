@@ -178,11 +178,12 @@ node tests/watch/verify107_watch.mjs
 | 106 | 换 3 张封面（童话镇 / 独角 / 南下），旧图改名留档 | ✅ 已上线 |
 | 107 | 删「每年 10 首」「N 首」文案；换夕颜封面；双 bump v43/v35 | ✅ 已上线 `8efa9df` |
 | 108 | **清理与归档**：删 `.st-row-track` 死码 12 行、`watch.css?v=44`、72 张原图移出 `docs/` → `assets/songs/`、文档归入 `开发文档/` | ✅ 已上线 `ec1e8c3` |
-| 120 | **雨滴氛围层**：与 index 共用 `rain.js?v=1` / `rain.css?v=1`，页脚开关写 `localStorage['rain.enabled']`，watch 恒 cinema 不翻相；不动 css44/js35 | ✅ 已上线 `c91a085` |
+| 120 | **雨滴氛围层**：与 index 共用资源，页脚开关写 `localStorage['rain.enabled']`，watch 恒 cinema；不动 css44/js35 | ✅ 已上线 `c91a085` |
+| 121 | **雨滴改 DOM + backdrop-filter**：WebGL 采样不到背景 → 推翻；每颗水滴真实折射页面，尺寸 10~40px；v=3 | ✅ 已上线 `64ece50` |
 
-- 当前版本键：`watch.css?v=44` / `watch.js?v=35` + 新增共用 `rain.css?v=1` / `rain.js?v=1`
-- 第 120 轮验收：`verify120_watch` **18/0**、`online120` watch 侧 **10/0**；两线全量 **64 套件 1601 → 1600/1**（唯一红 `verify56 B11`）；`npm test` **52/0**。
-- 🔴 雨滴是装饰层：`rain.js` 必须 **async** 引入（defer 会拖住 DOMContentLoaded 让 index 骨架屏晚退场，700px 短暂横向溢出）；WebGL 只在首屏数据就绪后启动，30fps 封顶 + 0.55× 分辨率 + 交互后 300ms 让路，否则 `verify118 B9` 的动画起始高度会被抢帧推走。判据一律不改。
+- 当前版本键：`watch.css?v=44` / `watch.js?v=35` + 共用 `rain.css?v=3` / `rain.js?v=3`
+- 第 121 轮验收：`verify120_watch` **18/0**、`verify121` **12/0**、`online121` watch 侧 **10/0**；两线全量 **65 套件 1612 → 1610/2**（`verify56 B11` 已知 + `verify95 B5` 并发偶发、单跑 19/0）；`npm test` **52/0**。
+- 🔴 雨滴是装饰层：`rain.js` 必须 **async** 引入，并在 index 骨架屏退场后再铺水滴；`#rain-layer` fixed / `pointer-events:none` / z=6，关时整层 `hidden`。cream 用 `.rain-drop` 独立规则，**禁止再用 `filter:invert(1)`**（会把高光翻成脏灰）。判据 `verify120`/`verify120_watch`/`verify121`。
 - 数据体量：125 部影视 / 9 组 90 首歌 / 66 张缩略图 / 369 张海报
 - 已知未做：线上首屏感知仍 ~10.5 s（瓶颈是 Pages 侧 HTTP/2 并发 + CDN 首包，不是体量）；`srcset` 分档（桌面 240 px）未做；年度影视海报未走同一套缩略图流程。
 
