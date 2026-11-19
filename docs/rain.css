@@ -1,5 +1,5 @@
 /* ============================================================================
-   雨滴氛围层 · rain.css   v=1
+   雨滴氛围层 · rain.css   v=3
    与 rain.js 配套，供 index.html / watch.html 两页共用。
    🔴 独立新文件：不并入 style.css / watch.css，避免动到已上线版本号。
    ============================================================================ */
@@ -7,21 +7,59 @@
 /* 全屏 fixed 装饰层：不占布局、不拦点击，CLS = 0。
    z-index 6 —— 高于内容(0/2)，低于页眉(10)、FAB(40)、toast(50)、弹层(60)，
    与既有 #fx-canvas(20) 同属氛围层但不抢事件。 */
-#rain-canvas {
+#rain-layer {
   position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
   z-index: 6;
   pointer-events: none;
+  overflow: hidden;
+  contain: layout style paint;
 }
 
-/* 着色器输出的是白色高光水滴（深色底最佳，watch 页 cinema 原样显示）。
-   浅色 cream 主题翻相为暗色水痕，保证在暖阳米底上依然看得见。 */
-[data-theme="cream"] #rain-canvas { filter: invert(1); }
+/* 第 121 轮：每颗水滴是一个 DOM 元素，靠 backdrop-filter 真正折射背后页面。
+   WebGL 版本无法采样页面背景，只能画灰白蒙版 —— 这是「不通透」的根因。
+   圆角只用 50%，不引入裸 px。 */
+.rain-drop {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: var(--rain-op, .92);
+  transform: rotate(var(--rain-rot, 0deg));
+  backdrop-filter: blur(var(--rain-blur, 3px)) saturate(1.18) brightness(1.05);
+  -webkit-backdrop-filter: blur(var(--rain-blur, 3px)) saturate(1.18) brightness(1.05);
+  box-shadow:
+    inset -3px -4px 8px rgba(255, 255, 255, .78),
+    inset 3px 4px 9px rgba(0, 0, 0, .30),
+    0 1px 4px rgba(0, 0, 0, .14);
+  background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, .72), rgba(255, 255, 255, 0) 46%);
+  will-change: transform;
+}
 
-/* 右上角开关：复用两页都有的选择器语义，配色/圆角走主题变量。 */
+/* 浅色主题：白色高光更亮、暗边更深，水滴在米底上才立得住 */
+[data-theme="cream"] .rain-drop {
+  box-shadow:
+    inset -2px -3px 7px rgba(255, 255, 255, .95),
+    inset 2px 3px 8px rgba(45, 55, 75, .40),
+    0 1px 3px rgba(45, 55, 75, .12);
+  background: radial-gradient(circle at 30% 24%, rgba(255, 255, 255, .95), rgba(255, 255, 255, 0) 40%);
+}
+
+/* 只有约四成水滴在缓慢下滑，其余是静态凝结水珠；全部用合成层动画，不触发布局 */
+.rain-drop.is-moving {
+  animation: rain-fall var(--rain-dur, 16s) linear infinite;
+  animation-delay: var(--rain-delay, 0s);
+}
+
+@keyframes rain-fall {
+  from { transform: translate3d(0, -14vh, 0) rotate(var(--rain-rot, 0deg)); }
+  to   { transform: translate3d(var(--rain-drift, 0px), 112vh, 0) rotate(var(--rain-rot, 0deg)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rain-drop.is-moving { animation: none; }
+}
+
+/* 开关：复用两页都有的选择器语义，配色/圆角走主题变量。 */
 .rain-toggle {
   display: inline-flex;
   align-items: center;
@@ -52,9 +90,13 @@
 @media (max-width: 860px) {
   .site-footer .rain-toggle { margin-left: 0; }
   .w-foot .rain-toggle { margin-left: 0; }
+  .rain-drop {
+    backdrop-filter: blur(2px) saturate(1.15) brightness(1.04);
+    -webkit-backdrop-filter: blur(2px) saturate(1.15) brightness(1.04);
+  }
 }
 
 @media print {
-  #rain-canvas { display: none; }
+  #rain-layer { display: none; }
   .rain-toggle { display: none; }
 }

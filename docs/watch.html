@@ -18,10 +18,10 @@
 <!-- 与游戏站同一套本地花体字，保持品牌一致；preload + font-display:block 消除 FOUT -->
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="watch.css?v=44">
-<link rel="stylesheet" href="rain.css?v=1">
+<link rel="stylesheet" href="rain.css?v=3">
 </head>
 <body>
-<canvas id="rain-canvas" aria-hidden="true"></canvas>
+<div id="rain-layer" aria-hidden="true"></div>
 
 <header class="w-header">
   <!-- 小黄人：与首页同一个形象，负责「退出观影记录」回到游戏时长页
@@ -235,7 +235,7 @@
 <div class="w-toast" id="w-toast" role="status" hidden></div>
 <script src="watch.js?v=35"></script>
 <!-- 雨滴是装饰层：async 而不是 defer，避免拖住 DOMContentLoaded 让首屏海报墙晚渲染 -->
-<script src="rain.js?v=1" async fetchpriority="low"></script>
+<script src="rain.js?v=3" async fetchpriority="low"></script>
 <script>
 /* 第 75 轮：注册 Service Worker（docs/sw.js）。
    海报是内容哈希命名的不可变资源，Pages 只给 max-age=600，刷新超 10 分钟就要
