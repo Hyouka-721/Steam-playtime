@@ -2,19 +2,19 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-11-18T22:39:22.830Z",
-  "generated_at_local": "2026-11-19",
+  "generated_at": "2026-11-19T22:42:36.474Z",
+  "generated_at_local": "2026-11-20",
   "tracking_since": "2026-10-13",
-  "last_snapshot_date": "2026-11-18",
+  "last_snapshot_date": "2026-11-19",
   "steamid_hash": "a8474caf",
   "months": [
     "2026-10",
     "2026-11"
   ],
   "ach_stats": {
-    "unlocked": 856,
+    "unlocked": 858,
     "total": 2554,
-    "pct": 33.5,
+    "pct": 33.6,
     "games": 32
   },
   "ach_perfect": [
@@ -27,17 +27,17 @@
     "990630"
   ],
   "stats": {
-    "lifetime_minutes": 86140,
-    "lifetime_hours": 1435.7,
-    "owned_games": 53,
+    "lifetime_minutes": 86213,
+    "lifetime_hours": 1436.9,
+    "owned_games": 55,
     "lifetime_played_games": 38,
-    "total_minutes": 4416,
-    "total_hours": 73.6,
-    "tracked_days": 36,
-    "active_days": 35,
-    "current_streak": 28,
-    "longest_streak": 28,
-    "week_minutes": 409,
+    "total_minutes": 4489,
+    "total_hours": 74.8,
+    "tracked_days": 37,
+    "active_days": 36,
+    "current_streak": 29,
+    "longest_streak": 29,
+    "week_minutes": 482,
     "played_games": 6,
     "best_day": {
       "date": "2026-11-14",
@@ -57,17 +57,17 @@
       "appid": "227300",
       "name": "欧洲卡车模拟2",
       "img_icon_url": "adc18a4fc9adc0330144b76d61cbda68bb2394a0",
-      "total_minutes": 566,
+      "total_minutes": 580,
       "first_day": "2026-10-13",
-      "last_day": "2026-11-18"
+      "last_day": "2026-11-19"
     },
     "246420": {
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "total_minutes": 1408,
+      "total_minutes": 1457,
       "first_day": "2026-10-13",
-      "last_day": "2026-11-18"
+      "last_day": "2026-11-19"
     },
     "431960": {
       "appid": "431960",
@@ -89,9 +89,9 @@
       "appid": "3009140",
       "name": "Salt Player",
       "img_icon_url": "a2a0483be79a4082e0b50abccb3b67c979d3a457",
-      "total_minutes": 9,
+      "total_minutes": 19,
       "first_day": "2026-10-19",
-      "last_day": "2026-11-12"
+      "last_day": "2026-11-19"
     }
   },
   "games_lifetime": {
@@ -120,15 +120,15 @@
       "appid": "227300",
       "name": "欧洲卡车模拟2",
       "img_icon_url": "adc18a4fc9adc0330144b76d61cbda68bb2394a0",
-      "lifetime_minutes": 8363,
-      "last_played": "2026-11-18"
+      "lifetime_minutes": 8377,
+      "last_played": "2026-11-19"
     },
     "246420": {
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "lifetime_minutes": 1628,
-      "last_played": "2026-11-18"
+      "lifetime_minutes": 1677,
+      "last_played": "2026-11-19"
     },
     "250900": {
       "appid": "250900",
@@ -235,6 +235,13 @@
       "lifetime_minutes": 3582,
       "last_played": "2026-11-14"
     },
+    "458710": {
+      "appid": "458710",
+      "name": "Kingdom Rush Frontiers",
+      "img_icon_url": "5830f91eb62be434e08f053b59bbfa95f0e53424",
+      "lifetime_minutes": 0,
+      "last_played": null
+    },
     "489830": {
       "appid": "489830",
       "name": "上古卷轴5：天际 特别版",
@@ -311,6 +318,13 @@
       "img_icon_url": "8ccc812dd5e5c58cf9c1009c2a3eefe12820bea5",
       "lifetime_minutes": 3860,
       "last_played": "2024-11-23"
+    },
+    "816340": {
+      "appid": "816340",
+      "name": "Kingdom Rush Origins",
+      "img_icon_url": "e25b57417e1d0b8f5ee41959254bd4f4ec14f017",
+      "lifetime_minutes": 0,
+      "last_played": null
     },
     "877280": {
       "appid": "877280",
@@ -449,8 +463,8 @@
       "appid": "3009140",
       "name": "Salt Player",
       "img_icon_url": "a2a0483be79a4082e0b50abccb3b67c979d3a457",
-      "lifetime_minutes": 866,
-      "last_played": "2026-11-12"
+      "lifetime_minutes": 876,
+      "last_played": "2026-11-19"
     },
     "3167020": {
       "appid": "3167020",

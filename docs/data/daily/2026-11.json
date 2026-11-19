@@ -3,7 +3,7 @@
   "month": "2026-11",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-11-18T22:39:22.823Z",
+  "generated_at": "2026-11-19T22:42:36.468Z",
   "days": {
     "2026-11-01": {
       "total_minutes": 264,
@@ -355,6 +355,35 @@
           "appid": "246420",
           "name": "王国保卫战",
           "minutes": 90,
+          "is_new": false
+        }
+      ]
+    },
+    "2026-11-19": {
+      "total_minutes": 73,
+      "span_days": 1,
+      "confidence": "medium",
+      "source": "auto",
+      "flags": [
+        "new_game"
+      ],
+      "games": [
+        {
+          "appid": "246420",
+          "name": "王国保卫战",
+          "minutes": 49,
+          "is_new": false
+        },
+        {
+          "appid": "227300",
+          "name": "欧洲卡车模拟2",
+          "minutes": 14,
+          "is_new": false
+        },
+        {
+          "appid": "3009140",
+          "name": "Salt Player",
+          "minutes": 10,
           "is_new": false
         }
       ]
