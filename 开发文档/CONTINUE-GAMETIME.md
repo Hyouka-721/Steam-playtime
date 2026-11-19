@@ -158,6 +158,13 @@ steam-playtime/
 - 热力图 `#hx-day`：`renderHxDay()` 先同步替换内容，再用 `Element.animate` 做 **220ms 容器高度 old→new 过渡 + 列表淡入上移 5px**；`prefers-reduced-motion` 时直接显示终态。`.hx-day` 加 `overflow:hidden` 裁掉过渡期溢出。
 - 高度动画只解决「行数变化导致整块突然抽高/塌陷」，不改变取数：头部日期、每行游戏和时长仍全是 `state.days` 现算；旧套件 `verify103/111/113/115/116` 的点击→展开与 Esc 收起契约不变。
 
+### 雨滴氛围层（第 120 轮，两页共用）
+
+- `docs/rain.js?v=1` + `docs/rain.css?v=1` 为**新增独立资源**，两页共用；不动 `style.css?v=144` / `app.js?v=129` / `fx.js?v=19`，历史套件零改判。算法移植自 Steam Workshop 插件 `com.aoritian.playbackrain` 1.0.4（GPL-3.0，原始算法 BetterLyrics / shadertoy `ltffzl`）：Skia RuntimeEffect GLSL 转成 WebGL1，高度场 + OS2 噪声 + 静/动两层水滴 + 镜面高光。
+- 网页适配：亮度 ×0.5、alpha ×0.26（防白条盖字）；`0.55×` 渲染分辨率 + 30fps 封顶 + 用户交互后 300ms 让路；canvas fixed / `pointer-events:none` / `z-index:6`，不参与布局、CLS=0。cream 主题由 CSS `filter:invert(1)` 翻成暗水痕，cinema 原样。
+- 🔴 装饰层不许抢首屏：`rain.js` 用 **async**（不是 defer），且检测到 index 骨架屏 `.sk-block` 时轮询等它退场再初始化 WebGL（最多 3s 兜底）。否则 700px 下骨架行会短暂撑出 143px 横向滚动，`verify55/58 B[700]` 连红。
+- 开关 `#rain-toggle` 在页脚，写 `localStorage['rain.enabled']`（插件同名键），默认开；关则停帧清屏；`prefers-reduced-motion` 强制关并禁用按钮。两页同域共享同一状态。判据 `verify120`（24 条）/ `verify120_watch`（18 条）/ `online120`（20 条）。
+
 ### 排行榜行（第 99~102 轮定稿）
 
 `44px / 130px / minmax(150,260) / minmax(140,1fr) / 150px / 110px`；进度条不能写裸 `1fr`、日期必须固定 110px；`.rank-bar` 左右 `-30/-20` 负边距，`.rank-name` 补 `padding-right:22px`；≤860 负边距清零。
@@ -176,13 +183,13 @@ cinema 专属规则必须带 `[data-theme="cinema"]` 前缀（切回 cream 时 `
 
 ---
 
-## 七、当前状态（2026-11-18）
+## 七、当前状态（2026-11-19）
 
 | 项 | 值 |
 |---|---|
-| 版本 | 本地＝线上 `style.css?v=144` / `app.js?v=129` / `fx.js?v=19`（✅ 第 119 轮已上线 `deb5ca5`） |
-| 本地回归 | index 侧 **18 套件 410 条 0 FAIL**（含新 `verify119` 19 条）；两线全量 **62 套件 1560 条 → 1559/1**（唯一红 `verify56 B11`）；`npm test` **52 条 0 FAIL** |
-| 线上复验 | `online119` **11/0**（指纹 3 + 时间轴 5 + 热力图切换 1 + 零异常 1）；`online118` **14/0**（钉旧 143/128 与「合计」文案，按惯例不动）；`online104_watch` **21/0**；线上回归 9 套件 **143/0**；旧 `online117` 钉 `v=141` 会假红，按惯例不动 |
+| 版本 | 本地＝线上 `style.css?v=144` / `app.js?v=129` / `fx.js?v=19` + 新增 `rain.css?v=1` / `rain.js?v=1`（✅ 第 120 轮已上线 `c91a085`；merge 了远端数据快照 `52d141a`） |
+| 本地回归 | 两线全量 **64 套件 1601 条 → 1600 PASS / 1 FAIL**（唯一红 `verify56 B11`）；`verify120` **24/0**、`verify120_watch` **18/0**；`npm test` **52 条 0 FAIL** |
+| 线上复验 | `online120` **20/0**（两页 WebGL 出水滴 + 开关持久化 + 三档零溢出 + 零异常）；`online119` **11/0**、`online104_watch` **21/0**、`online103_watch` **16/0**；旧 `online118/116/115/113/112/108` 钉旧版本号 143/128 等，复跑假红属预期，按惯例不动 |
 | 性能红线 | 二次访问 FCP ≤100ms / 滚动 >50ms 帧 = 0 / **CLS = 0.000** |
 | 数据规模 | 以 `docs/data/meta.json` 为准，别写死数字 |
 
