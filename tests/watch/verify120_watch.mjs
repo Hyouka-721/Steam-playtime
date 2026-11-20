@@ -1,7 +1,6 @@
-/* verify120_watch.mjs — 雨滴氛围层（watch / My Watch List）
-   第 121 轮改判说明：改用 DOM 水滴 + CSS backdrop-filter（WebGL 采样不到背景，
-   调不出通透感）。watch 页恒为 cinema，浅色规则不生效；开关、持久化、视图切换、
-   CLS、五档宽度等契约不变。理由写进各条 ok 文案。
+/* verify120_watch.mjs — 雨丝氛围层（watch / My Watch List）
+   第 123 轮改判：DOM 水珠 + backdrop-filter 在均匀背景上仍是灰片 → 雨丝。
+   watch 恒 cinema，浅色规则不生效；开关、持久化、视图切换、CLS、宽度契约不变。
    用法：node tests/watch/verify120_watch.mjs（需先起 8895 静态服务） */
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
@@ -17,27 +16,26 @@ const ok = (n, c, x) => {
     : (fail++, console.log('FAIL ', n, '— ' + JSON.stringify(x)));
 };
 
-/* ---------- A 静态 ---------- */
 const html = fs.readFileSync(ROOT + 'docs/watch.html', 'utf8');
 const rainJs = fs.readFileSync(ROOT + 'docs/rain.js', 'utf8');
 const rainCss = fs.readFileSync(ROOT + 'docs/rain.css', 'utf8');
+const rainCssCode = rainCss.replace(/\/\*[\s\S]*?\*\//g, '');
 
-ok('A1 watch 以 v=4 引用 rain.css / rain.js，且不动 css44 / js35',
-  /rain\.css\?v=4["']/.test(html) && /rain\.js\?v=4["']/.test(html) &&
+ok('A1 watch 以 v=5 引用 rain.css / rain.js，且不动 css44 / js35',
+  /rain\.css\?v=5["']/.test(html) && /rain\.js\?v=5["']/.test(html) &&
   /watch\.css\?v=44["']/.test(html) && /watch\.js\?v=35["']/.test(html));
-ok('A2 雨滴层在 body 首位、开关在 .w-foot（无 title 气泡）',
+ok('A2 雨丝层在 body 首位、开关在 .w-foot（无 title 气泡）',
   /<body>\s*<div id="rain-layer" aria-hidden="true"><\/div>/.test(html) &&
   /class="rain-toggle" id="rain-toggle"/.test(html) && !/id="rain-toggle"[^>]*title=/.test(html));
-ok('A3 watch 恒为 cinema：只保留浅色规则不冲突，且不再用 filter:invert',
+ok('A3 watch 恒为 cinema：浅色规则不冲突，且没有 invert / backdrop-filter',
   /<html lang="zh-CN" data-theme="cinema">/.test(html) &&
-  /\[data-theme="cream"\] \.rain-drop \{/.test(rainCss) &&
-  !/filter:\s*invert\(1\)/.test(rainCss));
-ok('A4 与 index 共用同一份 rain.js（DOM 水滴 / 同一存储键 / 尺寸一致）',
-  /document\.createElement\('i'\)/.test(rainJs) &&
+  /\[data-theme="cream"\] \.rain-streak \{/.test(rainCss) &&
+  !/filter:\s*invert\(1\)/.test(rainCssCode) && !/backdrop-filter/.test(rainCssCode));
+ok('A4 与 index 共用同一份 rain.js（雨丝 / 同一存储键 / 三档景深）',
+  /el\.className = 'rain-streak'/.test(rainJs) &&
   /localStorage\.setItem\('rain\.enabled'/.test(rainJs) &&
-  /8 \+ Math\.pow\(rnd\(\), 1\.7\) \* 16/.test(rainJs));
+  /w: \[0\.6, 0\.9\]/.test(rainJs));
 
-/* ---------- B 运行时 ---------- */
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
 const page = await ctx.newPage();
@@ -47,42 +45,37 @@ page.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
 await page.goto(LOCAL + '?cb=' + Date.now(), { waitUntil: 'load' });
 await page.evaluate(() => { try { localStorage.removeItem('rain.enabled'); } catch (e) {} });
 await page.reload({ waitUntil: 'load' });
-// 等海报墙与雨滴都就绪：慢速机 fetch 晚到会让两视图同时 hidden（假红）
 await page.waitForFunction(() => document.querySelectorAll('#w-grid img').length > 100, null, { timeout: 15000 });
 await page.waitForFunction(() => window.__rain && window.__rain.ready(), null, { timeout: 20000 });
 await page.waitForTimeout(250);
 
-const st = await page.evaluate(() => ({
-  ready: window.__rain.ready(),
-  enabled: window.__rain.enabled(),
-  count: window.__rain.count(),
-  sample: window.__rain.sample(),
-  pressed: document.getElementById('rain-toggle').getAttribute('aria-pressed'),
-  theme: document.documentElement.dataset.theme,
-  cards: document.querySelectorAll('#w-grid img').length,
-  layer: (() => {
-    const l = document.getElementById('rain-layer');
-    const s = getComputedStyle(l);
-    return { pos: s.position, pe: s.pointerEvents, z: s.zIndex, hidden: l.hidden };
-  })(),
-  blur: getComputedStyle(document.querySelector('.rain-drop')).backdropFilter,
-}));
-ok('B1 水滴层就绪、默认开、已生成水滴且 backdrop-filter 生效',
-  st.ready === true && st.enabled === true && st.count > 0 && st.sample.pixels > 0 && /blur\(/.test(st.blur),
-  { count: st.count, pixels: st.sample.pixels, blur: st.blur });
-ok('B2 cinema 主题、海报墙未受影响、雨滴层 fixed 不拦点击',
-  st.theme === 'cinema' && st.cards > 100 && st.layer.pos === 'fixed' && st.layer.pe === 'none' && st.layer.z === '6',
-  { theme: st.theme, cards: st.cards, layer: st.layer });
+const st = await page.evaluate(() => {
+  const ds = [...document.querySelectorAll('.rain-streak')];
+  const cs = getComputedStyle(ds[0]);
+  return {
+    enabled: window.__rain.enabled(), count: window.__rain.count(), sample: window.__rain.sample(),
+    pressed: document.getElementById('rain-toggle').getAttribute('aria-pressed'),
+    theme: document.documentElement.dataset.theme,
+    cards: document.querySelectorAll('#w-grid img').length,
+    bg: cs.backgroundImage, maxW: Math.max(...ds.map((d) => parseFloat(getComputedStyle(d).width))),
+    layer: (() => { const l = document.getElementById('rain-layer'); const s = getComputedStyle(l); return { pos: s.position, pe: s.pointerEvents, z: s.zIndex, hidden: l.hidden }; })(),
+  };
+});
+ok('B1 雨丝层就绪、默认开、已生成雨丝、linear-gradient 渐隐',
+  st.enabled === true && st.count > 0 && st.sample.pixels > 0 && /linear-gradient/.test(st.bg),
+  { count: st.count, pixels: st.sample.pixels });
+ok('B2 cinema 主题、海报墙未受影响、雨丝宽度 ≤2px、层 fixed 不拦点击',
+  st.theme === 'cinema' && st.cards > 100 && st.maxW <= 2 &&
+  st.layer.pos === 'fixed' && st.layer.pe === 'none' && st.layer.z === '6',
+  { theme: st.theme, cards: st.cards, maxW: +st.maxW.toFixed(2), layer: st.layer });
 ok('B3 按钮初始态为开', st.pressed === 'true');
 
 await page.click('#rain-toggle');
 await page.waitForTimeout(250);
 const off = await page.evaluate(() => ({
-  enabled: window.__rain.enabled(),
-  stored: localStorage.getItem('rain.enabled'),
+  enabled: window.__rain.enabled(), stored: localStorage.getItem('rain.enabled'),
   pressed: document.getElementById('rain-toggle').getAttribute('aria-pressed'),
-  hidden: document.getElementById('rain-layer').hidden,
-  sample: window.__rain.sample(),
+  hidden: document.getElementById('rain-layer').hidden, sample: window.__rain.sample(),
 }));
 ok('B4 关：整层隐藏、localStorage=0、aria-pressed=false',
   off.enabled === false && off.stored === '0' && off.pressed === 'false' && off.hidden === true && off.sample.pixels === 0, off);
@@ -94,7 +87,6 @@ await page.waitForFunction(() => document.querySelectorAll('#w-grid img').length
 await page.waitForFunction(() => window.__rain && window.__rain.ready(), null, { timeout: 20000 });
 ok('B5 重新打开后刷新持久化', await page.evaluate(() => window.__rain.enabled() === true && localStorage.getItem('rain.enabled') === '1'));
 
-// 视图切换仍正常（雨滴层不拦点击）
 await page.evaluate(() => { const b = document.getElementById('w-avatar'); if (b) b.click(); });
 await page.waitForTimeout(350);
 const view = await page.evaluate(() => ({
@@ -102,10 +94,9 @@ const view = await page.evaluate(() => ({
   gridHidden: document.getElementById('w-grid').hidden,
   pressed: document.getElementById('w-avatar').getAttribute('aria-pressed'),
 }));
-ok('B6 雨滴层不拦点击：史蒂夫切到时间轴视图仍生效',
+ok('B6 雨丝层不拦点击：史蒂夫切到时间轴视图仍生效',
   view.tlHidden === false && view.gridHidden === true && view.pressed === 'true', view);
 
-// 五档宽度
 for (const w of [1440, 1280, 1088, 900, 390]) {
   await page.setViewportSize({ width: w, height: 900 });
   await page.waitForTimeout(180);
@@ -113,14 +104,12 @@ for (const w of [1440, 1280, 1088, 900, 390]) {
   ok(`B7 ${w}px 零横向溢出`, ov <= 0, { ov });
 }
 
-// CLS
 await page.setViewportSize({ width: 1440, height: 900 });
 await page.waitForTimeout(200);
 await page.evaluate(() => {
   window.__cls = 0;
-  new PerformanceObserver((list) => {
-    for (const e of list.getEntries()) if (!e.hadRecentInput) window.__cls += e.value;
-  }).observe({ type: 'layout-shift', buffered: false });
+  new PerformanceObserver((list) => { for (const e of list.getEntries()) if (!e.hadRecentInput) window.__cls += e.value; })
+    .observe({ type: 'layout-shift', buffered: false });
 });
 await page.click('#rain-toggle');
 await page.waitForTimeout(250);
@@ -129,14 +118,12 @@ await page.waitForTimeout(250);
 const cls = await page.evaluate(() => window.__cls);
 ok('C1 开关切换零 CLS', cls === 0, { cls });
 
-// 减少动效
 const rmCtx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' });
 const rm = await rmCtx.newPage();
 await rm.goto(LOCAL + '?cb=' + Date.now(), { waitUntil: 'load' });
 await rm.waitForFunction(() => window.__rain && window.__rain.ready(), null, { timeout: 20000 });
 const rmSt = await rm.evaluate(() => ({
-  enabled: window.__rain.enabled(),
-  disabled: document.getElementById('rain-toggle').disabled,
+  enabled: window.__rain.enabled(), disabled: document.getElementById('rain-toggle').disabled,
   hidden: document.getElementById('rain-layer').hidden,
 }));
 ok('C2 prefers-reduced-motion 下强制关且按钮禁用',
@@ -145,5 +132,5 @@ await rmCtx.close();
 
 ok('C3 全程零 JS 异常', errs.length === 0, errs.slice(0, 3));
 await browser.close();
-console.log(`\n雨滴（watch，第 121 轮 DOM 版）：${pass} PASS / ${fail} FAIL`);
+console.log(`\n雨丝（watch，第 123 轮）：${pass} PASS / ${fail} FAIL`);
 process.exit(fail ? 1 : 0);

@@ -1,62 +1,58 @@
 /* ============================================================================
-   雨滴氛围层 · rain.css   v=4
+   雨丝氛围层 · rain.css   v=5
    与 rain.js 配套，供 index.html / watch.html 两页共用。
    🔴 独立新文件：不并入 style.css / watch.css，避免动到已上线版本号。
    ============================================================================ */
 
 /* 全屏 fixed 装饰层：不占布局、不拦点击，CLS = 0。
-   z-index 6 —— 高于内容(0/2)，低于页眉(10)、FAB(40)、toast(50)、弹层(60)，
-   与既有 #fx-canvas(20) 同属氛围层但不抢事件。 */
+   z-index 6 —— 高于内容(0/2)，低于页眉(10)、FAB(40)、toast(50)、弹层(60)。
+   第 123 轮去掉 backdrop-filter：均匀深色背景下模糊纯色仍是同一块纯色，
+   只会得到灰圆片；雨丝不依赖背景纹理。 */
 #rain-layer {
   position: fixed;
   inset: 0;
   z-index: 6;
   pointer-events: none;
   overflow: hidden;
-  contain: layout style paint;
+  contain: layout style;
 }
 
-/* 第 121 轮：每颗水滴是一个 DOM 元素，靠 backdrop-filter 真正折射背后页面。
-   WebGL 版本无法采样页面背景，只能画灰白蒙版 —— 这是「不通透」的根因。
-   圆角用每颗随机的 var(--rain-radius)（4~8 个百分比角），不引入裸 px。 */
-.rain-drop {
+/* 单根雨丝：两端渐隐的细线 + 轻微模糊，深色底用冷白，浅色底用蓝灰。
+   圆角 2px 在白名单内；宽度/长度/速度由 JS 按三档景深写入 CSS 变量。 */
+.rain-streak {
   position: absolute;
-  border-radius: var(--rain-radius, 50%);
-  pointer-events: none;
-  opacity: var(--rain-op, .62);
-  transform: rotate(var(--rain-rot, 0deg));
-  backdrop-filter: blur(var(--rain-blur, 2.5px)) saturate(1.10) brightness(1.02);
-  -webkit-backdrop-filter: blur(var(--rain-blur, 2.5px)) saturate(1.10) brightness(1.02);
-  box-shadow:
-    inset -2px -3px 6px rgba(255, 255, 255, .55),
-    inset 2px 3px 7px rgba(0, 0, 0, .22),
-    0 1px 3px rgba(0, 0, 0, .10);
-  background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, .48), rgba(255, 255, 255, 0) 42%);
+  left: 0;
+  top: 0;
+  width: var(--rain-w, 1px);
+  height: var(--rain-len, 48px);
+  border-radius: 2px;
+  opacity: var(--rain-op, .3);
+  filter: blur(var(--rain-blur, .3px));
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0) 0%,
+    var(--rain-stroke, rgba(210, 228, 255, .55)) 32%,
+    var(--rain-stroke, rgba(210, 228, 255, .55)) 68%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(var(--rain-tilt, 8deg));
   will-change: transform;
-}
-
-/* 浅色主题：白色高光更亮、暗边更深，水滴在米底上才立得住 */
-[data-theme="cream"] .rain-drop {
-  box-shadow:
-    inset -2px -3px 6px rgba(255, 255, 255, .72),
-    inset 2px 3px 7px rgba(45, 55, 75, .30),
-    0 1px 3px rgba(45, 55, 75, .12);
-  background: radial-gradient(circle at 30% 24%, rgba(255, 255, 255, .78), rgba(255, 255, 255, 0) 40%);
-}
-
-/* 只有约四分之一水滴在缓慢下滑，其余是静态凝结水珠；全部用合成层动画，不触发布局 */
-.rain-drop.is-moving {
-  animation: rain-fall var(--rain-dur, 16s) linear infinite;
+  animation: rain-fall var(--rain-dur, 2s) linear infinite;
   animation-delay: var(--rain-delay, 0s);
 }
 
+/* 浅色主题：冷白线在米底上看不见，换成蓝灰水痕 */
+[data-theme="cream"] .rain-streak {
+  --rain-stroke: rgba(62, 82, 104, .52);
+}
+
 @keyframes rain-fall {
-  from { transform: translate3d(0, -14vh, 0) rotate(var(--rain-rot, 0deg)); }
-  to   { transform: translate3d(var(--rain-drift, 0px), 112vh, 0) rotate(var(--rain-rot, 0deg)); }
+  from { transform: translate3d(0, -30vh, 0) rotate(var(--rain-tilt, 8deg)); }
+  to   { transform: translate3d(var(--rain-drift, -50px), 120vh, 0) rotate(var(--rain-tilt, 8deg)); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rain-drop.is-moving { animation: none; }
+  .rain-streak { animation: none; }
 }
 
 /* 开关：复用两页都有的选择器语义，配色/圆角走主题变量。 */
@@ -90,10 +86,7 @@
 @media (max-width: 860px) {
   .site-footer .rain-toggle { margin-left: 0; }
   .w-foot .rain-toggle { margin-left: 0; }
-  .rain-drop {
-    backdrop-filter: blur(2px) saturate(1.15) brightness(1.04);
-    -webkit-backdrop-filter: blur(2px) saturate(1.15) brightness(1.04);
-  }
+  .rain-streak { filter: blur(.2px); }
 }
 
 @media print {

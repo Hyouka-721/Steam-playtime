@@ -38,7 +38,7 @@ tests/
   NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
   for s in verify6 verify54 verify82_index verify83_index verify91 verify92 \
            verify103 verify104 verify105 verify106 verify108 verify111 \
-           verify113 verify115 verify116 verify117 verify118 verify119 verify120 verify121 verify122; do
+           verify113 verify115 verify116 verify117 verify118 verify119 verify120 verify121 verify122 verify123; do
     echo "== $s =="; "$NODE" tests/index/$s.mjs 2>&1 | tail -2
   done
   ```
@@ -336,10 +336,11 @@ tests/
 | `verify117` | 第 117 轮 index 侧：**首屏榜单整行显示** —— 行距 4→8→（按用户要求回退）**6**，行高由 `fitRankRows()` 按「第一行顶边 → 视口底」的可⽤高度反解（`--rank-row-h`）：8 行落在 74~100px 观感带内就用 8 行，屏幕偏高多放、偏矮少放，**折线永远落在行与行之间**；1440×1080 恰好 8 整行 0 切开，1440×1200 / 1280×1080 / 1920×800 / 1088×1000 / 1440×900 全部 0 条被切开的行；`.sk-row` 同吃该变量（CLS 0）；切视图与 resize 后仍成立；390 不参与（两行式布局） | 15 |
 | `verify118` | 第 118 轮 index 侧：**时间轴周合计 + 热力图详情平滑切换** —— ① 静态：`v=143/v=128`（**第 119 轮随 bump 到 144/129**）、`.tl-week-total` 用 `hoursShort(weekTotal)`（与角标同口径）、日期行 14.5px 与合计行 12.5px 各自独立（**第 119 轮用户删「合计」并把字体改成与年份同款 24/19px，本条断言已改判、具体字体由 verify119 守**）、`renderHxDay` 同时用 `box.animate` 做高度过渡与 `listEl.animate` 做淡入上移且守 `prefers-reduced-motion`、`.hx-day` 裁切换期的溢出 ② 时间轴：60 周**逐周**与本地 daily + `timeline_extra` 现算全等，时长行在日期下方且不越出左列，1440/1280/1088/900/390 零溢出 ③ 热力图：点第一天头部/每行时长与数据一致；换第二天时**内容同步替换**（不残留旧日期），切换瞬间容器高度仍从旧值起步且 `scrollY` 不变，动画结束后高度稳定、行数不变、零溢出；减少动效上下文直接显示终态且内容照常更新；Esc 收起与零 JS 异常照旧 | 21 |
 | `verify119` | 第 119 轮 index 侧：**周时长删「合计」+ 与年份同字体** —— ① 静态 5（版本 144/129；源码不再输出「合计」前缀；`.tl-week-total` 与 `.tl-month` 的 font-family/size/weight/letter-spacing/color/line-height 六项声明逐项一致，桌面 24px/700 Black Rose；≤860 窄屏同步缩到 19px；日期行仍 14.5px）② 运行时 3（60 周时长只含数字+单位、与 daily + `timeline_extra` 现算全等、仍在日期下方）③ 五档宽度各 2 条：时长与年份 computed 六项全等、文字不越出左列且零横向溢出（390 左列 78px 下文字宽 40.2px）；零 JS 异常 | 19 |
-| `verify120` | 雨滴氛围层（index 侧，**第 121 轮改为 DOM 水滴 + CSS backdrop-filter，第 122 轮收敛参数**）。第 120 轮 WebGL 版只能输出灰白蒙版（采样不到页面背景）、0.55× 放大发虚；第 121 轮改成 23~31 颗真实 DOM 水滴，backdrop-filter 直接折射背后页面。静态 9（两页 v=4 引用且不动 144/129/19、DOM 不是 canvas、有 -webkit- 前缀、尺寸 8~24px/滑动 30%/上限 36、无 title、fixed/pe:none/z6/无 invert/打印隐藏、圆角白名单、860 块唯一、rain.enabled 默认开）② 运行时 10（就绪/默认开/水滴数>0、水滴有尺寸且 blur 生效、层 fixed、按钮开；关→整层 hidden+storage 0、开→写 1、刷新持久化；五档零溢出）③ CLS 0 / reduced-motion 强制关按钮禁用 / 零异常 | 24 |
-| `verify120_watch` | 雨滴氛围层（watch 侧，**同一份 DOM 水滴（第 122 轮收敛参数）**）—— 静态 4（v=4 且不动 css44/js35；层在 body 首位、开关在 .w-foot；watch 恒 cinema、无 invert；共用 rain.js）② 运行时 10（就绪/默认开/23~31 颗、blur 生效、cinema 海报墙 125 张未受影响、层 fixed；关→hidden+storage 0、开→持久化；史蒂夫切时间轴仍生效；五档零溢出）③ CLS 0 / reduced-motion 强制关 / 零异常 | 18 |
-| `verify121` | 第 121 轮「通透度 + 尺寸」专项：DOM 水滴而非 canvas、backdrop-filter 带 -webkit-、cream 不用 invert、第 122 轮收敛为尺寸 8~24/滑动 0.30/上限 36；运行时中位宽 ≥10px、最大 ≥18px、数量 14~36、滑动占比 20%~60%、blur+inset 阴影、层 fixed/pe:none/z6、60 帧 ≤1.5s、铺水滴 CLS=0、零异常 | 12 |
-| `verify122` | 第 122 轮「收敛为环境层」专项：数量 `w*h/42000` 且 14~36、尺寸 8~24（中位 ≤18、最大 ≤34）、透明度 ≤0.73、不规则圆角 ≥4 个百分比、滑动 0.30；运行时数量/中位宽/最大宽/最大 opacity/圆角逐项实测，60 帧 ≤1.5s、CLS=0、零异常 | 11 |
+| `verify120` | 雨丝氛围层（index 侧，**第 123 轮由水珠改为雨丝**）。第 120 轮 WebGL 灰蒙版、第 121/122 轮 DOM 水珠 + backdrop-filter 在均匀深色底上仍是灰片（用户实测 blur(8px) brightness(1.35) 无变化）→ 改为细长渐隐线。静态 9（两页 v=5 引用且不动 144/129/19、DOM 是 `.rain-streak` 无 canvas/backdrop、三档景深 0.6~1.8px/16~110px、无 title、fixed/pe:none/z6/无 invert/打印隐藏、圆角白名单、860 块唯一、rain.enabled 默认开）② 运行时 10（就绪/默认开/数量>0、宽 ≤2px/长 16~120/linear-gradient/blur、层 fixed、按钮开；关→整层 hidden+storage 0、开→写 1、刷新持久化；五档零溢出）③ CLS 0 / reduced-motion 强制关且动画停 / 零异常 | 24 |
+| `verify120_watch` | 雨丝氛围层（watch 侧，同一份 rain.js）—— 静态 4（v=5 且不动 css44/js35；层在 body 首位、开关在 .w-foot；watch 恒 cinema、无 invert/backdrop；共用三档景深）② 运行时 10（就绪/默认开/数量>0/linear-gradient、cinema 海报墙 125 张未受影响、宽 ≤2px/层 fixed；关→hidden+storage 0、开→持久化；史蒂夫切时间轴仍生效；五档零溢出）③ CLS 0 / reduced-motion 强制关 / 零异常 | 18 |
+| `verify121` | 第 123 轮「雨丝视觉质量」：彻底无 backdrop-filter/.rain-drop、linear-gradient 两端透明、cream 用蓝灰线且无 invert、三档景深区间；运行时宽 ≤2px/长 16~120、blur + rain-fall 动画、透明度 ≤0.5、数量 50~160、60 帧 ≤1.5s、CLS=0、零异常 | 11 |
+| `verify122` | 第 123 轮「雨丝密度与景深」：数量 `w*h/9000` 50~160、三档宽度/长度/速度齐备、50/30/20 分配；运行时 1440×900 下 120~160 根、线宽 0.5~2.1px 且远近两档都有、线长跨度 ≥3 倍、60 帧 ≤1.5s、三档零溢出、零异常 | 11 |
+| `verify123` | 第 123 轮「不许退回灰片」回归守卫：两页 v=5 且无旧 canvas、rain.css/js 去注释后无 backdrop-filter/.rain-drop、雨丝无 radial-gradient 圆底与 box-shadow 灰边、必须是 linear-gradient 两端透明 + JS 控制宽度；运行时旧水珠/旧 canvas 数量为 0、实际背景是 linear-gradient、零异常 | 7 |
 
 | `verify116` | 第 116 轮 index 侧：**统计口径统一** —— 自 `meta.tracking_since` 到 `meta.last_snapshot_date`，缺数据的日期一律按 **0 分钟**补齐（`.l0` 灰点、`role=button` 可点、气泡「游玩时长：0 min」、当日列表「这天没有游玩记录」），不再出现「未采集」空格；开始统计之前与最新快照之后的未来日期仍是 `.lna`「尚未记录」且不可点；范围天数、合计、峰值从 `meta.stats` 推导比对；365 格 / 7 行 / 64 列不变；390 无溢出；零异常 | 14 |
 | `verify115` | 第 115 轮 index 侧：**把「下钻单个游戏」整条线删干净** —— 累计榜行不再可点（光标非 pointer、点行不切视图不改 hash、连点四行仍停在原处）；页面里没有 `#drill-more` / `#btn-drill-back`，源码没有 `openDrill/closeDrill/renderDrillMore/drill.appid`，CSS 没有 `.drill-more`/`.dm-*`/`.is-drill`/`.btn-back`；勋章墙徽章从 `<button>` 改成 `<div>`（去掉 pointer 与 hover 上浮、提示语不再写「点一枚看趋势」），点它也不再跳转；旧深链 `#/recent/g/<appid>` 只按视图处理落到总览；「最近游玩」总点阵 365 格与点格子展开当日列表不受影响；390 无溢出；零异常。⚠️ 同日被推翻的 `verify114`（下钻只剩详情卡）已删除 | 16 |
@@ -420,6 +421,14 @@ tests/
 - 本轮只改参数、不改机制：数量 `w*h/42000`、14~36；尺寸 `8 + pow(rnd,1.7)*16`（8~24）；透明度 0.55~0.73；滑动 30%；每颗随机 4~8 个百分比角的 `border-radius`，不再全是正圆泡泡；`inset` 高光/暗边整体减弱约 30%。
 - 版本 `rain.css/js v=3→4`；两页只改四个引用。判据同步：`verify120`/`verify120_watch` 的版本与尺寸常量、`verify121` 的中位宽/数量阈值按新事实改判（理由写进 `ok`）；新增 `verify122`（11 条）与 `online122`。
 - 效果目标从「像播放器」改为「几乎无感的环境层」：1080 宽下 23~25 颗，中位宽 ~16px，不再盖住 500 h / 38 / 53 这类关键数字。
+
+### 补记 15 · 第 123 轮：水珠改雨丝（2026-11-20）
+
+- **为什么又推翻**：用户线上实测第 122 轮水珠仍是灰片；按建议在 Console 里 `contain:none`、甚至 `blur(8px) saturate(1.6) brightness(1.35)` 也不变。根因不是 `contain: paint`，而是**页面大面积均匀深色**——`backdrop-filter` 模糊纯色仍是同一块纯色，水滴内部没有可折射纹理，只剩 `inset` 阴影的灰边。
+- **新方案**：`rain.js` 改雨丝引擎。每根 `<i class="rain-streak">`，`linear-gradient` 两端透明、中间冷白（cream 用蓝灰 `rgba(62,82,104,.52)`），`filter: blur(.2~.65px)`，三档景深：远 0.6~0.9px / 16~34px / 2.8~4.6s，中 0.9~1.2px / 30~64px / 1.8~3.0s，近 1.2~1.8px / 50~110px / 1.1~2.0s；数量 `w*h/9000`、50~160。
+- **不再有**：`backdrop-filter`、`.rain-drop`、`radial-gradient` 圆底、`box-shadow` 灰边、`filter:invert`。这正是「灰片」的四个来源，`verify123` 逐条守卫。
+- **版本**：`rain.css/js v=4→5`；`style/app/fx/watch.css/watch.js` 未动。判据同步：`verify120`/`verify120_watch` 改雨丝契约、`verify121` 改视觉质量、`verify122` 改密度景深；新增 `verify123`（7 条灰片守卫）与 `online123`。
+- **注意**：`getBoundingClientRect()` 会把旋转后的 1px×100px 细线量成 ~20px 宽，判「细长」必须用 `getComputedStyle().width`；静态检查 `backdrop-filter` 是否存在时先去注释，否则注释里的历史说明会假红。
 
 ## 踩过的坑（脚本层面）
 
