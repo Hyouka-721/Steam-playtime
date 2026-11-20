@@ -190,9 +190,9 @@ cinema 专属规则必须带 `[data-theme="cinema"]` 前缀（切回 cream 时 `
 
 | 项 | 值 |
 |---|---|
-| 版本 | 本地 `style.css?v=144` / `app.js?v=129` / `fx.js?v=19` + `rain.css?v=5` / `rain.js?v=5`；线上仍是 `rain v=4`（⏳ 第 123 轮待推送，提交 `792516d`；GitHub 网络 502/SSL EOF 暂阻断） |
+| 版本 | 本地＝线上 `style.css?v=144` / `app.js?v=129` / `fx.js?v=19` + `rain.css?v=5` / `rain.js?v=5`（✅ 第 123 轮已上线 `957da35`；测试修正 `c629da6`） |
 | 本地回归 | 两线全量 **67 套件 1630 条 → 1629 PASS / 1 FAIL**（唯一红 `verify56 B11`）；`verify120` **24/0**、`verify120_watch` **18/0**、`verify121` **11/0**、`verify122` **11/0**、`verify123` **7/0**；`npm test` **52 条 0 FAIL** |
-| 线上复验 | 待推送后跑 `online123`（20/0 预期）；线上当前仍跑 `online122` 的 v=4 水珠版 |
+| 线上复验 | `online123` **20/0**（两页雨丝 + linear-gradient + 开关持久化 + 三档零溢出 + 零异常）；`online119` **11/0**、`online104_watch` **21/0**、`online103_watch` **16/0**；旧 `online122/121/120/...` 钉旧版本号复跑假红属预期 |
 | 性能红线 | 二次访问 FCP ≤100ms / 滚动 >50ms 帧 = 0 / **CLS = 0.000** |
 | 数据规模 | 以 `docs/data/meta.json` 为准，别写死数字 |
 
