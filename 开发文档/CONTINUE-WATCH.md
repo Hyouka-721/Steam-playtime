@@ -181,9 +181,11 @@ node tests/watch/verify107_watch.mjs
 | 120 | **雨滴氛围层**：与 index 共用资源，页脚开关写 `localStorage['rain.enabled']`，watch 恒 cinema；不动 css44/js35 | ✅ 已上线 `c91a085` |
 | 121 | **雨滴改 DOM + backdrop-filter**：WebGL 采样不到背景 → 推翻；每颗水滴真实折射页面，尺寸 10~40px；v=3 | ✅ 已上线 `64ece50` |
 | 122 | **雨滴收敛为环境层**：8~24px / 14~36 颗 / 透明度 0.55~0.73 / 不规则圆角；v=4 | ✅ 已上线 `d3f9a4c` |
+| 123 | **水珠改雨丝**：均匀深色底下 backdrop-filter 必成灰片 → 细长渐隐线，v=5 | ⏳ 本地完成待推送 `792516d` |
 
-- 当前版本键：`watch.css?v=44` / `watch.js?v=35` + 共用 `rain.css?v=4` / `rain.js?v=4`
-- 第 122 轮验收：`verify120_watch` **18/0**、`verify121` **12/0**、`verify122` **11/0**、`online122` watch 侧 **11/0**；两线全量 **66 套件 1624 → 1623/1**（唯一红 `verify56 B11`）；`npm test` **52/0**。
+- 当前版本键：`watch.css?v=44` / `watch.js?v=35` + 本地 `rain.css?v=5` / `rain.js?v=5`（线上仍 v=4）
+- 第 123 轮验收：`verify120_watch` **18/0**、`verify121` **11/0**、`verify122` **11/0**、`verify123` **7/0**；两线全量 **67 套件 1630 → 1629/1**（唯一红 `verify56 B11`）；`npm test` **52/0**。
+- 🔴 雨丝禁止再回到 `backdrop-filter` / `.rain-drop` / `radial-gradient` 圆底 / `box-shadow` 灰边；这四条由 `verify123` 守着。`online123` 待推送后跑。
 - 🔴 雨滴是装饰层：`rain.js` 必须 **async** 引入，并在 index 骨架屏退场后再铺水滴；`#rain-layer` fixed / `pointer-events:none` / z=6，关时整层 `hidden`。cream 用 `.rain-drop` 独立规则，**禁止再用 `filter:invert(1)`**（会把高光翻成脏灰）。判据 `verify120`/`verify120_watch`/`verify121`。
 - 数据体量：125 部影视 / 9 组 90 首歌 / 66 张缩略图 / 369 张海报
 - 已知未做：线上首屏感知仍 ~10.5 s（瓶颈是 Pages 侧 HTTP/2 并发 + CDN 首包，不是体量）；`srcset` 分档（桌面 240 px）未做；年度影视海报未走同一套缩略图流程。
