@@ -161,7 +161,8 @@ steam-playtime/
 ### 雨滴氛围层（第 120 轮上线，第 121 轮改 DOM 方案）
 
 - 第 120 轮曾把 Steam Workshop 插件 `com.aoritian.playbackrain` 1.0.4 的 Skia 着色器移植成 WebGL；**第 121 轮推翻**：WebGL 画布只能输出颜色，采样不到页面背景，调参只能得到灰白蒙版，且 `0.55×` 放大发虚。
-- **现方案（v=3）**：`docs/rain.js?v=3` + `docs/rain.css?v=3`，两页共用。每颗水滴是一个 `<i class="rain-drop">`，`backdrop-filter: blur() saturate() brightness()` 真实折射背后页面，再叠 `inset` 高光/暗边；尺寸 10~40px，约 42% 缓慢下滑，数量按 `w*h/30000` 生成、上限 56。
+- **现方案（v=4）**：`docs/rain.js?v=4` + `docs/rain.css?v=4`，两页共用。每颗水滴是一个 `<i class="rain-drop">`，`backdrop-filter: blur() saturate() brightness()` 真实折射背后页面，再叠 `inset` 高光/暗边。
+- **第 122 轮收敛**：尺寸 `8 + pow(rnd,1.7)*16`（8~24px，中位 ~16）、数量按 `w*h/42000`、14~36 颗、透明度 0.55~0.73、约 30% 下滑；每颗用 4~8 个百分比角的 `border-radius` 做不规则形状。1080 宽下约 23~25 颗，不再盖住 500 h / 38 / 53 这类数字。
 - 容器 `#rain-layer` fixed / `pointer-events:none` / `z-index:6`，不参与布局、CLS=0；`rain.js` 仍 **async** 引入，并在 index 骨架屏 `.sk-block` 退场后再铺水滴（最多 3s 兜底），避免首帧抖动。
 - 主题：cream 用 `.rain-drop` 的独立规则（更亮白高光 + 更深暗边），**不再 `filter:invert(1)`**；cinema / watch 原样。
 - 开关 `#rain-toggle` 在页脚，写 `localStorage['rain.enabled']`（插件同名键），默认开；关闭整层 `hidden`；`prefers-reduced-motion` 强制关、按钮禁用、滑落动画停。两页同域共享同一状态。判据 `verify120`（24）/ `verify120_watch`（18）/ `verify121`（12）/ `online121`（20）。
@@ -188,9 +189,9 @@ cinema 专属规则必须带 `[data-theme="cinema"]` 前缀（切回 cream 时 `
 
 | 项 | 值 |
 |---|---|
-| 版本 | 本地＝线上 `style.css?v=144` / `app.js?v=129` / `fx.js?v=19` + `rain.css?v=3` / `rain.js?v=3`（✅ 第 121 轮已上线 `64ece50`） |
-| 本地回归 | 两线全量 **65 套件 1612 条 → 1610 PASS / 2 FAIL**（`verify56 B11` 已知 + `verify95 B5` 并发偶发、单跑 19/0）；`verify120` **24/0**、`verify120_watch` **18/0**、`verify121` **12/0**；`npm test` **52 条 0 FAIL** |
-| 线上复验 | `online121` **20/0**（两页 DOM 水滴 blur 折射 + 开关持久化 + 三档零溢出 + 零异常）；`online119` **11/0**、`online104_watch` **21/0**、`online103_watch` **16/0**；旧 `online120/118/116/...` 钉旧版本号（v=1、143/128 等）复跑假红属预期，按惯例不动 |
+| 版本 | 本地＝线上 `style.css?v=144` / `app.js?v=129` / `fx.js?v=19` + `rain.css?v=4` / `rain.js?v=4`（✅ 第 122 轮已上线 `d3f9a4c`；测试版本修正 `c0ff7b0`） |
+| 本地回归 | 两线全量 **66 套件 1624 条 → 1623 PASS / 1 FAIL**（唯一红 `verify56 B11`）；`verify120` **24/0**、`verify120_watch` **18/0**、`verify121` **12/0**、`verify122` **11/0**；`npm test` **52 条 0 FAIL** |
+| 线上复验 | `online122` **20/0**（两页 DOM 水滴 blur 折射 + 开关持久化 + 三档零溢出 + 零异常）；`online119` **11/0**、`online104_watch` **21/0**、`online103_watch` **16/0**；旧 `online121/120/118/...` 钉旧版本号复跑假红属预期，按惯例不动 |
 | 性能红线 | 二次访问 FCP ≤100ms / 滚动 >50ms 帧 = 0 / **CLS = 0.000** |
 | 数据规模 | 以 `docs/data/meta.json` 为准，别写死数字 |
 
