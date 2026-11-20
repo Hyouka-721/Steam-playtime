@@ -49,7 +49,9 @@ ok('A3 既有版本号未动（index 144/129/19、watch 44/35）',
   /watch\.css\?v=44["']/.test(fp.w) && /watch\.js\?v=35["']/.test(fp.w));
 ok('A4 线上是雨丝层（rain-streak / linear-gradient / 无 backdrop-filter）',
   /id="rain-layer"/.test(fp.i) && /id="rain-layer"/.test(fp.w) &&
-  /rain-streak/.test(fp.j) && /linear-gradient/.test(fp.c) && !/backdrop-filter/.test(fp.c));
+  /rain-streak/.test(fp.j) && /linear-gradient/.test(fp.c) &&
+  /* CSS 注释里保留了「已移除 backdrop-filter」的历史说明，检查前先去注释 */
+  !/backdrop-filter/.test(fp.c.replace(/\/\*[\s\S]*?\*\//g, '')));
 await fpCtx.close();
 
 for (const [name, url] of [['index', SITE], ['watch', SITE + 'watch.html']]) {
