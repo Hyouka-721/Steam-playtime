@@ -1,20 +1,31 @@
 /* ============================================================================
-   雨丝氛围层 · rain.css   v=6
-   与 rain.js 配套，供 index.html / watch.html 两页共用。
-   🔴 独立新文件：不并入 style.css / watch.css，避免动到已上线版本号。
+   氛围层 · rain.css   v=7
+   雨丝 + 流星画布 + 三态「关 / 流星 / 雨滴」共用控件，供 index / watch 两页共用。
+   🔴 独立文件：不并入 style.css / watch.css，避免动到已上线版本号。
    ============================================================================ */
 
-/* 全屏 fixed 装饰层：不占布局、不拦点击，CLS = 0。
-   z-index 6 —— 高于内容(0/2)，低于页眉(10)、FAB(40)、toast(50)、弹层(60)。
-   第 123 轮去掉 backdrop-filter：均匀深色背景下模糊纯色仍是同一块纯色，
-   只会得到灰圆片；雨丝不依赖背景纹理。 */
+/* 雨丝层：fixed 全屏装饰，不占布局、不拦点击，CLS = 0。
+   第 125 轮 z-index 6 → 12：页眉是 z=10 且带背景，6 会让雨丝在页眉区域被整块盖住；
+   12 高于页眉、低于流星画布(20)/FAB(40)/toast(50)/弹层(60)。 */
 #rain-layer {
   position: fixed;
   inset: 0;
-  z-index: 6;
+  z-index: 12;
   pointer-events: none;
   overflow: hidden;
   contain: layout style;
+}
+
+/* 流星画布：index 原本在 style.css 里，这里补一份给 watch 页共用；
+   两页数值一致（fixed / inset:0 / pe:none / z=20），后加载覆盖同值无副作用。 */
+#fx-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 20;
+  pointer-events: none;
 }
 
 /* 单根雨丝：两端渐隐的细线 + 轻微模糊，深色底用冷白，浅色底用蓝灰。
@@ -22,7 +33,6 @@
 .rain-streak {
   position: absolute;
   left: 0;
-  /* 起点在屏幕顶边之上一个自身长度：t=0 时下端点刚好贴顶，真正「从最顶端落下」 */
   top: calc(-1 * var(--rain-len, 48px));
   width: var(--rain-w, 1px);
   height: var(--rain-len, 48px);
@@ -42,7 +52,6 @@
   animation-delay: var(--rain-delay, 0s);
 }
 
-/* 浅色主题：冷白线在米底上看不见，换成蓝灰水痕 */
 [data-theme="cream"] .rain-streak {
   --rain-stroke: rgba(62, 82, 104, .52);
 }
@@ -56,41 +65,52 @@
   .rain-streak { animation: none; }
 }
 
-/* 开关：复用两页都有的选择器语义，配色/圆角走主题变量。 */
-.rain-toggle {
+/* ---------------- 三态氛围控件：关 / 流星 / 雨滴 ---------------- */
+.ambience-switch {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  margin-left: auto;
+}
+.ambience-label {
+  font-size: 13px;
+  color: var(--text-faint);
+  letter-spacing: .5px;
+}
+.ambience-seg {
+  display: flex;
+  gap: 4px;
+}
+.ambience-seg button {
   padding: 3px 11px;
   font-size: 13px;
   line-height: 1.5;
   font-family: inherit;
-  color: var(--text-dim);
-  background: transparent;
+  color: var(--text);
+  background: var(--sunken);
   border: 1px solid var(--border);
-  --r-pill: 999px;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-sm, 8px);
   cursor: pointer;
-  white-space: nowrap;
-  transition: color .18s, border-color .18s, background .18s;
+  outline: none;
+  transition: color .15s, border-color .15s, background .15s;
 }
-.rain-toggle:hover:not(:disabled) { color: var(--accent); border-color: var(--accent); }
-.rain-toggle[aria-pressed="true"] { color: var(--accent); }
-.rain-toggle:disabled { opacity: .45; cursor: not-allowed; }
-.rain-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-/* 首页页脚已有 .fx-switch；雨滴开关贴在其后，用同样的间距节奏。
-   watch 页脚是 .w-foot（flex wrap），直接作为一项流入即可。 */
-.site-footer .rain-toggle { margin-left: 8px; }
-.w-foot .rain-toggle { margin-left: auto; }
+.ambience-seg button:hover:not(:disabled) { border-color: var(--border-hi); }
+.ambience-seg button[aria-pressed="true"] {
+  color: var(--accent);
+  background: var(--tint-2);
+  border-color: var(--tint-border);
+}
+.ambience-seg button:disabled { opacity: .45; cursor: not-allowed; }
+.ambience-seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 @media (max-width: 860px) {
-  .site-footer .rain-toggle { margin-left: 0; }
-  .w-foot .rain-toggle { margin-left: 0; }
+  .ambience-switch { margin-left: 0; width: 100%; justify-content: flex-end; }
+  .ambience-seg button { padding: 3px 9px; }
   .rain-streak { filter: blur(.2px); }
 }
 
 @media print {
-  #rain-layer { display: none; }
-  .rain-toggle { display: none; }
+  #rain-layer,
+  #fx-canvas,
+  .ambience-switch { display: none; }
 }

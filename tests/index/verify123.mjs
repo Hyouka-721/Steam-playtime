@@ -28,9 +28,9 @@ const wat = fs.readFileSync(ROOT + 'docs/watch.html', 'utf8');
 const rainCssCode = rainCss.replace(/\/\*[\s\S]*?\*\//g, '');
 const rainJsCode = rainJs.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
-ok('A1 两页都引用 v=6，且 HTML 里没有旧 canvas / rain-drop',
-  /rain\.css\?v=6/.test(idx) && /rain\.js\?v=6/.test(idx) &&
-  /rain\.css\?v=6/.test(wat) && /rain\.js\?v=6/.test(wat) &&
+ok('A1 两页都引用 v=7，且 HTML 里没有旧 canvas / rain-drop',
+  /rain\.css\?v=7/.test(idx) && /rain\.js\?v=7/.test(idx) &&
+  /rain\.css\?v=7/.test(wat) && /rain\.js\?v=7/.test(wat) &&
   !/rain-canvas/.test(idx + wat));
 ok('A2 rain.css / rain.js 已无 backdrop-filter 与 .rain-drop',
   !/backdrop-filter/.test(rainCssCode) && !/backdrop-filter/.test(rainJsCode) &&

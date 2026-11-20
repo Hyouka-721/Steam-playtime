@@ -38,7 +38,7 @@ tests/
   NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
   for s in verify6 verify54 verify82_index verify83_index verify91 verify92 \
            verify103 verify104 verify105 verify106 verify108 verify111 \
-           verify113 verify115 verify116 verify117 verify118 verify119 verify120 verify121 verify122 verify123 verify124; do
+           verify113 verify115 verify116 verify117 verify118 verify119 verify120 verify121 verify122 verify123 verify124 verify125; do
     echo "== $s =="; "$NODE" tests/index/$s.mjs 2>&1 | tail -2
   done
   ```
@@ -336,12 +336,13 @@ tests/
 | `verify117` | 第 117 轮 index 侧：**首屏榜单整行显示** —— 行距 4→8→（按用户要求回退）**6**，行高由 `fitRankRows()` 按「第一行顶边 → 视口底」的可⽤高度反解（`--rank-row-h`）：8 行落在 74~100px 观感带内就用 8 行，屏幕偏高多放、偏矮少放，**折线永远落在行与行之间**；1440×1080 恰好 8 整行 0 切开，1440×1200 / 1280×1080 / 1920×800 / 1088×1000 / 1440×900 全部 0 条被切开的行；`.sk-row` 同吃该变量（CLS 0）；切视图与 resize 后仍成立；390 不参与（两行式布局） | 15 |
 | `verify118` | 第 118 轮 index 侧：**时间轴周合计 + 热力图详情平滑切换** —— ① 静态：`v=143/v=128`（**第 119 轮随 bump 到 144/129**）、`.tl-week-total` 用 `hoursShort(weekTotal)`（与角标同口径）、日期行 14.5px 与合计行 12.5px 各自独立（**第 119 轮用户删「合计」并把字体改成与年份同款 24/19px，本条断言已改判、具体字体由 verify119 守**）、`renderHxDay` 同时用 `box.animate` 做高度过渡与 `listEl.animate` 做淡入上移且守 `prefers-reduced-motion`、`.hx-day` 裁切换期的溢出 ② 时间轴：60 周**逐周**与本地 daily + `timeline_extra` 现算全等，时长行在日期下方且不越出左列，1440/1280/1088/900/390 零溢出 ③ 热力图：点第一天头部/每行时长与数据一致；换第二天时**内容同步替换**（不残留旧日期），切换瞬间容器高度仍从旧值起步且 `scrollY` 不变，动画结束后高度稳定、行数不变、零溢出；减少动效上下文直接显示终态且内容照常更新；Esc 收起与零 JS 异常照旧 | 21 |
 | `verify119` | 第 119 轮 index 侧：**周时长删「合计」+ 与年份同字体** —— ① 静态 5（版本 144/129；源码不再输出「合计」前缀；`.tl-week-total` 与 `.tl-month` 的 font-family/size/weight/letter-spacing/color/line-height 六项声明逐项一致，桌面 24px/700 Black Rose；≤860 窄屏同步缩到 19px；日期行仍 14.5px）② 运行时 3（60 周时长只含数字+单位、与 daily + `timeline_extra` 现算全等、仍在日期下方）③ 五档宽度各 2 条：时长与年份 computed 六项全等、文字不越出左列且零横向溢出（390 左列 78px 下文字宽 40.2px）；零 JS 异常 | 19 |
-| `verify120` | 雨丝氛围层（index 侧，**第 123 轮由水珠改为雨丝**）。第 120 轮 WebGL 灰蒙版、第 121/122 轮 DOM 水珠 + backdrop-filter 在均匀深色底上仍是灰片（用户实测 blur(8px) brightness(1.35) 无变化）→ 改为细长渐隐线。静态 9（两页 v=6 引用且不动 144/129/19、DOM 是 `.rain-streak` 无 canvas/backdrop、三档景深 0.6~1.8px/16~110px、无 title、fixed/pe:none/z6/无 invert/打印隐藏、圆角白名单、860 块唯一、rain.enabled 默认开）② 运行时 10（就绪/默认开/数量>0、宽 ≤2px/长 16~120/linear-gradient/blur、层 fixed、按钮开；关→整层 hidden+storage 0、开→写 1、刷新持久化；五档零溢出）③ CLS 0 / reduced-motion 强制关且动画停 / 零异常 | 24 |
-| `verify120_watch` | 雨丝氛围层（watch 侧，同一份 rain.js）—— 静态 4（v=6 且不动 css44/js35；层在 body 首位、开关在 .w-foot；watch 恒 cinema、无 invert/backdrop；共用三档景深）② 运行时 10（就绪/默认开/数量>0/linear-gradient、cinema 海报墙 125 张未受影响、宽 ≤2px/层 fixed；关→hidden+storage 0、开→持久化；史蒂夫切时间轴仍生效；五档零溢出）③ CLS 0 / reduced-motion 强制关 / 零异常 | 18 |
+| `verify120` | 雨丝氛围层（index 侧，**第 123 轮由水珠改为雨丝**）。第 120 轮 WebGL 灰蒙版、第 121/122 轮 DOM 水珠 + backdrop-filter 在均匀深色底上仍是灰片（用户实测 blur(8px) brightness(1.35) 无变化）→ 改为细长渐隐线。静态 9（两页 v=7 引用且不动 144/129/19、DOM 是 `.rain-streak` 无 canvas/backdrop、三档景深 0.6~1.8px/16~110px、无 title、fixed/pe:none/z12（高于页眉 10）/无 invert/打印隐藏、圆角白名单、860 块唯一、rain.enabled 默认开）② 运行时 10（就绪/默认开/数量>0、宽 ≤2px/长 16~120/linear-gradient/blur、层 fixed、三态控件选「雨滴」；选「关」→整层 hidden+ambience.mode=off、再选雨滴→rain、刷新持久化；五档零溢出）③ CLS 0 / reduced-motion 强制关且动画停 / 零异常 | 24 |
+| `verify120_watch` | 雨丝氛围层（watch 侧，同一份 rain.js）—— 静态 4（v=7 且不动 css44/js35；层在 body 首位、三态控件在 .w-foot；watch 恒 cinema、无 invert/backdrop；共用三档景深）② 运行时 10（就绪/默认开/数量>0/linear-gradient、cinema 海报墙 125 张未受影响、宽 ≤2px/层 fixed；关→hidden+storage 0、开→持久化；史蒂夫切时间轴仍生效；五档零溢出）③ CLS 0 / reduced-motion 强制关 / 零异常 | 18 |
 | `verify121` | 第 123 轮「雨丝视觉质量」：彻底无 backdrop-filter/.rain-drop、linear-gradient 两端透明、cream 用蓝灰线且无 invert、三档景深区间；运行时宽 ≤2px/长 16~120、blur + rain-fall 动画、透明度 ≤0.5、数量 50~160、60 帧 ≤1.5s、CLS=0、零异常 | 11 |
 | `verify122` | 第 123 轮「雨丝密度与景深」：数量 `w*h/9000` 50~160、三档宽度/长度/速度齐备、50/30/20 分配；运行时 1440×900 下 120~160 根、线宽 0.5~2.1px 且远近两档都有、线长跨度 ≥3 倍、60 帧 ≤1.5s、三档零溢出、零异常 | 11 |
 | `verify123` | 第 123 轮「不许退回灰片」回归守卫：两页 v=6 且无旧 canvas、rain.css/js 去注释后无 backdrop-filter/.rain-drop、雨丝无 radial-gradient 圆底与 box-shadow 灰边、必须是 linear-gradient 两端透明 + JS 控制宽度；运行时旧水珠/旧 canvas 数量为 0、实际背景是 linear-gradient、零异常 | 7 |
 | `verify124` | 第 124 轮「倾角与轨迹对齐 + 从顶端落下」：`drift = -tan(tilt) × (1.1h+len)`、三档倾角 4~8/8~12/10~15°、CSS `top: calc(-1 * var(--rain-len))`、keyframes 从 0 到 110vh；运行时逐根校验 drift 与 tan 误差 ≤2%、top = -height、全部有 rain-fall 动画、JS 不写 inline top | 9 |
+| `verify125` | 第 125 轮「三态氛围 + 两页同步」：两页 `#ambience-seg` 三个按钮（off/meteor/rain），旧 `#fx-seg`/`#rain-toggle` 删除；`ambience.mode` 单键调度 `__fx`/`__rain`；雨丝 z=12 > 页眉 10、流星 z=20、watch 有 `#fx-canvas`；运行时默认流星、选雨滴 fx 关雨丝开、选关全关、选流星雨丝关；index 选雨滴后 watch 保持雨滴且盖过页眉；刷新保持；reduced-motion 只留「关」；零异常 | 12 |
 
 | `verify116` | 第 116 轮 index 侧：**统计口径统一** —— 自 `meta.tracking_since` 到 `meta.last_snapshot_date`，缺数据的日期一律按 **0 分钟**补齐（`.l0` 灰点、`role=button` 可点、气泡「游玩时长：0 min」、当日列表「这天没有游玩记录」），不再出现「未采集」空格；开始统计之前与最新快照之后的未来日期仍是 `.lna`「尚未记录」且不可点；范围天数、合计、峰值从 `meta.stats` 推导比对；365 格 / 7 行 / 64 列不变；390 无溢出；零异常 | 14 |
 | `verify115` | 第 115 轮 index 侧：**把「下钻单个游戏」整条线删干净** —— 累计榜行不再可点（光标非 pointer、点行不切视图不改 hash、连点四行仍停在原处）；页面里没有 `#drill-more` / `#btn-drill-back`，源码没有 `openDrill/closeDrill/renderDrillMore/drill.appid`，CSS 没有 `.drill-more`/`.dm-*`/`.is-drill`/`.btn-back`；勋章墙徽章从 `<button>` 改成 `<div>`（去掉 pointer 与 hover 上浮、提示语不再写「点一枚看趋势」），点它也不再跳转；旧深链 `#/recent/g/<appid>` 只按视图处理落到总览；「最近游玩」总点阵 365 格与点格子展开当日列表不受影响；390 无溢出；零异常。⚠️ 同日被推翻的 `verify114`（下钻只剩详情卡）已删除 | 16 |
@@ -437,6 +438,15 @@ tests/
 - **修复**：`drift = -tan(tilt) × (1.1h + len)`，tilt 按景深 4~8 / 8~12 / 10~15°；元素 `top: calc(-1 * var(--rain-len))`，keyframes 从 `translate3d(0,0,0)` 到 `translate3d(drift, 110vh, 0)`。每根的下端点 t=0 刚好贴屏幕顶边，负延迟只负责错峰。
 - **JS 不写 inline `top`**：之前 `el.style.top='0'` 会覆盖 CSS 的 `-len`，这是「半空开始」的另一个原因；`verify124 B4` 专门守这一条。
 - 版本 `rain.css/js v=5→6`；新增 `verify124` 9 条 + `online124`；`verify120`/`verify120_watch`/`verify123` 版本号同步 v=6。
+
+### 补记 17 · 第 125 轮：三态氛围控件 + 两页同步（2026-11-20）
+
+- **用户要求**：雨滴范围要包括页眉（从最顶部开始）；把「关/流星」与「雨滴」合并成「关 / 流星 / 雨滴」三选一；流星同步到 watch 页；切换页面保持氛围不变。
+- **层级的坑**：`#rain-layer` 原来是 z=6，页眉 z=10 且带背景 → 雨丝在页眉区域被整块盖住，看起来像从页眉下沿才开始。改 z=12（>10，<流星 20/FAB40/toast50/弹层60）即解决；`inset:0` 本来就从顶部开始。
+- **控件合并**：新增 `docs/ambience.js`（v=1）单键 `ambience.mode`（off/meteor/rain）调度 `window.__fx` 与 `window.__rain`；两页统一 `#ambience-seg` 三个按钮，删除 `#fx-seg` / `#rain-toggle`。旧数据迁移顺序：`ambience.mode` → `fx-mode` → `rain.enabled`。
+- **watch 流星**：watch.html 补 `#fx-canvas`，引入 `fx.js?v=19`（未改 fx.js，避免历史套件全红）；流星/雨丝共用同一状态，跨页保持。
+- **雨丝启动**：`rain.js` 不再自己读写 `rain.enabled`；骨架等待改为只看「可见」`.sk-block`（隐藏视图里也有，全局 querySelector 会白等 3s），且 build 后不再强制 `setEnabled(false)`（否则会覆盖 ambience 已设置的状态）。
+- **版本**：`rain.css/js v=6→7`；`style/app/fx/watch.css/watch.js` 未动。判据：`verify120`/`verify120_watch`/`verify123` 同步 v7 与 z12、按钮改三态；`verify54 B10` 改测 `#ambience-seg`；新增 `verify125`（12 条）与 `online125`。
 
 ## 踩过的坑（脚本层面）
 

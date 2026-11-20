@@ -20,21 +20,22 @@ const html = fs.readFileSync(ROOT + 'docs/watch.html', 'utf8');
 const rainJs = fs.readFileSync(ROOT + 'docs/rain.js', 'utf8');
 const rainCss = fs.readFileSync(ROOT + 'docs/rain.css', 'utf8');
 const rainCssCode = rainCss.replace(/\/\*[\s\S]*?\*\//g, '');
+const ambienceJs = fs.readFileSync(ROOT + 'docs/ambience.js', 'utf8');
 
-ok('A1 watch 以 v=6 引用 rain.css / rain.js，且不动 css44 / js35',
-  /rain\.css\?v=6["']/.test(html) && /rain\.js\?v=6["']/.test(html) &&
+ok('A1 watch 以 v=7 引用 rain.css / rain.js，且不动 css44 / js35',
+  /rain\.css\?v=7["']/.test(html) && /rain\.js\?v=7["']/.test(html) &&
   /watch\.css\?v=44["']/.test(html) && /watch\.js\?v=35["']/.test(html));
 ok('A2 雨丝层在 body 首位、开关在 .w-foot（无 title 气泡）',
   /<body>\s*<div id="rain-layer" aria-hidden="true"><\/div>/.test(html) &&
-  /class="rain-toggle" id="rain-toggle"/.test(html) && !/id="rain-toggle"[^>]*title=/.test(html));
+  /id="ambience-seg"/.test(html) && /data-amb="rain"/.test(html));
 ok('A3 watch 恒为 cinema：浅色规则不冲突，且没有 invert / backdrop-filter',
   /<html lang="zh-CN" data-theme="cinema">/.test(html) &&
   /\[data-theme="cream"\] \.rain-streak \{/.test(rainCss) &&
   !/filter:\s*invert\(1\)/.test(rainCssCode) && !/backdrop-filter/.test(rainCssCode));
-ok('A4 与 index 共用同一份 rain.js（雨丝 / 同一存储键 / 三档景深）',
+ok('A4 与 index 共用同一份 rain.js（雨丝 / 三档景深）+ ambience 状态键',
   /el\.className = 'rain-streak'/.test(rainJs) &&
-  /localStorage\.setItem\('rain\.enabled'/.test(rainJs) &&
-  /w: \[0\.6, 0\.9\]/.test(rainJs));
+  /w: \[0\.6, 0\.9\]/.test(rainJs) &&
+  /ambience\.mode/.test(ambienceJs));
 
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
@@ -43,8 +44,9 @@ const errs = [];
 page.on('pageerror', (e) => errs.push(e.message));
 page.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
 await page.goto(LOCAL + '?cb=' + Date.now(), { waitUntil: 'load' });
-await page.evaluate(() => { try { localStorage.removeItem('rain.enabled'); } catch (e) {} });
+await page.evaluate(() => { try { localStorage.removeItem('rain.enabled'); localStorage.removeItem('ambience.mode'); } catch (e) {} });
 await page.reload({ waitUntil: 'load' });
+await page.click('#ambience-seg button[data-amb="rain"]');
 await page.waitForFunction(() => document.querySelectorAll('#w-grid img').length > 100, null, { timeout: 15000 });
 await page.waitForFunction(() => window.__rain && window.__rain.ready(), null, { timeout: 20000 });
 await page.waitForTimeout(250);
@@ -54,7 +56,8 @@ const st = await page.evaluate(() => {
   const cs = getComputedStyle(ds[0]);
   return {
     enabled: window.__rain.enabled(), count: window.__rain.count(), sample: window.__rain.sample(),
-    pressed: document.getElementById('rain-toggle').getAttribute('aria-pressed'),
+    amb: window.__ambience.mode(),
+    pressed: document.querySelector('#ambience-seg button[data-amb="rain"]').getAttribute('aria-pressed'),
     theme: document.documentElement.dataset.theme,
     cards: document.querySelectorAll('#w-grid img').length,
     bg: cs.backgroundImage, maxW: Math.max(...ds.map((d) => parseFloat(getComputedStyle(d).width))),
@@ -66,26 +69,27 @@ ok('B1 雨丝层就绪、默认开、已生成雨丝、linear-gradient 渐隐',
   { count: st.count, pixels: st.sample.pixels });
 ok('B2 cinema 主题、海报墙未受影响、雨丝宽度 ≤2px、层 fixed 不拦点击',
   st.theme === 'cinema' && st.cards > 100 && st.maxW <= 2 &&
-  st.layer.pos === 'fixed' && st.layer.pe === 'none' && st.layer.z === '6',
+  st.layer.pos === 'fixed' && st.layer.pe === 'none' && st.layer.z === '12',
   { theme: st.theme, cards: st.cards, maxW: +st.maxW.toFixed(2), layer: st.layer });
-ok('B3 按钮初始态为开', st.pressed === 'true');
+ok('B3 三态控件选中「雨滴」', st.amb === 'rain' && st.pressed === 'true', { amb: st.amb });
 
-await page.click('#rain-toggle');
+await page.click('#ambience-seg button[data-amb="off"]');
 await page.waitForTimeout(250);
 const off = await page.evaluate(() => ({
-  enabled: window.__rain.enabled(), stored: localStorage.getItem('rain.enabled'),
-  pressed: document.getElementById('rain-toggle').getAttribute('aria-pressed'),
+  enabled: window.__rain.enabled(), amb: window.__ambience.mode(), stored: localStorage.getItem('ambience.mode'),
+  pressed: document.querySelector('#ambience-seg button[data-amb="rain"]').getAttribute('aria-pressed'),
   hidden: document.getElementById('rain-layer').hidden, sample: window.__rain.sample(),
 }));
 ok('B4 关：整层隐藏、localStorage=0、aria-pressed=false',
-  off.enabled === false && off.stored === '0' && off.pressed === 'false' && off.hidden === true && off.sample.pixels === 0, off);
+  off.enabled === false && off.amb === 'off' && off.stored === 'off' && off.pressed === 'false' && off.hidden === true && off.sample.pixels === 0, off);
 
-await page.click('#rain-toggle');
+await page.click('#ambience-seg button[data-amb="rain"]');
 await page.waitForTimeout(250);
 await page.reload({ waitUntil: 'load' });
 await page.waitForFunction(() => document.querySelectorAll('#w-grid img').length > 100, null, { timeout: 15000 });
 await page.waitForFunction(() => window.__rain && window.__rain.ready(), null, { timeout: 20000 });
-ok('B5 重新打开后刷新持久化', await page.evaluate(() => window.__rain.enabled() === true && localStorage.getItem('rain.enabled') === '1'));
+await page.waitForFunction(() => window.__ambience && window.__ambience.mode() === 'rain', null, { timeout: 5000 });
+ok('B5 重新打开后刷新持久化', await page.evaluate(() => window.__rain.enabled() === true && localStorage.getItem('ambience.mode') === 'rain'));
 
 await page.evaluate(() => { const b = document.getElementById('w-avatar'); if (b) b.click(); });
 await page.waitForTimeout(350);
@@ -111,9 +115,9 @@ await page.evaluate(() => {
   new PerformanceObserver((list) => { for (const e of list.getEntries()) if (!e.hadRecentInput) window.__cls += e.value; })
     .observe({ type: 'layout-shift', buffered: false });
 });
-await page.click('#rain-toggle');
+await page.click('#ambience-seg button[data-amb="off"]');
 await page.waitForTimeout(250);
-await page.click('#rain-toggle');
+await page.click('#ambience-seg button[data-amb="rain"]');
 await page.waitForTimeout(250);
 const cls = await page.evaluate(() => window.__cls);
 ok('C1 开关切换零 CLS', cls === 0, { cls });
@@ -123,7 +127,7 @@ const rm = await rmCtx.newPage();
 await rm.goto(LOCAL + '?cb=' + Date.now(), { waitUntil: 'load' });
 await rm.waitForFunction(() => window.__rain && window.__rain.ready(), null, { timeout: 20000 });
 const rmSt = await rm.evaluate(() => ({
-  enabled: window.__rain.enabled(), disabled: document.getElementById('rain-toggle').disabled,
+  enabled: window.__rain.enabled(), disabled: document.querySelector('#ambience-seg button[data-amb="rain"]').disabled,
   hidden: document.getElementById('rain-layer').hidden,
 }));
 ok('C2 prefers-reduced-motion 下强制关且按钮禁用',

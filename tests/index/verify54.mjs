@@ -150,13 +150,13 @@ const fxBefore = await page.evaluate(() => window.__fx.mode());
 await page.click('.header-avatar');
 await page.waitForTimeout(200);
 const fxAfter = await page.evaluate(() => window.__fx.mode());
-ok('B9 点史蒂夫不影响氛围特效（仍是页脚 #fx-seg 的地盘）', fxBefore === fxAfter, { fxBefore, fxAfter });
+ok('B9 点史蒂夫不影响氛围特效（仍是页脚三态氛围控件的地盘）', fxBefore === fxAfter, { fxBefore, fxAfter });
 
-await page.click('#fx-seg button[data-fx="off"]');
+await page.click('#ambience-seg button[data-amb="off"]');
 await page.waitForTimeout(200);
-const segOk = await page.evaluate(() => window.__fx.mode() === 'off' && document.querySelector('#fx-seg button[data-fx="off"]').classList.contains('active'));
+const segOk = await page.evaluate(() => window.__ambience.mode() === 'off' && window.__fx.mode() === 'off' && document.querySelector('#ambience-seg button[data-amb="off"]').getAttribute('aria-pressed') === 'true');
 ok('B10 页脚氛围开关仍正常工作', segOk);
-await page.click('#fx-seg button[data-fx="meteor"]');
+await page.click('#ambience-seg button[data-amb="meteor"]');
 await page.waitForTimeout(150);
 
 // 刷新后主题保持

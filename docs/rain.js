@@ -1,5 +1,5 @@
 /* ============================================================================
- * 雨丝氛围层 · rain.js   v=6
+ * 雨丝氛围层 · rain.js   v=7
  * ---------------------------------------------------------------------------
  * 第 120 轮 WebGL 水滴：采样不到页面背景，只能画灰白蒙版。
  * 第 121/122 轮 DOM 水珠 + backdrop-filter：页面大面积是均匀深色，
@@ -9,16 +9,15 @@
  *   不依赖背景纹理，深色/浅色底都能读成下雨，也不挡榜单数字。
  *
  * 契约（两页共用）：
- *   - #rain-layer fixed / pointer-events:none / z-index:6，不参与布局（CLS=0）
- *   - 开关 #rain-toggle 写 localStorage['rain.enabled']，默认开
- *   - prefers-reduced-motion：强制关、按钮禁用、雨丝动画停
+ *   - #rain-layer fixed / pointer-events:none / z-index:12（高于页眉 10，低于流星 20）
+ *   - 不在本文件管开关：由 ambience.js 的三态控件「关 / 流星 / 雨滴」调用 set()
+ *   - prefers-reduced-motion：强制关、雨丝动画停
  *   - 三档景深：远/中/近，宽度 0.6~1.8px、长度 16~110px、三档不同速度
  * ========================================================================== */
 (function () {
   'use strict';
 
   var layer = document.getElementById('rain-layer');
-  var btn = document.getElementById('rain-toggle');
   if (!layer) return;
 
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -84,31 +83,11 @@
     layer.hidden = !on;
   }
 
-  function paintBtn() {
-    if (!btn) return;
-    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-    btn.textContent = on ? '雨滴 开' : '雨滴 关';
-    btn.disabled = reduced.matches;
-  }
-
-  function setEnabled(v, persist) {
-    var want = !!v && !reduced.matches;
-    on = want;
-    if (persist !== false) {
-      try { localStorage.setItem('rain.enabled', want ? '1' : '0'); } catch (e) {}
-    }
+  function setEnabled(v) {
+    on = !!v && !reduced.matches;
     if (ready) layer.hidden = !on;
-    paintBtn();
     notify();
     return on;
-  }
-
-  function readStored() {
-    var saved = null;
-    try { saved = localStorage.getItem('rain.enabled'); } catch (e) {}
-    if (saved === '0') return false;
-    if (saved === '1') return true;
-    return !reduced.matches;
   }
 
   var listeners = [];
@@ -116,13 +95,6 @@
     for (var i = 0; i < listeners.length; i++) {
       try { listeners[i](on); } catch (e) {}
     }
-  }
-
-  if (btn) {
-    btn.addEventListener('click', function () {
-      if (btn.disabled) return;
-      setEnabled(!on);
-    });
   }
 
   window.addEventListener('resize', function () {
@@ -134,14 +106,12 @@
         build();
         on = wasOn;
         layer.hidden = !on;
-        paintBtn();
       }
     }, 220);
   });
 
   function onReducedChange() {
-    if (reduced.matches) setEnabled(false, false);
-    else paintBtn();
+    if (reduced.matches) setEnabled(false);
   }
   if (reduced.addEventListener) reduced.addEventListener('change', onReducedChange);
   else if (reduced.addListener) reduced.addListener(onReducedChange);
@@ -173,13 +143,15 @@
      最多等 3s 兜底；watch 页没有骨架，立即启动。 */
   var waited = 0;
   function bootWhenReady() {
-    if (document.querySelector('.sk-block') && waited < 25) {
+    /* 只看「可见」骨架：隐藏视图里也有 .sk-block，按全局 querySelector 会白等 3s */
+    var sk = document.querySelector('.sk-block');
+    var visible = !!(sk && sk.getClientRects().length);
+    if (visible && waited < 25) {
       waited++;
       setTimeout(bootWhenReady, 120);
       return;
     }
-    build();
-    setEnabled(readStored(), false);
+    build();   // on 由 ambience.js 决定，这里不再强制关闭
   }
   bootWhenReady();
 })();

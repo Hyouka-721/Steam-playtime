@@ -18,10 +18,11 @@
 <!-- 与游戏站同一套本地花体字，保持品牌一致；preload + font-display:block 消除 FOUT -->
 <link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="watch.css?v=44">
-<link rel="stylesheet" href="rain.css?v=6">
+<link rel="stylesheet" href="rain.css?v=7">
 </head>
 <body>
 <div id="rain-layer" aria-hidden="true"></div>
+<canvas id="fx-canvas" aria-hidden="true"></canvas>
 
 <header class="w-header">
   <!-- 小黄人：与首页同一个形象，负责「退出观影记录」回到游戏时长页
@@ -107,7 +108,16 @@
   <span id="w-total">共 — 部影视剧</span>
   <span class="w-foot-sep">·</span>
   <a href="./">← 回到 Game Time</a>
-  <button type="button" class="rain-toggle" id="rain-toggle" aria-pressed="true" aria-label="切换雨滴效果">雨滴 开</button>
+  <!-- 第 125 轮：三态氛围控件（关 / 流星 / 雨滴），状态存 localStorage['ambience.mode']，
+       两页共用；切换页面时保持同一氛围。旧 .fx-switch / .rain-toggle 已合并。 -->
+  <span class="ambience-switch">
+    <span class="ambience-label">氛围</span>
+    <span class="ambience-seg" id="ambience-seg" role="group" aria-label="背景氛围效果">
+      <button type="button" data-amb="off" aria-pressed="false">关</button>
+      <button type="button" data-amb="meteor" aria-pressed="true">流星</button>
+      <button type="button" data-amb="rain" aria-pressed="false">雨滴</button>
+    </span>
+  </span>
 </footer>
 
 <!-- 手动添加：右下角加号 → 原生 <dialog> 表单 → 直接提交进 GitHub 仓库
@@ -235,7 +245,9 @@
 <div class="w-toast" id="w-toast" role="status" hidden></div>
 <script src="watch.js?v=35"></script>
 <!-- 雨滴是装饰层：async 而不是 defer，避免拖住 DOMContentLoaded 让首屏海报墙晚渲染 -->
-<script src="rain.js?v=6" async fetchpriority="low"></script>
+<script src="fx.js?v=19" defer fetchpriority="low"></script>
+<script src="ambience.js?v=1" defer fetchpriority="low"></script>
+<script src="rain.js?v=7" async fetchpriority="low"></script>
 <script>
 /* 第 75 轮：注册 Service Worker（docs/sw.js）。
    海报是内容哈希命名的不可变资源，Pages 只给 max-age=600，刷新超 10 分钟就要

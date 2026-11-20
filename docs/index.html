@@ -42,7 +42,7 @@
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
 <link rel="stylesheet" href="style.css?v=144">
-<link rel="stylesheet" href="rain.css?v=6">
+<link rel="stylesheet" href="rain.css?v=7">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -241,18 +241,16 @@
   <span class="dot">·</span>
   <!-- 观影记录入口（2026-10-24 起全站唯一入口：header 里的三连挂小黄人已按用户要求移除） -->
   <a class="footer-watch" href="watch.html">观影记录 →</a>
-  <!-- 氛围切换：关 / 流星 二选一（互斥，不叠加），选择记入 localStorage。
-       2026-10-24 由史蒂夫头像改回页脚文字开关（沿用此前一版的 .seg 分段控件外观）；
-       雨 / 雪 已于 2026-10-18 移除，故只剩两项。
-       .active / aria-pressed / 减少动效时禁用，全部由 fx.js 的 syncButtons() 统一负责。 -->
-  <span class="fx-switch">
-    <span class="fx-label">氛围</span>
-    <span class="seg" id="fx-seg" role="group" aria-label="背景氛围效果">
-      <button type="button" data-fx="off" class="active" aria-pressed="true">关</button>
-      <button type="button" data-fx="meteor" aria-pressed="false">流星</button>
+  <!-- 第 125 轮：三态氛围控件（关 / 流星 / 雨滴），状态存 localStorage['ambience.mode']，
+       两页共用；切换页面时保持同一氛围。旧 .fx-switch / .rain-toggle 已合并。 -->
+  <span class="ambience-switch">
+    <span class="ambience-label">氛围</span>
+    <span class="ambience-seg" id="ambience-seg" role="group" aria-label="背景氛围效果">
+      <button type="button" data-amb="off" aria-pressed="false">关</button>
+      <button type="button" data-amb="meteor" aria-pressed="true">流星</button>
+      <button type="button" data-amb="rain" aria-pressed="false">雨滴</button>
     </span>
   </span>
-  <button type="button" class="rain-toggle" id="rain-toggle" aria-pressed="true" aria-label="切换雨滴效果">雨滴 开</button>
 </footer>
 
 <!-- fx.js 自己绑定页脚的氛围开关（#fx-seg），app.js 不再参与特效状态；
@@ -274,6 +272,7 @@ if ('serviceWorker' in navigator) {
      所以「执行时机从 app.js 之前挪到之后」不会影响它。 -->
 <script src="fx.js?v=19" defer fetchpriority="low"></script>
 <!-- 雨滴是装饰层：async 而不是 defer，避免拖住 DOMContentLoaded 让首屏榜单骨架屏晚渲染 -->
-<script src="rain.js?v=6" async fetchpriority="low"></script>
+<script src="rain.js?v=7" async fetchpriority="low"></script>
+<script src="ambience.js?v=1" defer fetchpriority="low"></script>
 </body>
 </html>
