@@ -22,8 +22,8 @@ const html = fs.readFileSync(ROOT + 'docs/watch.html', 'utf8');
 const rainJs = fs.readFileSync(ROOT + 'docs/rain.js', 'utf8');
 const rainCss = fs.readFileSync(ROOT + 'docs/rain.css', 'utf8');
 
-ok('A1 watch 以 v=3 引用 rain.css / rain.js，且不动 css44 / js35',
-  /rain\.css\?v=3["']/.test(html) && /rain\.js\?v=3["']/.test(html) &&
+ok('A1 watch 以 v=4 引用 rain.css / rain.js，且不动 css44 / js35',
+  /rain\.css\?v=4["']/.test(html) && /rain\.js\?v=4["']/.test(html) &&
   /watch\.css\?v=44["']/.test(html) && /watch\.js\?v=35["']/.test(html));
 ok('A2 雨滴层在 body 首位、开关在 .w-foot（无 title 气泡）',
   /<body>\s*<div id="rain-layer" aria-hidden="true"><\/div>/.test(html) &&
@@ -35,7 +35,7 @@ ok('A3 watch 恒为 cinema：只保留浅色规则不冲突，且不再用 filte
 ok('A4 与 index 共用同一份 rain.js（DOM 水滴 / 同一存储键 / 尺寸一致）',
   /document\.createElement\('i'\)/.test(rainJs) &&
   /localStorage\.setItem\('rain\.enabled'/.test(rainJs) &&
-  /10 \+ Math\.pow\(rnd\(\), 1\.35\) \* 30/.test(rainJs));
+  /8 \+ Math\.pow\(rnd\(\), 1\.7\) \* 16/.test(rainJs));
 
 /* ---------- B 运行时 ---------- */
 const browser = await chromium.launch();

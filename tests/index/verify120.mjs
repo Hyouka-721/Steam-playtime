@@ -24,9 +24,9 @@ const rainJs = fs.readFileSync(ROOT + 'docs/rain.js', 'utf8');
 const rainCss = fs.readFileSync(ROOT + 'docs/rain.css', 'utf8');
 const watchHtml = fs.readFileSync(ROOT + 'docs/watch.html', 'utf8');
 
-ok('A1 两页均以 v=3 引用 rain.css / rain.js',
-  /rain\.css\?v=3["']/.test(html) && /rain\.js\?v=3["']/.test(html) &&
-  /rain\.css\?v=3["']/.test(watchHtml) && /rain\.js\?v=3["']/.test(watchHtml));
+ok('A1 两页均以 v=4 引用 rain.css / rain.js',
+  /rain\.css\?v=4["']/.test(html) && /rain\.js\?v=4["']/.test(html) &&
+  /rain\.css\?v=4["']/.test(watchHtml) && /rain\.js\?v=4["']/.test(watchHtml));
 ok('A2 不动已上线版本号（css144 / app129 / fx19 原样保留）',
   /style\.css\?v=144["']/.test(html) && /app\.js\?v=129["']/.test(html) && /fx\.js\?v=19["']/.test(html));
 ok('A3 第 121 轮改判：DOM 水滴 + backdrop-filter，不再依赖 WebGL',
@@ -34,10 +34,10 @@ ok('A3 第 121 轮改判：DOM 水滴 + backdrop-filter，不再依赖 WebGL',
   /document\.createElement\('i'\)/.test(rainJs) &&
   /backdrop-filter: blur\(var\(--rain-blur/.test(rainCss) &&
   !/getContext\('webgl'/.test(rainJs) && !/rain-canvas/.test(html));
-ok('A4 水滴尺寸 10~40px、约四成下滑、数量按面积封顶 56',
-  /10 \+ Math\.pow\(rnd\(\), 1\.35\) \* 30/.test(rainJs) &&
-  /rnd\(\) < 0\.42/.test(rainJs) &&
-  /Math\.min\(56/.test(rainJs));
+ok('A4 第 122 轮收敛：尺寸 8~24px、约三成下滑、数量封顶 36',
+  /8 \+ Math\.pow\(rnd\(\), 1\.7\) \* 16/.test(rainJs) &&
+  /rnd\(\) < 0\.30/.test(rainJs) &&
+  /Math\.min\(36/.test(rainJs));
 ok('A5 雨滴层与开关标记在 DOM（无 title 原生气泡，遵守 verify82 A2）',
   /<div id="rain-layer" aria-hidden="true">/.test(html) &&
   /id="rain-toggle"/.test(html) && !/id="rain-toggle"[^>]*title=/.test(html));
@@ -49,7 +49,7 @@ ok('A6 rain.css：fixed 全屏 / pointer-events:none / z-index 6 / 无 invert / 
   !/filter:\s*invert\(1\)/.test(rainCss) &&
   /@media print \{[\s\S]*?#rain-layer \{ display: none; \}/.test(rainCss));
 ok('A7 圆角只用变量 / 50% / 2px 白名单（rain.css 未出现裸 px 圆角）',
-  !/border-radius:\s*(?!var\(--r-|50%|2px)[\d.]+px/.test(rainCss));
+  !/border-radius:\s*(?!var\(--r-|var\(--rain-|50%|2px)[\d.]+px/.test(rainCss));
 ok('A8 @media (max-width:860px) 在 rain.css 只出现一次',
   (rainCss.match(/@media \(max-width:\s*860px\)/g) || []).length === 1);
 ok('A9 状态键沿用插件 rain.enabled，默认开且减少动效强制关',

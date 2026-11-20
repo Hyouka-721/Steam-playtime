@@ -1,5 +1,5 @@
 /* ============================================================================
-   雨滴氛围层 · rain.css   v=3
+   雨滴氛围层 · rain.css   v=4
    与 rain.js 配套，供 index.html / watch.html 两页共用。
    🔴 独立新文件：不并入 style.css / watch.css，避免动到已上线版本号。
    ============================================================================ */
@@ -18,33 +18,33 @@
 
 /* 第 121 轮：每颗水滴是一个 DOM 元素，靠 backdrop-filter 真正折射背后页面。
    WebGL 版本无法采样页面背景，只能画灰白蒙版 —— 这是「不通透」的根因。
-   圆角只用 50%，不引入裸 px。 */
+   圆角用每颗随机的 var(--rain-radius)（4~8 个百分比角），不引入裸 px。 */
 .rain-drop {
   position: absolute;
-  border-radius: 50%;
+  border-radius: var(--rain-radius, 50%);
   pointer-events: none;
-  opacity: var(--rain-op, .92);
+  opacity: var(--rain-op, .62);
   transform: rotate(var(--rain-rot, 0deg));
-  backdrop-filter: blur(var(--rain-blur, 3px)) saturate(1.18) brightness(1.05);
-  -webkit-backdrop-filter: blur(var(--rain-blur, 3px)) saturate(1.18) brightness(1.05);
+  backdrop-filter: blur(var(--rain-blur, 2.5px)) saturate(1.10) brightness(1.02);
+  -webkit-backdrop-filter: blur(var(--rain-blur, 2.5px)) saturate(1.10) brightness(1.02);
   box-shadow:
-    inset -3px -4px 8px rgba(255, 255, 255, .78),
-    inset 3px 4px 9px rgba(0, 0, 0, .30),
-    0 1px 4px rgba(0, 0, 0, .14);
-  background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, .72), rgba(255, 255, 255, 0) 46%);
+    inset -2px -3px 6px rgba(255, 255, 255, .55),
+    inset 2px 3px 7px rgba(0, 0, 0, .22),
+    0 1px 3px rgba(0, 0, 0, .10);
+  background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, .48), rgba(255, 255, 255, 0) 42%);
   will-change: transform;
 }
 
 /* 浅色主题：白色高光更亮、暗边更深，水滴在米底上才立得住 */
 [data-theme="cream"] .rain-drop {
   box-shadow:
-    inset -2px -3px 7px rgba(255, 255, 255, .95),
-    inset 2px 3px 8px rgba(45, 55, 75, .40),
+    inset -2px -3px 6px rgba(255, 255, 255, .72),
+    inset 2px 3px 7px rgba(45, 55, 75, .30),
     0 1px 3px rgba(45, 55, 75, .12);
-  background: radial-gradient(circle at 30% 24%, rgba(255, 255, 255, .95), rgba(255, 255, 255, 0) 40%);
+  background: radial-gradient(circle at 30% 24%, rgba(255, 255, 255, .78), rgba(255, 255, 255, 0) 40%);
 }
 
-/* 只有约四成水滴在缓慢下滑，其余是静态凝结水珠；全部用合成层动画，不触发布局 */
+/* 只有约四分之一水滴在缓慢下滑，其余是静态凝结水珠；全部用合成层动画，不触发布局 */
 .rain-drop.is-moving {
   animation: rain-fall var(--rain-dur, 16s) linear infinite;
   animation-delay: var(--rain-delay, 0s);

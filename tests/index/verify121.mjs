@@ -34,9 +34,9 @@ ok('A2 backdrop-filter 同时带 -webkit- 前缀（Safari / Chrome 都要能折�
   /-webkit-backdrop-filter: blur\(var\(--rain-blur/.test(rainCss));
 ok('A3 cream 用独立规则而不是 filter:invert(1)',
   /\[data-theme="cream"\] \.rain-drop \{/.test(rainCss) && !/invert\(1\)/.test(rainCss));
-ok('A4 尺寸区间 10~40px、滑动比例 0.42、数量上限 56',
-  /10 \+ Math\.pow\(rnd\(\), 1\.35\) \* 30/.test(rainJs) &&
-  /rnd\(\) < 0\.42/.test(rainJs) && /Math\.min\(56/.test(rainJs));
+ok('A4 第 122 轮收敛：尺寸 8~24px、滑动比例 0.30、数量上限 36',
+  /8 \+ Math\.pow\(rnd\(\), 1\.7\) \* 16/.test(rainJs) &&
+  /rnd\(\) < 0\.30/.test(rainJs) && /Math\.min\(36/.test(rainJs));
 
 /* ---------- B 运行时 ---------- */
 const browser = await chromium.launch();
@@ -65,13 +65,13 @@ const st = await page.evaluate(() => {
   };
 });
 const median = st.widths[Math.floor(st.widths.length / 2)];
-ok('B1 水滴宽度中位数 ≥ 12px、最大 ≥ 24px（第 120 轮偏小的修正）',
-  median >= 12 && st.widths[st.widths.length - 1] >= 24,
+ok('B1 水滴宽度中位数 ≥ 10px、最大 ≥ 18px（第 122 轮收敛后仍看得见）',
+  median >= 10 && st.widths[st.widths.length - 1] >= 18,
   { median: +median.toFixed(1), max: +st.widths[st.widths.length - 1].toFixed(1) });
-ok('B2 数量在 18~56 之间（按视口面积生成，不无限堆 DOM）',
-  st.count >= 18 && st.count <= 56, { count: st.count });
-ok('B3 约 20%~60% 水滴在滑动，其余静态',
-  st.moving / st.count >= 0.2 && st.moving / st.count <= 0.6,
+ok('B2 数量在 14~36 之间（第 122 轮收敛，不堆 DOM）',
+  st.count >= 14 && st.count <= 36, { count: st.count });
+ok('B3 约 15%~45% 水滴在滑动，其余静态',
+  st.moving / st.count >= 0.15 && st.moving / st.count <= 0.45,
   { moving: st.moving, count: st.count });
 ok('B4 每颗水滴都有 blur 折射 + 内外阴影（不是纯色圆点）',
   /blur\(\d/.test(st.blur) && /inset/.test(st.shadow), { blur: st.blur, shadow: st.shadow.slice(0, 60) });

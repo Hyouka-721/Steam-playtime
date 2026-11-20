@@ -31,7 +31,7 @@
   }
 
   function countFor(w, h) {
-    return Math.max(18, Math.min(56, Math.round((w * h) / 30000)));
+    return Math.max(14, Math.min(36, Math.round((w * h) / 42000)));
   }
 
   function build() {
@@ -45,21 +45,22 @@
       var el = document.createElement('i');
       el.className = 'rain-drop';
 
-      var size = 10 + Math.pow(rnd(), 1.35) * 30;          // 10~40px，小珠更多
-      var aspect = 0.85 + rnd() * 0.55;                    // 略拉长，像挂壁水珠
-      var moving = rnd() < 0.42;
+      var size = 8 + Math.pow(rnd(), 1.7) * 16;            // 8~24px，主体 8~14，少量到 24
+      var aspect = 0.90 + rnd() * 0.55;                    // 略拉长，像挂壁水珠
+      var moving = rnd() < 0.30;
 
       el.style.width = size.toFixed(1) + 'px';
       el.style.height = (size * aspect).toFixed(1) + 'px';
       el.style.left = (rnd() * 100).toFixed(2) + '%';
       el.style.top = moving ? '0' : (rnd() * 100).toFixed(2) + '%';
-      el.style.setProperty('--rain-rot', (rnd() * 50 - 25).toFixed(1) + 'deg');
-      el.style.setProperty('--rain-blur', (2.2 + rnd() * 1.8).toFixed(1) + 'px');
-      el.style.setProperty('--rain-op', (0.72 + rnd() * 0.24).toFixed(2));
+      el.style.setProperty('--rain-rot', (rnd() * 40 - 20).toFixed(1) + 'deg');
+      el.style.setProperty('--rain-radius', (52 + rnd() * 12).toFixed(0) + '% ' + (48 + rnd() * 12).toFixed(0) + '% ' + (50 + rnd() * 10).toFixed(0) + '% ' + (50 + rnd() * 10).toFixed(0) + '% / ' + (52 + rnd() * 12).toFixed(0) + '% ' + (50 + rnd() * 12).toFixed(0) + '% ' + (48 + rnd() * 12).toFixed(0) + '% ' + (50 + rnd() * 10).toFixed(0) + '%');
+      el.style.setProperty('--rain-blur', (2.0 + rnd() * 1.2).toFixed(1) + 'px');
+      el.style.setProperty('--rain-op', (0.55 + rnd() * 0.18).toFixed(2));
 
       if (moving) {
         el.className += ' is-moving';
-        el.style.setProperty('--rain-dur', (12 + rnd() * 14).toFixed(1) + 's');
+        el.style.setProperty('--rain-dur', (18 + rnd() * 16).toFixed(1) + 's');
         el.style.setProperty('--rain-delay', (-rnd() * 22).toFixed(1) + 's');
         el.style.setProperty('--rain-drift', (rnd() * 60 - 30).toFixed(0) + 'px');
       }
