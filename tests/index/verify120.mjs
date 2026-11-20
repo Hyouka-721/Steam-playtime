@@ -25,9 +25,9 @@ const rainCssCode = rainCss.replace(/\/\*[\s\S]*?\*\//g, '');
 const rainJsCode = rainJs.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 const watchHtml = fs.readFileSync(ROOT + 'docs/watch.html', 'utf8');
 
-ok('A1 两页均以 v=5 引用 rain.css / rain.js',
-  /rain\.css\?v=5["']/.test(html) && /rain\.js\?v=5["']/.test(html) &&
-  /rain\.css\?v=5["']/.test(watchHtml) && /rain\.js\?v=5["']/.test(watchHtml));
+ok('A1 两页均以 v=6 引用 rain.css / rain.js',
+  /rain\.css\?v=6["']/.test(html) && /rain\.js\?v=6["']/.test(html) &&
+  /rain\.css\?v=6["']/.test(watchHtml) && /rain\.js\?v=6["']/.test(watchHtml));
 ok('A2 不动已上线版本号（css144 / app129 / fx19 原样保留）',
   /style\.css\?v=144["']/.test(html) && /app\.js\?v=129["']/.test(html) && /fx\.js\?v=19["']/.test(html));
 ok('A3 第 123 轮改判：DOM 雨丝，不再依赖 canvas / backdrop-filter',

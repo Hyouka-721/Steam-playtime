@@ -1,5 +1,5 @@
 /* ============================================================================
- * 雨丝氛围层 · rain.js   v=5
+ * 雨丝氛围层 · rain.js   v=6
  * ---------------------------------------------------------------------------
  * 第 120 轮 WebGL 水滴：采样不到页面背景，只能画灰白蒙版。
  * 第 121/122 轮 DOM 水珠 + backdrop-filter：页面大面积是均匀深色，
@@ -41,6 +41,9 @@
     { w: [0.9, 1.2],  len: [30, 64],  op: [0.24, 0.36], blur: [0.3, 0.5],  dur: [1.8, 3.0] },
     { w: [1.2, 1.8],  len: [50, 110], op: [0.32, 0.48], blur: [0.4, 0.65], dur: [1.1, 2.0] }
   ];
+  /* 第 124 轮：倾角按景深给区间；横向位移必须由倾角算出来，
+     否则「线斜着、路垂直」会像斜线笔直下坠。 */
+  var TILT = [[4, 8], [8, 12], [10, 15]];
   function pick(range) { return range[0] + rnd() * (range[1] - range[0]); }
 
   function build() {
@@ -61,13 +64,15 @@
       el.style.width = pick(d.w).toFixed(2) + 'px';
       el.style.height = length.toFixed(1) + 'px';
       el.style.left = (rnd() * 100).toFixed(2) + '%';
-      el.style.top = '0';
       el.style.setProperty('--rain-op', pick(d.op).toFixed(2));
       el.style.setProperty('--rain-blur', pick(d.blur).toFixed(2) + 'px');
-      el.style.setProperty('--rain-tilt', (6 + rnd() * 7).toFixed(1) + 'deg');
+      var tilt = pick(TILT[depth]);
+      var travel = h * 1.1 + length;
+      var drift = -Math.tan(tilt * Math.PI / 180) * travel;
+      el.style.setProperty('--rain-tilt', tilt.toFixed(1) + 'deg');
       el.style.setProperty('--rain-dur', pick(d.dur).toFixed(2) + 's');
       el.style.setProperty('--rain-delay', (-rnd() * 6).toFixed(2) + 's');
-      el.style.setProperty('--rain-drift', (-(20 + depth * 26 + rnd() * 40)).toFixed(0) + 'px');
+      el.style.setProperty('--rain-drift', drift.toFixed(0) + 'px');
       el.style.setProperty('--rain-len', length.toFixed(1) + 'px');
 
       layer.appendChild(el);

@@ -1,5 +1,5 @@
 /* ============================================================================
-   雨丝氛围层 · rain.css   v=5
+   雨丝氛围层 · rain.css   v=6
    与 rain.js 配套，供 index.html / watch.html 两页共用。
    🔴 独立新文件：不并入 style.css / watch.css，避免动到已上线版本号。
    ============================================================================ */
@@ -22,7 +22,8 @@
 .rain-streak {
   position: absolute;
   left: 0;
-  top: 0;
+  /* 起点在屏幕顶边之上一个自身长度：t=0 时下端点刚好贴顶，真正「从最顶端落下」 */
+  top: calc(-1 * var(--rain-len, 48px));
   width: var(--rain-w, 1px);
   height: var(--rain-len, 48px);
   border-radius: 2px;
@@ -47,8 +48,8 @@
 }
 
 @keyframes rain-fall {
-  from { transform: translate3d(0, -30vh, 0) rotate(var(--rain-tilt, 8deg)); }
-  to   { transform: translate3d(var(--rain-drift, -50px), 120vh, 0) rotate(var(--rain-tilt, 8deg)); }
+  from { transform: translate3d(0, 0, 0) rotate(var(--rain-tilt, 8deg)); }
+  to   { transform: translate3d(var(--rain-drift, -50px), 110vh, 0) rotate(var(--rain-tilt, 8deg)); }
 }
 
 @media (prefers-reduced-motion: reduce) {

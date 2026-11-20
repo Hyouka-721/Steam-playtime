@@ -42,7 +42,7 @@
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
 <link rel="stylesheet" href="style.css?v=144">
-<link rel="stylesheet" href="rain.css?v=5">
+<link rel="stylesheet" href="rain.css?v=6">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
   window.__appFail = function () {
@@ -274,6 +274,6 @@ if ('serviceWorker' in navigator) {
      所以「执行时机从 app.js 之前挪到之后」不会影响它。 -->
 <script src="fx.js?v=19" defer fetchpriority="low"></script>
 <!-- 雨滴是装饰层：async 而不是 defer，避免拖住 DOMContentLoaded 让首屏榜单骨架屏晚渲染 -->
-<script src="rain.js?v=5" async fetchpriority="low"></script>
+<script src="rain.js?v=6" async fetchpriority="low"></script>
 </body>
 </html>

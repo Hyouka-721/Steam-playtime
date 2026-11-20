@@ -21,8 +21,8 @@ const rainJs = fs.readFileSync(ROOT + 'docs/rain.js', 'utf8');
 const rainCss = fs.readFileSync(ROOT + 'docs/rain.css', 'utf8');
 const rainCssCode = rainCss.replace(/\/\*[\s\S]*?\*\//g, '');
 
-ok('A1 watch 以 v=5 引用 rain.css / rain.js，且不动 css44 / js35',
-  /rain\.css\?v=5["']/.test(html) && /rain\.js\?v=5["']/.test(html) &&
+ok('A1 watch 以 v=6 引用 rain.css / rain.js，且不动 css44 / js35',
+  /rain\.css\?v=6["']/.test(html) && /rain\.js\?v=6["']/.test(html) &&
   /watch\.css\?v=44["']/.test(html) && /watch\.js\?v=35["']/.test(html));
 ok('A2 雨丝层在 body 首位、开关在 .w-foot（无 title 气泡）',
   /<body>\s*<div id="rain-layer" aria-hidden="true"><\/div>/.test(html) &&
