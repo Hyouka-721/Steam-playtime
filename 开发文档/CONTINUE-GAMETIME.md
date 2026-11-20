@@ -164,6 +164,7 @@ steam-playtime/
 - **现方案（v=5，第 123 轮）**：`docs/rain.js?v=5` + `docs/rain.css?v=5`，两页共用。DOM 水珠 + `backdrop-filter` 已被推翻：页面大面积均匀深色，模糊纯色仍是同一块纯色，用户实测 `blur(8px) brightness(1.35)` 依旧灰片。现改为**雨丝**：每根 `<i class="rain-streak">`，`linear-gradient` 两端透明、中间冷白（cream 用蓝灰），`filter: blur(.2~.65px)`，三档景深（远 0.6~0.9px / 中 0.9~1.2px / 近 1.2~1.8px；长度 16~110px；速度 1.1~4.6s），数量 `w*h/9000`、50~160。
 - **不要再引入**：`backdrop-filter`、`.rain-drop`、`radial-gradient` 圆底、`box-shadow` 灰边、`filter:invert` —— 这五样就是灰片/泡泡的来源，`verify123` 逐条守着。
 - 🔴 判「细长」必须用 `getComputedStyle().width/height`：`getBoundingClientRect()` 会把旋转后的 1px×100px 细线量成 ~20px 宽。
+- **第 124 轮（v=6）**：倾角与轨迹对齐。`drift = -tan(tilt) × (1.1h + len)`，三档倾角 4~8 / 8~12 / 10~15°；元素 `top: calc(-1 * var(--rain-len))`，keyframes 从 `translate3d(0,0,0)` 到 `translate3d(drift, 110vh, 0)`。🔴 JS 不许写 inline `top`（之前 `el.style.top='0'` 会覆盖 CSS 的 `-len`，导致半空开始）。`verify124` 9 条守着 drift/tan 误差 ≤2%。
 - 容器 `#rain-layer` fixed / `pointer-events:none` / `z-index:6`，不参与布局、CLS=0；`rain.js` 仍 **async** 引入，并在 index 骨架屏 `.sk-block` 退场后再铺水滴（最多 3s 兜底），避免首帧抖动。
 - 主题：cream 用 `.rain-drop` 的独立规则（更亮白高光 + 更深暗边），**不再 `filter:invert(1)`**；cinema / watch 原样。
 - 开关 `#rain-toggle` 在页脚，写 `localStorage['rain.enabled']`（插件同名键），默认开；关闭整层 `hidden`；`prefers-reduced-motion` 强制关、按钮禁用、滑落动画停。两页同域共享同一状态。判据 `verify120`（24）/ `verify120_watch`（18）/ `verify121`（12）/ `online121`（20）。
@@ -190,9 +191,9 @@ cinema 专属规则必须带 `[data-theme="cinema"]` 前缀（切回 cream 时 `
 
 | 项 | 值 |
 |---|---|
-| 版本 | 本地＝线上 `style.css?v=144` / `app.js?v=129` / `fx.js?v=19` + `rain.css?v=5` / `rain.js?v=5`（✅ 第 123 轮已上线 `957da35`；测试修正 `c629da6`） |
-| 本地回归 | 两线全量 **67 套件 1630 条 → 1629 PASS / 1 FAIL**（唯一红 `verify56 B11`）；`verify120` **24/0**、`verify120_watch` **18/0**、`verify121` **11/0**、`verify122` **11/0**、`verify123` **7/0**；`npm test` **52 条 0 FAIL** |
-| 线上复验 | `online123` **20/0**（两页雨丝 + linear-gradient + 开关持久化 + 三档零溢出 + 零异常）；`online119` **11/0**、`online104_watch` **21/0**、`online103_watch` **16/0**；旧 `online122/121/120/...` 钉旧版本号复跑假红属预期 |
+| 版本 | 本地＝线上 `style.css?v=144` / `app.js?v=129` / `fx.js?v=19` + `rain.css?v=6` / `rain.js?v=6`（✅ 第 124 轮已上线 `4beb945`） |
+| 本地回归 | 两线全量 **68 套件 1639 条 → 1638 PASS / 1 FAIL**（唯一红 `verify56 B11`）；`verify120` **24/0**、`verify120_watch` **18/0**、`verify121` **11/0**、`verify122` **11/0**、`verify123` **7/0**、`verify124` **9/0**；`npm test` **52 条 0 FAIL** |
+| 线上复验 | `online124` **20/0**（两页雨丝 v=6 + 开关持久化 + 三档零溢出 + 零异常）；`online119` **11/0**、`online104_watch` **21/0**、`online103_watch` **16/0**；旧 `online123/122/121/...` 钉旧版本号复跑假红属预期 |
 | 性能红线 | 二次访问 FCP ≤100ms / 滚动 >50ms 帧 = 0 / **CLS = 0.000** |
 | 数据规模 | 以 `docs/data/meta.json` 为准，别写死数字 |
 
