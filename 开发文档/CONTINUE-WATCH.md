@@ -183,9 +183,11 @@ node tests/watch/verify107_watch.mjs
 | 122 | **雨滴收敛为环境层**：8~24px / 14~36 颗 / 透明度 0.55~0.73 / 不规则圆角；v=4 | ✅ 已上线 `d3f9a4c` |
 | 123 | **水珠改雨丝**：均匀深色底下 backdrop-filter 必成灰片 → 细长渐隐线，v=5 | ✅ 已上线 `957da35` |
 | 124 | **雨丝倾角与轨迹对齐**：`drift=-tan(tilt)*(1.1h+len)`、从顶边之上起步，v=6 | ✅ 已上线 `4beb945` |
+| 125 | **三态氛围（关/流星/雨滴）+ watch 同步**：`ambience.js` 单键调度，雨丝 z=12 盖过页眉，v=7 | ✅ 已上线 `1ab1a8b` |
 
-- 当前版本键：`watch.css?v=44` / `watch.js?v=35` + 共用 `rain.css?v=6` / `rain.js?v=6`
-- 第 124 轮验收：`verify120_watch` **18/0**、`verify121` **11/0**、`verify122` **11/0**、`verify123` **7/0**、`verify124` **9/0**、`online124` watch 侧 **10/0**；两线全量 **68 套件 1639 → 1638/1**（唯一红 `verify56 B11`）；`npm test` **52/0**。
+- 当前版本键：`watch.css?v=44` / `watch.js?v=35` + 共用 `rain.css?v=7` / `rain.js?v=7` / `ambience.js?v=1`
+- 第 125 轮验收：`verify120_watch` **18/0**、`verify121` **11/0**、`verify122` **11/0**、`verify123` **7/0**、`verify124` **9/0**、`verify125` **12/0**、`online125` watch 侧 **6/0**；两线全量 **69 套件 1651 → 1650/1**（唯一红 `verify56 B11`）；`npm test` **52/0**。
+- 🔴 watch 现在也有 `#fx-canvas` 与 `fx.js?v=19`；流星/雨丝状态由 `ambience.mode` 跨页保持，别再单独写 `fx-mode` / `rain.enabled`。
 - 🔴 雨丝禁止再回到 `backdrop-filter` / `.rain-drop` / `radial-gradient` 圆底 / `box-shadow` 灰边；`verify123` 守着。🔴 JS 不许写 inline `top`，`verify124 B4` 守着。
 - 🔴 雨滴是装饰层：`rain.js` 必须 **async** 引入，并在 index 骨架屏退场后再铺水滴；`#rain-layer` fixed / `pointer-events:none` / z=6，关时整层 `hidden`。cream 用 `.rain-drop` 独立规则，**禁止再用 `filter:invert(1)`**（会把高光翻成脏灰）。判据 `verify120`/`verify120_watch`/`verify121`。
 - 数据体量：125 部影视 / 9 组 90 首歌 / 66 张缩略图 / 369 张海报
