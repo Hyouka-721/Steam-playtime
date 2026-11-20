@@ -39,10 +39,10 @@ const fp = await fpPage.evaluate(async ({ site }) => {
   ]);
   return { i: i.t, w: w.t, j: j.t, c: c.t, st: [i.s, w.s, j.s, c.s] };
 }, { site: SITE });
-ok('A1 线上两页都以 v=3 引入 rain.css / rain.js 且四资源全 200',
+ok('A1 线上两页都以 v=4 引入 rain.css / rain.js 且四资源全 200',
   fp.st.every((s) => s === 200) &&
-  /rain\.css\?v=3["']/.test(fp.i) && /rain\.js\?v=3["']/.test(fp.i) &&
-  /rain\.css\?v=3["']/.test(fp.w) && /rain\.js\?v=3["']/.test(fp.w), { st: fp.st });
+  /rain\.css\?v=4["']/.test(fp.i) && /rain\.js\?v=4["']/.test(fp.i) &&
+  /rain\.css\?v=4["']/.test(fp.w) && /rain\.js\?v=4["']/.test(fp.w), { st: fp.st });
 ok('A2 线上 index/watch/rain.js/rain.css 字节 md5 与本地全等',
   md5(fp.i) === md5(idxLocal) && md5(fp.w) === md5(watLocal) &&
   md5(fp.j) === md5(rainJs) && md5(fp.c) === md5(rainCss));
