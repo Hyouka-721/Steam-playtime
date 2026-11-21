@@ -29,7 +29,7 @@ const js = fs.readFileSync(ROOT + 'docs/watch.js', 'utf8');
 
 // ---- A. 静态契约 ----
 ok('A1 只 bump watch.css→v45；watch.js?v=35 未动',
-  /watch\.css\?v=45/.test(html) && /watch\.js\?v=35/.test(html) &&
+  /watch\.css\?v=46/.test(html) && /watch\.js\?v=35/.test(html) &&
   !/watch\.css\?v=44/.test(html));
 ok('A2 六项规则齐备：年份分隔/评分辉光/衬线/字距/dialog高光/入场淡入',
   /\.st-song-year \+ \.st-song-year::before/.test(code) &&

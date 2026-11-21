@@ -120,8 +120,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=45 / watch.js?v=35（CSS 与 JS 都改了，两个都要 bump）',
-  /watch\.css\?v=45/.test(html) && /watch\.js\?v=35/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=46 / watch.js?v=35（CSS 与 JS 都改了，两个都要 bump）',
+  /watch\.css\?v=46/.test(html) && /watch\.js\?v=35/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 JS 有 stPie + 两套色板；评分区间与国别都走它（stPie(buckets) / stPie(countries)）',

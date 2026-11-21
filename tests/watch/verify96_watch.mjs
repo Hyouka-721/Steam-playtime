@@ -58,8 +58,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号：watch.html 引用 watch.css?v=45 / watch.js?v=35（CSS 改限宽、JS 改国别规范名，两个都要 bump）',
-  /watch\.css\?v=45/.test(html) && /watch\.js\?v=35/.test(html),
+ok('A1 版本号：watch.html 引用 watch.css?v=46 / watch.js?v=35（CSS 改限宽、JS 改国别规范名，两个都要 bump）',
+  /watch\.css\?v=46/.test(html) && /watch\.js\?v=35/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const statsBlock = (/(^|\n)\.w-stats \{[^}]*\}/.exec(css) || [''])[0];

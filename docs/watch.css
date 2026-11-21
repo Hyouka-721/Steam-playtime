@@ -139,8 +139,18 @@ code {
     radial-gradient(560px 128px at 50% -30px, rgba(232, 176, 75, 0.30), transparent 72%),
     var(--header-bg);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
+  /* 第 132 轮（方案 A+）：去掉 1px 实边框，改用 ::after 伪元素画两端渐隐的细线 ——
+     与首页 .site-header 逐像素同构。实边框占 1px 布局高度，导致本页页眉 173px、
+     首页 172px，切换页面时整页内容上下跳 1px。去掉后两页页眉同为 172px。 */
+  border-bottom: 0;
   position: sticky; top: 0; z-index: 10;
+}
+/* 复刻首页 .site-header::after 的渐变细线：两端渐隐、绝对定位不占布局高度。
+   .w-header 是 sticky（已建立定位上下文），::after 的 absolute 相对它定位。 */
+.w-header::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border) 14%, var(--border) 86%, transparent);
+  pointer-events: none;
 }
 /* 2026-10-24：图标放大到与首页站标（style.css 的 .logo，132×132）同一量级。
    原值 76×76 —— 用户反馈观影页的小黄人明显比首页小，要求「近似与主界面相近」。
