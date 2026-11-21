@@ -30,7 +30,7 @@ ok('A1 两页均以 v=7 引用 rain.css / rain.js',
   /rain\.css\?v=7["']/.test(html) && /rain\.js\?v=7["']/.test(html) &&
   /rain\.css\?v=7["']/.test(watchHtml) && /rain\.js\?v=7["']/.test(watchHtml));
 ok('A2 不动已上线版本号（css144 / app129 / fx19 原样保留）',
-  /style\.css\?v=146["']/.test(html) && /app\.js\?v=129["']/.test(html) && /fx\.js\?v=19["']/.test(html));
+  /style\.css\?v=147["']/.test(html) && /app\.js\?v=129["']/.test(html) && /fx\.js\?v=19["']/.test(html));
 ok('A3 第 123 轮改判：DOM 雨丝，不再依赖 canvas / backdrop-filter',
   /<div id="rain-layer" aria-hidden="true"><\/div>/.test(html) &&
   /el\.className = 'rain-streak'/.test(rainJs) &&

@@ -487,6 +487,16 @@ tests/
 - **判据**：verify6/103/104/82/83 revert 后自动回五卡，无需改；verify127 A2 去掉短线要求+B1 改守「::before content=none」+A1 文案 v146。只 bump style145→146（app129/fx19 未动），23 处/19 文件残留 0。
 - **验收**：实跑五卡、短线 none、数据卡下报告5块+周目标+健康度6项+导出+关于数据齐全、其余四卡均无；index 25 套件全绿、npm test 52/0、watch 46 套件全绿（唯一红 verify56 B11）；verify127 13/0；1440/390 截图目视通过。
 
+### 补记 22 · 第 131 轮：修数据视图越界（CSS 特异性 bug）（2026-11-21，本地完成、**未 push**）
+
+- **现象**：用户反馈游戏时长/最近游玩/成就/游戏库卡下页面底部仍出现阶段报告/导出/采集健康度/关于数据。
+- **根因**：第 127 轮加数据页 grid 用了裸 ID 选择器 `#view-data { display: grid }`（权重100），压过 `.view { display: none }`（权重10）→ 数据视图**不受 active 控制、在所有卡下常驻**。
+- **修复**：改为 `.view.active#view-data { display: grid }`（连同 `> .panel`/`> #panel-report` 前缀）；非 active 时回到 `.view` 的 none。
+- **守护**：verify127 新增 B3b——切到游戏时长后断言"仅 view-lifetime 可见 + view-data display:none"，防复发；A2 静态断言要求 grid 限 `.view.active#view-data` 且禁止裸 `#view-data{display:grid}`。
+- **版本**：只 bump style146→147（含 v=NN 两形态 + 裸串 cssV/vCss + pages-poll CSS_V），24处/19文件残留0。
+- **验收**：运行时逐卡点验只有对应视图可见；截图游戏时长/成就底部无数据段、数据视图内容完整；index 25套件全绿、npm test 52/0、watch 46套件全绿（唯一红 verify56 B11）；verify127 **14/0**。
+- 🔴 教训：给带 `.view` 的整块视图加 display 规则时绝不能用裸 ID 选择器，必须 `.view.active#xxx` 限定。
+
 ## 踩过的坑（脚本层面）
 
 - ⚠️ **两条线并发时，图标文件名会被对方的批量改名顺手清掉**（第 87 轮实测）：index 侧第 92 轮把图标改成 `<名>-<源图哈希>.png` 并清掉旧名 → 我这边刚生成的 `favicon-watch-16/32/48.png`（不带哈希）被同一个 `favicon-*.png` 的清理一并删掉，套件从 21/21 变成「三个文件 MISSING」并且 `sharp` 直接抛 `Input file is missing`。**规矩**：图标一律叫 `<用途>-<源图哈希>.png`，套件里的期望文件名**从源素材文件名推导**（不要手抄字面量），生成完立刻跑一次套件。

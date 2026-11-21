@@ -27,13 +27,16 @@ const code = css.replace(/\/\*[\s\S]*?\*\//g, '');   // 剥注释再查，避免
 const idx = fs.readFileSync(ROOT + 'docs/index.html', 'utf8');
 
 // ---- A. 静态契约 ----
-ok('A1 只 bump style.css→v146（第129轮删短线）；app129/fx19 未动',
-  /style\.css\?v=146/.test(idx) && /app\.js\?v=129/.test(idx) && /fx\.js\?v=19/.test(idx) &&
+ok('A1 只 bump style.css→v147（第131轮修数据视图越界）；app129/fx19 未动',
+  /style\.css\?v=147/.test(idx) && /app\.js\?v=129/.test(idx) && /fx\.js\?v=19/.test(idx) &&
   !/v=144/.test(code));
 // 第 129 轮：导航卡顶部短线按用户要求删除（数据视图保留）→ A2 去掉短线要求，改守其余六项
-ok('A2 六项规则齐备（数据grid/lining/字距/勋章柔光/淡入/token）；卡短线已删｜第129轮',
+// 第 131 轮：数据页 grid 必须限定在 .view.active#view-data（不能用裸 #view-data 的 ID 选择器，
+//            否则权重压过 .view{display:none} → 数据视图在其他卡下也常驻显示）
+ok('A2 六项规则齐备（数据grid/ lining/字距/勋章柔光/淡入/token）；卡短线已删；grid 限 active',
   !/\.card-nav\.active\)::before/.test(code) &&
-  /#view-data \{[\s\S]*?display: grid/.test(code) &&
+  /\.view\.active#view-data \{[\s\S]*?display: grid/.test(code) &&
+  !/(^|\n)#view-data \{[\s\S]*?display: grid/.test(code) &&
   /lining-nums/.test(code) &&
   /\.card-label \{ letter-spacing: 1\.4px/.test(code) &&
   /\.badges \.badge:hover/.test(code) &&
@@ -82,7 +85,17 @@ const creamMedal = await page.evaluate(() => getComputedStyle(document.documentE
 ok('B3 cinema 金牌 #f5c45e、cream 仍 #c58a00',
   cinemaMedal.toLowerCase() === '#f5c45e' && creamMedal.toLowerCase() === '#c58a00', { cinemaMedal, creamMedal });
 
-// ② 数据页 grid 两列 + 报告独占整行
+// 🔴 第 131 轮守护：切到数据以外的卡时，view-data 必须隐藏（防 ID 选择器 bug 复发）
+await page.click('#card-lifetime');
+await page.waitForTimeout(300);
+const leak = await page.evaluate(() => {
+  const vis = [...document.querySelectorAll('.view')].filter((v) => getComputedStyle(v).display !== 'none').map((v) => v.id);
+  return { visibleViews: vis, dataDisplay: getComputedStyle(document.getElementById('view-data')).display };
+});
+ok('B3b 游戏时长视图下只有 view-lifetime 可见，view-data 不越界常驻｜第131轮修特异性bug',
+  leak.visibleViews.length === 1 && leak.visibleViews[0] === 'view-lifetime' && leak.dataDisplay === 'none', leak);
+
+// ② 数据页 grid 两列 + 报告独占整行（此时需 active）
 await page.click('#card-data');
 await page.waitForTimeout(300);
 const grid = await page.evaluate(() => {
@@ -93,8 +106,8 @@ const grid = await page.evaluate(() => {
   const rc = getComputedStyle(report).gridColumnStart + '/' + getComputedStyle(report).gridColumnEnd;
   return { display: cs.display, cols, reportCol: rc, active: v.classList.contains('active') };
 });
-ok('B4 数据页 grid 至少两列、阶段报告独占整行',
-  grid.display === 'grid' && grid.cols >= 2 && grid.reportCol === '1/-1', grid);
+ok('B4 数据页 grid 至少两列、阶段报告独占整行（active 时才 grid）',
+  grid.display === 'grid' && grid.cols >= 2 && grid.reportCol === '1/-1' && grid.active, grid);
 
 // ⑤ 字距
 const ls = await page.evaluate(() => getComputedStyle(document.querySelector('.card-label')).letterSpacing);
