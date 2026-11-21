@@ -14,7 +14,7 @@ const { chromium } = require('playwright');
 
 const SITE = 'https://hyouka-721.github.io/Steam-playtime/';
 const ROOT = 'C:/Users/33329/WorkBuddy/2026-10-13-18-17-49/steam-playtime/docs/';
-const CSS_V = '145';   // 第 127 轮：style.css v144→145；上一轮 bump 只改了 v=144 形态漏了此裸串赋值
+const CSS_V = '146';   // 每次 bump style.css 必须同步此裸串赋值（大写变量，非 v=NN / cssV=== 形态）
 const APP_V = '129';
 const md5 = (s) => crypto.createHash('md5').update(Buffer.from(String(s).replace(/\r\n/g, '\n'), 'utf8')).digest('hex');
 
