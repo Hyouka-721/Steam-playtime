@@ -25,17 +25,21 @@ const idxHtml = fs.readFileSync(ROOT + 'docs/index.html', 'utf8');
 const watHtml = fs.readFileSync(ROOT + 'docs/watch.html', 'utf8');
 
 // ---- A 静态 ----
-ok('A1 双 bump：style?v=148 / watch?v=47；app129/fx19/watch.js35 未动',
-  /style\.css\?v=148/.test(idxHtml) && /app\.js\?v=129/.test(idxHtml) && /fx\.js\?v=19/.test(idxHtml) &&
-  /watch\.css\?v=47/.test(watHtml) && /watch\.js\?v=35/.test(watHtml));
+ok('A1 双 bump：style?v=149 / watch?v=48；app129/fx19/watch.js35 未动',
+  /style\.css\?v=149/.test(idxHtml) && /app\.js\?v=129/.test(idxHtml) && /fx\.js\?v=19/.test(idxHtml) &&
+  /watch\.css\?v=48/.test(watHtml) && /watch\.js\?v=35/.test(watHtml));
 ok('A2 .w-title 固定宽度 6.64em + nowrap（≥861px）｜第133轮',
   /@media \(min-width: 861px\) \{\s*\.w-title \{ width: 6\.64em; white-space: nowrap; \}/.test(watchCode));
 ok('A3 .rank-bar > span 已无 width 过渡｜第133轮去残影',
   /\.rank-bar > span \{[\s\S]*?\}/.test(styleCode) &&
   !/\.rank-bar > span \{[^}]*transition:\s*width/.test(styleCode));
-ok('A4 骨架动画加 .25s 启动延迟（sk-block / sk-value）｜第133轮降噪',
-  /\.sk-block \{[\s\S]*?animation: sk-shimmer 1\.8s ease-in-out \.25s infinite/.test(styleCode) &&
-  /\.card-value\.sk-value \{[\s\S]*?animation: sk-shimmer 1\.8s ease-in-out \.25s infinite/.test(styleCode));
+ok('A4 骨架延迟出现：sk-appear(.35s both) + shimmer 保留｜第134轮方案A',
+  /\.sk-block \{[\s\S]*?animation: sk-shimmer 1\.8s ease-in-out \.25s infinite, sk-appear \.3s ease \.35s both/.test(styleCode) &&
+  /\.card-value\.sk-value \{[\s\S]*?animation: sk-shimmer 1\.8s ease-in-out \.25s infinite, sk-appear \.3s ease \.35s both/.test(styleCode) &&
+  /@keyframes sk-appear \{ from \{ opacity: 0; \} to \{ opacity: 1; \} \}/.test(styleCode));
+ok('A4b 花体字已 base64 内联（两页 CSS 均含 data:font/woff2，无 url(blackrose)）｜第134轮方案D',
+  /data:font\/woff2;base64,/.test(styleCode) && /data:font\/woff2;base64,/.test(watchCode) &&
+  !/url\('blackrose\.woff2'\)/.test(styleCode) && !/url\('blackrose\.woff2'\)/.test(watchCode));
 ok('A5 冻结值未动：index 6.73em / rank-item 六列网格 / @keyframes sk-shimmer 仍在',
   /width: 6\.73em/.test(styleCode) &&
   /grid-template-columns: 44px 130px minmax\(150px, 260px\) minmax\(140px, 1fr\) 150px 110px/.test(styleCode) &&
@@ -46,41 +50,43 @@ ok('A6 watch 860 断点仍只 1 个',
 // ---- B 运行时 ----
 const browser = await chromium.launch();
 
-// B1：字体被拦截（模拟字体永不加载）时，标题盒子宽度应与字体正常时完全一致
-async function titleBox(blockFont) {
-  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-  if (blockFont) await ctx.route('**/blackrose.woff2', (r) => r.abort());
-  const p = await ctx.newPage();
-  await p.goto(BASE + 'watch.html?cb=' + Date.now(), { waitUntil: 'load' });
-  await p.waitForTimeout(1000);
-  if (!blockFont) await p.evaluate(() => document.fonts.ready);
-  const r = await p.evaluate(() => {
-    const el = document.querySelector('.w-title');
-    const b = el.getBoundingClientRect();
-    return { boxW: +b.width.toFixed(2), center: +(b.left + b.width / 2).toFixed(2) };
-  });
-  await ctx.close();
-  return r;
-}
-const withF = await titleBox(false);
-const noF = await titleBox(true);
-ok('B1 字体加载/未加载，标题盒子宽度与居中点完全一致（不跳）｜第133轮',
-  Math.abs(withF.boxW - noF.boxW) < 0.5 && Math.abs(withF.center - noF.center) < 0.5, { withF, noF });
+// B1：第 134 轮方案 D —— 字体已内联，验证页面零 woff2 请求 + 字体可用 + 标题盒固定
+const ctxB = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+const fontReqs = [];
+ctxB.on('request', (r) => { if (/blackrose\.woff2/.test(r.url())) fontReqs.push(r.url()); });
+const pB = await ctxB.newPage();
+await pB.goto(BASE + 'watch.html?cb=' + Date.now(), { waitUntil: 'load' });
+await pB.waitForTimeout(900);
+const b1 = await pB.evaluate(() => {
+  const el = document.querySelector('.w-title');
+  const b = el.getBoundingClientRect();
+  return { boxW: +b.width.toFixed(2), center: +(b.left + b.width / 2).toFixed(2), fontOk: document.fonts.check('70px "Black Rose"') };
+});
+await ctxB.close();
+ok('B1 花体字内联：页面零 woff2 请求 + 字体可用 + 标题盒固定 464.8/中心 720｜第134轮方案D',
+  fontReqs.length === 0 && b1.fontOk && Math.abs(b1.boxW - 464.8) < 0.5 && Math.abs(b1.center - 720) < 1, { fontReqs: fontReqs.length, b1 });
 
-// B2：骨架延迟生效（拦截 app.js 让骨架停留）
+// B2：骨架"延迟出现"——拦截 app.js 让骨架停留，测起始 opacity=0（不可见）、.35s 后=1
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
 await ctx.route('**/app.js*', (r) => r.abort());
 const p = await ctx.newPage();
-await p.goto(BASE + 'index.html?cb=' + Date.now(), { waitUntil: 'load' });
-await p.waitForTimeout(700);
-const sk = await p.evaluate(() => {
+await p.goto(BASE + 'index.html?cb=' + Date.now(), { waitUntil: 'domcontentloaded' });
+const early = await p.evaluate(() => {
   const blk = document.querySelector('#lt-list .sk-block');
   const val = document.querySelector('.card-value.sk-value');
-  const g = (el) => el ? getComputedStyle(el).animationDelay : null;
-  return { blk: g(blk), val: g(val), cond: !!document.querySelector('#lt-list .sk-row') || !blk };
+  return { blk: blk ? getComputedStyle(blk).opacity : 'no-el', val: val ? getComputedStyle(val).opacity : 'no-el' };
 });
-ok('B2 运行时骨架 animation-delay = 0.25s（快网下先到位就不闪）｜第133轮',
-  (sk.blk === null || sk.blk === '0.25s') && (sk.val === null || sk.val === '0.25s'), sk);
+await p.waitForTimeout(800);
+const late = await p.evaluate(() => {
+  const blk = document.querySelector('#lt-list .sk-block');
+  const val = document.querySelector('.card-value.sk-value');
+  return { blk: blk ? getComputedStyle(blk).opacity : 'no-el', val: val ? getComputedStyle(val).opacity : 'no-el' };
+});
+// 起始必须完全不可见（0.35s 内数据到位就根本不出现白块）；之后淡入到 1
+const earlyHidden = ['0', 'no-el'].includes(early.blk) && ['0', 'no-el'].includes(early.val);
+const lateShown = ['1', 'no-el'].includes(late.blk) && ['1', 'no-el'].includes(late.val);
+ok('B2 骨架延迟出现：起始 opacity=0（白块不出现），.35s 后淡入到 1｜第134轮方案A',
+  earlyHidden && lateShown, { early, late });
 await ctx.close();
 
 await browser.close();

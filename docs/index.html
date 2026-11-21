@@ -36,12 +36,11 @@
        远程字体 CSS 与 ZCOOL KuaiLe 请求整体移除——它们曾阻塞渲染，且字体迟迟到位
        才导致的跳变/闪烁正是本次要修的问题之一
      · 仅保留首屏真正需要的第三方源：Steam 游戏横幅图（列表首行）与成就图标 -->
-<!-- 关键字体预加载：与 style.css 里的 font-display:block 配合，
-     在 HTML 解析阶段就开始下载，配合首屏一次性正确渲染（消除 FOUT） -->
-<link rel="preload" href="blackrose.woff2" as="font" type="font/woff2" crossorigin>
+<!-- 第 134 轮：花体字已 base64 内联进 style.css，不再需要 preload（原 preload 会多下一次
+     无用的 11KB 请求，因为 CSS 里的 data: URI 已经在解析时提供字体）。 -->
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=148">
+<link rel="stylesheet" href="style.css?v=149">
 <link rel="stylesheet" href="rain.css?v=7">
 <script>
   /* 主脚本加载失败（网络波动 / 部署窗口期 404 / 缓存问题）时的可见兜底 */
@@ -128,6 +127,28 @@
         <div class="sk-row"><span class="sk-block sk-no"></span><span class="sk-block sk-cap"></span><span class="sk-block sk-line"></span><span class="sk-block sk-bar"></span><span class="sk-block sk-min"></span><span class="sk-block sk-date"></span></div>
         <div class="sk-row"><span class="sk-block sk-no"></span><span class="sk-block sk-cap"></span><span class="sk-block sk-line"></span><span class="sk-block sk-bar"></span><span class="sk-block sk-min"></span><span class="sk-block sk-date"></span></div>
       </div>
+      <!-- 第 134 轮：骨架行首帧就给出正确行高，消除「等 app.js 到位才设 --rank-row-h」时
+           骨架行从 0 塌缩到展开造成的首屏布局偏移（CLS，源头就是这 8 个 .sk-row）。
+           算法与 app.js 的 fitRankRows() 逐字一致（RANK_FIT: rows8 gap6 min74 max100 pad4，两处必须同步改）。
+           紧跟骨架同步执行：此时骨架已解析、样式表已应用，getBoundingClientRect 可直接用。 -->
+      <script>
+      (function () {
+        try {
+          var L = document.getElementById('lt-list');
+          if (!L || window.matchMedia('(max-width: 860px)').matches) return;
+          var f = L.querySelector('.sk-row');
+          if (!f) return;
+          var topDoc = f.getBoundingClientRect().top + window.scrollY;
+          var PAD = 4, ROWS = 8, GAP = 6, MIN = 74, MAX = 100;
+          var avail = window.innerHeight - topDoc - PAD;
+          if (!(avail > 0)) return;
+          var n = ROWS, h = (avail - (n - 1) * GAP) / n;
+          if (h > MAX) { n = Math.max(ROWS, Math.round((avail + GAP) / (MAX + GAP))); h = (avail - (n - 1) * GAP) / n; }
+          else if (h < MIN) { n = Math.max(3, Math.floor((avail + GAP) / (MIN + GAP))); h = (avail - (n - 1) * GAP) / n; }
+          if (h > 0) L.style.setProperty('--rank-row-h', h.toFixed(1) + 'px');
+        } catch (e) {}
+      })();
+      </script>
     </div>
   </div>
 </section>

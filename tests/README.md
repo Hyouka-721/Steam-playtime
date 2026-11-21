@@ -514,6 +514,15 @@ tests/
 - 新增 `verify133` **8/0**（含"字体拦截前后标题盒子宽度一致"核心断言）。双 bump style147→148 / watch46→47，112处/63文件残留0。
 - 全量 0 红：index 25 + watch 47 套件全绿、npm test 52/0。（verify117 B3 偶发 CLS 0.0238，重跑 15/0 CLS=0，首屏时序抖动与本轮无关。）
 
+### 补记 25 · 第 134 轮：骨架延迟出现（方案A）+ 花体字内联（方案D）（2026-11-21，本地完成、未 push）
+
+- **问题2 上次没治好**：第133轮的 `animation-delay` 只延迟闪烁，骨架灰底仍立即可见。→ 方案A：加 `sk-appear`（opacity 0→1, .35s delay, both），数据先到位骨架压根不出现。
+- **问题1 上次没治好**：`width:6.64em` 只锁盒子，`font-display:block` 仍会用回退字体再切花体，文字本体宽度变。→ 方案D：11KB woff2 base64 内联进两页 CSS，移除两页 HTML preload + sw.js 预缓存项。
+- 🔴 坑：`sw.js` 的 `SHELL_LIST` 与 `warmup()` 的 `base` 都硬编码了 `blackrose.woff2`，SW 会预缓存 → verify133 B1 仍报 1 次请求。两处都删才归零。
+- **附带修 CLS**：`verify117 B3` 反复报 0.0232，诊断确认源头是 8 个 `.sk-row`（min-height var(--rank-row-h,0) 初值 0，等 app.js 设行高才展开）。→ 在骨架后内联脚本首帧按 fitRankRows 同款算法设 `--rank-row-h`（RANK_FIT 两处必须同步）。连跑 4 次 CLS=0。
+- bump 时**跳过 .css 内容**（只改 html/mjs），避免 base64 长串偶然子串被误伤。双 bump style148→149 / watch47→48，116处/64文件。
+- 验收：verify133 **9/0**、全量 0 红（index 26 + watch 47 套件、npm test 52/0）；截图骨架期无白块、watch 标题花体居中、blackrose 请求 0 次。
+
 ## 踩过的坑（脚本层面）
 
 - ⚠️ **两条线并发时，图标文件名会被对方的批量改名顺手清掉**（第 87 轮实测）：index 侧第 92 轮把图标改成 `<名>-<源图哈希>.png` 并清掉旧名 → 我这边刚生成的 `favicon-watch-16/32/48.png`（不带哈希）被同一个 `favicon-*.png` 的清理一并删掉，套件从 21/21 变成「三个文件 MISSING」并且 `sharp` 直接抛 `Input file is missing`。**规矩**：图标一律叫 `<用途>-<源图哈希>.png`，套件里的期望文件名**从源素材文件名推导**（不要手抄字面量），生成完立刻跑一次套件。

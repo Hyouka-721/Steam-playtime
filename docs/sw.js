@@ -40,8 +40,10 @@ var ACH_RE = /\/data\/achievements\.json$/;
 // 带版本号的静态资源（css / js / 字体 / 图标 / manifest）
 var ASSET_RE = /\.(?:css|js|woff2?|png|webmanifest)$/;
 
-/* 首屏外壳：只预缓存不随数据变化的那几件，避免每次 bump 都回来改清单 */
-var SHELL_LIST = ['./', 'index.html', 'manifest.webmanifest', 'img/icon-game-192-fb74092c.png', 'img/icon-game-512-fb74092c.png', 'blackrose.woff2'];
+/* 首屏外壳：只预缓存不随数据变化的那几件，避免每次 bump 都回来改清单
+   ⚠️ 第 134 轮：花体字已 base64 内联进 style.css / watch.css，不再需要预缓存 blackrose.woff2
+   （预缓存它会多下载 11KB 且页面根本不用，见 verify133 B1「零 woff2 请求」）。 */
+var SHELL_LIST = ['./', 'index.html', 'manifest.webmanifest', 'img/icon-game-192-fb74092c.png', 'img/icon-game-512-fb74092c.png'];
 
 self.addEventListener('install', function (e) {
   self.skipWaiting();
@@ -54,7 +56,8 @@ self.addEventListener('install', function (e) {
  *  版本号是变的，所以这里**从 index.html 现场解析**（?v=NN），不在 SW 里写死。 */
 function warmup() {
   return caches.open(SHELL).then(function (cache) {
-    var base = ['./', 'index.html', 'manifest.webmanifest', 'img/icon-game-192-fb74092c.png', 'img/icon-game-512-fb74092c.png', 'blackrose.woff2'];
+    // 第 134 轮：字体已内联，预热列表同步移除 blackrose.woff2（否则断网首次仍会去抓它）
+    var base = ['./', 'index.html', 'manifest.webmanifest', 'img/icon-game-192-fb74092c.png', 'img/icon-game-512-fb74092c.png'];
     return fetch('index.html', { cache: 'reload' })
       .then(function (r) { return r.ok ? r.text() : ''; })
       .catch(function () { return ''; })

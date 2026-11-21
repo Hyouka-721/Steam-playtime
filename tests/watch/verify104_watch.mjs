@@ -39,8 +39,8 @@ const ok = (n, c, extra = '') => {
 
 /* ================= A 静态 ================= */
 console.log('== A 静态 ==');
-ok('A1 watch.html 引用 watch.css?v=47 / watch.js?v=35（本轮 css+js 都改，两个都 bump）',
-  /watch\.css\?v=47"/.test(html) && /watch\.js\?v=35"/.test(html),
+ok('A1 watch.html 引用 watch.css?v=48 / watch.js?v=35（本轮 css+js 都改，两个都 bump）',
+  /watch\.css\?v=48"/.test(html) && /watch\.js\?v=35"/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const yearShapeOk = songsJson.years.every((g) =>

@@ -36,8 +36,8 @@ const ok = (n, c, extra = '') => {
 
 /* ================= A 静态 ================= */
 console.log('== A 静态指纹 ==');
-ok('A1 版本号：watch.css?v=47（css 本轮未动不 bump）/ watch.js?v=35',
-  /watch\.css\?v=47"/.test(html) && /watch\.js\?v=35"/.test(html),
+ok('A1 版本号：watch.css?v=48（css 本轮未动不 bump）/ watch.js?v=35',
+  /watch\.css\?v=48"/.test(html) && /watch\.js\?v=35"/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 ok('A2 cards 数组 6 项整块匹配（…观影密度…峰值月份），密度/峰值计算代码就位、BEST_PICKS 删净',

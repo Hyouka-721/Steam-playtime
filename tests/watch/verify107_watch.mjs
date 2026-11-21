@@ -6,7 +6,7 @@
  *   ① 歌单标题只剩「年度歌单」，不再挂「每年 10 首」小字；
  *   ② 每年分组标题只剩「2018 年」，不再挂「10 首」；
  *   ③ 空态提示里也不再出现「每年 10 首」；
- *   ④ 版本号 watch.css?v=47 / watch.js?v=35（本轮动了两份源码，必须双双 bump）；
+ *   ④ 版本号 watch.css?v=48 / watch.js?v=35（本轮动了两份源码，必须双双 bump）；
  *   ⑤ 夕颜封面换成用户新图（t/夕颜.webp 内容哈希变化、原图 夕颜.jpg、旧图 夕颜_旧.webp 留档）。
  *
  * 🔴 判据方向：从「标题必须含 10 首」反转为「标题必须不含 首」——
@@ -55,8 +55,8 @@ ok('A3 空态提示保留「还没录入」但不再提要录 10 首',
   !/歌单还没录入[^'\n]*10 首/.test(js),
   `空态串=${(js.match(/歌单还没录入[^'\n]*/) || [''])[0]}`);
 
-ok('A4 版本号双 bump：watch.css?v=47 / watch.js?v=35',
-  /watch\.css\?v=47/.test(html) && /watch\.js\?v=35/.test(html),
+ok('A4 版本号双 bump：watch.css?v=48 / watch.js?v=35',
+  /watch\.css\?v=48/.test(html) && /watch\.js\?v=35/.test(html),
   `${(html.match(/watch\.css\?v=\d+/) || [''])[0]} / ${(html.match(/watch\.js\?v=\d+/) || [''])[0]}`);
 
 const xy = all.find((s) => s.title === '夕颜');
