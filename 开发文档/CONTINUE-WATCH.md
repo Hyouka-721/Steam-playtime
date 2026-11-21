@@ -184,8 +184,12 @@ node tests/watch/verify107_watch.mjs
 | 123 | **水珠改雨丝**：均匀深色底下 backdrop-filter 必成灰片 → 细长渐隐线，v=5 | ✅ 已上线 `957da35` |
 | 124 | **雨丝倾角与轨迹对齐**：`drift=-tan(tilt)*(1.1h+len)`、从顶边之上起步，v=6 | ✅ 已上线 `4beb945` |
 | 125 | **三态氛围（关/流星/雨滴）+ watch 同步**：`ambience.js` 单键调度，雨丝 z=12 盖过页眉，v=7 | ✅ 已上线 `1ab1a8b` |
+| 127 | **Game Time 七项视觉精修**（index 侧，watch 未动）：style.css v144→145 | 本地 `63bbce8`，未 push |
+| 128 | **Watch 六项视觉精修**（视觉层级按用户要求跳过）：布局/配色/字体/留白/组件/动效，全为 watch.css 追加规则，watch.css v44→45 | 本地完成，未 push |
 
-- 当前版本键：`watch.css?v=44` / `watch.js?v=35` + 共用 `rain.css?v=7` / `rain.js?v=7` / `ambience.js?v=1`
+- 当前版本键：`watch.css?v=45`（**本地**，线上仍 44）/ `watch.js?v=35` + 共用 `rain.css?v=7` / `rain.js?v=7` / `ambience.js?v=1`
+- 🔴 **第 128 轮锁定项**（追加规则一律不碰）：`.st-panel` data-panel 跨度 4/2/2/4 + 12 栏栅格 + 860 复位（`verify94`）、`.w-grid` minmax(234px)+gap34/12（`verify60`）、歌单列数 10/5/2 与 `.st-songs` margin-top14+h3 font14（`verify104`）、`.poster-note` 12px 与色 `rgb(168,168,180)`（`verify85/86`）、`.poster-score` 描边0/padding0（`verify85`）、`.w-sort-btn.is-on` 语义、860 断点数量=1。只动 font-family / letter-spacing / box-shadow 装饰 / 新派生色 / 入场 opacity。
+- 🔴 `verify128_watch` 踩坑：年报按钮 `#w-stats-btn` 初始 hidden 且**只在时间轴视图出现**（第 93 轮），须先点 `#w-avatar` 再展开；海报入场动画须在切视图前测。
 - 第 125 轮验收：`verify120_watch` **18/0**、`verify121` **11/0**、`verify122` **11/0**、`verify123` **7/0**、`verify124` **9/0**、`verify125` **12/0**、`online125` watch 侧 **6/0**；两线全量 **69 套件 1651 → 1650/1**（唯一红 `verify56 B11`）；`npm test` **52/0**。
 - 🔴 watch 现在也有 `#fx-canvas` 与 `fx.js?v=19`；流星/雨丝状态由 `ambience.mode` 跨页保持，别再单独写 `fx-mode` / `rain.enabled`。
 - 🔴 雨丝禁止再回到 `backdrop-filter` / `.rain-drop` / `radial-gradient` 圆底 / `box-shadow` 灰边；`verify123` 守着。🔴 JS 不许写 inline `top`，`verify124 B4` 守着。

@@ -50,7 +50,7 @@ tests/
            verify87_watch verify89_watch verify90_watch verify91_watch verify92_watch \
            verify93_watch verify94_watch verify95_watch verify96_watch verify97_watch \
            verify98_watch verify99_watch verify100_watch verify101_watch verify102_watch verify103_watch verify104_watch \
-           verify105_watch verify107_watch verify120_watch; do
+           verify105_watch verify107_watch verify120_watch verify128_watch; do
     echo "== $s =="; "$NODE" tests/watch/$s.mjs 2>&1 | tail -2
   done
   ```
@@ -465,6 +465,20 @@ tests/
 - **另一坑**：初版用 `:where(...)`（特异性 0）做覆盖，反被原规则 `.card-value`/`.card-label`（0,1,0）压过去 → lining-nums/字距两条没生效；改为末尾直接选择器（同特异性后者胜出）解决。判据强度未降。
 - **判据**：新增 `verify127`（13 条：静态 4 + 运行时 8 + 零异常 1），含冻结值运行时实测（padding-top18/head margin14/列宽/860 断点=3）。
 - **验收**：`verify127` **13/0**；`npm test` **52/0**；index 全量 25 套件全绿、watch 关键 `verify104_watch`/`verify120_watch` 全绿；1440 cream/cinema 首页+数据页、390 窄屏截图目视通过（浅色已肉眼复核，两套主题无异常）。
+
+### 补记 19 · 第 128 轮：Watch 页六项视觉精修（2026-11-21，本地完成、**未 push**）
+
+- **用户要求**：做 Watch 页美化，**除视觉层级外**的六项 —— 布局结构、配色、字体、留白、组件风格、动效。
+- **实现原则**：全部为 `docs/watch.css` 末尾追加规则，前面的冻结/断言值一字未动：`.st-panel` data-panel 跨度 4/2/2/4、12 栏栅格、860 复位、圆角令牌、`.w-grid` minmax(234px)+gap34/12、歌单列数 10/5/2、`.st-songs` margin-top14+h3 font14、`.poster-note` 12px 与色 rgb(168,168,180)、`.poster-name` 单行省略、`.poster-score` 描边0/padding0、`.w-sort-btn.is-on` 语义、860 断点数量=1。只动不被断言的属性（font-family / letter-spacing / box-shadow 装饰 / 新派生色 / 入场 opacity）。
+  - ① 布局结构：歌单年份分组之间加极细金分隔线（相邻兄弟 `::before`，绝对定位、左亮右隐，不占布局、不改列数）。
+  - ② 配色：海报评分 hover 的 text-shadow 加柔金辉光（新变量 `--gold-soft`），字色本体不动。
+  - ③ 字体：`poster-note` / `tl-note` 加宋体/Georgia 衬线族做「引用感」（字号/色/两行 clamp 全保留）。
+  - ④ 留白：年报 `.st-panel h3` / `.st-songs h3` 字距 `.6px`（标题短，不改字号/高度）。
+  - ⑤ 组件风格：录入 dialog 顶部金高光条（`.w-add::before` 绝对定位）+ 歌单 hover 柔金内高光。
+  - ⑥ 动效：海报/年报卡入场 `w-fade-in` 纯 opacity（不位移、不动最终几何，避免动 `getBoundingClientRect`），reduced-motion 关闭。
+- **版本 bump**：只 `watch.css?v=44→45`（watch.js?v=35 未动）。watch 线惯例 —— **43 个活跃文件**共 **87 处** v=44 全同步（两个字面量形态通吃，规则 `/v=44(?![0-9a-f])/g`）；无裸串形态；bump 作用域残留 0；online 历史套件 31 处钉 44 保持不动（预期假红）。
+- **判据**：新增 `verify128_watch`（13 条：静态 6 + 运行时 6 + 零异常 1），含冻结值静态实测（跨度/栅格/断点/歌单列数）+ 入场动画不位移。⚠️ 踩坑：年报按钮 `#w-stats-btn` 初始 hidden、且**只在时间轴视图出现**（第 93 轮契约），须先点 `#w-avatar` 切时间轴再展开；海报动画须在切视图**之前**测。
+- **验收**：`verify128_watch` **13/0**；`npm test` **52/0**；watch 全量 46 套件全绿（唯一红 `verify56 B11` 页眉 1px 历轮已知）、index 关键 `verify6/118/119/125/127` 全绿；1920 网格+录入弹窗、1440 年报歌单、390 窄屏截图目视通过（歌单年份分隔线清晰、封面 10 列整齐、无横向溢出）。
 
 ## 踩过的坑（脚本层面）
 

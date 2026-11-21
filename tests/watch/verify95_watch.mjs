@@ -38,8 +38,8 @@ const ok = (n, c, extra = '') => {
 
 /* ---------------- A 静态契约 ---------------- */
 console.log('== A 静态契约 ==');
-ok('A1 版本号 bump：watch.html 引用 watch.css?v=44 / watch.js?v=35',
-  /watch\.css\?v=44/.test(html) && /watch\.js\?v=35/.test(html),
+ok('A1 版本号 bump：watch.html 引用 watch.css?v=45 / watch.js?v=35',
+  /watch\.css\?v=45/.test(html) && /watch\.js\?v=35/.test(html),
   (html.match(/watch\.(css|js)\?v=\d+/g) || []).join(' '));
 
 const cInput = (html.match(/<input[^>]*id="add-country"[^>]*>/) || [''])[0];

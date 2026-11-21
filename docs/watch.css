@@ -1145,3 +1145,66 @@ select.w-input { cursor: pointer; }
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
   .poster-pic img { opacity: 1; }
 }
+
+/* ==========================================================================
+   第 128 轮 · Watch 页六项视觉精修（2026-11-21）—— 不含视觉层级（用户要求）
+   全部为追加规则，前面的冻结值/断言值一字未动：
+     .st-panel data-panel 跨度 4/2/2/4、12 栏栅格、860 复位、圆角令牌；
+     .w-grid minmax(234px,1fr) + gap 34px 12px；歌单列数 10/5/2；
+     .st-songs margin-top14 / h3 font-size14；.poster-note 字号12px 与色 rgb(168,168,180)；
+     .poster-name 单行省略、.poster-score 描边0/padding0；.w-sort-btn.is-on 语义。
+   只动不被断言的属性：font-family（新增）、letter-spacing、box-shadow 装饰、
+   派生色（新变量），以及入场 opacity（不改最终几何）。
+   ========================================================================== */
+
+/* 派生色：只给本轮新增装饰用，不改任何既有变量值（避免对比度/配色断言） */
+:root, [data-theme="cinema"] {
+  --gold-soft: rgba(232, 176, 75, .45);   /* 新增装饰的柔金，hover 辉光 */
+  --gold-hair: rgba(232, 176, 75, .22);   /* 极细分隔金线 */
+}
+
+/* ① 布局结构：年度歌单按年份分组之间加一条极细金分隔 + 分组留白节奏，
+   只作用于新的包装选择器，不碰 grid-template（10/5/2 冻结）与 st-songs 的 margin。
+   用相邻兄弟 + 伪元素画分隔线，不占布局（absolute），不改列数。 */
+.st-song-year { position: relative; }
+.st-song-year + .st-song-year::before {
+  content: ''; position: absolute; left: 0; right: 0; top: -11px; height: 1px;
+  background: linear-gradient(90deg, var(--gold-hair), transparent 70%);
+  pointer-events: none;
+}
+
+/* ② 配色：海报评分默认态的辉光在 hover 时更暖一点——只加 text-shadow 装饰，
+   字号/颜色本体（#dcb978、hover var(--accent)）都不动。 */
+.poster:hover .poster-score,
+.poster:focus-within .poster-score {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .7), 0 0 10px var(--gold-soft);
+}
+
+/* ③ 字体：短评用衬线体做「引用感」。只加 font-family，字号 12px / 行高 1.55 /
+   颜色 --text-soft / 两行 clamp 全部保留（verify85/86 守着）。 */
+.poster-note, .tl-note {
+  font-family: 'Songti SC', 'STSong', Georgia, 'Times New Roman', serif;
+}
+
+/* ④ 留白：年报各面板标题字距微增（短标题，不改高度/换行），层次更清楚。
+   .st-panel h3 / .st-songs h3 的 font-size14 与 margin 都不动，只加字距。 */
+.st-panel h3, .st-songs h3 { letter-spacing: .6px; }
+
+/* ⑤ 组件风格：录入弹窗顶部一条金色高光条（伪元素，不占布局），
+   与放映机光晕语言呼应；dialog 的 border/shadow/radius 原样不动。
+   年报歌单卡片 hover 时加一层柔金内高光（box-shadow 装饰，不动边框）。 */
+.w-add { position: relative; }
+.w-add::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent 72%);
+  pointer-events: none; z-index: 1;
+}
+.st-songs:hover { box-shadow: var(--card-shine), 0 4px 18px rgba(0, 0, 0, .18); }
+
+/* ⑥ 动效：海报与年报卡入场纯 opacity 淡入（不动 transform / 不动最终几何，
+   所以 getBoundingClientRect 的断言不受影响）；图片本身已有的 is-loaded 淡入不变。 */
+@keyframes w-fade-in { from { opacity: 0; } to { opacity: 1; } }
+#w-grid > .poster, .st-panel, .st-songs { animation: w-fade-in var(--t-2) var(--ease) both; }
+@media (prefers-reduced-motion: reduce) {
+  #w-grid > .poster, .st-panel, .st-songs { animation: none; }
+}
