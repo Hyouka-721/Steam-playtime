@@ -49,8 +49,8 @@ check('内联：构建脚本串上 inline-boot', /inline-boot\.mjs/.test(build))
 check('样式：骨架屏样式与动画存在', /\.sk-block/.test(css) && /@keyframes sk-shimmer/.test(css));
 check('样式：尊重 reduced-motion（骨架不流动）', /prefers-reduced-motion: reduce[\s\S]{0,120}sk-block/.test(css));
 check('构建：build.mjs 输出 ach_stats 到 meta', /ach_stats:\s*achStats/.test(build));
-check('版本号：style\.css\?v=146 / app\.js\?v=130 / fx.js?v=19',
-  /style\.css\?v=146/.test(html) && /app\.js\?v=130/.test(html) && /fx\.js\?v=19/.test(html));
+check('版本号：style\.css\?v=146 / app\.js\?v=129 / fx.js?v=19',
+  /style\.css\?v=146/.test(html) && /app\.js\?v=129/.test(html) && /fx\.js\?v=19/.test(html));
 
 /* ---------- B/C/D. 浏览器实测 ---------- */
 const browser = await chromium.launch();
@@ -110,9 +110,8 @@ const skState = await skPage.evaluate(() => ({
   lifetime: document.getElementById('c-lifetime').textContent.trim(),
 }));
 await skCtx.close();
-// 第 129 轮：第五张「数据」卡删除 → 骨架卡由 5 变 4（理由同本条 check 文案）
-check('骨架屏：脚本未到位时用骨架占位（而非空白「—」）｜第129轮数据卡删除后骨架卡=4',
-  skState.skRows > 0 && skState.skCards === 4 && skState.lifetime === '—',
+check('骨架屏：脚本未到位时用骨架占位（而非空白「—」）',
+  skState.skRows > 0 && skState.skCards === 5 && skState.lifetime === '—',
   JSON.stringify(skState));
 
 // 首屏可读时刻：优先取 DCL 时刻（内联数据后 DCL 即完成渲染），
@@ -232,8 +231,7 @@ await page.evaluate(() => document.querySelector('[data-view="lifetime"]').click
 await page.waitForTimeout(300);
 const cards = await page.evaluate(() =>
   [...document.querySelectorAll('.cards .card-value')].map((e) => e.textContent.trim()));
-// 第 129 轮：数据视图整体删除 → 概览卡由 5 张变 4 张
-check('回归：四张概览卡有值（第129轮删数据卡，原五张）', cards.length === 4 && cards.every((v) => v && v !== '—'), JSON.stringify(cards));
+check('回归：五张概览卡有值', cards.length === 5 && cards.every((v) => v && v !== '—'), JSON.stringify(cards));
 
 // 当日明细浮层（成就明细已加载，应精确回溯）
 // 第 87 轮：入口从「最近游玩」首行的小日历图标改为月历热力图格子。

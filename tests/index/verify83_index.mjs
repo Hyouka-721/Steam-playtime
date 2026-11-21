@@ -28,9 +28,8 @@ const meta = JSON.parse(rd('data/meta.json'));
 
 /* ================= A 静态 ================= */
 console.log('== A 静态 ==');
-// 第 129 轮：数据卡删除 → 导航卡由 5 变 4（理由见本条 ok 文案）
-ok('A1 概览四张卡，「游戏库」卡（#card-games）在｜第129轮删数据卡',
-  (html.match(/class="card card-nav/g) || []).length === 4 &&
+ok('A1 概览恢复五张卡，且「游戏库」卡（#card-games）回来了',
+  (html.match(/class="card card-nav/g) || []).length === 5 &&
   html.includes('id="card-games"') && html.includes('id="c-games"'));
 
 ok('A2 独立的「时间轴」视图恢复（#view-timeline 存在，且不在游戏时长视图里）',
@@ -166,13 +165,12 @@ ok('B6 深链 #/timeline 直接落在时间轴视图',
 await page.goto(`${BASE}#/data`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(900);
 const dataView = await page.evaluate(() => ({
-  hasView: !!document.getElementById('view-data'),
-  hasReport: !!document.getElementById('report'),
-  activeViews: [...document.querySelectorAll('.view.active')].map((v) => v.id),
+  active: document.getElementById('view-data').classList.contains('active'),
+  hasHeat: !!document.getElementById('heatmap') || !!document.querySelector('#panel-heat'),
+  reportCells: document.querySelectorAll('#report .rp-cell').length,
 }));
-// 第 129 轮：数据视图已整体删除，#/data 深链不再有对应视图（保持默认视图）
-ok('B7 数据视图已删除：#/data 无 view-data / 无报告｜第129轮按用户要求删除',
-  !dataView.hasView && !dataView.hasReport, JSON.stringify(dataView));
+ok('B7 深链 #/data 生效；数据页只留报告，热力图已移走',
+  dataView.active && !dataView.hasHeat && dataView.reportCells >= 4, JSON.stringify(dataView));
 
 await page.goto(BASE, { waitUntil: 'networkidle' });
 await page.waitForTimeout(800);
@@ -194,15 +192,23 @@ const badges = await page.evaluate(() => ({
 ok('B9 成就页全成就勋章墙数量与 meta.ach_perfect 一致',
   badges.visible && badges.count === meta.ach_perfect.length, JSON.stringify(badges));
 
-// 第 129 轮：阶段报告 / 周目标 / 换算随数据视图删除，改为守「已删除」
-const gone = await page.evaluate(() => ({
-  report: !!document.getElementById('report'),
-  pace: !!document.getElementById('pace'),
-  convert: !!document.getElementById('convert'),
-  weekGoal: !!document.getElementById('week-goal'),
+await page.click('#card-data');
+await page.waitForTimeout(700);
+const report = await page.evaluate(() => ({
+  cells: document.querySelectorAll('#report .rp-cell').length,
+  ring: !!document.querySelector('#pace .pace-ring'),
+  cv: document.querySelectorAll('#convert .cv-item').length,
+  range: (document.getElementById('report-range') || {}).textContent || '',
 }));
-ok('B10 阶段报告/周目标/换算已删除｜第129轮按用户要求随数据视图移除',
-  !gone.report && !gone.pace && !gone.convert && !gone.weekGoal, JSON.stringify(gone));
+ok('B10 阶段报告：四块统计 + 最常玩 + 周目标环 + 四条换算',
+  report.cells >= 4 && report.ring && report.cv === 4 && /→/.test(report.range), JSON.stringify(report));
+
+await page.fill('#week-goal', '9');
+await page.dispatchEvent('#week-goal', 'change');
+await page.waitForTimeout(300);
+ok('B11 周目标可改并持久化（9h 立刻写进 localStorage 与文案）',
+  await page.evaluate(() => localStorage.getItem('weekGoalH') === '9' &&
+    /目标 9 h/.test(document.querySelector('#pace .pace-main').textContent)));
 
 /* 第 115 轮：单游戏详情（占比 / 期段 / 成就）随下钻整条线一起删除 */
 await page.click('#card-lifetime');

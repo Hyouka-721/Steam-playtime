@@ -48,9 +48,9 @@ const a = await page.evaluate(() => ({
   detailParent: document.getElementById('lt-detail')?.parentElement?.id,
   rows: document.querySelectorAll('#lt-list .rank-item').length,
 }));
-ok('A1 版本参数 CSS 137 / APP 122', a.cssV === '146' && a.appV === '130', { css: a.cssV, app: a.appV });
-ok('A2 四张导航卡名称未变｜第129轮删数据卡（原五张）', JSON.stringify(a.cards) === JSON.stringify(['游戏时长', '最近游玩', '成就', '游戏库']), a.cards);
-ok('A3 四个视图 id 未变｜第129轮删数据视图（原五个）', JSON.stringify(a.views) === JSON.stringify(['view-lifetime', 'view-recent', 'view-ach', 'view-timeline']), a.views);
+ok('A1 版本参数 CSS 137 / APP 122', a.cssV === '146' && a.appV === '129', { css: a.cssV, app: a.appV });
+ok('A2 五张导航卡名称未变', JSON.stringify(a.cards) === JSON.stringify(['游戏时长', '最近游玩', '成就', '游戏库', '数据']), a.cards);
+ok('A3 五个视图 id 未变', JSON.stringify(a.views) === JSON.stringify(['view-lifetime', 'view-recent', 'view-ach', 'view-timeline', 'view-data']), a.views);
 ok('A4 热力图仍仅一份且归属「最近游玩」', a.detailCount === 1 && a.detailParent === 'view-recent', a);
 ok('A5 累计榜仍有数据', a.rows > 0, a.rows);
 
