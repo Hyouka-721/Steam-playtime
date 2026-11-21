@@ -136,6 +136,9 @@
      原 #e8964a 是高饱和琥珀橙，在浅米底上对比过强、像亮线划屏；
      现值更淡更灰，配合 fx.js 下调后的峰值透明度，只在余光里可感。 */
   --fx-meteor: #c9ad8e;
+  /* 第 127 轮：动效 token（对齐 watch.css，两主题同值，切主题不动效） */
+  --t-1: .16s; --t-2: .22s; --t-3: .32s;
+  --ease: cubic-bezier(.22, .68, .28, 1);
 }
 
 /* ⑩ 影院黑：与观影页 watch.html 同源的一套深色（第 105 轮加入；第 106 轮起成为站上唯一的深色主题）。
@@ -189,7 +192,8 @@
   --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 10px 26px rgba(0, 0, 0, 0.45);
   --card-hover-shadow: 0 18px 40px rgba(0, 0, 0, 0.62), 0 0 0 1px var(--ring);
   --header-bg: rgba(10, 10, 13, 0.82);
-  --medal-1: #e8b04b; --medal-2: #b9b4c9; --medal-3: #cf8f5f;
+  /* 第 127 轮：金银铜提亮一档，影院黑底上奖牌色更鲜明（cream 主题不动） */
+  --medal-1: #f5c45e; --medal-2: #d3cfe0; --medal-3: #e0a273;
   --medal-shadow-1: none; --medal-shadow-2: none; --medal-shadow-3: none;
   --gold: var(--medal-1);
   --gold-glow: rgba(232, 176, 75, 0.30);
@@ -207,6 +211,9 @@
   /* 第 108 轮：与顶部放映机暖光同系，但更淡、更去饱和，
      避免与金色强调色 / 选中卡高光混淆成「亮斑」。 */
   --fx-meteor: #bfa677;
+  /* 第 127 轮：动效 token（对齐 watch.css，两主题同值，切主题不动效） */
+  --t-1: .16s; --t-2: .22s; --t-3: .32s;
+  --ease: cubic-bezier(.22, .68, .28, 1);
 }
 
 [data-theme="cinema"] .site-header {
@@ -1568,4 +1575,65 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   .hx-bar { display: none; }
   .hx-foot { flex-wrap: wrap; gap: 8px; }
   .hx-hint { display: none; }
+}
+
+/* ==========================================================================
+   第 127 轮 · 七项视觉精修（2026-11-21）
+   全部为追加规则，前面的冻结值（panel padding18 / head margin14 / 6.73em
+   标题宽 / 卡片 27px 与列宽 / 主题白名单）一字未动。改哪个的原则：
+   只动不参与布局几何的属性（伪元素装饰 / box-shadow / opacity / 字距 /
+   font-variant-numeric / 颜色），布局项用 auto-fit 自适应并用套件兜底。
+   ========================================================================== */
+
+/* ① 视觉层级：五张导航卡顶部一条强调短线。绝对定位不占布局、不改行高列宽。
+   hero 卡与主色，其余弱一档；active 卡跟随主色，让"当前在看哪"更明确。 */
+.card { position: relative; }
+:where(.cards .card)::before {
+  content: ''; position: absolute; top: 0; left: 18px; right: 18px; height: 2px;
+  border-radius: 2px; background: var(--border-hi); opacity: .55;
+  transition: background-color var(--t-2) var(--ease), opacity var(--t-2) var(--ease);
+}
+:where(.cards .card-hero)::before,
+:where(.cards .card-nav.active)::before {
+  background: linear-gradient(90deg, var(--accent-2), var(--accent)); opacity: 1;
+}
+
+/* ② 布局结构：数据页四个面板在宽屏两两并排，缩短纵向滚动。
+   auto-fit 自适应：放不下自动回单列，不新增断点（860 断点全文件不增）。
+   只作用于 #view-data 的直接子面板，不碰任何 panel 内部 padding/margin。 */
+@supports (display: grid) {
+  #view-data > .panel { margin-bottom: 0; }
+  #view-data {
+    display: grid; gap: 20px; align-content: start;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  }
+  /* 阶段报告内容多，独占整行；其余三块按 auto-fit 铺 */
+  #view-data > #panel-report { grid-column: 1 / -1; }
+}
+
+/* ③ 字体：数字统一开 lining-nums（等宽 tabular 已开，加等高字形不改字宽，
+   零折行风险），时长/评分读数视觉更齐整。 */
+.card-value, .rp-value, .rank-no, .rank-last, .badge-min, .tl-week-total {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* ④ 留白：卡片标签字距微增（短文本，不改高度/折行），label 与数值的层次更清楚。 */
+.card-label { letter-spacing: 1.4px; }
+
+/* ⑤ 组件风格：全成就勋章展台加两级柔光高光 + 金边，纯 box-shadow 不占布局，
+   hover 上浮与描边沿用既有 transition（token 化见 ⑦）。 */
+.badges .badge {
+  box-shadow: var(--card-shine), 0 2px 10px rgba(0, 0, 0, .10);
+}
+.badges .badge:hover {
+  box-shadow: var(--card-shine), 0 6px 18px var(--ring);
+  border-color: var(--tint-border);
+}
+
+/* ⑥ 动效应用：把 ⑦ 的 token 用到视图切换——淡入但**不位移**（位移会动
+   getBoundingClientRect，几何套件会红），纯 opacity，reduced-motion 下关闭。 */
+.view.active > .panel { animation: view-fade var(--t-2) var(--ease) both; }
+@keyframes view-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .view.active > .panel { animation: none; }
 }

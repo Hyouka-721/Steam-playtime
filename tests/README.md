@@ -38,7 +38,7 @@ tests/
   NODE="C:/Users/33329/.workbuddy/binaries/node/versions/22.22.2-6/node.exe"
   for s in verify6 verify54 verify82_index verify83_index verify91 verify92 \
            verify103 verify104 verify105 verify106 verify108 verify111 \
-           verify113 verify115 verify116 verify117 verify118 verify119 verify120 verify121 verify122 verify123 verify124 verify125; do
+           verify113 verify115 verify116 verify117 verify118 verify119 verify120 verify121 verify122 verify123 verify124 verify125 verify127; do
     echo "== $s =="; "$NODE" tests/index/$s.mjs 2>&1 | tail -2
   done
   ```
@@ -447,6 +447,24 @@ tests/
 - **watch 流星**：watch.html 补 `#fx-canvas`，引入 `fx.js?v=19`（未改 fx.js，避免历史套件全红）；流星/雨丝共用同一状态，跨页保持。
 - **雨丝启动**：`rain.js` 不再自己读写 `rain.enabled`；骨架等待改为只看「可见」`.sk-block`（隐藏视图里也有，全局 querySelector 会白等 3s），且 build 后不再强制 `setEnabled(false)`（否则会覆盖 ambience 已设置的状态）。
 - **版本**：`rain.css/js v=6→7`；`style/app/fx/watch.css/watch.js` 未动。判据：`verify120`/`verify120_watch`/`verify123` 同步 v7 与 z12、按钮改三态；`verify54 B10` 改测 `#ambience-seg`；新增 `verify125`（12 条）与 `online125`。
+
+### 补记 18 · 第 127 轮：Game Time 七项视觉精修（2026-11-21，本地完成、**未 push**）
+
+> 注：第 126 轮（背景音乐）已按用户要求整体回退、归档删除，故补记号从 17 直接到 18（第 127 轮）。
+
+- **用户要求**：对 Game Time 做视觉层级、布局结构、配色、字体、留白、组件风格、动效七项精修（Watch 页另行）。
+- **实现原则**：全部为 style.css 追加规则 + 变量，**冻结值一字未动** —— `panel padding18`/`head margin14`/`6.73em` 标题宽/卡片 27px 与列宽/860 断点数量；不动 DOM 与 app.js。
+  - ① 视觉层级：导航卡顶部强调短线（`:before` 绝对定位、不占布局），hero/active 主色、其余弱化。
+  - ② 布局结构：数据页 `#view-data` 用 `grid` + `auto-fit minmax(420px)`，报告独占整行、其余三块并排（1440 实测 3 列、无空隙）；不新增断点。
+  - ③ 配色：cinema 金银铜 `--medal-1/2/3` 提亮（`#f5c45e/#d3cfe0/#e0a273`），cream 原值保留。
+  - ④ 字体：数字类补 `lining-nums`（tabular 本就开，字宽不变、零折行）。
+  - ⑤ 留白：`.card-label` 字距 `.8→1.4px`（短文本、不改高度）。
+  - ⑥ 组件风格：勋章墙 `.badge` 两级柔光 box-shadow + hover 金边（不占布局）。
+  - ⑦ 动效：两套主题引入 `--t-1/.16s --t-2/.22s --t-3/.32s --ease`（对齐 watch）；视图切换 `view-fade` 纯 opacity 淡入（**不位移**，避免动 `getBoundingClientRect` 触发几何套件）；reduced-motion 关闭。
+- **版本 bump**：只 `style.css?v=144→145`（app129/fx19 未动）。🔴 **踩坑**：bump 脚本只匹配 `v=144` 形态，漏了活跃套件里的**裸串** `cssV === '144'` → 8 个套件 A1 假红（verify91/103/104/105/106/108/118/119）。按交接文档「bump 须覆盖裸串」补全 8 处裸期望值为 `'145'`；`1440` 视口宽度未误伤；online 历史套件钉 144 保持不动（预期）。
+- **另一坑**：初版用 `:where(...)`（特异性 0）做覆盖，反被原规则 `.card-value`/`.card-label`（0,1,0）压过去 → lining-nums/字距两条没生效；改为末尾直接选择器（同特异性后者胜出）解决。判据强度未降。
+- **判据**：新增 `verify127`（13 条：静态 4 + 运行时 8 + 零异常 1），含冻结值运行时实测（padding-top18/head margin14/列宽/860 断点=3）。
+- **验收**：`verify127` **13/0**；`npm test` **52/0**；index 全量 25 套件全绿、watch 关键 `verify104_watch`/`verify120_watch` 全绿；1440 cream/cinema 首页+数据页、390 窄屏截图目视通过（浅色已肉眼复核，两套主题无异常）。
 
 ## 踩过的坑（脚本层面）
 
