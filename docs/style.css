@@ -570,10 +570,12 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   min-height: var(--rank-row-h, 0px);
 }
 .sk-block {
+  /* 第 133 轮：快网下骨架只存在极短时间，闪烁反而突兀 → 加 0.25s 启动延迟
+     （数据在此前到位就根本不开始闪），并把流动幅度 300%→200% 让亮暗过渡更柔。 */
   background: linear-gradient(90deg, var(--track) 0%, var(--sunken) 40%, var(--track) 80%);
-  background-size: 300% 100%;
+  background-size: 200% 100%;
   border-radius: 6px;
-  animation: sk-shimmer 1.4s ease-in-out infinite;
+  animation: sk-shimmer 1.8s ease-in-out .25s infinite;
 }
 .sk-cap { height: 60px; border-radius: 8px; }
 .sk-line { height: 11px; }
@@ -581,13 +583,14 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .sk-bar { height: 7px; border-radius: 4px; margin-left: -30px; margin-right: -20px; }
 .sk-min { width: 72px; height: 13px; margin-left: auto; }
 .sk-date { width: 58px; height: 11px; margin-left: auto; }
-/* 概览卡数值占位：与 .card-value 同高，避免渲染后卡片高度跳动 */
+/* 概览卡数值占位：与 .card-value 同高，避免渲染后卡片高度跳动。
+   第 133 轮：与 .sk-block 同步加 0.25s 启动延迟 + 降幅至 200%，快网下不闪。 */
 .card-value.sk-value {
   color: transparent;
   border-radius: 7px;
   background: linear-gradient(90deg, var(--track) 0%, var(--sunken) 40%, var(--track) 80%);
-  background-size: 300% 100%;
-  animation: sk-shimmer 1.4s ease-in-out infinite;
+  background-size: 200% 100%;
+  animation: sk-shimmer 1.8s ease-in-out .25s infinite;
 }
 @keyframes sk-shimmer {
   0% { background-position: 100% 0; }
@@ -1052,7 +1055,9 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   display: block; height: 100%; border-radius: 4px;
   background: var(--bar-grad);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  transition: width .5s ease;
+  /* 第 133 轮：去掉 `transition: width .5s ease`。柱子宽度只在渲染时按数据设一次、
+     之后不再变化，这条过渡没有真实用途；但在骨架→真实内容替换、或视图重渲染时
+     会让柱子"从窄长到宽"地生长半秒，正是用户反馈的「柱子残影」。 */
 }
 /* 第 102 轮（回退后，2026-11-03）：用户要求「游戏时长右移 20px」，随后又要求「再往右 20px」，
    累计 translateX(40px)。用 transform 而不是 padding/margin：

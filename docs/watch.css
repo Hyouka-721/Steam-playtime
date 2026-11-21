@@ -191,6 +191,9 @@ code {
 }
 .w-title:hover { color: var(--accent); }
 .w-title:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 8px; }
+/* 第 133 轮：.w-title 固定宽度（消除字体替换跳动）写在文件末尾的 @media 块里 ——
+   此处不能另起 @media：verify85 取「首个 @media 之前的 baseCss」、verify67 取
+   「首个 min-width:861 块」，在此插块会截断它们要看的规则（本轮已踩过）。 */
 
 /* 史蒂夫：与首页 style.css 的 .header-avatar **逐条同值**（同一素材、同一尺寸、同一套反馈），
    2026-10-24 第 56 轮复制到观影页，职责 = 网格视图 ⇄ 时间轴视图 的切换器
@@ -1217,4 +1220,19 @@ select.w-input { cursor: pointer; }
 #w-grid > .poster, .st-panel, .st-songs { animation: w-fade-in var(--t-2) var(--ease) both; }
 @media (prefers-reduced-motion: reduce) {
   #w-grid > .poster, .st-panel, .st-songs { animation: none; }
+}
+
+/* 第 133 轮：给「My Watch List」加固定宽度，消除切换页面 / 字体替换瞬间的水平跳动。
+   背景：本页字体 font-display:block，字体到位前先用回退字体（PingFang SC）渲染，
+   回退字体与 Black Rose 花体宽度不同；.w-title 是 justify-self:center 的自适应宽度，
+   宽度一变、居中点就挪 → 用户反馈「Watch List 标题跳一下再变位置」。
+   首页 .site-title 早在第 93 轮就用 `width: 6.73em` 锁死盒子（按「My Game Time」
+   实测 471.1px ÷ 70 得出），所以首页不跳；这里给本页补同款保护：
+   「My Watch List」实测 464.2px ÷ 70 = 6.63em，取 6.64em（464.8px，留 0.6px 余量防亚像素挤字）。
+   ⚠️ 只在 ≥861px（单行页眉）启用；窄屏标题独占一行、列宽有限，强加固定宽会撑破。
+   ⚠️ 必须配 nowrap：回退字体更宽时不被固定宽挤成两行（否则页眉高度会跳）。
+   ⚠️ 改站名文案时必须按「实测宽度 ÷ 字号」重算 em 值。
+   ⚠️ 放在文件末尾：不能靠前另起 @media（verify85/verify67 按「首个 @media / 首个 861 块」取规则）。 */
+@media (min-width: 861px) {
+  .w-title { width: 6.64em; white-space: nowrap; }
 }
