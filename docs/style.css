@@ -1585,31 +1585,10 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    font-variant-numeric / 颜色），布局项用 auto-fit 自适应并用套件兜底。
    ========================================================================== */
 
-/* ① 视觉层级：五张导航卡顶部一条强调短线。绝对定位不占布局、不改行高列宽。
-   hero 卡与主色，其余弱一档；active 卡跟随主色，让"当前在看哪"更明确。 */
-.card { position: relative; }
-:where(.cards .card)::before {
-  content: ''; position: absolute; top: 0; left: 18px; right: 18px; height: 2px;
-  border-radius: 2px; background: var(--border-hi); opacity: .55;
-  transition: background-color var(--t-2) var(--ease), opacity var(--t-2) var(--ease);
-}
-:where(.cards .card-hero)::before,
-:where(.cards .card-nav.active)::before {
-  background: linear-gradient(90deg, var(--accent-2), var(--accent)); opacity: 1;
-}
+/* ① 视觉层级：导航卡顶部强调短线 —— 第 129 轮按用户要求删除（曾在第 127 轮加入）。
+   其余七项精修（数据页 grid 除外，随数据视图一并删）保留。 */
 
-/* ② 布局结构：数据页四个面板在宽屏两两并排，缩短纵向滚动。
-   auto-fit 自适应：放不下自动回单列，不新增断点（860 断点全文件不增）。
-   只作用于 #view-data 的直接子面板，不碰任何 panel 内部 padding/margin。 */
-@supports (display: grid) {
-  #view-data > .panel { margin-bottom: 0; }
-  #view-data {
-    display: grid; gap: 20px; align-content: start;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
-  }
-  /* 阶段报告内容多，独占整行；其余三块按 auto-fit 铺 */
-  #view-data > #panel-report { grid-column: 1 / -1; }
-}
+/* ② 布局结构：数据页 grid —— 第 129 轮随「数据视图整体删除」一并移除。 */
 
 /* ③ 字体：数字统一开 lining-nums（等宽 tabular 已开，加等高字形不改字宽，
    零折行风险），时长/评分读数视觉更齐整。 */

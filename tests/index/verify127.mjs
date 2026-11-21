@@ -28,11 +28,11 @@ const idx = fs.readFileSync(ROOT + 'docs/index.html', 'utf8');
 
 // ---- A. 静态契约 ----
 ok('A1 只 bump style.css→v145；app129/fx19 未动',
-  /style\.css\?v=145/.test(idx) && /app\.js\?v=129/.test(idx) && /fx\.js\?v=19/.test(idx) &&
+  /style\.css\?v=146/.test(idx) && /app\.js\?v=130/.test(idx) && /fx\.js\?v=19/.test(idx) &&
   !/v=144/.test(code));
-ok('A2 七项规则齐备：卡短线/数据grid/lining/字距/勋章柔光/视图淡入/动效token',
-  /\.card-nav\.active\)::before/.test(code) &&
-  /#view-data \{[\s\S]*?display: grid/.test(code) &&
+// 第 129 轮：卡短线与数据页 grid 均已按用户要求删除 → 改守剩余项 + 两项确已删
+ok('A2 保留项齐备（lining/字距/勋章柔光/淡入/token）；卡短线与数据grid 已删｜第129轮',
+  !/\.card-nav\.active\)::before/.test(code) && !/#view-data \{[\s\S]*?display: grid/.test(code) &&
   /lining-nums/.test(code) &&
   /\.card-label \{ letter-spacing: 1\.4px/.test(code) &&
   /\.badges \.badge:hover/.test(code) &&
@@ -59,13 +59,13 @@ await page.waitForFunction(() => document.querySelector('.card-value:not(.sk-val
   document.querySelectorAll('.card-value').length >= 5, null, { timeout: 20000 });
 await page.waitForTimeout(300);
 
-// ① 卡片强调短线：绝对定位、不占布局（position absolute）
+// ① 卡片强调短线：第 129 轮按用户要求删除 → 守「已不存在」
 const heroBefore = await page.evaluate(() => {
   const cs = getComputedStyle(document.querySelector('.card-hero'), '::before');
-  return { content: cs.content, position: cs.position, height: cs.height };
+  return { content: cs.content, position: cs.position };
 });
-ok('B1 hero 卡强调短线存在且为绝对定位装饰（不占布局）',
-  heroBefore.content !== 'none' && heroBefore.position === 'absolute' && parseFloat(heroBefore.height) === 2, heroBefore);
+ok('B1 hero 卡强调短线已删除（::before content=none）｜第129轮按用户要求',
+  heroBefore.content === 'none', heroBefore);
 
 // ④ 字体 lining-nums
 const fv = await page.evaluate(() => getComputedStyle(document.querySelector('.card-value')).fontVariantNumeric);
@@ -81,46 +81,41 @@ const creamMedal = await page.evaluate(() => getComputedStyle(document.documentE
 ok('B3 cinema 金牌 #f5c45e、cream 仍 #c58a00',
   cinemaMedal.toLowerCase() === '#f5c45e' && creamMedal.toLowerCase() === '#c58a00', { cinemaMedal, creamMedal });
 
-// ② 数据页 grid 两列 + 报告独占整行
-await page.click('#card-data');
-await page.waitForTimeout(300);
-const grid = await page.evaluate(() => {
-  const v = document.getElementById('view-data');
-  const cs = getComputedStyle(v);
-  const cols = cs.gridTemplateColumns.split(' ').filter(Boolean).length;
-  const report = document.getElementById('panel-report');
-  const rc = getComputedStyle(report).gridColumnStart + '/' + getComputedStyle(report).gridColumnEnd;
-  return { display: cs.display, cols, reportCol: rc, active: v.classList.contains('active') };
-});
-ok('B4 数据页 grid 至少两列、阶段报告独占整行',
-  grid.display === 'grid' && grid.cols >= 2 && grid.reportCol === '1/-1', grid);
+// ② 数据视图整体删除 → 守 #card-data / #view-data 已不存在｜第129轮
+const grid = await page.evaluate(() => ({
+  card: !!document.getElementById('card-data'),
+  view: !!document.getElementById('view-data'),
+  cardCount: document.querySelectorAll('.card-nav').length,
+}));
+ok('B4 数据卡与数据视图已删除，现四张导航卡｜第129轮按用户要求',
+  !grid.card && !grid.view && grid.cardCount === 4, grid);
 
 // ⑤ 字距
 const ls = await page.evaluate(() => getComputedStyle(document.querySelector('.card-label')).letterSpacing);
 ok('B5 卡片标签字距 1.4px', Math.abs(parseFloat(ls) - 1.4) < 0.05, { ls });
 
-// ⑦ 动效 token + 淡入不位移
+// ⑦ 动效 token 声明（数据视图删除后不再有直接子 panel 测动画，改守 token 本身）
 const anim = await page.evaluate(() => {
-  const cs = getComputedStyle(document.querySelector('#view-data .panel'));
   const root = getComputedStyle(document.documentElement);
   return {
-    name: cs.animationName,
-    trans: cs.animationTimingFunction,
+    hasKeyframes: [...document.styleSheets].some((s) => {
+      try { return [...s.cssRules].some((r) => r.cssText && r.cssText.includes('view-fade')); } catch (e) { return false; }
+    }),
     t1: root.getPropertyValue('--t-1').trim(),
     ease: root.getPropertyValue('--ease').trim(),
   };
 });
-ok('B6 面板淡入动画用 view-fade + token 曲线，--t-1/--ease 已声明',
-  anim.name === 'view-fade' && /cubic-bezier/.test(anim.trans) && anim.t1 === '.16s' && /cubic-bezier/.test(anim.ease), anim);
+ok('B6 view-fade 动画仍在 + --t-1/--ease 已声明',
+  anim.hasKeyframes && anim.t1 === '.16s' && /cubic-bezier/.test(anim.ease), anim);
 
-// 冻结值几何：panel padding-top 18、head margin-bottom 14（运行时实测）
+// 冻结值几何：panel padding-top 18、head margin-bottom 14（运行时实测，用仍存在的 panel）
 const frozen = await page.evaluate(() => {
-  const p = document.querySelector('#view-data .panel');
-  const h = p.querySelector('.panel-head');
-  return { padTop: getComputedStyle(p).paddingTop, headMb: getComputedStyle(h).marginBottom };
+  const p = document.querySelector('#view-lifetime .panel');
+  return { padTop: getComputedStyle(p).paddingTop };
 });
-ok('B7 冻结值运行时仍是 padding-top18 / head margin14',
-  parseFloat(frozen.padTop) === 18 && parseFloat(frozen.headMb) === 14, frozen);
+// head margin14 由 A3 静态守着（数据视图删后无带 .panel-head 的可见面板）
+ok('B7 冻结值运行时仍是 panel padding-top18（head14 见 A3 静态）',
+  parseFloat(frozen.padTop) === 18, frozen);
 
 // reduced-motion：淡入关闭
 const rmCtx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' });

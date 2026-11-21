@@ -39,12 +39,12 @@ const a = await page.evaluate(() => ({
   cards: [...document.querySelectorAll('.card-label')].map((e) => e.textContent.trim()),
   views: [...document.querySelectorAll('.view')].map((e) => e.id),
 }));
-ok('A1 版本参数 CSS 137 / APP 122', a.cssV === '145' && a.appV === '129', { css: a.cssV, app: a.appV });
+ok('A1 版本参数 CSS 137 / APP 122', a.cssV === '146' && a.appV === '130', { css: a.cssV, app: a.appV });
 ok('A2 显示名改为 Wallpaper Engine', a.bootName === 'Wallpaper Engine', a.bootName);
 ok('A3 页面无「壁纸引擎」残留', a.hasChinese === false);
 ok('A4 榜单里确有一行 Wallpaper Engine', a.pageNames.some((n) => n.startsWith('Wallpaper Engine')), a.pageNames.filter((n) => /Wallpaper/i.test(n)));
-ok('A5 五张导航卡名称未变', JSON.stringify(a.cards) === JSON.stringify(['游戏时长', '最近游玩', '成就', '游戏库', '数据']), a.cards);
-ok('A6 五个视图 id 未变', JSON.stringify(a.views) === JSON.stringify(['view-lifetime', 'view-recent', 'view-ach', 'view-timeline', 'view-data']), a.views);
+ok('A5 四张导航卡名称未变｜第129轮删数据卡（原五张）', JSON.stringify(a.cards) === JSON.stringify(['游戏时长', '最近游玩', '成就', '游戏库']), a.cards);
+ok('A6 四个视图 id 未变｜第129轮删数据视图（原五个）', JSON.stringify(a.views) === JSON.stringify(['view-lifetime', 'view-recent', 'view-ach', 'view-timeline']), a.views);
 
 /* ---------- B 目录结构 ---------- */
 const b = await page.evaluate(() => ({
@@ -127,7 +127,7 @@ ok('D4 点累计榜行毫无反应（不切视图 / 不改 hash / 非 pointer �
   { before: dBefore, ...d });
 ok('D5 单游戏详情整条线已删除（无 #drill-more / 无返回按钮）', !d.drillMore && !d.backBtn, { more: d.drillMore, back: d.backBtn });
 
-for (const [card, view] of [['#card-ach', 'view-ach'], ['#card-games', 'view-timeline'], ['#card-data', 'view-data'], ['#card-lifetime', 'view-lifetime']]) {
+for (const [card, view] of [['#card-ach', 'view-ach'], ['#card-games', 'view-timeline'], ['#card-lifetime', 'view-lifetime']]) {
   await page.click(card);
   await page.waitForTimeout(260);
   const v = await page.evaluate(() => document.querySelector('.view.active')?.id);

@@ -163,13 +163,13 @@
     if (lt && !lt.querySelector('.sk-row') && !lt.querySelector('.rank-item')) {
       lt.innerHTML = rankSkeleton(8);
     }
-    ['c-lifetime', 'c-recent', 'c-ach', 'c-games', 'c-data'].forEach((id) => {
+    ['c-lifetime', 'c-recent', 'c-ach', 'c-games'].forEach((id) => {
       const el = $(id);
       if (el && el.textContent.trim() === '—') el.classList.add('sk-value');
     });
   }
   function clearCardSkeleton() {
-    ['c-lifetime', 'c-recent', 'c-ach', 'c-games', 'c-data'].forEach((id) => {
+    ['c-lifetime', 'c-recent', 'c-ach', 'c-games'].forEach((id) => {
       $(id)?.classList.remove('sk-value');
     });
   }
@@ -364,15 +364,7 @@
       $('c-ach').textContent = '—';
     }
 
-    // 数据卡：数据截止时间（不加速度前缀，保持卡片轻量）
-    $('c-data').textContent = asOf ?? '等待采集';
-
-    const dr = $('data-range');
-    if (dr) {
-      dr.textContent = asOf
-        ? `数据截至 ${asOf}` + (state.meta.tracking_since ? ` · 每日记录自 ${state.meta.tracking_since}` : '')
-        : '等待首次采集';
-    }
+    // 第 129 轮：数据卡与数据视图已删除，不再填充 #c-data / #data-range。
   }
 
   // ---------- ① 游戏累计 ----------
@@ -1407,7 +1399,7 @@
     const h = (location.hash || '').replace(/^#\/?/, '');
     if (!h) return false;
     const seg = h.split('/').filter(Boolean);
-    const view = ['lifetime', 'recent', 'ach', 'timeline', 'data'].includes(seg[0]) ? seg[0] : null;
+    const view = ['lifetime', 'recent', 'ach', 'timeline'].includes(seg[0]) ? seg[0] : null;
     if (!view) return false;
     // 第 115 轮：'g/<appid>' 段已废弃（单游戏下钻整条线删除），带了也只按视图处理
     switchView(view, { instant: true });
@@ -1464,7 +1456,6 @@
         }
       }
       if (v === 'timeline') renderTimeline();
-      if (v === 'data') renderReport();
       if (v === 'lifetime') fitRankRows();
       syncHash();
     };
@@ -1596,7 +1587,7 @@
     });
     $('card-recent').addEventListener('click', () => switchView('recent'));
     $('card-ach').addEventListener('click', () => switchView('ach'));
-    $('card-data').addEventListener('click', () => switchView('data'));
+    // 第 129 轮：#card-data 已删除（数据视图整体移除）
 
     // 成就页：游戏筛选
     $('ach-game').addEventListener('change', (e) => {
@@ -1614,9 +1605,7 @@
 
     // 第 111 轮：月份翻页（‹ ›）已随「两月并排日历」一起移除，
     // 现在由点阵上方的年份选择器切换范围。
-
-    $('btn-csv-daily').addEventListener('click', () => download('steam-daily.csv', csvDaily()));
-    $('btn-csv-lifetime').addEventListener('click', () => download('steam-games-lifetime.csv', csvLifetime()));
+    // 第 129 轮：导出按钮随数据视图删除，CSV 相关绑定一并移除。
   }
 
   (async function init() {
@@ -1641,12 +1630,11 @@
       // 不必等成就明细——这正是"首屏不再等 285KB"的关键
       renderLifetime();
       renderAch();      // 此处只有 stats 摘要，成就页显示骨架
-      renderHealth();
       buildAchSelect();
-      // 第 83 轮新增块：热力图 / 勋章墙 / 推荐 / 阶段报告，以及新交互的一次性绑定
+      // 第 83 轮新增块：热力图 / 勋章墙 / 推荐，以及新交互的一次性绑定
+      // 第 129 轮：renderHealth / renderReport 随数据视图删除
       bindMore();
       renderBadges();
-      renderReport();
       // 有深链就按深链走（applyHash 内部已切视图）；没有就用默认视图。
       // 首屏不播 View Transition：过渡回调是异步的，会把深链打开的详情面板又关回去。
       if (!applyHash()) switchView('lifetime', { instant: true });

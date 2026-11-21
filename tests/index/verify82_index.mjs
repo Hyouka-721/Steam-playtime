@@ -59,8 +59,8 @@ const titleRule = (cssNC.match(/\.site-title\s*\{[^}]*\}/) || [''])[0];
 ok('A7 .site-title 声明了 user-select:none（含 -webkit- 前缀）',
   /user-select:\s*none/.test(titleRule) && /-webkit-user-select:\s*none/.test(titleRule), titleRule.slice(0, 90));
 
-ok('A8 版本号已 bump：style.css?v=145 / app.js?v=129',
-  html.includes('style.css?v=145') && html.includes('app.js?v=129'),
+ok('A8 版本号已 bump：style.css?v=146 / app.js?v=130',
+  html.includes('style.css?v=146') && html.includes('app.js?v=130'),
   (html.match(/(style\.css|app\.js)\?v=\d+/g) || []).join(' '));
 
 /* ================= B 运行时 ================= */
@@ -125,9 +125,9 @@ await page.waitForTimeout(300);
 const theme2 = await page.evaluate(() => document.documentElement.dataset.theme);
 ok('B6 史蒂夫主题键点击仍切换主题', theme2 !== theme, `${theme} → ${theme2}`);
 
-// B7：五张概览卡仍能切视图
+// B7：概览卡仍能切视图（第129轮删数据卡 → 不再测 #card-data）
 const viewOk = [];
-for (const [card, view] of [['#card-ach', 'view-ach'], ['#card-data', 'view-data'], ['#card-lifetime', 'view-lifetime']]) {
+for (const [card, view] of [['#card-ach', 'view-ach'], ['#card-lifetime', 'view-lifetime']]) {
   await page.click(card);
   await page.waitForTimeout(320);
   viewOk.push(await page.evaluate((v) => {
