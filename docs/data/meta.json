@@ -2,10 +2,10 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-11-19T22:42:36.474Z",
-  "generated_at_local": "2026-11-20",
+  "generated_at": "2026-11-20T22:17:49.043Z",
+  "generated_at_local": "2026-11-21",
   "tracking_since": "2026-10-13",
-  "last_snapshot_date": "2026-11-19",
+  "last_snapshot_date": "2026-11-20",
   "steamid_hash": "a8474caf",
   "months": [
     "2026-10",
@@ -27,17 +27,17 @@
     "990630"
   ],
   "stats": {
-    "lifetime_minutes": 86213,
-    "lifetime_hours": 1436.9,
+    "lifetime_minutes": 86435,
+    "lifetime_hours": 1440.6,
     "owned_games": 55,
     "lifetime_played_games": 38,
-    "total_minutes": 4489,
-    "total_hours": 74.8,
-    "tracked_days": 37,
-    "active_days": 36,
-    "current_streak": 29,
-    "longest_streak": 29,
-    "week_minutes": 482,
+    "total_minutes": 4711,
+    "total_hours": 78.5,
+    "tracked_days": 38,
+    "active_days": 37,
+    "current_streak": 30,
+    "longest_streak": 30,
+    "week_minutes": 704,
     "played_games": 6,
     "best_day": {
       "date": "2026-11-14",
@@ -57,17 +57,17 @@
       "appid": "227300",
       "name": "欧洲卡车模拟2",
       "img_icon_url": "adc18a4fc9adc0330144b76d61cbda68bb2394a0",
-      "total_minutes": 580,
+      "total_minutes": 669,
       "first_day": "2026-10-13",
-      "last_day": "2026-11-19"
+      "last_day": "2026-11-20"
     },
     "246420": {
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "total_minutes": 1457,
+      "total_minutes": 1537,
       "first_day": "2026-10-13",
-      "last_day": "2026-11-19"
+      "last_day": "2026-11-20"
     },
     "431960": {
       "appid": "431960",
@@ -81,9 +81,9 @@
       "appid": "646570",
       "name": "杀戮尖塔",
       "img_icon_url": "33ea124ea8c03a9ce7012d34c3b348a351612fca",
-      "total_minutes": 208,
+      "total_minutes": 261,
       "first_day": "2026-10-16",
-      "last_day": "2026-10-25"
+      "last_day": "2026-11-20"
     },
     "3009140": {
       "appid": "3009140",
@@ -120,15 +120,15 @@
       "appid": "227300",
       "name": "欧洲卡车模拟2",
       "img_icon_url": "adc18a4fc9adc0330144b76d61cbda68bb2394a0",
-      "lifetime_minutes": 8377,
-      "last_played": "2026-11-19"
+      "lifetime_minutes": 8466,
+      "last_played": "2026-11-20"
     },
     "246420": {
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "lifetime_minutes": 1677,
-      "last_played": "2026-11-19"
+      "lifetime_minutes": 1757,
+      "last_played": "2026-11-20"
     },
     "250900": {
       "appid": "250900",
@@ -295,8 +295,8 @@
       "appid": "646570",
       "name": "杀戮尖塔",
       "img_icon_url": "33ea124ea8c03a9ce7012d34c3b348a351612fca",
-      "lifetime_minutes": 30000,
-      "last_played": "2026-10-25"
+      "lifetime_minutes": 30053,
+      "last_played": "2026-11-20"
     },
     "683320": {
       "appid": "683320",

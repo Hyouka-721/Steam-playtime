@@ -3,7 +3,7 @@
   "month": "2026-11",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-11-19T22:42:36.385Z",
+  "generated_at": "2026-11-20T22:17:48.929Z",
   "days": {
     "2026-11-01": {
       "total_minutes": 264,
@@ -384,6 +384,33 @@
           "appid": "3009140",
           "name": "Salt Player for Windows",
           "minutes": 10,
+          "is_new": false
+        }
+      ]
+    },
+    "2026-11-20": {
+      "total_minutes": 222,
+      "span_days": 1,
+      "confidence": "high",
+      "source": "auto",
+      "flags": [],
+      "games": [
+        {
+          "appid": "227300",
+          "name": "Euro Truck Simulator 2",
+          "minutes": 89,
+          "is_new": false
+        },
+        {
+          "appid": "246420",
+          "name": "Kingdom Rush",
+          "minutes": 80,
+          "is_new": false
+        },
+        {
+          "appid": "646570",
+          "name": "Slay the Spire",
+          "minutes": 53,
           "is_new": false
         }
       ]
