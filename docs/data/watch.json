@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-22T16:32:28+08:00",
+  "updated_at": "2026-11-22T16:32:46+08:00",
   "items": [
     {
       "id": "2026-11-22-whiplash",
@@ -294,15 +294,15 @@
       "title_en": "花束みたいな恋をした",
       "year": 2021,
       "rating": 8.5,
+      "order": 2,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "爱情",
         "剧情"
       ],
-      "order": 1,
-      "note": "爱情的底色，是成长命题",
-      "countries": [
-        "日本"
-      ]
+      "note": "爱情的底色，是成长命题"
     },
     {
       "id": "2026-04-05-the-secret-life-of-walter-mitty",
