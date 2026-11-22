@@ -334,21 +334,22 @@
       "kind": "series",
       "watched_at": "2026-02-14",
       "poster": "img/watch/swords-into-plowshares-bbd8bfc2.webp",
+      "added_at": "2026-10-25T09:53:34+08:00",
       "poster_w": 640,
       "poster_h": 1138,
       "poster_320": "img/watch/swords-into-plowshares-bbd8bfc2-320.webp",
       "poster_480": "img/watch/swords-into-plowshares-bbd8bfc2-480.webp",
       "title_en": "Swords into Plowshares",
       "year": 2026,
-      "rating": 8.5,
+      "rating": 8,
+      "order": 3,
+      "countries": [
+        "中国"
+      ],
       "tags": [
         "剧情"
       ],
-      "note": "就算有三千轮日月春秋",
-      "added_at": "2026-10-25T09:53:34+08:00",
-      "countries": [
-        "中国"
-      ]
+      "note": "就算有三千轮日月春秋"
     }
   ]
 }
