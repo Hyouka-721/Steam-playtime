@@ -737,16 +737,16 @@
       "poster_480": "img/watch/item-f52b2160-480.webp",
       "title_en": "青春ブタ野郎はバニーガール先輩の夢を見ない",
       "year": 2018,
-      "rating": 9,
-      "order": 5,
+      "rating": 8.5,
+      "order": 2,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "动画",
         "爱情"
       ],
-      "note": "人活着就是为了樱岛麻衣",
-      "countries": [
-        "日本"
-      ]
+      "note": "人活着就是为了樱岛麻衣"
     },
     {
       "id": "2020-05-02-item",
