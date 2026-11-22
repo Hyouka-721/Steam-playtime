@@ -75,23 +75,24 @@
       "kind": "movie",
       "watched_at": "2026-10-17",
       "poster": "img/watch/inside-out-2-3d6419ef.webp",
+      "added_at": "2026-10-24T22:28:04+08:00",
       "poster_w": 640,
       "poster_h": 914,
       "poster_320": "img/watch/inside-out-2-3d6419ef-320.webp",
       "poster_480": "img/watch/inside-out-2-3d6419ef-480.webp",
       "title_en": "Inside Out 2",
       "year": 2024,
-      "rating": 7,
+      "rating": 6.5,
+      "order": 3,
+      "countries": [
+        "美国"
+      ],
       "tags": [
         "动画",
         "奇幻",
         "冒险"
       ],
-      "note": "成长，就是有能力重建破碎的自己",
-      "added_at": "2026-10-24T22:28:04+08:00",
-      "countries": [
-        "美国"
-      ]
+      "note": "成长，就是有能力重建破碎的自己"
     },
     {
       "id": "2026-09-26-f1-the-movie",
