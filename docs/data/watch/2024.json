@@ -60,16 +60,17 @@
       "poster_480": "img/watch/cyberpunk-edgerunners-8d0ae9f0-480.webp",
       "title_en": "Cyberpunk: Edgerunners",
       "year": 2022,
-      "rating": 8,
+      "rating": 7.5,
+      "order": 3,
+      "countries": [
+        "日本",
+        "美国"
+      ],
       "tags": [
         "动画",
         "科幻"
       ],
-      "note": "边缘行者",
-      "countries": [
-        "日本",
-        "美国"
-      ]
+      "note": "边缘行者"
     },
     {
       "id": "2024-11-26-item",
