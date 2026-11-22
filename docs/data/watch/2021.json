@@ -407,6 +407,7 @@
       "kind": "series",
       "watched_at": "2021-01-17",
       "poster": "img/watch/item-b60713b9.webp",
+      "added_at": "2026-10-25T13:30:34+08:00",
       "poster_w": 640,
       "poster_h": 807,
       "poster_320": "img/watch/item-b60713b9-320.webp",
@@ -414,15 +415,15 @@
       "title_en": "半沢直樹",
       "year": 2013,
       "rating": 8.5,
+      "order": 2,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "剧情",
         "犯罪"
       ],
-      "note": "以牙还牙",
-      "added_at": "2026-10-25T13:30:34+08:00",
-      "countries": [
-        "日本"
-      ]
+      "note": "以牙还牙"
     }
   ]
 }

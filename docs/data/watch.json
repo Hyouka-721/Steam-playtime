@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-22T18:19:56+08:00",
+  "updated_at": "2026-11-22T18:57:28+08:00",
   "items": [
     {
       "id": "2026-11-22-whiplash",
@@ -1634,6 +1634,7 @@
       "kind": "series",
       "watched_at": "2021-01-17",
       "poster": "img/watch/item-b60713b9.webp",
+      "added_at": "2026-10-25T13:30:34+08:00",
       "poster_w": 640,
       "poster_h": 807,
       "poster_320": "img/watch/item-b60713b9-320.webp",
@@ -1641,15 +1642,15 @@
       "title_en": "半沢直樹",
       "year": 2013,
       "rating": 8.5,
+      "order": 2,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "剧情",
         "犯罪"
       ],
-      "note": "以牙还牙",
-      "added_at": "2026-10-25T13:30:34+08:00",
-      "countries": [
-        "日本"
-      ]
+      "note": "以牙还牙"
     },
     {
       "id": "2020-12-30-leap",
@@ -1755,7 +1756,7 @@
       "title_en": "アンナチュラル",
       "year": 2018,
       "rating": 8.5,
-      "order": 3,
+      "order": 2,
       "countries": [
         "日本"
       ],
