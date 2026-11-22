@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-22T16:45:06+08:00",
+  "updated_at": "2026-11-22T16:46:56+08:00",
   "items": [
     {
       "id": "2026-11-22-whiplash",
@@ -1381,15 +1381,16 @@
       "poster_320": "img/watch/item-2dfd5c7d-320.webp",
       "title_en": "どろろ",
       "year": 2019,
-      "rating": 7,
+      "rating": 6.5,
+      "order": 3,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "动画",
         "奇幻"
       ],
-      "note": "どろろ",
-      "countries": [
-        "日本"
-      ]
+      "note": "どろろ"
     },
     {
       "id": "2021-06-26-item",
