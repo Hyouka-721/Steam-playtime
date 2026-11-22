@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-22T16:32:16+08:00",
+  "updated_at": "2026-11-22T16:32:28+08:00",
   "items": [
     {
       "id": "2026-11-22-whiplash",
@@ -201,15 +201,16 @@
       "poster_480": "img/watch/the-million-pound-note-703e3519-480.webp",
       "title_en": "The Million Pound Note",
       "year": 1954,
-      "rating": 8,
+      "rating": 7.5,
+      "order": 3,
+      "countries": [
+        "英国"
+      ],
       "tags": [
         "喜剧",
         "剧情"
       ],
-      "note": "金钱的象征",
-      "countries": [
-        "英国"
-      ]
+      "note": "金钱的象征"
     },
     {
       "id": "2026-05-09-titanic",
