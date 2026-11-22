@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-22T16:43:55+08:00",
+  "updated_at": "2026-11-22T16:45:06+08:00",
   "items": [
     {
       "id": "2026-11-22-whiplash",
@@ -1123,15 +1123,16 @@
       "poster_480": "img/watch/empresses-in-the-palace-f648f123-480.webp",
       "title_en": "Empresses in the Palace",
       "year": 2011,
-      "rating": 7.5,
+      "rating": 7,
+      "order": 3,
+      "countries": [
+        "中国"
+      ],
       "tags": [
         "历史",
         "剧情"
       ],
-      "note": "长相思，长相守",
-      "countries": [
-        "中国"
-      ]
+      "note": "长相思，长相守"
     },
     {
       "id": "2022-02-05-harry-potter-and-the-chamber-of-secrets",
