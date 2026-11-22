@@ -1,6 +1,26 @@
 {
-  "updated_at": "2026-11-18T19:15:15+08:00",
+  "updated_at": "2026-11-22T16:28:29+08:00",
   "items": [
+    {
+      "id": "2026-11-22-whiplash",
+      "title": "爆裂鼓手",
+      "kind": "movie",
+      "watched_at": "2026-11-22",
+      "added_at": "2026-11-22T16:28:29+08:00",
+      "poster": "img/watch/whiplash-98d21b67.webp",
+      "poster_w": 640,
+      "poster_h": 948,
+      "poster_320": "img/watch/whiplash-98d21b67-320.webp",
+      "poster_480": "img/watch/whiplash-98d21b67-480.webp",
+      "title_en": "Whiplash",
+      "year": 2014,
+      "rating": 7.5,
+      "order": 3,
+      "countries": [
+        "美国"
+      ],
+      "note": "你对我不屑一顾，我也一样"
+    },
     {
       "id": "2026-10-31-dear-you",
       "title": "给阿嬷的情书",
