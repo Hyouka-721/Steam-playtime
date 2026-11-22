@@ -31,23 +31,24 @@
       "kind": "movie",
       "watched_at": "2025-06-13",
       "poster": "img/watch/dunkirk-5730ef3d.webp",
+      "added_at": "2026-10-24T22:46:37+08:00",
       "poster_w": 640,
       "poster_h": 948,
       "poster_320": "img/watch/dunkirk-5730ef3d-320.webp",
       "poster_480": "img/watch/dunkirk-5730ef3d-480.webp",
       "title_en": "Dunkirk",
       "year": 2017,
-      "rating": 6.5,
+      "rating": 6,
+      "order": 3,
+      "countries": [
+        "英国",
+        "美国"
+      ],
       "tags": [
         "战争",
         "历史"
       ],
-      "note": "疲惫的战争",
-      "added_at": "2026-10-24T22:46:37+08:00",
-      "countries": [
-        "英国",
-        "美国"
-      ]
+      "note": "疲惫的战争"
     },
     {
       "id": "2025-05-14-prison-break",
