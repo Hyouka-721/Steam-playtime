@@ -1,13 +1,13 @@
 {
-  "updated_at": "2026-11-22T16:28:29+08:00",
+  "updated_at": "2026-11-22T16:30:56+08:00",
   "items": [
     {
       "id": "2026-11-22-whiplash",
       "title": "爆裂鼓手",
       "kind": "movie",
       "watched_at": "2026-11-22",
-      "added_at": "2026-11-22T16:28:29+08:00",
       "poster": "img/watch/whiplash-98d21b67.webp",
+      "added_at": "2026-11-22T16:28:29+08:00",
       "poster_w": 640,
       "poster_h": 948,
       "poster_320": "img/watch/whiplash-98d21b67-320.webp",
