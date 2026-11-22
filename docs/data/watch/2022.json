@@ -86,15 +86,16 @@
       "poster_320": "img/watch/item-53246496-320.webp",
       "title_en": "新世紀エヴァンゲリオン",
       "year": 1995,
-      "rating": 8,
+      "rating": 7.5,
+      "order": 3,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "动画",
         "科幻"
       ],
-      "note": "在世界的中心呼唤爱的野兽",
-      "countries": [
-        "日本"
-      ]
+      "note": "在世界的中心呼唤爱的野兽"
     },
     {
       "id": "2022-08-01-item",
