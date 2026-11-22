@@ -101,23 +101,24 @@
       "kind": "series",
       "watched_at": "2024-11-23",
       "poster": "img/watch/arcane-2e38f6df.webp",
+      "added_at": "2026-10-24T23:23:27+08:00",
       "poster_w": 640,
       "poster_h": 948,
       "poster_320": "img/watch/arcane-2e38f6df-320.webp",
       "poster_480": "img/watch/arcane-2e38f6df-480.webp",
       "title_en": "Arcane",
       "year": 2021,
-      "rating": 8.5,
+      "rating": 8,
+      "order": 3,
+      "countries": [
+        "美国",
+        "法国"
+      ],
       "tags": [
         "动画",
         "科幻"
       ],
-      "note": "你所讨厌的人或许正是自己",
-      "added_at": "2026-10-24T23:23:27+08:00",
-      "countries": [
-        "美国",
-        "法国"
-      ]
+      "note": "你所讨厌的人或许正是自己"
     },
     {
       "id": "2024-11-17-item",
