@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-22T16:38:16+08:00",
+  "updated_at": "2026-11-22T16:39:28+08:00",
   "items": [
     {
       "id": "2026-11-22-whiplash",
@@ -690,23 +690,24 @@
       "kind": "movie",
       "watched_at": "2024-03-11",
       "poster": "img/watch/oppenheimer-04368923.webp",
+      "added_at": "2026-10-24T23:38:18+08:00",
       "poster_w": 640,
       "poster_h": 948,
       "poster_320": "img/watch/oppenheimer-04368923-320.webp",
       "poster_480": "img/watch/oppenheimer-04368923-480.webp",
       "title_en": "Oppenheimer",
       "year": 2023,
-      "rating": 8,
+      "rating": 7.5,
+      "order": 3,
+      "countries": [
+        "美国",
+        "英国"
+      ],
       "tags": [
         "历史",
         "剧情"
       ],
-      "note": "我正变成死亡，世界的毁灭者",
-      "added_at": "2026-10-24T23:38:18+08:00",
-      "countries": [
-        "美国",
-        "英国"
-      ]
+      "note": "我正变成死亡，世界的毁灭者"
     },
     {
       "id": "2023-12-27-item",
