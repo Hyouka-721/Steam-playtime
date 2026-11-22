@@ -1,0 +1,66 @@
+/* motion.css — 第 135 轮：不牺牲性能的流畅度增强
+ * ① content-visibility 长列表渲染跳过（视觉零变化）
+ * ② 错峰淡入 .rv：IntersectionObserver 挂载，纯 opacity + 8px translateY，合成层完成
+ * ③ 交互微反馈：卡片光泽扫过 + 按钮涟漪，均为伪元素 transform/opacity
+ * 全部走 compositor（transform/opacity），不触发重排重绘；reduced-motion 统一关闭。
+ * ⚠️ 独立文件：不塞进 style.css / watch.css，避开两页套件对「首个 @media / 首个块」的位置敏感判据。
+ */
+
+/* ---------- ① 长列表渲染跳过 ----------
+   contain-intrinsic-size 的估值取自身页实测行高（榜单 81.8px、海报卡约 420px），
+   auto 关键字让浏览器记住首次真实渲染尺寸，滚动过去后不再用估值。 */
+/* ⚠️ content-visibility 的范围被契约压到最小：
+   · #lt-list 首屏榜单不用 —— verify117 B1 按首屏 8 整行断言，估值会让第 8 行判半行
+   · .tl-item 不用 —— verify67 遍历条目高，估值 120px 让 chrome 差值出现多值
+   只对 .st-panel（年报卡，点开才出现、不被几何断言遍历）启用，收益虽小但零风险。 */
+@media (min-width: 861px) {
+  .st-panel {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 120px;
+  }
+}
+
+/* ---------- ② 错峰淡入 ----------
+   .rv 初始为隐藏态，JS 在元素临近视口时加 .in。
+   translateY 只有 8px 且 0.42s 结束，不参与任何 getBoundingClientRect 的稳态断言
+   —— 测稳态时动画早已结束（verify 都 waitForTimeout ≥ 500ms）。
+   ⚠️ 绝不应用到 .poster：它有 verify128 B5「入场动画必须是 w-fade-in」的契约。 */
+.rv { opacity: 0; transform: translateY(8px); }
+.rv.in {
+  opacity: 1; transform: none;
+  transition: opacity .42s var(--ease, ease), transform .42s var(--ease, ease);
+  transition-delay: var(--rv-d, 0ms);
+}
+/* 榜单行只用 opacity：verify117 用 getBoundingClientRect 判首屏 8 整行，
+   translateY 会让动画中的行几何偏移、把第 8 行误判成半行。opacity 不碰几何。 */
+.rv.flat { transform: none; }
+.rv.flat.in { transform: none; transition: opacity .42s var(--ease, ease); }
+
+/* ---------- ③ 交互微反馈 ---------- */
+/* 卡片光泽：一条柔光从左上扫到右下，只在 hover 期间跑一次，纯 transform+opacity。 */
+.card, .w-sort-btn, .card-nav { position: relative; overflow: hidden; }
+.card::after, .card-nav::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, .16) 50%, transparent 62%);
+  transform: translateX(-120%); opacity: 0;
+  transition: transform .55s ease, opacity .55s ease;
+}
+.card:hover::after, .card-nav:hover::after { transform: translateX(120%); opacity: 1; }
+
+/* 按钮涟漪：伪元素从中心 scale 展开，松开即消失。圆形用 50%（符合圆角红线）。 */
+.w-sort-btn::after {
+  content: ''; position: absolute; left: 50%; top: 50%;
+  width: 220%; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, .22), transparent 60%);
+  transform: translate(-50%, -50%) scale(0); opacity: 0;
+  transition: transform .4s ease, opacity .4s ease;
+  pointer-events: none;
+}
+.w-sort-btn:active::after { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+
+/* ---------- 降级：系统要求减少动效时全部关闭 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .rank-item { content-visibility: visible; }
+  .rv, .rv.in { opacity: 1; transform: none; transition: none; }
+  .card::after, .card-nav::after, .w-sort-btn::after { display: none; }
+}
