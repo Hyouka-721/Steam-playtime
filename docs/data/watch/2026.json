@@ -2,6 +2,29 @@
   "year": "2026",
   "items": [
     {
+      "id": "2026-11-22-whiplash",
+      "title": "爆裂鼓手",
+      "kind": "movie",
+      "watched_at": "2026-11-22",
+      "added_at": "2026-11-22T16:28:29+08:00",
+      "poster": "blob:https://hyouka-721.github.io/09fae614-0705-45af-b54b-b310789d03dd",
+      "poster_w": 640,
+      "poster_h": 948,
+      "poster_320": "blob:https://hyouka-721.github.io/e221882d-f6f4-48df-b099-09be30cefd42",
+      "poster_480": "blob:https://hyouka-721.github.io/40f836b4-fbac-44da-9b49-15d8e3de7c49",
+      "title_en": "Whiplash",
+      "year": 2014,
+      "rating": 7.5,
+      "order": 3,
+      "countries": [
+        "美国"
+      ],
+      "note": "你对我不屑一顾，我也一样",
+      "__posterPath": "img/watch/whiplash-98d21b67.webp",
+      "__poster320Path": "img/watch/whiplash-98d21b67-320.webp",
+      "__poster480Path": "img/watch/whiplash-98d21b67-480.webp"
+    },
+    {
       "id": "2026-10-31-dear-you",
       "title": "给阿嬷的情书",
       "kind": "movie",
