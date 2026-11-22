@@ -2,6 +2,26 @@
   "year": "2026",
   "items": [
     {
+      "id": "2026-11-22-whiplash",
+      "title": "爆裂鼓手",
+      "kind": "movie",
+      "watched_at": "2026-11-22",
+      "poster": "img/watch/whiplash-98d21b67.webp",
+      "added_at": "2026-11-22T16:28:29+08:00",
+      "poster_w": 640,
+      "poster_h": 948,
+      "poster_320": "img/watch/whiplash-98d21b67-320.webp",
+      "poster_480": "img/watch/whiplash-98d21b67-480.webp",
+      "title_en": "Whiplash",
+      "year": 2014,
+      "rating": 7.5,
+      "order": 3,
+      "countries": [
+        "美国"
+      ],
+      "note": "你对我不屑一顾，我也一样"
+    },
+    {
       "id": "2026-10-31-dear-you",
       "title": "给阿嬷的情书",
       "kind": "movie",
@@ -14,8 +34,8 @@
       "poster_480": "img/watch/dear-you-debeb470-480.webp",
       "title_en": "Dear You",
       "year": 2026,
-      "rating": 9.5,
-      "order": 2,
+      "rating": 9,
+      "order": 1,
       "countries": [
         "中国"
       ],
@@ -55,23 +75,24 @@
       "kind": "movie",
       "watched_at": "2026-10-17",
       "poster": "img/watch/inside-out-2-3d6419ef.webp",
+      "added_at": "2026-10-24T22:28:04+08:00",
       "poster_w": 640,
       "poster_h": 914,
       "poster_320": "img/watch/inside-out-2-3d6419ef-320.webp",
       "poster_480": "img/watch/inside-out-2-3d6419ef-480.webp",
       "title_en": "Inside Out 2",
       "year": 2024,
-      "rating": 7,
+      "rating": 6.5,
+      "order": 3,
+      "countries": [
+        "美国"
+      ],
       "tags": [
         "动画",
         "奇幻",
         "冒险"
       ],
-      "note": "成长，就是有能力重建破碎的自己",
-      "added_at": "2026-10-24T22:28:04+08:00",
-      "countries": [
-        "美国"
-      ]
+      "note": "成长，就是有能力重建破碎的自己"
     },
     {
       "id": "2026-09-26-f1-the-movie",
@@ -86,14 +107,15 @@
       "poster_480": "img/watch/f1-the-movie-25578d79-480.webp",
       "title_en": "F1: The Movie",
       "year": 2025,
-      "rating": 7.5,
+      "rating": 7,
+      "order": 3,
+      "countries": [
+        "美国"
+      ],
       "tags": [
         "剧情"
       ],
-      "note": "赛道即归途",
-      "countries": [
-        "美国"
-      ]
+      "note": "赛道即归途"
     },
     {
       "id": "2026-09-06-the-legend-of-hei-2",
@@ -131,7 +153,7 @@
       "poster_480": "img/watch/robot-dreams-37fc156f-480.webp",
       "title_en": "Robot Dreams",
       "year": 2023,
-      "rating": 8,
+      "rating": 7.5,
       "order": 3,
       "countries": [
         "西班牙",
@@ -179,15 +201,16 @@
       "poster_480": "img/watch/the-million-pound-note-703e3519-480.webp",
       "title_en": "The Million Pound Note",
       "year": 1954,
-      "rating": 8,
+      "rating": 7.5,
+      "order": 3,
+      "countries": [
+        "英国"
+      ],
       "tags": [
         "喜剧",
         "剧情"
       ],
-      "note": "金钱的象征",
-      "countries": [
-        "英国"
-      ]
+      "note": "金钱的象征"
     },
     {
       "id": "2026-05-09-titanic",
@@ -271,15 +294,15 @@
       "title_en": "花束みたいな恋をした",
       "year": 2021,
       "rating": 8.5,
+      "order": 2,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "爱情",
         "剧情"
       ],
-      "order": 1,
-      "note": "爱情的底色，是成长命题",
-      "countries": [
-        "日本"
-      ]
+      "note": "爱情的底色，是成长命题"
     },
     {
       "id": "2026-04-05-the-secret-life-of-walter-mitty",
@@ -311,21 +334,22 @@
       "kind": "series",
       "watched_at": "2026-02-14",
       "poster": "img/watch/swords-into-plowshares-bbd8bfc2.webp",
+      "added_at": "2026-10-25T09:53:34+08:00",
       "poster_w": 640,
       "poster_h": 1138,
       "poster_320": "img/watch/swords-into-plowshares-bbd8bfc2-320.webp",
       "poster_480": "img/watch/swords-into-plowshares-bbd8bfc2-480.webp",
       "title_en": "Swords into Plowshares",
       "year": 2026,
-      "rating": 8.5,
+      "rating": 8,
+      "order": 3,
+      "countries": [
+        "中国"
+      ],
       "tags": [
         "剧情"
       ],
-      "note": "就算有三千轮日月春秋",
-      "added_at": "2026-10-25T09:53:34+08:00",
-      "countries": [
-        "中国"
-      ]
+      "note": "就算有三千轮日月春秋"
     }
   ]
 }

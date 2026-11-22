@@ -14,7 +14,7 @@
       "poster_480": "img/watch/soul-c656a52b-480.webp",
       "title_en": "Soul",
       "year": 2020,
-      "rating": 8,
+      "rating": 7.5,
       "order": 3,
       "countries": [
         "美国"
@@ -30,25 +30,25 @@
       "title": "破冰行动",
       "kind": "series",
       "watched_at": "2022-11-09",
-      "added_at": "2026-10-31T17:18:43+08:00",
       "poster": "img/watch/the-thunder-90040ddf.webp",
+      "added_at": "2026-10-31T17:18:43+08:00",
       "poster_w": 640,
       "poster_h": 1138,
       "poster_320": "img/watch/the-thunder-90040ddf-320.webp",
       "poster_480": "img/watch/the-thunder-90040ddf-480.webp",
       "title_en": "The Thunder",
       "year": 2019,
-      "rating": 5.5,
+      "rating": 5,
       "order": 3,
-      "note": "The Thunder",
+      "countries": [
+        "中国"
+      ],
       "tags": [
         "剧情",
         "犯罪",
         "悬疑"
       ],
-      "countries": [
-        "中国"
-      ]
+      "note": "The Thunder"
     },
     {
       "id": "2022-09-14-yes-minister",
@@ -86,15 +86,16 @@
       "poster_320": "img/watch/item-53246496-320.webp",
       "title_en": "新世紀エヴァンゲリオン",
       "year": 1995,
-      "rating": 8,
+      "rating": 7.5,
+      "order": 3,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "动画",
         "科幻"
       ],
-      "note": "在世界的中心呼唤爱的野兽",
-      "countries": [
-        "日本"
-      ]
+      "note": "在世界的中心呼唤爱的野兽"
     },
     {
       "id": "2022-08-01-item",
@@ -224,15 +225,16 @@
       "poster_480": "img/watch/empresses-in-the-palace-f648f123-480.webp",
       "title_en": "Empresses in the Palace",
       "year": 2011,
-      "rating": 7.5,
+      "rating": 7,
+      "order": 3,
+      "countries": [
+        "中国"
+      ],
       "tags": [
         "历史",
         "剧情"
       ],
-      "note": "长相思，长相守",
-      "countries": [
-        "中国"
-      ]
+      "note": "长相思，长相守"
     },
     {
       "id": "2022-02-05-harry-potter-and-the-chamber-of-secrets",

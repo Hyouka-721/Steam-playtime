@@ -60,16 +60,17 @@
       "poster_480": "img/watch/cyberpunk-edgerunners-8d0ae9f0-480.webp",
       "title_en": "Cyberpunk: Edgerunners",
       "year": 2022,
-      "rating": 8,
+      "rating": 7.5,
+      "order": 3,
+      "countries": [
+        "日本",
+        "美国"
+      ],
       "tags": [
         "动画",
         "科幻"
       ],
-      "note": "边缘行者",
-      "countries": [
-        "日本",
-        "美国"
-      ]
+      "note": "边缘行者"
     },
     {
       "id": "2024-11-26-item",
@@ -100,23 +101,24 @@
       "kind": "series",
       "watched_at": "2024-11-23",
       "poster": "img/watch/arcane-2e38f6df.webp",
+      "added_at": "2026-10-24T23:23:27+08:00",
       "poster_w": 640,
       "poster_h": 948,
       "poster_320": "img/watch/arcane-2e38f6df-320.webp",
       "poster_480": "img/watch/arcane-2e38f6df-480.webp",
       "title_en": "Arcane",
       "year": 2021,
-      "rating": 8.5,
+      "rating": 8,
+      "order": 3,
+      "countries": [
+        "美国",
+        "法国"
+      ],
       "tags": [
         "动画",
         "科幻"
       ],
-      "note": "你所讨厌的人或许正是自己",
-      "added_at": "2026-10-24T23:23:27+08:00",
-      "countries": [
-        "美国",
-        "法国"
-      ]
+      "note": "你所讨厌的人或许正是自己"
     },
     {
       "id": "2024-11-17-item",
@@ -217,23 +219,24 @@
       "kind": "movie",
       "watched_at": "2024-03-11",
       "poster": "img/watch/oppenheimer-04368923.webp",
+      "added_at": "2026-10-24T23:38:18+08:00",
       "poster_w": 640,
       "poster_h": 948,
       "poster_320": "img/watch/oppenheimer-04368923-320.webp",
       "poster_480": "img/watch/oppenheimer-04368923-480.webp",
       "title_en": "Oppenheimer",
       "year": 2023,
-      "rating": 8,
+      "rating": 7.5,
+      "order": 3,
+      "countries": [
+        "美国",
+        "英国"
+      ],
       "tags": [
         "历史",
         "剧情"
       ],
-      "note": "我正变成死亡，世界的毁灭者",
-      "added_at": "2026-10-24T23:38:18+08:00",
-      "countries": [
-        "美国",
-        "英国"
-      ]
+      "note": "我正变成死亡，世界的毁灭者"
     }
   ]
 }

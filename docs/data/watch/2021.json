@@ -154,15 +154,16 @@
       "poster_320": "img/watch/item-2dfd5c7d-320.webp",
       "title_en": "どろろ",
       "year": 2019,
-      "rating": 7,
+      "rating": 6.5,
+      "order": 3,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "动画",
         "奇幻"
       ],
-      "note": "どろろ",
-      "countries": [
-        "日本"
-      ]
+      "note": "どろろ"
     },
     {
       "id": "2021-06-26-item",

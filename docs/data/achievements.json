@@ -1,12 +1,12 @@
 {
   "schema": 1,
   "ready": true,
-  "generated_at": "2026-11-20T22:17:49.038Z",
-  "snapshot_date": "2026-11-20",
+  "generated_at": "2026-11-21T20:58:16.466Z",
+  "snapshot_date": "2026-11-21",
   "stats": {
-    "unlocked": 858,
+    "unlocked": 863,
     "total": 2554,
-    "pct": 33.6,
+    "pct": 33.8,
     "games": 32
   },
   "games": {
@@ -620,7 +620,7 @@
           "name": "Quiet Neighborhood",
           "desc": "Enter a misty graveyard filled with the surly dead.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/105600/a3e4fc9470751bf2eec49a0d9fc3409a110328ec.jpg",
-          "percent": 41.6,
+          "percent": 41.5,
           "ts": 1787895216
         },
         {
@@ -1301,8 +1301,48 @@
       "appid": "246420",
       "name": "王国保卫战",
       "total": 74,
-      "unlocked": 53,
+      "unlocked": 58,
       "achievements": [
+        {
+          "api": "ACH_KILLMUSHROOM",
+          "name": "Super Mushroom",
+          "desc": "Defeat Myconid, the Rotten Fungus.",
+          "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/2c3a8556e689b5575d29c9679ea6c7112a12ab01.jpg",
+          "percent": 23.7,
+          "ts": 1795270468
+        },
+        {
+          "api": "ACH_SPORE",
+          "name": "Spore",
+          "desc": "Kill 25 Shrooms without them poisoning your soldiers.",
+          "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/3b356d5ed0302ba709e4860b0c0db2b3a3c48810.jpg",
+          "percent": 24.1,
+          "ts": 1795263783
+        },
+        {
+          "api": "ACH_LUMBERJACK",
+          "name": "Lumberjack",
+          "desc": "Defeat Greenmuck and its minions.",
+          "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/3c480c2c190650b0a7771f5391cea78b29855c74.jpg",
+          "percent": 28.5,
+          "ts": 1795243983
+        },
+        {
+          "api": "ACH_SHEPHERD",
+          "name": "Shepherd",
+          "desc": "Polymorph 50 enemies into sheep.",
+          "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/4b5ae80441814f8b183663ed9573cf6ef9f7b542.jpg",
+          "percent": 34.5,
+          "ts": 1795236355
+        },
+        {
+          "api": "ACH_GOC",
+          "name": "Game of Crowns",
+          "desc": "Defeat Lord Blackburn to avoid war between kingdoms.",
+          "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/98655485053c18b59082c5e7114d29d82e684f0b.jpg",
+          "percent": 23.2,
+          "ts": 1795231187
+        },
         {
           "api": "ACH_MEDIC",
           "name": "Medic!",
@@ -1364,7 +1404,7 @@
           "name": "Axe rain!",
           "desc": "Throw 500 or more axes.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/eb66c8952a350e79d7071427152290c18c653d35.jpg",
-          "percent": 38.1,
+          "percent": 38,
           "ts": 1794573000
         },
         {
@@ -1420,7 +1460,7 @@
           "name": "Orcs must die",
           "desc": "Defeat Gul'Thak and its minions.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/58bb1f3abc9fe72511af6c50748d2a4f3f583656.jpg",
-          "percent": 37.7,
+          "percent": 37.6,
           "ts": 1793798427
         },
         {
@@ -1460,7 +1500,7 @@
           "name": "Beam me up, Scotty",
           "desc": "Teleport 250 or more enemies.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/a078b81edd190a43389fb6f2ff1161b11bdaafa7.jpg",
-          "percent": 35.3,
+          "percent": 35.2,
           "ts": 1793110079
         },
         {
@@ -1468,7 +1508,7 @@
           "name": "G.I. Joe",
           "desc": "Train 1.00 soldiers.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/997b88e6b72915657f90aa162d1ab91b36029e93.jpg",
-          "percent": 54.8,
+          "percent": 54.7,
           "ts": 1792902392
         },
         {
@@ -1476,7 +1516,7 @@
           "name": "Superstar",
           "desc": "Earn 45 stars.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/3efaf50ce1b05c6aa14ad3d07a810e5da1d4dab9.jpg",
-          "percent": 37.9,
+          "percent": 37.8,
           "ts": 1792819263
         },
         {
@@ -1484,7 +1524,7 @@
           "name": "Rocketeer",
           "desc": "Shoot 100 missiles.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/9fb206c795fd51910692884bf05dbf5fe7f5d101.jpg",
-          "percent": 31.8,
+          "percent": 31.7,
           "ts": 1792818947
         },
         {
@@ -1516,7 +1556,7 @@
           "name": "We dine in hell!",
           "desc": "Have your soldiers survive the explosion of 300 demons.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/923051d3767523798418b2e3798557d25d738e2a.jpg",
-          "percent": 52.3,
+          "percent": 52.2,
           "ts": 1792211292
         },
         {
@@ -1524,7 +1564,7 @@
           "name": "Super Mario",
           "desc": "Earn 30 stars.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/72f1ca38b815bb34023c4f95f378b5f79db1107b.jpg",
-          "percent": 58.9,
+          "percent": 58.8,
           "ts": 1792148790
         },
         {
@@ -1540,7 +1580,7 @@
           "name": "AC/DC",
           "desc": "Kill 300 enemies with electricity.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/b0bab9eb1ab3810da225d9656ebbf08b19781852.jpg",
-          "percent": 48.3,
+          "percent": 48.2,
           "ts": 1791986453
         },
         {
@@ -1556,7 +1596,7 @@
           "name": "Terminator",
           "desc": "Kill 10.000 enemies.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/71c68c1935b562113b504db14ba52ecd45f830ec.jpg",
-          "percent": 50.8,
+          "percent": 50.7,
           "ts": 1791985108
         },
         {
@@ -1564,7 +1604,7 @@
           "name": "Is he dead yeti?",
           "desc": "Defeat J.T.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/246420/5e3c4682dc5e8b73a57e2895c60fe219c17075e8.jpg",
-          "percent": 62.8,
+          "percent": 62.7,
           "ts": 1791982453
         },
         {
@@ -1812,7 +1852,7 @@
           "name": "初尝胜果……",
           "desc": "完成一次任务",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/262060/26fed275fcac331b5d3477688742bfc4ea8c9e4d.jpg",
-          "percent": 87.7,
+          "percent": 87.6,
           "ts": 1776748061
         },
         {
@@ -2547,7 +2587,7 @@
           "name": "干杯！",
           "desc": "第一次到达废弃酿酒厂！",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/40ceac56f4d531259009be5d96a1e66a2ffdb25d.jpg",
-          "percent": 26.5,
+          "percent": 26.6,
           "ts": 1743249344
         },
         {
@@ -2595,7 +2635,7 @@
           "name": "消防员",
           "desc": "你完成了灯塔关！",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/350c96712f8cef704f9de6f5afc9aa8841e8e075.jpg",
-          "percent": 10.8,
+          "percent": 10.9,
           "ts": 1743159983
         },
         {
@@ -2627,7 +2667,7 @@
           "name": "泥泞到膝盖",
           "desc": "第一次到达巢穴。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/588650/ea5c5baf039d491395d31902faad1d79c438b671.jpg",
-          "percent": 25.8,
+          "percent": 25.9,
           "ts": 1743148848
         },
         {
@@ -3299,7 +3339,7 @@
           "name": "进阶0",
           "desc": "解锁进阶模式。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/646570/a24229e0772b333e8e374c22cffd8619998bb19b.jpg",
-          "percent": 66.3,
+          "percent": 66.4,
           "ts": 1744612883
         },
         {
@@ -3563,7 +3603,7 @@
           "name": "П",
           "desc": "П",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/67b72b14ac16c161cd260955714830247208e4e0.jpg",
-          "percent": 17.8,
+          "percent": 17.7,
           "ts": 1760104019
         },
         {
@@ -3811,7 +3851,7 @@
           "name": "V",
           "desc": "V",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/733070/ec57d1b050258c9a94e30166f5c0668f18db72ec.jpg",
-          "percent": 34,
+          "percent": 33.9,
           "ts": 1759297873
         },
         {
@@ -4611,7 +4651,7 @@
           "name": "一条蛇的召唤",
           "desc": "我们都被光吸引。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/990630/16573b0df59d21d228a7d991c6b45ee24c002d24.jpg",
-          "percent": 27.5,
+          "percent": 27.6,
           "ts": 1775480917
         },
         {
@@ -4627,7 +4667,7 @@
           "name": "厨师的觉醒",
           "desc": "激起潜在的饥饿……",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/990630/903a284999ffb5b147e52587e73a68681ec35694.jpg",
-          "percent": 35.9,
+          "percent": 36,
           "ts": 1775371148
         },
         {
@@ -4643,7 +4683,7 @@
           "name": "绝望者：十",
           "desc": "悲伤的阴影悬而未决……",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/990630/5085e22ba69cf669929bb1895152a646132e66ff.jpg",
-          "percent": 35.2,
+          "percent": 35.3,
           "ts": 1775137172
         },
         {
@@ -4762,7 +4802,7 @@
           "name": "Welcome To The Jungle!",
           "desc": null,
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1333910/fac93bb6aba8ec04e2ae97603ea5e2f456de5230.jpg",
-          "percent": 32.4,
+          "percent": 32.5,
           "ts": 1766472304
         },
         {
@@ -4794,7 +4834,7 @@
           "name": "Shellebration!",
           "desc": "Find every tortoise and unlock the secret levels.",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1333910/03d34bad0e7a511e8632b7569dd46a6dc9c66abc.jpg",
-          "percent": 46.9,
+          "percent": 47,
           "ts": 1751289675
         },
         {
@@ -4802,7 +4842,7 @@
           "name": "All Done!",
           "desc": "Unlock every normal level in Sizeable!",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1333910/44d039cfe925a222421da1a5e66673f6175a9c78.jpg",
-          "percent": 44.7,
+          "percent": 44.8,
           "ts": 1751288801
         },
         {
@@ -4842,7 +4882,7 @@
           "name": "二人同心",
           "desc": "你们成功了！二人同心，其利断金！",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1426210/785537e13a8c7231a63e8d8fa8bd64a060a06b49.jpg",
-          "percent": 30.9,
+          "percent": 30.8,
           "ts": 1784180142
         },
         {
@@ -4850,7 +4890,7 @@
           "name": "果敢的恶魔",
           "desc": "死了都要秀。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1426210/c0a8abfe121396d38573aa7f1dff601585a6faad.jpg",
-          "percent": 30.3,
+          "percent": 30.2,
           "ts": 1755849140
         },
         {
@@ -4858,7 +4898,7 @@
           "name": "飞天科迪",
           "desc": "向星星发射。",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1426210/602ee8c20ef1d17c7e4428a85b3cbcbc78843df4.jpg",
-          "percent": 43.3,
+          "percent": 43.2,
           "ts": 1755401245
         }
       ]
@@ -5098,7 +5138,7 @@
           "name": "帕鲁工作研究实习生",
           "desc": "完成10种帕鲁工作研究",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1623730/2c4f240cfc43182301fbfdb8e55da274f9d70ac1.jpg",
-          "percent": 23.3,
+          "percent": 23.4,
           "ts": 1774879850
         }
       ]
@@ -5306,7 +5346,7 @@
           "name": "工程师 - 深渊",
           "desc": "使用工程师在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/54c2281c619f3e1c4c31301184e91ed26351c45a.jpg",
-          "percent": 18.9,
+          "percent": 18.8,
           "ts": 1776576541
         },
         {
@@ -5562,7 +5602,7 @@
           "name": "角斗士 - 深渊",
           "desc": "使用角斗士在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/0317f27c4a4010a2d13b7eb4b42a69e1b9d96299.jpg",
-          "percent": 13.3,
+          "percent": 13.2,
           "ts": 1775018759
         },
         {
@@ -5626,7 +5666,7 @@
           "name": "老叟 - 深渊",
           "desc": "使用老叟在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/e5eda9de9306604bcff639c5e884c90f9fe52a7a.jpg",
-          "percent": 15.2,
+          "percent": 15.1,
           "ts": 1774597864
         },
         {
@@ -5682,7 +5722,7 @@
           "name": "法师 - 深渊",
           "desc": "使用法师在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/7c137f698df724b83640368cd9b073782f1ba2ac.jpg",
-          "percent": 20.1,
+          "percent": 20,
           "ts": 1774175385
         },
         {
@@ -5690,7 +5730,7 @@
           "name": "游侠 - 深渊",
           "desc": "使用游侠在深渊赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/7868803e77b2aa456ff4ca07029fd2e071e81077.jpg",
-          "percent": 19.8,
+          "percent": 19.7,
           "ts": 1774153398
         },
         {
@@ -5850,7 +5890,7 @@
           "name": "建造者 - 碰撞区域",
           "desc": "使用建造者在碰撞区域赢一场比赛",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/db736589042f209b43bed9f436c6d5c34071f568.jpg",
-          "percent": 23.8,
+          "percent": 23.7,
           "ts": 1769600884
         },
         {
@@ -6202,7 +6242,7 @@
           "name": "实验",
           "desc": "同时拥有6个不同的武器",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/a897188f49e06e54ca4aeb234602513a9153a2f0.jpg",
-          "percent": 46.9,
+          "percent": 47,
           "ts": 1766760443
         },
         {
@@ -6346,7 +6386,7 @@
           "name": "完美眼力",
           "desc": "达到300范围",
           "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/1942280/2a0717ada7db265529946cff8b13fd3ad9e5fcb4.jpg",
-          "percent": 44.3,
+          "percent": 44.4,
           "ts": 1766133556
         },
         {

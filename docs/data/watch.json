@@ -1,6 +1,26 @@
 {
-  "updated_at": "2026-11-18T19:15:15+08:00",
+  "updated_at": "2026-11-22T16:51:05+08:00",
   "items": [
+    {
+      "id": "2026-11-22-whiplash",
+      "title": "爆裂鼓手",
+      "kind": "movie",
+      "watched_at": "2026-11-22",
+      "poster": "img/watch/whiplash-98d21b67.webp",
+      "added_at": "2026-11-22T16:28:29+08:00",
+      "poster_w": 640,
+      "poster_h": 948,
+      "poster_320": "img/watch/whiplash-98d21b67-320.webp",
+      "poster_480": "img/watch/whiplash-98d21b67-480.webp",
+      "title_en": "Whiplash",
+      "year": 2014,
+      "rating": 7.5,
+      "order": 3,
+      "countries": [
+        "美国"
+      ],
+      "note": "你对我不屑一顾，我也一样"
+    },
     {
       "id": "2026-10-31-dear-you",
       "title": "给阿嬷的情书",
@@ -14,8 +34,8 @@
       "poster_480": "img/watch/dear-you-debeb470-480.webp",
       "title_en": "Dear You",
       "year": 2026,
-      "rating": 9.5,
-      "order": 2,
+      "rating": 9,
+      "order": 1,
       "countries": [
         "中国"
       ],
@@ -55,23 +75,24 @@
       "kind": "movie",
       "watched_at": "2026-10-17",
       "poster": "img/watch/inside-out-2-3d6419ef.webp",
+      "added_at": "2026-10-24T22:28:04+08:00",
       "poster_w": 640,
       "poster_h": 914,
       "poster_320": "img/watch/inside-out-2-3d6419ef-320.webp",
       "poster_480": "img/watch/inside-out-2-3d6419ef-480.webp",
       "title_en": "Inside Out 2",
       "year": 2024,
-      "rating": 7,
+      "rating": 6.5,
+      "order": 3,
+      "countries": [
+        "美国"
+      ],
       "tags": [
         "动画",
         "奇幻",
         "冒险"
       ],
-      "note": "成长，就是有能力重建破碎的自己",
-      "added_at": "2026-10-24T22:28:04+08:00",
-      "countries": [
-        "美国"
-      ]
+      "note": "成长，就是有能力重建破碎的自己"
     },
     {
       "id": "2026-09-26-f1-the-movie",
@@ -86,14 +107,15 @@
       "poster_480": "img/watch/f1-the-movie-25578d79-480.webp",
       "title_en": "F1: The Movie",
       "year": 2025,
-      "rating": 7.5,
+      "rating": 7,
+      "order": 3,
+      "countries": [
+        "美国"
+      ],
       "tags": [
         "剧情"
       ],
-      "note": "赛道即归途",
-      "countries": [
-        "美国"
-      ]
+      "note": "赛道即归途"
     },
     {
       "id": "2026-09-06-the-legend-of-hei-2",
@@ -131,7 +153,7 @@
       "poster_480": "img/watch/robot-dreams-37fc156f-480.webp",
       "title_en": "Robot Dreams",
       "year": 2023,
-      "rating": 8,
+      "rating": 7.5,
       "order": 3,
       "countries": [
         "西班牙",
@@ -179,15 +201,16 @@
       "poster_480": "img/watch/the-million-pound-note-703e3519-480.webp",
       "title_en": "The Million Pound Note",
       "year": 1954,
-      "rating": 8,
+      "rating": 7.5,
+      "order": 3,
+      "countries": [
+        "英国"
+      ],
       "tags": [
         "喜剧",
         "剧情"
       ],
-      "note": "金钱的象征",
-      "countries": [
-        "英国"
-      ]
+      "note": "金钱的象征"
     },
     {
       "id": "2026-05-09-titanic",
@@ -271,15 +294,15 @@
       "title_en": "花束みたいな恋をした",
       "year": 2021,
       "rating": 8.5,
+      "order": 2,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "爱情",
         "剧情"
       ],
-      "order": 1,
-      "note": "爱情的底色，是成长命题",
-      "countries": [
-        "日本"
-      ]
+      "note": "爱情的底色，是成长命题"
     },
     {
       "id": "2026-04-05-the-secret-life-of-walter-mitty",
@@ -311,21 +334,22 @@
       "kind": "series",
       "watched_at": "2026-02-14",
       "poster": "img/watch/swords-into-plowshares-bbd8bfc2.webp",
+      "added_at": "2026-10-25T09:53:34+08:00",
       "poster_w": 640,
       "poster_h": 1138,
       "poster_320": "img/watch/swords-into-plowshares-bbd8bfc2-320.webp",
       "poster_480": "img/watch/swords-into-plowshares-bbd8bfc2-480.webp",
       "title_en": "Swords into Plowshares",
       "year": 2026,
-      "rating": 8.5,
+      "rating": 8,
+      "order": 3,
+      "countries": [
+        "中国"
+      ],
       "tags": [
         "剧情"
       ],
-      "note": "就算有三千轮日月春秋",
-      "added_at": "2026-10-25T09:53:34+08:00",
-      "countries": [
-        "中国"
-      ]
+      "note": "就算有三千轮日月春秋"
     },
     {
       "id": "2025-10-06-soldiers-sortie",
@@ -357,23 +381,24 @@
       "kind": "movie",
       "watched_at": "2025-06-13",
       "poster": "img/watch/dunkirk-5730ef3d.webp",
+      "added_at": "2026-10-24T22:46:37+08:00",
       "poster_w": 640,
       "poster_h": 948,
       "poster_320": "img/watch/dunkirk-5730ef3d-320.webp",
       "poster_480": "img/watch/dunkirk-5730ef3d-480.webp",
       "title_en": "Dunkirk",
       "year": 2017,
-      "rating": 6.5,
+      "rating": 6,
+      "order": 3,
+      "countries": [
+        "英国",
+        "美国"
+      ],
       "tags": [
         "战争",
         "历史"
       ],
-      "note": "疲惫的战争",
-      "added_at": "2026-10-24T22:46:37+08:00",
-      "countries": [
-        "英国",
-        "美国"
-      ]
+      "note": "疲惫的战争"
     },
     {
       "id": "2025-05-14-prison-break",
@@ -506,16 +531,17 @@
       "poster_480": "img/watch/cyberpunk-edgerunners-8d0ae9f0-480.webp",
       "title_en": "Cyberpunk: Edgerunners",
       "year": 2022,
-      "rating": 8,
+      "rating": 7.5,
+      "order": 3,
+      "countries": [
+        "日本",
+        "美国"
+      ],
       "tags": [
         "动画",
         "科幻"
       ],
-      "note": "边缘行者",
-      "countries": [
-        "日本",
-        "美国"
-      ]
+      "note": "边缘行者"
     },
     {
       "id": "2024-11-26-item",
@@ -546,23 +572,24 @@
       "kind": "series",
       "watched_at": "2024-11-23",
       "poster": "img/watch/arcane-2e38f6df.webp",
+      "added_at": "2026-10-24T23:23:27+08:00",
       "poster_w": 640,
       "poster_h": 948,
       "poster_320": "img/watch/arcane-2e38f6df-320.webp",
       "poster_480": "img/watch/arcane-2e38f6df-480.webp",
       "title_en": "Arcane",
       "year": 2021,
-      "rating": 8.5,
+      "rating": 8,
+      "order": 3,
+      "countries": [
+        "美国",
+        "法国"
+      ],
       "tags": [
         "动画",
         "科幻"
       ],
-      "note": "你所讨厌的人或许正是自己",
-      "added_at": "2026-10-24T23:23:27+08:00",
-      "countries": [
-        "美国",
-        "法国"
-      ]
+      "note": "你所讨厌的人或许正是自己"
     },
     {
       "id": "2024-11-17-item",
@@ -663,23 +690,24 @@
       "kind": "movie",
       "watched_at": "2024-03-11",
       "poster": "img/watch/oppenheimer-04368923.webp",
+      "added_at": "2026-10-24T23:38:18+08:00",
       "poster_w": 640,
       "poster_h": 948,
       "poster_320": "img/watch/oppenheimer-04368923-320.webp",
       "poster_480": "img/watch/oppenheimer-04368923-480.webp",
       "title_en": "Oppenheimer",
       "year": 2023,
-      "rating": 8,
+      "rating": 7.5,
+      "order": 3,
+      "countries": [
+        "美国",
+        "英国"
+      ],
       "tags": [
         "历史",
         "剧情"
       ],
-      "note": "我正变成死亡，世界的毁灭者",
-      "added_at": "2026-10-24T23:38:18+08:00",
-      "countries": [
-        "美国",
-        "英国"
-      ]
+      "note": "我正变成死亡，世界的毁灭者"
     },
     {
       "id": "2023-12-27-item",
@@ -828,25 +856,25 @@
       "title": "狂飙",
       "kind": "series",
       "watched_at": "2023-02-15",
-      "added_at": "2026-10-31T17:22:01+08:00",
       "poster": "img/watch/punch-out-ad547063.webp",
+      "added_at": "2026-10-31T17:22:01+08:00",
       "poster_w": 640,
       "poster_h": 1138,
       "poster_320": "img/watch/punch-out-ad547063-320.webp",
       "poster_480": "img/watch/punch-out-ad547063-480.webp",
       "title_en": "Punch Out",
       "year": 2023,
-      "rating": 8,
+      "rating": 7.5,
       "order": 3,
-      "note": "共情反派，是因为真正受害者的缺席",
+      "countries": [
+        "中国"
+      ],
       "tags": [
         "剧情",
         "犯罪",
         "悬疑"
       ],
-      "countries": [
-        "中国"
-      ]
+      "note": "共情反派，是因为真正受害者的缺席"
     },
     {
       "id": "2023-01-29-the-wandering-earth",
@@ -884,7 +912,7 @@
       "poster_480": "img/watch/soul-c656a52b-480.webp",
       "title_en": "Soul",
       "year": 2020,
-      "rating": 8,
+      "rating": 7.5,
       "order": 3,
       "countries": [
         "美国"
@@ -900,25 +928,25 @@
       "title": "破冰行动",
       "kind": "series",
       "watched_at": "2022-11-09",
-      "added_at": "2026-10-31T17:18:43+08:00",
       "poster": "img/watch/the-thunder-90040ddf.webp",
+      "added_at": "2026-10-31T17:18:43+08:00",
       "poster_w": 640,
       "poster_h": 1138,
       "poster_320": "img/watch/the-thunder-90040ddf-320.webp",
       "poster_480": "img/watch/the-thunder-90040ddf-480.webp",
       "title_en": "The Thunder",
       "year": 2019,
-      "rating": 5.5,
+      "rating": 5,
       "order": 3,
-      "note": "The Thunder",
+      "countries": [
+        "中国"
+      ],
       "tags": [
         "剧情",
         "犯罪",
         "悬疑"
       ],
-      "countries": [
-        "中国"
-      ]
+      "note": "The Thunder"
     },
     {
       "id": "2022-09-14-yes-minister",
@@ -956,15 +984,16 @@
       "poster_320": "img/watch/item-53246496-320.webp",
       "title_en": "新世紀エヴァンゲリオン",
       "year": 1995,
-      "rating": 8,
+      "rating": 7.5,
+      "order": 3,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "动画",
         "科幻"
       ],
-      "note": "在世界的中心呼唤爱的野兽",
-      "countries": [
-        "日本"
-      ]
+      "note": "在世界的中心呼唤爱的野兽"
     },
     {
       "id": "2022-08-01-item",
@@ -1094,15 +1123,16 @@
       "poster_480": "img/watch/empresses-in-the-palace-f648f123-480.webp",
       "title_en": "Empresses in the Palace",
       "year": 2011,
-      "rating": 7.5,
+      "rating": 7,
+      "order": 3,
+      "countries": [
+        "中国"
+      ],
       "tags": [
         "历史",
         "剧情"
       ],
-      "note": "长相思，长相守",
-      "countries": [
-        "中国"
-      ]
+      "note": "长相思，长相守"
     },
     {
       "id": "2022-02-05-harry-potter-and-the-chamber-of-secrets",
@@ -1351,15 +1381,16 @@
       "poster_320": "img/watch/item-2dfd5c7d-320.webp",
       "title_en": "どろろ",
       "year": 2019,
-      "rating": 7,
+      "rating": 6.5,
+      "order": 3,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "动画",
         "奇幻"
       ],
-      "note": "どろろ",
-      "countries": [
-        "日本"
-      ]
+      "note": "どろろ"
     },
     {
       "id": "2021-06-26-item",
@@ -1723,15 +1754,15 @@
       "title_en": "アンナチュラル",
       "year": 2018,
       "rating": 8.5,
-      "order": 1,
+      "order": 3,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "悬疑",
         "剧情"
       ],
-      "note": "时至今日，你仍是我的光",
-      "countries": [
-        "日本"
-      ]
+      "note": "时至今日，你仍是我的光"
     },
     {
       "id": "2020-12-06-item",
@@ -2355,16 +2386,16 @@
       "poster_480": "img/watch/item-f52b2160-480.webp",
       "title_en": "青春ブタ野郎はバニーガール先輩の夢を見ない",
       "year": 2018,
-      "rating": 9,
-      "order": 5,
+      "rating": 8.5,
+      "order": 2,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "动画",
         "爱情"
       ],
-      "note": "人活着就是为了樱岛麻衣",
-      "countries": [
-        "日本"
-      ]
+      "note": "人活着就是为了樱岛麻衣"
     },
     {
       "id": "2020-05-02-item",
