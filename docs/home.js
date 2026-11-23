@@ -44,7 +44,8 @@
     try { localStorage.setItem(KEY, String(i)); } catch (e) {}
   }
 
-  /* 渲染：「句子」- 作者；无作者时省掉 " - 作者"；\n 由 CSS white-space:pre-line 换行 */
+  /* 渲染：「句子」- 作者；无作者时省掉 "- 作者"；\n 由 CSS white-space:pre-line 换行。
+     第 137 轮格式：」与 - 紧贴（」自带留白），- 后空一格再接作者 →「句」- 作者 */
   function render(i) {
     var row = poems[i];
     var text = '「' + row[0] + '」';
@@ -53,7 +54,7 @@
     if (row[1]) {
       var by = document.createElement('span');
       by.className = 'by';
-      by.textContent = ' - ' + row[1];
+      by.textContent = '- ' + row[1];
       quoteEl.appendChild(by);
     }
     quoteEl.setAttribute('data-index', String(i));

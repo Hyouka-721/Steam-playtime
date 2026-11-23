@@ -93,8 +93,9 @@ ok('A8 长句用 \\n 分两行，常规句不超 20 字（下界守卫）',
 
 ok('A9 渲染为「句子」- 作者、无作者省略；\\n 由 pre-line 换行',
   /'「' \+ row\[0\] \+ '」'/.test(js) &&
+  /by\.textContent = '- ' \+ row\[1\]/.test(js) &&
   /if \(row\[1\]\)/.test(js) && /white-space:\s*pre-line/.test(css),
-  '理由：用户指定的签名格式');
+  '理由：用户指定签名格式（第九版：」紧接 -，- 后空格再接作者）');
 
 // ── B 运行时 ──
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });
@@ -132,8 +133,8 @@ const view = await p.evaluate(() => ({
       avatarNoFrame: acs.borderTopWidth === '0px' && acs.boxShadow === 'none' &&
         acs.backgroundColor === 'rgba(0, 0, 0, 0)',
       entryTextEmpty: [...document.querySelectorAll('.entry')].every(a => a.textContent.trim() === ''),
-      // 第七版：头像+昵称+诗句整体左移 48px（中心比视口中线小 ~48）；卡片与图标无背景底
-      avatarCentered: Math.abs((av.left + av.right) / 2 - (innerWidth / 2 - 48)) <= 3,
+      // 第九版：头像组整体左移 24px（中心比视口中线小 ~24）；卡片与图标无背景底
+      avatarCentered: Math.abs((av.left + av.right) / 2 - (innerWidth / 2 - 24)) <= 3,
       groupAligned: (() => {
         const cx = s => { const r = document.querySelector(s).getBoundingClientRect(); return (r.left + r.right) / 2; };
         return Math.abs(cx('.avatar') - cx('.name')) <= 2 && Math.abs(cx('.name') - cx('#home-quote')) <= 2;
@@ -155,8 +156,8 @@ const view = await p.evaluate(() => ({
 }));
 ok('B1 页面标题 / 昵称 / 诗句都渲染出来',
   view.title === 'Hyouka' && view.name === 'Hyouka' &&
-  /^「.+」( - .+)?$/.test(view.quote) && view.idx >= 0 && view.idx < view.count,
-  { quote: view.quote, idx: view.idx, reason: '首屏三要素齐全' });
+  /^「.+」(- .+)?$/.test(view.quote) && view.idx >= 0 && view.idx < view.count,
+  { quote: view.quote, idx: view.idx, reason: '首屏三要素齐全（第九版格式：」后紧接 -，- 后空格）' });
 
 ok('B2 三张图（头像/史蒂夫/小黄人）全部加载成功',
   view.imgs.length === 3 && view.imgs.every(i => i.ok),
@@ -175,21 +176,27 @@ ok('B4b 布局：头像组无底框且整体对齐、昵称诗句在下、两图
   view.geo.avatarAboveName && view.geo.nameAboveQuote && view.geo.entryStacked &&
   view.geo.entryAligned && view.geo.avatarNoFrame && view.geo.entryTextEmpty &&
   view.geo.avatarCentered && view.geo.groupAligned && view.geo.noBg,
-  { ...view.geo, reason: '第七版：头像组整体左移 48px，三组中心仍对齐（原"正中"判据随需求改）' });
+  { ...view.geo, reason: '第九版：头像组整体左移 24px（第八版 48→24 右移 24），三组中心仍对齐' });
 
-ok('B4c 第八版：头像 300、图标 222×210、离头像 200px、图标间距 30',
+ok('B4c 第九版：头像 300、图标 222×210、离头像 220px、图标间距 30',
   view.geo.avatarSize === 300 &&
   view.geo.iconSize[0] === 222 && view.geo.iconSize[1] === 210 &&
-  view.geo.iconRightOfAvatar && view.geo.iconOffset >= 195 &&
+  view.geo.iconRightOfAvatar && view.geo.iconOffset >= 215 &&
   view.geo.iconVerticalGap >= 25,
   { avatarSize: view.geo.avatarSize, iconSize: view.geo.iconSize,
     iconOffset: view.geo.iconOffset, iconVerticalGap: view.geo.iconVerticalGap,
-    reason: '用户要求两图标继续右移到离头像 200px（第七版≥115 的判据随需求收紧）' });
+    reason: '用户要求两图标继续右移到离头像 220px（第八版≥195 的判据随需求收紧）' });
 
-ok('B4d 已删除"点一下，换一句"提示、昵称与诗句间距收紧到 0px',
+ok('B4d 已删除"点一下，换一句"提示、昵称与诗句间距用负边距再收紧',
   !/点一下，换一句/.test(html) && !/class="hint"/.test(html) &&
-  /\.name\s*\{[^}]*margin:\s*0\s+0\s+0/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
-  '理由：用户要求删掉换句提示、昵称与诗句间距再收紧（2→0）');
+  /\.name\s*\{[^}]*margin:\s*0\s+0\s+-4px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
+  '理由：用户要求删掉换句提示、昵称与诗句间距再收紧（0→-4px，有效间距 8-gap→4）');
+
+ok('B4e 诗句格式：」与 - 紧贴、- 后空一格 →「句」- 作者',
+  /by\.textContent\s*=\s*'- '\s*\+/.test(js) &&
+  !/by\.textContent\s*=\s*' - '\s*\+/.test(js) &&
+  /^「.+」- .+$/.test(view.quote),
+  { quote: view.quote, reason: '用户要求」自带留白故其后不加空格、- 后加一个空格' });
 
 ok('B5 零控制台 / 页面错误',
   errs.length === 0, errs);
@@ -237,8 +244,8 @@ const noDash = await p.evaluate(() => {
 });
 await p.waitForFunction(() => window.__home && document.querySelector('#home-quote')?.getAttribute('data-index') !== null && window.__home.currentIndex() === window.POEMS.findIndex(x => x[1] === ''));
 const dashText = await p.evaluate(() => document.querySelector('#home-quote').textContent);
-ok('B9 无作者句只显示「句子」，不出现 " - "',
-  !dashText.includes(' - '), { dashText, reason: '用户要求影视剧/游戏句不署名' });
+ok('B9 无作者句只显示「句子」，不出现 "- 作者"',
+  !dashText.includes('- '), { dashText, reason: '用户要求影视剧/游戏句不署名（第九版格式下无作者不含 "- "）' });
 
 await ctx.close();
 
