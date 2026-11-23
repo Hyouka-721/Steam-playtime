@@ -1,5 +1,5 @@
 /* ============================================================================
-   氛围层 · rain.css   v=7
+   氛围层 · rain.css   v=8
    雨丝 + 流星画布 + 三态「关 / 流星 / 雨滴」共用控件，供 index / watch 两页共用。
    🔴 独立文件：不并入 style.css / watch.css，避免动到已上线版本号。
    ============================================================================ */
@@ -42,8 +42,8 @@
   background: linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0) 0%,
-    var(--rain-stroke, rgba(210, 228, 255, .55)) 32%,
-    var(--rain-stroke, rgba(210, 228, 255, .55)) 68%,
+    var(--rain-stroke, rgba(238, 246, 255, .86)) 32%,
+    var(--rain-stroke, rgba(238, 246, 255, .86)) 68%,
     rgba(255, 255, 255, 0) 100%
   );
   transform: rotate(var(--rain-tilt, 8deg));
@@ -52,8 +52,9 @@
   animation-delay: var(--rain-delay, 0s);
 }
 
+/* v=8：浅底原先 rgba(62,82,104,.52) 偏灰发闷，提亮为清透的蓝（更亮、更蓝、略实） */
 [data-theme="cream"] .rain-streak {
-  --rain-stroke: rgba(62, 82, 104, .52);
+  --rain-stroke: rgba(84, 146, 208, .68);
 }
 
 @keyframes rain-fall {

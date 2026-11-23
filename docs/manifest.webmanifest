@@ -2,7 +2,7 @@
   "name": "Game Time · Steam 游戏时长",
   "short_name": "Game Time",
   "description": "把 Steam 的累计时长拆成每一天：热力图、排行榜、成就与阶段报告。",
-  "start_url": "./index.html",
+  "start_url": "./index.html?stay=1",
   "scope": "./",
   "display": "standalone",
   "background_color": "#fbf7f1",

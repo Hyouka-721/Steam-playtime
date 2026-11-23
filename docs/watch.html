@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon-watch-97e35b7b.png">
 <!-- 第 134 轮：花体字已 base64 内联进 watch.css，移除 preload（避免多下一次无用请求）。 -->
 <link rel="stylesheet" href="watch.css?v=48">
-<link rel="stylesheet" href="rain.css?v=7">
+<link rel="stylesheet" href="rain.css?v=8">
 <!-- 第 135 轮：流畅度增强（错峰淡入 / 微反馈）独立文件，避免碰 watch.css 的位置敏感块。 -->
 <link rel="stylesheet" href="motion.css?v=1">
 </head>
@@ -28,7 +28,7 @@
 <header class="w-header">
   <!-- 小黄人：与首页同一个形象，负责「退出观影记录」回到游戏时长页
        （首页上它负责进入，于是这个图标在全站就是两页之间的切换器） -->
-  <a class="w-home" href="./" aria-label="退出观影记录，回到游戏时长">
+  <a class="w-home" href="index.html?stay=1" aria-label="退出观影记录，回到游戏时长">
     <img src="img/minion-0ef9a202.webp" alt="小黄人" width="460" height="420" decoding="async">
   </a>
   <!-- 2026-10-24 第 64 轮：标题兼作「回到顶部」按钮（页面滚很长时才用得上）。
@@ -108,7 +108,7 @@
   <!-- 第 82 轮：影视剧总数（全量，不随「类型」筛选变化），由 watch.js 在每次渲染时同步 -->
   <span id="w-total">共 — 部影视剧</span>
   <span class="w-foot-sep">·</span>
-  <a href="./">← 回到 Game Time</a>
+  <a href="index.html?stay=1">← 回到 Game Time</a>
   <!-- 第 125 轮：三态氛围控件（关 / 流星 / 雨滴），状态存 localStorage['ambience.mode']，
        两页共用；切换页面时保持同一氛围。旧 .fx-switch / .rain-toggle 已合并。 -->
   <span class="ambience-switch">

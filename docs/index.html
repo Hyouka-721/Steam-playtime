@@ -2,6 +2,21 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<script>
+  /* 2026-11-23 第 137 轮：目录式访问（根地址，pathname 以 / 结尾）默认进门户主页。
+     判定只看"路径是否以 / 结尾"，因此：
+       · https://…/Steam-playtime/        → 跳 home.html（用户要的「根地址进主页」）
+       · https://…/Steam-playtime/index.html → 留在 Game Time（显式点名本页 = 有意进来）
+     这样回归套件、PWA 启动、旧书签都直接访问 index.html，不会被弹走；
+     主页的 Game Time 图标也显式写 index.html?stay=1，双保险。 */
+  (function () {
+    try {
+      var dirVisit = /\/$/.test(location.pathname);
+      var stay = /[?&]stay=1(?:&|$)/.test(location.search);
+      if (dirVisit && !stay) location.replace('home.html');
+    } catch (e) {}
+  })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Game Time</title>
 <!-- 图标：第 92 轮换成文件引用（原来内联 base64）。换成三档尺寸 + 明暗两套用途后
@@ -41,7 +56,7 @@
 <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
 <link rel="preconnect" href="https://media.steampowered.com" crossorigin>
 <link rel="stylesheet" href="style.css?v=150">
-<link rel="stylesheet" href="rain.css?v=7">
+<link rel="stylesheet" href="rain.css?v=8">
 <!-- 第 135 轮：流畅度增强（content-visibility / 错峰淡入 / 微反馈）独立成文件，
      不塞进 style.css —— 两页多套套件按「首个 @media / 首个块」取规则，插进去会假红。 -->
 <link rel="stylesheet" href="motion.css?v=1">

@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#fbf7f1">
 <title>Hyouka</title>
-<!-- 门户图标沿用站内 favicon（换素材就换文件名，不带缓存版本号） -->
-<link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32-fb74092c.png">
-<link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon-fb74092c.png">
+<!-- 门户专属图标：松鼠（不再是站内那只手柄）。文件名带源图哈希，换图就换名，不靠缓存刷新 -->
+<link rel="icon" type="image/png" sizes="32x32" href="img/favicon-home-32-b51ad21c.png">
+<link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon-home-b51ad21c.png">
 <meta name="description" content="Hyouka 的个人主页 · 游戏时长与观影记录">
 <!-- 第 137 轮：独立样式 / 脚本；绝不引用 index/watch 的版本化资源，避免 bump 牵连两页。
      rain.css / rain.js 是两页共用的氛围层（只读引用、不改它们 → 不 bump v=7）；
      data-theme="cream" 让浅色壁纸上的雨丝走蓝灰描边（rain.css 里的 cream 分支）。 -->
-<link rel="stylesheet" href="rain.css?v=7">
+<link rel="stylesheet" href="rain.css?v=8">
 <link rel="stylesheet" href="home.css?v=2">
 </head>
 <body>
@@ -26,7 +26,7 @@
            alt="Hyouka 的头像：戴草帽的皮卡丘" width="300" height="300" decoding="async">
       <!-- 入口列：史蒂夫在上、小黄人在下，位于头像正右侧；无框无文字 -->
       <nav class="entries" aria-label="站点入口">
-        <a class="entry" href="index.html" aria-label="进入 Game Time 游戏时长统计">
+        <a class="entry" href="index.html?stay=1" aria-label="进入 Game Time 游戏时长统计">
           <img src="img/steve-ceb15b8a.webp" alt="史蒂夫" width="400" height="386" decoding="async">
         </a>
         <a class="entry" href="watch.html" aria-label="进入 Watch List 观影记录">
@@ -42,8 +42,8 @@
   </section>
 </main>
 
-<script src="poems.js?v=1"></script>
-<script src="home.js?v=1"></script>
+<script src="poems.js?v=2"></script>
+<script src="home.js?v=2"></script>
 
 <!-- 第 137 轮：复用两页共用雨效（rain.js v=7）。主页没有氛围开关，默认下雨；
      若用户在其它页把氛围设为「关」（ambience.mode === 'off'）则主页也不下，保持一致。

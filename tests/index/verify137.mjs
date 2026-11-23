@@ -22,10 +22,10 @@ const js = fs.readFileSync(ROOT + 'docs/home.js', 'utf8');
 const poemsSrc = fs.readFileSync(ROOT + 'docs/poems.js', 'utf8');
 
 // ── A 静态契约 ──
-ok('A1 主页挂自己的版本化资源（home.css v=2），且未引用两页私有版本化资源',
-  /home\.css\?v=2/.test(html) && /home\.js\?v=1/.test(html) && /poems\.js\?v=1/.test(html) &&
+ok('A1 主页挂自己的版本化资源（home.css v=2 / home.js v=2 / poems.js v=2），不引用两页私有资源',
+  /home\.css\?v=2/.test(html) && /home\.js\?v=2/.test(html) && /poems\.js\?v=2/.test(html) &&
   !/style\.css\?v=|app\.js\?v=|watch\.css\?v=|watch\.js\?v=/.test(html),
-  '理由：主页独立，bump 两页会误伤已上线版本；home.css 因加雨效层级 v=1→2');
+  '理由：主页独立，bump 两页会误伤已上线版本；home.css 加雨效层级、home.js 加防重复、poems.js 加歌词，各自 v=1→2');
 
 ok('A2 两页 index.html / watch.html 一字未动（主页是纯新增）',
   /GAME TIME|Game Time/.test(fs.readFileSync(ROOT + 'docs/index.html', 'utf8')) &&
@@ -44,10 +44,10 @@ ok('A4 壁纸 fixed 铺底 + 内容居中（第三版改判）+ 圆角全部走 
   !/border-radius:\s*\d+px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
   '理由：用户要求删除所有背景框、头像放正中 → 由"卡片靠右"改判为"内容居中"；壁纸保留；圆角白名单见红线10');
 
-ok('A5 两入口 href 精确指向 index.html / watch.html',
-  /href="index\.html"[^>]*aria-label="进入 Game Time/.test(html) &&
+ok('A5 两入口 href 指向 index.html?stay=1 / watch.html',
+  /href="index\.html\?stay=1"[^>]*aria-label="进入 Game Time/.test(html) &&
   /href="watch\.html"[^>]*aria-label="进入 Watch List/.test(html),
-  '理由：主页核心功能就是这两个跳转');
+  '理由：主页核心功能是这两个跳转；index 带 stay=1 以免被根地址跳转弹回主页');
 
 const cssPlain = css.replace(/\/\*[\s\S]*?\*\//g, '');
 ok('A5b 头像无白圈底框/阴影/占位底色（用户要求"删除头像后的背景"）',
@@ -97,8 +97,8 @@ ok('A9 渲染为「句子」- 作者、无作者省略；\\n 由 pre-line 换行
   /if \(row\[1\]\)/.test(js) && /white-space:\s*pre-line/.test(css),
   '理由：用户指定签名格式（第九版：」紧接 -，- 后空格再接作者）');
 
-ok('A10 主页复用两页共用雨效（rain.css/rain.js v=7、#rain-layer、cream 主题）',
-  /rain\.css\?v=7/.test(html) && /rain\.js\?v=7/.test(html) &&
+ok('A10 主页复用两页共用雨效（rain.css v=8 / rain.js v=7、#rain-layer、cream 主题）',
+  /rain\.css\?v=8/.test(html) && /rain\.js\?v=7/.test(html) &&
   /<div id="rain-layer"/.test(html) &&
   /data-theme="cream"/.test(html),
   '理由：用户要求加入两站共有下雨特效；cream 让浅色壁纸上的雨丝走蓝灰描边');
@@ -106,6 +106,41 @@ ok('A10 主页复用两页共用雨效（rain.css/rain.js v=7、#rain-layer、cr
 ok('A10b 内容抬到雨丝层(z=12)之上，雨丝不穿文字',
   /\.stage\s*\{[^}]*z-index:\s*13/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
   '理由：细线穿过诗句会干扰可读性');
+
+// 根地址默认进主页：index.html 无 ?stay=1 时跳 home.html；主页/watch 回 Game Time 都带 stay=1
+const idxHtml = fs.readFileSync(ROOT + 'docs/index.html', 'utf8');
+const watchHtml2 = fs.readFileSync(ROOT + 'docs/watch.html', 'utf8');
+ok('A11 根地址（目录式访问）默认进主页，显式 index.html 不跳',
+  /location\.replace\('home\.html'\)/.test(idxHtml) &&
+  /location\.pathname/.test(idxHtml) && /dirVisit/.test(idxHtml),
+  '理由：只在 pathname 以 / 结尾时跳；显式 index.html 留给 Game Time，套件/PWA/旧书签不受影响');
+
+ok('A12 回 Game Time 的入口都带 ?stay=1（主页史蒂夫 / watch 两处 / manifest start_url）',
+  /href="index\.html\?stay=1"/.test(html) &&
+  (watchHtml2.match(/index\.html\?stay=1/g) || []).length >= 2 &&
+  /"start_url":\s*"\.\/index\.html\?stay=1"/.test(fs.readFileSync(ROOT + 'docs/manifest.webmanifest', 'utf8')),
+  '理由：不带参数会被根地址跳转弹回主页，形成回不去的死循环');
+
+ok('A13 主页 favicon 换成松鼠（不再引用站内手柄图标）',
+  /favicon-home-32-b51ad21c\.png/.test(html) &&
+  /apple-touch-icon-home-b51ad21c\.png/.test(html) &&
+  !/favicon-32-fb74092c\.png/.test(html),
+  '理由：用户指定松鼠图作门户图标');
+
+const poemRows = [...fs.readFileSync(ROOT + 'docs/poems.js', 'utf8')
+  .matchAll(/\['([^']*)',\s*'([^']*)'\]/g)]
+  .map(m => [m[1].replace(/\\n/g, ''), m[2]]);
+const lyricRows = poemRows.filter(r => /《.+》/.test(r[1]));
+const poemDup = poemRows.length - new Set(poemRows.map(r => r[0])).size;
+ok('A14 诗句库已加入歌词（≥15 句带《歌名》署名），且全库无重复',
+  lyricRows.length >= 15 && poemDup === 0,
+  { total: poemRows.length, lyrics: lyricRows.length, dups: poemDup,
+    reason: '用户要求加入有名的歌词，且库内不得重复' });
+
+ok('A15 home.js 有近期不重复逻辑（recent 窗口 + 持久化 + 池外抽取）',
+  /RECENT_KEY/.test(js) && /recent\.indexOf\(k\)\s*===\s*-1/.test(js) &&
+  /function remember/.test(js),
+  '理由：修用户反馈的"刷新撞见前几次出现过的"');
 
 // ── B 运行时 ──
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });
@@ -179,7 +214,7 @@ ok('B2 三张图（头像/史蒂夫/小黄人）全部加载成功',
 
 ok('B3 两个入口的 href 与可访问标签就位',
   view.entries.length === 2 &&
-  view.entries[0].href === 'index.html' && view.entries[1].href === 'watch.html' &&
+  view.entries[0].href === 'index.html?stay=1' && view.entries[1].href === 'watch.html' &&
   /Game Time/.test(view.entries[0].label) && /Watch List/.test(view.entries[1].label),
   view.entries);
 
@@ -254,9 +289,26 @@ ok('B4h 内容层级高于雨丝（stage z=13 > rain-layer z=12）',
   rain.zStage === '13' && rain.zLayer === '12',
   { zStage: rain.zStage, zLayer: rain.zLayer, reason: '雨丝只作背景，不穿文字' });
 
-ok('B4i cream 主题让浅色壁纸上的雨丝走蓝灰描边（非冷白）',
-  /62,\s*82,\s*104/.test(rain.stroke || ''),
-  { stroke: rain.stroke, reason: '冷白雨丝在浅色壁纸上几乎看不见，需蓝灰' });
+ok('B4i cream 主题让浅色壁纸上的雨丝走蓝调描边（v=8 提亮后才不是灰的）',
+  /84,\s*146,\s*208/.test(rain.stroke || ''),
+  { stroke: rain.stroke, reason: '冷白在浅底看不见；v=8 由灰蓝 rgba(62,82,104,.52) 提亮为 rgba(84,146,208,.68)' });
+
+// 防重复：清状态后连换 30 次，任意连续 12 次不得出现同一句
+const dedup = await p.evaluate(() => {
+  window.__home.reset();
+  const seq = [];
+  for (let i = 0; i < 30; i++) { window.__home.next(); seq.push(window.__home.currentIndex()); }
+  const keep = window.__home.keep;
+  let worst = 0;
+  for (let i = keep; i < seq.length; i++) {
+    if (seq.slice(i - keep, i).includes(seq[i])) worst++;
+  }
+  return { seq, keep, worst, recentLen: window.__home.recentIndices().length };
+});
+ok('B4j 连换 30 次：最近 KEEP 句窗口内无重复（防重复生效）',
+  dedup.keep >= 10 && dedup.worst === 0,
+  { keep: dedup.keep, worst: dedup.worst, recentLen: dedup.recentLen,
+    seq: dedup.seq.slice(0, 8), reason: '修"刷新撞见前几次出现过的"' });
 
 ok('B4e 诗句格式：」与 - 紧贴、- 后空一格 →「句」- 作者',
   /by\.textContent\s*=\s*'- '\s*\+/.test(js) &&
@@ -312,6 +364,28 @@ await p.waitForFunction(() => window.__home && document.querySelector('#home-quo
 const dashText = await p.evaluate(() => document.querySelector('#home-quote').textContent);
 ok('B9 无作者句只显示「句子」，不出现 "- 作者"',
   !dashText.includes('- '), { dashText, reason: '用户要求影视剧/游戏句不署名（第九版格式下无作者不含 "- "）' });
+
+// 根地址分流：/ 应被 index.html 的内联脚本 replace 到 home.html；?stay=1 则留在 Game Time
+const pRoot = await ctx.newPage();
+await pRoot.goto(BASE, { waitUntil: 'domcontentloaded' });
+await pRoot.waitForTimeout(900);
+const rootUrl = pRoot.url();
+ok('B11 根地址自动跳到 home.html', /\/home\.html(\?|#|$)/.test(rootUrl), { url: rootUrl });
+
+await pRoot.goto(BASE + 'index.html?stay=1', { waitUntil: 'domcontentloaded' });
+await pRoot.waitForTimeout(900);
+const stayUrl = pRoot.url(), stayTitle = await pRoot.title();
+ok('B12 index.html?stay=1 留在 Game Time（不再被弹回主页）',
+  /stay=1/.test(stayUrl) && /Game Time/.test(stayTitle), { url: stayUrl, title: stayTitle });
+
+// 关键：显式 index.html（无任何参数）也必须留在 Game Time —— 套件/PWA/旧书签都走这条
+await pRoot.goto(BASE + 'index.html', { waitUntil: 'domcontentloaded' });
+await pRoot.waitForTimeout(900);
+const plainUrl = pRoot.url(), plainTitle = await pRoot.title();
+ok('B13 显式访问 index.html（无参数）不跳主页，留在 Game Time',
+  /\/index\.html(\?|#|$)/.test(plainUrl) && /Game Time/.test(plainTitle),
+  { url: plainUrl, title: plainTitle, reason: '目录式访问才跳，显式点名本页即有意进入' });
+await pRoot.close();
 
 await ctx.close();
 
