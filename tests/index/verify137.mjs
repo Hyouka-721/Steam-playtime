@@ -134,10 +134,12 @@ const view = await p.evaluate(() => ({
       entryTextEmpty: [...document.querySelectorAll('.entry')].every(a => a.textContent.trim() === ''),
       // 头像水平居中：中心与视口中线差 ≤ 2px；卡片与图标无背景底
       avatarCentered: Math.abs((av.left + av.right) / 2 - innerWidth / 2) <= 2,
-      // 第四版：头像放大一倍(264)、图标在头像右侧且放大一倍(148×140)
+      // 第五版：头像 300、图标 222×210、在头像右侧且右移(间距≥40)、两图标间距放大
       avatarSize: Math.round(av.width),
       iconSize: [Math.round(e0.width), Math.round(e0.height)],
       iconRightOfAvatar: e0.left >= av.right,
+      iconOffset: Math.round(e0.left - av.right),
+      iconVerticalGap: Math.round(e1.top - e0.bottom),
       noBg: (() => {
         const card = getComputedStyle(document.querySelector('.card'));
         const entry = getComputedStyle(document.querySelector('.entry'));
@@ -171,13 +173,19 @@ ok('B4b 布局：头像正中无底框、昵称诗句在下、两图标竖排对
   view.geo.avatarCentered && view.geo.noBg,
   { ...view.geo, reason: '第137轮第三版布局契约：删除所有背景框、头像正中' });
 
-ok('B4c 第四版：头像放大一倍(264)、图标在头像右侧且放大一倍(148×140)',
-  view.geo.avatarSize === 264 &&
-  view.geo.iconSize[0] === 148 && view.geo.iconSize[1] === 140 &&
-  view.geo.iconRightOfAvatar,
+ok('B4c 第五版：头像 300、图标 222×210 在头像右侧且右移、图标间距放大',
+  view.geo.avatarSize === 300 &&
+  view.geo.iconSize[0] === 222 && view.geo.iconSize[1] === 210 &&
+  view.geo.iconRightOfAvatar && view.geo.iconOffset >= 40 &&
+  view.geo.iconVerticalGap >= 25,
   { avatarSize: view.geo.avatarSize, iconSize: view.geo.iconSize,
-    iconRightOfAvatar: view.geo.iconRightOfAvatar,
-    reason: '用户要求头像与两图标各放大一倍、图标移到头像正右侧' });
+    iconOffset: view.geo.iconOffset, iconVerticalGap: view.geo.iconVerticalGap,
+    reason: '用户要求头像 300、图标 1.5 倍、右移且间距放大（判据随第五版需求改）' });
+
+ok('B4d 已删除"点一下，换一句"提示、昵称与诗句间距收紧',
+  !/点一下，换一句/.test(html) && !/class="hint"/.test(html) &&
+  /\.name\s*\{[^}]*margin:\s*0 0 10px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
+  '理由：用户要求删掉换句提示、诗句上移');
 
 ok('B5 零控制台 / 页面错误',
   errs.length === 0, errs);
