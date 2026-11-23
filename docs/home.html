@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="cream">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,11 +9,15 @@
 <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32-fb74092c.png">
 <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon-fb74092c.png">
 <meta name="description" content="Hyouka 的个人主页 · 游戏时长与观影记录">
-<!-- 第 137 轮：独立样式 / 脚本，全部 v=1 起步；绝不引用 index/watch 的版本化资源，
-     避免任何 bump 牵连已上线两页。poems.js 先于 home.js 加载（同步脚本，顺序有保证）。 -->
-<link rel="stylesheet" href="home.css?v=1">
+<!-- 第 137 轮：独立样式 / 脚本；绝不引用 index/watch 的版本化资源，避免 bump 牵连两页。
+     rain.css / rain.js 是两页共用的氛围层（只读引用、不改它们 → 不 bump v=7）；
+     data-theme="cream" 让浅色壁纸上的雨丝走蓝灰描边（rain.css 里的 cream 分支）。 -->
+<link rel="stylesheet" href="rain.css?v=7">
+<link rel="stylesheet" href="home.css?v=2">
 </head>
 <body>
+<!-- 雨丝层：fixed 全屏，z=12，内容 .stage 抬到 z=13 之上 -->
+<div id="rain-layer" aria-hidden="true"></div>
 <main class="stage">
   <section class="card" aria-label="Hyouka 的主页">
     <!-- 头像（正中、无底框、放大一倍）+ 右侧图标列 -->
@@ -40,5 +44,24 @@
 
 <script src="poems.js?v=1"></script>
 <script src="home.js?v=1"></script>
+
+<!-- 第 137 轮：复用两页共用雨效（rain.js v=7）。主页没有氛围开关，默认下雨；
+     若用户在其它页把氛围设为「关」（ambience.mode === 'off'）则主页也不下，保持一致。
+     rain.js 是 async 引入，可能晚到 → 轻量轮询等 window.__rain 就绪后再 set(true)。 -->
+<script src="rain.js?v=7" async fetchpriority="low"></script>
+<script>
+(function () {
+  'use strict';
+  var off = false;
+  try { off = localStorage.getItem('ambience.mode') === 'off'; } catch (e) {}
+  if (off) return;                       /* 尊重用户在其它页的「关」设置 */
+  var tries = 0;
+  (function boot() {
+    if (window.__rain) { window.__rain.set(true); return; }   /* rain.js 内部会再滤 prefers-reduced-motion */
+    if (++tries > 150) return;           /* 约 12s 兜底，避免无限轮询 */
+    setTimeout(boot, 80);
+  })();
+})();
+</script>
 </body>
 </html>

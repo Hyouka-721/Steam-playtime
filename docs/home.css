@@ -2,9 +2,9 @@
    门户主页 · home.css   v=1
    第 137 轮新增 —— Hyouka 的个人主页（头像 / 昵称 / 随机诗句 / 两个入口）。
    🔴 独立文件：不并入 style.css / watch.css，不动两页任何版本号（红线 2）。
-   布局（第十一版）：壁纸 sketch 保留铺底；所有元素无背景框、浮在壁纸上；头像 300 回到
-   水平正中（--shift 归零）、整体上移 --vshift(40px)；两图标在头像右侧 --ic-offset(200px)
-   处并整体下移 --ic-down；诗句改无衬线易读字体。尺寸走 CSS 变量，窄屏收敛防溢出。
+   布局（第十二版）：壁纸 sketch 保留铺底；所有元素无背景框、浮在壁纸上；头像 300 水平
+   居中、整体上移 --vshift(40px)；两图标在头像右侧 --ic-offset(200px) 处并整体下移
+   --ic-down；诗句用行楷。第 137 轮追加：复用两页共用 rain.css 雨丝，内容抬到雨丝之上。
    ============================================================================ */
 :root {
   --r-chip: 14px;
@@ -35,8 +35,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* 内容整体居中（头像组再按 --shift 左移） */
+/* 内容整体居中（头像组按 --shift 水平偏移、--vshift 上移）。
+   第 137 轮加雨效：内容抬到 #rain-layer(z=12) 之上，细线只作背景氛围、不穿文字 */
 .stage {
+  position: relative;
+  z-index: 13;
   min-height: 100vh;
   display: flex;
   align-items: center;

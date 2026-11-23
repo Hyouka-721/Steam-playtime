@@ -22,10 +22,10 @@ const js = fs.readFileSync(ROOT + 'docs/home.js', 'utf8');
 const poemsSrc = fs.readFileSync(ROOT + 'docs/poems.js', 'utf8');
 
 // ── A 静态契约 ──
-ok('A1 主页挂自己的 v=1 资源，且未引用两页版本化资源',
-  /home\.css\?v=1/.test(html) && /home\.js\?v=1/.test(html) && /poems\.js\?v=1/.test(html) &&
+ok('A1 主页挂自己的版本化资源（home.css v=2），且未引用两页私有版本化资源',
+  /home\.css\?v=2/.test(html) && /home\.js\?v=1/.test(html) && /poems\.js\?v=1/.test(html) &&
   !/style\.css\?v=|app\.js\?v=|watch\.css\?v=|watch\.js\?v=/.test(html),
-  '理由：主页独立，bump 两页会误伤已上线版本');
+  '理由：主页独立，bump 两页会误伤已上线版本；home.css 因加雨效层级 v=1→2');
 
 ok('A2 两页 index.html / watch.html 一字未动（主页是纯新增）',
   /GAME TIME|Game Time/.test(fs.readFileSync(ROOT + 'docs/index.html', 'utf8')) &&
@@ -96,6 +96,16 @@ ok('A9 渲染为「句子」- 作者、无作者省略；\\n 由 pre-line 换行
   /by\.textContent = '- ' \+ row\[1\]/.test(js) &&
   /if \(row\[1\]\)/.test(js) && /white-space:\s*pre-line/.test(css),
   '理由：用户指定签名格式（第九版：」紧接 -，- 后空格再接作者）');
+
+ok('A10 主页复用两页共用雨效（rain.css/rain.js v=7、#rain-layer、cream 主题）',
+  /rain\.css\?v=7/.test(html) && /rain\.js\?v=7/.test(html) &&
+  /<div id="rain-layer"/.test(html) &&
+  /data-theme="cream"/.test(html),
+  '理由：用户要求加入两站共有下雨特效；cream 让浅色壁纸上的雨丝走蓝灰描边');
+
+ok('A10b 内容抬到雨丝层(z=12)之上，雨丝不穿文字',
+  /\.stage\s*\{[^}]*z-index:\s*13/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
+  '理由：细线穿过诗句会干扰可读性');
 
 // ── B 运行时 ──
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });
@@ -215,6 +225,38 @@ ok('B4f 第十二版：诗句用行楷/楷体字体（非宋体非无衬线）�
   !/Songti|STSong|SimSun/i.test(qfont.family) &&
   qfont.size >= 21 && qfont.byInherit,
   { ...qfont, reason: '用户要求略带行楷、作者字体同步' });
+
+// 雨效：等 rain.js 就绪并启用（async 引入 + 启动脚本轮询，最多等 8s）
+let rainUp = true;
+try {
+  await p.waitForFunction(() => window.__rain && window.__rain.ready() && window.__rain.enabled(), { timeout: 8000 });
+} catch (e) { rainUp = false; }
+const rain = await p.evaluate(() => {
+  const r = window.__rain, layer = document.getElementById('rain-layer');
+  if (!r || !layer) return { has: false };
+  const s = r.sample();
+  const first = layer.firstElementChild;
+  const cs = first ? getComputedStyle(first) : null;
+  return {
+    has: true, ready: r.ready(), enabled: r.enabled(), count: r.count(),
+    hidden: layer.hidden, visible: s.pixels, total: s.total,
+    zLayer: getComputedStyle(layer).zIndex,
+    zStage: getComputedStyle(document.querySelector('.stage')).zIndex,
+    stroke: first ? cs.getPropertyValue('--rain-stroke').trim() : null
+  };
+});
+ok('B4g 主页雨丝已启用：__rain ready/enabled、layer 可见、有可见雨丝',
+  rainUp && rain.has && rain.ready && rain.enabled && rain.hidden === false &&
+  rain.count > 0 && rain.visible > 0,
+  { ...rain, reason: '用户要求加入两站共有下雨特效' });
+
+ok('B4h 内容层级高于雨丝（stage z=13 > rain-layer z=12）',
+  rain.zStage === '13' && rain.zLayer === '12',
+  { zStage: rain.zStage, zLayer: rain.zLayer, reason: '雨丝只作背景，不穿文字' });
+
+ok('B4i cream 主题让浅色壁纸上的雨丝走蓝灰描边（非冷白）',
+  /62,\s*82,\s*104/.test(rain.stroke || ''),
+  { stroke: rain.stroke, reason: '冷白雨丝在浅色壁纸上几乎看不见，需蓝灰' });
 
 ok('B4e 诗句格式：」与 - 紧贴、- 后空一格 →「句」- 作者',
   /by\.textContent\s*=\s*'- '\s*\+/.test(js) &&
