@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#fbf7f1">
+<title>Hyouka</title>
+<!-- 门户图标沿用站内 favicon（换素材就换文件名，不带缓存版本号） -->
+<link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32-fb74092c.png">
+<link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon-fb74092c.png">
+<meta name="description" content="Hyouka 的个人主页 · 游戏时长与观影记录">
+<!-- 第 137 轮：独立样式 / 脚本，全部 v=1 起步；绝不引用 index/watch 的版本化资源，
+     避免任何 bump 牵连已上线两页。poems.js 先于 home.js 加载（同步脚本，顺序有保证）。 -->
+<link rel="stylesheet" href="home.css?v=1">
+</head>
+<body>
+<main class="stage">
+  <section class="card" aria-label="Hyouka 的主页">
+    <!-- 头像：皮卡丘（草帽麦田），源图 SHA 前 8 位做文件名，WebP 640×640 -->
+    <img class="avatar" src="img/avatar-hyouka-b5c4c979.webp"
+         alt="Hyouka 的头像：戴草帽的皮卡丘" width="132" height="132" decoding="async">
+
+    <h1 class="name">Hyouka</h1>
+
+    <!-- 随机诗句：每日一句 / 点击换一句；role+tabindex 让键盘也能触发 -->
+    <blockquote class="quote" id="home-quote" role="button" tabindex="0"
+                aria-label="点按换一句诗">加载中…</blockquote>
+    <p class="hint">点一下，换一句</p>
+
+    <!-- 两个入口：史蒂夫 → Game Time，小黄人 → Watch List（与两页页眉图标同源） -->
+    <nav class="entries" aria-label="站点入口">
+      <a class="entry" href="index.html" aria-label="进入 Game Time 游戏时长统计">
+        <img src="img/steve-ceb15b8a.webp" alt="史蒂夫" width="400" height="386" decoding="async">
+        <span>Game Time<small>游戏时长</small></span>
+      </a>
+      <a class="entry" href="watch.html" aria-label="进入 Watch List 观影记录">
+        <img src="img/minion-0ef9a202.webp" alt="小黄人" width="460" height="420" decoding="async">
+        <span>Watch List<small>观影记录</small></span>
+      </a>
+    </nav>
+  </section>
+</main>
+
+<script src="poems.js?v=1"></script>
+<script src="home.js?v=1"></script>
+</body>
+</html>
