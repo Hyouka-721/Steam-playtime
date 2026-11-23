@@ -2,9 +2,9 @@
    门户主页 · home.css   v=1
    第 137 轮新增 —— Hyouka 的个人主页（头像 / 昵称 / 随机诗句 / 两个入口）。
    🔴 独立文件：不并入 style.css / watch.css，不动两页任何版本号（红线 2）。
-   布局（第三版）：壁纸 sketch 保留铺底；去掉卡片白底与图标框底——所有元素直接浮在
-   壁纸上；整体单列居中，头像落在正中，昵称诗句在下，两图标竖排居中、无文字。
-   圆角全部走 --r-*（红线 10）。
+   布局（第四版）：壁纸 sketch 保留铺底；所有元素无背景框、浮在壁纸上；头像居中放大
+   一倍（132→264），两图标移到头像正右侧、上下排布并放大一倍（74×70→148×140）。
+   尺寸走 --av / --ic-w / --ic-h 变量，窄屏按比例缩小防溢出。圆角全走 --r-*（红线10）。
    ============================================================================ */
 :root {
   --r-chip: 14px;
@@ -12,6 +12,11 @@
   --ink-dim: #6b5a4b;
   --accent: #d9762f;
   --accent-deep: #b85c1c;
+  /* 头像与图标尺寸：桌面为放大一倍后的值 */
+  --av: 264px;
+  --ic-w: 148px;
+  --ic-h: 140px;
+  --ic-gap: 18px;                  /* 头像右缘到图标左缘的距离 */
 }
 
 * { box-sizing: border-box; }
@@ -27,7 +32,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* 内容整体居中：头像落正中间，其余元素围绕中轴线排布 */
+/* 内容整体居中：头像落正中间 */
 .stage {
   min-height: 100vh;
   display: flex;
@@ -36,31 +41,60 @@ body {
   padding: clamp(20px, 5vw, 72px);
 }
 
-/* 无背景 / 无边框 / 无阴影：仅作布局容器，视觉全靠壁纸与文字本身 */
+/* 无背景 / 无边框 / 无阴影：仅作布局容器 */
 .card {
-  width: min(100%, 460px);
+  position: relative;              /* 图标列以 hero 为锚点定位 */
+  width: min(100%, 720px);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 26px;
 }
 
-/* ── 主区：头像（正中、无底框）+ 昵称 + 诗句 ── */
-.profile {
+/* ── hero：头像居中 + 右侧图标列 ── */
+.hero {
+  position: relative;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+  justify-content: center;        /* 头像保持正中 */
   width: 100%;
 }
 .avatar {
   display: block;
-  width: 132px;
-  height: 132px;
-  margin: 0 auto 16px;
-  border-radius: 50%;              /* 圆形裁剪，白名单内；不额外加边框/阴影/底色 */
+  width: var(--av);
+  height: var(--av);
+  border-radius: 50%;              /* 圆形裁剪；无边框/阴影/底色 */
   object-fit: cover;
 }
+
+/* 入口列：头像正右侧、上下排布、水平对齐；无框无文字 */
+.entries {
+  position: absolute;
+  left: calc(50% + var(--av) / 2 + var(--ic-gap));
+  top: 50%;
+  transform: translateY(-50%);     /* 垂直居中于头像 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ic-gap);
+}
+.entry {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.entry:hover { transform: translateY(-4px); opacity: 0.82; }
+.entry:active { transform: translateY(-2px); }
+.entry:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: var(--r-chip); }
+.entry img {
+  width: var(--ic-w);
+  height: var(--ic-h);
+  object-fit: contain;
+  display: block;
+}
+
+/* ── 昵称 + 诗句（头像下方居中） ── */
 .name {
   margin: 0 0 22px;
   font-size: 32px;
@@ -68,13 +102,12 @@ body {
   letter-spacing: 1.2px;
   color: var(--ink);
   line-height: 1.2;
+  text-align: center;
 }
-
-/* ── 随机诗句 ── */
 .quote {
   margin: 0;
   padding: 4px 2px;
-  min-height: 104px;               /* 预留两行高度，换句时不跳动（CLS=0） */
+  min-height: 104px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -87,6 +120,7 @@ body {
   white-space: pre-line;
   transition: color 0.18s;
   -webkit-tap-highlight-color: transparent;
+  text-align: center;
 }
 .quote:hover { color: var(--accent-deep); }
 .quote:focus-visible {
@@ -98,7 +132,7 @@ body {
   color: var(--ink-dim);
   font-size: 0.82em;
   font-style: normal;
-  white-space: nowrap;             /* 作者名不拆行 */
+  white-space: nowrap;
 }
 .hint {
   margin: 6px 0 0;
@@ -106,41 +140,22 @@ body {
   letter-spacing: 0.6px;
   color: var(--ink-dim);
   opacity: 0.72;
+  text-align: center;
 }
 
-/* ── 入口：两图标竖排居中对齐、无框无文字 ── */
-.entries {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-.entry {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-.entry:hover { transform: translateY(-3px); opacity: 0.82; }
-.entry:active { transform: translateY(-1px); }
-.entry:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: var(--r-chip); }
-.entry img {
-  width: 74px;
-  height: 70px;
-  object-fit: contain;
-  display: block;
-}
-
-/* ── 窄屏：收紧尺寸，仍保持单列居中 ── */
+/* ── 窄屏：整体按比例缩小，头像仍居中、图标仍在右侧 ── */
 @media (max-width: 680px) {
-  .stage { padding: 20px 16px; }
+  :root {
+    /* 窄屏物理宽度有限：头像/图标按"放大一倍"的方向同比收敛，保证图标不越出视口 */
+    --av: 160px;
+    --ic-w: 88px;
+    --ic-h: 84px;
+    --ic-gap: 10px;
+  }
+  .stage { padding: 20px 12px; }
   .card { gap: 18px; width: min(100%, 400px); }
   .name { font-size: 26px; margin-bottom: 16px; }
-  .avatar { width: 100px; height: 100px; margin-bottom: 12px; }
   .quote { min-height: 92px; font-size: 16px; }
-  .entry img { width: 58px; height: 55px; }
-  .entries { gap: 10px; }
 }
 
 /* 尊重减少动态效果偏好 */

@@ -16,26 +16,26 @@
 <body>
 <main class="stage">
   <section class="card" aria-label="Hyouka 的主页">
-    <!-- 主区：头像（正中、无底框）+ 昵称 + 随机诗句 -->
-    <div class="profile">
+    <!-- 头像（正中、无底框、放大一倍）+ 右侧图标列 -->
+    <div class="hero">
       <img class="avatar" src="img/avatar-hyouka-b5c4c979.webp"
-           alt="Hyouka 的头像：戴草帽的皮卡丘" width="132" height="132" decoding="async">
-      <h1 class="name">Hyouka</h1>
-      <!-- 随机诗句：每日一句 / 点击换一句；role+tabindex 让键盘也能触发 -->
-      <blockquote class="quote" id="home-quote" role="button" tabindex="0"
-                  aria-label="点按换一句诗">加载中…</blockquote>
-      <p class="hint">点一下，换一句</p>
+           alt="Hyouka 的头像：戴草帽的皮卡丘" width="264" height="264" decoding="async">
+      <!-- 入口列：史蒂夫在上、小黄人在下，位于头像正右侧；无框无文字 -->
+      <nav class="entries" aria-label="站点入口">
+        <a class="entry" href="index.html" aria-label="进入 Game Time 游戏时长统计">
+          <img src="img/steve-ceb15b8a.webp" alt="史蒂夫" width="400" height="386" decoding="async">
+        </a>
+        <a class="entry" href="watch.html" aria-label="进入 Watch List 观影记录">
+          <img src="img/minion-0ef9a202.webp" alt="小黄人" width="460" height="420" decoding="async">
+        </a>
+      </nav>
     </div>
 
-    <!-- 入口列：史蒂夫在上、小黄人在下，两图标居中对齐；无框无文字 -->
-    <nav class="entries" aria-label="站点入口">
-      <a class="entry" href="index.html" aria-label="进入 Game Time 游戏时长统计">
-        <img src="img/steve-ceb15b8a.webp" alt="史蒂夫" width="400" height="386" decoding="async">
-      </a>
-      <a class="entry" href="watch.html" aria-label="进入 Watch List 观影记录">
-        <img src="img/minion-0ef9a202.webp" alt="小黄人" width="460" height="420" decoding="async">
-      </a>
-    </nav>
+    <!-- 昵称 + 随机诗句 -->
+    <h1 class="name">Hyouka</h1>
+    <blockquote class="quote" id="home-quote" role="button" tabindex="0"
+                aria-label="点按换一句诗">加载中…</blockquote>
+    <p class="hint">点一下，换一句</p>
   </section>
 </main>
 

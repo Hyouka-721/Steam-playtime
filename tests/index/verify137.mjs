@@ -53,8 +53,8 @@ const cssPlain = css.replace(/\/\*[\s\S]*?\*\//g, '');
 ok('A5b 头像无白圈底框/阴影/占位底色（用户要求"删除头像后的背景"）',
   /\.avatar\s*\{[^}]*border-radius:\s*50%/.test(cssPlain) &&
   !/\.avatar\s*\{[^}]*(border:|box-shadow:|background:)/.test(cssPlain) &&
-  /<div class="profile">\s*\n\s*<img class="avatar"/.test(html),
-  '理由：头像只保留圆形裁剪，白边/阴影/底色全部去掉');
+  /<img class="avatar"/.test(html),
+  '理由：头像只保留圆形裁剪，白边/阴影/底色全部去掉；第四版结构改 hero 容器，"profile 后紧跟 img"的形式判据随之放宽为"存在 avatar"');
 
 ok('A5c 图标列竖排居中对齐、无 Game Time / 游戏时长等文字',
   /\.entries\s*\{[^}]*flex-direction:\s*column/.test(cssPlain) &&
@@ -134,6 +134,10 @@ const view = await p.evaluate(() => ({
       entryTextEmpty: [...document.querySelectorAll('.entry')].every(a => a.textContent.trim() === ''),
       // 头像水平居中：中心与视口中线差 ≤ 2px；卡片与图标无背景底
       avatarCentered: Math.abs((av.left + av.right) / 2 - innerWidth / 2) <= 2,
+      // 第四版：头像放大一倍(264)、图标在头像右侧且放大一倍(148×140)
+      avatarSize: Math.round(av.width),
+      iconSize: [Math.round(e0.width), Math.round(e0.height)],
+      iconRightOfAvatar: e0.left >= av.right,
       noBg: (() => {
         const card = getComputedStyle(document.querySelector('.card'));
         const entry = getComputedStyle(document.querySelector('.entry'));
@@ -166,6 +170,14 @@ ok('B4b 布局：头像正中无底框、昵称诗句在下、两图标竖排对
   view.geo.entryAligned && view.geo.avatarNoFrame && view.geo.entryTextEmpty &&
   view.geo.avatarCentered && view.geo.noBg,
   { ...view.geo, reason: '第137轮第三版布局契约：删除所有背景框、头像正中' });
+
+ok('B4c 第四版：头像放大一倍(264)、图标在头像右侧且放大一倍(148×140)',
+  view.geo.avatarSize === 264 &&
+  view.geo.iconSize[0] === 148 && view.geo.iconSize[1] === 140 &&
+  view.geo.iconRightOfAvatar,
+  { avatarSize: view.geo.avatarSize, iconSize: view.geo.iconSize,
+    iconRightOfAvatar: view.geo.iconRightOfAvatar,
+    reason: '用户要求头像与两图标各放大一倍、图标移到头像正右侧' });
 
 ok('B5 零控制台 / 页面错误',
   errs.length === 0, errs);
@@ -225,10 +237,16 @@ await p2.goto(BASE + 'home.html?cb=' + Date.now(), { waitUntil: 'load' });
 await p2.waitForTimeout(400);
 const mob = await p2.evaluate(() => {
   const card = document.querySelector('.card').getBoundingClientRect();
+  const ics = [...document.querySelectorAll('.entry')].map(e => e.getBoundingClientRect());
   return { left: card.left, right: card.right, vw: innerWidth,
-    fits: card.left >= 0 && card.right <= innerWidth };
+    docW: document.documentElement.scrollWidth,
+    iconRight: Math.round(Math.max(...ics.map(r => r.right))),
+    // 第四版图标绝对定位在头像右侧，可能越过卡片边界 —— 必须连图标一并检查
+    fits: card.left >= 0 && card.right <= innerWidth &&
+      ics.every(r => r.right <= innerWidth) &&
+      document.documentElement.scrollWidth <= innerWidth };
 });
-ok('B10 窄屏卡片不横向溢出', mob.fits, mob);
+ok('B10 窄屏无横向溢出（含绝对定位的图标；第四版收紧判据）', mob.fits, mob);
 await c2.close();
 
 await browser.close();
