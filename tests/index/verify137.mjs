@@ -132,9 +132,13 @@ const view = await p.evaluate(() => ({
       avatarNoFrame: acs.borderTopWidth === '0px' && acs.boxShadow === 'none' &&
         acs.backgroundColor === 'rgba(0, 0, 0, 0)',
       entryTextEmpty: [...document.querySelectorAll('.entry')].every(a => a.textContent.trim() === ''),
-      // 头像水平居中：中心与视口中线差 ≤ 2px；卡片与图标无背景底
-      avatarCentered: Math.abs((av.left + av.right) / 2 - innerWidth / 2) <= 2,
-      // 第五版：头像 300、图标 222×210、在头像右侧且右移(间距≥40)、两图标间距放大
+      // 第六版：头像+昵称+诗句整体左移 24px（中心比视口中线小 ~24）；卡片与图标无背景底
+      avatarCentered: Math.abs((av.left + av.right) / 2 - (innerWidth / 2 - 24)) <= 3,
+      groupAligned: (() => {
+        const cx = s => { const r = document.querySelector(s).getBoundingClientRect(); return (r.left + r.right) / 2; };
+        return Math.abs(cx('.avatar') - cx('.name')) <= 2 && Math.abs(cx('.name') - cx('#home-quote')) <= 2;
+      })(),
+      // 图标 222×210、离头像右缘 80、两图标间距 30
       avatarSize: Math.round(av.width),
       iconSize: [Math.round(e0.width), Math.round(e0.height)],
       iconRightOfAvatar: e0.left >= av.right,
@@ -167,25 +171,25 @@ ok('B3 两个入口的 href 与可访问标签就位',
 ok('B4 壁纸已作为 body 背景加载（fixed 铺底）',
   /wallpaper-sketch-10e388d7\.webp/.test(view.bg), view.bg);
 
-ok('B4b 布局：头像正中无底框、昵称诗句在下、两图标竖排对齐无文字、卡片图标无背景',
+ok('B4b 布局：头像组无底框且整体对齐、昵称诗句在下、两图标竖排无文字、卡片图标无背景',
   view.geo.avatarAboveName && view.geo.nameAboveQuote && view.geo.entryStacked &&
   view.geo.entryAligned && view.geo.avatarNoFrame && view.geo.entryTextEmpty &&
-  view.geo.avatarCentered && view.geo.noBg,
-  { ...view.geo, reason: '第137轮第三版布局契约：删除所有背景框、头像正中' });
+  view.geo.avatarCentered && view.geo.groupAligned && view.geo.noBg,
+  { ...view.geo, reason: '第六版：头像组整体左移 24px，三组中心仍对齐（原"正中"判据随需求改）' });
 
-ok('B4c 第五版：头像 300、图标 222×210 在头像右侧且右移、图标间距放大',
+ok('B4c 第六版：头像 300、图标 222×210、离头像 80px、图标间距 30',
   view.geo.avatarSize === 300 &&
   view.geo.iconSize[0] === 222 && view.geo.iconSize[1] === 210 &&
-  view.geo.iconRightOfAvatar && view.geo.iconOffset >= 40 &&
+  view.geo.iconRightOfAvatar && view.geo.iconOffset >= 75 &&
   view.geo.iconVerticalGap >= 25,
   { avatarSize: view.geo.avatarSize, iconSize: view.geo.iconSize,
     iconOffset: view.geo.iconOffset, iconVerticalGap: view.geo.iconVerticalGap,
-    reason: '用户要求头像 300、图标 1.5 倍、右移且间距放大（判据随第五版需求改）' });
+    reason: '用户要求两图标继续右移到离头像 80px（第五版≥40 的判据随需求收紧）' });
 
-ok('B4d 已删除"点一下，换一句"提示、昵称与诗句间距收紧',
+ok('B4d 已删除"点一下，换一句"提示、昵称与诗句间距再收紧到 4px',
   !/点一下，换一句/.test(html) && !/class="hint"/.test(html) &&
-  /\.name\s*\{[^}]*margin:\s*0 0 10px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
-  '理由：用户要求删掉换句提示、诗句上移');
+  /\.name\s*\{[^}]*margin:\s*0 0 4px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
+  '理由：用户要求删掉换句提示、昵称与诗句间距再收紧（10→4）');
 
 ok('B5 零控制台 / 页面错误',
   errs.length === 0, errs);
