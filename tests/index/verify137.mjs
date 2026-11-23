@@ -202,14 +202,19 @@ ok('B4d 已删除"点一下，换一句"提示、昵称与诗句间距用负边�
   '理由：用户要求删掉换句提示、昵称与诗句间距再收紧（-4→-8px）');
 
 const qfont = await p.evaluate(() => {
-  const qs = getComputedStyle(document.querySelector('#home-quote'));
-  return { family: qs.fontFamily, size: parseFloat(qs.fontSize) };
+  const qEl = document.querySelector('#home-quote');
+  const qs = getComputedStyle(qEl);
+  const byEl = qEl.querySelector('.by');
+  const byFam = byEl ? getComputedStyle(byEl).fontFamily : null;
+  const byInherit = byEl ? getComputedStyle(byEl).fontFamily === qs.fontFamily : false;
+  return { family: qs.fontFamily, size: parseFloat(qs.fontSize),
+    byFamily: byFam, byInherit };
 });
-ok('B4f 第十一版：诗句换成无衬线易读字体（非宋体）且字号加大',
+ok('B4f 第十二版：诗句用行楷/楷体字体（非宋体非无衬线），作者同字体',
+  /Xingkai|STKaiti|KaiTi|Kaiti|楷/i.test(qfont.family) &&
   !/Songti|STSong|SimSun/i.test(qfont.family) &&
-  /sans-serif|PingFang|Microsoft YaHei|-apple-system/i.test(qfont.family) &&
-  qfont.size >= 19,
-  { ...qfont, reason: '用户反馈诗句字体不易读 → 由宋体改无衬线、字号加大' });
+  qfont.size >= 21 && qfont.byInherit,
+  { ...qfont, reason: '用户要求略带行楷、作者字体同步' });
 
 ok('B4e 诗句格式：」与 - 紧贴、- 后空一格 →「句」- 作者',
   /by\.textContent\s*=\s*'- '\s*\+/.test(js) &&
