@@ -133,8 +133,8 @@ const view = await p.evaluate(() => ({
       avatarNoFrame: acs.borderTopWidth === '0px' && acs.boxShadow === 'none' &&
         acs.backgroundColor === 'rgba(0, 0, 0, 0)',
       entryTextEmpty: [...document.querySelectorAll('.entry')].every(a => a.textContent.trim() === ''),
-      // 第九版：头像组整体左移 24px（中心比视口中线小 ~24）；卡片与图标无背景底
-      avatarCentered: Math.abs((av.left + av.right) / 2 - (innerWidth / 2 - 24)) <= 3,
+      // 第十一版：头像组回到水平正中（中心≈视口中线）；卡片与图标无背景底
+      avatarCentered: Math.abs((av.left + av.right) / 2 - innerWidth / 2) <= 3,
       groupAligned: (() => {
         const cx = s => { const r = document.querySelector(s).getBoundingClientRect(); return (r.left + r.right) / 2; };
         return Math.abs(cx('.avatar') - cx('.name')) <= 2 && Math.abs(cx('.name') - cx('#home-quote')) <= 2;
@@ -147,6 +147,8 @@ const view = await p.evaluate(() => ({
       iconRightOfAvatar: e0.left >= av.right,
       iconOffset: Math.round(e0.left - av.right),
       iconVerticalGap: Math.round(e1.top - e0.bottom),
+      // 两图标整体下移：图标列中心比头像中心低约 --ic-down(48)
+      iconDown: Math.round((e0.top + e1.bottom) / 2 - (av.top + av.bottom) / 2),
       noBg: (() => {
         const card = getComputedStyle(document.querySelector('.card'));
         const entry = getComputedStyle(document.querySelector('.entry'));
@@ -179,7 +181,7 @@ ok('B4b 布局：头像组无底框且整体对齐、昵称诗句在下、两图
   view.geo.entryAligned && view.geo.avatarNoFrame && view.geo.entryTextEmpty &&
   view.geo.avatarCentered && view.geo.groupAligned && view.geo.noBg &&
   view.geo.shiftedUp,
-  { ...view.geo, reason: '第十版：头像组左移 24px 且整体上移 40px，三组中心仍对齐' });
+  { ...view.geo, reason: '第十一版：头像组回水平正中且整体上移 40px，三组中心仍对齐' });
 
 ok('B4c 第十版：头像 300、图标 222×210、离头像 200px、图标间距 30',
   view.geo.avatarSize === 300 &&
@@ -190,10 +192,24 @@ ok('B4c 第十版：头像 300、图标 222×210、离头像 200px、图标间�
     iconOffset: view.geo.iconOffset, iconVerticalGap: view.geo.iconVerticalGap,
     reason: '用户要求两图标离头像改为 200px（第九版≥215 的判据随需求放宽）' });
 
+ok('B4c2 第十一版：两图标整体下移（图标列中心低于头像中心约 48px）',
+  view.geo.iconDown >= 40 && view.geo.iconDown <= 60,
+  { iconDown: view.geo.iconDown, reason: '用户要求两图标整体下移' });
+
 ok('B4d 已删除"点一下，换一句"提示、昵称与诗句间距用负边距再收紧',
   !/点一下，换一句/.test(html) && !/class="hint"/.test(html) &&
   /\.name\s*\{[^}]*margin:\s*0\s+0\s+-8px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
   '理由：用户要求删掉换句提示、昵称与诗句间距再收紧（-4→-8px）');
+
+const qfont = await p.evaluate(() => {
+  const qs = getComputedStyle(document.querySelector('#home-quote'));
+  return { family: qs.fontFamily, size: parseFloat(qs.fontSize) };
+});
+ok('B4f 第十一版：诗句换成无衬线易读字体（非宋体）且字号加大',
+  !/Songti|STSong|SimSun/i.test(qfont.family) &&
+  /sans-serif|PingFang|Microsoft YaHei|-apple-system/i.test(qfont.family) &&
+  qfont.size >= 19,
+  { ...qfont, reason: '用户反馈诗句字体不易读 → 由宋体改无衬线、字号加大' });
 
 ok('B4e 诗句格式：」与 - 紧贴、- 后空一格 →「句」- 作者',
   /by\.textContent\s*=\s*'- '\s*\+/.test(js) &&

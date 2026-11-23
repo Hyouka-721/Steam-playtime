@@ -2,9 +2,9 @@
    门户主页 · home.css   v=1
    第 137 轮新增 —— Hyouka 的个人主页（头像 / 昵称 / 随机诗句 / 两个入口）。
    🔴 独立文件：不并入 style.css / watch.css，不动两页任何版本号（红线 2）。
-   布局（第十版）：壁纸 sketch 保留铺底；所有元素无背景框、浮在壁纸上；头像 300 居中
-   后整体左移 --shift(24px) 并上移 --vshift(40px)；两图标在头像右侧 --ic-offset(200px) 处、
-   上下间距 --ic-gap；昵称与诗句间距再收紧。尺寸走 CSS 变量，窄屏收敛防溢出。圆角全走 --r-*。
+   布局（第十一版）：壁纸 sketch 保留铺底；所有元素无背景框、浮在壁纸上；头像 300 回到
+   水平正中（--shift 归零）、整体上移 --vshift(40px)；两图标在头像右侧 --ic-offset(200px)
+   处并整体下移 --ic-down；诗句改无衬线易读字体。尺寸走 CSS 变量，窄屏收敛防溢出。
    ============================================================================ */
 :root {
   --r-chip: 14px;
@@ -16,10 +16,11 @@
   --av: 300px;
   --ic-w: 222px;
   --ic-h: 210px;
-  --shift: 24px;                   /* 头像组整体左移量 */
+  --shift: 0px;                    /* 头像组水平偏移（第十一版：归零回到正中） */
   --vshift: 40px;                  /* 头像组整体上移量 */
-  --ic-offset: 200px;              /* 头像右缘 → 图标左缘（第十版：220 → 200） */
+  --ic-offset: 200px;              /* 头像右缘 → 图标左缘 */
   --ic-gap: 30px;                  /* 两图标上下间距 */
+  --ic-down: 48px;                 /* 图标列相对头像中心下移量 */
 }
 
 * { box-sizing: border-box; }
@@ -73,7 +74,7 @@ body {
 .entries {
   position: absolute;
   left: calc(50% - var(--shift) + var(--av) / 2 + var(--ic-offset));
-  top: 50%;
+  top: calc(50% + var(--ic-down));
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
@@ -115,10 +116,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Songti SC", "STSong", "SimSun", serif;
-  font-size: clamp(17px, 2vw, 20px);
-  line-height: 1.75;
-  letter-spacing: 0.4px;
+  /* 第十一版：宋体在浅色壁纸 + 小字号下笔画过细，改用无衬线正文字体并加大字号/字重 */
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: clamp(19px, 2.2vw, 23px);
+  font-weight: 500;
+  line-height: 1.7;
+  letter-spacing: 0.6px;
   color: var(--ink);
   cursor: pointer;
   white-space: pre-line;
@@ -150,11 +153,12 @@ body {
     --vshift: 0px;                 /* 窄屏不上移，避免顶部溢出 */
     --ic-offset: 12px;
     --ic-gap: 14px;
+    --ic-down: 24px;
   }
   .stage { padding: 20px 12px; }
   .card { gap: 14px; width: min(100%, 400px); }
   .name { font-size: 26px; margin-bottom: 4px; }
-  .quote { min-height: 92px; font-size: 16px; }
+  .quote { min-height: 92px; font-size: 18px; }
 }
 
 /* 尊重减少动态效果偏好 */
