@@ -24,7 +24,7 @@ const ambienceJs = fs.readFileSync(ROOT + 'docs/ambience.js', 'utf8');
 
 /* 第 137 轮：雨丝提亮只改 rain.css（v=7→8），rain.js 未动仍是 v=7，判据随版本同步 */
 ok('A1 watch 以 v=8 引用 rain.css、v=7 引用 rain.js，且不动 css48 / js35',
-  /rain\.css\?v=8["']/.test(html) && /rain\.js\?v=7["']/.test(html) &&
+  /rain.css\?v=9["']/.test(html) && /rain\.js\?v=7["']/.test(html) &&
   /watch\.css\?v=48["']/.test(html) && /watch\.js\?v=35["']/.test(html));
 ok('A2 雨丝层在 body 首位、开关在 .w-foot（无 title 气泡）',
   /<body>\s*<div id="rain-layer" aria-hidden="true"><\/div>/.test(html) &&

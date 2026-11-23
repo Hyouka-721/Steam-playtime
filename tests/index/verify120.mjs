@@ -28,8 +28,8 @@ const ambienceJs = fs.readFileSync(ROOT + 'docs/ambience.js', 'utf8');
 
 /* 第 137 轮：雨丝提亮只改 rain.css（v=7→8），rain.js 未动仍是 v=7，判据随版本同步 */
 ok('A1 两页均以 v=8 引用 rain.css、v=7 引用 rain.js',
-  /rain\.css\?v=8["']/.test(html) && /rain\.js\?v=7["']/.test(html) &&
-  /rain\.css\?v=8["']/.test(watchHtml) && /rain\.js\?v=7["']/.test(watchHtml));
+  /rain.css\?v=9["']/.test(html) && /rain\.js\?v=7["']/.test(html) &&
+  /rain.css\?v=9["']/.test(watchHtml) && /rain\.js\?v=7["']/.test(watchHtml));
 ok('A2 不动已上线版本号（css144 / app129 / fx19 原样保留）',
   /style\.css\?v=150["']/.test(html) && /app\.js\?v=129["']/.test(html) && /fx\.js\?v=19["']/.test(html));
 ok('A3 第 123 轮改判：DOM 雨丝，不再依赖 canvas / backdrop-filter',

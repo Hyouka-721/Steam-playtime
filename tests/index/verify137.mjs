@@ -97,8 +97,8 @@ ok('A9 渲染为「句子」- 作者、无作者省略；\\n 由 pre-line 换行
   /if \(row\[1\]\)/.test(js) && /white-space:\s*pre-line/.test(css),
   '理由：用户指定签名格式（第九版：」紧接 -，- 后空格再接作者）');
 
-ok('A10 主页复用两页共用雨效（rain.css v=8 / rain.js v=7、#rain-layer、cream 主题）',
-  /rain\.css\?v=8/.test(html) && /rain\.js\?v=7/.test(html) &&
+ok('A10 主页复用两页共用雨效（rain.css v=9 / rain.js v=7、#rain-layer、cream 主题）',
+  /rain.css\?v=9/.test(html) && /rain\.js\?v=7/.test(html) &&
   /<div id="rain-layer"/.test(html) &&
   /data-theme="cream"/.test(html),
   '理由：用户要求加入两站共有下雨特效；cream 让浅色壁纸上的雨丝走蓝灰描边');
@@ -289,9 +289,10 @@ ok('B4h 内容层级高于雨丝（stage z=13 > rain-layer z=12）',
   rain.zStage === '13' && rain.zLayer === '12',
   { zStage: rain.zStage, zLayer: rain.zLayer, reason: '雨丝只作背景，不穿文字' });
 
-ok('B4i cream 主题让浅色壁纸上的雨丝走蓝调描边（v=8 提亮后才不是灰的）',
-  /84,\s*146,\s*208/.test(rain.stroke || ''),
-  { stroke: rain.stroke, reason: '冷白在浅底看不见；v=8 由灰蓝 rgba(62,82,104,.52) 提亮为 rgba(84,146,208,.68)' });
+ok('B4i cream 浅底雨丝用中性暖灰褐（v=9：不偏蓝、不发灰蓝）',
+  /152,\s*140,\s*126/.test(rain.stroke || ''),
+  { stroke: rain.stroke,
+    reason: '用户否掉了冷白/蓝/灰蓝；v=9 改 rgba(152,140,126,.46) 并减半模糊，线条利落不发糊' });
 
 // 防重复：清状态后连换 30 次，任意连续 12 次不得出现同一句
 const dedup = await p.evaluate(() => {
