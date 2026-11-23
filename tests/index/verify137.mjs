@@ -22,8 +22,8 @@ const js = fs.readFileSync(ROOT + 'docs/home.js', 'utf8');
 const poemsSrc = fs.readFileSync(ROOT + 'docs/poems.js', 'utf8');
 
 // ── A 静态契约 ──
-ok('A1 主页挂自己的版本化资源（home.css v=3 / home.js v=2 / poems.js v=3），不引用两页私有资源',
-  /home\.css\?v=3/.test(html) && /home\.js\?v=2/.test(html) && /poems\.js\?v=3/.test(html) &&
+ok('A1 主页挂自己的版本化资源（home.css v=3 / home.js v=2 / poems.js v=4），不引用两页私有资源',
+  /home\.css\?v=3/.test(html) && /home\.js\?v=2/.test(html) && /poems\.js\?v=4/.test(html) &&
   !/style\.css\?v=|app\.js\?v=|watch\.css\?v=|watch\.js\?v=/.test(html),
   '理由：主页独立，bump 两页会误伤已上线版本；home.css 加雨效层级、home.js 加防重复、poems.js 加歌词，各自 v=1→2');
 
@@ -71,21 +71,24 @@ ok('A5d 删除所有背景：卡片白底与图标框底都去掉（壁纸保留
 // 诗句库静态校验（在 node 沙箱里 eval，因 poems.js 是 IIFE 挂 globalThis）
 (0, eval)(poemsSrc);
 const P = globalThis.POEMS || [];
-/* v=3 删掉中小学必背篇目后规模降了一半，下界随之下调（红线5：写下界、不写快照） */
-ok('A6 诗句库规模 ≥ 40 句、格式全为 [句子, 作者] 且无重复',
-  P.length >= 40 && P.every(x => Array.isArray(x) && x.length === 2 &&
+/* v=4 大幅扩充到 150+；按下界写（红线5：不写死快照数字） */
+ok('A6 诗句库规模 ≥ 120 句、格式全为 [句子, 作者] 且无重复',
+  P.length >= 120 && P.every(x => Array.isArray(x) && x.length === 2 &&
     typeof x[0] === 'string' && typeof x[1] === 'string') &&
   new Set(P.map(x => x[0])).size === P.length,
-  { count: P.length, reason: 'v=3 剔除必背篇目后 50 句；规模走下界，不写死快照数字' });
+  { count: P.length, reason: 'v=4 大力扩充冷门佳句；规模走下界，不写死快照数字' });
 
 const noAuthor = P.filter(x => x[1] === '');
 const withAuthor = P.filter(x => x[1] !== '');
-ok('A7 影视剧/游戏来源不署名、有传世作品的作者署名（含张舜民）',
+/* v=4 判据调整：张舜民那句（回首夕阳红尽处）属怀古主题，已按用户新要求删除，
+   改以元稹、白居易这类传世作者校验署名；汉魏乐府佚名者按空串不署名。 */
+ok('A7 影视剧/游戏与汉魏佚名不署名、有传世作品的作者正常署名',
   noAuthor.some(x => /遥远的事物/.test(x[0])) &&
   noAuthor.some(x => /谁也没有见过风/.test(x[0])) &&
+  noAuthor.some(x => x[0] === '盈盈一水间，脉脉不得语' && x[1] === '') &&
   withAuthor.some(x => x[0] === '笙歌归院落，灯火下楼台' && x[1] === '白居易') &&
-  withAuthor.some(x => x[0] === '回首夕阳红尽处，应是长安' && x[1] === '张舜民'),
-  { noAuthor: noAuthor.length, reason: '用户口径：只有文学史上留名的作者署名' });
+  withAuthor.some(x => x[0] === '诚知此恨人人有，贫贱夫妻百事哀' && x[1] === '元稹'),
+  { noAuthor: noAuthor.length, reason: '张舜民句属怀古已删；改为元稹/白居易校验署名' });
 
 ok('A8 长句用 \\n 分两行，常规句不超 20 字（下界守卫）',
   P.some(x => x[0].includes('\n') && /谁也没有见过爱情/.test(x[0])) &&
@@ -133,12 +136,26 @@ const poemRows = [...fs.readFileSync(ROOT + 'docs/poems.js', 'utf8')
   .map(m => [m[1].replace(/\\n/g, ''), m[2]]);
 const lyricRows = poemRows.filter(r => /《.+》/.test(r[1]));
 const poemDup = poemRows.length - new Set(poemRows.map(r => r[0])).size;
-/* v=3：歌词必须成对（上句 + 下句），且不得再出现中小学必背篇目的名句 */
+/* v=3：歌词必须成对（上句 + 下句）；v=4：两句合计不得超过 20 字 */
 const lyricOneLiners = lyricRows.filter(r => !/[，；]/.test(r[0])).map(r => r[0]);
-ok('A14 歌词 ≥15 句且全部成对（含逗号/分号），全库无重复',
-  lyricRows.length >= 15 && lyricOneLiners.length === 0 && poemDup === 0,
+const lyricTextLen = s => s.replace(/[，。！？、；：「」《》\s]/g, '').length;
+const lyricTooLong = lyricRows.filter(r => lyricTextLen(r[0]) > 20)
+  .map(r => [r[0], lyricTextLen(r[0])]);
+ok('A14 歌词 ≥28 句、全部成对、两句合计 ≤20 字，全库无重复',
+  lyricRows.length >= 28 && lyricOneLiners.length === 0 &&
+  lyricTooLong.length === 0 && poemDup === 0,
   { total: poemRows.length, lyrics: lyricRows.length, dups: poemDup,
-    oneLiners: lyricOneLiners, reason: '用户要求歌词至少两句，凑不成对的不收' });
+    oneLiners: lyricOneLiners, tooLong: lyricTooLong,
+    reason: '用户要求：歌词至少两句成对，且两句加起来超过 20 字不采用' });
+
+/* v=4：思乡 / 怀古两类主题不收——用不会误伤的高辨识度词做守卫 */
+const HOME_WORDS = ['故乡', '故园', '故里', '乡愁', '思乡', '望乡', '归梦', '家书', '客愁', '羁旅'];
+const GU_WORDS = ['王谢', '六朝', '兴亡', '吊古', '霸业', '遗恨', '故国', '古战场'];
+const homeHit = poemRows.filter(r => HOME_WORDS.some(w => r[0].includes(w))).map(r => r[0]);
+const guHit = poemRows.filter(r => GU_WORDS.some(w => r[0].includes(w))).map(r => r[0]);
+ok('A17 思乡 / 怀古主题零命中（用户指定不收这两类）',
+  homeHit.length === 0 && guHit.length === 0,
+  { 思乡: homeHit, 怀古: guHit, reason: '用户要求这两类主题的诗句不采用' });
 
 const MUST_RECITE = ['大漠孤烟直', '明月松间照', '劝君更尽一杯酒', '天生我材必有用',
   '会当凌绝顶', '烽火连三月', '春蚕到死丝方尽', '采菊东篱下', '但愿人长久',
