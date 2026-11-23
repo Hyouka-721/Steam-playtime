@@ -177,19 +177,19 @@ ok('B4b 布局：头像组无底框且整体对齐、昵称诗句在下、两图
   view.geo.avatarCentered && view.geo.groupAligned && view.geo.noBg,
   { ...view.geo, reason: '第七版：头像组整体左移 48px，三组中心仍对齐（原"正中"判据随需求改）' });
 
-ok('B4c 第七版：头像 300、图标 222×210、离头像 120px、图标间距 30',
+ok('B4c 第八版：头像 300、图标 222×210、离头像 200px、图标间距 30',
   view.geo.avatarSize === 300 &&
   view.geo.iconSize[0] === 222 && view.geo.iconSize[1] === 210 &&
-  view.geo.iconRightOfAvatar && view.geo.iconOffset >= 115 &&
+  view.geo.iconRightOfAvatar && view.geo.iconOffset >= 195 &&
   view.geo.iconVerticalGap >= 25,
   { avatarSize: view.geo.avatarSize, iconSize: view.geo.iconSize,
     iconOffset: view.geo.iconOffset, iconVerticalGap: view.geo.iconVerticalGap,
-    reason: '用户要求两图标继续右移到离头像 120px（第六版≥75 的判据随需求收紧）' });
+    reason: '用户要求两图标继续右移到离头像 200px（第七版≥115 的判据随需求收紧）' });
 
-ok('B4d 已删除"点一下，换一句"提示、昵称与诗句间距再收紧到 2px',
+ok('B4d 已删除"点一下，换一句"提示、昵称与诗句间距收紧到 0px',
   !/点一下，换一句/.test(html) && !/class="hint"/.test(html) &&
-  /\.name\s*\{[^}]*margin:\s*0 0 2px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
-  '理由：用户要求删掉换句提示、昵称与诗句间距再收紧（4→2）');
+  /\.name\s*\{[^}]*margin:\s*0\s+0\s+0/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
+  '理由：用户要求删掉换句提示、昵称与诗句间距再收紧（2→0）');
 
 ok('B5 零控制台 / 页面错误',
   errs.length === 0, errs);
