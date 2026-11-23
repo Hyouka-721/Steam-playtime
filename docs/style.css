@@ -1297,24 +1297,16 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
 .footer-watch { color: var(--text-faint); text-decoration: none; border-bottom: 1px solid transparent; transition: color .15s, border-color .15s; }
 .footer-watch:hover { color: var(--accent); border-bottom-color: var(--tint-border); }
 .footer-watch:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 5px; }
-/* 页脚右侧的「氛围」切换器（2026-10-24 从史蒂夫头像改回此处）：
-   直接复用已有的 .seg 分段控件样式，只把尺寸压小并贴右（margin-left:auto）。 */
-.fx-switch {
-  display: inline-flex; align-items: center; gap: 8px;
-  margin-left: auto;
-}
-.fx-label { font-size: 13px; color: var(--text-faint); letter-spacing: .5px; }
-.fx-switch .seg button { padding: 3px 11px; font-size: 13px; line-height: 1.5; }
-.fx-switch .seg button[disabled] { opacity: .45; cursor: not-allowed; }
-.fx-switch .seg button[disabled]:hover { border-color: var(--border); }
+/* 第 136 轮：删掉 .fx-switch / .fx-label 家族（5 条规则）。
+   第 125 轮起页脚氛围控件已换成 .ambience-switch（样式全在 rain.css:69 起，
+   display / gap / 按钮 padding / 窄屏对齐一应俱全），这组旧规则既无 HTML/JS 引用、
+   又被后加载的 rain.css 完全覆盖 —— 纯死码。校验：grep 全仓 0 引用、无套件守它。 */
 
 @media (max-width: 860px) {
   .cards { padding: 26px 16px 8px; }
   .view { padding: 22px 16px 8px; }
   .tabs { padding: 12px 16px 0; }
   .site-header { padding: 14px 16px; }
-  /* 窄屏页脚会换行，氛围切换器占满一行并靠右 */
-  .fx-switch { margin-left: 0; width: 100%; justify-content: flex-end; }
   /* 第 83 轮 #5：窄屏从「六列挤成四列、进度条与日期直接丢掉」改成两行 ——
      首行 序号 / 封面 / 片名 / 时长，进度条整条落在第二行。信息维度一个不少。 */
   /* 两行布局：首行 序号/封面/片名，次行 进度条 + 时长。
