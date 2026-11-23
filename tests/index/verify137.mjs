@@ -139,7 +139,9 @@ const view = await p.evaluate(() => ({
         const cx = s => { const r = document.querySelector(s).getBoundingClientRect(); return (r.left + r.right) / 2; };
         return Math.abs(cx('.avatar') - cx('.name')) <= 2 && Math.abs(cx('.name') - cx('#home-quote')) <= 2;
       })(),
-      // 图标 222×210、离头像右缘 80、两图标间距 30
+      // 第十版：整体上移 40px（card 中心高于视口中心约 40）
+      shiftedUp: Math.abs(((document.querySelector('.card').getBoundingClientRect().top + document.querySelector('.card').getBoundingClientRect().bottom) / 2) - (innerHeight / 2 - 40)) <= 4,
+      // 图标 222×210、离头像右缘 200、两图标间距 30
       avatarSize: Math.round(av.width),
       iconSize: [Math.round(e0.width), Math.round(e0.height)],
       iconRightOfAvatar: e0.left >= av.right,
@@ -175,22 +177,23 @@ ok('B4 壁纸已作为 body 背景加载（fixed 铺底）',
 ok('B4b 布局：头像组无底框且整体对齐、昵称诗句在下、两图标竖排无文字、卡片图标无背景',
   view.geo.avatarAboveName && view.geo.nameAboveQuote && view.geo.entryStacked &&
   view.geo.entryAligned && view.geo.avatarNoFrame && view.geo.entryTextEmpty &&
-  view.geo.avatarCentered && view.geo.groupAligned && view.geo.noBg,
-  { ...view.geo, reason: '第九版：头像组整体左移 24px（第八版 48→24 右移 24），三组中心仍对齐' });
+  view.geo.avatarCentered && view.geo.groupAligned && view.geo.noBg &&
+  view.geo.shiftedUp,
+  { ...view.geo, reason: '第十版：头像组左移 24px 且整体上移 40px，三组中心仍对齐' });
 
-ok('B4c 第九版：头像 300、图标 222×210、离头像 220px、图标间距 30',
+ok('B4c 第十版：头像 300、图标 222×210、离头像 200px、图标间距 30',
   view.geo.avatarSize === 300 &&
   view.geo.iconSize[0] === 222 && view.geo.iconSize[1] === 210 &&
-  view.geo.iconRightOfAvatar && view.geo.iconOffset >= 215 &&
+  view.geo.iconRightOfAvatar && view.geo.iconOffset >= 195 &&
   view.geo.iconVerticalGap >= 25,
   { avatarSize: view.geo.avatarSize, iconSize: view.geo.iconSize,
     iconOffset: view.geo.iconOffset, iconVerticalGap: view.geo.iconVerticalGap,
-    reason: '用户要求两图标继续右移到离头像 220px（第八版≥195 的判据随需求收紧）' });
+    reason: '用户要求两图标离头像改为 200px（第九版≥215 的判据随需求放宽）' });
 
 ok('B4d 已删除"点一下，换一句"提示、昵称与诗句间距用负边距再收紧',
   !/点一下，换一句/.test(html) && !/class="hint"/.test(html) &&
-  /\.name\s*\{[^}]*margin:\s*0\s+0\s+-4px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
-  '理由：用户要求删掉换句提示、昵称与诗句间距再收紧（0→-4px，有效间距 8-gap→4）');
+  /\.name\s*\{[^}]*margin:\s*0\s+0\s+-8px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
+  '理由：用户要求删掉换句提示、昵称与诗句间距再收紧（-4→-8px）');
 
 ok('B4e 诗句格式：」与 - 紧贴、- 后空一格 →「句」- 作者',
   /by\.textContent\s*=\s*'- '\s*\+/.test(js) &&
