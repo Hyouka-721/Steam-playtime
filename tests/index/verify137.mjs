@@ -132,8 +132,8 @@ const view = await p.evaluate(() => ({
       avatarNoFrame: acs.borderTopWidth === '0px' && acs.boxShadow === 'none' &&
         acs.backgroundColor === 'rgba(0, 0, 0, 0)',
       entryTextEmpty: [...document.querySelectorAll('.entry')].every(a => a.textContent.trim() === ''),
-      // 第六版：头像+昵称+诗句整体左移 24px（中心比视口中线小 ~24）；卡片与图标无背景底
-      avatarCentered: Math.abs((av.left + av.right) / 2 - (innerWidth / 2 - 24)) <= 3,
+      // 第七版：头像+昵称+诗句整体左移 48px（中心比视口中线小 ~48）；卡片与图标无背景底
+      avatarCentered: Math.abs((av.left + av.right) / 2 - (innerWidth / 2 - 48)) <= 3,
       groupAligned: (() => {
         const cx = s => { const r = document.querySelector(s).getBoundingClientRect(); return (r.left + r.right) / 2; };
         return Math.abs(cx('.avatar') - cx('.name')) <= 2 && Math.abs(cx('.name') - cx('#home-quote')) <= 2;
@@ -175,21 +175,21 @@ ok('B4b 布局：头像组无底框且整体对齐、昵称诗句在下、两图
   view.geo.avatarAboveName && view.geo.nameAboveQuote && view.geo.entryStacked &&
   view.geo.entryAligned && view.geo.avatarNoFrame && view.geo.entryTextEmpty &&
   view.geo.avatarCentered && view.geo.groupAligned && view.geo.noBg,
-  { ...view.geo, reason: '第六版：头像组整体左移 24px，三组中心仍对齐（原"正中"判据随需求改）' });
+  { ...view.geo, reason: '第七版：头像组整体左移 48px，三组中心仍对齐（原"正中"判据随需求改）' });
 
-ok('B4c 第六版：头像 300、图标 222×210、离头像 80px、图标间距 30',
+ok('B4c 第七版：头像 300、图标 222×210、离头像 120px、图标间距 30',
   view.geo.avatarSize === 300 &&
   view.geo.iconSize[0] === 222 && view.geo.iconSize[1] === 210 &&
-  view.geo.iconRightOfAvatar && view.geo.iconOffset >= 75 &&
+  view.geo.iconRightOfAvatar && view.geo.iconOffset >= 115 &&
   view.geo.iconVerticalGap >= 25,
   { avatarSize: view.geo.avatarSize, iconSize: view.geo.iconSize,
     iconOffset: view.geo.iconOffset, iconVerticalGap: view.geo.iconVerticalGap,
-    reason: '用户要求两图标继续右移到离头像 80px（第五版≥40 的判据随需求收紧）' });
+    reason: '用户要求两图标继续右移到离头像 120px（第六版≥75 的判据随需求收紧）' });
 
-ok('B4d 已删除"点一下，换一句"提示、昵称与诗句间距再收紧到 4px',
+ok('B4d 已删除"点一下，换一句"提示、昵称与诗句间距再收紧到 2px',
   !/点一下，换一句/.test(html) && !/class="hint"/.test(html) &&
-  /\.name\s*\{[^}]*margin:\s*0 0 4px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
-  '理由：用户要求删掉换句提示、昵称与诗句间距再收紧（10→4）');
+  /\.name\s*\{[^}]*margin:\s*0 0 2px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
+  '理由：用户要求删掉换句提示、昵称与诗句间距再收紧（4→2）');
 
 ok('B5 零控制台 / 页面错误',
   errs.length === 0, errs);
