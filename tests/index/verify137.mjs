@@ -49,6 +49,19 @@ ok('A5 两入口 href 精确指向 index.html / watch.html',
   /href="watch\.html"[^>]*aria-label="进入 Watch List/.test(html),
   '理由：主页核心功能就是这两个跳转');
 
+const cssPlain = css.replace(/\/\*[\s\S]*?\*\//g, '');
+ok('A5b 头像无白圈底框/阴影/占位底色（用户要求"删除头像后的背景"）',
+  /\.avatar\s*\{[^}]*border-radius:\s*50%/.test(cssPlain) &&
+  !/\.avatar\s*\{[^}]*(border:|box-shadow:|background:)/.test(cssPlain) &&
+  /<div class="profile">\s*\n\s*<img class="avatar"/.test(html),
+  '理由：头像只保留圆形裁剪，白边/阴影/底色全部去掉');
+
+ok('A5c 右图标列竖排对齐、无 Game Time / 游戏时长等文字',
+  /\.entries\s*\{[^}]*flex-direction:\s*column/.test(cssPlain) &&
+  /\.entries\s*\{[^}]*align-items:\s*center/.test(cssPlain) &&
+  !/Game Time<\/span>|游戏时长<\/small>|Watch List<\/span>|观影记录<\/small>/.test(html),
+  '理由：史蒂夫在上、小黄人在下、水平对齐；入口图标旁不再写任何文字');
+
 // 诗句库静态校验（在 node 沙箱里 eval，因 poems.js 是 IIFE 挂 globalThis）
 (0, eval)(poemsSrc);
 const P = globalThis.POEMS || [];
@@ -98,7 +111,23 @@ const view = await p.evaluate(() => ({
   })),
   imgs: [...document.images].map(i => ({ src: i.getAttribute('src'), ok: i.complete && i.naturalWidth > 0 })),
   bg: getComputedStyle(document.body).backgroundImage,
-  count: window.__home.count
+  count: window.__home.count,
+  // 布局几何：头像 → 昵称 → 诗句自上而下；两图标竖排且水平对齐；头像无底框
+  geo: (() => {
+    const box = s => document.querySelector(s).getBoundingClientRect();
+    const av = box('.avatar'), nm = box('.name'), q = box('#home-quote');
+    const e0 = box('.entries .entry:first-child'), e1 = box('.entries .entry:last-child');
+    const acs = getComputedStyle(document.querySelector('.avatar'));
+    return {
+      avatarAboveName: av.bottom <= nm.top,
+      nameAboveQuote: nm.bottom <= q.top,
+      entryStacked: e1.top >= e0.bottom,
+      entryAligned: Math.abs(e0.left - e1.left) <= 1,
+      avatarNoFrame: acs.borderTopWidth === '0px' && acs.boxShadow === 'none' &&
+        acs.backgroundColor === 'rgba(0, 0, 0, 0)',
+      entryTextEmpty: [...document.querySelectorAll('.entry')].every(a => a.textContent.trim() === '')
+    };
+  })()
 }));
 ok('B1 页面标题 / 昵称 / 诗句都渲染出来',
   view.title === 'Hyouka' && view.name === 'Hyouka' &&
@@ -117,6 +146,11 @@ ok('B3 两个入口的 href 与可访问标签就位',
 
 ok('B4 壁纸已作为 body 背景加载（fixed 铺底）',
   /wallpaper-sketch-10e388d7\.webp/.test(view.bg), view.bg);
+
+ok('B4b 布局：头像在上昵称诗句在下、两图标竖排对齐无文字、头像无底框',
+  view.geo.avatarAboveName && view.geo.nameAboveQuote && view.geo.entryStacked &&
+  view.geo.entryAligned && view.geo.avatarNoFrame && view.geo.entryTextEmpty,
+  { ...view.geo, reason: '第137轮布局调整后的几何契约' });
 
 ok('B5 零控制台 / 页面错误',
   errs.length === 0, errs);

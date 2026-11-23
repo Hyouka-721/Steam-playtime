@@ -2,7 +2,8 @@
    门户主页 · home.css   v=1
    第 137 轮新增 —— Hyouka 的个人主页（头像 / 昵称 / 随机诗句 / 两个入口）。
    🔴 独立文件：不并入 style.css / watch.css，不动两页任何版本号（红线 2）。
-   壁纸 sketch（女孩牵鳄鱼）左侧是主体、右侧大面积留白 → 桌面卡片靠右避开插画；
+   布局：壁纸 sketch（女孩牵鳄鱼）左侧是主体、右侧大面积留白 → 桌面卡片靠右避开插画；
+   卡片内左右两栏——左栏头像（无底框、居中偏上）+ 昵称 + 诗句，右栏上下两图标对齐。
    窄屏插画被裁掉两侧时卡片回正居中。圆角全部走 --r-*（红线 10）。
    ============================================================================ */
 :root {
@@ -43,31 +44,40 @@ body {
 }
 
 .card {
-  width: min(100%, 420px);
+  width: min(100%, 560px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;   /* 左主区 + 右图标列 */
+  align-items: center;
+  gap: clamp(20px, 3vw, 36px);
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: var(--r-card);
   box-shadow: var(--card-shadow);
   -webkit-backdrop-filter: blur(14px) saturate(1.15);
   backdrop-filter: blur(14px) saturate(1.15);
-  padding: 40px 34px 34px;
-  text-align: center;
+  padding: 38px clamp(24px, 3vw, 38px);
 }
 
-/* ── 头像 + 昵称 ── */
+/* ── 左侧主区：头像（无底框、居中偏上）+ 昵称 + 诗句 ── */
+.profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  /* 头像整体落在卡片偏上：顶部收紧、底部留白托住，视觉重心上移 */
+  padding-top: 2px;
+}
 .avatar {
   display: block;
   width: 132px;
   height: 132px;
-  margin: 0 auto 18px;
-  border-radius: 50%;              /* 头像圆形，白名单内 */
+  margin: 0 auto 16px;
+  border-radius: 50%;              /* 圆形裁剪，白名单内；不额外加边框/阴影/底色 */
   object-fit: cover;
-  border: 4px solid #fff;
-  box-shadow: 0 8px 26px rgba(92, 60, 30, 0.20);
-  background: #f6e7cf;             /* 图片加载前的占位底色，避免闪白 */
 }
 .name {
-  margin: 0 0 26px;
+  margin: 0 0 22px;
   font-size: 32px;
   font-weight: 700;
   letter-spacing: 1.2px;
@@ -84,7 +94,7 @@ body {
   align-items: center;
   justify-content: center;
   font-family: "Songti SC", "STSong", "SimSun", serif;  /* 诗句衬线体，与正文拉开气质 */
-  font-size: clamp(18px, 2.4vw, 22px);
+  font-size: clamp(17px, 2vw, 20px);
   line-height: 1.75;
   letter-spacing: 0.4px;
   color: var(--ink);
@@ -103,33 +113,33 @@ body {
   color: var(--ink-dim);
   font-size: 0.82em;
   font-style: normal;
+  white-space: nowrap;             /* 作者名不拆行（窄栏里"杜甫"曾被拆成两行） */
 }
 .hint {
-  margin: 6px 0 30px;
+  margin: 6px 0 0;
   font-size: 12px;
   letter-spacing: 0.6px;
   color: var(--ink-dim);
   opacity: 0.72;
 }
 
-/* ── 两个入口 ── */
+/* ── 右侧入口列：上下两图标对齐，无文字 ── */
 .entries {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;             /* 两个图标水平对齐 */
+  gap: 18px;
 }
 .entry {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 18px 8px 14px;
+  justify-content: center;
+  width: 96px;
+  height: 92px;
   border-radius: var(--r-icon);
   background: linear-gradient(170deg, #fffaf1, #f9edd9);
   border: 1px solid #f0e2cc;
   box-shadow: 0 1px 2px rgba(217, 118, 47, 0.06), 0 6px 16px rgba(180, 90, 40, 0.08);
-  text-decoration: none;
-  color: var(--ink);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .entry:hover {
@@ -140,32 +150,27 @@ body {
 .entry:active { transform: translateY(-1px); }
 .entry:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .entry img {
-  width: 72px;
-  height: 68px;
+  width: 74px;
+  height: 70px;
   object-fit: contain;
   display: block;
 }
-.entry span {
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-.entry small {
-  display: block;
-  font-size: 11px;
-  font-weight: 400;
-  color: var(--ink-dim);
-  margin-top: 3px;
-  letter-spacing: 0.2px;
-}
 
-/* ── 窄屏：插画会被 cover 裁到中间，卡片回正居中、留白收紧 ── */
+/* ── 窄屏：插画会被 cover 裁到中间，卡片回正居中、两栏收紧 ── */
 @media (max-width: 680px) {
   .stage { justify-content: center; padding: 20px 16px; }
-  .card { padding: 30px 22px 26px; width: min(100%, 400px); }
-  .name { font-size: 28px; margin-bottom: 20px; }
-  .avatar { width: 112px; height: 112px; }
-  .quote { min-height: 96px; }
+  .card {
+    gap: 14px;
+    padding: 26px 18px;
+    width: min(100%, 400px);
+    grid-template-columns: minmax(0, 1fr) auto;   /* 仍保留左主区 + 右图标列 */
+  }
+  .name { font-size: 26px; margin-bottom: 16px; }
+  .avatar { width: 100px; height: 100px; margin-bottom: 12px; }
+  .quote { min-height: 92px; font-size: 16px; }
+  .entry { width: 74px; height: 72px; }
+  .entry img { width: 58px; height: 55px; }
+  .entries { gap: 12px; }
 }
 
 /* 尊重减少动态效果偏好：只关位移与过渡，文字照常显示 */
