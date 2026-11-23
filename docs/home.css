@@ -103,7 +103,7 @@ body {
 
 /* ── 昵称 + 诗句（跟随头像左移，间距再收紧） ── */
 .name {
-  margin: 0 0 -8px;                /* -4 → -8：昵称与诗句间距再收紧 */
+  margin: 0 0 -6px;                /* -8 → -6：按用户要求回调一档 */
   font-size: 32px;
   font-weight: 700;
   letter-spacing: 1.2px;
@@ -164,6 +164,9 @@ body {
   .card { gap: 14px; width: min(100%, 400px); }
   .name { font-size: 26px; margin-bottom: 4px; }
   .quote { min-height: 92px; font-size: 21px; }
+  /* 两支歌词在窄屏会折成 3~4 行，作者再跟在行尾会飘到右边 —— 让它独占一行居中 */
+  .quote { flex-wrap: wrap; }
+  .quote .by { flex-basis: 100%; text-align: center; margin-top: 2px; }
 }
 
 /* 尊重减少动态效果偏好 */

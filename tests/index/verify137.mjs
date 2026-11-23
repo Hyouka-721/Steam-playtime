@@ -22,8 +22,8 @@ const js = fs.readFileSync(ROOT + 'docs/home.js', 'utf8');
 const poemsSrc = fs.readFileSync(ROOT + 'docs/poems.js', 'utf8');
 
 // ── A 静态契约 ──
-ok('A1 主页挂自己的版本化资源（home.css v=2 / home.js v=2 / poems.js v=2），不引用两页私有资源',
-  /home\.css\?v=2/.test(html) && /home\.js\?v=2/.test(html) && /poems\.js\?v=2/.test(html) &&
+ok('A1 主页挂自己的版本化资源（home.css v=3 / home.js v=2 / poems.js v=3），不引用两页私有资源',
+  /home\.css\?v=3/.test(html) && /home\.js\?v=2/.test(html) && /poems\.js\?v=3/.test(html) &&
   !/style\.css\?v=|app\.js\?v=|watch\.css\?v=|watch\.js\?v=/.test(html),
   '理由：主页独立，bump 两页会误伤已上线版本；home.css 加雨效层级、home.js 加防重复、poems.js 加歌词，各自 v=1→2');
 
@@ -71,11 +71,12 @@ ok('A5d 删除所有背景：卡片白底与图标框底都去掉（壁纸保留
 // 诗句库静态校验（在 node 沙箱里 eval，因 poems.js 是 IIFE 挂 globalThis）
 (0, eval)(poemsSrc);
 const P = globalThis.POEMS || [];
-ok('A6 诗句库规模 ≥ 100 句、格式全为 [句子, 作者] 且无重复',
-  P.length >= 100 && P.every(x => Array.isArray(x) && x.length === 2 &&
+/* v=3 删掉中小学必背篇目后规模降了一半，下界随之下调（红线5：写下界、不写快照） */
+ok('A6 诗句库规模 ≥ 40 句、格式全为 [句子, 作者] 且无重复',
+  P.length >= 40 && P.every(x => Array.isArray(x) && x.length === 2 &&
     typeof x[0] === 'string' && typeof x[1] === 'string') &&
   new Set(P.map(x => x[0])).size === P.length,
-  { count: P.length, reason: '红线5——规模走实际数组、不写死快照数字；下界即可' });
+  { count: P.length, reason: 'v=3 剔除必背篇目后 50 句；规模走下界，不写死快照数字' });
 
 const noAuthor = P.filter(x => x[1] === '');
 const withAuthor = P.filter(x => x[1] !== '');
@@ -132,10 +133,33 @@ const poemRows = [...fs.readFileSync(ROOT + 'docs/poems.js', 'utf8')
   .map(m => [m[1].replace(/\\n/g, ''), m[2]]);
 const lyricRows = poemRows.filter(r => /《.+》/.test(r[1]));
 const poemDup = poemRows.length - new Set(poemRows.map(r => r[0])).size;
-ok('A14 诗句库已加入歌词（≥15 句带《歌名》署名），且全库无重复',
-  lyricRows.length >= 15 && poemDup === 0,
+/* v=3：歌词必须成对（上句 + 下句），且不得再出现中小学必背篇目的名句 */
+const lyricOneLiners = lyricRows.filter(r => !/[，；]/.test(r[0])).map(r => r[0]);
+ok('A14 歌词 ≥15 句且全部成对（含逗号/分号），全库无重复',
+  lyricRows.length >= 15 && lyricOneLiners.length === 0 && poemDup === 0,
   { total: poemRows.length, lyrics: lyricRows.length, dups: poemDup,
-    reason: '用户要求加入有名的歌词，且库内不得重复' });
+    oneLiners: lyricOneLiners, reason: '用户要求歌词至少两句，凑不成对的不收' });
+
+const MUST_RECITE = ['大漠孤烟直', '明月松间照', '劝君更尽一杯酒', '天生我材必有用',
+  '会当凌绝顶', '烽火连三月', '春蚕到死丝方尽', '采菊东篱下', '但愿人长久',
+  '众里寻他千百度', '寻寻觅觅', '山重水复疑无路', '落霞与孤鹜齐飞', '海内存知己',
+  '夕阳西下，断肠人在天涯', '枯藤老树', '蒹葭苍苍', '昔我往矣', '天苍苍，野茫茫',
+  '轻轻的我走了', '面朝大海', '乡愁是一湾浅浅的海峡', '黑夜给了我黑色的眼睛',
+  '同是天涯沦落人', '长风破浪会有时', '夕阳无限好', '此情可待成追忆', '何当共剪西窗烛',
+  '春江潮水连海平', '旧时王谢堂前燕', '沉舟侧畔千帆过', '问君能有几多愁', '剪不断，理还乱',
+  '回首向来萧瑟处', '十年生死两茫茫', '无可奈何花落去', '少年不识愁滋味', '醉里挑灯看剑',
+  '莫道不销魂', '此情无计可消除', '人生若只如初见', '夜阑卧听风吹雨',
+  '路漫漫其修远兮', '至人无己', '我说你是人间的四月天', '举杯邀明月', '抽刀断水水更流',
+  '桃花潭水深千尺', '露从今夜白', '安得广厦千万间', '星垂平野阔', '飘飘何所似',
+  '晚来天欲雪', '人生得意须尽欢', '我寄愁心与明月', '沧海月明珠有泪', '人生代代无穷已',
+  '久在樊笼里', '此中有真意', '料得年年肠断处', '昨夜西风凋碧树', '而今识尽愁滋味',
+  '花自飘零水自流', '赌书消得泼茶香', '谁念西风独自凉', '兴，百姓苦', '亦余心之所善兮',
+  '相濡以沫', '吾生也有涯', '你站在桥上看风景', '明月装饰了你的窗子', '我挥一挥衣袖',
+  '从明天起'];
+const stillThere = MUST_RECITE.filter(s => poemRows.some(r => r[0].includes(s)));
+ok('A16 中小学必背篇目的名句已全部剔除',
+  stillThere.length === 0,
+  {残留: stillThere, reason: '用户要求删除课本必背诗句' });
 
 ok('A15 home.js 有近期不重复逻辑（recent 窗口 + 持久化 + 池外抽取）',
   /RECENT_KEY/.test(js) && /recent\.indexOf\(k\)\s*===\s*-1/.test(js) &&
@@ -205,7 +229,7 @@ const view = await p.evaluate(() => ({
 }));
 ok('B1 页面标题 / 昵称 / 诗句都渲染出来',
   view.title === 'Hyouka' && view.name === 'Hyouka' &&
-  /^「.+」(- .+)?$/.test(view.quote) && view.idx >= 0 && view.idx < view.count,
+  /^「[\s\S]+」(- [\s\S]+)?$/.test(view.quote) && view.idx >= 0 && view.idx < view.count,
   { quote: view.quote, idx: view.idx, reason: '首屏三要素齐全（第九版格式：」后紧接 -，- 后空格）' });
 
 ok('B2 三张图（头像/史蒂夫/小黄人）全部加载成功',
@@ -241,10 +265,10 @@ ok('B4c2 第十一版：两图标整体下移（图标列中心低于头像中�
   view.geo.iconDown >= 40 && view.geo.iconDown <= 60,
   { iconDown: view.geo.iconDown, reason: '用户要求两图标整体下移' });
 
-ok('B4d 已删除"点一下，换一句"提示、昵称与诗句间距用负边距再收紧',
+ok('B4d 已删除"点一下，换一句"提示、昵称与诗句间距为 -6px',
   !/点一下，换一句/.test(html) && !/class="hint"/.test(html) &&
-  /\.name\s*\{[^}]*margin:\s*0\s+0\s+-8px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
-  '理由：用户要求删掉换句提示、昵称与诗句间距再收紧（-4→-8px）');
+  /\.name\s*\{[^}]*margin:\s*0\s+0\s+-6px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
+  '理由：用户要求昵称与诗句边距回调到 -6px（-8→-6）');
 
 const qfont = await p.evaluate(() => {
   const qEl = document.querySelector('#home-quote');
@@ -314,7 +338,7 @@ ok('B4j 连换 30 次：最近 KEEP 句窗口内无重复（防重复生效）',
 ok('B4e 诗句格式：」与 - 紧贴、- 后空一格 →「句」- 作者',
   /by\.textContent\s*=\s*'- '\s*\+/.test(js) &&
   !/by\.textContent\s*=\s*' - '\s*\+/.test(js) &&
-  /^「.+」- .+$/.test(view.quote),
+  /^「[\s\S]+」- [\s\S]+$/.test(view.quote),
   { quote: view.quote, reason: '用户要求」自带留白故其后不加空格、- 后加一个空格' });
 
 ok('B5 零控制台 / 页面错误',
