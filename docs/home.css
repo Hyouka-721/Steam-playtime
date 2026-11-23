@@ -2,22 +2,16 @@
    门户主页 · home.css   v=1
    第 137 轮新增 —— Hyouka 的个人主页（头像 / 昵称 / 随机诗句 / 两个入口）。
    🔴 独立文件：不并入 style.css / watch.css，不动两页任何版本号（红线 2）。
-   布局：壁纸 sketch（女孩牵鳄鱼）左侧是主体、右侧大面积留白 → 桌面卡片靠右避开插画；
-   卡片内左右两栏——左栏头像（无底框、居中偏上）+ 昵称 + 诗句，右栏上下两图标对齐。
-   窄屏插画被裁掉两侧时卡片回正居中。圆角全部走 --r-*（红线 10）。
+   布局（第三版）：壁纸 sketch 保留铺底；去掉卡片白底与图标框底——所有元素直接浮在
+   壁纸上；整体单列居中，头像落在正中，昵称诗句在下，两图标竖排居中、无文字。
+   圆角全部走 --r-*（红线 10）。
    ============================================================================ */
 :root {
-  --r-card: 22px;
   --r-chip: 14px;
-  --r-icon: 18px;
-  /* 暖阳米色系，与站内 cream 主题同源 */
   --ink: #241c15;
   --ink-dim: #6b5a4b;
   --accent: #d9762f;
   --accent-deep: #b85c1c;
-  --card-bg: rgba(255, 251, 245, 0.90);
-  --card-border: rgba(255, 255, 255, 0.85);
-  --card-shadow: 0 18px 60px rgba(92, 60, 30, 0.18), 0 2px 8px rgba(92, 60, 30, 0.08);
 }
 
 * { box-sizing: border-box; }
@@ -27,46 +21,37 @@ html, body { margin: 0; min-height: 100%; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   color: var(--ink);
-  /* 壁纸：fixed 铺满、居中、cover。图片文件名含源图哈希，内容永不变。 */
+  /* 壁纸：fixed 铺满、居中、cover。文件名含源图哈希，内容永不变。 */
   background: #f4ede2 url("img/wallpaper-sketch-10e388d7.webp") center center / cover no-repeat fixed;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
 
-/* 壁纸整体是浅色高调插画：卡片用暖白半透明 + 毛玻璃，保证深色文字始终可读；
-   系统深色下壁纸仍是那张浅色图，所以卡片不跟着变深，避免深字落在浅底上。 */
+/* 内容整体居中：头像落正中间，其余元素围绕中轴线排布 */
 .stage {
   min-height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: flex-end;       /* 桌面靠右，把左侧插画让出来 */
+  justify-content: center;
   padding: clamp(20px, 5vw, 72px);
 }
 
+/* 无背景 / 无边框 / 无阴影：仅作布局容器，视觉全靠壁纸与文字本身 */
 .card {
-  width: min(100%, 560px);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;   /* 左主区 + 右图标列 */
+  width: min(100%, 460px);
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: clamp(20px, 3vw, 36px);
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--r-card);
-  box-shadow: var(--card-shadow);
-  -webkit-backdrop-filter: blur(14px) saturate(1.15);
-  backdrop-filter: blur(14px) saturate(1.15);
-  padding: 38px clamp(24px, 3vw, 38px);
+  gap: 26px;
 }
 
-/* ── 左侧主区：头像（无底框、居中偏上）+ 昵称 + 诗句 ── */
+/* ── 主区：头像（正中、无底框）+ 昵称 + 诗句 ── */
 .profile {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
   text-align: center;
-  /* 头像整体落在卡片偏上：顶部收紧、底部留白托住，视觉重心上移 */
-  padding-top: 2px;
+  width: 100%;
 }
 .avatar {
   display: block;
@@ -93,13 +78,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Songti SC", "STSong", "SimSun", serif;  /* 诗句衬线体，与正文拉开气质 */
+  font-family: "Songti SC", "STSong", "SimSun", serif;
   font-size: clamp(17px, 2vw, 20px);
   line-height: 1.75;
   letter-spacing: 0.4px;
   color: var(--ink);
   cursor: pointer;
-  white-space: pre-line;           /* 让诗句里的 \n 真正换成两行 */
+  white-space: pre-line;
   transition: color 0.18s;
   -webkit-tap-highlight-color: transparent;
 }
@@ -113,7 +98,7 @@ body {
   color: var(--ink-dim);
   font-size: 0.82em;
   font-style: normal;
-  white-space: nowrap;             /* 作者名不拆行（窄栏里"杜甫"曾被拆成两行） */
+  white-space: nowrap;             /* 作者名不拆行 */
 }
 .hint {
   margin: 6px 0 0;
@@ -123,32 +108,23 @@ body {
   opacity: 0.72;
 }
 
-/* ── 右侧入口列：上下两图标对齐，无文字 ── */
+/* ── 入口：两图标竖排居中对齐、无框无文字 ── */
 .entries {
   display: flex;
   flex-direction: column;
-  align-items: center;             /* 两个图标水平对齐 */
-  gap: 18px;
+  align-items: center;
+  gap: 16px;
 }
 .entry {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 96px;
-  height: 92px;
-  border-radius: var(--r-icon);
-  background: linear-gradient(170deg, #fffaf1, #f9edd9);
-  border: 1px solid #f0e2cc;
-  box-shadow: 0 1px 2px rgba(217, 118, 47, 0.06), 0 6px 16px rgba(180, 90, 40, 0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  padding: 4px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
 }
-.entry:hover {
-  transform: translateY(-3px);
-  border-color: var(--accent);
-  box-shadow: 0 10px 26px rgba(180, 90, 40, 0.16);
-}
+.entry:hover { transform: translateY(-3px); opacity: 0.82; }
 .entry:active { transform: translateY(-1px); }
-.entry:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.entry:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: var(--r-chip); }
 .entry img {
   width: 74px;
   height: 70px;
@@ -156,24 +132,18 @@ body {
   display: block;
 }
 
-/* ── 窄屏：插画会被 cover 裁到中间，卡片回正居中、两栏收紧 ── */
+/* ── 窄屏：收紧尺寸，仍保持单列居中 ── */
 @media (max-width: 680px) {
-  .stage { justify-content: center; padding: 20px 16px; }
-  .card {
-    gap: 14px;
-    padding: 26px 18px;
-    width: min(100%, 400px);
-    grid-template-columns: minmax(0, 1fr) auto;   /* 仍保留左主区 + 右图标列 */
-  }
+  .stage { padding: 20px 16px; }
+  .card { gap: 18px; width: min(100%, 400px); }
   .name { font-size: 26px; margin-bottom: 16px; }
   .avatar { width: 100px; height: 100px; margin-bottom: 12px; }
   .quote { min-height: 92px; font-size: 16px; }
-  .entry { width: 74px; height: 72px; }
   .entry img { width: 58px; height: 55px; }
-  .entries { gap: 12px; }
+  .entries { gap: 10px; }
 }
 
-/* 尊重减少动态效果偏好：只关位移与过渡，文字照常显示 */
+/* 尊重减少动态效果偏好 */
 @media (prefers-reduced-motion: reduce) {
   .entry, .entry:hover, .entry:active { transform: none; transition: none; }
   .quote { transition: none; }

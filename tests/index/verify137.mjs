@@ -38,11 +38,11 @@ ok('A3 头像/壁纸/两图标均为带源图哈希的 WebP，文件名固定',
   /steve-ceb15b8a\.webp/.test(html) && /minion-0ef9a202\.webp/.test(html),
   '理由：文件名含内容哈希，换素材换名、不靠版本参数');
 
-ok('A4 壁纸 fixed 铺底 + 卡片靠右避插画，圆角全部走 --r-*',
+ok('A4 壁纸 fixed 铺底 + 内容居中（第三版改判）+ 圆角全部走 --r-*',
   /background:[^;]*wallpaper-sketch-10e388d7\.webp[^;]*fixed/.test(css) &&
-  /justify-content:\s*flex-end/.test(css) &&
+  /justify-content:\s*center/.test(css) &&
   !/border-radius:\s*\d+px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
-  '理由：壁纸左侧是插画主体；圆角白名单见红线10');
+  '理由：用户要求删除所有背景框、头像放正中 → 由"卡片靠右"改判为"内容居中"；壁纸保留；圆角白名单见红线10');
 
 ok('A5 两入口 href 精确指向 index.html / watch.html',
   /href="index\.html"[^>]*aria-label="进入 Game Time/.test(html) &&
@@ -56,11 +56,17 @@ ok('A5b 头像无白圈底框/阴影/占位底色（用户要求"删除头像后
   /<div class="profile">\s*\n\s*<img class="avatar"/.test(html),
   '理由：头像只保留圆形裁剪，白边/阴影/底色全部去掉');
 
-ok('A5c 右图标列竖排对齐、无 Game Time / 游戏时长等文字',
+ok('A5c 图标列竖排居中对齐、无 Game Time / 游戏时长等文字',
   /\.entries\s*\{[^}]*flex-direction:\s*column/.test(cssPlain) &&
   /\.entries\s*\{[^}]*align-items:\s*center/.test(cssPlain) &&
   !/Game Time<\/span>|游戏时长<\/small>|Watch List<\/span>|观影记录<\/small>/.test(html),
-  '理由：史蒂夫在上、小黄人在下、水平对齐；入口图标旁不再写任何文字');
+  '理由：史蒂夫在上、小黄人在下、居中对齐；入口图标旁不再写任何文字');
+
+ok('A5d 删除所有背景：卡片白底与图标框底都去掉（壁纸保留）',
+  !/\.card\s*\{[^}]*(background:|box-shadow:|border:)/.test(cssPlain) &&
+  !/\.entry\s*\{[^}]*(background:|box-shadow:|border:)/.test(cssPlain) &&
+  /body\s*\{[^}]*wallpaper-sketch-10e388d7\.webp/.test(cssPlain),
+  '理由：用户要求"删除所有背景"——卡片/图标框无底色无阴影，壁纸继续铺底（用户二次确认保留）');
 
 // 诗句库静态校验（在 node 沙箱里 eval，因 poems.js 是 IIFE 挂 globalThis）
 (0, eval)(poemsSrc);
@@ -125,7 +131,15 @@ const view = await p.evaluate(() => ({
       entryAligned: Math.abs(e0.left - e1.left) <= 1,
       avatarNoFrame: acs.borderTopWidth === '0px' && acs.boxShadow === 'none' &&
         acs.backgroundColor === 'rgba(0, 0, 0, 0)',
-      entryTextEmpty: [...document.querySelectorAll('.entry')].every(a => a.textContent.trim() === '')
+      entryTextEmpty: [...document.querySelectorAll('.entry')].every(a => a.textContent.trim() === ''),
+      // 头像水平居中：中心与视口中线差 ≤ 2px；卡片与图标无背景底
+      avatarCentered: Math.abs((av.left + av.right) / 2 - innerWidth / 2) <= 2,
+      noBg: (() => {
+        const card = getComputedStyle(document.querySelector('.card'));
+        const entry = getComputedStyle(document.querySelector('.entry'));
+        const transparent = s => s.backgroundColor === 'rgba(0, 0, 0, 0)' || s.backgroundColor === 'transparent';
+        return transparent(card) && transparent(entry) && card.boxShadow === 'none' && entry.boxShadow === 'none';
+      })()
     };
   })()
 }));
@@ -147,10 +161,11 @@ ok('B3 两个入口的 href 与可访问标签就位',
 ok('B4 壁纸已作为 body 背景加载（fixed 铺底）',
   /wallpaper-sketch-10e388d7\.webp/.test(view.bg), view.bg);
 
-ok('B4b 布局：头像在上昵称诗句在下、两图标竖排对齐无文字、头像无底框',
+ok('B4b 布局：头像正中无底框、昵称诗句在下、两图标竖排对齐无文字、卡片图标无背景',
   view.geo.avatarAboveName && view.geo.nameAboveQuote && view.geo.entryStacked &&
-  view.geo.entryAligned && view.geo.avatarNoFrame && view.geo.entryTextEmpty,
-  { ...view.geo, reason: '第137轮布局调整后的几何契约' });
+  view.geo.entryAligned && view.geo.avatarNoFrame && view.geo.entryTextEmpty &&
+  view.geo.avatarCentered && view.geo.noBg,
+  { ...view.geo, reason: '第137轮第三版布局契约：删除所有背景框、头像正中' });
 
 ok('B5 零控制台 / 页面错误',
   errs.length === 0, errs);
