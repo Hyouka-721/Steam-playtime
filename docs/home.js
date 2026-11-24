@@ -1,9 +1,10 @@
 /* ============================================================================
-   门户主页 · home.js   v=3
+   门户主页 · home.js   v=4
    第 137 轮 —— 取句与交互：
      ① 今日签：按日期 FNV-1a 稳定取模，同一天不变；满月度配额时顺延到下一句
      ② 点击换一句：从「本月<2 次 + 非最近 20 句」池子里抽
      ③ 刷新沿用 choice（存 hash，不存下标——防止诗句库增删后错位）
+   v=4（热修）：兼容老用户数字 choice（否则卡在"加载中…"）、脏数据兜底。
    v=3 新增：
      · 稳定 ID：每句用 poems.js 第三列的 hash；旧版数字 choice 自动迁移
      · 月度配额：同一句本月最多出现 2 次（localStorage 按 YYYY-MM 分桶），
@@ -60,6 +61,7 @@
   /* ---------- 月度配额 / 点踩 ---------- */
   function monthly() {
     var all = lsGet(MONTH_KEY, {});
+    if (!all || typeof all !== 'object' || Array.isArray(all)) all = {};
     var m = monthId();
     if (!all[m]) all[m] = {};
     // 只保留最近 2 个月，避免无限增长
@@ -146,6 +148,9 @@
   /* ---------- 渲染：作者独占一行，不带 "- " ---------- */
   function render(i) {
     var row = poems[i];
+    if (!row) {                                // 极端脏数据兜底：绝不把页面卡在"加载中…"
+      i = 0; row = poems[0];
+    }
     var text = '「' + row[0] + '」';
     quoteEl.textContent = '';
     quoteEl.appendChild(document.createTextNode(text));
@@ -183,13 +188,21 @@
   /* ---------- 初始化：读 choice（hash），兼容旧数字下标 ---------- */
   var current = 0;
   var saved = lsGet(KEY, null);                 // JSON 存储：读到的是解析后的 hash 字符串
-  if (typeof saved === 'string' && saved !== '') {
-    if (/^\d+$/.test(saved)) {                 // 老版本存的是下标
+  /* 🔴 老版本（v≤2）choice 存的是数字下标字符串 "413"，JSON.parse 后是数字 413。
+     旧代码只在 typeof === 'string' 时迁移，数字会绕过 → indexOfHash(413)=null → render(null)
+     抛错、整段脚本中断，页面永远停在"加载中…"（用户 2026-11-24 实测踩到）。
+     这里数字/字符串两种形态都迁移。 */
+  if (typeof saved === 'number') {
+    saved = Number.isInteger(saved) && saved >= 0 && saved < poems.length ? hashOf(saved) : null;
+  } else if (typeof saved === 'string' && saved !== '') {
+    if (/^\d+$/.test(saved)) {                 // 老版本未 JSON 化的纯数字下标
       var old = Number(saved);
       saved = old >= 0 && old < poems.length ? hashOf(old) : null;
     } else if (indexOfHash(saved) === null) {
       saved = null;
     }
+  } else if (saved !== null) {
+    saved = null;                              // 其它异常形态一律回落今日签
   }
   if (saved === null || isPending(saved)) {
     current = dailyIndex();
@@ -198,9 +211,18 @@
     remember(hashOf(current));
     render(current);
   } else {
-    current = indexOfHash(saved);
-    remember(saved);                           // 刷新沿用，不再 +1
-    render(current);
+    var idx = indexOfHash(saved);
+    if (idx === null) {                        // 兜底：任何未预料形态都回落今日签
+      current = dailyIndex();
+      lsSet(KEY, hashOf(current));
+      countOnce(hashOf(current));
+      remember(hashOf(current));
+      render(current);
+    } else {
+      current = idx;
+      remember(saved);                         // 刷新沿用，不再 +1
+      render(current);
+    }
   }
 
   /* ---------- 交互 ---------- */

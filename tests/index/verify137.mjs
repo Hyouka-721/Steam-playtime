@@ -22,8 +22,8 @@ const poemsSrc = fs.readFileSync(ROOT + 'docs/poems.js', 'utf8');
 const cssPlain = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
 // ── A 静态契约 ──
-ok('A1 主页版本化资源 home.css v=4 / home.js v=3 / poems.js v=5',
-  /home\.css\?v=4/.test(html) && /home\.js\?v=3/.test(html) && /poems\.js\?v=5/.test(html) &&
+ok('A1 主页版本化资源 home.css v=4 / home.js v=4 / poems.js v=5',
+  /home\.css\?v=4/.test(html) && /home\.js\?v=4/.test(html) && /poems\.js\?v=5/.test(html) &&
   !/style\.css\?v=|app\.js\?v=|watch\.css\?v=|watch\.js\?v=/.test(html),
   '理由：主页独立，不碰两页已上线版本；v5 因扩库/点踩/换行 bump');
 
@@ -141,7 +141,7 @@ ok('A15 月度配额 / 点踩 / 三击导出逻辑齐备',
 
 ok('A16 choice/recent 存 hash（非下标），且兼容旧数据迁移',
   /lsSet\(KEY,\s*hashOf/.test(js) && /recent\.indexOf\(h\)/.test(js) &&
-  /老版本存的是下标/.test(js),
+  /typeof saved === 'number'/.test(js) && /v≤2/.test(js),
   '理由：诗句库会增删，存下标会错位');
 
 // ── B 运行时 ──
@@ -285,6 +285,25 @@ await p.reload({ waitUntil: 'load' });
 await p.waitForFunction(() => window.__home && document.querySelector('#home-quote')?.getAttribute('data-hash'));
 const hAfter = await p.evaluate(() => window.__home.currentHash());
 ok('B7 刷新沿用 choice（hash 不变）', hBefore === hAfter, { hBefore, hAfter });
+
+// 🔴 老用户迁移：旧版 choice 存数字下标字符串（如 "413"），必须能迁移到 hash，
+// 否则 indexOfHash=数字 → render(null) 抛错 → 页面永远停在"加载中…"（2026-11-24 实测）
+const migrate = await ctx.newPage();
+await migrate.addInitScript(() => {
+  try { localStorage.setItem('home.quote.choice', '413'); } catch (e) {}
+});
+await migrate.goto(BASE + 'home.html', { waitUntil: 'load' });
+await migrate.waitForTimeout(900);
+const mig = await migrate.evaluate(() => ({
+  quote: document.querySelector('#home-quote').textContent,
+  hash: document.querySelector('#home-quote').getAttribute('data-hash'),
+  hasHome: !!window.__home,
+  choice: localStorage.getItem('home.quote.choice')
+}));
+ok('B7b 老用户数字 choice 自动迁移（不停在"加载中…"）',
+  mig.hasHome && /^「/.test(mig.quote) && /^[a-f0-9]{8}$/.test(mig.hash || ''),
+  { ...mig, reason: 'v≤2 存数字下标，v3 必须兼容，否则脚本中断卡在加载中' });
+await migrate.close();
 
 // 点击换句
 const clicks = await p.evaluate(() => {
