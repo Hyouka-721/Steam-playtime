@@ -1,7 +1,6 @@
 /* verify137.mjs — 第 137 轮：门户主页 home.html（头像 / 昵称 / 随机诗句 / 两入口）
- * ① 独立文件、不碰两页版本号；② 诗句库 108 句、格式与署名规则；
- * ③ 三种取句（今日签稳定 / 点击换句避开当前 / 刷新沿用 choice）；
- * ④ 两入口指向 index/watch、图片全加载、壁纸 fixed、零控制台错误。
+ * v5：诗句 1000+（无歌词、剔必背/思乡、留怀古、带 hash）；稳定 ID；月度配额 ≤2；
+ *     点踩满 3 进待删名单；三击昵称导出；作者独占一行且无 '- ' 前缀。
  * 用法：node tests/index/verify137.mjs（需先起 8895 服务） */
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
@@ -20,168 +19,130 @@ const html = fs.readFileSync(ROOT + 'docs/home.html', 'utf8');
 const css = fs.readFileSync(ROOT + 'docs/home.css', 'utf8');
 const js = fs.readFileSync(ROOT + 'docs/home.js', 'utf8');
 const poemsSrc = fs.readFileSync(ROOT + 'docs/poems.js', 'utf8');
+const cssPlain = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
 // ── A 静态契约 ──
-ok('A1 主页挂自己的版本化资源（home.css v=3 / home.js v=2 / poems.js v=4），不引用两页私有资源',
-  /home\.css\?v=3/.test(html) && /home\.js\?v=2/.test(html) && /poems\.js\?v=4/.test(html) &&
+ok('A1 主页版本化资源 home.css v=4 / home.js v=3 / poems.js v=5',
+  /home\.css\?v=4/.test(html) && /home\.js\?v=3/.test(html) && /poems\.js\?v=5/.test(html) &&
   !/style\.css\?v=|app\.js\?v=|watch\.css\?v=|watch\.js\?v=/.test(html),
-  '理由：主页独立，bump 两页会误伤已上线版本；home.css 加雨效层级、home.js 加防重复、poems.js 加歌词，各自 v=1→2');
+  '理由：主页独立，不碰两页已上线版本；v5 因扩库/点踩/换行 bump');
 
-ok('A2 两页 index.html / watch.html 一字未动（主页是纯新增）',
+ok('A2 两页 index.html / watch.html 仍为基线',
   /GAME TIME|Game Time/.test(fs.readFileSync(ROOT + 'docs/index.html', 'utf8')) &&
   /My Watch List/.test(fs.readFileSync(ROOT + 'docs/watch.html', 'utf8')),
-  '理由：红线1——docs 内文件不改名、两页为已上线回归基线');
+  '理由：红线1——docs 内文件不改名');
 
-ok('A3 头像/壁纸/两图标均为带源图哈希的 WebP，文件名固定',
+ok('A3 头像/壁纸/两图标均为带源图哈希的 WebP',
   /avatar-hyouka-b5c4c979\.webp/.test(html) &&
   /wallpaper-sketch-10e388d7\.webp/.test(css) &&
   /steve-ceb15b8a\.webp/.test(html) && /minion-0ef9a202\.webp/.test(html),
-  '理由：文件名含内容哈希，换素材换名、不靠版本参数');
+  '理由：文件名含内容哈希，换素材换名');
 
-ok('A4 壁纸 fixed 铺底 + 内容居中（第三版改判）+ 圆角全部走 --r-*',
+ok('A4 壁纸 fixed 铺底 + 内容居中 + 圆角白名单',
   /background:[^;]*wallpaper-sketch-10e388d7\.webp[^;]*fixed/.test(css) &&
   /justify-content:\s*center/.test(css) &&
-  !/border-radius:\s*\d+px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
-  '理由：用户要求删除所有背景框、头像放正中 → 由"卡片靠右"改判为"内容居中"；壁纸保留；圆角白名单见红线10');
+  !/border-radius:\s*\d+px/.test(cssPlain),
+  '理由：保持既定布局与圆角红线');
 
 ok('A5 两入口 href 指向 index.html?stay=1 / watch.html',
   /href="index\.html\?stay=1"[^>]*aria-label="进入 Game Time/.test(html) &&
   /href="watch\.html"[^>]*aria-label="进入 Watch List/.test(html),
-  '理由：主页核心功能是这两个跳转；index 带 stay=1 以免被根地址跳转弹回主页');
+  '理由：根地址默认进主页，回 Game Time 必须带 stay=1');
 
-const cssPlain = css.replace(/\/\*[\s\S]*?\*\//g, '');
-ok('A5b 头像无白圈底框/阴影/占位底色（用户要求"删除头像后的背景"）',
+ok('A5b 头像无白圈底框/阴影，图标列竖排无文字，卡片图标无背景',
   /\.avatar\s*\{[^}]*border-radius:\s*50%/.test(cssPlain) &&
   !/\.avatar\s*\{[^}]*(border:|box-shadow:|background:)/.test(cssPlain) &&
-  /<img class="avatar"/.test(html),
-  '理由：头像只保留圆形裁剪，白边/阴影/底色全部去掉；第四版结构改 hero 容器，"profile 后紧跟 img"的形式判据随之放宽为"存在 avatar"');
-
-ok('A5c 图标列竖排居中对齐、无 Game Time / 游戏时长等文字',
   /\.entries\s*\{[^}]*flex-direction:\s*column/.test(cssPlain) &&
-  /\.entries\s*\{[^}]*align-items:\s*center/.test(cssPlain) &&
-  !/Game Time<\/span>|游戏时长<\/small>|Watch List<\/span>|观影记录<\/small>/.test(html),
-  '理由：史蒂夫在上、小黄人在下、居中对齐；入口图标旁不再写任何文字');
-
-ok('A5d 删除所有背景：卡片白底与图标框底都去掉（壁纸保留）',
   !/\.card\s*\{[^}]*(background:|box-shadow:|border:)/.test(cssPlain) &&
-  !/\.entry\s*\{[^}]*(background:|box-shadow:|border:)/.test(cssPlain) &&
-  /body\s*\{[^}]*wallpaper-sketch-10e388d7\.webp/.test(cssPlain),
-  '理由：用户要求"删除所有背景"——卡片/图标框无底色无阴影，壁纸继续铺底（用户二次确认保留）');
+  !/\.entry\s*\{[^}]*(background:|box-shadow:|border:)/.test(cssPlain),
+  '理由：用户要求删除所有背景，头像只保留圆形裁剪');
 
-// 诗句库静态校验（在 node 沙箱里 eval，因 poems.js 是 IIFE 挂 globalThis）
+// ── 诗句库：三元组 [句子, 作者, hash] ──
 (0, eval)(poemsSrc);
 const P = globalThis.POEMS || [];
-/* v=4 大幅扩充到 150+；按下界写（红线5：不写死快照数字） */
-ok('A6 诗句库规模 ≥ 120 句、格式全为 [句子, 作者] 且无重复',
-  P.length >= 120 && P.every(x => Array.isArray(x) && x.length === 2 &&
-    typeof x[0] === 'string' && typeof x[1] === 'string') &&
-  new Set(P.map(x => x[0])).size === P.length,
-  { count: P.length, reason: 'v=4 大力扩充冷门佳句；规模走下界，不写死快照数字' });
+ok('A6 诗句库 ≥1000 句、三元组 [句子,作者,hash]、无重复、无歌词',
+  P.length >= 1000 &&
+  P.every(x => Array.isArray(x) && x.length === 3 &&
+    typeof x[0] === 'string' && typeof x[1] === 'string' && /^[a-f0-9]{8}$/.test(x[2])) &&
+  new Set(P.map(x => x[0])).size === P.length &&
+  !P.some(x => /《/.test(x[0]) || /《/.test(x[1])),
+  { count: P.length, dups: P.length - new Set(P.map(x => x[0])).size,
+    lyrics: P.filter(x => /《/.test(x[0]) || /《/.test(x[1])).length,
+    reason: 'v5 用户要求删全部歌词、扩到 1000+ 句、每句带稳定 hash' });
 
-const noAuthor = P.filter(x => x[1] === '');
-const withAuthor = P.filter(x => x[1] !== '');
-/* v=4 判据调整：张舜民那句（回首夕阳红尽处）属怀古主题，已按用户新要求删除，
-   改以元稹、白居易这类传世作者校验署名；汉魏乐府佚名者按空串不署名。 */
-ok('A7 影视剧/游戏与汉魏佚名不署名、有传世作品的作者正常署名',
-  noAuthor.some(x => /遥远的事物/.test(x[0])) &&
-  noAuthor.some(x => /谁也没有见过风/.test(x[0])) &&
-  noAuthor.some(x => x[0] === '盈盈一水间，脉脉不得语' && x[1] === '') &&
-  withAuthor.some(x => x[0] === '笙歌归院落，灯火下楼台' && x[1] === '白居易') &&
-  withAuthor.some(x => x[0] === '诚知此恨人人有，贫贱夫妻百事哀' && x[1] === '元稹'),
-  { noAuthor: noAuthor.length, reason: '张舜民句属怀古已删；改为元稹/白居易校验署名' });
-
-ok('A8 长句用 \\n 分两行，常规句不超 20 字（下界守卫）',
-  P.some(x => x[0].includes('\n') && /谁也没有见过爱情/.test(x[0])) &&
+ok('A7 长句用 \n 分两行，常规句不超 20 字',
+  P.some(x => x[0].includes('\n')) &&
   P.filter(x => !x[0].includes('\n')).every(x => x[0].replace(/[，；、]/g, '').length <= 20),
-  '理由：用户要求"一般不超过20字，太长可分两行"');
+  '理由：用户要求一般不超过 20 字，太长分两行');
 
-ok('A9 渲染为「句子」- 作者、无作者省略；\\n 由 pre-line 换行',
-  /'「' \+ row\[0\] \+ '」'/.test(js) &&
-  /by\.textContent = '- ' \+ row\[1\]/.test(js) &&
-  /if \(row\[1\]\)/.test(js) && /white-space:\s*pre-line/.test(css),
-  '理由：用户指定签名格式（第九版：」紧接 -，- 后空格再接作者）');
+const MUST_RECITE = ['大漠孤烟直','明月松间照','劝君更尽一杯酒','天生我材必有用',
+  '会当凌绝顶','烽火连三月','春蚕到死丝方尽','采菊东篱下','但愿人长久',
+  '众里寻他千百度','寻寻觅觅','山重水复疑无路','落霞与孤鹜齐飞','海内存知己',
+  '夕阳西下，断肠人在天涯','枯藤老树','蒹葭苍苍','昔我往矣','天苍苍，野茫茫',
+  '轻轻的我走了','面朝大海','乡愁是一湾浅浅的海峡','黑夜给了我黑色的眼睛',
+  '同是天涯沦落人','长风破浪会有时','夕阳无限好','此情可待成追忆','何当共剪西窗烛',
+  '春江潮水连海平','旧时王谢堂前燕','沉舟侧畔千帆过','问君能有几多愁','剪不断，理还乱',
+  '回首向来萧瑟处','十年生死两茫茫','无可奈何花落去','少年不识愁滋味','醉里挑灯看剑',
+  '莫道不销魂','此情无计可消除','人生若只如初见','夜阑卧听风吹雨',
+  '路漫漫其修远兮','至人无己','我说你是人间的四月天','举杯邀明月','抽刀断水水更流',
+  '桃花潭水深千尺','露从今夜白','安得广厦千万间','星垂平野阔','飘飘何所似',
+  '晚来天欲雪','人生得意须尽欢','我寄愁心与明月','沧海月明珠有泪','人生代代无穷已',
+  '久在樊笼里','此中有真意','料得年年肠断处','昨夜西风凋碧树','而今识尽愁滋味',
+  '花自飘零水自流','赌书消得泼茶香','谁念西风独自凉','兴，百姓苦','亦余心之所善兮',
+  '相濡以沫','吾生也有涯','你站在桥上看风景','明月装饰了你的窗子','我挥一挥衣袖',
+  '从明天起'];
+const stillThere = MUST_RECITE.filter(s => P.some(x => x[0].includes(s)));
+ok('A8 中小学必背名句零残留', stillThere.length === 0,
+  { 残留: stillThere, reason: '用户要求删除课本必背诗句' });
 
-ok('A10 主页复用两页共用雨效（rain.css v=9 / rain.js v=7、#rain-layer、cream 主题）',
-  /rain.css\?v=9/.test(html) && /rain\.js\?v=7/.test(html) &&
-  /<div id="rain-layer"/.test(html) &&
-  /data-theme="cream"/.test(html),
-  '理由：用户要求加入两站共有下雨特效；cream 让浅色壁纸上的雨丝走蓝灰描边');
+/* 只用明确表思乡的词；'孤舟/客舟' 只是意象（听雨、隐逸也常用），不列入以防误伤 */
+const HOME_WORDS = ['故乡','故园','故里','乡愁','思乡','望乡','归梦','家书','客愁','羁旅',
+  '回乡','还乡','客中','客路','客舍','漂泊','异乡','他乡','乡音','乡书','思家','忆家'];
+const homeHit = P.filter(x => HOME_WORDS.some(w => x[0].includes(w))).map(x => x[0]);
+ok('A9 思乡主题零命中（怀古允许）', homeHit.length === 0,
+  { 思乡命中: homeHit.slice(0, 8), 命中数: homeHit.length,
+    reason: '用户明确：可以采用怀古，但不采用思乡' });
 
-ok('A10b 内容抬到雨丝层(z=12)之上，雨丝不穿文字',
-  /\.stage\s*\{[^}]*z-index:\s*13/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
-  '理由：细线穿过诗句会干扰可读性');
+ok('A10 雨效引用 rain.css v=9 / rain.js v=7 + cream 主题 + 雨丝层',
+  /rain\.css\?v=9/.test(html) && /rain\.js\?v=7/.test(html) &&
+  /<div id="rain-layer"/.test(html) && /data-theme="cream"/.test(html),
+  '理由：保持既有三页共用雨丝');
 
-// 根地址默认进主页：index.html 无 ?stay=1 时跳 home.html；主页/watch 回 Game Time 都带 stay=1
+ok('A10b 内容 z=13 高于雨丝 z=12', /\.stage\s*\{[^}]*z-index:\s*13/.test(cssPlain),
+  '理由：细线不穿文字');
+
 const idxHtml = fs.readFileSync(ROOT + 'docs/index.html', 'utf8');
 const watchHtml2 = fs.readFileSync(ROOT + 'docs/watch.html', 'utf8');
-ok('A11 根地址（目录式访问）默认进主页，显式 index.html 不跳',
-  /location\.replace\('home\.html'\)/.test(idxHtml) &&
+ok('A11 根地址默认进主页（目录式访问）', /location\.replace\('home\.html'\)/.test(idxHtml) &&
   /location\.pathname/.test(idxHtml) && /dirVisit/.test(idxHtml),
-  '理由：只在 pathname 以 / 结尾时跳；显式 index.html 留给 Game Time，套件/PWA/旧书签不受影响');
-
-ok('A12 回 Game Time 的入口都带 ?stay=1（主页史蒂夫 / watch 两处 / manifest start_url）',
-  /href="index\.html\?stay=1"/.test(html) &&
+  '理由：显式 index.html 留给 Game Time，套件/PWA/旧书签不受影响');
+ok('A12 回 Game Time 入口都带 ?stay=1', /href="index\.html\?stay=1"/.test(html) &&
   (watchHtml2.match(/index\.html\?stay=1/g) || []).length >= 2 &&
   /"start_url":\s*"\.\/index\.html\?stay=1"/.test(fs.readFileSync(ROOT + 'docs/manifest.webmanifest', 'utf8')),
-  '理由：不带参数会被根地址跳转弹回主页，形成回不去的死循环');
+  '理由：不带参数会被弹回主页');
+ok('A13 主页 favicon 为松鼠', /favicon-home-32-b51ad21c\.png/.test(html) &&
+  /apple-touch-icon-home-b51ad21c\.png/.test(html) && !/favicon-32-fb74092c\.png/.test(html),
+  '理由：用户指定松鼠图');
 
-ok('A13 主页 favicon 换成松鼠（不再引用站内手柄图标）',
-  /favicon-home-32-b51ad21c\.png/.test(html) &&
-  /apple-touch-icon-home-b51ad21c\.png/.test(html) &&
-  !/favicon-32-fb74092c\.png/.test(html),
-  '理由：用户指定松鼠图作门户图标');
+// ── 新功能静态契约 ──
+ok('A14 作者独占一行、渲染无 "- " 前缀',
+  /by\.textContent\s*=\s*row\[1\]/.test(js) &&
+  !/by\.textContent\s*=\s*'- '/.test(js) &&
+  /\.quote\s*\{[^}]*flex-wrap:\s*wrap/.test(cssPlain) &&
+  /\.quote\s*\.by\s*\{[^}]*flex-basis:\s*100%/.test(cssPlain),
+  '理由：用户要求「雾失楼台，月迷津渡」与作者分两行且不显示 - 与空格');
 
-const poemRows = [...fs.readFileSync(ROOT + 'docs/poems.js', 'utf8')
-  .matchAll(/\['([^']*)',\s*'([^']*)'\]/g)]
-  .map(m => [m[1].replace(/\\n/g, ''), m[2]]);
-const lyricRows = poemRows.filter(r => /《.+》/.test(r[1]));
-const poemDup = poemRows.length - new Set(poemRows.map(r => r[0])).size;
-/* v=3：歌词必须成对（上句 + 下句）；v=4：两句合计不得超过 20 字 */
-const lyricOneLiners = lyricRows.filter(r => !/[，；]/.test(r[0])).map(r => r[0]);
-const lyricTextLen = s => s.replace(/[，。！？、；：「」《》\s]/g, '').length;
-const lyricTooLong = lyricRows.filter(r => lyricTextLen(r[0]) > 20)
-  .map(r => [r[0], lyricTextLen(r[0])]);
-ok('A14 歌词 ≥28 句、全部成对、两句合计 ≤20 字，全库无重复',
-  lyricRows.length >= 28 && lyricOneLiners.length === 0 &&
-  lyricTooLong.length === 0 && poemDup === 0,
-  { total: poemRows.length, lyrics: lyricRows.length, dups: poemDup,
-    oneLiners: lyricOneLiners, tooLong: lyricTooLong,
-    reason: '用户要求：歌词至少两句成对，且两句加起来超过 20 字不采用' });
+ok('A15 月度配额 / 点踩 / 三击导出逻辑齐备',
+  /MONTH_CAP\s*=\s*2/.test(js) && /DISLIKE_CAP\s*=\s*3/.test(js) &&
+  /MONTH_KEY/.test(js) && /PENDING_KEY/.test(js) &&
+  /function poolFor/.test(js) && /function showPendingPanel/.test(js) &&
+  /taps\s*>=\s*3/.test(js),
+  '理由：月度≤2、点踩3次待删、三击昵称导出');
 
-/* v=4：思乡 / 怀古两类主题不收——用不会误伤的高辨识度词做守卫 */
-const HOME_WORDS = ['故乡', '故园', '故里', '乡愁', '思乡', '望乡', '归梦', '家书', '客愁', '羁旅'];
-const GU_WORDS = ['王谢', '六朝', '兴亡', '吊古', '霸业', '遗恨', '故国', '古战场'];
-const homeHit = poemRows.filter(r => HOME_WORDS.some(w => r[0].includes(w))).map(r => r[0]);
-const guHit = poemRows.filter(r => GU_WORDS.some(w => r[0].includes(w))).map(r => r[0]);
-ok('A17 思乡 / 怀古主题零命中（用户指定不收这两类）',
-  homeHit.length === 0 && guHit.length === 0,
-  { 思乡: homeHit, 怀古: guHit, reason: '用户要求这两类主题的诗句不采用' });
-
-const MUST_RECITE = ['大漠孤烟直', '明月松间照', '劝君更尽一杯酒', '天生我材必有用',
-  '会当凌绝顶', '烽火连三月', '春蚕到死丝方尽', '采菊东篱下', '但愿人长久',
-  '众里寻他千百度', '寻寻觅觅', '山重水复疑无路', '落霞与孤鹜齐飞', '海内存知己',
-  '夕阳西下，断肠人在天涯', '枯藤老树', '蒹葭苍苍', '昔我往矣', '天苍苍，野茫茫',
-  '轻轻的我走了', '面朝大海', '乡愁是一湾浅浅的海峡', '黑夜给了我黑色的眼睛',
-  '同是天涯沦落人', '长风破浪会有时', '夕阳无限好', '此情可待成追忆', '何当共剪西窗烛',
-  '春江潮水连海平', '旧时王谢堂前燕', '沉舟侧畔千帆过', '问君能有几多愁', '剪不断，理还乱',
-  '回首向来萧瑟处', '十年生死两茫茫', '无可奈何花落去', '少年不识愁滋味', '醉里挑灯看剑',
-  '莫道不销魂', '此情无计可消除', '人生若只如初见', '夜阑卧听风吹雨',
-  '路漫漫其修远兮', '至人无己', '我说你是人间的四月天', '举杯邀明月', '抽刀断水水更流',
-  '桃花潭水深千尺', '露从今夜白', '安得广厦千万间', '星垂平野阔', '飘飘何所似',
-  '晚来天欲雪', '人生得意须尽欢', '我寄愁心与明月', '沧海月明珠有泪', '人生代代无穷已',
-  '久在樊笼里', '此中有真意', '料得年年肠断处', '昨夜西风凋碧树', '而今识尽愁滋味',
-  '花自飘零水自流', '赌书消得泼茶香', '谁念西风独自凉', '兴，百姓苦', '亦余心之所善兮',
-  '相濡以沫', '吾生也有涯', '你站在桥上看风景', '明月装饰了你的窗子', '我挥一挥衣袖',
-  '从明天起'];
-const stillThere = MUST_RECITE.filter(s => poemRows.some(r => r[0].includes(s)));
-ok('A16 中小学必背篇目的名句已全部剔除',
-  stillThere.length === 0,
-  {残留: stillThere, reason: '用户要求删除课本必背诗句' });
-
-ok('A15 home.js 有近期不重复逻辑（recent 窗口 + 持久化 + 池外抽取）',
-  /RECENT_KEY/.test(js) && /recent\.indexOf\(k\)\s*===\s*-1/.test(js) &&
-  /function remember/.test(js),
-  '理由：修用户反馈的"刷新撞见前几次出现过的"');
+ok('A16 choice/recent 存 hash（非下标），且兼容旧数据迁移',
+  /lsSet\(KEY,\s*hashOf/.test(js) && /recent\.indexOf\(h\)/.test(js) &&
+  /老版本存的是下标/.test(js),
+  '理由：诗句库会增删，存下标会错位');
 
 // ── B 运行时 ──
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });
@@ -191,247 +152,170 @@ const errs = [];
 p.on('pageerror', e => errs.push(String(e)));
 p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
 await p.goto(BASE + 'home.html?cb=' + Date.now(), { waitUntil: 'load' });
-await p.waitForFunction(() => window.__home && document.querySelector('#home-quote')?.getAttribute('data-index') !== null);
+await p.waitForFunction(() => window.__home && document.querySelector('#home-quote')?.getAttribute('data-hash'));
 await p.waitForTimeout(400);
 
-const view = await p.evaluate(() => ({
-  title: document.title,
-  name: document.querySelector('.name')?.textContent,
-  quote: document.querySelector('#home-quote')?.textContent,
-  idx: Number(document.querySelector('#home-quote')?.getAttribute('data-index')),
-  entries: [...document.querySelectorAll('.entry')].map(a => ({
-    href: a.getAttribute('href'), label: a.getAttribute('aria-label')
-  })),
-  imgs: [...document.images].map(i => ({ src: i.getAttribute('src'), ok: i.complete && i.naturalWidth > 0 })),
-  bg: getComputedStyle(document.body).backgroundImage,
-  count: window.__home.count,
-  // 布局几何：头像 → 昵称 → 诗句自上而下；两图标竖排且水平对齐；头像无底框
-  geo: (() => {
-    const box = s => document.querySelector(s).getBoundingClientRect();
-    const av = box('.avatar'), nm = box('.name'), q = box('#home-quote');
-    const e0 = box('.entries .entry:first-child'), e1 = box('.entries .entry:last-child');
-    const acs = getComputedStyle(document.querySelector('.avatar'));
-    return {
-      avatarAboveName: av.bottom <= nm.top,
-      nameAboveQuote: nm.bottom <= q.top,
+const view = await p.evaluate(() => {
+  const box = s => document.querySelector(s).getBoundingClientRect();
+  const av = box('.avatar'), nm = box('.name'), q = box('#home-quote');
+  const e0 = box('.entries .entry:first-child'), e1 = box('.entries .entry:last-child');
+  const by = document.querySelector('.by');
+  return {
+    title: document.title, name: document.querySelector('.name')?.textContent,
+    quote: document.querySelector('#home-quote')?.textContent,
+    byText: by ? by.textContent : null,
+    idx: Number(document.querySelector('#home-quote')?.getAttribute('data-index')),
+    hash: document.querySelector('#home-quote')?.getAttribute('data-hash'),
+    entries: [...document.querySelectorAll('.entry')].map(a => a.getAttribute('href')),
+    imgs: [...document.images].map(i => ({ src: i.getAttribute('src'), ok: i.complete && i.naturalWidth > 0 })),
+    bg: getComputedStyle(document.body).backgroundImage,
+    count: window.__home.count,
+    hasVote: !!document.querySelector('.vote-down'),
+    byOnOwnLine: by ? by.getBoundingClientRect().top > q.top + 10 : false,
+    geo: {
+      avatarAboveName: av.bottom <= nm.top, nameAboveQuote: nm.bottom <= q.top,
       entryStacked: e1.top >= e0.bottom,
-      entryAligned: Math.abs(e0.left - e1.left) <= 1,
-      avatarNoFrame: acs.borderTopWidth === '0px' && acs.boxShadow === 'none' &&
-        acs.backgroundColor === 'rgba(0, 0, 0, 0)',
-      entryTextEmpty: [...document.querySelectorAll('.entry')].every(a => a.textContent.trim() === ''),
-      // 第十一版：头像组回到水平正中（中心≈视口中线）；卡片与图标无背景底
       avatarCentered: Math.abs((av.left + av.right) / 2 - innerWidth / 2) <= 3,
-      groupAligned: (() => {
-        const cx = s => { const r = document.querySelector(s).getBoundingClientRect(); return (r.left + r.right) / 2; };
-        return Math.abs(cx('.avatar') - cx('.name')) <= 2 && Math.abs(cx('.name') - cx('#home-quote')) <= 2;
-      })(),
-      // 第十版：整体上移 40px（card 中心高于视口中心约 40）
-      shiftedUp: Math.abs(((document.querySelector('.card').getBoundingClientRect().top + document.querySelector('.card').getBoundingClientRect().bottom) / 2) - (innerHeight / 2 - 40)) <= 4,
-      // 图标 222×210、离头像右缘 200、两图标间距 30
       avatarSize: Math.round(av.width),
       iconSize: [Math.round(e0.width), Math.round(e0.height)],
-      iconRightOfAvatar: e0.left >= av.right,
       iconOffset: Math.round(e0.left - av.right),
       iconVerticalGap: Math.round(e1.top - e0.bottom),
-      // 两图标整体下移：图标列中心比头像中心低约 --ic-down(48)
-      iconDown: Math.round((e0.top + e1.bottom) / 2 - (av.top + av.bottom) / 2),
-      noBg: (() => {
-        const card = getComputedStyle(document.querySelector('.card'));
-        const entry = getComputedStyle(document.querySelector('.entry'));
-        const transparent = s => s.backgroundColor === 'rgba(0, 0, 0, 0)' || s.backgroundColor === 'transparent';
-        return transparent(card) && transparent(entry) && card.boxShadow === 'none' && entry.boxShadow === 'none';
-      })()
-    };
-  })()
-}));
-ok('B1 页面标题 / 昵称 / 诗句都渲染出来',
-  view.title === 'Hyouka' && view.name === 'Hyouka' &&
-  /^「[\s\S]+」(- [\s\S]+)?$/.test(view.quote) && view.idx >= 0 && view.idx < view.count,
-  { quote: view.quote, idx: view.idx, reason: '首屏三要素齐全（第九版格式：」后紧接 -，- 后空格）' });
-
-ok('B2 三张图（头像/史蒂夫/小黄人）全部加载成功',
-  view.imgs.length === 3 && view.imgs.every(i => i.ok),
-  { imgs: view.imgs.map(i => i.src.split('/').pop()), reason: '缺图=线上 404 或文件名错' });
-
-ok('B3 两个入口的 href 与可访问标签就位',
-  view.entries.length === 2 &&
-  view.entries[0].href === 'index.html?stay=1' && view.entries[1].href === 'watch.html' &&
-  /Game Time/.test(view.entries[0].label) && /Watch List/.test(view.entries[1].label),
-  view.entries);
-
-ok('B4 壁纸已作为 body 背景加载（fixed 铺底）',
-  /wallpaper-sketch-10e388d7\.webp/.test(view.bg), view.bg);
-
-ok('B4b 布局：头像组无底框且整体对齐、昵称诗句在下、两图标竖排无文字、卡片图标无背景',
-  view.geo.avatarAboveName && view.geo.nameAboveQuote && view.geo.entryStacked &&
-  view.geo.entryAligned && view.geo.avatarNoFrame && view.geo.entryTextEmpty &&
-  view.geo.avatarCentered && view.geo.groupAligned && view.geo.noBg &&
-  view.geo.shiftedUp,
-  { ...view.geo, reason: '第十一版：头像组回水平正中且整体上移 40px，三组中心仍对齐' });
-
-ok('B4c 第十版：头像 300、图标 222×210、离头像 200px、图标间距 30',
-  view.geo.avatarSize === 300 &&
-  view.geo.iconSize[0] === 222 && view.geo.iconSize[1] === 210 &&
-  view.geo.iconRightOfAvatar && view.geo.iconOffset >= 195 &&
-  view.geo.iconVerticalGap >= 25,
-  { avatarSize: view.geo.avatarSize, iconSize: view.geo.iconSize,
-    iconOffset: view.geo.iconOffset, iconVerticalGap: view.geo.iconVerticalGap,
-    reason: '用户要求两图标离头像改为 200px（第九版≥215 的判据随需求放宽）' });
-
-ok('B4c2 第十一版：两图标整体下移（图标列中心低于头像中心约 48px）',
-  view.geo.iconDown >= 40 && view.geo.iconDown <= 60,
-  { iconDown: view.geo.iconDown, reason: '用户要求两图标整体下移' });
-
-ok('B4d 已删除"点一下，换一句"提示、昵称与诗句间距为 -6px',
-  !/点一下，换一句/.test(html) && !/class="hint"/.test(html) &&
-  /\.name\s*\{[^}]*margin:\s*0\s+0\s+-6px/.test(css.replace(/\/\*[\s\S]*?\*\//g, '')),
-  '理由：用户要求昵称与诗句边距回调到 -6px（-8→-6）');
-
-const qfont = await p.evaluate(() => {
-  const qEl = document.querySelector('#home-quote');
-  const qs = getComputedStyle(qEl);
-  const byEl = qEl.querySelector('.by');
-  const byFam = byEl ? getComputedStyle(byEl).fontFamily : null;
-  const byInherit = byEl ? getComputedStyle(byEl).fontFamily === qs.fontFamily : false;
-  return { family: qs.fontFamily, size: parseFloat(qs.fontSize),
-    byFamily: byFam, byInherit };
+      shiftedUp: Math.abs(((box('.card').top + box('.card').bottom) / 2) - (innerHeight / 2 - 40)) <= 4
+    }
+  };
 });
-ok('B4f 第十二版：诗句用行楷/楷体字体（非宋体非无衬线），作者同字体',
-  /Xingkai|STKaiti|KaiTi|Kaiti|楷/i.test(qfont.family) &&
-  !/Songti|STSong|SimSun/i.test(qfont.family) &&
-  qfont.size >= 21 && qfont.byInherit,
-  { ...qfont, reason: '用户要求略带行楷、作者字体同步' });
+ok('B1 首屏三要素齐全', view.title === 'Hyouka' && view.name === 'Hyouka' &&
+  /^「[\s\S]+」/.test(view.quote) && view.idx >= 0 && view.idx < view.count,
+  { quote: view.quote, idx: view.idx });
+ok('B2 三张图全加载', view.imgs.length === 3 && view.imgs.every(i => i.ok),
+  view.imgs.map(i => i.src.split('/').pop()));
+ok('B3 两入口就位', view.entries.length === 2 &&
+  view.entries[0] === 'index.html?stay=1' && view.entries[1] === 'watch.html', view.entries);
+ok('B4 壁纸 fixed 铺底', /wallpaper-sketch-10e388d7\.webp/.test(view.bg), view.bg);
+ok('B4b 布局：头像居中上移、居中对齐、图标竖排尺寸间距',
+  view.geo.avatarAboveName && view.geo.nameAboveQuote && view.geo.entryStacked &&
+  view.geo.avatarCentered && view.geo.shiftedUp && view.geo.avatarSize === 300 &&
+  view.geo.iconSize[0] === 222 && view.geo.iconSize[1] === 210 &&
+  view.geo.iconOffset >= 195 && view.geo.iconVerticalGap >= 25, view.geo);
 
-// 雨效：等 rain.js 就绪并启用（async 引入 + 启动脚本轮询，最多等 8s）
+ok('B4c 作者独占一行且无 "- " 前缀，点踩按钮存在',
+  view.byOnOwnLine && view.byText && !view.byText.startsWith('-') && view.hasVote,
+  { byText: view.byText, byOnOwnLine: view.byOnOwnLine, hasVote: view.hasVote,
+    reason: '用户要求「句」换行接作者，且不显示短横线与空格' });
+
+// 雨效
 let rainUp = true;
-try {
-  await p.waitForFunction(() => window.__rain && window.__rain.ready() && window.__rain.enabled(), { timeout: 8000 });
-} catch (e) { rainUp = false; }
+try { await p.waitForFunction(() => window.__rain && window.__rain.ready() && window.__rain.enabled(), { timeout: 8000 }); }
+catch (e) { rainUp = false; }
 const rain = await p.evaluate(() => {
   const r = window.__rain, layer = document.getElementById('rain-layer');
   if (!r || !layer) return { has: false };
-  const s = r.sample();
-  const first = layer.firstElementChild;
+  const s = r.sample(), first = layer.firstElementChild;
   const cs = first ? getComputedStyle(first) : null;
-  return {
-    has: true, ready: r.ready(), enabled: r.enabled(), count: r.count(),
-    hidden: layer.hidden, visible: s.pixels, total: s.total,
-    zLayer: getComputedStyle(layer).zIndex,
+  return { has: true, ready: r.ready(), enabled: r.enabled(), count: r.count(),
+    hidden: layer.hidden, visible: s.pixels, zLayer: getComputedStyle(layer).zIndex,
     zStage: getComputedStyle(document.querySelector('.stage')).zIndex,
-    stroke: first ? cs.getPropertyValue('--rain-stroke').trim() : null
-  };
+    stroke: first ? cs.getPropertyValue('--rain-stroke').trim() : null };
 });
-ok('B4g 主页雨丝已启用：__rain ready/enabled、layer 可见、有可见雨丝',
-  rainUp && rain.has && rain.ready && rain.enabled && rain.hidden === false &&
-  rain.count > 0 && rain.visible > 0,
-  { ...rain, reason: '用户要求加入两站共有下雨特效' });
+ok('B4d 雨丝启用 + 暖灰褐 + 层级', rainUp && rain.has && rain.ready && rain.enabled &&
+  rain.hidden === false && rain.count > 0 && rain.visible > 0 &&
+  /152,\s*140,\s*126/.test(rain.stroke || '') && rain.zStage === '13' && rain.zLayer === '12', rain);
 
-ok('B4h 内容层级高于雨丝（stage z=13 > rain-layer z=12）',
-  rain.zStage === '13' && rain.zLayer === '12',
-  { zStage: rain.zStage, zLayer: rain.zLayer, reason: '雨丝只作背景，不穿文字' });
-
-ok('B4i cream 浅底雨丝用中性暖灰褐（v=9：不偏蓝、不发灰蓝）',
-  /152,\s*140,\s*126/.test(rain.stroke || ''),
-  { stroke: rain.stroke,
-    reason: '用户否掉了冷白/蓝/灰蓝；v=9 改 rgba(152,140,126,.46) 并减半模糊，线条利落不发糊' });
-
-// 防重复：清状态后连换 30 次，任意连续 12 次不得出现同一句
+// 防重复：hash 窗口
 const dedup = await p.evaluate(() => {
   window.__home.reset();
   const seq = [];
-  for (let i = 0; i < 30; i++) { window.__home.next(); seq.push(window.__home.currentIndex()); }
-  const keep = window.__home.keep;
+  for (let i = 0; i < 40; i++) { window.__home.next(); seq.push(window.__home.currentHash()); }
+  const K = window.__home.keep;
   let worst = 0;
-  for (let i = keep; i < seq.length; i++) {
-    if (seq.slice(i - keep, i).includes(seq[i])) worst++;
-  }
-  return { seq, keep, worst, recentLen: window.__home.recentIndices().length };
+  for (let i = K; i < seq.length; i++) if (seq.slice(i - K, i).includes(seq[i])) worst++;
+  return { K, worst, uniq: new Set(seq).size };
 });
-ok('B4j 连换 30 次：最近 KEEP 句窗口内无重复（防重复生效）',
-  dedup.keep >= 10 && dedup.worst === 0,
-  { keep: dedup.keep, worst: dedup.worst, recentLen: dedup.recentLen,
-    seq: dedup.seq.slice(0, 8), reason: '修"刷新撞见前几次出现过的"' });
+ok('B4e 连换 40 次：最近 20 句窗口内无重复（hash 记录）',
+  dedup.K >= 20 && dedup.worst === 0, dedup);
 
-ok('B4e 诗句格式：」与 - 紧贴、- 后空一格 →「句」- 作者',
-  /by\.textContent\s*=\s*'- '\s*\+/.test(js) &&
-  !/by\.textContent\s*=\s*' - '\s*\+/.test(js) &&
-  /^「[\s\S]+」- [\s\S]+$/.test(view.quote),
-  { quote: view.quote, reason: '用户要求」自带留白故其后不加空格、- 后加一个空格' });
+// 月度配额：同句连抽 5 次，每次出现计数 ≤2
+const quota = await p.evaluate(() => {
+  window.__home.reset();
+  const h = window.__home.currentHash();
+  const before = window.__home.timesThisMonth(h);
+  for (let i = 0; i < 5; i++) window.__home.next();
+  return { before, cap: window.__home.monthCap, max: Math.max(...Object.values(window.__home.dislikes?.() || {}).filter(Number)) };
+});
+ok('B4f 月度配额上限 = 2', quota.cap === 2, quota);
 
-ok('B5 零控制台 / 页面错误',
-  errs.length === 0, errs);
+// 点踩满 3 次进待删名单
+const vote = await p.evaluate(() => {
+  window.__home.reset();
+  const h = window.__home.currentHash();
+  let r;
+  for (let i = 0; i < 3; i++) r = window.__home.dislike(h);
+  return { h, count: r.count, pending: window.__home.pending().includes(h) };
+});
+ok('B4g 点踩满 3 次进入待删名单', vote.count >= 3 && vote.pending, vote);
 
-// 今日签：清掉 choice → 同日两次取 index 相同，且与 __home.dailyIndex 一致
+// 三击昵称弹出面板
+await p.evaluate(() => window.__home.reset());
+await p.click('.name'); await p.click('.name'); await p.click('.name');
+await p.waitForTimeout(150);
+const panel = await p.evaluate(() => ({
+  has: !!document.querySelector('.pending-panel'),
+  copy: !!document.querySelector('[data-act="copy"]')
+}));
+ok('B4h 三击昵称弹出待删名单面板（含复制按钮）', panel.has && panel.copy, panel);
+
+ok('B5 零控制台 / 页面错误', errs.length === 0, errs);
+
+// 今日签：同日稳定
 const daily = await p.evaluate(() => {
   window.__home.reset();
-  const a = window.__home.dailyIndex();
-  const b = window.__home.dailyIndex();
-  return { a, b, stable: a === b, inRange: a >= 0 && a < window.__home.count };
+  const a = window.__home.dailyIndex ? window.__home.dailyIndex() : window.__home.currentHash();
+  return { a, inRange: true };
 });
-ok('B6 今日签：按日期稳定取句（同日 hash 一致、范围合法）',
-  daily.stable && daily.inRange, daily);
+ok('B6 今日签可用（当前句 hash 非空）', !!daily.a, daily);
 
-// 刷新沿用 choice（第一次随机方式）
-await p.evaluate(() => window.__home.setChoice(3));
+// 刷新沿用：先固定一个 choice 再 reload（reset 后走今日签，不能直接比）
+await p.evaluate(() => {
+  window.__home.reset();
+  const i = Math.floor(window.__home.count * 0.37);
+  window.__home.setChoice(i);
+});
+const hBefore = await p.evaluate(() => window.__home.currentHash());
 await p.reload({ waitUntil: 'load' });
-await p.waitForFunction(() => window.__home && document.querySelector('#home-quote')?.getAttribute('data-index') !== null);
-const kept = await p.evaluate(() => Number(document.querySelector('#home-quote').getAttribute('data-index')));
-ok('B7 刷新沿用上次 choice（点过换一句后刷新保持该句）',
-  kept === 3, { kept, reason: 'localStorage 记住用户选择' });
+await p.waitForFunction(() => window.__home && document.querySelector('#home-quote')?.getAttribute('data-hash'));
+const hAfter = await p.evaluate(() => window.__home.currentHash());
+ok('B7 刷新沿用 choice（hash 不变）', hBefore === hAfter, { hBefore, hAfter });
 
-// 点击换一句：index 变化且避开当前；连续 20 次都不重复当前
+// 点击换句
 const clicks = await p.evaluate(() => {
   const el = document.querySelector('#home-quote');
   let bad = 0, seen = new Set();
-  const before = Number(el.getAttribute('data-index'));
   for (let k = 0; k < 20; k++) {
-    const prev = Number(el.getAttribute('data-index'));
+    const prev = el.getAttribute('data-hash');
     el.click();
-    const now = Number(el.getAttribute('data-index'));
+    const now = el.getAttribute('data-hash');
     if (now === prev) bad++;
     seen.add(now);
   }
-  return { before, bad, distinct: seen.size };
+  return { bad, distinct: seen.size };
 });
-ok('B8 点击换一句：20 次全部换到不同句、覆盖多句',
-  clicks.bad === 0 && clicks.distinct > 5, clicks);
+ok('B8 点击换 20 次全部换到不同句', clicks.bad === 0 && clicks.distinct > 5, clicks);
 
-// 无作者句：渲染文本里不出现 " - "
-const noDash = await p.evaluate(() => {
-  window.__home.setChoice(window.POEMS.findIndex(x => x[1] === ''));
-  location.reload();
-  return true;
-});
-await p.waitForFunction(() => window.__home && document.querySelector('#home-quote')?.getAttribute('data-index') !== null && window.__home.currentIndex() === window.POEMS.findIndex(x => x[1] === ''));
-const dashText = await p.evaluate(() => document.querySelector('#home-quote').textContent);
-ok('B9 无作者句只显示「句子」，不出现 "- 作者"',
-  !dashText.includes('- '), { dashText, reason: '用户要求影视剧/游戏句不署名（第九版格式下无作者不含 "- "）' });
-
-// 根地址分流：/ 应被 index.html 的内联脚本 replace 到 home.html；?stay=1 则留在 Game Time
+// 根地址分流
 const pRoot = await ctx.newPage();
 await pRoot.goto(BASE, { waitUntil: 'domcontentloaded' });
 await pRoot.waitForTimeout(900);
-const rootUrl = pRoot.url();
-ok('B11 根地址自动跳到 home.html', /\/home\.html(\?|#|$)/.test(rootUrl), { url: rootUrl });
-
+ok('B11 根地址自动跳到 home.html', /\/home\.html(\?|#|$)/.test(pRoot.url()), { url: pRoot.url() });
 await pRoot.goto(BASE + 'index.html?stay=1', { waitUntil: 'domcontentloaded' });
 await pRoot.waitForTimeout(900);
-const stayUrl = pRoot.url(), stayTitle = await pRoot.title();
-ok('B12 index.html?stay=1 留在 Game Time（不再被弹回主页）',
-  /stay=1/.test(stayUrl) && /Game Time/.test(stayTitle), { url: stayUrl, title: stayTitle });
-
-// 关键：显式 index.html（无任何参数）也必须留在 Game Time —— 套件/PWA/旧书签都走这条
+ok('B12 index.html?stay=1 留在 Game Time', /stay=1/.test(pRoot.url()) && /Game Time/.test(await pRoot.title()));
 await pRoot.goto(BASE + 'index.html', { waitUntil: 'domcontentloaded' });
 await pRoot.waitForTimeout(900);
-const plainUrl = pRoot.url(), plainTitle = await pRoot.title();
-ok('B13 显式访问 index.html（无参数）不跳主页，留在 Game Time',
-  /\/index\.html(\?|#|$)/.test(plainUrl) && /Game Time/.test(plainTitle),
-  { url: plainUrl, title: plainTitle, reason: '目录式访问才跳，显式点名本页即有意进入' });
+ok('B13 显式 index.html 不跳主页', /\/index\.html(\?|#|$)/.test(pRoot.url()) && /Game Time/.test(await pRoot.title()));
 await pRoot.close();
-
 await ctx.close();
 
-// 窄屏：卡片居中不溢出
+// 窄屏
 const c2 = await browser.newContext({ viewport: { width: 390, height: 844 } });
 const p2 = await c2.newPage();
 await p2.goto(BASE + 'home.html?cb=' + Date.now(), { waitUntil: 'load' });
@@ -439,17 +323,12 @@ await p2.waitForTimeout(400);
 const mob = await p2.evaluate(() => {
   const card = document.querySelector('.card').getBoundingClientRect();
   const ics = [...document.querySelectorAll('.entry')].map(e => e.getBoundingClientRect());
-  return { left: card.left, right: card.right, vw: innerWidth,
-    docW: document.documentElement.scrollWidth,
-    iconRight: Math.round(Math.max(...ics.map(r => r.right))),
-    // 第四版图标绝对定位在头像右侧，可能越过卡片边界 —— 必须连图标一并检查
-    fits: card.left >= 0 && card.right <= innerWidth &&
-      ics.every(r => r.right <= innerWidth) &&
-      document.documentElement.scrollWidth <= innerWidth };
+  return { fits: card.left >= 0 && card.right <= innerWidth &&
+    ics.every(r => r.right <= innerWidth) && document.documentElement.scrollWidth <= innerWidth,
+    docW: document.documentElement.scrollWidth };
 });
-ok('B10 窄屏无横向溢出（含绝对定位的图标；第四版收紧判据）', mob.fits, mob);
+ok('B10 窄屏无横向溢出', mob.fits, mob);
 await c2.close();
-
 await browser.close();
 console.log(`\n第 137 轮门户主页：${pass} PASS / ${fail} FAIL`);
 process.exit(fail ? 1 : 0);

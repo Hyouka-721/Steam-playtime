@@ -115,8 +115,10 @@ body {
 .quote {
   margin: 0;
   padding: 4px 2px;
-  min-height: 104px;
+  min-height: 128px;
   display: flex;
+  flex-wrap: wrap;                    /* 作者独占一行（不再跟在句尾、不带 - ） */
+  align-content: center;
   align-items: center;
   justify-content: center;
   /* 第十二版：用户要"略带一点行楷"——优先华文行楷/行楷，回退楷体系；行楷无粗体，
@@ -141,11 +143,77 @@ body {
   border-radius: var(--r-chip);
 }
 .quote .by {
+  flex-basis: 100%;                /* 整行独占，居中 */
+  text-align: center;
   color: var(--ink-dim);
   font-size: 0.85em;
   font-style: normal;
-  font-family: inherit;            /* 第十二版：作者与诗句同一行楷字体 */
+  font-family: inherit;            /* 作者与诗句同一行楷字体 */
   white-space: nowrap;
+  margin-top: 2px;
+}
+
+/* 点踩栏 + 提示 */
+.vote-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: -2px;
+  min-height: 26px;
+  transform: translateX(calc(-1 * var(--shift)));
+}
+.vote-down {
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--ink-dim);
+  background: transparent;
+  border: 1px solid var(--border, rgba(0,0,0,.16));
+  border-radius: var(--r-chip, 999px);
+  padding: 3px 12px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.vote-down:hover { color: var(--accent-deep, var(--ink)); border-color: var(--accent); }
+.vote-down:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.vote-tip { font-size: 12px; color: var(--ink-dim); }
+
+/* 三击昵称弹出的待删名单面板 */
+.pending-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.28);
+}
+.pending-box {
+  width: min(92vw, 560px);
+  max-height: 76vh;
+  overflow: auto;
+  padding: 18px 20px;
+  background: var(--paper, #fbf7f1);
+  color: var(--ink);
+  border: 1px solid var(--border, rgba(0,0,0,.16));
+  border-radius: var(--r-lg, 14px);
+  box-shadow: 0 12px 40px rgba(0,0,0,.18);
+}
+.pending-box pre {
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-size: 12px;
+  line-height: 1.6;
+  max-height: 46vh;
+  overflow: auto;
+  padding: 10px 0;
+}
+.pending-actions { display: flex; gap: 10px; }
+.pending-actions button {
+  font-family: inherit; font-size: 13px; padding: 5px 14px; cursor: pointer;
+  color: var(--ink); background: transparent;
+  border: 1px solid var(--border, rgba(0,0,0,.16));
+  border-radius: var(--r-chip, 999px);
 }
 
 /* ── 窄屏：不左移、图标就近，保证不越界 ── */
@@ -163,10 +231,7 @@ body {
   .stage { padding: 20px 12px; }
   .card { gap: 14px; width: min(100%, 400px); }
   .name { font-size: 26px; margin-bottom: 4px; }
-  .quote { min-height: 92px; font-size: 21px; }
-  /* 两支歌词在窄屏会折成 3~4 行，作者再跟在行尾会飘到右边 —— 让它独占一行居中 */
-  .quote { flex-wrap: wrap; }
-  .quote .by { flex-basis: 100%; text-align: center; margin-top: 2px; }
+  .quote { min-height: 116px; font-size: 21px; }
 }
 
 /* 尊重减少动态效果偏好 */

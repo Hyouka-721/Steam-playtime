@@ -10,10 +10,10 @@
 <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon-home-b51ad21c.png">
 <meta name="description" content="Hyouka 的个人主页 · 游戏时长与观影记录">
 <!-- 第 137 轮：独立样式 / 脚本；绝不引用 index/watch 的版本化资源，避免 bump 牵连两页。
-     rain.css / rain.js 是两页共用的氛围层（只读引用、不改它们 → 不 bump v=7）；
-     data-theme="cream" 让浅色壁纸上的雨丝走蓝灰描边（rain.css 里的 cream 分支）。 -->
+     rain.css / rain.js 是两页共用的氛围层（只读引用；rain.css 现 v=9，rain.js v=7）；
+     data-theme="cream" 让浅色壁纸上的雨丝走中性暖灰褐描边（rain.css 的 cream 分支）。 -->
 <link rel="stylesheet" href="rain.css?v=9">
-<link rel="stylesheet" href="home.css?v=3">
+<link rel="stylesheet" href="home.css?v=4">
 </head>
 <body>
 <!-- 雨丝层：fixed 全屏，z=12，内容 .stage 抬到 z=13 之上 -->
@@ -42,8 +42,8 @@
   </section>
 </main>
 
-<script src="poems.js?v=4"></script>
-<script src="home.js?v=2"></script>
+<script src="poems.js?v=5"></script>
+<script src="home.js?v=3"></script>
 
 <!-- 第 137 轮：复用两页共用雨效（rain.js v=7）。主页没有氛围开关，默认下雨；
      若用户在其它页把氛围设为「关」（ambience.mode === 'off'）则主页也不下，保持一致。
