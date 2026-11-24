@@ -2,19 +2,19 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-11-22T21:08:24.716Z",
-  "generated_at_local": "2026-11-23",
+  "generated_at": "2026-11-24T02:26:51.253Z",
+  "generated_at_local": "2026-11-24",
   "tracking_since": "2026-10-13",
-  "last_snapshot_date": "2026-11-22",
+  "last_snapshot_date": "2026-11-23",
   "steamid_hash": "a8474caf",
   "months": [
     "2026-10",
     "2026-11"
   ],
   "ach_stats": {
-    "unlocked": 867,
+    "unlocked": 871,
     "total": 2554,
-    "pct": 33.9,
+    "pct": 34.1,
     "games": 32
   },
   "ach_perfect": [
@@ -27,17 +27,17 @@
     "990630"
   ],
   "stats": {
-    "lifetime_minutes": 87111,
-    "lifetime_hours": 1451.9,
+    "lifetime_minutes": 87163,
+    "lifetime_hours": 1452.7,
     "owned_games": 55,
     "lifetime_played_games": 38,
-    "total_minutes": 5387,
-    "total_hours": 89.8,
-    "tracked_days": 40,
-    "active_days": 39,
-    "current_streak": 32,
-    "longest_streak": 32,
-    "week_minutes": 0,
+    "total_minutes": 5439,
+    "total_hours": 90.7,
+    "tracked_days": 41,
+    "active_days": 40,
+    "current_streak": 33,
+    "longest_streak": 33,
+    "week_minutes": 52,
     "played_games": 6,
     "best_day": {
       "date": "2026-11-14",
@@ -65,17 +65,17 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "total_minutes": 1923,
+      "total_minutes": 1974,
       "first_day": "2026-10-13",
-      "last_day": "2026-11-22"
+      "last_day": "2026-11-23"
     },
     "431960": {
       "appid": "431960",
       "name": "Wallpaper Engine",
       "img_icon_url": "72edaed9d748c6cf7397ffb1c83f0b837b9ebd9d",
-      "total_minutes": 29,
+      "total_minutes": 30,
       "first_day": "2026-10-18",
-      "last_day": "2026-11-14"
+      "last_day": "2026-11-23"
     },
     "646570": {
       "appid": "646570",
@@ -127,8 +127,8 @@
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "lifetime_minutes": 2143,
-      "last_played": "2026-11-22"
+      "lifetime_minutes": 2194,
+      "last_played": "2026-11-23"
     },
     "250900": {
       "appid": "250900",
@@ -232,8 +232,8 @@
       "appid": "431960",
       "name": "Wallpaper Engine",
       "img_icon_url": "72edaed9d748c6cf7397ffb1c83f0b837b9ebd9d",
-      "lifetime_minutes": 3582,
-      "last_played": "2026-11-14"
+      "lifetime_minutes": 3583,
+      "last_played": "2026-11-23"
     },
     "458710": {
       "appid": "458710",
