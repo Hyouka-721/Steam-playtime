@@ -1,9 +1,10 @@
 /* ============================================================================
-   门户主页 · home.js   v=5
+   门户主页 · home.js   v=6
    第 137 轮 —— 取句与交互：
      ① 今日签：按日期 FNV-1a 稳定取模，同一天不变；满月度配额时顺延到下一句
      ② 点击换一句：从「本月<2 次 + 非最近 20 句」池子里抽
      ③ 刷新沿用 choice（存 hash，不存下标——防止诗句库增删后错位）
+   v=6：双击作者点踩后【不换句】（用户反馈"点作者仍刷新诗句"），改为作者位 1.5s 文字反馈。
    v=5：删「不喜欢」按钮；诗句与作者拆成两个元素，功能隔离——点诗句换句、双击作者点踩。
    v=4（热修）：兼容老用户数字 choice（否则卡在"加载中…"）、脏数据兜底。
    v=3 新增：
@@ -242,7 +243,9 @@
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose('next'); }
   });
 
-  /* 双击作者点踩：500ms 内点两次作者即记一次踩，然后换句 */
+  /* 双击作者点踩：500ms 内点两次作者即记一次踩。
+     🔴 点与作者相关的操作绝不换句——这是用户要的"诗句/作者功能隔离"；
+        点踩成功后只在作者位给 1.5s 文字反馈，诗句保持原样。 */
   var byTaps = 0, byTimer = 0;
   quoteEl.addEventListener('click', function (e) {
     var by = e.target.closest && e.target.closest('.by');
@@ -254,8 +257,11 @@
     if (byTaps >= 2) {
       byTaps = 0;
       var h = hashOf(current);
-      dislike(h);
-      choose('next');                          // 点踩后照常换下一句
+      var r = dislike(h);                      // 只记踩，不换句
+      var original = by.textContent;
+      by.textContent = r.count >= DISLIKE_CAP ? '已记入待删名单'
+        : (r.counted ? '已记录 ' + r.count + '/' + DISLIKE_CAP : '本月已记过');
+      setTimeout(function () { by.textContent = original; }, 1500);
     }
   });
 

@@ -22,8 +22,8 @@ const poemsSrc = fs.readFileSync(ROOT + 'docs/poems.js', 'utf8');
 const cssPlain = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
 // ── A 静态契约 ──
-ok('A1 主页版本化资源 home.css v=5 / home.js v=5 / poems.js v=5',
-  /home\.css\?v=5/.test(html) && /home\.js\?v=5/.test(html) && /poems\.js\?v=5/.test(html) &&
+ok('A1 主页版本化资源 home.css v=5 / home.js v=6 / poems.js v=5',
+  /home\.css\?v=5/.test(html) && /home\.js\?v=6/.test(html) && /poems\.js\?v=5/.test(html) &&
   !/style\.css\?v=|app\.js\?v=|watch\.css\?v=|watch\.js\?v=/.test(html),
   '理由：主页独立，不碰两页已上线版本；v5 因扩库/点踩/换行 bump');
 
@@ -215,18 +215,18 @@ const isolation = await p.evaluate(() => {
 ok('B4c0 功能隔离：点作者不换句、点诗句才换句',
   isolation.byNoSwitch && isolation.verseSwitches, isolation);
 
-// 双击作者：500ms 内两次 → 点踩 + 换句
+// 双击作者：500ms 内两次 → 点踩，但【不换句】（诗句/作者功能隔离）
 const doubleBy = await p.evaluate(() => {
   window.__home.reset();
   const by = document.querySelector('.by');
   const h = window.__home.currentHash();
   by.click(); by.click();
   return { h, count: window.__home.dislikes()[h] || 0,
-    pending: window.__home.pending().includes(h),
+    feedback: by.textContent,
     switched: window.__home.currentHash() !== h };
 });
-ok('B4c1 双击作者一次即点踩（并自动换句）',
-  doubleBy.count >= 1 && doubleBy.switched, doubleBy);
+ok('B4c1 双击作者即点踩，诗句保持不变（功能隔离）',
+  doubleBy.count >= 1 && !doubleBy.switched && /已记录|已记入/.test(doubleBy.feedback), doubleBy);
 
 ok('B4c 作者独占一行无 "- "，诗句/作者已拆元素，无点踩按钮',
   view.byOnOwnLine && view.byText && !view.byText.startsWith('-') &&
