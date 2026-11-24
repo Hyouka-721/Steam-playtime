@@ -3,7 +3,7 @@
   "month": "2026-11",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-11-22T21:08:24.707Z",
+  "generated_at": "2026-11-24T02:26:51.243Z",
   "days": {
     "2026-11-01": {
       "total_minutes": 264,
@@ -471,6 +471,27 @@
           "appid": "646570",
           "name": "杀戮尖塔",
           "minutes": 7,
+          "is_new": false
+        }
+      ]
+    },
+    "2026-11-23": {
+      "total_minutes": 52,
+      "span_days": 1,
+      "confidence": "high",
+      "source": "auto",
+      "flags": [],
+      "games": [
+        {
+          "appid": "246420",
+          "name": "王国保卫战",
+          "minutes": 51,
+          "is_new": false
+        },
+        {
+          "appid": "431960",
+          "name": "Wallpaper Engine",
+          "minutes": 1,
           "is_new": false
         }
       ]
