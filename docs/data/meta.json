@@ -2,19 +2,19 @@
   "schema": 2,
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-11-24T02:26:51.253Z",
-  "generated_at_local": "2026-11-24",
+  "generated_at": "2026-11-24T23:59:17.913Z",
+  "generated_at_local": "2026-11-25",
   "tracking_since": "2026-10-13",
-  "last_snapshot_date": "2026-11-23",
+  "last_snapshot_date": "2026-11-24",
   "steamid_hash": "a8474caf",
   "months": [
     "2026-10",
     "2026-11"
   ],
   "ach_stats": {
-    "unlocked": 871,
+    "unlocked": 873,
     "total": 2554,
-    "pct": 34.1,
+    "pct": 34.2,
     "games": 32
   },
   "ach_perfect": [
@@ -27,17 +27,17 @@
     "990630"
   ],
   "stats": {
-    "lifetime_minutes": 87163,
-    "lifetime_hours": 1452.7,
+    "lifetime_minutes": 87259,
+    "lifetime_hours": 1454.3,
     "owned_games": 55,
     "lifetime_played_games": 38,
-    "total_minutes": 5439,
-    "total_hours": 90.7,
-    "tracked_days": 41,
-    "active_days": 40,
-    "current_streak": 33,
-    "longest_streak": 33,
-    "week_minutes": 52,
+    "total_minutes": 5535,
+    "total_hours": 92.3,
+    "tracked_days": 42,
+    "active_days": 41,
+    "current_streak": 34,
+    "longest_streak": 34,
+    "week_minutes": 148,
     "played_games": 6,
     "best_day": {
       "date": "2026-11-14",
@@ -57,17 +57,17 @@
       "appid": "227300",
       "name": "欧洲卡车模拟2",
       "img_icon_url": "adc18a4fc9adc0330144b76d61cbda68bb2394a0",
-      "total_minutes": 755,
+      "total_minutes": 823,
       "first_day": "2026-10-13",
-      "last_day": "2026-11-21"
+      "last_day": "2026-11-24"
     },
     "246420": {
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "total_minutes": 1974,
+      "total_minutes": 2002,
       "first_day": "2026-10-13",
-      "last_day": "2026-11-23"
+      "last_day": "2026-11-24"
     },
     "431960": {
       "appid": "431960",
@@ -120,15 +120,15 @@
       "appid": "227300",
       "name": "欧洲卡车模拟2",
       "img_icon_url": "adc18a4fc9adc0330144b76d61cbda68bb2394a0",
-      "lifetime_minutes": 8552,
-      "last_played": "2026-11-21"
+      "lifetime_minutes": 8620,
+      "last_played": "2026-11-24"
     },
     "246420": {
       "appid": "246420",
       "name": "王国保卫战",
       "img_icon_url": "2dccbb4dbb08987e38d7efe916fd303bea8dc39a",
-      "lifetime_minutes": 2194,
-      "last_played": "2026-11-23"
+      "lifetime_minutes": 2222,
+      "last_played": "2026-11-24"
     },
     "250900": {
       "appid": "250900",
