@@ -1,9 +1,10 @@
 /* ============================================================================
-   门户主页 · home.js   v=4
+   门户主页 · home.js   v=5
    第 137 轮 —— 取句与交互：
      ① 今日签：按日期 FNV-1a 稳定取模，同一天不变；满月度配额时顺延到下一句
      ② 点击换一句：从「本月<2 次 + 非最近 20 句」池子里抽
      ③ 刷新沿用 choice（存 hash，不存下标——防止诗句库增删后错位）
+   v=5：删「不喜欢」按钮；诗句与作者拆成两个元素，功能隔离——点诗句换句、双击作者点踩。
    v=4（热修）：兼容老用户数字 choice（否则卡在"加载中…"）、脏数据兜底。
    v=3 新增：
      · 稳定 ID：每句用 poems.js 第三列的 hash；旧版数字 choice 自动迁移
@@ -153,7 +154,11 @@
     }
     var text = '「' + row[0] + '」';
     quoteEl.textContent = '';
-    quoteEl.appendChild(document.createTextNode(text));
+    /* v=5：诗句与作者拆成两个元素，功能隔离——点诗句换句，双击作者点踩，互不触发 */
+    var verse = document.createElement('span');
+    verse.className = 'verse';
+    verse.textContent = text;
+    quoteEl.appendChild(verse);
     if (row[1]) {
       var by = document.createElement('span');
       by.className = 'by';
@@ -225,29 +230,33 @@
     }
   }
 
-  /* ---------- 交互 ---------- */
-  quoteEl.addEventListener('click', function () { choose('next'); });
+  /* ---------- 交互：诗句与作者功能隔离 ----------
+     点诗句（.verse）→ 换句；双击作者（.by 500ms 内两次）→ 点踩。
+     两者互不冒泡、互不触发；键盘 Enter/空格在诗句上仍可换句。 */
+  quoteEl.addEventListener('click', function (e) {
+    /* 用 closest 判断来源，避免点到作者时冒泡成"换句" */
+    if (e.target.closest && e.target.closest('.by')) return;   // 作者区不触发换句
+    choose('next');
+  });
   quoteEl.addEventListener('keydown', function (e) {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose('next'); }
   });
 
-  /* 点踩按钮：放在诗句下方，不冒泡到换句 */
-  var voteBar = document.createElement('div');
-  voteBar.className = 'vote-bar';
-  voteBar.innerHTML = '<button type="button" class="vote-down" aria-label="不喜欢这句，点踩">👎 不喜欢</button>' +
-                      '<span class="vote-tip" aria-live="polite"></span>';
-  if (quoteEl.parentNode) quoteEl.parentNode.insertBefore(voteBar, quoteEl.nextSibling);
-  var downBtn = voteBar.querySelector('.vote-down');
-  var voteTip = voteBar.querySelector('.vote-tip');
-  downBtn.addEventListener('click', function (e) {
-    e.stopPropagation();
-    var h = hashOf(current);
-    var r = dislike(h);
-    voteTip.textContent = r.counted
-      ? (r.count >= DISLIKE_CAP ? '已记入待删名单' : '已记录（' + r.count + '/' + DISLIKE_CAP + '）')
-      : '本月已记过';
-    setTimeout(function () { voteTip.textContent = ''; }, 1800);
-    choose('next');
+  /* 双击作者点踩：500ms 内点两次作者即记一次踩，然后换句 */
+  var byTaps = 0, byTimer = 0;
+  quoteEl.addEventListener('click', function (e) {
+    var by = e.target.closest && e.target.closest('.by');
+    if (!by) return;
+    e.stopPropagation();                       // 隔离：不让这次点击冒泡成换句
+    byTaps++;
+    clearTimeout(byTimer);
+    byTimer = setTimeout(function () { byTaps = 0; }, 500);
+    if (byTaps >= 2) {
+      byTaps = 0;
+      var h = hashOf(current);
+      dislike(h);
+      choose('next');                          // 点踩后照常换下一句
+    }
   });
 
   /* 三击昵称导出待删名单 */

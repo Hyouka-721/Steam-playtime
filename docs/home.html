@@ -13,7 +13,7 @@
      rain.css / rain.js 是两页共用的氛围层（只读引用；rain.css 现 v=9，rain.js v=7）；
      data-theme="cream" 让浅色壁纸上的雨丝走中性暖灰褐描边（rain.css 的 cream 分支）。 -->
 <link rel="stylesheet" href="rain.css?v=9">
-<link rel="stylesheet" href="home.css?v=4">
+<link rel="stylesheet" href="home.css?v=5">
 </head>
 <body>
 <!-- 雨丝层：fixed 全屏，z=12，内容 .stage 抬到 z=13 之上 -->
@@ -38,12 +38,12 @@
     <!-- 昵称 + 随机诗句 -->
     <h1 class="name">Hyouka</h1>
     <blockquote class="quote" id="home-quote" role="button" tabindex="0"
-                aria-label="点按换一句诗">加载中…</blockquote>
+                aria-label="点诗句换一句，双击作者可点踩">加载中…</blockquote>
   </section>
 </main>
 
 <script src="poems.js?v=5"></script>
-<script src="home.js?v=4"></script>
+<script src="home.js?v=5"></script>
 
 <!-- 第 137 轮：复用两页共用雨效（rain.js v=7）。主页没有氛围开关，默认下雨；
      若用户在其它页把氛围设为「关」（ambience.mode === 'off'）则主页也不下，保持一致。

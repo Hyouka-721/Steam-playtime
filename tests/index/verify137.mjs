@@ -22,8 +22,8 @@ const poemsSrc = fs.readFileSync(ROOT + 'docs/poems.js', 'utf8');
 const cssPlain = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
 // ── A 静态契约 ──
-ok('A1 主页版本化资源 home.css v=4 / home.js v=4 / poems.js v=5',
-  /home\.css\?v=4/.test(html) && /home\.js\?v=4/.test(html) && /poems\.js\?v=5/.test(html) &&
+ok('A1 主页版本化资源 home.css v=5 / home.js v=5 / poems.js v=5',
+  /home\.css\?v=5/.test(html) && /home\.js\?v=5/.test(html) && /poems\.js\?v=5/.test(html) &&
   !/style\.css\?v=|app\.js\?v=|watch\.css\?v=|watch\.js\?v=/.test(html),
   '理由：主页独立，不碰两页已上线版本；v5 因扩库/点踩/换行 bump');
 
@@ -132,12 +132,14 @@ ok('A14 作者独占一行、渲染无 "- " 前缀',
   /\.quote\s*\.by\s*\{[^}]*flex-basis:\s*100%/.test(cssPlain),
   '理由：用户要求「雾失楼台，月迷津渡」与作者分两行且不显示 - 与空格');
 
-ok('A15 月度配额 / 点踩 / 三击导出逻辑齐备',
+ok('A15 月度配额 / 双击作者点踩 / 三击导出逻辑齐备',
   /MONTH_CAP\s*=\s*2/.test(js) && /DISLIKE_CAP\s*=\s*3/.test(js) &&
   /MONTH_KEY/.test(js) && /PENDING_KEY/.test(js) &&
   /function poolFor/.test(js) && /function showPendingPanel/.test(js) &&
-  /taps\s*>=\s*3/.test(js),
-  '理由：月度≤2、点踩3次待删、三击昵称导出');
+  /taps\s*>=\s*3/.test(js) &&
+  /byTaps\s*>=\s*2/.test(js) && /closest\('\.by'\)/.test(js) &&
+  !/vote-down|vote-bar/.test(js),
+  '理由：月度≤2、点踩3次待删、三击昵称导出；v=5 删按钮改双击作者、诗句作者隔离');
 
 ok('A16 choice/recent 存 hash（非下标），且兼容旧数据迁移',
   /lsSet\(KEY,\s*hashOf/.test(js) && /recent\.indexOf\(h\)/.test(js) &&
@@ -170,7 +172,8 @@ const view = await p.evaluate(() => {
     imgs: [...document.images].map(i => ({ src: i.getAttribute('src'), ok: i.complete && i.naturalWidth > 0 })),
     bg: getComputedStyle(document.body).backgroundImage,
     count: window.__home.count,
-    hasVote: !!document.querySelector('.vote-down'),
+    hasVerse: !!document.querySelector('.verse'),
+    noVoteBtn: !document.querySelector('.vote-down, .vote-bar'),
     byOnOwnLine: by ? by.getBoundingClientRect().top > q.top + 10 : false,
     geo: {
       avatarAboveName: av.bottom <= nm.top, nameAboveQuote: nm.bottom <= q.top,
@@ -198,10 +201,39 @@ ok('B4b 布局：头像居中上移、居中对齐、图标竖排尺寸间距',
   view.geo.iconSize[0] === 222 && view.geo.iconSize[1] === 210 &&
   view.geo.iconOffset >= 195 && view.geo.iconVerticalGap >= 25, view.geo);
 
-ok('B4c 作者独占一行且无 "- " 前缀，点踩按钮存在',
-  view.byOnOwnLine && view.byText && !view.byText.startsWith('-') && view.hasVote,
-  { byText: view.byText, byOnOwnLine: view.byOnOwnLine, hasVote: view.hasVote,
-    reason: '用户要求「句」换行接作者，且不显示短横线与空格' });
+// 功能隔离：单击诗句换句；单击作者不换句；双击作者才点踩
+const isolation = await p.evaluate(() => {
+  window.__home.reset();
+  const verse = document.querySelector('.verse'), by = document.querySelector('.by');
+  const h0 = window.__home.currentHash();
+  by.click();                                   // 单击作者：不应换句
+  const hAfterOneBy = window.__home.currentHash();
+  verse.click();                                // 单击诗句：应换句
+  const hAfterVerse = window.__home.currentHash();
+  return { h0, hAfterOneBy, hAfterVerse, byNoSwitch: h0 === hAfterOneBy, verseSwitches: hAfterVerse !== hAfterOneBy };
+});
+ok('B4c0 功能隔离：点作者不换句、点诗句才换句',
+  isolation.byNoSwitch && isolation.verseSwitches, isolation);
+
+// 双击作者：500ms 内两次 → 点踩 + 换句
+const doubleBy = await p.evaluate(() => {
+  window.__home.reset();
+  const by = document.querySelector('.by');
+  const h = window.__home.currentHash();
+  by.click(); by.click();
+  return { h, count: window.__home.dislikes()[h] || 0,
+    pending: window.__home.pending().includes(h),
+    switched: window.__home.currentHash() !== h };
+});
+ok('B4c1 双击作者一次即点踩（并自动换句）',
+  doubleBy.count >= 1 && doubleBy.switched, doubleBy);
+
+ok('B4c 作者独占一行无 "- "，诗句/作者已拆元素，无点踩按钮',
+  view.byOnOwnLine && view.byText && !view.byText.startsWith('-') &&
+  view.hasVerse && view.noVoteBtn,
+  { byText: view.byText, byOnOwnLine: view.byOnOwnLine,
+    hasVerse: view.hasVerse, noVoteBtn: view.noVoteBtn,
+    reason: '用户要求删按钮、双击作者点踩、诗句与作者功能隔离' });
 
 // 雨效
 let rainUp = true;

@@ -1,5 +1,5 @@
 /* ============================================================================
-   门户主页 · home.css   v=1
+   门户主页 · home.css   v=5
    第 137 轮新增 —— Hyouka 的个人主页（头像 / 昵称 / 随机诗句 / 两个入口）。
    🔴 独立文件：不并入 style.css / watch.css，不动两页任何版本号（红线 2）。
    布局（第十二版）：壁纸 sketch 保留铺底；所有元素无背景框、浮在壁纸上；头像 300 水平
@@ -142,8 +142,12 @@ body {
   outline-offset: 6px;
   border-radius: var(--r-chip);
 }
+.quote .verse {
+  flex-basis: 100%;                /* 诗句整行独占 */
+  text-align: center;
+}
 .quote .by {
-  flex-basis: 100%;                /* 整行独占，居中 */
+  flex-basis: 100%;                /* 作者整行独占，居中 */
   text-align: center;
   color: var(--ink-dim);
   font-size: 0.85em;
@@ -151,32 +155,10 @@ body {
   font-family: inherit;            /* 作者与诗句同一行楷字体 */
   white-space: nowrap;
   margin-top: 2px;
+  cursor: pointer;                 /* 双击作者 = 点踩 */
+  transition: color .15s;
 }
-
-/* 点踩栏 + 提示 */
-.vote-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: -2px;
-  min-height: 26px;
-  transform: translateX(calc(-1 * var(--shift)));
-}
-.vote-down {
-  font-family: inherit;
-  font-size: 13px;
-  color: var(--ink-dim);
-  background: transparent;
-  border: 1px solid var(--border, rgba(0,0,0,.16));
-  border-radius: var(--r-chip, 999px);
-  padding: 3px 12px;
-  cursor: pointer;
-  transition: color .15s, border-color .15s, background .15s;
-}
-.vote-down:hover { color: var(--accent-deep, var(--ink)); border-color: var(--accent); }
-.vote-down:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.vote-tip { font-size: 12px; color: var(--ink-dim); }
+.quote .by:hover { color: var(--accent-deep, var(--ink)); }
 
 /* 三击昵称弹出的待删名单面板 */
 .pending-panel {
