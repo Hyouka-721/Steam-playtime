@@ -222,17 +222,17 @@
       "poster_480": "img/watch/item-dada35c9-480.webp",
       "title_en": "君の膵臓をたべたい",
       "year": 2018,
-      "rating": 9,
+      "rating": 9.5,
       "order": 1,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "动画",
         "爱情",
         "温情"
       ],
-      "note": "樱花在等待绽放的时机，我遇见了你",
-      "countries": [
-        "日本"
-      ]
+      "note": "樱花在等待绽放的时机，我遇见了你"
     },
     {
       "id": "2019-07-10-item",
