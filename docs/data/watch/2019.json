@@ -168,8 +168,8 @@
       "title": "我和我的祖国",
       "kind": "movie",
       "watched_at": "2019-10-13",
-      "added_at": "2026-10-26T18:37:51+08:00",
       "poster": "img/watch/my-people-my-country-d012a458.webp",
+      "added_at": "2026-10-26T18:37:51+08:00",
       "poster_w": 640,
       "poster_h": 896,
       "poster_320": "img/watch/my-people-my-country-d012a458-320.webp",
@@ -177,14 +177,15 @@
       "title_en": "My People, My Country",
       "year": 2019,
       "rating": 7.5,
+      "order": 5,
+      "countries": [
+        "中国"
+      ],
       "tags": [
         "历史",
         "剧情"
       ],
-      "note": "小人物见证大时代",
-      "countries": [
-        "中国"
-      ]
+      "note": "小人物见证大时代"
     },
     {
       "id": "2019-09-22-the-black-troop",
