@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-22T18:57:28+08:00",
+  "updated_at": "2026-11-25T17:59:29+08:00",
   "items": [
     {
       "id": "2026-11-22-whiplash",
@@ -2600,16 +2600,16 @@
       "poster_480": "img/watch/little-forest-3d667be7-480.webp",
       "title_en": "Little Forest",
       "year": 2015,
-      "rating": 9,
+      "rating": 9.5,
+      "order": 3,
+      "countries": [
+        "日本"
+      ],
       "tags": [
         "剧情",
         "温情"
       ],
-      "note": "我回来了，欢迎回来",
-      "countries": [
-        "日本"
-      ],
-      "order": 2
+      "note": "我回来了，欢迎回来"
     },
     {
       "id": "2019-12-21-la-leggenda-del-pianista-sull-oceano",
