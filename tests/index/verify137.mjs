@@ -22,10 +22,10 @@ const poemsSrc = fs.readFileSync(ROOT + 'docs/poems.js', 'utf8');
 const cssPlain = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
 // ── A 静态契约 ──
-ok('A1 主页版本化资源 home.css v=5 / home.js v=6 / poems.js v=5',
-  /home\.css\?v=5/.test(html) && /home\.js\?v=6/.test(html) && /poems\.js\?v=5/.test(html) &&
+ok('A1 主页版本化资源 home.css v=6 / home.js v=7 / poems.js v=5',
+  /home\.css\?v=6/.test(html) && /home\.js\?v=7/.test(html) && /poems\.js\?v=5/.test(html) &&
   !/style\.css\?v=|app\.js\?v=|watch\.css\?v=|watch\.js\?v=/.test(html),
-  '理由：主页独立，不碰两页已上线版本；v5 因扩库/点踩/换行 bump');
+  '理由：主页独立，不碰两页已上线版本；css v6/js v7 因第138轮视觉精修+雨天选句 bump，poems 未改不 bump');
 
 ok('A2 两页 index.html / watch.html 仍为基线',
   /GAME TIME|Game Time/.test(fs.readFileSync(ROOT + 'docs/index.html', 'utf8')) &&

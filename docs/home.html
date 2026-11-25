@@ -13,7 +13,7 @@
      rain.css / rain.js 是两页共用的氛围层（只读引用；rain.css 现 v=9，rain.js v=7）；
      data-theme="cream" 让浅色壁纸上的雨丝走中性暖灰褐描边（rain.css 的 cream 分支）。 -->
 <link rel="stylesheet" href="rain.css?v=9">
-<link rel="stylesheet" href="home.css?v=5">
+<link rel="stylesheet" href="home.css?v=6">
 </head>
 <body>
 <!-- 雨丝层：fixed 全屏，z=12，内容 .stage 抬到 z=13 之上 -->
@@ -26,10 +26,10 @@
            alt="Hyouka 的头像：戴草帽的皮卡丘" width="300" height="300" decoding="async">
       <!-- 入口列：史蒂夫在上、小黄人在下，位于头像正右侧；无框无文字 -->
       <nav class="entries" aria-label="站点入口">
-        <a class="entry" href="index.html?stay=1" aria-label="进入 Game Time 游戏时长统计">
+        <a class="entry" href="index.html?stay=1" aria-label="进入 Game Time 游戏时长统计" data-label="游戏时长">
           <img src="img/steve-ceb15b8a.webp" alt="史蒂夫" width="400" height="386" decoding="async">
         </a>
-        <a class="entry" href="watch.html" aria-label="进入 Watch List 观影记录">
+        <a class="entry" href="watch.html" aria-label="进入 Watch List 观影记录" data-label="观影记录">
           <img src="img/minion-0ef9a202.webp" alt="小黄人" width="460" height="420" decoding="async">
         </a>
       </nav>
@@ -43,7 +43,7 @@
 </main>
 
 <script src="poems.js?v=5"></script>
-<script src="home.js?v=6"></script>
+<script src="home.js?v=7"></script>
 
 <!-- 第 137 轮：复用两页共用雨效（rain.js v=7）。主页没有氛围开关，默认下雨；
      若用户在其它页把氛围设为「关」（ambience.mode === 'off'）则主页也不下，保持一致。

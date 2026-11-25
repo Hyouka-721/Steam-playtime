@@ -1,10 +1,16 @@
 /* ============================================================================
-   门户主页 · home.css   v=5
+   门户主页 · home.css   v=6
    第 137 轮新增 —— Hyouka 的个人主页（头像 / 昵称 / 随机诗句 / 两个入口）。
    🔴 独立文件：不并入 style.css / watch.css，不动两页任何版本号（红线 2）。
    布局（第十二版）：壁纸 sketch 保留铺底；所有元素无背景框、浮在壁纸上；头像 300 水平
    居中、整体上移 --vshift(40px)；两图标在头像右侧 --ic-offset(200px) 处并整体下移
    --ic-down；诗句用行楷。第 137 轮追加：复用两页共用 rain.css 雨丝，内容抬到雨丝之上。
+   第 138 轮（v=6）视觉精修：①诗句柔光衬底（.quote::before 径向米白薄雾，让字从插画里
+   浮出，不破坏 .card/.entry 无背景约束）②窄屏 text-wrap:balance 治孤字断行
+   ③换句纯 opacity 淡入 ④作者署名提档（更深更大一档）⑤窄屏图标内收
+   ⑥今日签角标（data-daily）⑦入口 hover 文字（::after attr(data-label)）。
+   🔴 全程只追加/微调，不改既有几何冻结值（桌面 300/222/210/200/48/40）、圆角白名单、
+      不动 @media 结构；动效一律 opacity 不位移。
    ============================================================================ */
 :root {
   --r-chip: 14px;
@@ -113,6 +119,8 @@ body {
   transform: translateX(calc(-1 * var(--shift)));
 }
 .quote {
+  position: relative;                 /* 第138轮：给 ::before 柔光定位锚点 */
+  isolation: isolate;                 /* 建立堆叠上下文，::before 的 z=-1 只沉到本块文字之下 */
   margin: 0;
   padding: 4px 2px;
   min-height: 128px;
@@ -136,29 +144,80 @@ body {
   text-align: center;
   transform: translateX(calc(-1 * var(--shift)));
 }
+/* 第138轮：诗句柔光衬底——径向米白薄雾，边缘透明融入壁纸，只把字下方的插画细节压淡，
+   不是实心背景框（.card/.entry 仍无背景）；z=-1 在文字之下、stage 之上，不穿雨丝。 */
+.quote::before {
+  content: '';
+  position: absolute;
+  inset: -18px -30px;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center,
+    rgba(251, 247, 241, 0.86) 0%,
+    rgba(251, 247, 241, 0.66) 45%,
+    rgba(251, 247, 241, 0) 78%);
+}
 .quote:hover { color: var(--accent-deep); }
 .quote:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 6px;
   border-radius: var(--r-chip);
 }
+/* 第138轮：换句纯 opacity 淡入（不位移，避开几何断言）；JS 在 render 时重挂 .fade-in */
+.quote.is-fresh .verse { animation: quote-fade .22s ease-out both; }
+@keyframes quote-fade { from { opacity: 0; } to { opacity: 1; } }
 .quote .verse {
   flex-basis: 100%;                /* 诗句整行独占 */
   text-align: center;
+  text-wrap: balance;              /* 第138轮：两行时均匀分配，避免末行只剩一字 */
 }
 .quote .by {
   flex-basis: 100%;                /* 作者整行独占，居中 */
   text-align: center;
-  color: var(--ink-dim);
-  font-size: 0.85em;
+  color: #574636;                  /* 第138轮：署名提档——比 ink-dim 更深，压在插画上也清楚 */
+  font-size: 0.92em;               /* 0.85 → 0.92，放大一档；行楷不设字重，避免合成加粗变脏 */
   font-style: normal;
   font-family: inherit;            /* 作者与诗句同一行楷字体 */
   white-space: nowrap;
-  margin-top: 2px;
+  margin-top: 3px;
   cursor: pointer;                 /* 双击作者 = 点踩 */
   transition: color .15s;
 }
 .quote .by:hover { color: var(--accent-deep, var(--ink)); }
+
+/* 第138轮：今日签角标——仅当 data-daily="1" 时在诗句右上浮一个极小的「今」，
+   用 ::after 不新增 DOM（B2 仍只有三张图）；绝对定位不参与 flex，不影响作者独占行。
+   不设 border-radius 数字、不加 background/box-shadow，守住圆角与无框红线。 */
+.quote[data-daily="1"]::after {
+  content: '今';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 12px;
+  color: var(--accent, #d9762f);
+  opacity: 0.55;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* 第138轮：入口 hover 文字——默认完全无字（.entry 无背景框），悬停/聚焦才在图标下方
+   浮出极简标签；标签文本由 HTML 的 data-label 提供，::after 不新增 DOM/图片。 */
+.entry { position: relative; }
+.entry::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 50%;
+  bottom: -18px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 12px;
+  letter-spacing: .5px;
+  color: var(--ink-dim);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+}
+.entry:hover::after, .entry:focus-visible::after { opacity: 1; }
 
 /* 三击昵称弹出的待删名单面板 */
 .pending-panel {
@@ -202,11 +261,11 @@ body {
 @media (max-width: 680px) {
   :root {
     --av: 150px;
-    --ic-w: 100px;
-    --ic-h: 94px;
+    --ic-w: 92px;                  /* 第138轮：100→92，图标内收，离右缘留白更稳 */
+    --ic-h: 86px;
     --shift: 0px;                  /* 窄屏空间有限，头像组不左移 */
     --vshift: 0px;                 /* 窄屏不上移，避免顶部溢出 */
-    --ic-offset: 12px;
+    --ic-offset: 8px;              /* 12→8，贴近头像但留缝 */
     --ic-gap: 14px;
     --ic-down: 24px;
   }
@@ -214,10 +273,14 @@ body {
   .card { gap: 14px; width: min(100%, 400px); }
   .name { font-size: 26px; margin-bottom: 4px; }
   .quote { min-height: 116px; font-size: 21px; }
+  .quote::before { inset: -12px 0; }       /* 窄屏柔光左右不外扩，避免 negative inset 撑出横向滚动 */
+  .entry::after { bottom: -15px; font-size: 11px; }
 }
 
 /* 尊重减少动态效果偏好 */
 @media (prefers-reduced-motion: reduce) {
   .entry, .entry:hover, .entry:active { transform: none; transition: none; }
   .quote { transition: none; }
+  .quote.is-fresh .verse { animation: none; }
+  .entry::after { transition: none; }
 }

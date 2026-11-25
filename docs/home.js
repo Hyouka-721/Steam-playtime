@@ -1,9 +1,12 @@
 /* ============================================================================
-   门户主页 · home.js   v=6
+   门户主页 · home.js   v=7
    第 137 轮 —— 取句与交互：
      ① 今日签：按日期 FNV-1a 稳定取模，同一天不变；满月度配额时顺延到下一句
      ② 点击换一句：从「本月<2 次 + 非最近 20 句」池子里抽
      ③ 刷新沿用 choice（存 hash，不存下标——防止诗句库增删后错位）
+   v=7（第138轮）：① render 后重挂 .is-fresh 触发纯 opacity 淡入 ②今日签给 #home-quote
+       打 data-daily="1"（CSS 角落浮极小「今」，不动 .by）③点「换一句」时若正下雨且
+       雨意象句充足，从雨句中抽（月度配额照旧，只影响抽取偏好，不写 poems.js 三元组）。
    v=6：双击作者点踩后【不换句】（用户反馈"点作者仍刷新诗句"），改为作者位 1.5s 文字反馈。
    v=5：删「不喜欢」按钮；诗句与作者拆成两个元素，功能隔离——点诗句换句、双击作者点踩。
    v=4（热修）：兼容老用户数字 choice（否则卡在"加载中…"）、脏数据兜底。
@@ -111,6 +114,18 @@
     lsSet(RECENT_KEY, recent);
   }
 
+  /* ---------- 雨意象识别（第138轮）----------
+     不写 poems.js 三元组（A6 锁死），只按句中是否含 雨/霖/霪 判定；
+     库里 120 句命中，够撑起「雨天优先」且不至于每次都同一句。 */
+  var RAIN_RE = /[雨霖霪]/;
+  function isRainy(i) { return RAIN_RE.test(poems[i][0]); }
+  function rainOn() {
+    /* 主页默认下雨（见 home.html 内联脚本）；用户设了「关」或系统减少动态则不优先 */
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+    try { if (localStorage.getItem('ambience.mode') === 'off') return false; } catch (e) {}
+    return true;
+  }
+
   /* ---------- 日期 → 整数 ---------- */
   function dayHash(s) {
     var h = 2166136261;
@@ -168,6 +183,14 @@
     }
     quoteEl.setAttribute('data-index', String(i));
     quoteEl.setAttribute('data-hash', hashOf(i));
+    /* 第138轮：今日签角标——当前 hash 等于今日签 hash 才打标（1），换句后自动清除 */
+    try { quoteEl.setAttribute('data-daily', hashOf(i) === hashOf(dailyIndex()) ? '1' : '0'); } catch (e) {}
+    /* 第138轮：重挂淡入 class——先移除再强制回流再添加，保证每次换句都重播动画（纯 opacity） */
+    try {
+      quoteEl.classList.remove('is-fresh');
+      void quoteEl.offsetWidth;
+      quoteEl.classList.add('is-fresh');
+    } catch (e) {}
   }
 
   /* ---------- 选句入口 ---------- */
@@ -179,6 +202,12 @@
       pool = poolFor(hashOf(current), 0);
       if (!pool.length) pool = poolFor(hashOf(current), 1);
       if (!pool.length) pool = poolFor(hashOf(current), 2);
+      /* 第138轮：雨天优先——约半数换句在雨意象子集中抽，呼应雨丝氛围；
+         只影响抽取偏好：池已排除最近20句+月度配额，且雨句不足3条时不启用，避免单调/耗尽。 */
+      if (pool.length && rainOn() && Math.random() < 0.5) {
+        var rainPool = pool.filter(isRainy);
+        if (rainPool.length >= 3) pool = rainPool;
+      }
       i = pickFrom(pool);
       if (i === undefined) i = (current + 1) % poems.length;
     }
@@ -320,6 +349,9 @@
     choiceKey: KEY,
     keep: KEEP,
     dailyIndex: dailyIndex,
+    isRainy: isRainy,
+    rainyCount: function () { return poems.reduce(function (n, _, i) { return n + (isRainy(i) ? 1 : 0); }, 0); },
+    rainOn: rainOn,
     monthCap: MONTH_CAP,
     dislikeCap: DISLIKE_CAP,
     timesThisMonth: timesThisMonth,
