@@ -1445,6 +1445,25 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   ::view-transition-new(root) { animation-duration: .24s; }
 }
 
+/* 第 140 轮：液体主题切换专用的 View Transition 规则。
+   🔴 全部用 html.liquid-vt 限定作用域——上面 #11 的视图切换 VT 不能被裁剪/关混合；
+   只在主题动画期间由 app.js 挂上 .liquid-vt，结束即移除。
+   old 在下、new 在上用 SVG clipPath（#liquidClip）逐帧揭示；关闭默认交叉淡入与混合避免闪屏；
+   liquid-hold 仅用 opacity 恒定动画把 VT 撑到 2040ms（1.2×），rAF 同期更新 path 的 d。 */
+html.liquid-vt::view-transition-old(root),
+html.liquid-vt::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html.liquid-vt::view-transition-image-pair(root) { isolation: auto; }
+html.liquid-vt::view-transition-old(root) { z-index: 1; }
+html.liquid-vt::view-transition-new(root) {
+  z-index: 2;
+  clip-path: url(#liquidClip);
+  animation: liquid-hold var(--liquid-dur, 2040ms) linear forwards;
+}
+@keyframes liquid-hold { from { opacity: 1; } to { opacity: 1; } }
+
 @media (max-width: 860px) {
   .heat { gap: 3px; }
   .report { grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); }

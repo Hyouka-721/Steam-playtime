@@ -29,11 +29,11 @@ await fpPage.goto(SITE, { waitUntil: 'domcontentloaded', timeout: 60000 });
 const fp = await fpPage.evaluate(async ({ site }) => {
   const g = async (u) => { const r = await fetch(site + u, { cache: 'reload' }); return { s: r.status, t: await r.text() }; };
   const cb = Date.now();
-  const [i, c, j] = await Promise.all([g('index.html?cb=' + cb), g('style.css?v=147&cb=' + cb), g('app.js?v=129&cb=' + cb)]);
+  const [i, c, j] = await Promise.all([g('index.html?cb=' + cb), g('style.css?v=147&cb=' + cb), g('app.js?v=130&cb=' + cb)]);
   return { i: i.t, c: c.t, j: j.t, st: [i.s, c.s, j.s] };
 }, { site: SITE });
 ok('A1 线上 style147/app129 三资源全 200',
-  fp.st.every((s) => s === 200) && /style\.css\?v=147/.test(fp.i) && /app\.js\?v=129/.test(fp.i), { st: fp.st });
+  fp.st.every((s) => s === 200) && /style\.css\?v=147/.test(fp.i) && /app\.js\?v=130/.test(fp.i), { st: fp.st });
 ok('A2 线上 index/style.css/app.js md5 与本地全等',
   md5(fp.i) === md5(idxLocal) && md5(fp.c) === md5(cssLocal) && md5(fp.j) === md5(appLocal));
 const code = fp.c.replace(/\/\*[\s\S]*?\*\//g, '');

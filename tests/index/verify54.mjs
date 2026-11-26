@@ -36,11 +36,11 @@ const pa = await ctxA.newPage();
 await pa.goto(URL, { waitUntil: 'domcontentloaded' });
 const grab = (u) => pa.evaluate(async (x) => (await fetch(x, { cache: 'reload' })).text(), u);
 const html = await grab('index.html?cb=' + Date.now());
-const app = await grab('app.js?v=129&cb=' + Date.now());
+const app = await grab('app.js?v=130&cb=' + Date.now());
 const watchHtml = await grab('watch.html?cb=' + Date.now());
 
-ok('A1 版本号 style.css?v=150 / app.js?v=129 / fx.js?v=19',
-  /style\.css\?v=150/.test(html) && /app\.js\?v=129/.test(html) && /fx\.js\?v=19/.test(html));
+ok('A1 版本号 style.css?v=151 / app.js?v=130 / fx.js?v=19',
+  /style\.css\?v=151/.test(html) && /app\.js\?v=130/.test(html) && /fx\.js\?v=19/.test(html));
 
 ok('A2 小黄人是链接（class=logo + href=watch.html + id=logo-watch），不再是 theme-light',
   /<a class="logo" id="logo-watch" href="watch\.html"/.test(html) && !/logo"[^>]*id="theme-light"/.test(html));
@@ -116,10 +116,15 @@ const t1 = await page.evaluate(() => ({
   aria: document.querySelector('.header-avatar').getAttribute('aria-label'),
   toast: (document.querySelector('.toast') || {}).textContent || '',
 }));
+/* 第 140 轮：主题切换改为 1.2× 液体动画（2040ms），toast 延后到动画结束才弹，
+   避免被 View Transition 快照冻结。故这里等动画完成再取 toast，判据语义不变（仍要出现）。 */
+await page.waitForFunction(() => !!document.querySelector('.toast'), { timeout: 5000 }).catch(() => {});
+const t1toast = await page.evaluate(() => (document.querySelector('.toast') || {}).textContent || '');
 ok('B6 点史蒂夫 → 主题切换 + 写入 localStorage + aria-label/toast 同步（title 恒为空）',
-  t1.theme !== t0.theme && t1.stored === t1.theme && /当前：/.test(t1.aria) && /主题/.test(t1.toast)
+  t1.theme !== t0.theme && t1.stored === t1.theme && /当前：/.test(t1.aria) && /主题/.test(t1toast)
   && (await page.evaluate(() => document.querySelector('.header-avatar').getAttribute('title'))) === null,
-  { before: t0.theme, after: t1.theme, stored: t1.stored, aria: t1.aria });
+  { before: t0.theme, after: t1.theme, stored: t1.stored, aria: t1.aria, toast: t1toast,
+    reason: '第140轮液体动画 2040ms，toast 改在动画结束后弹（快照冻结规避），此处等待后再断言；主题/存储/aria 语义不变' });
 
 // 连点 6 次，始终落在 3 套浅色主题内且每次都变
 const seq = [t1.theme];

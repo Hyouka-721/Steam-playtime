@@ -234,6 +234,94 @@
     return list[Math.floor(Math.random() * list.length)].id;
   }
 
+  /* ---------- 第 140 轮：液体主题切换（Game Time 专属）----------
+     点主题按钮 → 新主题快照从按钮下方以液柱→飞溅→波浪液面覆盖全屏。
+     实现：View Transition 拍新旧快照，new 层用 SVG clipPath 裁剪；
+     一条 rAF 逐帧只改 <path id=liquidPath> 的 d，不碰 DOM 结构、不重渲染。
+     时长 2040ms = 1700ms 基准 × 1.2（用户指定 1.2×）。 */
+  const LIQUID_DUR = 2040;
+  let liquidRaf = 0;
+
+  function liquidPath(p, phase, cx, cy, W, H) {
+    const f = (n) => n.toFixed(1);
+    const circ = (x, y, r) => 'M ' + f(x - r) + ' ' + f(y) + ' a ' + f(r) + ' ' + f(r) +
+      ' 0 1 0 ' + f(r * 2) + ' 0 a ' + f(r) + ' ' + f(r) + ' 0 1 0 ' + f(-r * 2) + ' 0 Z';
+    const parts = [];
+    const topY = cy;
+    if (p < 0.32) {
+      const q = p / 0.32, end = topY + (H - topY) * q, wBase = 10 + 8 * Math.sin(q * Math.PI);
+      const left = [], right = [], steps = 18;
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps, y = topY + (end - topY) * t;
+        const wob = Math.sin(t * 9 + phase * 3) * 6 * t;
+        const w = wBase * (0.7 + 0.3 * Math.sin(t * 14 - phase * 4)) * (1 - 0.25 * t);
+        left.push(f(cx + wob - w) + ' ' + f(y));
+        right.unshift(f(cx + wob + w) + ' ' + f(y));
+      }
+      parts.push('M ' + left.join(' L ') + ' L ' + right.join(' L ') + ' Z');
+      parts.push(circ(cx + Math.sin(phase * 5) * 5, end + 14 + 22 * q, 4 + 3 * Math.sin(q * Math.PI)));
+    } else if (p < 0.52) {
+      const q = (p - 0.32) / 0.20;
+      parts.push('M ' + f(cx - 16) + ' ' + f(topY) + ' L ' + f(cx + 16) + ' ' + f(topY) +
+        ' L ' + f(cx + 10 + Math.sin(phase * 4) * 5) + ' ' + f(H) + ' L ' + f(cx - 10) + ' ' + f(H) + ' Z');
+      for (let j = 0; j < 5; j++) {
+        const a = (j / 5) * Math.PI + Math.PI * 0.1, d = (18 + j * 7) * q;
+        parts.push(circ(cx + Math.cos(a) * d * 1.6, H - Math.sin(a) * d - 4, 3 + 2 * Math.sin(j + phase * 3)));
+      }
+    } else {
+      const q = (p - 0.52) / 0.48, eased = 1 - Math.pow(1 - q, 3);
+      const surfaceY = H - (H + 40) * eased, amp = 16 * (1 - q * 0.5), k = 5;
+      const pts = ['M -20 ' + f(H + 20), 'L -20 ' + f(surfaceY)];
+      for (let x = -20; x <= W + 20; x += 14) {
+        const y = surfaceY + Math.sin(x / W * Math.PI * 2 * k + phase * 4) * amp +
+          Math.sin(x / W * Math.PI * 2 * (k * 2) - phase * 3) * amp * 0.35;
+        pts.push('L ' + f(x) + ' ' + f(y));
+      }
+      pts.push('L ' + f(W + 20) + ' ' + f(H + 20) + ' Z');
+      parts.push(pts.join(' '));
+    }
+    return parts.join(' ');
+  }
+
+  /** 液体主题切换：复用 state.vt 锁；不支持/减少动效/有其它 VT 在跑 → 直接切。 */
+  function applyThemeLiquid(id, { announce = false } = {}) {
+    if (!THEMES.some((t) => t.id === id)) id = 'cream';
+    const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const pathEl = document.getElementById('liquidPath');
+    if (!document.startViewTransition || reduce || !pathEl || state.vt) {
+      applyTheme(id, { announce });   // 回退：无动画，行为与原来完全一致
+      return;
+    }
+    const root = document.documentElement;
+    const btn = $('theme-light');
+    const r = btn ? btn.getBoundingClientRect() : { left: innerWidth - 60, width: 40, bottom: 60 };
+    const cx = r.left + r.width / 2, cy = r.bottom, W = innerWidth, H = innerHeight;
+    root.style.setProperty('--liquid-dur', LIQUID_DUR + 'ms');
+    root.classList.add('liquid-vt');
+    state.vt = true;                  // 占锁：视图切换的 setView 会自动回退成直接切
+    pathEl.setAttribute('d', liquidPath(0, 0, cx, cy, W, H));
+
+    const t0 = performance.now();
+    const vt = document.startViewTransition(() => {
+      document.documentElement.dataset.theme = id;
+      try { localStorage.setItem('theme', id); } catch (e) {}
+      syncThemeUi(id);
+    });
+    const frame = (now) => {
+      const p = Math.min(1, (now - t0) / LIQUID_DUR);
+      pathEl.setAttribute('d', liquidPath(p, (now - t0) / 1000, cx, cy, W, H));
+      if (p < 1) liquidRaf = requestAnimationFrame(frame);
+    };
+    liquidRaf = requestAnimationFrame(frame);
+    Promise.resolve(vt.finished).catch(() => {}).then(() => {
+      cancelAnimationFrame(liquidRaf);
+      pathEl.setAttribute('d', 'M0 0 Z');
+      root.classList.remove('liquid-vt');
+      state.vt = null;
+      if (announce) toast(`主题：${themeName(id)}`);   // toast 在动画结束后弹，避免被快照冻结
+    });
+  }
+
   function toast(msg) {
     document.querySelectorAll('.toast').forEach((t) => t.remove());
     const el = document.createElement('div');
@@ -1481,7 +1569,8 @@
     // 站标（小黄人）：点击随机切换浅色主题；键盘 Enter / 空格同样支持
     const bindFlip = (el, mode) => {
       if (!el) return;
-      const flip = () => applyTheme(randomTheme(mode), { announce: true });
+      /* 第 140 轮：点主题按钮走液体动画；其它路径（首屏/其它脚本）仍调 applyTheme 无动画 */
+      const flip = () => applyThemeLiquid(randomTheme(mode), { announce: true });
       el.addEventListener('click', flip);
       el.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {

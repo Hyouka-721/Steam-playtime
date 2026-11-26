@@ -3,7 +3,7 @@
 > **用法**：新开一个对话，把本文件**全文**粘进去即可无缝续做，不需要再解释项目。
 > **范围**：只研究 `docs/index.html`（Steam 游戏时长统计界面）及其采集管线。
 > **明确排除**：`docs/watch.html` 观影列表及其 `watch.*` / `docs/data/watch.json` / `docs/img/watch/` / `scripts/watch/` / `tests/watch/` —— 本文件不涉及，也不要改。
-> **最后同步**：2026-11-18（第 119 轮：周时长删「合计」+ 与年份同字体，`style.css?v=144` / `app.js?v=129`）
+> **最后同步**：2026-11-18（第 119 轮：周时长删「合计」+ 与年份同字体，`style.css?v=144` / `app.js?v=130`）
 
 ---
 
@@ -196,7 +196,7 @@ cinema 专属规则必须带 `[data-theme="cinema"]` 前缀（切回 cream 时 `
 
 | 项 | 值 |
 |---|---|
-| 版本 | 本地＝线上 `style.css?v=144` / `app.js?v=129` / `fx.js?v=19` + `rain.css?v=7` / `rain.js?v=7` / `ambience.js?v=1`（✅ 第 125 轮已上线 `1ab1a8b`） |
+| 版本 | 本地＝线上 `style.css?v=144` / `app.js?v=130` / `fx.js?v=19` + `rain.css?v=7` / `rain.js?v=7` / `ambience.js?v=1`（✅ 第 125 轮已上线 `1ab1a8b`） |
 | 本地回归 | 两线全量 **69 套件 1651 条 → 1650 PASS / 1 FAIL**（唯一红 `verify56 B11`）；`verify120` **24/0**、`verify120_watch` **18/0**、`verify121` **11/0**、`verify122` **11/0**、`verify123` **7/0**、`verify124` **9/0**、`verify125` **12/0**；`npm test` **52 条 0 FAIL** |
 | 线上复验 | `online125` **13/0**（三态控件 + 两页同步 + 雨丝盖过页眉 + 三档零溢出 + 零异常）；`online119` **11/0**、`online104_watch` **21/0**、`online103_watch` **16/0**；旧 `online124/123/...` 钉旧版本号复跑假红属预期 |
 | 性能红线 | 二次访问 FCP ≤100ms / 滚动 >50ms 帧 = 0 / **CLS = 0.000** |

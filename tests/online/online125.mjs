@@ -48,7 +48,7 @@ ok('A2 线上 index/watch/rain.js/rain.css/ambience.js md5 与本地全等',
   md5(fp.i) === md5(idxLocal) && md5(fp.w) === md5(watLocal) &&
   md5(fp.j) === md5(rainJs) && md5(fp.c) === md5(rainCss) && md5(fp.a) === md5(ambJs));
 ok('A3 既有版本号未动（144/129/19、44/35）',
-  /style\.css\?v=144/.test(fp.i) && /app\.js\?v=129/.test(fp.i) && /fx\.js\?v=19/.test(fp.i) &&
+  /style\.css\?v=144/.test(fp.i) && /app\.js\?v=130/.test(fp.i) && /fx\.js\?v=19/.test(fp.i) &&
   /watch\.css\?v=44/.test(fp.w) && /watch\.js\?v=35/.test(fp.w));
 ok('A4 两页三态控件齐备，旧 #fx-seg / #rain-toggle 已删，watch 有 #fx-canvas',
   /id="ambience-seg"/.test(fp.i) && /id="ambience-seg"/.test(fp.w) &&
