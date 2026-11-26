@@ -21,8 +21,8 @@ const js = fs.readFileSync(ROOT + 'docs/app.js', 'utf8');
 const cssPlain = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
 // ── A 静态契约 ──
-ok('A1 版本 style.css v=152 / app.js v=131',
-  /style\.css\?v=152/.test(html) && /app\.js\?v=131/.test(html),
+ok('A1 版本 style.css v=153 / app.js v=132',
+  /style\.css\?v=153/.test(html) && /app\.js\?v=132/.test(html),
   '理由：第141轮改了 css/js 两文件，按红线2各 bump 一次');
 
 ok('A2 揭示层双层 DOM：克隆函数 + aria-hidden + inert + data-theme',
@@ -127,7 +127,9 @@ const sampler = async () => {
       playState: anim ? anim.playState : 'none',
       top: el.getBoundingClientRect().top,
       inRealLayer: el.closest('#rain-layer') !== null,
-      revealHasRain: !!document.querySelector('#liquid-reveal .rain-streak')
+      revealHasRain: !!document.querySelector('#liquid-reveal .rain-streak'),
+      bodyTp: getComputedStyle(document.body).transitionProperty,
+      cardTp: getComputedStyle(document.querySelector('.card')).transitionProperty
     };
   });
   if (s) RAIN_SAMPLES.push(s);
@@ -172,6 +174,13 @@ ok('B3 ★雨丝元素位置在揭示期间持续移动',
 ok('B4 ★雨丝始终在真实层、揭示层不含雨丝副本（天然连续）',
   RAIN_SAMPLES.every(s => s.inRealLayer === true && s.revealHasRain === false),
   { allInReal: RAIN_SAMPLES.every(s => s.inRealLayer), anyCloned: RAIN_SAMPLES.some(s => s.revealHasRain) });
+
+/* 第 141 轮修闪回归：动画期间全页颜色过渡必须冻结为 none，
+   否则揭示层揭掉瞬间底层从旧色渐变 → 闪一下（诊断实测 body 250ms 渐变）。 */
+const withRev = RAIN_SAMPLES.filter(s => s.bodyTp !== undefined);
+ok('B4b ★修闪：动画期间 body/卡片颜色过渡冻结为 none（杜绝结束闪回）',
+  withRev.length >= 3 && withRev.every(s => s.bodyTp === 'none' && s.cardTp === 'none'),
+  { samples: withRev.length, bodyTp: withRev[0]?.bodyTp, cardTp: withRev[0]?.cardTp });
 
 ok('B5 揭示层属性：aria-hidden + inert + clip-path + z=11',
   during.reveal === true && during.ariaHidden === 'true' && during.inert === true &&

@@ -31,13 +31,13 @@ const fp = await fpPage.evaluate(async ({ site }) => {
   const g = async (u) => { const r = await fetch(site + u, { cache: 'reload' }); return { s: r.status, t: await r.text() }; };
   const cb = Date.now();
   const [i, c, j] = await Promise.all([
-    g('index.html?cb=' + cb), g('style.css?v=145&cb=' + cb), g('app.js?v=131&cb=' + cb),
+    g('index.html?cb=' + cb), g('style.css?v=145&cb=' + cb), g('app.js?v=132&cb=' + cb),
   ]);
   return { i: i.t, c: c.t, j: j.t, st: [i.s, c.s, j.s] };
 }, { site: SITE });
 ok('A1 线上 style145/app129 三个资源全 200，watch.css 已 45',
   fp.st.every((s) => s === 200) &&
-  /style\.css\?v=145/.test(fp.i) && /app\.js\?v=131/.test(fp.i) && /fx\.js\?v=19/.test(fp.i), { st: fp.st });
+  /style\.css\?v=145/.test(fp.i) && /app\.js\?v=132/.test(fp.i) && /fx\.js\?v=19/.test(fp.i), { st: fp.st });
 ok('A2 线上 index/style.css/app.js md5 与本地全等',
   md5(fp.i) === md5(idxLocal) && md5(fp.c) === md5(cssLocal) && md5(fp.j) === md5(appLocal));
 const code = fp.c.replace(/\/\*[\s\S]*?\*\//g, '');

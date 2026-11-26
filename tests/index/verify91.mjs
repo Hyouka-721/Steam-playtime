@@ -63,7 +63,7 @@ const daily = (() => {
 
 const appV = (html.match(/app\.js\?v=(\d+)/) || [])[1];
 const cssV = (html.match(/style\.css\?v=(\d+)/) || [])[1];
-ok('0.1 index.html 引用 app.js?v=131 / style.css?v=152', appV === '131' && cssV === '152', { app: appV, css: cssV });
+ok('0.1 index.html 引用 app.js?v=132 / style.css?v=153', appV === '132' && cssV === '153', { app: appV, css: cssV });
 
 ok('0.2 里程碑步长改成 500h（STEP = 30000 分钟）', /const STEP = 30000;/.test(app), (app.match(/const STEP = \d+;/) || [])[0]);
 ok('0.3 旧的 100h 步长（6000）已不存在', !/const STEP = 6000;/.test(app));

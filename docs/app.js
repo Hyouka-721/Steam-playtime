@@ -381,9 +381,14 @@
     const finish = () => {
       if (done) return;
       done = true;
-      // 先把真实页面切到新主题（持久化 + aria + toast 都走 applyTheme 原逻辑），
-      // 再移除揭示层 —— 底层已是新主题，揭掉覆盖层不会出现旧色闪回。
+      // 先把真实页面切到新主题（持久化 + aria + toast 都走 applyTheme 原逻辑）。
+      // .liquid-vt 此刻仍挂着，CSS 把全页颜色过渡冻结为 none（transition-property:none）。
       applyTheme(id, { announce });
+      // 🔴 关键：强制同步布局，让新主题颜色在「过渡冻结」状态下真正提交到渲染树。
+      // 否则紧接着 cleanup() 移除 .liquid-vt 恢复过渡后，浏览器会把这次尚未提交的颜色
+      // 变化当作新过渡来执行，揭掉揭示层时底层又从旧色渐变 → 闪一下。
+      void document.body.offsetHeight;
+      // 此时底层已是最终新色且已提交，再移除揭示层不会闪回。
       cleanup();
     };
     // 连点 / 切视图打断：清掉揭示层但**不**应用本次主题（由后续那次直接切负责）

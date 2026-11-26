@@ -601,6 +601,14 @@ tests/
 - **老套件等待时机适配（非为跑绿改判据，断言一字未动）**：第 140 轮 VT 方案在动画开始的 callback 里就改 dataset，双层 DOM 为保证「底层视觉保持旧主题直到被揭示」必须等动画结束（2040ms）才落地 dataset/localStorage。verify6 / verify82_index / verify105 / verify106 的主 context 加 `reducedMotion:'reduce'`、verify54 仅在 B6-B8 主题段临时 `emulateMedia({reducedMotion:'reduce'})`（B9 氛围段前恢复）——让它们走无动画直接切换，恢复它们原本守护的「点击即切主题」语义。这些套件测业务不测动画；真正的动画取证在 verify141（雨丝 currentTime 连续采样）。
 - **`currentTheme()` 动画期读 pending**：加 `liquidPending` 记录动画目标，动画期间 `currentTheme()` 返回它——否则连点第二次 `randomTheme()` 基于滞后的 dataset 会算出重复主题。
 
+## 第 141 轮补修：切换结束闪一下（上线后用户反馈）
+
+- **现象**：液体揭示完成、揭掉揭示层的一瞬间闪一下（新色→旧色→新色）。
+- **根因（诊断取证）**：`html, body` 及卡片/面板/页眉都有 `.15~.3s` 的 `background-color`/`color` transition。`finish()` 改 `data-theme` 后这些过渡启动，但同一帧就移除揭示层；揭示层是瞬间完整新色，露出的底层还在从旧色渐变（实测揭层瞬间 body=`rgb(251,247,241)` 米白，约 380ms 后才到 `rgb(11,11,14)` 影院黑）→ 闪回。
+- **修复**：`style.css` 加 `html.liquid-vt *, ...::before, ...::after { transition-property: none !important; }` —— 动画期间冻结全页颜色过渡；`app.js` 的 `finish()` 里 `applyTheme()` 后加 `void document.body.offsetHeight` **强制同步布局**，让新主题颜色在冻结状态下提交到渲染树，再 `cleanup()` 移除揭示层、恢复过渡。🔴 缺了 reflow 那步无效（浏览器会把未提交的颜色变化在恢复过渡后当成新过渡执行）。
+- **只冻结 transition-property，不碰 animation**：雨丝 `rain-fall` 是 animation，全程不受影响（verify141 B2/B3 仍绿）。
+- **验证**：诊断探针揭层瞬间 body 已是最终色且 6 次采样稳定；三帧像素对照（结束前/结束立即/稳定）背景差 ≤2、卡片区结束两帧完全相同；verify141 新增 **B4b** 断言动画期间 body/card 的 `transitionProperty==='none'`，套件 **24/0**；index 31 套件全绿、npm 52/0。版本 bump `style.css?v=153`/`app.js?v=132`。
+
 ## 关于旧脚本
 
 第 1~46 轮的一堆一次性诊断脚本（`dbg*` / `diag*` / `measure*` / `cal*` / `ab*` 等）**没有**收进仓库——它们是一次性实验，无复用价值，仍留在本机临时目录与各轮归档 `Documents/Misc/对话成果/Steam游戏时长站/06_验证截图/` 里。需要考古时去归档目录按轮次找。

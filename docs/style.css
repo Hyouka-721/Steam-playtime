@@ -1490,6 +1490,17 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   }
   #liquid-reveal .view.active.lr-id-view-data > .lr-id-panel-report { grid-column: 1 / -1; }
 }
+/* 第 141 轮修闪：动画期间冻结底层所有颜色过渡。
+   body/页眉/卡片/面板/榜单都有 .15~.3s 的 background-color/color transition，
+   若 finish() 改 data-theme 后不再锁定，揭掉揭示层的瞬间底层还在从旧色渐变 →
+   「新色→旧色→新色」闪一下。动画期间统一 transition:none，让 applyTheme 的
+   颜色变化瞬间到位；结束移除 .liquid-vt 后过渡自然恢复（此后不再有主题切换）。
+   只作用于 color/background/border/box-shadow，不碰 transform/opacity（动效契约不变）。 */
+html.liquid-vt *,
+html.liquid-vt *::before,
+html.liquid-vt *::after {
+  transition-property: none !important;
+}
 
 @media (max-width: 860px) {
   .heat { gap: 3px; }

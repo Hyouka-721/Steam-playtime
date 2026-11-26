@@ -39,7 +39,7 @@ const fp = await page.evaluate(async ({ site }) => {
   };
   const cb = Date.now();
   const [h, c, a] = await Promise.all([
-    g('index.html?cb=' + cb), g('style.css?v=144&cb=' + cb), g('app.js?v=131&cb=' + cb),
+    g('index.html?cb=' + cb), g('style.css?v=144&cb=' + cb), g('app.js?v=132&cb=' + cb),
   ]);
   return {
     html: h.t, css: c.t, app: a.t, statuses: [h.s, c.s, a.s],
@@ -47,8 +47,8 @@ const fp = await page.evaluate(async ({ site }) => {
     appTag: (h.t.match(/app\.js\?v=\d+/) || [])[0],
   };
 }, { site: SITE });
-ok('A1 线上引用 style.css?v=144 / app.js?v=131',
-  fp.cssTag === 'style.css?v=144' && fp.appTag === 'app.js?v=131', { css: fp.cssTag, app: fp.appTag });
+ok('A1 线上引用 style.css?v=144 / app.js?v=132',
+  fp.cssTag === 'style.css?v=144' && fp.appTag === 'app.js?v=132', { css: fp.cssTag, app: fp.appTag });
 ok('A2 线上 html/css/app 字节 md5 与本地全等',
   fp.statuses.every((s) => s === 200) &&
   md5(fp.html) === md5(htmlLocal) && md5(fp.css) === md5(cssLocal) && md5(fp.app) === md5(appLocal));
