@@ -22,8 +22,8 @@ const js = fs.readFileSync(ROOT + 'docs/app.js', 'utf8');
 const cssPlain = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
 // ── A 静态契约 ──
-ok('A1 版本 style.css v=155 / app.js v=133',
-  /style\.css\?v=155/.test(html) && /app\.js\?v=133/.test(html),
+ok('A1 版本 style.css v=156 / app.js v=133',
+  /style\.css\?v=156/.test(html) && /app\.js\?v=133/.test(html),
   '理由：第140轮改了 css/js 两文件，按红线2各 bump 一次');
 
 ok('A2 SVG clipPath 定义就位（userSpaceOnUse + path id）',

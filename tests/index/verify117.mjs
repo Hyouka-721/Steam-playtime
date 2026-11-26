@@ -23,7 +23,7 @@ const ok = (n, c, x) => { c ? (pass++, console.log('PASS ', n, x === undefined ?
 const css = fs.readFileSync(ROOT + 'docs/style.css', 'utf8');
 const js = fs.readFileSync(ROOT + 'docs/app.js', 'utf8');
 const html = fs.readFileSync(ROOT + 'docs/index.html', 'utf8');
-ok('A1 版本参数 CSS 141 / APP 127', html.includes('style.css?v=155') && html.includes('app.js?v=133'),
+ok('A1 版本参数 CSS 141 / APP 127', html.includes('style.css?v=156') && html.includes('app.js?v=133'),
   { css: (html.match(/style\.css\?v=(\d+)/) || [])[1], app: (html.match(/app\.js\?v=(\d+)/) || [])[1] });
 ok('A2 行距 4 → 6 且行高走变量',
   /\.rank-list\s*\{[^}]*gap:\s*6px/.test(css) && /\.rank-item\s*\{[\s\S]{0,2000}min-height:\s*var\(--rank-row-h/.test(css));

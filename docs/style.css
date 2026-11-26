@@ -1499,18 +1499,21 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    「新色→旧色→新色」闪一下。动画期间统一 transition:none，让 applyTheme 的
    颜色变化瞬间到位；结束移除 .liquid-vt 后过渡自然恢复（此后不再有主题切换）。
    只作用于 color/background/border/box-shadow，不碰 transform/opacity（动效契约不变）。 */
+/* 🔴 第 141 轮补修4：必须同时冻结 html 自身 —— `html.liquid-vt *` 只匹配**后代**，
+   不含 html 元素本身。而滚动条轨道是 transparent、露出的是 html 的背景色，html 的
+   `background-color .25s` 过渡若不冻结，揭层后轨道底色仍在渐变 → 柱子背后跳变。 */
+html.liquid-vt,
 html.liquid-vt *,
 html.liquid-vt *::before,
 html.liquid-vt *::after {
   transition-property: none !important;
 }
-/* 第 141 轮补修3：原生滚动条 thumb 是浏览器渲染层，不受 transition 冻结控制。
-   ⚠️ 上一版写 scrollbar-color:transparent 是错的 —— 真实浏览器会把它渲染成
-   **系统默认色**（浅主题下深灰、深主题下白），正是用户看到的「柱子反色 + 闪」。
-   现在改为：动画期间由 app.js 把 html 的 --scroll-thumb 内联设成**目标主题色**，
-   让滚动条从动画第一帧起就是新主题色，与揭层后的最终态完全一致 → 全程不跳。
-   （app.js 在 cleanup 时移除内联，此后 dataset 已是新主题、变量自然等于同一值。） */
-html.liquid-vt { scrollbar-color: var(--scroll-thumb) transparent; }
+/* 🔴 第 141 轮补修4：不要用 scrollbar-color！
+   一旦设置标准的 scrollbar-color，Chrome 会弃用 `::-webkit-scrollbar{width:10px}`
+   自定义样式、切换到系统原生滚动条（Windows 约 17px 宽）→ 滚动条占位宽度突变 →
+   整页内容横向位移（用户「点击切换主题时画面微小位移」的真凶）。
+   滚动条颜色改由 app.js 内联锁 `--scroll-thumb`（伪元素的 background 就取这个变量），
+   颜色照样随时序生效，而自定义滚动条宽度恒为 10px，零位移。 */
 
 @media (max-width: 860px) {
   .heat { gap: 3px; }

@@ -21,8 +21,8 @@ const js = fs.readFileSync(ROOT + 'docs/app.js', 'utf8');
 const cssPlain = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
 // ── A 静态契约 ──
-ok('A1 版本 style.css v=155 / app.js v=133',
-  /style\.css\?v=155/.test(html) && /app\.js\?v=133/.test(html),
+ok('A1 版本 style.css v=156 / app.js v=133',
+  /style\.css\?v=156/.test(html) && /app\.js\?v=133/.test(html),
   '理由：第141轮改了 css/js 两文件，按红线2各 bump 一次');
 
 ok('A2 揭示层双层 DOM：克隆函数 + aria-hidden + inert + data-theme',
@@ -130,6 +130,8 @@ const sampler = async () => {
       revealHasRain: !!document.querySelector('#liquid-reveal .rain-streak'),
       bodyTp: getComputedStyle(document.body).transitionProperty,
       cardTp: getComputedStyle(document.querySelector('.card')).transitionProperty,
+      htmlTp: getComputedStyle(document.documentElement).transitionProperty,
+      scrollbarColor: getComputedStyle(document.documentElement).scrollbarColor,
       scrollThumbInline: document.documentElement.style.getPropertyValue('--scroll-thumb').trim(),
       revTheme: (() => { const r = document.getElementById('liquid-reveal'); return r ? r.dataset.theme : null; })(),
       revOverflow: (() => { const r = document.getElementById('liquid-reveal'); return r ? getComputedStyle(r).overflowY : null; })(),
@@ -184,22 +186,25 @@ ok('B4 ★雨丝始终在真实层、揭示层不含雨丝副本（天然连续�
 /* 第 141 轮修闪回归：动画期间全页颜色过渡必须冻结为 none，
    否则揭示层揭掉瞬间底层从旧色渐变 → 闪一下（诊断实测 body 250ms 渐变）。 */
 const withRev = RAIN_SAMPLES.filter(s => s.bodyTp !== undefined);
-ok('B4b ★修闪：动画期间 body/卡片颜色过渡冻结为 none（杜绝结束闪回）',
-  withRev.length >= 3 && withRev.every(s => s.bodyTp === 'none' && s.cardTp === 'none'),
-  { samples: withRev.length, bodyTp: withRev[0]?.bodyTp, cardTp: withRev[0]?.cardTp });
+ok('B4b ★修闪：动画期间 html/body/卡片颜色过渡全冻结为 none（含 html 自身）',
+  withRev.length >= 3 &&
+  withRev.every(s => s.bodyTp === 'none' && s.cardTp === 'none' && s.htmlTp === 'none'),
+  { samples: withRev.length, htmlTp: withRev[0]?.htmlTp, bodyTp: withRev[0]?.bodyTp, cardTp: withRev[0]?.cardTp });
 
-/* 补修3：滚动条「反色闪」+ 横向位移（用户 4 张截图：两主题下柱子反色、内容错位）。
-   ① 滚动条：上一版 scrollbar-color:transparent 被真实浏览器渲染成系统默认色（反色），
-      现改为动画首帧把 --scroll-thumb 内联锁成**目标主题色**，全程不变、揭层不跳。
-   ② 位移：揭示层 overflow:hidden（不让自己长滚动条挤窄内容）+ 显式 width=clientWidth。 */
+/* 补修3/4：滚动条轨道背景跳变 + 微小位移（用户二次截图：柱子变色了但背后仍跳、点击时画面微移）。
+   ① 轨道透出 html 背景 → html 自身过渡必须冻结（`*` 不含 html，补修4 已加）。
+   ② 不能用 scrollbar-color —— 它会切到系统原生滚动条（宽度变）→ 位移；
+      改由内联 --scroll-thumb 驱动 ::-webkit-scrollbar-thumb，宽度恒 10px 零位移。 */
 const revSamples = withRev.filter(s => s.revTheme);
-ok('B4c ★修闪3：滚动条锁目标主题色 + 揭示层无自身滚动条且宽度=clientWidth',
+ok('B4c ★修闪4：scrollbar-color 保持 auto（不切原生滚动条，零宽度变化）+ thumb 锁目标色',
   revSamples.length >= 3 &&
   revSamples.every(s => s.scrollThumbInline && s.scrollThumbInline.length > 0) &&
+  revSamples.every(s => s.scrollbarColor === 'auto' || /^auto/.test(s.scrollbarColor || 'auto')) &&
   revSamples.every(s => s.revOverflow === 'hidden' && s.revHasOwnScrollbar === 0) &&
   revSamples.every(s => s.revW === s.clientW),
-  { thumb: revSamples[0]?.scrollThumbInline, overflow: revSamples[0]?.revOverflow,
-    ownSb: revSamples[0]?.revHasOwnScrollbar, revW: revSamples[0]?.revW, clientW: revSamples[0]?.clientW });
+  { thumb: revSamples[0]?.scrollThumbInline, sbColor: revSamples[0]?.scrollbarColor,
+    overflow: revSamples[0]?.revOverflow, ownSb: revSamples[0]?.revHasOwnScrollbar,
+    revW: revSamples[0]?.revW, clientW: revSamples[0]?.clientW });
 
 // 直接守卫「反色」：浅→深时动画期滚动条色应已是 cinema 的 #2c2c37，不是 cream 的 #dccdbb
 const creamThumb = '#dccdbb', cinemaThumb = '#2c2c37';
