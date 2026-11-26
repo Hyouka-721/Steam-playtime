@@ -25,8 +25,8 @@ const idxHtml = fs.readFileSync(ROOT + 'docs/index.html', 'utf8');
 const watHtml = fs.readFileSync(ROOT + 'docs/watch.html', 'utf8');
 
 // ---- A 静态 ----
-ok('A1 双 bump：style?v=154 / watch?v=48；app129/fx19/watch.js35 未动',
-  /style\.css\?v=154/.test(idxHtml) && /app\.js\?v=132/.test(idxHtml) && /fx\.js\?v=19/.test(idxHtml) &&
+ok('A1 双 bump：style?v=155 / watch?v=48；app129/fx19/watch.js35 未动',
+  /style\.css\?v=155/.test(idxHtml) && /app\.js\?v=133/.test(idxHtml) && /fx\.js\?v=19/.test(idxHtml) &&
   /watch\.css\?v=48/.test(watHtml) && /watch\.js\?v=35/.test(watHtml));
 ok('A2 .w-title 固定宽度 6.64em + nowrap（≥861px）｜第133轮',
   /@media \(min-width: 861px\) \{\s*\.w-title \{ width: 6\.64em; white-space: nowrap; \}/.test(watchCode));

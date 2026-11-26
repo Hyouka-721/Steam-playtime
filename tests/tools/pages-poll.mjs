@@ -1,5 +1,5 @@
 /* p111_poll.mjs — 推送后轮询 Pages 是否已生效
-   判据：index.html 同时引用 style.css?v=154 与 app.js?v=132，
+   判据：index.html 同时引用 style.css?v=155 与 app.js?v=133，
         且 **两个文件的字节（CRLF→LF 归一）md5 都与本地一致**
    ⚠️ 只比 CSS 会漏判：某轮只改了 app.js（CSS 未 bump）时，旧页面的 CSS 本来就与本地相同，
       轮询会立刻报 READY，其实新脚本还没上。所以两件一起比。

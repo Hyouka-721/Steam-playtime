@@ -360,11 +360,24 @@
     try { reveal = buildLiquidReveal(id); }
     catch (e) { applyTheme(id, { announce }); return; }
 
+    // 第 141 轮补修3：显式把揭示层宽高锁定为「底层可布局宽高」（clientWidth/Height），
+    // 不用 inset:0 —— 经典滚动条下 fixed 全宽与 body 内容宽会差一个滚动条宽度，
+    // 不锁死会让揭层瞬间内容横向位移（用户反馈的「切换回画面有明显位移」）。
+    reveal.style.width = document.documentElement.clientWidth + 'px';
+    reveal.style.height = document.documentElement.clientHeight + 'px';
+
     root.style.setProperty('--liquid-dur', LIQUID_DUR + 'ms');
     root.classList.add('liquid-vt');
     state.vt = true;                  // 占锁：视图切换的 setView 会自动回退成直接切
     liquidPending = id;               // 动画期间的业务当前主题（供连点选不同色）
     document.body.appendChild(reveal);
+    // 🔴 必须先 append 再读样式：游离节点不在文档级联里，getComputedStyle 拿不到变量。
+    // 揭示层是 data-theme=目标主题，读出它的 --scroll-thumb 锁到 html —— 滚动条是浏览器
+    // 渲染层、不吃 transition 冻结，必须从动画第一帧起就是新主题色，否则揭层瞬间旧色
+    // thumb 在深底上「柱子闪一下」。
+    let sbThumb = '';
+    try { sbThumb = getComputedStyle(reveal).getPropertyValue('--scroll-thumb').trim(); } catch (e) {}
+    if (sbThumb) root.style.setProperty('--scroll-thumb', sbThumb);
     reveal.scrollTop = window.scrollY; // sticky 页眉两层滚动位置对齐
     pathEl.setAttribute('d', liquidPath(0, 0, cx, cy, W, H));
 
@@ -373,6 +386,7 @@
       cancelAnimationFrame(liquidRaf);
       if (reveal.parentNode) reveal.remove();
       pathEl.setAttribute('d', 'M0 0 Z');
+      root.style.removeProperty('--scroll-thumb');  // 撤掉内联，回到 dataset 主题自带值
       root.classList.remove('liquid-vt');
       state.vt = null;
       liquidAbort = null;

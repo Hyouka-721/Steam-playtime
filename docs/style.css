@@ -1458,11 +1458,15 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
    ============================================================ */
 #liquid-reveal {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  /* 宽高由 JS 显式设为 clientWidth/clientHeight（= 底层 body 内容宽），
+     不写 inset:0 —— 经典滚动条下 fixed 全宽与 body 内容宽可能差一个滚动条宽度。 */
   z-index: 11;                 /* 内容之上、雨丝(12)/流星(20)之下 —— 特效层全程 live */
-  overflow-x: hidden;
-  overflow-y: auto;
-  scrollbar-width: none;
+  /* 🔴 overflow:hidden 而非 auto：揭示层内容(整页)高于视口，auto 会让它自己长出滚动条
+     把内容区挤窄 → 揭层瞬间横向位移。hidden 下仍可用 scrollTop 编程滚动对齐，
+     且 sticky 页眉照样按 scrollTop 吸附。 */
+  overflow: hidden;
   pointer-events: none;        /* 揭示层不拦交互；真页面状态照常 live */
   clip-path: url(#liquidClip);
   /* 背景与 body 一致（变量已随 data-theme=新主题解析），保证揭示区底色也换掉 */
@@ -1470,7 +1474,6 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   background-image: var(--bg-layers);
   background-attachment: fixed;
 }
-#liquid-reveal::-webkit-scrollbar { display: none; }
 /* 揭示层内页眉复刻 sticky 定位：滚动位置由 JS 设 scrollTop 对齐真页面 */
 #liquid-reveal .site-header { position: sticky; top: 0; z-index: 10; }
 /* 克隆时剥掉 id 换成 .lr-id-* class（避免重复 id），这里补回 id 选择器承载的关键样式 */
@@ -1501,15 +1504,13 @@ html.liquid-vt *::before,
 html.liquid-vt *::after {
   transition-property: none !important;
 }
-/* 第 141 轮补修2：原生滚动条 thumb 是浏览器渲染层，不受 transition 冻结控制，
-   深浅主题色差极大（cream #dccdbb 米 / cinema #2c2c37 深）。揭层瞬间 body 已是新色，
-   但 thumb 可能晚一帧仍是旧色 → 深色底上闪一下「米色柱子」。动画期间隐藏 thumb，
-   揭层恢复时 dataset 已是新主题、thumb 直接取新色，杜绝时序差。 */
-html.liquid-vt { scrollbar-color: transparent transparent; }
-html.liquid-vt::-webkit-scrollbar-thumb { background: transparent; }
-/* 榜单进度条柱子的 1px 白色内高光：揭示层克隆层里去掉，避免揭示边界扫过时
-   与底层柱子的高光短暂叠加、柱子末端「变亮一下」；真页面柱子高光保持不变。 */
-#liquid-reveal .rank-bar > span { box-shadow: none; }
+/* 第 141 轮补修3：原生滚动条 thumb 是浏览器渲染层，不受 transition 冻结控制。
+   ⚠️ 上一版写 scrollbar-color:transparent 是错的 —— 真实浏览器会把它渲染成
+   **系统默认色**（浅主题下深灰、深主题下白），正是用户看到的「柱子反色 + 闪」。
+   现在改为：动画期间由 app.js 把 html 的 --scroll-thumb 内联设成**目标主题色**，
+   让滚动条从动画第一帧起就是新主题色，与揭层后的最终态完全一致 → 全程不跳。
+   （app.js 在 cleanup 时移除内联，此后 dataset 已是新主题、变量自然等于同一值。） */
+html.liquid-vt { scrollbar-color: var(--scroll-thumb) transparent; }
 
 @media (max-width: 860px) {
   .heat { gap: 3px; }

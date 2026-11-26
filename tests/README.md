@@ -607,7 +607,7 @@ tests/
 - **根因（诊断取证）**：`html, body` 及卡片/面板/页眉都有 `.15~.3s` 的 `background-color`/`color` transition。`finish()` 改 `data-theme` 后这些过渡启动，但同一帧就移除揭示层；揭示层是瞬间完整新色，露出的底层还在从旧色渐变（实测揭层瞬间 body=`rgb(251,247,241)` 米白，约 380ms 后才到 `rgb(11,11,14)` 影院黑）→ 闪回。
 - **修复**：`style.css` 加 `html.liquid-vt *, ...::before, ...::after { transition-property: none !important; }` —— 动画期间冻结全页颜色过渡；`app.js` 的 `finish()` 里 `applyTheme()` 后加 `void document.body.offsetHeight` **强制同步布局**，让新主题颜色在冻结状态下提交到渲染树，再 `cleanup()` 移除揭示层、恢复过渡。🔴 缺了 reflow 那步无效（浏览器会把未提交的颜色变化在恢复过渡后当成新过渡执行）。
 - **只冻结 transition-property，不碰 animation**：雨丝 `rain-fall` 是 animation，全程不受影响（verify141 B2/B3 仍绿）。
-- **验证**：诊断探针揭层瞬间 body 已是最终色且 6 次采样稳定；三帧像素对照（结束前/结束立即/稳定）背景差 ≤2、卡片区结束两帧完全相同；verify141 新增 **B4b** 断言动画期间 body/card 的 `transitionProperty==='none'`，套件 **24/0**；index 31 套件全绿、npm 52/0。版本 bump `style.css?v=154`/`app.js?v=132`。
+- **验证**：诊断探针揭层瞬间 body 已是最终色且 6 次采样稳定；三帧像素对照（结束前/结束立即/稳定）背景差 ≤2、卡片区结束两帧完全相同；verify141 新增 **B4b** 断言动画期间 body/card 的 `transitionProperty==='none'`，套件 **24/0**；index 31 套件全绿、npm 52/0。版本 bump `style.css?v=155`/`app.js?v=133`。
 
 ## 关于旧脚本
 

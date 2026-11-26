@@ -47,7 +47,7 @@ ok('A2 线上 index/watch/rain.js/rain.css 字节 md5 与本地全等',
   md5(fp.i) === md5(idxLocal) && md5(fp.w) === md5(watLocal) &&
   md5(fp.j) === md5(rainJs) && md5(fp.c) === md5(rainCss));
 ok('A3 既有版本号未动（index 144/129/19、watch 44/35）',
-  /style\.css\?v=144["']/.test(fp.i) && /app\.js\?v=132["']/.test(fp.i) && /fx\.js\?v=19["']/.test(fp.i) &&
+  /style\.css\?v=144["']/.test(fp.i) && /app\.js\?v=133["']/.test(fp.i) && /fx\.js\?v=19["']/.test(fp.i) &&
   /watch\.css\?v=44["']/.test(fp.w) && /watch\.js\?v=35["']/.test(fp.w));
 ok('A4 线上是 DOM 水滴层（#rain-layer）且带 backdrop-filter',
   /id="rain-layer"/.test(fp.i) && /id="rain-layer"/.test(fp.w) &&
