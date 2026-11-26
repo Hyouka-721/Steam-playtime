@@ -587,6 +587,20 @@ tests/
 - 验收：新增 `verify138` **19/0**、verify137 **40/0**（A1 版本串同步 v6/v7，理由写进 ok）；index 侧 27 套件全绿、`npm test` 52 条 51/1（唯一红＝用户录片「爆裂鼓手」缺 tags 的历史旧红，与本轮无关、不改判据）；桌面/移动截图目视通过。
 - bump 只覆盖真改的 css/js；A1 钉版本号的套件只有 verify137，已同步。旧 online 套件钉 v5/v6 会假红，属预期不动。
 
+## 第 141 轮：Game Time 主题切换架构变更（VT 快照 → 双层真实 DOM）
+
+- **改了什么**：`app.js` 弃用 `startViewTransition` 整页快照，改两层真实 DOM —— 底层真页面保持旧主题 live，揭示层 `#liquid-reveal` 克隆页面视觉内容、套新主题变量（`data-theme`）、复用同一个 `#liquidClip` 由 rAF 逐帧揭示；结束先 `applyTheme(id,{announce})` 再移除揭示层，杜绝旧色闪回。
+- **为什么**：VT 是静态快照，2040ms 里雨丝/流星在后台跑但用户看到冻结画面、揭掉时跳位（API 本质限制）。双层 DOM 让揭示层 `z-index:11` 卡在内容(≤10)与雨丝(12)/流星(20)之间 —— 特效层浮在揭示层**之上**全程连续运动，且**不克隆 canvas**（克隆只能得到空白画布），连雨丝/流星的克隆坑一并绕过。
+- **verify140 判据更新（架构变更必需，非为跑绿调阈值）**：
+  - `A3` 原查 `html.liquid-vt::view-transition-new(root)` 的 clip-path → 改查 `#liquid-reveal` 的 `clip-path:url(#liquidClip)` + `z-index:11`；`::view-transition-old(root){animation-duration:.18s}`（#11 视图切换）继续原样守。理由写进 ok 文案。
+  - `B2` 原查 VT 伪元素 `getComputedStyle(root,'::view-transition-new(root)').clipPath` → 改查揭示层元素 `#liquid-reveal` 的 computed clip-path，并新增 `aria-hidden`/`inert` 断言。理由写进 ok 文案。
+  - `B4` 新增「揭示层已移除」断言（DOM 节点数回基线）。原有主题/class/path 三条判据不变。
+- **重复 id**：克隆时 `stripCloneIds()` 把每个 id 剥掉换成 `.lr-id-<原名>` class；依赖 id 的样式（`#lt-detail` 标题居中、`#view-data` grid、`#idle-list` padding 等）在 `style.css` 用 `#liquid-reveal .lr-id-*` 补回。#11 的 `.view` 默认 `display:none` 契约不动，揭示层 grid 规则同样限定 `.view.active`。
+- **锁与互斥**：延续 `state.vt` 共用锁；动画期间 `switchView` 先调 `liquidAbort()` 清揭示层再直接切视图，不叠加；连点由 `applyThemeLiquid` 的回退分支先 abort 旧动画；`pagehide` 也调 abort（bfcache/离页清理）。
+- **回退**：`prefers-reduced-motion` / 无 `startViewTransition` / 无 `clip-path:url` 支持 / 无锁但克隆抛错 → 直接 `applyTheme()`，行为等同原版。
+- **老套件等待时机适配（非为跑绿改判据，断言一字未动）**：第 140 轮 VT 方案在动画开始的 callback 里就改 dataset，双层 DOM 为保证「底层视觉保持旧主题直到被揭示」必须等动画结束（2040ms）才落地 dataset/localStorage。verify6 / verify82_index / verify105 / verify106 的主 context 加 `reducedMotion:'reduce'`、verify54 仅在 B6-B8 主题段临时 `emulateMedia({reducedMotion:'reduce'})`（B9 氛围段前恢复）——让它们走无动画直接切换，恢复它们原本守护的「点击即切主题」语义。这些套件测业务不测动画；真正的动画取证在 verify141（雨丝 currentTime 连续采样）。
+- **`currentTheme()` 动画期读 pending**：加 `liquidPending` 记录动画目标，动画期间 `currentTheme()` 返回它——否则连点第二次 `randomTheme()` 基于滞后的 dataset 会算出重复主题。
+
 ## 关于旧脚本
 
 第 1~46 轮的一堆一次性诊断脚本（`dbg*` / `diag*` / `measure*` / `cal*` / `ab*` 等）**没有**收进仓库——它们是一次性实验，无复用价值，仍留在本机临时目录与各轮归档 `Documents/Misc/对话成果/Steam游戏时长站/06_验证截图/` 里。需要考古时去归档目录按轮次找。

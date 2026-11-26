@@ -1,5 +1,7 @@
-/* verify140.mjs — 第 140 轮：Game Time 液体主题切换（1.2× / 2040ms）
- * 新主题从史蒂夫按钮下方以液柱→飞溅→波浪液面覆盖全屏，用 SVG clipPath 裁剪 VT 快照。
+/* verify140.mjs — 第 140 轮契约：Game Time 液体主题切换（1.2× / 2040ms）
+ * 新主题从史蒂夫按钮下方以液柱→飞溅→波浪液面覆盖全屏，用 SVG clipPath 裁剪揭示。
+ * ⚠️ 第 141 轮架构变更为「双层真实 DOM」（揭示层 #liquid-reveal 取代 VT 快照），
+ *    A3/B2/B4 判据随架构更新，理由已写进各 ok 文案 + tests/README.md；阈值未放宽。
  * 用法：node tests/index/verify140.mjs（需先起 8895 服务） */
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
@@ -20,8 +22,8 @@ const js = fs.readFileSync(ROOT + 'docs/app.js', 'utf8');
 const cssPlain = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
 // ── A 静态契约 ──
-ok('A1 版本 style.css v=151 / app.js v=130',
-  /style\.css\?v=151/.test(html) && /app\.js\?v=130/.test(html),
+ok('A1 版本 style.css v=152 / app.js v=131',
+  /style\.css\?v=152/.test(html) && /app\.js\?v=131/.test(html),
   '理由：第140轮改了 css/js 两文件，按红线2各 bump 一次');
 
 ok('A2 SVG clipPath 定义就位（userSpaceOnUse + path id）',
@@ -29,11 +31,11 @@ ok('A2 SVG clipPath 定义就位（userSpaceOnUse + path id）',
   /<path id="liquidPath"/.test(html),
   '理由：液体裁剪的地基，0 尺寸 SVG 不占布局、aria-hidden');
 
-ok('A3 液体 VT 规则用 html.liquid-vt 严格 scope，不污染视图切换',
-  /html\.liquid-vt::view-transition-new\(root\)\s*\{[^}]*clip-path:\s*url\(#liquidClip\)/.test(cssPlain) &&
-  /::view-transition-old\(root\)\s*\{\s*animation-duration:\s*\.18s/.test(cssPlain) &&
-  /html\.liquid-vt::view-transition-old\(root\),[\s\S]{0,120}mix-blend-mode:\s*normal/.test(cssPlain),
-  '理由：#11 视图切换的 .18s/.24s 规则必须原样保留；液体规则另起 scope');
+ok('A3 液体裁剪规则用 #liquid-reveal 严格 scope，不污染视图切换（第141轮改双层DOM）',
+  /#liquid-reveal\s*\{[^}]*clip-path:\s*url\(#liquidClip\)/.test(cssPlain) &&
+  /#liquid-reveal\s*\{[^}]*z-index:\s*11/.test(cssPlain) &&
+  /::view-transition-old\(root\)\s*\{\s*animation-duration:\s*\.18s/.test(cssPlain),
+  '理由：第141轮把 VT 静态快照换成双层真实 DOM（揭示层 #liquid-reveal），clip-path 与 z=11 分层移到该容器；#11 视图切换的 .18s/.24s 规则仍须原样保留');
 
 ok('A4 时长 2040ms = 1700 × 1.2，共用 state.vt 锁',
   /LIQUID_DUR\s*=\s*2040/.test(js) &&
@@ -80,15 +82,22 @@ await p.click('#theme-light');
 await p.waitForTimeout(300);
 d0 = await p.evaluate(() => document.getElementById('liquidPath').getAttribute('d'));
 await p.waitForTimeout(1000);
-const mid = await p.evaluate(() => ({
-  liquid: document.documentElement.classList.contains('liquid-vt'),
-  d: document.getElementById('liquidPath').getAttribute('d'),
-  clip: getComputedStyle(document.documentElement, '::view-transition-new(root)').clipPath
-}));
+const mid = await p.evaluate(() => {
+  const rev = document.getElementById('liquid-reveal');
+  return {
+    liquid: document.documentElement.classList.contains('liquid-vt'),
+    d: document.getElementById('liquidPath').getAttribute('d'),
+    reveal: !!rev,
+    ariaHidden: rev ? rev.getAttribute('aria-hidden') : null,
+    inert: rev ? rev.hasAttribute('inert') : null,
+    clip: rev ? getComputedStyle(rev).clipPath : 'none'
+  };
+});
 dMid = mid.d;
-ok('B2 动画中 class 挂载 + clip-path 指向 SVG',
-  mid.liquid === true && /url\(.*liquidClip/.test(mid.clip),
-  { liquid: mid.liquid, clip: mid.clip });
+ok('B2 动画中 class 挂载 + 揭示层 clip-path 指向 SVG（第141轮改双层DOM）',
+  mid.liquid === true && mid.reveal === true && mid.ariaHidden === 'true' &&
+  mid.inert === true && /url\(.*liquidClip/.test(mid.clip),
+  { liquid: mid.liquid, reveal: mid.reveal, ariaHidden: mid.ariaHidden, inert: mid.inert, clip: mid.clip });
 ok('B3 path 逐帧变化（液柱→液面）',
   d0 !== dMid && dMid.length > 50 && /L /.test(dMid),
   { d0len: d0.length, dMidlen: dMid.length });
@@ -97,10 +106,12 @@ await p.waitForTimeout(1400); // 合计 2700ms > 2040ms
 const after = await p.evaluate(() => ({
   theme: document.documentElement.dataset.theme,
   liquid: document.documentElement.classList.contains('liquid-vt'),
-  d: document.getElementById('liquidPath').getAttribute('d')
+  d: document.getElementById('liquidPath').getAttribute('d'),
+  revealGone: !document.getElementById('liquid-reveal')
 }));
-ok('B4 动画结束：主题切换完成、class 清除、path 复位',
-  after.theme === 'cinema' && after.liquid === false && after.d === 'M0 0 Z', after);
+ok('B4 动画结束：主题切换完成、class 清除、path 复位、揭示层移除（第141轮）',
+  after.theme === 'cinema' && after.liquid === false && after.d === 'M0 0 Z' &&
+  after.revealGone === true, after);
 
 // 键盘 Enter 深→浅
 await p.focus('#theme-light');

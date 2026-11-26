@@ -1445,24 +1445,51 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   ::view-transition-new(root) { animation-duration: .24s; }
 }
 
-/* 第 140 轮：液体主题切换专用的 View Transition 规则。
-   🔴 全部用 html.liquid-vt 限定作用域——上面 #11 的视图切换 VT 不能被裁剪/关混合；
-   只在主题动画期间由 app.js 挂上 .liquid-vt，结束即移除。
-   old 在下、new 在上用 SVG clipPath（#liquidClip）逐帧揭示；关闭默认交叉淡入与混合避免闪屏；
-   liquid-hold 仅用 opacity 恒定动画把 VT 撑到 2040ms（1.2×），rAF 同期更新 path 的 d。 */
-html.liquid-vt::view-transition-old(root),
-html.liquid-vt::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-html.liquid-vt::view-transition-image-pair(root) { isolation: auto; }
-html.liquid-vt::view-transition-old(root) { z-index: 1; }
-html.liquid-vt::view-transition-new(root) {
-  z-index: 2;
+/* ============================================================
+   第 141 轮：双层真实 DOM 主题切换（替代第 140 轮的 VT 静态快照）
+   ------------------------------------------------------------
+   VT 是整页静态快照，2040ms 里雨丝/流星被冻成图片、揭掉时跳位。
+   改为两层真实 DOM：底层真页面保持旧主题 live；揭示层 #liquid-reveal
+   克隆页面视觉内容 + 新主题变量，用同一个 #liquidClip 逐帧揭示。
+   🔴 z-index 分层是核心：揭示层 z=11 —— 高于内容（页眉 10、卡片 auto），
+      低于雨丝（rain.css z=12）与流星（z=20）—— 于是雨丝/流星始终浮在揭示层
+      **之上**全程连续运动，也不会被克隆（克隆 canvas 只会得到空白画布）。
+   html.liquid-vt 仍作唯一的动画态标记（与第 140 轮同款钩子，套件可复用）。
+   ============================================================ */
+#liquid-reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 11;                 /* 内容之上、雨丝(12)/流星(20)之下 —— 特效层全程 live */
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+  pointer-events: none;        /* 揭示层不拦交互；真页面状态照常 live */
   clip-path: url(#liquidClip);
-  animation: liquid-hold var(--liquid-dur, 2040ms) linear forwards;
+  /* 背景与 body 一致（变量已随 data-theme=新主题解析），保证揭示区底色也换掉 */
+  background-color: var(--bg);
+  background-image: var(--bg-layers);
+  background-attachment: fixed;
 }
-@keyframes liquid-hold { from { opacity: 1; } to { opacity: 1; } }
+#liquid-reveal::-webkit-scrollbar { display: none; }
+/* 揭示层内页眉复刻 sticky 定位：滚动位置由 JS 设 scrollTop 对齐真页面 */
+#liquid-reveal .site-header { position: sticky; top: 0; z-index: 10; }
+/* 克隆时剥掉 id 换成 .lr-id-* class（避免重复 id），这里补回 id 选择器承载的关键样式 */
+@media (min-width: 861px) {
+  #liquid-reveal .lr-id-lt-detail .panel-head { position: relative; }
+  #liquid-reveal .lr-id-lt-detail .panel-head > .panel-title > h2 {
+    position: absolute; left: 50%; transform: translateX(-50%);
+  }
+}
+#liquid-reveal .lr-id-lt-detail[hidden] { display: none; }
+#liquid-reveal .lr-id-idle-list { padding-top: 4px; }
+@supports (display: grid) {
+  #liquid-reveal .view.active.lr-id-view-data > .panel { margin-bottom: 0; }
+  #liquid-reveal .view.active.lr-id-view-data {
+    display: grid; gap: 20px; align-content: start;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  }
+  #liquid-reveal .view.active.lr-id-view-data > .lr-id-panel-report { grid-column: 1 / -1; }
+}
 
 @media (max-width: 860px) {
   .heat { gap: 3px; }

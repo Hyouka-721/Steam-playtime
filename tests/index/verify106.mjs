@@ -27,7 +27,7 @@ const ok = (name, cond, extra) => {
 /* ---------- A 源码契约 ---------- */
 const cssV = (html.match(/style\.css\?v=(\d+)/) || [])[1];
 const appV = (html.match(/app\.js\?v=(\d+)/) || [])[1];
-ok('A1 版本参数 CSS 137 / APP 122', cssV === '151' && appV === '130', { css: cssV, app: appV });
+ok('A1 版本参数 CSS 137 / APP 122', cssV === '152' && appV === '131', { css: cssV, app: appV });
 
 const themesBlock = (js.match(/const THEMES = \[([\s\S]*?)\];/) || [])[1] || '';
 const themeIds = [...themesBlock.matchAll(/id:\s*'([^']+)'/g)].map((m) => m[1]);
@@ -73,7 +73,7 @@ ok('B2 系统浅色 + 从未选过 → 暖阳米', (await mk('light')) === 'crea
 ok('B3 localStorage 残留已删的 night → 安全回落到 cinema',
   (await mk('dark', 'night')) === 'cinema');
 
-const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
 const page = await ctx.newPage();
 page.on('pageerror', (e) => errs.push(String(e)));
 page.on('console', (m) => { if (m.type() === 'error') errs.push('console: ' + m.text()); });

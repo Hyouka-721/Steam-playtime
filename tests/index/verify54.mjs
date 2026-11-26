@@ -36,11 +36,11 @@ const pa = await ctxA.newPage();
 await pa.goto(URL, { waitUntil: 'domcontentloaded' });
 const grab = (u) => pa.evaluate(async (x) => (await fetch(x, { cache: 'reload' })).text(), u);
 const html = await grab('index.html?cb=' + Date.now());
-const app = await grab('app.js?v=130&cb=' + Date.now());
+const app = await grab('app.js?v=131&cb=' + Date.now());
 const watchHtml = await grab('watch.html?cb=' + Date.now());
 
-ok('A1 版本号 style.css?v=151 / app.js?v=130 / fx.js?v=19',
-  /style\.css\?v=151/.test(html) && /app\.js\?v=130/.test(html) && /fx\.js\?v=19/.test(html));
+ok('A1 版本号 style.css?v=152 / app.js?v=131 / fx.js?v=19',
+  /style\.css\?v=152/.test(html) && /app\.js\?v=131/.test(html) && /fx\.js\?v=19/.test(html));
 
 ok('A2 小黄人是链接（class=logo + href=watch.html + id=logo-watch），不再是 theme-light',
   /<a class="logo" id="logo-watch" href="watch\.html"/.test(html) && !/logo"[^>]*id="theme-light"/.test(html));
@@ -107,6 +107,11 @@ ok('B5 两个图标都保留点击反馈（cursor:pointer + transition 非 0）'
   { lc: geo.logoCursor, ac: geo.avCursor, lt: geo.logoTransition, at: geo.avTransition });
 
 // —— 主题切换：点史蒂夫
+/* 第 141 轮：主题切换改成双层 DOM 揭示动画（2040ms），dataset 到动画结束才落地。
+   本套件守的是「点击即切换 + 持久化 + aria/toast」的业务语义，不是动画本身，
+   故临时切到 reduced-motion 让 applyThemeLiquid 走无动画直接切换（旧语义）。
+   B9/B10 氛围测试前恢复 no-preference，避免雨丝/流星被强制关闭。 */
+await page.emulateMedia({ reducedMotion: 'reduce' });
 const t0 = await page.evaluate(() => ({ theme: document.documentElement.dataset.theme, stored: localStorage.getItem('theme'), aria: document.querySelector('.header-avatar').getAttribute('aria-label') }));
 await page.click('.header-avatar');
 await page.waitForTimeout(300);
@@ -149,6 +154,9 @@ await page.keyboard.press('Space');
 await page.waitForTimeout(220);
 const tk2 = await page.evaluate(() => document.documentElement.dataset.theme);
 ok('B8 键盘 Enter / Space 在史蒂夫上同样切换主题', tk1 !== tk0 && tk2 !== tk1, { tk0, tk1, tk2 });
+
+// 第 141 轮：主题段结束，恢复动画偏好，避免影响下方氛围（雨丝/流星）测试
+await page.emulateMedia({ reducedMotion: 'no-preference' });
 
 // 互不干扰
 const fxBefore = await page.evaluate(() => window.__fx.mode());

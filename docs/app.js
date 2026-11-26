@@ -201,7 +201,9 @@
   const themeName = (id) => (THEMES.find((t) => t.id === id) ?? THEMES[0]).name;
 
   function currentTheme() {
-    const t = document.documentElement.dataset.theme;
+    // 第 141 轮：动画期间 dataset 要到结束才落地，但业务上的"当前主题"应视作揭示目标，
+    // 否则连点第二次的 randomTheme() 会基于滞后的旧主题算出重复值（表现为"没切换"）。
+    const t = liquidPending || document.documentElement.dataset.theme;
     return THEMES.some((x) => x.id === t) ? t : 'cream';
   }
 
@@ -234,13 +236,64 @@
     return list[Math.floor(Math.random() * list.length)].id;
   }
 
-  /* ---------- 第 140 轮：液体主题切换（Game Time 专属）----------
-     点主题按钮 → 新主题快照从按钮下方以液柱→飞溅→波浪液面覆盖全屏。
-     实现：View Transition 拍新旧快照，new 层用 SVG clipPath 裁剪；
-     一条 rAF 逐帧只改 <path id=liquidPath> 的 d，不碰 DOM 结构、不重渲染。
+  /* ---------- 第 141 轮：双层真实 DOM 主题切换（Game Time 专属）----------
+     第 140 轮用 View Transition 拍整页静态快照 → 2040ms 里雨丝/流星被冻成图片，
+     快照移除时跳位（VT API 本质限制，给雨丝单独 view-transition-name 也没用）。
+     第 141 轮改为两层真实 DOM：
+       · 底层 = 真实页面（旧主题），雨丝/流星/所有业务状态全程 live 不动；
+       · 揭示层 = #liquid-reveal（克隆页面视觉内容 + 新主题变量），z-index 11 夹在
+         内容(≤10) 与 雨丝(12)/流星(20) 之间，用同一个 #liquidClip 逐帧揭示。
+     于是揭示区看到新主题内容 + 持续运动的雨丝/流星，未揭示区保持旧主题 live。
+     流星/雨丝**不克隆**：真实层浮在揭示层之上，天然连续（克隆 canvas 会得到空白画布）。
+     动画结束 → applyTheme(id, announce) 切真实页主题 → 移除揭示层 → 复位 path → 清锁。
      时长 2040ms = 1700ms 基准 × 1.2（用户指定 1.2×）。 */
   const LIQUID_DUR = 2040;
   let liquidRaf = 0;
+  let liquidAbort = null;   // 当前动画的强制清理函数（回退/连点时先收尾，避免旧 id 覆盖）
+  let liquidPending = null; // 动画目标主题：动画期间 currentTheme() 读它，保证连点选到不同主题
+
+  /** 剥掉克隆层的 id 避免重复（id 选择器样式由 style.css 的 .lr-id-* 规则兜底）。
+      改成同名 class 是为了让 #lt-detail / #view-data 等关键布局在新层里继续生效。 */
+  function stripCloneIds(root) {
+    const all = [root].concat(Array.prototype.slice.call(root.querySelectorAll('[id]')));
+    all.forEach((el) => {
+      const id = el.getAttribute('id');
+      if (!id) return;
+      el.removeAttribute('id');
+      el.classList.add('lr-id-' + id);
+    });
+  }
+
+  /** 克隆 body 的视觉内容成新主题揭示层；套 data-theme=id 让 CSS 变量解析为新配色。
+      跳过 script / svg defs / canvas / rain-layer / toast / 已有揭示层：
+      流星与雨丝由真实层浮在上方（z 20 / 12 > 揭示层 11），克隆它们反而会冻结。 */
+  function buildLiquidReveal(id) {
+    const src = document.body;
+    const reveal = document.createElement('div');
+    reveal.id = 'liquid-reveal';        // 唯一 id（克隆进来的 id 已全部剥掉）
+    reveal.className = 'liquid-reveal';
+    reveal.dataset.theme = id;          // 新主题 CSS 变量从容器向下继承
+    reveal.setAttribute('aria-hidden', 'true');
+    reveal.setAttribute('inert', '');
+    Array.prototype.forEach.call(src.children, (node) => {
+      if (node === reveal) return;
+      const tag = node.tagName;
+      if (tag === 'SCRIPT' || tag === 'SVG' || tag === 'CANVAS' || tag === 'STYLE') return;
+      if (node.id === 'fx-canvas' || node.id === 'rain-layer' || node.id === 'liquid-reveal') return;
+      if (node.classList.contains('toast')) return;
+      const c = node.cloneNode(true);
+      stripCloneIds(c);
+      reveal.appendChild(c);
+    });
+    // select / checkbox 的当前值是 property，cloneNode 不会复制 —— 手动同步保留业务状态
+    const realFields = src.querySelectorAll('input,select,textarea');
+    const cloneFields = reveal.querySelectorAll('input,select,textarea');
+    for (let i = 0; i < realFields.length && i < cloneFields.length; i++) {
+      cloneFields[i].value = realFields[i].value;
+      if (realFields[i].checked !== undefined) cloneFields[i].checked = realFields[i].checked;
+    }
+    return reveal;
+  }
 
   function liquidPath(p, phase, cx, cy, W, H) {
     const f = (n) => n.toFixed(1);
@@ -283,43 +336,67 @@
     return parts.join(' ');
   }
 
-  /** 液体主题切换：复用 state.vt 锁；不支持/减少动效/有其它 VT 在跑 → 直接切。 */
+  /** 双层 DOM 液体主题切换：复用 state.vt 锁；
+      减少动效/无 clipPath 支持/克隆失败/有其它动画在跑 → 直接 applyTheme 回退。 */
   function applyThemeLiquid(id, { announce = false } = {}) {
     if (!THEMES.some((t) => t.id === id)) id = 'cream';
     const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     const pathEl = document.getElementById('liquidPath');
-    if (!document.startViewTransition || reduce || !pathEl || state.vt) {
-      applyTheme(id, { announce });   // 回退：无动画，行为与原来完全一致
+    const clipOK = window.CSS && CSS.supports && CSS.supports('clip-path', 'url(#x)');
+    // 沿用第 140 轮的 startViewTransition 能力探针：老浏览器缺 VT API 时统一保守回退，
+    // 双层 DOM 虽不依赖 VT，但保留同一能力门槛可避免两套路径在不同浏览器分叉。
+    if (!document.startViewTransition || reduce || !pathEl || !clipOK || state.vt) {
+      if (liquidAbort) liquidAbort();   // 连点打断旧动画：先清理，再由本次直接切
+      applyTheme(id, { announce });     // 回退：无动画，行为与原来完全一致
       return;
     }
     const root = document.documentElement;
     const btn = $('theme-light');
     const r = btn ? btn.getBoundingClientRect() : { left: innerWidth - 60, width: 40, bottom: 60 };
     const cx = r.left + r.width / 2, cy = r.bottom, W = innerWidth, H = innerHeight;
+
+    // 建揭示层（克隆失败立即回退，不留半截 DOM）
+    let reveal;
+    try { reveal = buildLiquidReveal(id); }
+    catch (e) { applyTheme(id, { announce }); return; }
+
     root.style.setProperty('--liquid-dur', LIQUID_DUR + 'ms');
     root.classList.add('liquid-vt');
     state.vt = true;                  // 占锁：视图切换的 setView 会自动回退成直接切
+    liquidPending = id;               // 动画期间的业务当前主题（供连点选不同色）
+    document.body.appendChild(reveal);
+    reveal.scrollTop = window.scrollY; // sticky 页眉两层滚动位置对齐
     pathEl.setAttribute('d', liquidPath(0, 0, cx, cy, W, H));
 
+    let done = false;
+    const cleanup = () => {
+      cancelAnimationFrame(liquidRaf);
+      if (reveal.parentNode) reveal.remove();
+      pathEl.setAttribute('d', 'M0 0 Z');
+      root.classList.remove('liquid-vt');
+      state.vt = null;
+      liquidAbort = null;
+      liquidPending = null;
+    };
+    const finish = () => {
+      if (done) return;
+      done = true;
+      // 先把真实页面切到新主题（持久化 + aria + toast 都走 applyTheme 原逻辑），
+      // 再移除揭示层 —— 底层已是新主题，揭掉覆盖层不会出现旧色闪回。
+      applyTheme(id, { announce });
+      cleanup();
+    };
+    // 连点 / 切视图打断：清掉揭示层但**不**应用本次主题（由后续那次直接切负责）
+    liquidAbort = () => { if (done) return; done = true; cleanup(); };
+
     const t0 = performance.now();
-    const vt = document.startViewTransition(() => {
-      document.documentElement.dataset.theme = id;
-      try { localStorage.setItem('theme', id); } catch (e) {}
-      syncThemeUi(id);
-    });
     const frame = (now) => {
       const p = Math.min(1, (now - t0) / LIQUID_DUR);
       pathEl.setAttribute('d', liquidPath(p, (now - t0) / 1000, cx, cy, W, H));
       if (p < 1) liquidRaf = requestAnimationFrame(frame);
+      else finish();
     };
     liquidRaf = requestAnimationFrame(frame);
-    Promise.resolve(vt.finished).catch(() => {}).then(() => {
-      cancelAnimationFrame(liquidRaf);
-      pathEl.setAttribute('d', 'M0 0 Z');
-      root.classList.remove('liquid-vt');
-      state.vt = null;
-      if (announce) toast(`主题：${themeName(id)}`);   // toast 在动画结束后弹，避免被快照冻结
-    });
   }
 
   function toast(msg) {
@@ -330,6 +407,9 @@
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 1500);
   }
+
+  // 第 141 轮：离页时若液体动画在跑，立即清理揭示层（bfcache 冻结/返回时不留旧主题快照）
+  window.addEventListener('pagehide', () => { if (liquidAbort) liquidAbort(); });
 
   /* ---------- load ----------
      2026-10-18 首屏优化（两轮）：
@@ -1559,7 +1639,12 @@
     // #11 视图过渡：支持的浏览器用 View Transitions，不支持的（或用户要求减少动效）直接切
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (opts.instant || !document.startViewTransition || reduce) { run(); return; }
-    if (state.vt) { run(); return; }
+    if (state.vt) {
+      // 第 141 轮：若液体主题动画正在跑，先清掉揭示层（旧视图克隆）再切视图，
+      // 否则揭示层会残留下一个视图的画面直到动画结束。清锁后本视图仍走直接切，不叠加动画。
+      if (liquidAbort) liquidAbort();
+      run(); return;
+    }
     const t = document.startViewTransition(run);
     state.vt = t;
     Promise.resolve(t.finished).catch(() => {}).then(() => { state.vt = null; });

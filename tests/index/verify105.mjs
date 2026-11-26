@@ -29,7 +29,7 @@ const ok = (name, cond, extra) => {
 /* ---------- A 源码契约 ---------- */
 const cssV = (html.match(/style\.css\?v=(\d+)/) || [])[1];
 const appV = (html.match(/app\.js\?v=(\d+)/) || [])[1];
-ok('A1 版本参数 CSS 137 / APP 122', cssV === '151' && appV === '130', { css: cssV, app: appV });
+ok('A1 版本参数 CSS 137 / APP 122', cssV === '152' && appV === '131', { css: cssV, app: appV });
 
 const themesBlock = (js.match(/const THEMES = \[([\s\S]*?)\];/) || [])[1] || '';
 const themeIds = [...themesBlock.matchAll(/id:\s*'([^']+)'/g)].map((m) => m[1]);
@@ -69,7 +69,7 @@ ok('A10 三套已删主题的变量块全站为零',
 
 /* ---------- B 运行时（影院黑 + 持久化） ---------- */
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });
-const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
 const page = await ctx.newPage();
 const errs = [];
 page.on('pageerror', (e) => errs.push(String(e)));

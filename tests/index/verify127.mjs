@@ -28,7 +28,7 @@ const idx = fs.readFileSync(ROOT + 'docs/index.html', 'utf8');
 
 // ---- A. 静态契约 ----
 ok('A1 只 bump style.css→v147（第131轮修数据视图越界）；app129/fx19 未动',
-  /style\.css\?v=151/.test(idx) && /app\.js\?v=130/.test(idx) && /fx\.js\?v=19/.test(idx) &&
+  /style\.css\?v=152/.test(idx) && /app\.js\?v=131/.test(idx) && /fx\.js\?v=19/.test(idx) &&
   !/v=144/.test(code));
 // 第 129 轮：导航卡顶部短线按用户要求删除（数据视图保留）→ A2 去掉短线要求，改守其余六项
 // 第 131 轮：数据页 grid 必须限定在 .view.active#view-data（不能用裸 #view-data 的 ID 选择器，

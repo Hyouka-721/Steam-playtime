@@ -59,14 +59,14 @@ const titleRule = (cssNC.match(/\.site-title\s*\{[^}]*\}/) || [''])[0];
 ok('A7 .site-title 声明了 user-select:none（含 -webkit- 前缀）',
   /user-select:\s*none/.test(titleRule) && /-webkit-user-select:\s*none/.test(titleRule), titleRule.slice(0, 90));
 
-ok('A8 版本号已 bump：style.css?v=151 / app.js?v=130',
-  html.includes('style.css?v=151') && html.includes('app.js?v=130'),
+ok('A8 版本号已 bump：style.css?v=152 / app.js?v=131',
+  html.includes('style.css?v=152') && html.includes('app.js?v=131'),
   (html.match(/(style\.css|app\.js)\?v=\d+/g) || []).join(' '));
 
 /* ================= B 运行时 ================= */
 console.log('== B 运行时 ==');
 const browser = await chromium.launch();
-const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
 await ctx.route(/^https?:\/\/(cdn\.jsdelivr\.net|cdn\.bootcdn\.net|fonts\.loli\.net)\//, (r) => r.abort());
 await ctx.route(/^https?:\/\/(cdn\.cloudflare\.steamstatic\.com|media\.steampowered\.com|steamcdn-a\.akamaihd\.net)\//, (r) => r.abort());
 const page = await ctx.newPage();
