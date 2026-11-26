@@ -52,13 +52,26 @@ const sampler = async () => {
       revClip: rev ? getComputedStyle(rev).clipPath : null,
       revAria: rev ? rev.getAttribute('aria-hidden') : null,
       revInert: rev ? rev.hasAttribute('inert') : null,
-      revIds: rev ? rev.querySelectorAll('[id]').length : -1
+      revIds: rev ? rev.querySelectorAll('[id]').length : -1,
+      bodyTp: getComputedStyle(document.body).transitionProperty,
+      revealGone: !rev
     };
   });
   if (s) samples.push(s);
 };
 await p.evaluate(() => document.getElementById('theme-light').click());
 for (let i = 0; i < 8; i++) { await sampler(); await p.waitForTimeout(200); }
+// 抓揭层瞬间：高频轮询直到 reveal 消失，立即取 body 背景色
+let snapAtReveal = null;
+for (let i = 0; i < 20; i++) {
+  const s = await p.evaluate(() => {
+    const rev = document.getElementById('liquid-reveal');
+    if (rev) return null;
+    return { bg: getComputedStyle(document.body).backgroundColor, theme: document.documentElement.dataset.theme };
+  });
+  if (s) { snapAtReveal = s; break; }
+  await p.waitForTimeout(40);
+}
 
 const times = samples.map(s => s.t);
 let grows = 0, mono = true;
@@ -74,6 +87,13 @@ ok('O3 ★线上雨丝 animation 切换期间不冻结（currentTime 连续增�
 ok('O4 ★雨丝始终在真实层、揭示层不含副本',
   samples.every(s => s.inReal === true && s.revRain === false),
   { allReal: samples.every(s => s.inReal), anyCloned: samples.some(s => s.revRain) });
+
+/* 修闪回归：动画期间颜色过渡冻结为 none，且揭层瞬间 body 已是最终影院黑（不闪回米白） */
+const animSamples = samples.filter(s => s.bodyTp !== undefined && s.revealGone === false);
+const darkAtReveal = snapAtReveal && /rgb\(1[01], 1[01], 1[0-5]\)/.test(snapAtReveal.bg);
+ok('O4b ★修闪：动画期过渡冻结 + 揭层瞬间已是影院黑（无闪回）',
+  animSamples.length >= 3 && animSamples.every(s => s.bodyTp === 'none') && darkAtReveal,
+  { tpSamples: animSamples.map(s => s.bodyTp), revealSnap: snapAtReveal });
 
 const mid = samples.find(s => s.revZ !== null) || {};
 ok('O5 线上揭示层 z=11 + clip-path + aria-hidden + inert + 无重复 id',
