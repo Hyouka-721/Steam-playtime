@@ -1501,6 +1501,15 @@ html.liquid-vt *::before,
 html.liquid-vt *::after {
   transition-property: none !important;
 }
+/* 第 141 轮补修2：原生滚动条 thumb 是浏览器渲染层，不受 transition 冻结控制，
+   深浅主题色差极大（cream #dccdbb 米 / cinema #2c2c37 深）。揭层瞬间 body 已是新色，
+   但 thumb 可能晚一帧仍是旧色 → 深色底上闪一下「米色柱子」。动画期间隐藏 thumb，
+   揭层恢复时 dataset 已是新主题、thumb 直接取新色，杜绝时序差。 */
+html.liquid-vt { scrollbar-color: transparent transparent; }
+html.liquid-vt::-webkit-scrollbar-thumb { background: transparent; }
+/* 榜单进度条柱子的 1px 白色内高光：揭示层克隆层里去掉，避免揭示边界扫过时
+   与底层柱子的高光短暂叠加、柱子末端「变亮一下」；真页面柱子高光保持不变。 */
+#liquid-reveal .rank-bar > span { box-shadow: none; }
 
 @media (max-width: 860px) {
   .heat { gap: 3px; }

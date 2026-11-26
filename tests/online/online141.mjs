@@ -23,13 +23,13 @@ await p.waitForFunction(() => window.__rain && window.__rain.ready && window.__r
 await p.waitForTimeout(500);
 
 const base = await p.evaluate(() => ({
-  css: [...document.styleSheets].some(s => (s.href || '').includes('style.css?v=153')),
+  css: [...document.styleSheets].some(s => (s.href || '').includes('style.css?v=154')),
   app: [...document.scripts].some(s => (s.src || '').includes('app.js?v=132')),
   clip: !!document.getElementById('liquidClip') && !!document.getElementById('liquidPath'),
   rain: window.__rain.count(),
   theme: document.documentElement.dataset.theme
 }));
-ok('O1 线上版本串 style.css?v=153 / app.js?v=132 + SVG 裁剪地基就位',
+ok('O1 线上版本串 style.css?v=154 / app.js?v=132 + SVG 裁剪地基就位',
   base.css && base.app && base.clip, base);
 ok('O2 首屏主题有效 + 雨丝已建', ['cream', 'cinema'].includes(base.theme) && base.rain > 0, base);
 

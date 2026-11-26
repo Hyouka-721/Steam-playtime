@@ -21,8 +21,8 @@ const js = fs.readFileSync(ROOT + 'docs/app.js', 'utf8');
 const cssPlain = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
 // ── A 静态契约 ──
-ok('A1 版本 style.css v=153 / app.js v=132',
-  /style\.css\?v=153/.test(html) && /app\.js\?v=132/.test(html),
+ok('A1 版本 style.css v=154 / app.js v=132',
+  /style\.css\?v=154/.test(html) && /app\.js\?v=132/.test(html),
   '理由：第141轮改了 css/js 两文件，按红线2各 bump 一次');
 
 ok('A2 揭示层双层 DOM：克隆函数 + aria-hidden + inert + data-theme',
@@ -129,7 +129,10 @@ const sampler = async () => {
       inRealLayer: el.closest('#rain-layer') !== null,
       revealHasRain: !!document.querySelector('#liquid-reveal .rain-streak'),
       bodyTp: getComputedStyle(document.body).transitionProperty,
-      cardTp: getComputedStyle(document.querySelector('.card')).transitionProperty
+      cardTp: getComputedStyle(document.querySelector('.card')).transitionProperty,
+      scrollbarColor: getComputedStyle(document.documentElement).scrollbarColor,
+      revBarShadow: (() => { const b = document.querySelector('#liquid-reveal .rank-bar > span'); return b ? getComputedStyle(b).boxShadow : null; })(),
+      realBarShadow: getComputedStyle(document.querySelector('.rank-bar > span')).boxShadow
     };
   });
   if (s) RAIN_SAMPLES.push(s);
@@ -181,6 +184,16 @@ const withRev = RAIN_SAMPLES.filter(s => s.bodyTp !== undefined);
 ok('B4b ★修闪：动画期间 body/卡片颜色过渡冻结为 none（杜绝结束闪回）',
   withRev.length >= 3 && withRev.every(s => s.bodyTp === 'none' && s.cardTp === 'none'),
   { samples: withRev.length, bodyTp: withRev[0]?.bodyTp, cardTp: withRev[0]?.cardTp });
+
+/* 补修2：滚动条 thumb 与进度条柱子高光 —— 原生滚动条不受 transition 冻结，
+   揭层瞬间旧色 thumb 在深色底上像「米色柱子闪一下」；揭示层柱子高光可能与底层叠加变亮。 */
+ok('B4c ★修闪2：动画期滚动条 thumb 透明 + 揭示层柱子高光去除（防"柱子变亮"）',
+  withRev.length >= 3 &&
+  withRev.every(s => /transparent|rgba\(0, 0, 0, 0\)/.test(s.scrollbarColor || '')) &&
+  withRev.every(s => s.revBarShadow === 'none') &&
+  withRev.every(s => s.realBarShadow !== 'none'),
+  { scrollbar: withRev[0]?.scrollbarColor, revBarShadow: withRev[0]?.revBarShadow,
+    realBarShadow: withRev[0]?.realBarShadow });
 
 ok('B5 揭示层属性：aria-hidden + inert + clip-path + z=11',
   during.reveal === true && during.ariaHidden === 'true' && during.inert === true &&
