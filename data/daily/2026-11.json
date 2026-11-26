@@ -3,7 +3,7 @@
   "month": "2026-11",
   "tz": "Asia/Shanghai",
   "unit": "minute",
-  "generated_at": "2026-11-25T23:42:57.370Z",
+  "generated_at": "2026-11-26T23:56:05.232Z",
   "days": {
     "2026-11-01": {
       "total_minutes": 264,
@@ -540,6 +540,27 @@
           "appid": "105600",
           "name": "Terraria",
           "minutes": 7,
+          "is_new": false
+        }
+      ]
+    },
+    "2026-11-26": {
+      "total_minutes": 97,
+      "span_days": 1,
+      "confidence": "high",
+      "source": "auto",
+      "flags": [],
+      "games": [
+        {
+          "appid": "646570",
+          "name": "Slay the Spire",
+          "minutes": 85,
+          "is_new": false
+        },
+        {
+          "appid": "246420",
+          "name": "Kingdom Rush",
+          "minutes": 12,
           "is_new": false
         }
       ]
