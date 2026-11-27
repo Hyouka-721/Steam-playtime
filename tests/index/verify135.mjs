@@ -26,21 +26,21 @@ const code = motionCss.replace(/\/\*[\s\S]*?\*\//g, '');
 const jsCode = motionJs.replace(/\/\*[\s\S]*?\*\//g, '');
 
 // A 静态
-ok('A1 两页都挂 motion.css?v=1 与 motion.js?v=3｜第146轮只 bump 改过的 js',
-  /motion\.css\?v=1/.test(idxHtml) && /motion\.js\?v=3/.test(idxHtml) &&
-  /motion\.css\?v=1/.test(watHtml) && /motion\.js\?v=3/.test(watHtml),
-  '理由：第146轮只改 motion.js（榜单行退出淡入以消除刷新闪烁），motion.css 一字节未动，按红线2单侧 bump');
+ok('A1 两页都挂 motion.css?v=1 与 motion.js?v=4｜第147轮只 bump 改过的 js',
+  /motion\.css\?v=1/.test(idxHtml) && /motion\.js\?v=4/.test(idxHtml) &&
+  /motion\.css\?v=1/.test(watHtml) && /motion\.js\?v=4/.test(watHtml),
+  '理由：第147轮只改 motion.js（卡片退出淡入，恢复刷新只更新数字），motion.css 一字节未动，按红线2单侧 bump');
 const cvOnSt = /\.st-panel\s*\{[^}]*content-visibility:\s*auto/.test(code);
 const cvOnRank = /\.rank-item\s*\{[^}]*content-visibility:\s*auto/.test(code);
 const cvOnTl = /\.tl-item\s*\{[^}]*content-visibility:\s*auto/.test(code);
 ok('A2 content-visibility 只给 .st-panel，不碰 rank-item/tl-item（守 verify117/67）',
   cvOnSt && !cvOnRank && !cvOnTl, { cvOnSt, cvOnRank, cvOnTl });
-ok('A3 错峰淡入：flat 纯 opacity 仍在，但榜单行已退出动画｜第146轮改判',
+ok('A3 错峰淡入：flat 纯 opacity 仍在，但卡片/榜单行已退出动画｜第147轮改判',
   /\.rv \{ opacity: 0; transform: translateY\(8px\); \}/.test(code) &&
   /\.rv\.flat \{ transform: none; \}/.test(code) &&
-  /var SEL = '\.card, \.tl-item, \.st-panel';/.test(jsCode) && !/rankNodes/.test(jsCode) &&
+  /var SEL = '\.tl-item, \.st-panel';/.test(jsCode) && !/rankNodes/.test(jsCode) &&
   /flat/.test(jsCode) && !/\.poster\b/.test(code),
-  '理由：第146轮把 rank-item 从选择器移除，避免 .rv→.in 造成刷新闪烁；其它几何类元素仍用 flat');
+  '理由：第147轮把 .card 也从选择器移除，刷新时首屏卡片始终可见、只更新数字；动画只留给滚动区元素');
 ok('A4 微反馈用伪元素 transform/opacity；reduced-motion 全关',
   /\.card:hover::after/.test(code) && /\.w-sort-btn:active::after/.test(code) &&
   /@media \(prefers-reduced-motion: reduce\)/.test(code) &&
@@ -56,10 +56,15 @@ await p.goto(BASE + 'index.html?cb=' + Date.now(), { waitUntil: 'load' });
 await p.waitForTimeout(1200);
 const cards = await p.evaluate(() => {
   const els = [...document.querySelectorAll('.card')];
-  return { n: els.length, rv: els.filter(e => e.classList.contains('rv')).length,
-    shown: els.filter(e => e.classList.contains('in')).length };
+  return {
+    n: els.length,
+    rv: els.filter(e => e.classList.contains('rv')).length,
+    flat: els.filter(e => e.classList.contains('flat')).length,
+    opaque: els.filter(e => getComputedStyle(e).opacity === '1').length,
+  };
 });
-ok('B1 卡片获得 rv 并淡入（首屏全部 in）', cards.n > 0 && cards.rv === cards.n && cards.shown === cards.n, cards);
+ok('B1 卡片不挂 rv/flat、始终不透明｜第147轮改判，恢复刷新只更新数字',
+  cards.n > 0 && cards.rv === 0 && cards.flat === 0 && cards.opaque === cards.n, cards);
 const flat = await p.evaluate(() => {
   const rows = [...document.querySelectorAll('#lt-list > .rank-item')];
   return {

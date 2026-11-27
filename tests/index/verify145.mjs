@@ -26,14 +26,14 @@ const idx = fs.readFileSync(ROOT + 'docs/index.html', 'utf8');
 const wat = fs.readFileSync(ROOT + 'docs/watch.html', 'utf8');
 const js = fs.readFileSync(ROOT + 'docs/motion.js', 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
 
-ok('A1 motion.js?v=3 两页同步，motion.css 仍是 v1',
-  /motion\.js\?v=3/.test(idx) && /motion\.js\?v=3/.test(wat) &&
+ok('A1 motion.js?v=4 两页同步，motion.css 仍是 v1',
+  /motion\.js\?v=4/.test(idx) && /motion\.js\?v=4/.test(wat) &&
   /motion\.css\?v=1/.test(idx) && /motion\.css\?v=1/.test(wat),
-  '理由：第146轮只改 motion.js，按红线2单侧 bump，css 不动');
+  '理由：第147轮只改 motion.js，按红线2单侧 bump，css 不动');
 
-ok('A2 榜单行已退出错峰淡入选择器，其它元素仍保留 flat',
-  /var SEL = '\.card, \.tl-item, \.st-panel';/.test(js) && !/rankNodes/.test(js) && /flat/.test(js),
-  '理由：第145轮拆观察器仍会 .rv→.in 闪一下；第146轮让榜单行彻底不参与动画，始终可见');
+ok('A2 卡片与榜单行都已退出错峰淡入，动画只留给滚动区',
+  /var SEL = '\.tl-item, \.st-panel';/.test(js) && !/rankNodes/.test(js) && /flat/.test(js),
+  '理由：第146轮移除榜单行，第147轮再移除卡片；刷新时首屏始终可见、只更新数字');
 
 const browser = await chromium.launch({ args: ['--no-proxy-server'] });
 

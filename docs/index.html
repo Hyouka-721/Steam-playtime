@@ -320,7 +320,7 @@ if ('serviceWorker' in navigator) {
      （标签在文档里更靠前），实测请求顺序是 fx.js → app.js。调换位置后才真正让路。
      fx.js 是独立 IIFE，只读 localStorage 与 CSS 变量，不依赖 app.js，
      所以「执行时机从 app.js 之前挪到之后」不会影响它。 -->
-<script src="motion.js?v=3" defer fetchpriority="low"></script>
+<script src="motion.js?v=4" defer fetchpriority="low"></script>
 <script src="fx.js?v=19" defer fetchpriority="low"></script>
 <!-- 雨滴是装饰层：async 而不是 defer，避免拖住 DOMContentLoaded 让首屏榜单骨架屏晚渲染 -->
 <script src="rain.js?v=7" async fetchpriority="low"></script>

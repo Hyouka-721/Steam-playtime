@@ -1,21 +1,21 @@
-/* motion.js — 第 135 轮：滚动错峰淡入（第 146 轮：榜单行退出动画）
- * 给 .card / .tl-item / .st-panel 加 .rv，元素临近视口时加 .in，
- * 同批进入的元素按序错开 40ms（CSS 变量 --rv-d）。
+/* motion.js — 第 135 轮：滚动错峰淡入（第 147 轮：卡片/榜单行退出动画）
+ * 只给 .tl-item / .st-panel 这类滚动区元素加 .rv，临近视口时加 .in。
  * ⚠️ 不碰 .poster（verify128 B5 要 w-fade-in），不碰标题/页眉（verify56/58/133）。
  * reduced-motion 直接跳过绑定，元素保持可见。
  *
- * 第 145 轮曾把 .rank-item 拆成独立观察器、底边不内收，解决了第 8 行透明；
- * 第 146 轮用户反馈刷新后榜单仍会闪一下：数据渲染后轮询 bind() 给新行挂
- * .rv（opacity:0），IO 再补 .in 淡入，肉眼就是一次闪烁。榜单行本就有
- * fitRankRows() 保证零 CLS、无位移，不需要淡入，直接不参与 .rv 最稳。
+ * 第 146 轮：.rank-item 退出动画，解决第 8 行透明与刷新闪烁；
+ * 第 147 轮：.card 也退出动画——用户要的是“刷新只更新数字”。卡片被挂
+ * .rv（opacity:0）后再错峰淡入，肉眼就是“除了顶部栏全都消失后重新加载”。
+ * 卡片数字本来就在 JS 到位后原地更新，不需要入场动画。
  */
 (function () {
   'use strict';
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce || !('IntersectionObserver' in window)) return;
 
-  // 第 146 轮：.rank-item 不再进选择器，刷新后榜单始终可见、零闪烁。
-  var SEL = '.card, .tl-item, .st-panel';
+  // 第 147 轮：.card 与 .rank-item 都不进选择器，刷新后首屏始终可见，
+  // 数据到位只更新数字；动画只留给下方滚动区元素。
+  var SEL = '.tl-item, .st-panel';
 
   function observe(nodes, margin) {
     if (!nodes.length) return;
