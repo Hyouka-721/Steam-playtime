@@ -7,7 +7,7 @@
    （封面仍 130×60 不动），使两个视口刷新即 8 整行、0 半行。
 
    契约：
-     ① 版本 style.css?v=157 / app.js?v=134，且只 bump 真改过的两个文件；
+     ① 版本 style.css?v=158 / app.js?v=135，且只 bump 真改过的两个文件；
      ② app.js 与 index.html 首帧内联脚本的 RANK_FIT 逐项一致（rows8 gap6 min65 max100 pad4）；
      ③ 骨架行与真行同用 clamp 上下留白，封面 130×60 冻结值未动；
      ④ 1920×950 / 1920×957 / 1440×960 刷新即 8 整行、0 半行、CLS=0；
@@ -30,13 +30,13 @@ const css = fs.readFileSync(ROOT + 'docs/style.css', 'utf8');
 const js = fs.readFileSync(ROOT + 'docs/app.js', 'utf8');
 const html = fs.readFileSync(ROOT + 'docs/index.html', 'utf8');
 
-ok('A1 版本 style.css?v=157 / app.js?v=134（watch 资源未动）',
-  /style\.css\?v=157/.test(html) && /app\.js\?v=134/.test(html) && !/watch\.css\?v=49/.test(html),
-  '理由：第142轮只改了 index.html / style.css / app.js，按红线2只 bump 真改过的 css/js');
+ok('A1 版本 style.css?v=158 / app.js?v=135（watch 资源未动）',
+  /style\.css\?v=158/.test(html) && /app\.js\?v=135/.test(html) && !/watch\.css\?v=49/.test(html),
+  '理由：第143轮只改了 index.html / style.css / app.js，按红线2只 bump 真改过的 css/js');
 
-ok('A2 app.js 与 HTML 首帧脚本 RANK_FIT 逐项一致（rows8 gap6 min65 max100 pad4）',
-  /const RANK_FIT = \{ rows: 8, gap: 6, min: 65, max: 100, pad: 4 \}/.test(js) &&
-  /var PAD = 4, ROWS = 8, GAP = 6, MIN = 65, MAX = 100;/.test(html),
+ok('A2 app.js 与 HTML 首帧脚本 RANK_FIT 逐项一致（rows8 gap6 min54 max100 pad4）',
+  /const RANK_FIT = \{ rows: 8, gap: 6, min: 54, max: 100, pad: 4 \}/.test(js) &&
+  /var PAD = 4, ROWS = 8, GAP = 6, MIN = 54, MAX = 100;/.test(html),
   '理由：两处算法必须同步改，否则骨架期与数据期行高不同会重新引入 CLS');
 
 ok('A3 骨架行与真行同用 clamp 留白，封面 130×60 冻结值未动',

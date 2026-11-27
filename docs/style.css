@@ -1710,3 +1710,18 @@ html.liquid-vt *::after {
 @media (prefers-reduced-motion: reduce) {
   .view.active > .panel { animation: none; }
 }
+
+/* 第 143 轮：低视口下 8 行仍要站得住。
+   第 142 轮只收紧了上下留白，但封面本体固定 60px：视口再矮一点时，
+   fitRankRows() 反解出的 54~60px 行高会被封面撑回 62px，于是又掉回 7 行。
+   这里只在桌面端、且只作用于 #lt-list：封面外框高度跟着 --rank-row-h 收缩，
+   高行高时仍锁在原来的 134×64（图片 130×60），观感零变化。
+   骨架 .sk-cap 用同式同步，换真行时零 CLS。 */
+@media (min-width: 861px) {
+  #lt-list .rank-capsule-wrap {
+    height: min(var(--cap-box-h), calc(var(--rank-row-h, 76px) + 2px));
+  }
+  #lt-list .sk-cap {
+    height: min(60px, calc(var(--rank-row-h, 76px) - 2px));
+  }
+}
