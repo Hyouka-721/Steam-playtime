@@ -25,9 +25,10 @@ const watHtml = fs.readFileSync(ROOT + 'docs/watch.html', 'utf8');
 const code = motionCss.replace(/\/\*[\s\S]*?\*\//g, '');
 
 // A 静态
-ok('A1 两页都挂 motion.css?v=1 与 motion.js?v=1',
-  /motion\.css\?v=1/.test(idxHtml) && /motion\.js\?v=1/.test(idxHtml) &&
-  /motion\.css\?v=1/.test(watHtml) && /motion\.js\?v=1/.test(watHtml));
+ok('A1 两页都挂 motion.css?v=1 与 motion.js?v=2｜第145轮只 bump 改过的 js',
+  /motion\.css\?v=1/.test(idxHtml) && /motion\.js\?v=2/.test(idxHtml) &&
+  /motion\.css\?v=1/.test(watHtml) && /motion\.js\?v=2/.test(watHtml),
+  '理由：第145轮只改 motion.js（榜单行观察器不收底边），motion.css 一字节未动，按红线2单侧 bump');
 const cvOnSt = /\.st-panel\s*\{[^}]*content-visibility:\s*auto/.test(code);
 const cvOnRank = /\.rank-item\s*\{[^}]*content-visibility:\s*auto/.test(code);
 const cvOnTl = /\.tl-item\s*\{[^}]*content-visibility:\s*auto/.test(code);
