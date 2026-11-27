@@ -10,7 +10,7 @@
       让分片走原生 HTTP 缓存即可，不必为此 bump 共用缓存版本、牵动两个页面的既有契约。
 
    B. 首页 / 游戏时长（第 84 轮新增，为「离线也能看」）
-      · 页面导航（index / watch）   网络优先 → 断网回落上次的 HTML
+      · 页面导航（index / watch）   真·网络优先（cache:'reload' 绕开 HTTP 缓存）→ 断网回落上次的 HTML
       · /data/meta.json 等数据      网络优先（每晚 CI 会改，绝不吃旧值）
       · ?v= 的 css/js / 字体 / 图标 / manifest   cache-first（新发布=新 URL）
       · /img/covers/*.webp          cache-first（本地化后的游戏封面）
@@ -20,7 +20,8 @@
    ============================================================ */
 var CACHE = 'watch-posters-v1';
 var DATA_CACHE = 'watch-data-v1';
-var SHELL = 'app-shell-v1';
+// 第 144 轮：导航改为绕过 HTTP 缓存后，旧 shell 缓存要随 activate 清掉
+var SHELL = 'app-shell-v2';
 // 第 93 轮：achievements 改走 SWR，数据缓存的语义变了 → 换版本号，旧缓存随 activate 清掉
 var APP_DATA = 'app-data-v2';
 
@@ -92,9 +93,12 @@ self.addEventListener('activate', function (e) {
   );
 });
 
-/** 网络优先：先 fetch，成功顺手存一份；失败才读缓存。 */
-function netFirst(req, cacheName) {
-  return fetch(req).then(function (res) {
+/** 网络优先：先 fetch，成功顺手存一份；失败才读缓存。
+ *  init 只在导航时传 { cache: 'reload' }：GitHub Pages 给 index.html 的
+ *  max-age=600 会让普通 fetch(req) 命中浏览器 HTTP 缓存，SW 以为自己走了网络，
+ *  实际仍把旧 HTML（旧 ?v=）交回页面，于是新版 css/js 永远不生效。 */
+function netFirst(req, cacheName, init) {
+  return fetch(req, init).then(function (res) {
     if (res && res.ok) {
       var copy = res.clone();
       caches.open(cacheName).then(function (c) { c.put(req, copy); });
@@ -144,7 +148,9 @@ self.addEventListener('fetch', function (e) {
 
   /* ---- 页面导航：网络优先，断网回落到上次成功的那份 HTML ---- */
   if (req.mode === 'navigate') {
-    e.respondWith(netFirst(req, SHELL));
+    // 第 144 轮：必须绕开 index.html 的 HTTP 缓存，否则发布后 10 分钟内
+    // 老用户普通刷新仍拿到旧 HTML / 旧 app.js，8 款修复看起来“无效”。
+    e.respondWith(netFirst(req, SHELL, { cache: 'reload' }));
     return;
   }
 

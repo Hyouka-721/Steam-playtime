@@ -73,6 +73,14 @@ tests/
 
 **验收**：index 全部 **33 套件 0 FAIL**；`npm test` **52/0**。已提交 `c689fdd` 并 push `9e19d44..c689fdd`，Pages 第 3 轮 READY（v158/v135）；线上 1920×900 / 1920×958 / 1440×860 均 8 整行、0 半行、CLS 0、零报错。
 
+## 补记 · 第 144 轮：SW 导航吃旧 HTML 缓存（2026-11-27，本地完成、未提交）
+
+**用户反馈**：第 143 轮已 push，但普通刷新后仍跑旧脚本、只显示 7 款。取证：线上 `index.html` / `app.js?v=135` / `style.css?v=158` 都是新版本，用户截图 1920×915 的 7 行行高 70.8px 正好是旧 `min=65` 的解；GitHub Pages 给 `index.html` 的 `Cache-Control: max-age=600`，而 SW 导航分支用普通 `fetch(req)`，会命中浏览器 HTTP 缓存，10 分钟内把旧 HTML/旧 `?v=` 交回页面。
+
+**修复**：`docs/sw.js` 的 `netFirst()` 增加 `init` 参数并原样传给 `fetch`；导航分支改 `netFirst(req, SHELL, { cache: 'reload' })` 绕开 HTTP 缓存，APP_DATA 分支保持原样；`SHELL` 缓存名 `app-shell-v1`→`app-shell-v2`，旧 shell 随 activate 清掉。css/js 一字节未动，按红线2不 bump。
+
+**验收**：新增 `verify144.mjs` **7/0**（静态 + vm 真跑 fetch 监听器断言导航带 reload、数据不带 + 浏览器 SW 接管后 8 整行）；`verify83` 的 C1 缓存名同步 v2、理由写进 ok 文案；index 全部 **34 套件 0 FAIL**，`npm test` **52/0**。本地完成、未提交、未推送。
+
 ## 当前基线 · watch 线第 104 轮（✅ **已上线** 2026-11-15）
 
 **版本**：`watch.css?v=44` / `watch.js?v=35`（第 108 轮：删 `.st-row-track` 死码只动了 `watch.css`，**单侧 bump** —— `watch.js` 一个字节没动，文件没变还 bump 只会让浏览器白丢缓存）。本轮 bump 扫 68 个非 md 文件、**183 处**，规则是 `/v=43(?![0-9a-f])/g` **一条通吃两种字面量**（纯文本 `watch.css?v=44` + 正则转义 `watch\.css\?v=44`），残留 0；`songs.json` 里 90 个 `?v=<8位哈希>` 一个没动。🔴 上一轮（第 107 轮，`v=42→43` / `v=34→35`）是双 bump，扫 68 文件 909 个非 md 文件：纯文本 205 处 + 正则转义 124 处，合计 **329 处**，但**转义写法是单独一遍补的** —— 详见补记 10 的假绿坑。

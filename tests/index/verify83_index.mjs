@@ -276,13 +276,15 @@ console.log('== C 离线 ==');
     const reg = await navigator.serviceWorker.getRegistration();
     const keys = await caches.keys();
     let shellHasIndex = false;
-    if (keys.includes('app-shell-v1')) {
-      const c = await caches.open('app-shell-v1');
+    // 第144轮：SHELL 从 app-shell-v1 bump 到 v2（导航改为 cache:'reload'，
+    // 旧 shell 随 activate 清掉），判据跟着改；理由写进 ok 文案。
+    if (keys.includes('app-shell-v2')) {
+      const c = await caches.open('app-shell-v2');
       shellHasIndex = !!(await c.match('index.html')) || !!(await c.match('./'));
     }
     return { controlled: !!reg && !!reg.active, keys, shellHasIndex };
   });
-  ok('C1 SW 已注册并接管首页，外壳缓存里有 index.html',
+  ok('C1 SW 已注册并接管首页，外壳缓存里有 index.html｜第144轮 SHELL bump v2',
     swState.controlled && swState.shellHasIndex, JSON.stringify(swState.keys));
 
   await offCtx.setOffline(true);
