@@ -59,8 +59,8 @@ const titleRule = (cssNC.match(/\.site-title\s*\{[^}]*\}/) || [''])[0];
 ok('A7 .site-title 声明了 user-select:none（含 -webkit- 前缀）',
   /user-select:\s*none/.test(titleRule) && /-webkit-user-select:\s*none/.test(titleRule), titleRule.slice(0, 90));
 
-ok('A8 版本号已 bump：style.css?v=156 / app.js?v=133',
-  html.includes('style.css?v=156') && html.includes('app.js?v=133'),
+ok('A8 版本号已 bump：style.css?v=157 / app.js?v=134',
+  html.includes('style.css?v=157') && html.includes('app.js?v=134'),
   (html.match(/(style\.css|app\.js)\?v=\d+/g) || []).join(' '));
 
 /* ================= B 运行时 ================= */

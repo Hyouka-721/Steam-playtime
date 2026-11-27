@@ -26,7 +26,7 @@ const css = fs.readFileSync(ROOT + 'docs/style.css', 'utf8');
 const cssNoCmt = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const vCss = (html.match(/style\.css\?v=(\d+)/) || [])[1];
 const vApp = (html.match(/app\.js\?v=(\d+)/) || [])[1];
-ok('A1 版本号 bump 到 CSS 144 / APP 129', vCss === '156' && vApp === '133', { css: vCss, app: vApp });
+ok('A1 版本号 bump 到 CSS 157 / APP 134', vCss === '157' && vApp === '134', { css: vCss, app: vApp });
 ok('A2 时长行只输出时长，源码不再有「合计」前缀',
   /class="tl-week-total">\$\{hoursShort\(weekTotal\)\}/.test(js) &&
   !/tl-week-total">合计/.test(js) &&

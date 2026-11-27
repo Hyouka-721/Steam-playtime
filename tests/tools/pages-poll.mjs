@@ -1,5 +1,5 @@
 /* p111_poll.mjs — 推送后轮询 Pages 是否已生效
-   判据：index.html 同时引用 style.css?v=156 与 app.js?v=133，
+   判据：index.html 同时引用 style.css?v=157 与 app.js?v=134，
         且 **两个文件的字节（CRLF→LF 归一）md5 都与本地一致**
    ⚠️ 只比 CSS 会漏判：某轮只改了 app.js（CSS 未 bump）时，旧页面的 CSS 本来就与本地相同，
       轮询会立刻报 READY，其实新脚本还没上。所以两件一起比。
@@ -14,8 +14,8 @@ const { chromium } = require('playwright');
 
 const SITE = 'https://hyouka-721.github.io/Steam-playtime/';
 const ROOT = 'C:/Users/33329/WorkBuddy/2026-10-13-18-17-49/steam-playtime/docs/';
-const CSS_V = '150';   // 每次 bump style.css 必须同步此裸串赋值（大写变量，非 v=NN / cssV=== 形态）
-const APP_V = '129';
+const CSS_V = '157';   // 每次 bump style.css 必须同步此裸串赋值（大写变量，非 v=NN / cssV=== 形态）
+const APP_V = '134';
 const md5 = (s) => crypto.createHash('md5').update(Buffer.from(String(s).replace(/\r\n/g, '\n'), 'utf8')).digest('hex');
 
 const localCss = md5(fs.readFileSync(ROOT + 'style.css', 'utf8'));

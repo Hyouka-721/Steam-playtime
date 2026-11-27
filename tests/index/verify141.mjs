@@ -21,9 +21,9 @@ const js = fs.readFileSync(ROOT + 'docs/app.js', 'utf8');
 const cssPlain = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
 // ── A 静态契约 ──
-ok('A1 版本 style.css v=156 / app.js v=133',
-  /style\.css\?v=156/.test(html) && /app\.js\?v=133/.test(html),
-  '理由：第141轮改了 css/js 两文件，按红线2各 bump 一次');
+ok('A1 版本 style.css v=157 / app.js v=134',
+  /style\.css\?v=157/.test(html) && /app\.js\?v=134/.test(html),
+  '理由：第142轮改了 css/js 两文件与 HTML 内联首帧脚本，按红线2各 bump 一次');
 
 ok('A2 揭示层双层 DOM：克隆函数 + aria-hidden + inert + data-theme',
   /function buildLiquidReveal/.test(js) &&

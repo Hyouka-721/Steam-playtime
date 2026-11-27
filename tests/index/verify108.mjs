@@ -48,8 +48,8 @@ const sat = (hex) => {
 const cssV = (html.match(/style\.css\?v=(\d+)/) || [])[1];
 const appV = (html.match(/app\.js\?v=(\d+)/) || [])[1];
 const fxV = (html.match(/fx\.js\?v=(\d+)/) || [])[1];
-ok('A1 版本参数 CSS 133 / APP 119 / FX 19（app.js 未改不 bump）',
-  cssV === '156' && appV === '133' && fxV === '19', { css: cssV, app: appV, fx: fxV });
+ok('A1 版本参数 CSS 157 / APP 134 / FX 19（app.js 未改不 bump）',
+  cssV === '157' && appV === '134' && fxV === '19', { css: cssV, app: appV, fx: fxV });
 
 const rate = pair('spawnPerSec'), speed = pair('speed'), alpha = pair('alpha'),
   len = pair('length'), ttl = pair('ttl'), thick = pair('thickness');
