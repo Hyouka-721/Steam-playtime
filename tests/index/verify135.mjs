@@ -23,22 +23,24 @@ const motionJs = fs.readFileSync(ROOT + 'docs/motion.js', 'utf8');
 const idxHtml = fs.readFileSync(ROOT + 'docs/index.html', 'utf8');
 const watHtml = fs.readFileSync(ROOT + 'docs/watch.html', 'utf8');
 const code = motionCss.replace(/\/\*[\s\S]*?\*\//g, '');
+const jsCode = motionJs.replace(/\/\*[\s\S]*?\*\//g, '');
 
 // A 静态
-ok('A1 两页都挂 motion.css?v=1 与 motion.js?v=2｜第145轮只 bump 改过的 js',
-  /motion\.css\?v=1/.test(idxHtml) && /motion\.js\?v=2/.test(idxHtml) &&
-  /motion\.css\?v=1/.test(watHtml) && /motion\.js\?v=2/.test(watHtml),
-  '理由：第145轮只改 motion.js（榜单行观察器不收底边），motion.css 一字节未动，按红线2单侧 bump');
+ok('A1 两页都挂 motion.css?v=1 与 motion.js?v=3｜第146轮只 bump 改过的 js',
+  /motion\.css\?v=1/.test(idxHtml) && /motion\.js\?v=3/.test(idxHtml) &&
+  /motion\.css\?v=1/.test(watHtml) && /motion\.js\?v=3/.test(watHtml),
+  '理由：第146轮只改 motion.js（榜单行退出淡入以消除刷新闪烁），motion.css 一字节未动，按红线2单侧 bump');
 const cvOnSt = /\.st-panel\s*\{[^}]*content-visibility:\s*auto/.test(code);
 const cvOnRank = /\.rank-item\s*\{[^}]*content-visibility:\s*auto/.test(code);
 const cvOnTl = /\.tl-item\s*\{[^}]*content-visibility:\s*auto/.test(code);
 ok('A2 content-visibility 只给 .st-panel，不碰 rank-item/tl-item（守 verify117/67）',
   cvOnSt && !cvOnRank && !cvOnTl, { cvOnSt, cvOnRank, cvOnTl });
-ok('A3 错峰淡入：.rv 变体（flat 纯 opacity）+ poster 仍 w-fade-in',
+ok('A3 错峰淡入：flat 纯 opacity 仍在，但榜单行已退出动画｜第146轮改判',
   /\.rv \{ opacity: 0; transform: translateY\(8px\); \}/.test(code) &&
   /\.rv\.flat \{ transform: none; \}/.test(code) &&
-  /rank-item/.test(motionJs) && /flat/.test(motionJs) &&
-  !/\.poster\b/.test(code));
+  /var SEL = '\.card, \.tl-item, \.st-panel';/.test(jsCode) && !/rankNodes/.test(jsCode) &&
+  /flat/.test(jsCode) && !/\.poster\b/.test(code),
+  '理由：第146轮把 rank-item 从选择器移除，避免 .rv→.in 造成刷新闪烁；其它几何类元素仍用 flat');
 ok('A4 微反馈用伪元素 transform/opacity；reduced-motion 全关',
   /\.card:hover::after/.test(code) && /\.w-sort-btn:active::after/.test(code) &&
   /@media \(prefers-reduced-motion: reduce\)/.test(code) &&
@@ -59,10 +61,16 @@ const cards = await p.evaluate(() => {
 });
 ok('B1 卡片获得 rv 并淡入（首屏全部 in）', cards.n > 0 && cards.rv === cards.n && cards.shown === cards.n, cards);
 const flat = await p.evaluate(() => {
-  const rows = [...document.querySelectorAll('#lt-list .rank-item')];
-  return { n: rows.length, flat: rows.filter(e => e.classList.contains('flat')).length };
+  const rows = [...document.querySelectorAll('#lt-list > .rank-item')];
+  return {
+    n: rows.length,
+    rv: rows.filter(e => e.classList.contains('rv')).length,
+    flat: rows.filter(e => e.classList.contains('flat')).length,
+    opaque: rows.filter(e => getComputedStyle(e).opacity === '1').length,
+  };
 });
-ok('B2 榜单行走 flat（纯 opacity，不位移）', flat.n > 0 && flat.flat === flat.n, flat);
+ok('B2 榜单行不挂 rv/flat、始终不透明｜第146轮改判，消除刷新闪烁',
+  flat.n > 0 && flat.rv === 0 && flat.flat === 0 && flat.opaque === flat.n, flat);
 await ctx.close();
 
 // watch 页：poster 不受 rv 影响

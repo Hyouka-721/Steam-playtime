@@ -1,20 +1,21 @@
-/* motion.js — 第 135 轮：滚动错峰淡入（第 145 轮修第 8 行透明）
- * 给 .card / .rank-item / .tl-item / .st-panel 加 .rv，元素临近视口时加 .in，
+/* motion.js — 第 135 轮：滚动错峰淡入（第 146 轮：榜单行退出动画）
+ * 给 .card / .tl-item / .st-panel 加 .rv，元素临近视口时加 .in，
  * 同批进入的元素按序错开 40ms（CSS 变量 --rv-d）。
  * ⚠️ 不碰 .poster（verify128 B5 要 w-fade-in），不碰标题/页眉（verify56/58/133）。
  * reduced-motion 直接跳过绑定，元素保持可见。
  *
- * 第 145 轮：fitRankRows() 故意让第 8 行底部只离视口 4px，原来统一的
- * rootMargin:'0px 0px -8% 0px' 会把视口底部再收 8%（~75px），第 8 行永远
- * 不进入观察区 → 拿不到 .in → .rv 保持 opacity:0，看起来就只有 7 款。
- * 这里把榜单行拆成独立观察器、底边不内收；其它元素保留原节奏。
+ * 第 145 轮曾把 .rank-item 拆成独立观察器、底边不内收，解决了第 8 行透明；
+ * 第 146 轮用户反馈刷新后榜单仍会闪一下：数据渲染后轮询 bind() 给新行挂
+ * .rv（opacity:0），IO 再补 .in 淡入，肉眼就是一次闪烁。榜单行本就有
+ * fitRankRows() 保证零 CLS、无位移，不需要淡入，直接不参与 .rv 最稳。
  */
 (function () {
   'use strict';
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce || !('IntersectionObserver' in window)) return;
 
-  var SEL = '.card, .rank-item, .tl-item, .st-panel';
+  // 第 146 轮：.rank-item 不再进选择器，刷新后榜单始终可见、零闪烁。
+  var SEL = '.card, .tl-item, .st-panel';
 
   function observe(nodes, margin) {
     if (!nodes.length) return;
@@ -32,23 +33,17 @@
   }
 
   function bind(root) {
-    var rankNodes = [];
-    var otherNodes = [];
+    var nodes = [];
     (root || document).querySelectorAll(SEL).forEach(function (el) {
       if (el.classList.contains('rv')) return;
       el.classList.add('rv');
-      // 所有走几何断言的元素都 flat（纯 opacity）：榜单行(verify117)、年报卡(verify94/98/99/101)、
-      // 条目高(verify67)。位移版 .rv 只留给 .card 这种没有几何断言的装饰性容器。
+      // 走几何断言的元素用 flat（纯 opacity）：年报卡、条目高。
+      // 位移版 .rv 只留给 .card 这种没有几何断言的装饰性容器。
       if (!el.classList.contains('card')) el.classList.add('flat');
-      (el.classList.contains('rank-item') ? rankNodes : otherNodes).push(el);
+      nodes.push(el);
     });
-    if (!rankNodes.length && !otherNodes.length) return;
-
-    // 榜单行底边不内收：fitRankRows() 把第 8 行放在离视口底 4px 处，
-    // 任何负 bottom margin 都会把它排除在观察区之外（用户只看到 7 款的根因）。
-    observe(rankNodes, '0px 0px 0px 0px');
-    // 其它元素保留第 135 轮的错峰节奏。
-    observe(otherNodes, '0px 0px -8% 0px');
+    if (!nodes.length) return;
+    observe(nodes, '0px 0px -8% 0px');
   }
 
   // 首屏：DOM 就绪后绑一次（脚本 defer，DOM 已解析）
