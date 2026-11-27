@@ -73,13 +73,13 @@ tests/
 
 **验收**：index 全部 **33 套件 0 FAIL**；`npm test` **52/0**。已提交 `c689fdd` 并 push `9e19d44..c689fdd`，Pages 第 3 轮 READY（v158/v135）；线上 1920×900 / 1920×958 / 1440×860 均 8 整行、0 半行、CLS 0、零报错。
 
-## 补记 · 第 144 轮：SW 导航吃旧 HTML 缓存（2026-11-27，本地完成、未提交）
+## 补记 · 第 144 轮：SW 导航吃旧 HTML 缓存（2026-11-27，✅ 已上线 `9bcd5de`）
 
 **用户反馈**：第 143 轮已 push，但普通刷新后仍跑旧脚本、只显示 7 款。取证：线上 `index.html` / `app.js?v=135` / `style.css?v=158` 都是新版本，用户截图 1920×915 的 7 行行高 70.8px 正好是旧 `min=65` 的解；GitHub Pages 给 `index.html` 的 `Cache-Control: max-age=600`，而 SW 导航分支用普通 `fetch(req)`，会命中浏览器 HTTP 缓存，10 分钟内把旧 HTML/旧 `?v=` 交回页面。
 
 **修复**：`docs/sw.js` 的 `netFirst()` 增加 `init` 参数并原样传给 `fetch`；导航分支改 `netFirst(req, SHELL, { cache: 'reload' })` 绕开 HTTP 缓存，APP_DATA 分支保持原样；`SHELL` 缓存名 `app-shell-v1`→`app-shell-v2`，旧 shell 随 activate 清掉。css/js 一字节未动，按红线2不 bump。
 
-**验收**：新增 `verify144.mjs` **7/0**（静态 + vm 真跑 fetch 监听器断言导航带 reload、数据不带 + 浏览器 SW 接管后 8 整行）；`verify83` 的 C1 缓存名同步 v2、理由写进 ok 文案；index 全部 **34 套件 0 FAIL**，`npm test` **52/0**。本地完成、未提交、未推送。
+**验收**：新增 `verify144.mjs` **7/0**（静态 + vm 真跑 fetch 监听器断言导航带 reload、数据不带 + 浏览器 SW 接管后 8 整行）；`verify83` 的 C1 缓存名同步 v2、理由写进 ok 文案；index 全部 **34 套件 0 FAIL**，`npm test` **52/0**。已提交 `9bcd5de` 并 push `6e93101..9bcd5de`；线上 sw.js 第 3 次轮询生效（v2 + reload），线上 SW 接管重载实测 v158/v135、8 整行、0 半行、零报错。
 
 ## 当前基线 · watch 线第 104 轮（✅ **已上线** 2026-11-15）
 
