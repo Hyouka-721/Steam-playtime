@@ -81,13 +81,13 @@ tests/
 
 **验收**：新增 `verify144.mjs` **7/0**（静态 + vm 真跑 fetch 监听器断言导航带 reload、数据不带 + 浏览器 SW 接管后 8 整行）；`verify83` 的 C1 缓存名同步 v2、理由写进 ok 文案；index 全部 **34 套件 0 FAIL**，`npm test` **52/0**。已提交 `9bcd5de` 并 push `6e93101..9bcd5de`；线上 sw.js 第 3 次轮询生效（v2 + reload），线上 SW 接管重载实测 v158/v135、8 整行、0 半行、零报错。
 
-## 补记 · 第 145 轮：第 8 行被错峰淡入藏成透明（2026-11-27，本地完成、未提交）
+## 补记 · 第 145 轮：第 8 行被错峰淡入藏成透明（2026-11-27，✅ 已上线 `a3ba03a`）
 
 **用户实测**：`innerWidth=1168 / innerHeight=942 / varH=64.6px / firstTop=378.95`，第 8 行底部 937.75 < 942，几何上完整可见，却只看到 7 款；滚动后又出现。根因是 `motion.js` 的统一 IntersectionObserver `rootMargin:'0px 0px -8% 0px'` 把视口底收掉约 75px，第 8 行顶部 873.15 > 866.64，永不进入观察区 → 拿不到 `.in` → `.rv` 保持 `opacity:0`。不是缓存、不是 `fitRankRows()` 算错。
 
 **修复**：`motion.js` 拆成两个观察器：`.rank-item` 用 `rootMargin:'0px 0px 0px 0px'`，其它 `.card/.tl-item/.st-panel` 保留原 `-8%` 节奏；两页 `motion.js?v=1`→`v=2`，`motion.css` 未改不 bump。新增 `verify145.mjs` **7/0**，断言第 8 行拿到 `.in` 且 `opacity=1`，并覆盖 1168×942 / 1920×958 / reduced-motion；`verify135` A1 同步 v2 并把理由写进文案。
 
-**验收**：index 全部 **35 套件 0 FAIL**，watch 43/46（3 条仍为历史旧红：verify57 缺素材、verify66/67 太平年评分数据），`npm test` **52/0**。本地完成、未提交、未推送。
+**验收**：index 全部 **35 套件 0 FAIL**，watch 43/46（3 条仍为历史旧红：verify57 缺素材、verify66/67 太平年评分数据），`npm test` **52/0**。已提交 `a3ba03a` 并 push `681bfd4..a3ba03a`；线上 HTML 第 5 轮轮询到 `motion.js?v=2`，线上实测 1168×942 / 1920×958 均 8 整行、第 8 行 `.in` 且 `opacity=1`、0 半行、零报错。
 
 ## 当前基线 · watch 线第 104 轮（✅ **已上线** 2026-11-15）
 
