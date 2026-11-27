@@ -31,7 +31,7 @@ ok('A1 两页均以 v=8 引用 rain.css、v=7 引用 rain.js',
   /rain.css\?v=9["']/.test(html) && /rain\.js\?v=7["']/.test(html) &&
   /rain.css\?v=9["']/.test(watchHtml) && /rain\.js\?v=7["']/.test(watchHtml));
 ok('A2 不动已上线版本号（css144 / app129 / fx19 原样保留）',
-  /style\.css\?v=158["']/.test(html) && /app\.js\?v=135["']/.test(html) && /fx\.js\?v=19["']/.test(html));
+  /style\.css\?v=158["']/.test(html) && /app\.js\?v=136["']/.test(html) && /fx\.js\?v=19["']/.test(html));
 ok('A3 第 123 轮改判：DOM 雨丝，不再依赖 canvas / backdrop-filter',
   /<div id="rain-layer" aria-hidden="true"><\/div>/.test(html) &&
   /el\.className = 'rain-streak'/.test(rainJs) &&
@@ -119,8 +119,12 @@ await page.click('#ambience-seg button[data-amb="rain"]');
 await page.waitForTimeout(250);
 ok('B6 再点「雨滴」恢复为开并写入 rain', await page.evaluate(() => window.__rain.enabled() && localStorage.getItem('ambience.mode') === 'rain'));
 await page.reload({ waitUntil: 'load' });
-await page.waitForFunction(() => window.__rain && window.__rain.ready(), null, { timeout: 20000 });
-ok('B7 刷新后沿用 localStorage 的开启态', await page.evaluate(() => window.__rain.enabled() === true));
+// 第148轮：首屏快照恢复会增加一点启动工作，__rain.ready() 可能早于
+// ambience.boot() 的下一个 80ms tick。这里等到 ambience 真正应用完存储态再断言，
+// 判据本身不变（仍是 rain=true），只是不再抢跑。
+await page.waitForFunction(() => window.__rain && window.__rain.ready() &&
+  window.__ambience && window.__ambience.mode() === 'rain', null, { timeout: 20000 });
+ok('B7 刷新后沿用 localStorage 的开启态｜第148轮等待 ambience 应用完成', await page.evaluate(() => window.__rain.enabled() === true));
 
 for (const w of [1440, 1280, 1088, 900, 390]) {
   await page.setViewportSize({ width: w, height: 900 });

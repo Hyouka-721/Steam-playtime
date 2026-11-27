@@ -47,7 +47,10 @@ page.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
 await page.goto(BASE + 'index.html?cb=' + Date.now(), { waitUntil: 'load' });
 await page.evaluate(() => { localStorage.clear(); });
 await page.reload({ waitUntil: 'load' });
-await page.waitForFunction(() => window.__ambience && window.__rain && window.__rain.ready(), null, { timeout: 20000 });
+// 第148轮：快照恢复会让 ambience.boot() 的 80ms 轮询略晚于 __rain.ready()，
+// 等到默认 meteor 真正应用再断言；判据不变，只是不抢跑。
+await page.waitForFunction(() => window.__ambience && window.__rain && window.__rain.ready() &&
+  window.__ambience.mode() === 'meteor', null, { timeout: 20000 });
 
 const st0 = await page.evaluate(() => ({
   amb: window.__ambience.mode(), fx: window.__fx.mode(), rain: window.__rain.enabled(),

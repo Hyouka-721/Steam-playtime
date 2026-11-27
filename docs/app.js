@@ -562,6 +562,28 @@
     }
   }
 
+  /* 第 148 轮：首屏快照。用户要的是“刷新只更新数字”，而不是整页先空再重建。
+     每次渲染完成后把五张卡的最终文本与榜单 HTML 存进 sessionStorage；
+     index.html 在 app.js 之前用内联脚本恢复，app.js 到位后再原地覆盖。
+     这样即使 app.js / 数据要等几秒，页面也不会先变成空白。
+     只用 sessionStorage：刷新保留，关标签页即清，不会把旧数据带到下次访问。 */
+  const PAINT_KEY = 'index.paint.v1';
+  function savePaintSnapshot() {
+    try {
+      const s = state.meta?.stats ?? {};
+      const cards = [
+        hm(s.lifetime_minutes ?? 0),
+        hm(lastNDaysTotal(14).minutes),
+        state.ach?.stats ? `${Number(state.ach.stats.pct).toFixed(1)}%` : '—',
+        `${s.lifetime_played_games ?? 0} / ${s.owned_games ?? 0}`,
+        state.meta?.last_snapshot_date ?? '等待采集',
+      ];
+      const list = $('lt-list');
+      if (!list || list.querySelector('.sk-row')) return;
+      sessionStorage.setItem(PAINT_KEY, JSON.stringify({ schema: 1, cards, list: list.innerHTML }));
+    } catch (e) { /* 隐私模式 / 配额满：静默降级，不影响页面 */ }
+  }
+
   // ---------- ① 游戏累计 ----------
   /** 追踪期内每款游戏的近期时长（近 N 天），用于「在玩」标记与最近游玩页 */
   function recentMinutesByApp(windowDays) {
@@ -661,6 +683,7 @@
     observeCapsules(box); // 登记新渲染出的胶囊图（视口临近才真正下载）
     if (idle.length) bindIdleToggle(idle.length);
     fitRankRows();
+    savePaintSnapshot(); // 第148轮：渲染完成即存首屏快照，下次刷新先恢复再更新
   }
 
   /* ---------- 首屏「恰好 N 款」：按视口反解榜单行高 ----------
