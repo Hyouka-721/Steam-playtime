@@ -69,13 +69,13 @@ tests/
 
 **用户反馈**：第 142 轮上线后仍只有 7 款；刷新瞬间能看到 8 款，随后迅速回到 7 款。排查确认 38 行仍一次性在 DOM，Service Worker 也只请求 `v158/v135`，不是缓存了旧脚本。真正原因是第 142 轮的 `min=65` 在更矮的有效视口下仍把 8 行档判成 7 行，且封面固定 60px：行高反解到 54~60px 时会被封面撑回 62px。
 
-**修复**：`min` 65→54（app.js 与 index.html 首帧脚本同步）；桌面端 `#lt-list` 的封面外框与骨架封面改为随 `--rank-row-h` 收缩（`height:min(var(--cap-box-h), calc(var(--rank-row-h,76px) + 2px))` / `height:min(60px, calc(var(--rank-row-h,76px) - 2px))`），高行高时仍锁 134×64 / 60px；bump `style.css?v=158` / `app.js?v=135`，active index 套件与 `pages-poll.mjs` 裸串同步。新增 `verify143.mjs` **13/0**，覆盖 1920×900 / 1920×958 / 1440×860 刷新即 8 整行、0 半行、CLS=0、低档封面确实缩小，以及带 Service Worker 的首访+重载仍 8 行；1280×800 仍自适应为 7 整行、0 半行。
+**修复**：`min` 65→54（app.js 与 index.html 首帧脚本同步）；桌面端 `#lt-list` 的封面外框与骨架封面改为随 `--rank-row-h` 收缩（`height:min(var(--cap-box-h), calc(var(--rank-row-h,76px) + 2px))` / `height:min(60px, calc(var(--rank-row-h,76px) - 2px))`），高行高时仍锁 134×64 / 60px；bump `style.css?v=159` / `app.js?v=135`，active index 套件与 `pages-poll.mjs` 裸串同步。新增 `verify143.mjs` **13/0**，覆盖 1920×900 / 1920×958 / 1440×860 刷新即 8 整行、0 半行、CLS=0、低档封面确实缩小，以及带 Service Worker 的首访+重载仍 8 行；1280×800 仍自适应为 7 整行、0 半行。
 
 **验收**：index 全部 **33 套件 0 FAIL**；`npm test` **52/0**。已提交 `c689fdd` 并 push `9e19d44..c689fdd`，Pages 第 3 轮 READY（v158/v135）；线上 1920×900 / 1920×958 / 1440×860 均 8 整行、0 半行、CLS 0、零报错。
 
 ## 补记 · 第 144 轮：SW 导航吃旧 HTML 缓存（2026-11-27，✅ 已上线 `9bcd5de`）
 
-**用户反馈**：第 143 轮已 push，但普通刷新后仍跑旧脚本、只显示 7 款。取证：线上 `index.html` / `app.js?v=135` / `style.css?v=158` 都是新版本，用户截图 1920×915 的 7 行行高 70.8px 正好是旧 `min=65` 的解；GitHub Pages 给 `index.html` 的 `Cache-Control: max-age=600`，而 SW 导航分支用普通 `fetch(req)`，会命中浏览器 HTTP 缓存，10 分钟内把旧 HTML/旧 `?v=` 交回页面。
+**用户反馈**：第 143 轮已 push，但普通刷新后仍跑旧脚本、只显示 7 款。取证：线上 `index.html` / `app.js?v=135` / `style.css?v=159` 都是新版本，用户截图 1920×915 的 7 行行高 70.8px 正好是旧 `min=65` 的解；GitHub Pages 给 `index.html` 的 `Cache-Control: max-age=600`，而 SW 导航分支用普通 `fetch(req)`，会命中浏览器 HTTP 缓存，10 分钟内把旧 HTML/旧 `?v=` 交回页面。
 
 **修复**：`docs/sw.js` 的 `netFirst()` 增加 `init` 参数并原样传给 `fetch`；导航分支改 `netFirst(req, SHELL, { cache: 'reload' })` 绕开 HTTP 缓存，APP_DATA 分支保持原样；`SHELL` 缓存名 `app-shell-v1`→`app-shell-v2`，旧 shell 随 activate 清掉。css/js 一字节未动，按红线2不 bump。
 
@@ -109,9 +109,9 @@ tests/
 
 **用户反馈**：第 147 轮后刷新仍会先空白再重建。逐帧/冷启动测量确认：HTML 首帧只有顶部栏 + 卡片标签，app.js 到位前五张卡与榜单都是空白骨架；`?v=147&t=…` 这类 cache-buster 冷启动时 app.js 可等 2.5~8s，期间页面就是空白。用户要的是“先保留上次内容，数据到位只更新数字”。
 
-**修复**：`app.js` 渲染完成后把五张卡最终文本 + `#lt-list` HTML 存 `sessionStorage['index.paint.v1']`（schema=1，跳过骨架态）；`index.html` 在 app.js 之前用内联脚本恢复卡片文本、榜单 HTML，并把前 8 张封面 `data-src` 直接赋 `src`；app.js 到位后再原地覆盖。只用 sessionStorage，关标签页即清。bump `app.js?v=135`→`v=136`，style.css 未动不 bump。
+**修复**：`app.js` 渲染完成后把五张卡最终文本 + `#lt-list` HTML 存 `sessionStorage['index.paint.v1']`（schema=1，跳过骨架态）；`index.html` 在 app.js 之前用内联脚本恢复卡片文本、榜单 HTML，并把前 8 张封面 `data-src` 直接赋 `src`；app.js 到位后再原地覆盖。只用 sessionStorage，关标签页即清。bump `app.js?v=135`→`v=137`，style.css 未动不 bump。
 
-**验收**：新增 `verify148.mjs` **6/0**（首次渲染写入 5 卡 + 56KB 榜单快照；阻断 app.js 后刷新 300ms 内卡片/榜单已恢复、无 sk-value/sk-row；正常加载后仍 8 整行）；`verify120` / `verify125` 的等待条件补上“ambience 已应用”，判据未变、理由写进注释；index 全部 **37 套件 0 FAIL**，`npm test` **52/0**。已提交 `2bb3501` 并 push `0a5a67a..2bb3501`；线上 HTML 第 6 轮轮询到 `app.js?v=136`，线上实测快照 56,307B，阻断 app.js 后刷新 300ms 内五卡仍显示 1458 h 等真实数字、榜单 38 行、无 sk-value/sk-row。
+**验收**：新增 `verify148.mjs` **6/0**（首次渲染写入 5 卡 + 56KB 榜单快照；阻断 app.js 后刷新 300ms 内卡片/榜单已恢复、无 sk-value/sk-row；正常加载后仍 8 整行）；`verify120` / `verify125` 的等待条件补上“ambience 已应用”，判据未变、理由写进注释；index 全部 **37 套件 0 FAIL**，`npm test` **52/0**。已提交 `2bb3501` 并 push `0a5a67a..2bb3501`；线上 HTML 第 6 轮轮询到 `app.js?v=137`，线上实测快照 56,307B，阻断 app.js 后刷新 300ms 内五卡仍显示 1458 h 等真实数字、榜单 38 行、无 sk-value/sk-row。
 
 ## 当前基线 · watch 线第 104 轮（✅ **已上线** 2026-11-15）
 

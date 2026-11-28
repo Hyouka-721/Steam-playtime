@@ -372,12 +372,18 @@
     liquidPending = id;               // 动画期间的业务当前主题（供连点选不同色）
     document.body.appendChild(reveal);
     // 🔴 必须先 append 再读样式：游离节点不在文档级联里，getComputedStyle 拿不到变量。
-    // 揭示层是 data-theme=目标主题，读出它的 --scroll-thumb 锁到 html —— 滚动条是浏览器
-    // 渲染层、不吃 transition 冻结，必须从动画第一帧起就是新主题色，否则揭层瞬间旧色
-    // thumb 在深底上「柱子闪一下」。
-    let sbThumb = '';
-    try { sbThumb = getComputedStyle(reveal).getPropertyValue('--scroll-thumb').trim(); } catch (e) {}
+    // 揭示层是 data-theme=目标主题，读出它的滚动条滑块色/轨道色锁到 html ——
+    // 滚动条是浏览器渲染层、不吃 transition 冻结，必须从动画第一帧起就是新主题色。
+    // 第 141 轮补修5：轨道也要一起锁！原先轨道 transparent 透出 html 背景，而 html 背景
+    // 要到 finish() 才切 → 出现「滑块立刻变色、轨道背后背景滞后到结束才变」的割裂。
+    let sbThumb = '', sbTrack = '';
+    try {
+      const cs = getComputedStyle(reveal);
+      sbThumb = cs.getPropertyValue('--scroll-thumb').trim();
+      sbTrack = cs.getPropertyValue('--scroll-track').trim();
+    } catch (e) {}
     if (sbThumb) root.style.setProperty('--scroll-thumb', sbThumb);
+    if (sbTrack) root.style.setProperty('--scroll-track', sbTrack);
     reveal.scrollTop = window.scrollY; // sticky 页眉两层滚动位置对齐
     pathEl.setAttribute('d', liquidPath(0, 0, cx, cy, W, H));
 
@@ -387,6 +393,7 @@
       if (reveal.parentNode) reveal.remove();
       pathEl.setAttribute('d', 'M0 0 Z');
       root.style.removeProperty('--scroll-thumb');  // 撤掉内联，回到 dataset 主题自带值
+      root.style.removeProperty('--scroll-track');
       root.classList.remove('liquid-vt');
       state.vt = null;
       liquidAbort = null;

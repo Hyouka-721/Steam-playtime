@@ -130,6 +130,10 @@
   --badge-bg: rgba(255, 255, 255, 0.92); --badge-text: #241c15;
   --tl-line: linear-gradient(180deg, rgba(217, 118, 47, 0.5), transparent);
   --scroll-thumb: #dccdbb;
+  /* 第 141 轮补修5：滚动条轨道独立取色（= 本主题背景色）。
+     原先轨道是 transparent，透出 html 背景 —— html 背景要到动画结束才切，
+     所以「滑块立刻变色、轨道背后的背景却滞后」= 用户看到的跳变。 */
+  --scroll-track: #fbf7f1;
   --chart-axis: #6d6055; --chart-split: rgba(36, 28, 21, 0.1); --chart-title: #6d6055;
   --chart-tip-bg: #fffdfa; --chart-tip-border: #ecd9c4; --chart-tip-text: #241c15;
   --chart-legend-off: #c0b2a3;
@@ -206,6 +210,7 @@
   --badge-bg: rgba(20, 20, 26, 0.92); --badge-text: #f5f5f8;
   --tl-line: linear-gradient(180deg, rgba(232, 176, 75, 0.5), transparent);
   --scroll-thumb: #2c2c37;
+  --scroll-track: #0b0b0e;
   --chart-axis: #9696a6; --chart-split: rgba(255, 255, 255, 0.12); --chart-title: #9696a6;
   --chart-tip-bg: #17171e; --chart-tip-border: #33333f; --chart-tip-text: #f5f5f8;
   --chart-legend-off: #5a5a67;
@@ -286,7 +291,9 @@ a { color: var(--accent); }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
+/* 第 141 轮补修5：轨道不再 transparent（那会透出 html 背景、导致配色滞后半秒），
+   改为显式取 --scroll-track（= 本主题背景色），动画期与滑块一起被内联锁定。 */
+::-webkit-scrollbar-track { background: var(--scroll-track, transparent); }
 
 /* ---- header ---- */
 /* 2026-10-17：三列网格（1fr auto 1fr）——logo 靠左、标题恒定视觉居中、头像靠右 */

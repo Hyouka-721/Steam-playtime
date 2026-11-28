@@ -21,8 +21,8 @@ const js = fs.readFileSync(ROOT + 'docs/app.js', 'utf8');
 const cssPlain = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
 // ── A 静态契约 ──
-ok('A1 版本 style.css v=158 / app.js v=136',
-  /style\.css\?v=158/.test(html) && /app\.js\?v=136/.test(html),
+ok('A1 版本 style.css v=159 / app.js v=137',
+  /style\.css\?v=159/.test(html) && /app\.js\?v=137/.test(html),
   '理由：第142轮改了 css/js 两文件与 HTML 内联首帧脚本，按红线2各 bump 一次');
 
 ok('A2 揭示层双层 DOM：克隆函数 + aria-hidden + inert + data-theme',
@@ -133,6 +133,7 @@ const sampler = async () => {
       htmlTp: getComputedStyle(document.documentElement).transitionProperty,
       scrollbarColor: getComputedStyle(document.documentElement).scrollbarColor,
       scrollThumbInline: document.documentElement.style.getPropertyValue('--scroll-thumb').trim(),
+      scrollTrackInline: document.documentElement.style.getPropertyValue('--scroll-track').trim(),
       revTheme: (() => { const r = document.getElementById('liquid-reveal'); return r ? r.dataset.theme : null; })(),
       revOverflow: (() => { const r = document.getElementById('liquid-reveal'); return r ? getComputedStyle(r).overflowY : null; })(),
       revHasOwnScrollbar: (() => { const r = document.getElementById('liquid-reveal'); return r ? r.offsetWidth - r.clientWidth : null; })(),
@@ -207,6 +208,15 @@ ok('B4c ★修闪4：scrollbar-color 保持 auto（不切原生滚动条，零�
     revW: revSamples[0]?.revW, clientW: revSamples[0]?.clientW });
 
 // 直接守卫「反色」：浅→深时动画期滚动条色应已是 cinema 的 #2c2c37，不是 cream 的 #dccdbb
+/* 补修5：轨道背景跳变（用户：滑块立刻变色、轨道背后背景要等结束才变）。
+   根因是 track 原为 transparent，透出 html 背景；html 背景要等 finish 才切。
+   现改为 track 取 --scroll-track 并在动画首帧一起锁定 → 滑块与轨道同步变色。 */
+ok('B4e ★修闪5：动画期滚动条轨道色也已锁定目标主题（与滑块同步，不滞后到结束）',
+  revSamples.length >= 3 &&
+  revSamples.every(s => s.scrollTrackInline && s.scrollTrackInline.length > 0) &&
+  revSamples.every(s => s.scrollTrackInline.toLowerCase() === '#0b0b0e'),
+  { trackInline: revSamples[0]?.scrollTrackInline, thumbInline: revSamples[0]?.scrollThumbInline });
+
 const creamThumb = '#dccdbb', cinemaThumb = '#2c2c37';
 ok('B4d ★修闪3：浅→深动画期滚动条已是影院黑色（不是旧米色，杜绝反色闪）',
   revSamples.length >= 3 &&
