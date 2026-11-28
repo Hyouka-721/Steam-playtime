@@ -69,13 +69,13 @@ tests/
 
 **用户反馈**：第 142 轮上线后仍只有 7 款；刷新瞬间能看到 8 款，随后迅速回到 7 款。排查确认 38 行仍一次性在 DOM，Service Worker 也只请求 `v158/v135`，不是缓存了旧脚本。真正原因是第 142 轮的 `min=65` 在更矮的有效视口下仍把 8 行档判成 7 行，且封面固定 60px：行高反解到 54~60px 时会被封面撑回 62px。
 
-**修复**：`min` 65→54（app.js 与 index.html 首帧脚本同步）；桌面端 `#lt-list` 的封面外框与骨架封面改为随 `--rank-row-h` 收缩（`height:min(var(--cap-box-h), calc(var(--rank-row-h,76px) + 2px))` / `height:min(60px, calc(var(--rank-row-h,76px) - 2px))`），高行高时仍锁 134×64 / 60px；bump `style.css?v=159` / `app.js?v=135`，active index 套件与 `pages-poll.mjs` 裸串同步。新增 `verify143.mjs` **13/0**，覆盖 1920×900 / 1920×958 / 1440×860 刷新即 8 整行、0 半行、CLS=0、低档封面确实缩小，以及带 Service Worker 的首访+重载仍 8 行；1280×800 仍自适应为 7 整行、0 半行。
+**修复**：`min` 65→54（app.js 与 index.html 首帧脚本同步）；桌面端 `#lt-list` 的封面外框与骨架封面改为随 `--rank-row-h` 收缩（`height:min(var(--cap-box-h), calc(var(--rank-row-h,76px) + 2px))` / `height:min(60px, calc(var(--rank-row-h,76px) - 2px))`），高行高时仍锁 134×64 / 60px；bump `style.css?v=160` / `app.js?v=135`，active index 套件与 `pages-poll.mjs` 裸串同步。新增 `verify143.mjs` **13/0**，覆盖 1920×900 / 1920×958 / 1440×860 刷新即 8 整行、0 半行、CLS=0、低档封面确实缩小，以及带 Service Worker 的首访+重载仍 8 行；1280×800 仍自适应为 7 整行、0 半行。
 
 **验收**：index 全部 **33 套件 0 FAIL**；`npm test` **52/0**。已提交 `c689fdd` 并 push `9e19d44..c689fdd`，Pages 第 3 轮 READY（v158/v135）；线上 1920×900 / 1920×958 / 1440×860 均 8 整行、0 半行、CLS 0、零报错。
 
 ## 补记 · 第 144 轮：SW 导航吃旧 HTML 缓存（2026-11-27，✅ 已上线 `9bcd5de`）
 
-**用户反馈**：第 143 轮已 push，但普通刷新后仍跑旧脚本、只显示 7 款。取证：线上 `index.html` / `app.js?v=135` / `style.css?v=159` 都是新版本，用户截图 1920×915 的 7 行行高 70.8px 正好是旧 `min=65` 的解；GitHub Pages 给 `index.html` 的 `Cache-Control: max-age=600`，而 SW 导航分支用普通 `fetch(req)`，会命中浏览器 HTTP 缓存，10 分钟内把旧 HTML/旧 `?v=` 交回页面。
+**用户反馈**：第 143 轮已 push，但普通刷新后仍跑旧脚本、只显示 7 款。取证：线上 `index.html` / `app.js?v=135` / `style.css?v=160` 都是新版本，用户截图 1920×915 的 7 行行高 70.8px 正好是旧 `min=65` 的解；GitHub Pages 给 `index.html` 的 `Cache-Control: max-age=600`，而 SW 导航分支用普通 `fetch(req)`，会命中浏览器 HTTP 缓存，10 分钟内把旧 HTML/旧 `?v=` 交回页面。
 
 **修复**：`docs/sw.js` 的 `netFirst()` 增加 `init` 参数并原样传给 `fetch`；导航分支改 `netFirst(req, SHELL, { cache: 'reload' })` 绕开 HTTP 缓存，APP_DATA 分支保持原样；`SHELL` 缓存名 `app-shell-v1`→`app-shell-v2`，旧 shell 随 activate 清掉。css/js 一字节未动，按红线2不 bump。
 
@@ -670,7 +670,7 @@ tests/
 - **现象**（用户反馈）：「位移没有了，但柱子背后的背景依然跳变。点击切换的一瞬间，柱子会变成对应颜色，后面的背景却要到切换结束才会变。」
 - **根因**：`::-webkit-scrollbar-track { background: transparent; }` —— 轨道透明，透出的是 `html` 元素背景；而 html 背景要等 `finish()` 里 `applyTheme()`（动画 2040ms 结束）才切。滑块因第 141 轮补修3 已内联锁 `--scroll-thumb` 所以立刻变色 → 两者割裂。
 - **修复**：①`style.css` 新增 `--scroll-track`（cream `#fbf7f1` / cinema `#0b0b0e`，即各主题背景色），`::-webkit-scrollbar-track` 改 `var(--scroll-track, transparent)`；②`app.js` 动画首帧从揭示层（data-theme=目标主题）一并读出 `--scroll-thumb` + `--scroll-track` 内联锁到 `<html>`，`cleanup()` 一并 removeProperty。**不要用 `scrollbar-color`**——它会切换 Chrome 到系统原生滚动条（Windows ~17px），占位宽变化 → 位移；只用 `::-webkit-scrollbar-*`，宽度恒 10px。
-- **验证**：点击前 thumb `#dccdbb`/track `#fbf7f1` → 点击后 250ms 双双变为 `#2c2c37`/`#0b0b0e`；结束后内联清空、computed 同值。深→浅同样正确。verify141 新增 **B4e**，套件 **27/0**；index **37 套件全绿**、npm 52/0；watch 3 红为历史旧红（太平年评分数据漂移 / verify57 缺 `poster_test.png`）。版本 `style.css?v=159`/`app.js?v=141`。
+- **验证**：点击前 thumb `#dccdbb`/track `#fbf7f1` → 点击后 250ms 双双变为 `#2c2c37`/`#0b0b0e`；结束后内联清空、computed 同值。深→浅同样正确。verify141 新增 **B4e**，套件 **27/0**；index **37 套件全绿**、npm 52/0；watch 3 红为历史旧红（太平年评分数据漂移 / verify57 缺 `poster_test.png`）。版本 `style.css?v=160`/`app.js?v=141`。
 - 🔴 **本轮最大的坑：仓库状态误判**。开工时按记忆当作第 141 轮，实际 HEAD 已是第 148 轮（`2197c45`）；首次 bump 用错基准（以为 156/133，实际 158/136），**误改了一批历史 online 套件的期望版本号**，发现后 `git checkout --` 全部恢复。**教训：动手前必须先 `git log -1` + 读 `docs/index.html` 里的实际版本串，绝不凭记忆猜。** 另外本项目的 bump 惯例是**全仓同步所有 index 套件**钉的版本号（第 142~148 轮都如此），不是只改活跃套件。
 
 ## 第 150 轮：液流起点定稿（跟随视口右缘）

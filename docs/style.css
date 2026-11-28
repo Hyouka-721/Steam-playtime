@@ -1484,8 +1484,33 @@ select:hover, .seg button:hover { border-color: var(--border-hi); }
   clip-path: url(#liquidClip);
   /* 背景与 body 一致（变量已随 data-theme=新主题解析），保证揭示区底色也换掉 */
   background-color: var(--bg);
-  background-image: var(--bg-layers);
+  /* 第 151 轮修闪：与 body 的背景完全一致 —— 补上 body 有、这里原先漏掉的 140×140 SVG 噪点
+     （body 是「噪点 + var(--bg-layers)」，揭示层原先只有 var(--bg-layers)，
+     揭层瞬间噪点层突然出现也会有细微跳变）。data URI 与 html,body 那处逐字节相同。 */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"),
+    var(--bg-layers);
   background-attachment: fixed;
+}
+/* 第 151 轮修闪：揭示层复刻 cinema 的 body::before 点阵。
+   🔴 body::before 是**伪元素**，cloneNode 不会复制；且选择器要求 body 是 cinema 后代，
+   而揭示层内没有 body → 揭示层完全没有这层点阵。揭层瞬间底层点阵突然出现，
+   实测颗粒度 12→22（+78%）、亮度 +4 色阶 → 深色画面「闪一下」。
+   （浅色主题无此规则，所以深→浅不闪。）
+   复刻时尺寸/位置/透明度与 body::before 完全一致，且两者都是 fixed 相对视口，
+   图案逐像素对齐；揭示层有 clip-path，::before 只会在已揭示区域显示 → 揭层无缝。 */
+#liquid-reveal[data-theme="cinema"]::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 2;                  /* 与 body::before 同层：压在内容上、页眉(10)之下 */
+  pointer-events: none;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1.4px),
+    radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1.5px);
+  background-size: 3px 3px, 5px 5px;
+  background-position: 0 0, 1px 2px;
+  opacity: .62;
 }
 /* 揭示层内页眉复刻 sticky 定位：滚动位置由 JS 设 scrollTop 对齐真页面 */
 #liquid-reveal .site-header { position: sticky; top: 0; z-index: 10; }

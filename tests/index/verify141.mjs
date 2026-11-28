@@ -21,8 +21,8 @@ const js = fs.readFileSync(ROOT + 'docs/app.js', 'utf8');
 const cssPlain = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
 // ── A 静态契约 ──
-ok('A1 版本 style.css v=159 / app.js v=141',
-  /style\.css\?v=159/.test(html) && /app\.js\?v=141/.test(html),
+ok('A1 版本 style.css v=160 / app.js v=141',
+  /style\.css\?v=160/.test(html) && /app\.js\?v=141/.test(html),
   '理由：第142轮改了 css/js 两文件与 HTML 内联首帧脚本，按红线2各 bump 一次');
 
 ok('A2 揭示层双层 DOM：克隆函数 + aria-hidden + inert + data-theme',
@@ -138,6 +138,10 @@ const sampler = async () => {
       revOverflow: (() => { const r = document.getElementById('liquid-reveal'); return r ? getComputedStyle(r).overflowY : null; })(),
       revHasOwnScrollbar: (() => { const r = document.getElementById('liquid-reveal'); return r ? r.offsetWidth - r.clientWidth : null; })(),
       revW: (() => { const r = document.getElementById('liquid-reveal'); return r ? Math.round(r.getBoundingClientRect().width) : null; })(),
+      revPseudoBg: (() => { const r = document.getElementById('liquid-reveal'); return r ? getComputedStyle(r, '::before').backgroundImage : null; })(),
+      revPseudoSize: (() => { const r = document.getElementById('liquid-reveal'); return r ? getComputedStyle(r, '::before').backgroundSize : null; })(),
+      revPseudoOpacity: (() => { const r = document.getElementById('liquid-reveal'); return r ? getComputedStyle(r, '::before').opacity : null; })(),
+      revBgImg: (() => { const r = document.getElementById('liquid-reveal'); return r ? getComputedStyle(r).backgroundImage.slice(0, 40) : null; })(),
       clientW: document.documentElement.clientWidth
     };
   });
@@ -223,6 +227,23 @@ ok('B4d ★修闪3：浅→深动画期滚动条已是影院黑色（不是旧�
   revSamples.every(s => s.revTheme === 'cinema' && s.scrollThumbInline.toLowerCase() === cinemaThumb) &&
   revSamples.every(s => s.scrollThumbInline.toLowerCase() !== creamThumb),
   { revTheme: revSamples[0]?.revTheme, thumb: revSamples[0]?.scrollThumbInline });
+
+/* 补修6（第 151 轮）：揭示层必须复刻 cinema 的 body::before 点阵。
+   body::before 是伪元素，cloneNode 不复制，揭示层原本完全没有这层 →
+   揭层瞬间点阵突然出现（实测颗粒 +78%、亮度 +4 色阶）= 用户说的「浅→深闪一下」。
+   深→浅不闪因为 cream 本就无此规则。 */
+ok('B4f ★修闪6：揭示层复刻 cinema 点阵（3px/5px · opacity .62），杜绝揭层瞬间颗粒突变',
+  revSamples.length >= 3 &&
+  revSamples.every(s => s.revPseudoBg && /radial-gradient/.test(s.revPseudoBg)) &&
+  revSamples.every(s => s.revPseudoSize === '3px 3px, 5px 5px' && s.revPseudoOpacity === '0.62'),
+  { pseudoBg: (revSamples[0]?.revPseudoBg || '').slice(0, 50),
+    size: revSamples[0]?.revPseudoSize, opacity: revSamples[0]?.revPseudoOpacity });
+
+/* 揭示层背景必须与 body 一致（含 SVG 噪点），否则揭层瞬间噪点层突然出现也有细微跳变 */
+ok('B4g ★修闪6：揭示层背景含 SVG 噪点（与 body 一致，不再只有渐变）',
+  revSamples.length >= 3 &&
+  revSamples.every(s => s.revBgImg && /url\("data:image\/svg\+xml/.test(s.revBgImg)),
+  { revBgImg: revSamples[0]?.revBgImg });
 
 ok('B5 揭示层属性：aria-hidden + inert + clip-path + z=11',
   during.reveal === true && during.ariaHidden === 'true' && during.inert === true &&
