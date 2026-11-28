@@ -251,8 +251,8 @@
   /* 第 150 轮：液流起点相对「史蒂夫按钮中心下沿」的微调偏移（单位 px）。
      用户实验中：+X 向右、+Y 向上（即向右上方偏移）。
      ⚠️ 调这两个数即可，其它地方不用动。 */
-  const LIQUID_ORIGIN_DX = 10;
-  const LIQUID_ORIGIN_DY = 10;
+  const LIQUID_ORIGIN_DX = 100;
+  const LIQUID_ORIGIN_DY = 200;
   let liquidRaf = 0;
   let liquidAbort = null;   // 当前动画的强制清理函数（回退/连点时先收尾，避免旧 id 覆盖）
   let liquidPending = null; // 动画目标主题：动画期间 currentTheme() 读它，保证连点选到不同主题

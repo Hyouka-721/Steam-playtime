@@ -49,7 +49,7 @@ const cssV = (html.match(/style\.css\?v=(\d+)/) || [])[1];
 const appV = (html.match(/app\.js\?v=(\d+)/) || [])[1];
 const fxV = (html.match(/fx\.js\?v=(\d+)/) || [])[1];
 ok('A1 版本参数 CSS 158 / APP 136 / FX 19（app.js 未改不 bump）',
-  cssV === '159' && appV === '138' && fxV === '19', { css: cssV, app: appV, fx: fxV });
+  cssV === '159' && appV === '139' && fxV === '19', { css: cssV, app: appV, fx: fxV });
 
 const rate = pair('spawnPerSec'), speed = pair('speed'), alpha = pair('alpha'),
   len = pair('length'), ttl = pair('ttl'), thick = pair('thickness');
