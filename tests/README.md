@@ -665,6 +665,14 @@ tests/
 - **只冻结 transition-property，不碰 animation**：雨丝 `rain-fall` 是 animation，全程不受影响（verify141 B2/B3 仍绿）。
 - **验证**：诊断探针揭层瞬间 body 已是最终色且 6 次采样稳定；三帧像素对照（结束前/结束立即/稳定）背景差 ≤2、卡片区结束两帧完全相同；verify141 新增 **B4b** 断言动画期间 body/card 的 `transitionProperty==='none'`，套件 **24/0**；index 31 套件全绿、npm 52/0。版本 bump `style.css?v=156`/`app.js?v=133`。
 
+## 第 149 轮：滚动条轨道与滑块同步变色（第 141 轮主题切换第五次补修）
+
+- **现象**（用户反馈）：「位移没有了，但柱子背后的背景依然跳变。点击切换的一瞬间，柱子会变成对应颜色，后面的背景却要到切换结束才会变。」
+- **根因**：`::-webkit-scrollbar-track { background: transparent; }` —— 轨道透明，透出的是 `html` 元素背景；而 html 背景要等 `finish()` 里 `applyTheme()`（动画 2040ms 结束）才切。滑块因第 141 轮补修3 已内联锁 `--scroll-thumb` 所以立刻变色 → 两者割裂。
+- **修复**：①`style.css` 新增 `--scroll-track`（cream `#fbf7f1` / cinema `#0b0b0e`，即各主题背景色），`::-webkit-scrollbar-track` 改 `var(--scroll-track, transparent)`；②`app.js` 动画首帧从揭示层（data-theme=目标主题）一并读出 `--scroll-thumb` + `--scroll-track` 内联锁到 `<html>`，`cleanup()` 一并 removeProperty。**不要用 `scrollbar-color`**——它会切换 Chrome 到系统原生滚动条（Windows ~17px），占位宽变化 → 位移；只用 `::-webkit-scrollbar-*`，宽度恒 10px。
+- **验证**：点击前 thumb `#dccdbb`/track `#fbf7f1` → 点击后 250ms 双双变为 `#2c2c37`/`#0b0b0e`；结束后内联清空、computed 同值。深→浅同样正确。verify141 新增 **B4e**，套件 **27/0**；index **37 套件全绿**、npm 52/0；watch 3 红为历史旧红（太平年评分数据漂移 / verify57 缺 `poster_test.png`）。版本 `style.css?v=159`/`app.js?v=137`。
+- 🔴 **本轮最大的坑：仓库状态误判**。开工时按记忆当作第 141 轮，实际 HEAD 已是第 148 轮（`2197c45`）；首次 bump 用错基准（以为 156/133，实际 158/136），**误改了一批历史 online 套件的期望版本号**，发现后 `git checkout --` 全部恢复。**教训：动手前必须先 `git log -1` + 读 `docs/index.html` 里的实际版本串，绝不凭记忆猜。** 另外本项目的 bump 惯例是**全仓同步所有 index 套件**钉的版本号（第 142~148 轮都如此），不是只改活跃套件。
+
 ## 关于旧脚本
 
 第 1~46 轮的一堆一次性诊断脚本（`dbg*` / `diag*` / `measure*` / `cal*` / `ab*` 等）**没有**收进仓库——它们是一次性实验，无复用价值，仍留在本机临时目录与各轮归档 `Documents/Misc/对话成果/Steam游戏时长站/06_验证截图/` 里。需要考古时去归档目录按轮次找。
