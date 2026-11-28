@@ -42,7 +42,7 @@ const fp = await page.evaluate(async () => {
   const g = async (u) => (await fetch(u, { cache: 'reload' })).text();
   const [html, css, app] = await Promise.all([
     g('index.html?cb=' + Date.now()),
-    g('style.css?v=139'),
+    g('style.css?v=140'),
     g('app.js?v=125'),
   ]);
   return {
@@ -53,7 +53,7 @@ const fp = await page.evaluate(async () => {
     hasMinutes: /function hxMinutes\(date\)/.test(app),
   };
 });
-ok('A1 线上版本 139 / 125', fp.cssTag === 'style.css?v=139' && fp.jsTag === 'app.js?v=125', { css: fp.cssTag, js: fp.jsTag });
+ok('A1 线上版本 139 / 125', fp.cssTag === 'style.css?v=140' && fp.jsTag === 'app.js?v=125', { css: fp.cssTag, js: fp.jsTag });
 ok('A2 线上 style.css 字节与本地全等', md5(fp.css) === md5(fs.readFileSync(LOCAL + 'style.css', 'utf8')), { online: md5(fp.css).slice(0, 12) });
 ok('A3 线上 app.js 字节与本地全等', md5(fp.app) === md5(fs.readFileSync(LOCAL + 'app.js', 'utf8')), { online: md5(fp.app).slice(0, 12) });
 ok('A4 线上 app.js 含 hxScope / hxMinutes', fp.hasScope && fp.hasMinutes, { scope: fp.hasScope, minutes: fp.hasMinutes });

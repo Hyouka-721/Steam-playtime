@@ -248,11 +248,10 @@
      动画结束 → applyTheme(id, announce) 切真实页主题 → 移除揭示层 → 复位 path → 清锁。
      时长 2040ms = 1700ms 基准 × 1.2（用户指定 1.2×）。 */
   const LIQUID_DUR = 2040;
-  /* 第 150 轮：液流起点相对「史蒂夫按钮中心下沿」的微调偏移（单位 px）。
-     用户实验中：+X 向右、+Y 向上（即向右上方偏移）。
-     ⚠️ 调这两个数即可，其它地方不用动。 */
-  const LIQUID_ORIGIN_DX = 100;
-  const LIQUID_ORIGIN_DY = 200;
+  /* 第 150 轮：液流起点（视口绝对坐标，px）。用户逐步校准中，当前 = 视口右上角 (1440, 0)。
+     ⚠️ 直接改这两个数即可；置为 null 则回退「史蒂夫按钮中心下沿」的原始行为。 */
+  const LIQUID_ORIGIN_X = 1440;
+  const LIQUID_ORIGIN_Y = 0;
   let liquidRaf = 0;
   let liquidAbort = null;   // 当前动画的强制清理函数（回退/连点时先收尾，避免旧 id 覆盖）
   let liquidPending = null; // 动画目标主题：动画期间 currentTheme() 读它，保证连点选到不同主题
@@ -358,9 +357,9 @@
     const root = document.documentElement;
     const btn = $('theme-light');
     const r = btn ? btn.getBoundingClientRect() : { left: innerWidth - 60, width: 40, bottom: 60 };
-    // 第 150 轮：起点 = 史蒂夫按钮水平中心 + DX 向右、下沿 - DY 向上（常量见文件顶部）
-    const cx = r.left + r.width / 2 + LIQUID_ORIGIN_DX;
-    const cy = r.bottom - LIQUID_ORIGIN_DY;
+    // 第 150 轮：起点用视口绝对坐标；为 null 时回退按钮中心下沿（原始行为）
+    const cx = LIQUID_ORIGIN_X == null ? r.left + r.width / 2 : LIQUID_ORIGIN_X;
+    const cy = LIQUID_ORIGIN_Y == null ? r.bottom : LIQUID_ORIGIN_Y;
     const W = innerWidth, H = innerHeight;
 
     // 建揭示层（克隆失败立即回退，不留半截 DOM）

@@ -109,9 +109,9 @@ tests/
 
 **用户反馈**：第 147 轮后刷新仍会先空白再重建。逐帧/冷启动测量确认：HTML 首帧只有顶部栏 + 卡片标签，app.js 到位前五张卡与榜单都是空白骨架；`?v=147&t=…` 这类 cache-buster 冷启动时 app.js 可等 2.5~8s，期间页面就是空白。用户要的是“先保留上次内容，数据到位只更新数字”。
 
-**修复**：`app.js` 渲染完成后把五张卡最终文本 + `#lt-list` HTML 存 `sessionStorage['index.paint.v1']`（schema=1，跳过骨架态）；`index.html` 在 app.js 之前用内联脚本恢复卡片文本、榜单 HTML，并把前 8 张封面 `data-src` 直接赋 `src`；app.js 到位后再原地覆盖。只用 sessionStorage，关标签页即清。bump `app.js?v=135`→`v=139`，style.css 未动不 bump。
+**修复**：`app.js` 渲染完成后把五张卡最终文本 + `#lt-list` HTML 存 `sessionStorage['index.paint.v1']`（schema=1，跳过骨架态）；`index.html` 在 app.js 之前用内联脚本恢复卡片文本、榜单 HTML，并把前 8 张封面 `data-src` 直接赋 `src`；app.js 到位后再原地覆盖。只用 sessionStorage，关标签页即清。bump `app.js?v=135`→`v=140`，style.css 未动不 bump。
 
-**验收**：新增 `verify148.mjs` **6/0**（首次渲染写入 5 卡 + 56KB 榜单快照；阻断 app.js 后刷新 300ms 内卡片/榜单已恢复、无 sk-value/sk-row；正常加载后仍 8 整行）；`verify120` / `verify125` 的等待条件补上“ambience 已应用”，判据未变、理由写进注释；index 全部 **37 套件 0 FAIL**，`npm test` **52/0**。已提交 `2bb3501` 并 push `0a5a67a..2bb3501`；线上 HTML 第 6 轮轮询到 `app.js?v=139`，线上实测快照 56,307B，阻断 app.js 后刷新 300ms 内五卡仍显示 1458 h 等真实数字、榜单 38 行、无 sk-value/sk-row。
+**验收**：新增 `verify148.mjs` **6/0**（首次渲染写入 5 卡 + 56KB 榜单快照；阻断 app.js 后刷新 300ms 内卡片/榜单已恢复、无 sk-value/sk-row；正常加载后仍 8 整行）；`verify120` / `verify125` 的等待条件补上“ambience 已应用”，判据未变、理由写进注释；index 全部 **37 套件 0 FAIL**，`npm test` **52/0**。已提交 `2bb3501` 并 push `0a5a67a..2bb3501`；线上 HTML 第 6 轮轮询到 `app.js?v=140`，线上实测快照 56,307B，阻断 app.js 后刷新 300ms 内五卡仍显示 1458 h 等真实数字、榜单 38 行、无 sk-value/sk-row。
 
 ## 当前基线 · watch 线第 104 轮（✅ **已上线** 2026-11-15）
 
@@ -670,7 +670,7 @@ tests/
 - **现象**（用户反馈）：「位移没有了，但柱子背后的背景依然跳变。点击切换的一瞬间，柱子会变成对应颜色，后面的背景却要到切换结束才会变。」
 - **根因**：`::-webkit-scrollbar-track { background: transparent; }` —— 轨道透明，透出的是 `html` 元素背景；而 html 背景要等 `finish()` 里 `applyTheme()`（动画 2040ms 结束）才切。滑块因第 141 轮补修3 已内联锁 `--scroll-thumb` 所以立刻变色 → 两者割裂。
 - **修复**：①`style.css` 新增 `--scroll-track`（cream `#fbf7f1` / cinema `#0b0b0e`，即各主题背景色），`::-webkit-scrollbar-track` 改 `var(--scroll-track, transparent)`；②`app.js` 动画首帧从揭示层（data-theme=目标主题）一并读出 `--scroll-thumb` + `--scroll-track` 内联锁到 `<html>`，`cleanup()` 一并 removeProperty。**不要用 `scrollbar-color`**——它会切换 Chrome 到系统原生滚动条（Windows ~17px），占位宽变化 → 位移；只用 `::-webkit-scrollbar-*`，宽度恒 10px。
-- **验证**：点击前 thumb `#dccdbb`/track `#fbf7f1` → 点击后 250ms 双双变为 `#2c2c37`/`#0b0b0e`；结束后内联清空、computed 同值。深→浅同样正确。verify141 新增 **B4e**，套件 **27/0**；index **37 套件全绿**、npm 52/0；watch 3 红为历史旧红（太平年评分数据漂移 / verify57 缺 `poster_test.png`）。版本 `style.css?v=159`/`app.js?v=139`。
+- **验证**：点击前 thumb `#dccdbb`/track `#fbf7f1` → 点击后 250ms 双双变为 `#2c2c37`/`#0b0b0e`；结束后内联清空、computed 同值。深→浅同样正确。verify141 新增 **B4e**，套件 **27/0**；index **37 套件全绿**、npm 52/0；watch 3 红为历史旧红（太平年评分数据漂移 / verify57 缺 `poster_test.png`）。版本 `style.css?v=159`/`app.js?v=140`。
 - 🔴 **本轮最大的坑：仓库状态误判**。开工时按记忆当作第 141 轮，实际 HEAD 已是第 148 轮（`2197c45`）；首次 bump 用错基准（以为 156/133，实际 158/136），**误改了一批历史 online 套件的期望版本号**，发现后 `git checkout --` 全部恢复。**教训：动手前必须先 `git log -1` + 读 `docs/index.html` 里的实际版本串，绝不凭记忆猜。** 另外本项目的 bump 惯例是**全仓同步所有 index 套件**钉的版本号（第 142~148 轮都如此），不是只改活跃套件。
 
 ## 关于旧脚本
