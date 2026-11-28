@@ -34,7 +34,7 @@ const fp = await page.evaluate(async () => {
   const g = async (u) => (await fetch(u, { cache: 'reload' })).text();
   const [html, css, js] = await Promise.all([
     g('index.html?cb=' + Date.now()),
-    g('style.css?v=140'),
+    g('style.css?v=141'),
     g('app.js?v=122'),
   ]);
   return {
@@ -46,7 +46,7 @@ const fp = await page.evaluate(async () => {
     hmText: /hmText/.test(js),
   };
 });
-ok('A1 线上版本 137 / 122', fp.cssTag === 'style.css?v=140' && fp.jsTag === 'app.js?v=122', { css: fp.cssTag, js: fp.jsTag });
+ok('A1 线上版本 137 / 122', fp.cssTag === 'style.css?v=141' && fp.jsTag === 'app.js?v=122', { css: fp.cssTag, js: fp.jsTag });
 ok('A2 线上 style.css 字节与本地全等', md5(fp.css) === md5(fs.readFileSync(LOCAL + 'style.css', 'utf8')), { online: md5(fp.css).slice(0, 12) });
 ok('A3 线上 app.js 字节与本地全等', md5(fp.js) === md5(fs.readFileSync(LOCAL + 'app.js', 'utf8')), { online: md5(fp.js).slice(0, 12) });
 ok('A4 线上源码里浮层彻底消失（html / js / hmText）', !fp.calInHtml && !fp.calInJs && !fp.hmText, { html: fp.calInHtml, js: fp.calInJs, hm: fp.hmText });

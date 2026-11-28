@@ -4,7 +4,7 @@
    index.html 在 app.js 之前用内联脚本恢复，app.js 到位后原地覆盖。
 
    契约：
-     ① app.js?v=140；PAINT_KEY=index.paint.v1 同时出现在 app.js 与 index.html；
+     ① app.js?v=141；PAINT_KEY=index.paint.v1 同时出现在 app.js 与 index.html；
      ② 首次渲染后 sessionStorage 有 schema=1 快照（cards 5 项 + list HTML）；
      ③ 阻断 app.js 再刷新：300ms 内五张卡已是快照数字（无 sk-value）、
         榜单已是快照行（无 sk-row），证明不依赖 app.js 就能先恢复；
@@ -24,8 +24,8 @@ const ok = (n, c, x) => { c ? (pass++, console.log('PASS ', n, x === undefined ?
 const idx = fs.readFileSync(ROOT + 'docs/index.html', 'utf8');
 const js = fs.readFileSync(ROOT + 'docs/app.js', 'utf8');
 
-ok('A1 app.js?v=140，且快照 key 在两处一致',
-  /app\.js\?v=140/.test(idx) && /index\.paint\.v1/.test(idx) && /index\.paint\.v1/.test(js),
+ok('A1 app.js?v=141，且快照 key 在两处一致',
+  /app\.js\?v=141/.test(idx) && /index\.paint\.v1/.test(idx) && /index\.paint\.v1/.test(js),
   '理由：第148轮改 app.js 存快照 + index.html 内联恢复，两处 key 必须一致');
 
 ok('A2 app.js 在渲染完成后写快照，且跳过骨架态',

@@ -22,7 +22,7 @@ const css = fs.readFileSync(ROOT + 'docs/style.css', 'utf8');
 const js = fs.readFileSync(ROOT + 'docs/app.js', 'utf8');
 const html = fs.readFileSync(ROOT + 'docs/index.html', 'utf8');
 
-ok('A1 版本参数 CSS 158 / APP 136', html.includes('style.css?v=159') && html.includes('app.js?v=140'),
+ok('A1 版本参数 CSS 158 / APP 136', html.includes('style.css?v=159') && html.includes('app.js?v=141'),
   { css: (html.match(/style\.css\?v=(\d+)/) || [])[1], app: (html.match(/app\.js\?v=(\d+)/) || [])[1] });
 const deadJs = ['openDrill', 'closeDrill', 'renderDrillMore', 'drill.appid', 'drill-more', "id === 'g'"].filter((k) => new RegExp(k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(js));
 ok('A2 app.js 里没有下钻相关标识符', deadJs.length === 0, deadJs);

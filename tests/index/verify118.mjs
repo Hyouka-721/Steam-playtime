@@ -27,7 +27,7 @@ const css = fs.readFileSync(ROOT + 'docs/style.css', 'utf8');
 const vCss = (html.match(/style\.css\?v=(\d+)/) || [])[1];
 const vApp = (html.match(/app\.js\?v=(\d+)/) || [])[1];
 ok('A1 版本号已 bump（第 119 轮 CSS 158 / APP 136；第 118 轮文案改判跟随）',
-  vCss === '159' && vApp === '140', { css: vCss, app: vApp });
+  vCss === '159' && vApp === '141', { css: vCss, app: vApp });
 /* 第 119 轮用户要求删「合计」字样，左列只留时长；口径仍是 hoursShort，故改判而非调阈值。 */
 ok('A2 周时长走 hoursShort、与角标同口径（第119轮删「合计」前缀）',
   /class="tl-week-total">\$\{hoursShort\(weekTotal\)\}/.test(js) &&

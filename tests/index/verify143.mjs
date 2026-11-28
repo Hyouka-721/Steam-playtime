@@ -4,7 +4,7 @@
    仍会把 8 行档判成 7 行，且封面固定 60px 会把反解出的 54~60px 行高撑回 62px。
 
    契约：
-     ① 版本 style.css?v=159 / app.js?v=140，且只 bump 真改过的两个文件；
+     ① 版本 style.css?v=159 / app.js?v=141，且只 bump 真改过的两个文件；
      ② app.js 与 index.html 首帧脚本 RANK_FIT 逐项一致（rows8 gap6 min54 max100 pad4）；
      ③ 桌面端 #lt-list 的封面外框与骨架封面随 --rank-row-h 收缩，高行高仍锁 134×64 / 60px；
      ④ 1920×900 / 1920×958 / 1440×860 刷新即 8 整行、0 半行、CLS=0，低档封面确实缩小；
@@ -27,8 +27,8 @@ const css = fs.readFileSync(ROOT + 'docs/style.css', 'utf8');
 const js = fs.readFileSync(ROOT + 'docs/app.js', 'utf8');
 const html = fs.readFileSync(ROOT + 'docs/index.html', 'utf8');
 
-ok('A1 版本 style.css?v=159 / app.js?v=140（watch 资源未动）',
-  /style\.css\?v=159/.test(html) && /app\.js\?v=140/.test(html) && !/watch\.css\?v=49/.test(html),
+ok('A1 版本 style.css?v=159 / app.js?v=141（watch 资源未动）',
+  /style\.css\?v=159/.test(html) && /app\.js\?v=141/.test(html) && !/watch\.css\?v=49/.test(html),
   '理由：第143轮只改了 index.html / style.css / app.js，按红线2只 bump 真改过的 css/js');
 
 ok('A2 RANK_FIT 两处逐项一致（rows8 gap6 min54 max100 pad4）',
@@ -102,7 +102,7 @@ for (const [w, h] of [[1920, 900], [1920, 958], [1440, 860]]) {
 const sw = await measure(1920, 958, { sw: true });
 ok('B3 带 Service Worker 的首访+重载仍 8 整行，且资源只请求 v158/v135',
   sw.m.full === 8 && sw.m.partial === 0 && sw.m.sw &&
-  sw.assets.every((a) => a === 'style.css?v=159' || a === 'app.js?v=140'),
+  sw.assets.every((a) => a === 'style.css?v=159' || a === 'app.js?v=141'),
   { ...sw.m, assets: [...new Set(sw.assets)] });
 await sw.ctx.close();
 
