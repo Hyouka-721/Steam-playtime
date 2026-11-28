@@ -27,8 +27,8 @@ const ok = (n, c, x) => { c ? (pass++, console.log('PASS ', n, x === undefined ?
 const sw = fs.readFileSync(ROOT + 'docs/sw.js', 'utf8');
 const html = fs.readFileSync(ROOT + 'docs/index.html', 'utf8');
 
-ok('A1 版本未动：style.css?v=159 / app.js?v=137（本轮只改 sw.js）',
-  /style\.css\?v=159/.test(html) && /app\.js\?v=137/.test(html),
+ok('A1 版本未动：style.css?v=159 / app.js?v=138（本轮只改 sw.js）',
+  /style\.css\?v=159/.test(html) && /app\.js\?v=138/.test(html),
   '理由：第144轮只改 sw.js 缓存策略，css/js 一字节未动，按红线2不 bump');
 
 ok('A2 SHELL 缓存名 bump 到 v2，旧 shell 会在 activate 清掉',
@@ -107,7 +107,7 @@ const m = await page.evaluate(() => {
   return {
     sw: !!navigator.serviceWorker.controller,
     css: [...document.styleSheets].some((s) => (s.href || '').includes('style.css?v=159')),
-    js: [...document.scripts].some((s) => (s.src || '').includes('app.js?v=137')),
+    js: [...document.scripts].some((s) => (s.src || '').includes('app.js?v=138')),
     full: items.filter((el) => r(el).bottom <= vh + 0.5).length,
     partial: items.filter((el) => r(el).top < vh - 0.5 && r(el).bottom > vh + 0.5).length,
     varH: L.style.getPropertyValue('--rank-row-h'),

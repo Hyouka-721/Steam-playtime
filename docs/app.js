@@ -248,6 +248,11 @@
      动画结束 → applyTheme(id, announce) 切真实页主题 → 移除揭示层 → 复位 path → 清锁。
      时长 2040ms = 1700ms 基准 × 1.2（用户指定 1.2×）。 */
   const LIQUID_DUR = 2040;
+  /* 第 150 轮：液流起点相对「史蒂夫按钮中心下沿」的微调偏移（单位 px）。
+     用户实验中：+X 向右、+Y 向上（即向右上方偏移）。
+     ⚠️ 调这两个数即可，其它地方不用动。 */
+  const LIQUID_ORIGIN_DX = 10;
+  const LIQUID_ORIGIN_DY = 10;
   let liquidRaf = 0;
   let liquidAbort = null;   // 当前动画的强制清理函数（回退/连点时先收尾，避免旧 id 覆盖）
   let liquidPending = null; // 动画目标主题：动画期间 currentTheme() 读它，保证连点选到不同主题
@@ -353,7 +358,10 @@
     const root = document.documentElement;
     const btn = $('theme-light');
     const r = btn ? btn.getBoundingClientRect() : { left: innerWidth - 60, width: 40, bottom: 60 };
-    const cx = r.left + r.width / 2, cy = r.bottom, W = innerWidth, H = innerHeight;
+    // 第 150 轮：起点 = 史蒂夫按钮水平中心 + DX 向右、下沿 - DY 向上（常量见文件顶部）
+    const cx = r.left + r.width / 2 + LIQUID_ORIGIN_DX;
+    const cy = r.bottom - LIQUID_ORIGIN_DY;
+    const W = innerWidth, H = innerHeight;
 
     // 建揭示层（克隆失败立即回退，不留半截 DOM）
     let reveal;
