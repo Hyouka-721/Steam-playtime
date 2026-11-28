@@ -189,6 +189,7 @@ cinema 专属规则必须带 `[data-theme="cinema"]` 前缀（切回 cream 时 `
 - `.panel` padding 18 / `.panel-head` margin 14 不许动。
 - `.cards` 断点 1080；1081 是最窄安全宽度。
 - 图标文件名带源图 hash；`sw.js` 是 cache-first，固定名会被旧缓存挡住。
+- **液流起点（第 150 轮定稿，用户逐轮校准 4 次）**：`app.js` 顶部 `LIQUID_ORIGIN_X = 'right'` / `LIQUID_ORIGIN_Y = 0`。`'right'` = 跟随 `innerWidth` 贴视口最右缘（窗口多宽都在右边），数字 = 绝对 px，`null` = 回退「史蒂夫按钮中心下沿」。计算在 `applyThemeLiquid`。⚠️ 圆心落在边缘线上，液柱只有左半约 9px 可见；若要整条可见改 `innerWidth - 10`。历史：10/10 → 100/200（跑出视口）→ 1440/0（1920 窗口下在 75% 处）→ `'right'`。
 
 ---
 
